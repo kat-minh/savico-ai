@@ -1,0 +1,680 @@
+{
+  "common": {
+    "appName": "SAVICO AI",
+    "loading": "Đang tải…",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "submit": "Gửi",
+    "close": "Đóng",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "more": "Thêm",
+    "actions": "Thao tác",
+    "pageOf": "Trang {page}/{total}",
+    "comingSoon": "Sắp ra mắt",
+    "optional": "tuỳ chọn",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu",
+    "combobox": {
+      "placeholder": "Chọn một mục",
+      "searchPlaceholder": "Tìm kiếm…",
+      "emptyMessage": "Không tìm thấy kết quả",
+      "optional": "tuỳ chọn"
+    }
+  },
+  "theme": {
+    "label": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống",
+    "toggle": "Đổi giao diện"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "assistant": {
+    "uiTab": "Giao diện",
+    "chatTab": "Chatbot AI",
+    "title": "Trợ lý AI",
+    "subtitle": "Hỏi bất cứ điều gì về dự án của bạn",
+    "close": "Đóng"
+  },
+  "auth": {
+    "login": {
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập vào tài khoản của bạn để tiếp tục",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ban@congty.com",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu của bạn",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "noAccount": "Chưa có tài khoản?",
+      "signUp": "Đăng ký"
+    },
+    "social": {
+      "or": "hoặc",
+      "continueGoogle": "Tiếp tục với Google",
+      "soon": "Đăng nhập bằng Google sẽ sớm khả dụng."
+    },
+    "forbidden": {
+      "title": "Không có quyền truy cập",
+      "description": "Khu vực này chỉ dành cho quản trị viên."
+    },
+    "register": {
+      "title": "Tạo tài khoản",
+      "subtitle": "Đăng ký để bắt đầu thiết kế cùng SAVICO AI",
+      "nameLabel": "Họ và tên",
+      "namePlaceholder": "Nguyễn Văn A",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ban@congty.com",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+      "agree": "Tôi đồng ý với <terms>Điều khoản sử dụng</terms> và <privacy>Chính sách bảo mật</privacy>",
+      "submit": "Đăng ký",
+      "success": "Tạo tài khoản thành công. Vui lòng đăng nhập.",
+      "haveAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập"
+    },
+    "forgot": {
+      "title": "Quên mật khẩu",
+      "subtitle": "Nhập email để nhận liên kết đặt lại mật khẩu",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ban@congty.com",
+      "submit": "Gửi liên kết đặt lại",
+      "backToLogin": "Quay lại đăng nhập",
+      "sentTitle": "Đã gửi email",
+      "sentSubtitle": "Chúng tôi đã gửi liên kết đặt lại tới {email}. Vui lòng kiểm tra hộp thư."
+    }
+  },
+  "errors": {
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "network": "Lỗi mạng. Kiểm tra kết nối và thử lại.",
+    "unauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này.",
+    "notFound": "Trang bạn tìm không tồn tại.",
+    "validation": "Vui lòng kiểm tra lại các trường được đánh dấu.",
+    "tooManyRequests": "Quá nhiều yêu cầu. Vui lòng chậm lại.",
+    "server": "Máy chủ đang gặp sự cố. Vui lòng thử lại sau.",
+    "pageNotFound": {
+      "title": "Không tìm thấy trang",
+      "description": "Xin lỗi, chúng tôi không tìm thấy trang đó.",
+      "action": "Về trang chủ"
+    },
+    "boundary": {
+      "title": "Đã xảy ra lỗi",
+      "description": "Một lỗi không mong muốn đã xảy ra khi hiển thị trang này.",
+      "action": "Thử lại"
+    }
+  },
+  "validation": {
+    "required": "Trường này là bắt buộc",
+    "email": "Nhập địa chỉ email hợp lệ",
+    "minLength": "Phải có ít nhất {min} ký tự",
+    "maxLength": "Tối đa {max} ký tự",
+    "passwordMin": "Mật khẩu phải có ít nhất {min} ký tự",
+    "passwordMismatch": "Mật khẩu xác nhận không khớp",
+    "agreeTerms": "Bạn cần đồng ý với điều khoản",
+    "phone": "Số điện thoại không hợp lệ",
+    "positiveNumber": "Nhập một số lớn hơn 0"
+  },
+  "legal": {
+    "terms": {
+      "title": "Điều khoản sử dụng",
+      "updated": "Cập nhật lần cuối: nội dung mẫu — SAVICO cung cấp nội dung chính thức trước khi go-live.",
+      "intro": "Các điều khoản này điều chỉnh việc bạn sử dụng nền tảng SAVICO AI. Khi tạo tài khoản hoặc sử dụng dịch vụ, bạn đồng ý với các điều khoản dưới đây.",
+      "sections": [
+        {
+          "title": "1. Chấp nhận điều khoản",
+          "body": "Khi truy cập hoặc sử dụng nền tảng, bạn đồng ý tuân thủ Điều khoản sử dụng và Chính sách bảo mật của chúng tôi."
+        },
+        {
+          "title": "2. Sử dụng dịch vụ",
+          "body": "Bản vẽ và dự toán do AI tạo ra chỉ mang tính tham khảo; kết quả và chi phí thực tế có thể thay đổi. Bạn chịu trách nhiệm về tính chính xác của thông tin cung cấp."
+        },
+        {
+          "title": "3. Tài khoản",
+          "body": "Bạn cần cung cấp thông tin đăng ký chính xác và bảo mật thông tin đăng nhập. Bạn chịu trách nhiệm cho các hoạt động trong tài khoản của mình."
+        },
+        {
+          "title": "4. Sở hữu trí tuệ",
+          "body": "Nội dung, thương hiệu và tài liệu trên nền tảng thuộc về SAVICO trừ khi có ghi chú khác."
+        },
+        {
+          "title": "5. Giới hạn trách nhiệm",
+          "body": "Dự toán chỉ mang tính tham khảo. SAVICO không chịu trách nhiệm cho các quyết định chỉ dựa trên kết quả do AI tạo ra."
+        },
+        {
+          "title": "6. Liên hệ",
+          "body": "Mọi thắc mắc về điều khoản, vui lòng liên hệ qua các kênh ở mục liên hệ."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Chính sách bảo mật",
+      "updated": "Cập nhật lần cuối: nội dung mẫu — SAVICO cung cấp nội dung chính thức trước khi go-live.",
+      "intro": "Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn theo Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.",
+      "sections": [
+        {
+          "title": "1. Dữ liệu thu thập",
+          "body": "Thông tin tài khoản (họ tên, email, SĐT), ảnh mặt bằng bạn tải lên để xử lý AI, và thông tin từ form liên hệ. Chúng tôi không thu thập ảnh sổ đỏ."
+        },
+        {
+          "title": "2. Mục đích sử dụng",
+          "body": "Để cung cấp dịch vụ thiết kế và dự toán, phản hồi yêu cầu của bạn và cải thiện nền tảng."
+        },
+        {
+          "title": "3. Dữ liệu hình ảnh",
+          "body": "Ảnh mặt bằng tải lên chỉ dùng để tạo bản vẽ và phối cảnh. Dữ liệu được lưu trữ an toàn và có thể xóa theo yêu cầu."
+        },
+        {
+          "title": "4. Chia sẻ dữ liệu",
+          "body": "Chúng tôi không bán dữ liệu cá nhân của bạn. Việc xử lý AI có thể liên quan đến các đối tác đáng tin cậy theo cam kết bảo mật."
+        },
+        {
+          "title": "5. Quyền của bạn",
+          "body": "Bạn có thể yêu cầu truy cập, chỉnh sửa hoặc xóa dữ liệu cá nhân bất cứ lúc nào."
+        },
+        {
+          "title": "6. Liên hệ",
+          "body": "Mọi yêu cầu về bảo mật, vui lòng liên hệ qua các kênh ở mục liên hệ."
+        }
+      ]
+    }
+  },
+  "chatbot": {
+    "placeholder": "Nhập câu hỏi của bạn…",
+    "send": "Gửi",
+    "remaining": "Còn {remaining}/{limit} tin nhắn hôm nay",
+    "limitReached": "Bạn đã đạt giới hạn {limit} tin nhắn hôm nay. Vui lòng quay lại vào ngày mai.",
+    "greeting": "Xin chào! Tôi là trợ lý AI của SAVICO. Tôi có thể giải thích bảng dự toán, gợi ý phương án tối ưu chi phí và hướng dẫn bạn qua từng bước. Bạn cần hỗ trợ gì?",
+    "waitingHint": "AI đang trao đổi với bạn trong lúc xử lý",
+    "openPanel": "Mở khung trò chuyện",
+    "proactive": {
+      "estimate": {
+        "opening": "Tôi đang đọc dữ liệu {building} bạn vừa nhập và bắt đầu bóc khối lượng.",
+        "openingWithArea": "Tôi đang đọc dữ liệu {building} tại {area} và áp đơn giá vật tư, nhân công của khu vực này.",
+        "photo": "Ảnh lô đất bạn tải lên đã được phân tích: tôi lấy hình dạng, hướng và tỷ lệ lô để bố trí mặt bằng hợp lý nhất.",
+        "noPhoto": "Bạn chưa tải ảnh lô đất nên tôi đang dùng giả định hình lô tiêu chuẩn — bổ sung ảnh sẽ giúp bản vẽ sát thực tế hơn.",
+        "scale": "Quy mô {scale} sẽ quyết định phần lớn chi phí phần thô: móng, khung và sàn.",
+        "package": "Với gói {package}, tôi áp bộ đơn giá hoàn thiện và nội thất tương ứng để con số cuối cùng sát với mức bạn mong đợi.",
+        "style": "Bạn chọn phong cách {style} — lát nữa tôi sẽ gợi ý vài mẫu bố trí cùng phong cách trong Cẩm nang, bạn có thể lưu mẫu ưng ý bằng nút ♥.",
+        "handbook": "Trong lúc chờ, bạn có thể xem trước vài mẫu bố trí trong panel Cẩm nang bên phải và lưu mẫu ưng ý bằng nút ♥."
+      },
+      "dossier": {
+        "opening": "Tôi bắt đầu render bộ hồ sơ cho {building} của bạn — bước này nặng hơn nên sẽ lâu hơn một chút.",
+        "interior": "Phối cảnh nội thất đang được dựng theo phong cách {style} bạn đã chọn.",
+        "contents": "Bộ hồ sơ sẽ gồm trang bìa, bản vẽ mặt bằng 2D, phối cảnh ngoại thất và bảng dự toán chi tiết.",
+        "share": "Xong hồ sơ, bạn có thể tải PDF, tạo link chia sẻ, gửi email hoặc quét QR để mở trên điện thoại."
+      }
+    }
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "design": "Thiết kế & Dự toán",
+    "handbook": "Cẩm nang",
+    "guide": "Hướng dẫn",
+    "createProject": "Tạo dự án mới",
+    "account": "Tài khoản của tôi",
+    "logout": "Đăng xuất",
+    "menu": "Menu",
+    "preferences": "Tùy chọn"
+  },
+  "footer": {
+    "tagline": "AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút.",
+    "hotline": "Hotline",
+    "zalo": "Chat Zalo",
+    "rights": "Bảo lưu mọi quyền.",
+    "privacy": "Chính sách bảo mật",
+    "terms": "Điều khoản sử dụng"
+  },
+  "favorite": {
+    "add": "Yêu thích",
+    "remove": "Bỏ yêu thích"
+  },
+  "landing": {
+    "hero": {
+      "title": "Thiết kế và dự toán công trình bằng AI",
+      "subtitle": "AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút",
+      "primaryCta": "Tạo dự án mới",
+      "secondaryCta": "Xem hướng dẫn",
+      "promises": {
+        "fast": "Nhanh chóng",
+        "accurate": "Chính xác",
+        "secure": "Bảo mật"
+      }
+    },
+    "showcase": {
+      "label": "Kết quả mẫu",
+      "tabs": {
+        "floorPlan": "Mặt bằng",
+        "render3d": "Phối cảnh 3D",
+        "dossier": "Hồ sơ",
+        "estimate": "Dự toán"
+      },
+      "rows": {
+        "structure": "Phần thô",
+        "finishing": "Phần hoàn thiện",
+        "interior": "Phần nội thất",
+        "total": "Tổng cộng"
+      }
+    },
+    "steps": {
+      "input": {
+        "title": "Nhập liệu",
+        "description": "Chụp ảnh lô đất, nhập thông tin nhu cầu và phong cách mong muốn"
+      },
+      "estimate": {
+        "title": "Nhận dự toán",
+        "description": "AI tạo bản vẽ, phối cảnh 3D và dự toán chi phí chi tiết"
+      },
+      "dossier": {
+        "title": "Hồ sơ thi công",
+        "description": "Render và nhận đầy đủ hồ sơ thiết kế, dự toán để thi công"
+      }
+    }
+  },
+  "handbook": {
+    "page": {
+      "title": "Cẩm nang",
+      "subtitle": "Mẫu tham khảo và bài viết tư vấn về kiến trúc, nội thất.",
+      "tabs": {
+        "templates": "Mẫu tham khảo",
+        "articles": "Bài viết tư vấn"
+      },
+      "searchPlaceholder": "Tìm mẫu hoặc bài viết…",
+      "empty": {
+        "title": "Chưa có nội dung phù hợp",
+        "description": "Thử từ khóa khác hoặc bỏ bớt bộ lọc."
+      },
+      "filters": {
+        "allBuildingTypes": "Tất cả loại công trình",
+        "allInteriorStyles": "Tất cả phong cách",
+        "clear": "Xóa lọc"
+      },
+      "resultCount": "{count} kết quả"
+    },
+    "panel": {
+      "title": "Cẩm nang cá nhân hóa",
+      "tabs": {
+        "templates": "Mẫu bố trí nội thất",
+        "articles": "Bài viết tư vấn"
+      },
+      "minimize": "Thu nhỏ",
+      "restore": "Mở cẩm nang"
+    },
+    "detail": {
+      "note": "Mẫu tham khảo do SAVICO biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn."
+    }
+  },
+  "guide": {
+    "title": "Hướng dẫn sử dụng",
+    "subtitle": "Video ngắn và bài viết cho từng thao tác chính.",
+    "searchPlaceholder": "Tìm hướng dẫn…",
+    "articlesTitle": "Bài hướng dẫn",
+    "empty": {
+      "title": "Không tìm thấy hướng dẫn",
+      "description": "Thử từ khóa khác."
+    },
+    "topics": {
+      "land-photo": "Chụp ảnh lô đất",
+      "input": "Nhập liệu",
+      "read-estimate": "Đọc bảng dự toán",
+      "dossier": "Bộ hồ sơ thi công",
+      "share": "Chia sẻ hồ sơ"
+    },
+    "highlights": {
+      "title": "Hướng dẫn sử dụng",
+      "subtitle": "Xem nhanh cách dùng trong chưa đầy một phút.",
+      "viewAll": "Xem tất cả"
+    },
+    "videosTitle": "Video hướng dẫn theo bước"
+  },
+  "design": {
+    "steps": {
+      "1": "Nhập liệu",
+      "2": "Nhận dự toán",
+      "3": "Hồ sơ thi công",
+      "label": "Tiến trình",
+      "status": {
+        "done": "Hoàn thành",
+        "current": "Đang thực hiện",
+        "pending": "Chưa bắt đầu"
+      }
+    },
+    "entry": {
+      "title": "Thiết kế & Dự toán",
+      "subtitle": "Chọn một dự án để mở tiếp, hoặc tạo dự án mới.",
+      "create": "Tạo dự án mới"
+    },
+    "createProject": {
+      "title": "Tạo dự án",
+      "subtitle": "Đặt tên để dễ tìm lại dự án sau này.",
+      "nameLabel": "Tên dự án",
+      "nameHint": "Đặt tên gợi nhớ, ví dụ \"Nhà phố Tân Lợi 3 tầng\".",
+      "namePlaceholder": "Nhà phố Tân Lợi 3 tầng",
+      "descriptionLabel": "Mô tả",
+      "descriptionHint": "Ghi chú riêng về dự án, chỉ bạn nhìn thấy.",
+      "descriptionPlaceholder": "Ghi chú thêm về dự án…",
+      "submit": "Tạo dự án"
+    },
+    "input": {
+      "extra": {
+        "title": "Thông tin bổ sung",
+        "empty": "Chọn loại công trình để hiển thị các lựa chọn phù hợp"
+      },
+      "landPhoto": {
+        "label": "Ảnh lô đất",
+        "labelApartment": "Ảnh mặt bằng căn hộ hiện trạng",
+        "hint": "Chụp hoặc tải ảnh mặt bằng khu đất (nhìn rõ ranh giới, đủ sáng). AI tự nhận diện hình dạng, tỷ lệ lô đất — không cần nhập kích thước.",
+        "hintApartment": "Tải ảnh mặt bằng căn hộ (bản vẽ / sơ đồ từ chủ đầu tư) để AI nhận diện các phòng.",
+        "cta": "Chụp ảnh hoặc kéo-thả vào đây",
+        "constraints": "JPG, PNG, HEIC — tối đa 10MB",
+        "remove": "Xóa ảnh",
+        "errorType": "Chỉ hỗ trợ JPG, PNG hoặc HEIC.",
+        "errorSize": "Ảnh vượt quá 10MB."
+      },
+      "address": {
+        "label": "Địa chỉ công trình",
+        "hint": "Nhập địa chỉ xây dựng (đường, xã/phường, tỉnh/TP). Hệ thống dùng địa chỉ để áp dụng đơn giá vật liệu, nhân công theo khu vực.",
+        "province": "Tỉnh / Thành phố",
+        "provincePlaceholder": "Chọn tỉnh/TP",
+        "ward": "Xã / Phường",
+        "wardPlaceholder": "Chọn xã/phường",
+        "streetPlaceholder": "Số nhà, tên đường",
+        "searchPlaceholder": "Tìm kiếm…",
+        "noResult": "Không tìm thấy"
+      },
+      "buildingType": {
+        "label": "Loại công trình",
+        "hint": "Chọn loại công trình. Các lựa chọn tiếp theo (số tầng, kiểu kiến trúc…) sẽ hiển thị phù hợp với loại bạn chọn.",
+        "placeholder": "Chọn loại công trình",
+        "options": {
+          "house": "Nhà ở",
+          "townhouse": "Nhà phố",
+          "apartment": "Căn hộ"
+        }
+      },
+      "floorCount": {
+        "label": "Quy mô (số tầng)",
+        "hint": "Chọn số tầng dự kiến xây. Dùng để tính tổng diện tích sàn và dự toán.",
+        "options": {
+          "ground": "Trệt",
+          "ground+1": "Trệt + 1 lầu",
+          "ground+2": "Trệt + 2 lầu",
+          "ground+3": "Trệt + 3 lầu",
+          "ground+4": "Trệt + 4 lầu"
+        }
+      },
+      "attic": {
+        "label": "Tum",
+        "hint": "Tum là tầng nhỏ trên cùng che cầu thang, có thể làm sân phơi / kho. Chọn Có nếu muốn xây thêm tum.",
+        "options": {
+          "yes": "Có tum",
+          "no": "Không tum"
+        }
+      },
+      "packageTier": {
+        "label": "Gói hoàn thiện & nội thất",
+        "hint": "Một gói chung cho cả vật liệu hoàn thiện và nội thất, quyết định đơn giá dự toán. Kéo để chọn Cơ bản — Tiêu chuẩn — VIP.",
+        "options": {
+          "basic": "Cơ bản",
+          "standard": "Tiêu chuẩn",
+          "vip": "VIP"
+        }
+      },
+      "architectureStyle": {
+        "label": "Kiểu kiến trúc",
+        "hint": "Chọn kiểu dáng bên ngoài của công trình. Bản vẽ và phối cảnh sẽ được tạo theo kiểu kiến trúc này.",
+        "options": {
+          "roofed": "Nhà mái (Thái / Nhật / ngói)",
+          "modern-townhouse": "Nhà phố hiện đại",
+          "neoclassical": "Nhà tân cổ điển"
+        }
+      },
+      "interiorStyle": {
+        "label": "Phong cách nội thất",
+        "hint": "Chọn phong cách không gian bên trong. Dùng để bố trí nội thất, tính dự toán nội thất và gợi ý mẫu trong cẩm nang.",
+        "options": {
+          "modern": "Hiện đại",
+          "minimal": "Tối giản",
+          "neoclassical": "Tân cổ điển",
+          "indochine": "Indochine"
+        }
+      },
+      "wishes": {
+        "label": "Mô tả mong muốn",
+        "hint": "Mô tả thêm mong muốn: số phòng ngủ, chỗ đậu ô tô, hướng nhà, không gian mở, tông màu… AI đọc hiểu để tùy chỉnh kết quả.",
+        "placeholder": "Ví dụ: 3 phòng ngủ, có chỗ đậu ô tô, bếp mở, tông màu ấm…"
+      },
+      "submit": "Nhận dự toán ngay"
+    },
+    "progress": {
+      "estimate": {
+        "title": "AI đang phân tích và lập dự toán…",
+        "stages": [
+          "Đang đọc ảnh và nhận diện hình dạng lô đất…",
+          "Đang bố trí mặt bằng theo nhu cầu của bạn…",
+          "Đang phân tích khối lượng vật tư…",
+          "Đang tính chi phí theo đơn giá khu vực…"
+        ]
+      },
+      "dossier": {
+        "title": "Đang render bộ hồ sơ thi công…",
+        "stages": [
+          "Đang dựng bản vẽ mặt bằng 2D…",
+          "Đang render phối cảnh ngoại thất…",
+          "Đang lập bảng dự toán chi tiết…",
+          "Đang đóng gói bộ hồ sơ PDF…"
+        ]
+      }
+    },
+    "estimate": {
+      "title": "Dự toán",
+      "grandTotal": "Tổng dự toán",
+      "sections": {
+        "structure": "Phần thô",
+        "finishing": "Phần hoàn thiện",
+        "interior": "Phần nội thất"
+      },
+      "sectionTotal": "Tổng",
+      "viewDetail": "XEM CHI TIẾT",
+      "downloadXlsx": "Tải bảng dự toán Excel (.xlsx)",
+      "breakdownTitle": "Tỷ trọng chi phí",
+      "advisoryTitle": "Tư vấn cho dự án của bạn",
+      "advisory": {
+        "defaultName": "Quý khách",
+        "unknownBuilding": "công trình",
+        "unknownAddress": "khu vực đã chọn",
+        "intro": "Chào {name}, dựa trên thông tin bạn cung cấp — {building} tại {address}, tổng diện tích sàn AI ước tính khoảng {area} m² — SAVICO AI đã lập bảng dự toán sơ bộ với tổng chi phí {total}.",
+        "unitCost": "Suất đầu tư bình quân của phương án này khoảng {unitCost}/m² sàn, tương ứng gói {package} bạn đã chọn.",
+        "unitCostWithScale": "Suất đầu tư bình quân của phương án này khoảng {unitCost}/m² sàn cho quy mô {scale}, tương ứng gói {package} bạn đã chọn.",
+        "breakdown": "Cơ cấu chi phí: phần thô chiếm {structure}%, phần hoàn thiện {finishing}% và phần nội thất {interior}%.",
+        "dominant": {
+          "structure": "Phần thô đang chiếm tỷ trọng lớn nhất — điều thường gặp ở công trình nhiều tầng hoặc nền đất yếu cần gia cố móng. Nếu muốn tối ưu, bạn có thể xem lại phương án kết cấu và số tầng trước khi chốt.",
+          "finishing": "Phần hoàn thiện đang chiếm tỷ trọng lớn nhất — chi phí này nhạy với lựa chọn vật liệu. Đổi sang nhóm gạch, đá và thiết bị cùng phân khúc nhưng khác thương hiệu có thể giảm đáng kể mà không ảnh hưởng thẩm mỹ.",
+          "interior": "Phần nội thất đang chiếm tỷ trọng lớn nhất — bạn có thể chia làm hai giai đoạn: làm trước nhóm nội thất gỗ cố định, nhóm nội thất rời bổ sung sau khi vào ở."
+        },
+        "style": "Phong cách {style} bạn chọn phù hợp với phương án bố trí trong Cẩm nang — bạn có thể mở mục Cẩm nang để xem các mẫu cùng phong cách và lưu lại mẫu ưng ý.",
+        "disclaimer": "Dự toán mang tính tham khảo, được lập tự động theo đơn giá thị trường khu vực tại thời điểm lập. Chi phí thực tế có thể chênh lệch tùy hiện trạng công trình, biến động vật tư và thời điểm thi công. Để có báo giá chính xác, vui lòng liên hệ kiến trúc sư SAVICO."
+      },
+      "xlsx": {
+        "fileName": "Du-toan-{project}.xlsx",
+        "untitledProject": "SAVICO",
+        "sheet": "Dự toán chi tiết",
+        "title": "BẢNG DỰ TOÁN CHI TIẾT",
+        "project": "Dự án",
+        "address": "Địa chỉ",
+        "floorArea": "Diện tích sàn (m²)",
+        "columns": {
+          "no": "STT",
+          "item": "Hạng mục",
+          "unit": "ĐVT",
+          "quantity": "Khối lượng",
+          "unitPrice": "Đơn giá (VND)",
+          "amount": "Thành tiền (VND)"
+        },
+        "note": "Bảng dự toán do SAVICO AI lập tự động, mang tính tham khảo. Chi phí thực tế có thể thay đổi theo hiện trạng công trình và biến động giá vật tư."
+      },
+      "continue": "Nhận hồ sơ thi công",
+      "readyToast": "Dự toán đã sẵn sàng"
+    },
+    "dossier": {
+      "infoTitle": "Thông tin dự án",
+      "info": {
+        "customerName": "Khách hàng",
+        "projectName": "Tên dự án",
+        "phone": "Số điện thoại",
+        "address": "Địa chỉ công trình",
+        "createdAt": "Ngày lập",
+        "buildingType": "Loại công trình",
+        "scale": "Quy mô",
+        "floorArea": "Tổng diện tích sàn",
+        "package": "Gói đã chọn",
+        "architecture": "Kiểu kiến trúc",
+        "interior": "Phong cách nội thất"
+      },
+      "floorAreaValue": "{value} m² (AI ước tính)",
+      "previewTitle": "Bộ hồ sơ gồm",
+      "preview": {
+        "cover": "Trang bìa hồ sơ",
+        "floorPlan": "Bản vẽ mặt bằng 2D",
+        "exterior": "Phối cảnh ngoại thất",
+        "estimate": "Bảng dự toán chi tiết"
+      },
+      "render": "Render hồ sơ",
+      "actions": {
+        "downloadPdf": "Tải hồ sơ PDF",
+        "shareLink": "Tạo link chia sẻ",
+        "email": "Gửi email",
+        "qr": "QR Code"
+      },
+      "lockedHint": "Bấm Render hồ sơ trước",
+      "readyTitle": "Bộ hồ sơ thi công của bạn đã sẵn sàng",
+      "readyThanks": "Cảm ơn bạn đã tin tưởng SAVICO AI.",
+      "readyToast": "Bộ hồ sơ đã sẵn sàng",
+      "privacyNote": "Hồ sơ chỉ bạn và người được chia sẻ mới xem được.",
+      "ctaTitle": "Liên hệ SAVICO để được kiến trúc sư tư vấn trực tiếp, miễn phí",
+      "ctaCall": "Gọi ngay",
+      "ctaZalo": "Chat Zalo",
+      "pdfSize": "({size} MB)",
+      "pdf": {
+        "fileName": "Ho-so-thi-cong-{project}.pdf",
+        "documentTitle": "HỒ SƠ THIẾT KẾ & DỰ TOÁN",
+        "coverEyebrow": "Bộ hồ sơ thi công",
+        "coverIssued": "Lập ngày",
+        "page": "Trang {page}/{total}"
+      },
+      "share": {
+        "preparing": "Đang tạo link chia sẻ…",
+        "privacyNote": "Ai có link đều xem được hồ sơ. Chỉ gửi cho người bạn tin tưởng.",
+        "link": {
+          "title": "Link chia sẻ hồ sơ",
+          "description": "Sao chép link dưới đây để gửi cho người khác xem hồ sơ mà không cần đăng nhập.",
+          "copy": "Sao chép link"
+        },
+        "qr": {
+          "title": "Mã QR hồ sơ",
+          "description": "Quét mã bằng camera điện thoại để mở hồ sơ ngay trên máy."
+        },
+        "email": {
+          "title": "Gửi hồ sơ qua email",
+          "description": "Nhập địa chỉ email, chúng tôi gửi kèm link xem hồ sơ.",
+          "placeholder": "email@vidu.com",
+          "submit": "Gửi hồ sơ",
+          "sent": "Đã gửi hồ sơ tới {email}."
+        }
+      }
+    },
+    "share": {
+      "eyebrow": "Hồ sơ được chia sẻ",
+      "floorArea": "Diện tích sàn {value} m²",
+      "invalidTitle": "Link không còn hiệu lực",
+      "invalidDescription": "Link chia sẻ này đã hết hạn hoặc không tồn tại. Hãy đề nghị người gửi tạo link mới."
+    },
+    "help": {
+      "label": "Xem hướng dẫn",
+      "tooltip": "Mở video hướng dẫn cho bước này"
+    },
+    "coverSample": {
+      "kicker": "Hồ sơ thiết kế & dự toán",
+      "title": "Nhà phố Tân Lợi 3 tầng",
+      "project": "SVC-0001 · 128 Nguyễn Văn Cừ, TP. Buôn Ma Thuột",
+      "rows": {
+        "scale": {
+          "label": "Quy mô",
+          "value": "Trệt + 2 lầu, có tum"
+        },
+        "package": {
+          "label": "Gói",
+          "value": "Tiêu chuẩn"
+        },
+        "date": {
+          "label": "Ngày lập",
+          "value": "21/07/2026"
+        }
+      }
+    },
+    "planSample": {
+      "label": "Bản vẽ mặt bằng 2D mẫu",
+      "rooms": {
+        "living": "PHÒNG KHÁCH",
+        "kitchen": "BẾP + ĂN",
+        "bed1": "PHÒNG NGỦ 1",
+        "wc": "WC",
+        "stairs": "CẦU THANG",
+        "bed2": "PHÒNG NGỦ 2"
+      }
+    }
+  },
+  "account": {
+    "title": "Tài khoản của tôi",
+    "info": {
+      "title": "Thông tin tài khoản",
+      "name": "Họ và tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "edit": "Chỉnh sửa",
+      "notProvided": "Chưa cập nhật",
+      "description": "Dùng để điền sẵn vào hồ sơ thi công."
+    },
+    "projects": {
+      "title": "Dự án của tôi",
+      "step": "Bước {step}/3",
+      "empty": {
+        "title": "Chưa có dự án nào",
+        "description": "Tạo dự án mới để bắt đầu."
+      },
+      "description": "Bấm vào một dự án để mở tiếp từ bước đang dừng.",
+      "open": "Mở tiếp"
+    },
+    "favorites": {
+      "title": "Dự án yêu thích",
+      "remove": "Bỏ yêu thích",
+      "kind": {
+        "layout": "Bố trí nội thất",
+        "interior": "Nội thất",
+        "architecture": "Kiến trúc"
+      },
+      "empty": {
+        "title": "Chưa lưu mẫu nào",
+        "description": "Bấm ♥ trên các mẫu trong cẩm nang để lưu lại."
+      },
+      "savedAt": "Đã lưu {date}",
+      "description": "Mẫu bạn đã bấm ♥ trong Cẩm nang và ở màn chờ của Bước 2, Bước 3.",
+      "count": "{count} mẫu"
+    },
+    "subtitle": "Thông tin tài khoản, các dự án đang làm và mẫu bạn đã lưu."
+  }
+}

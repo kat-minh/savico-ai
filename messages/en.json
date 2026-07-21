@@ -1,0 +1,680 @@
+{
+  "common": {
+    "appName": "SAVICO AI",
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "submit": "Submit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "more": "More",
+    "actions": "Actions",
+    "pageOf": "Page {page} of {total}",
+    "comingSoon": "Coming soon",
+    "optional": "optional",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "combobox": {
+      "placeholder": "Select an item",
+      "searchPlaceholder": "Search…",
+      "emptyMessage": "No results found",
+      "optional": "optional"
+    }
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Toggle theme"
+  },
+  "language": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "assistant": {
+    "uiTab": "Interface",
+    "chatTab": "AI Chatbot",
+    "title": "AI Assistant",
+    "subtitle": "Ask anything about your project",
+    "close": "Close"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account to continue",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@company.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "social": {
+      "or": "or",
+      "continueGoogle": "Continue with Google",
+      "soon": "Google sign-in will be available soon."
+    },
+    "forbidden": {
+      "title": "No access",
+      "description": "This area is restricted to administrators."
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Sign up to start designing with SAVICO AI",
+      "nameLabel": "Full name",
+      "namePlaceholder": "John Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@company.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "agree": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>",
+      "submit": "Sign up",
+      "success": "Account created. Please sign in.",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email to receive a reset link",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@company.com",
+      "submit": "Send reset link",
+      "backToLogin": "Back to sign in",
+      "sentTitle": "Email sent",
+      "sentSubtitle": "We sent a reset link to {email}. Please check your inbox."
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Check your connection and try again.",
+    "unauthorized": "Your session has expired. Please sign in again.",
+    "forbidden": "You don't have permission to perform this action.",
+    "notFound": "The page you're looking for doesn't exist.",
+    "validation": "Please review the highlighted fields.",
+    "tooManyRequests": "Too many requests. Please slow down.",
+    "server": "Our servers are having trouble. Please try again later.",
+    "pageNotFound": {
+      "title": "Page not found",
+      "description": "Sorry, we couldn't find that page.",
+      "action": "Back to home"
+    },
+    "boundary": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred while rendering this page.",
+      "action": "Try again"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email address",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must be at most {max} characters",
+    "passwordMin": "Password must be at least {min} characters",
+    "passwordMismatch": "Passwords do not match",
+    "agreeTerms": "You must agree to the terms",
+    "phone": "Enter a valid phone number",
+    "positiveNumber": "Enter a number greater than 0"
+  },
+  "legal": {
+    "terms": {
+      "title": "Terms of Service",
+      "updated": "Last updated: placeholder — final copy provided by SAVICO before go-live.",
+      "intro": "These terms govern your use of the SAVICO AI platform. By creating an account or using the service, you agree to the terms below.",
+      "sections": [
+        {
+          "title": "1. Acceptance of terms",
+          "body": "By accessing or using the platform you agree to be bound by these Terms of Service and our Privacy Policy."
+        },
+        {
+          "title": "2. Use of the service",
+          "body": "The AI-generated drawings and cost estimates are for reference only; actual results and costs may vary. You are responsible for the accuracy of the information you provide."
+        },
+        {
+          "title": "3. Accounts",
+          "body": "You must provide accurate registration details and keep your credentials secure. You are responsible for activity under your account."
+        },
+        {
+          "title": "4. Intellectual property",
+          "body": "Content, branding and materials on the platform belong to SAVICO unless stated otherwise."
+        },
+        {
+          "title": "5. Limitation of liability",
+          "body": "Estimates are indicative. SAVICO is not liable for decisions made solely based on AI-generated outputs."
+        },
+        {
+          "title": "6. Contact",
+          "body": "For questions about these terms, please contact us via the channels listed on the contact section."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated: placeholder — final copy provided by SAVICO before go-live.",
+      "intro": "This policy explains how we collect, use and protect your personal data in accordance with Vietnam's Decree 13/2023/ND-CP on personal data protection.",
+      "sections": [
+        {
+          "title": "1. Data we collect",
+          "body": "Account details (name, email, phone), floor-plan images you upload for AI processing, and contact/lead form submissions. We do not collect land-title (deed) documents."
+        },
+        {
+          "title": "2. How we use data",
+          "body": "To provide the design and estimate services, respond to your requests, and improve the platform."
+        },
+        {
+          "title": "3. Image data",
+          "body": "Uploaded floor-plan images are used only to generate drawings and renders. They are stored securely and can be deleted on request."
+        },
+        {
+          "title": "4. Data sharing",
+          "body": "We do not sell your personal data. AI processing may involve trusted providers under confidentiality obligations."
+        },
+        {
+          "title": "5. Your rights",
+          "body": "You may request access to, correction of, or deletion of your personal data at any time."
+        },
+        {
+          "title": "6. Contact",
+          "body": "For privacy requests, please contact us via the channels listed on the contact section."
+        }
+      ]
+    }
+  },
+  "chatbot": {
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "remaining": "{remaining}/{limit} messages left today",
+    "limitReached": "You've reached today's limit of {limit} messages. Please come back tomorrow.",
+    "greeting": "Hi! I'm the SAVICO AI assistant. I can walk you through the estimate, suggest ways to optimise cost and guide you step by step. What do you need?",
+    "waitingHint": "The assistant is talking you through it while it works",
+    "openPanel": "Open the chat panel",
+    "proactive": {
+      "estimate": {
+        "opening": "I'm reading the {building} details you entered and starting the quantity take-off.",
+        "openingWithArea": "I'm reading your {building} in {area} and applying the material and labour rates for that area.",
+        "photo": "Your land photo has been analysed — I'm using the plot shape, orientation and proportions to lay out the floor plan.",
+        "noPhoto": "You haven't uploaded a land photo, so I'm assuming a standard plot shape — adding a photo would make the drawings far more accurate.",
+        "scale": "A {scale} layout drives most of the structural cost: foundations, frame and slabs.",
+        "package": "With the {package} package I'm applying the matching finishing and interior rates so the final figure lands where you expect.",
+        "style": "You picked the {style} style — shortly I'll suggest a few layouts in the same style from the Handbook; save the ones you like with the ♥ button.",
+        "handbook": "While you wait, browse the sample layouts in the Handbook panel on the right and save your favourites with the ♥ button."
+      },
+      "dossier": {
+        "opening": "I've started rendering the dossier for your {building} — this step is heavier, so it takes a little longer.",
+        "interior": "The interior visuals are being rendered in the {style} style you chose.",
+        "contents": "The dossier will contain the cover page, the 2D floor plan, the exterior visual and the detailed estimate.",
+        "share": "Once it's done you can download the PDF, create a share link, send it by email or scan a QR code to open it on your phone."
+      }
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "design": "Design & Estimate",
+    "handbook": "Handbook",
+    "guide": "Guide",
+    "createProject": "New project",
+    "account": "My account",
+    "logout": "Sign out",
+    "menu": "Menu",
+    "preferences": "Preferences"
+  },
+  "footer": {
+    "tagline": "AI-generated drawings, renders and cost estimates in minutes.",
+    "hotline": "Hotline",
+    "zalo": "Chat on Zalo",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use"
+  },
+  "favorite": {
+    "add": "Save to favorites",
+    "remove": "Remove from favorites"
+  },
+  "landing": {
+    "hero": {
+      "title": "Design and estimate your build with AI",
+      "subtitle": "AI generates drawings, renders and a cost estimate in minutes",
+      "primaryCta": "New project",
+      "secondaryCta": "Watch the guide",
+      "promises": {
+        "fast": "Fast",
+        "accurate": "Accurate",
+        "secure": "Secure"
+      }
+    },
+    "showcase": {
+      "label": "Sample output",
+      "tabs": {
+        "floorPlan": "Floor plan",
+        "render3d": "3D render",
+        "dossier": "Dossier",
+        "estimate": "Estimate"
+      },
+      "rows": {
+        "structure": "Structure",
+        "finishing": "Finishing",
+        "interior": "Interior",
+        "total": "Total"
+      }
+    },
+    "steps": {
+      "input": {
+        "title": "Enter details",
+        "description": "Photograph the plot, then enter your needs and preferred style"
+      },
+      "estimate": {
+        "title": "Get the estimate",
+        "description": "AI produces drawings, 3D renders and a detailed cost estimate"
+      },
+      "dossier": {
+        "title": "Construction dossier",
+        "description": "Render and download the full design and estimate package"
+      }
+    }
+  },
+  "handbook": {
+    "page": {
+      "title": "Handbook",
+      "subtitle": "Reference layouts and advisory articles on architecture and interiors.",
+      "tabs": {
+        "templates": "Reference layouts",
+        "articles": "Articles"
+      },
+      "searchPlaceholder": "Search layouts or articles…",
+      "empty": {
+        "title": "Nothing matches",
+        "description": "Try a different keyword or clear a filter."
+      },
+      "filters": {
+        "allBuildingTypes": "All building types",
+        "allInteriorStyles": "All styles",
+        "clear": "Clear filters"
+      },
+      "resultCount": "{count} results"
+    },
+    "panel": {
+      "title": "Personalised handbook",
+      "tabs": {
+        "templates": "Layout ideas",
+        "articles": "Articles"
+      },
+      "minimize": "Minimise",
+      "restore": "Open handbook"
+    },
+    "detail": {
+      "note": "Reference layout curated by SAVICO. Actual output depends on your project details."
+    }
+  },
+  "guide": {
+    "title": "How to use",
+    "subtitle": "Short videos and articles for every key step.",
+    "searchPlaceholder": "Search the guide…",
+    "articlesTitle": "Written guides",
+    "empty": {
+      "title": "No guide found",
+      "description": "Try a different keyword."
+    },
+    "topics": {
+      "land-photo": "Photographing the plot",
+      "input": "Entering details",
+      "read-estimate": "Reading the estimate",
+      "dossier": "The construction dossier",
+      "share": "Sharing the dossier"
+    },
+    "highlights": {
+      "title": "How to use",
+      "subtitle": "Get up to speed in under a minute.",
+      "viewAll": "View all"
+    },
+    "videosTitle": "Guide videos, step by step"
+  },
+  "design": {
+    "steps": {
+      "1": "Enter details",
+      "2": "Get estimate",
+      "3": "Dossier",
+      "label": "Progress",
+      "status": {
+        "done": "Completed",
+        "current": "In progress",
+        "pending": "Not started"
+      }
+    },
+    "entry": {
+      "title": "Design & Estimate",
+      "subtitle": "Pick a project to continue, or start a new one.",
+      "create": "New project"
+    },
+    "createProject": {
+      "title": "New project",
+      "subtitle": "Give it a name you will recognise later.",
+      "nameLabel": "Project name",
+      "nameHint": "Use a memorable name, e.g. \"Tan Loi townhouse, 3 floors\".",
+      "namePlaceholder": "Tan Loi townhouse, 3 floors",
+      "descriptionLabel": "Description",
+      "descriptionHint": "Private notes about this project — only you can see them.",
+      "descriptionPlaceholder": "Notes about this project…",
+      "submit": "Create project"
+    },
+    "input": {
+      "extra": {
+        "title": "Additional details",
+        "empty": "Pick a building type to see the matching options"
+      },
+      "landPhoto": {
+        "label": "Plot photo",
+        "labelApartment": "Current apartment floor plan",
+        "hint": "Photograph or upload the plot (boundaries clearly visible, well lit). AI detects the shape and proportions — no dimensions needed.",
+        "hintApartment": "Upload the apartment floor plan (developer drawing) so AI can detect the rooms.",
+        "cta": "Take a photo or drag one here",
+        "constraints": "JPG, PNG, HEIC — up to 10MB",
+        "remove": "Remove photo",
+        "errorType": "Only JPG, PNG or HEIC are supported.",
+        "errorSize": "The image exceeds 10MB."
+      },
+      "address": {
+        "label": "Site address",
+        "hint": "Enter the build address (street, ward, province/city). It sets the regional material and labour rates.",
+        "province": "Province / City",
+        "provincePlaceholder": "Select province/city",
+        "ward": "Ward",
+        "wardPlaceholder": "Select ward",
+        "streetPlaceholder": "House number, street",
+        "searchPlaceholder": "Search…",
+        "noResult": "No match"
+      },
+      "buildingType": {
+        "label": "Building type",
+        "hint": "Pick the building type. The following options adapt to your choice.",
+        "placeholder": "Select a building type",
+        "options": {
+          "house": "House",
+          "townhouse": "Townhouse",
+          "apartment": "Apartment"
+        }
+      },
+      "floorCount": {
+        "label": "Scale (floors)",
+        "hint": "Pick the number of floors. Used for total floor area and the estimate.",
+        "options": {
+          "ground": "Ground floor",
+          "ground+1": "Ground + 1",
+          "ground+2": "Ground + 2",
+          "ground+3": "Ground + 3",
+          "ground+4": "Ground + 4"
+        }
+      },
+      "attic": {
+        "label": "Attic",
+        "hint": "The attic is a small top level covering the stairwell, usable as a drying area or store.",
+        "options": {
+          "yes": "With attic",
+          "no": "No attic"
+        }
+      },
+      "packageTier": {
+        "label": "Finishing & interior package",
+        "hint": "A single package covering both finishing materials and interiors; it drives the unit rates. Drag to pick Basic — Standard — VIP.",
+        "options": {
+          "basic": "Basic",
+          "standard": "Standard",
+          "vip": "VIP"
+        }
+      },
+      "architectureStyle": {
+        "label": "Architectural style",
+        "hint": "Pick the exterior style. Drawings and renders follow this choice.",
+        "options": {
+          "roofed": "Pitched roof (Thai / Japanese / tile)",
+          "modern-townhouse": "Modern townhouse",
+          "neoclassical": "Neoclassical"
+        }
+      },
+      "interiorStyle": {
+        "label": "Interior style",
+        "hint": "Pick the interior style. Used for the layout, interior costing and handbook suggestions.",
+        "options": {
+          "modern": "Modern",
+          "minimal": "Minimalist",
+          "neoclassical": "Neoclassical",
+          "indochine": "Indochine"
+        }
+      },
+      "wishes": {
+        "label": "What you have in mind",
+        "hint": "Add anything else: bedrooms, parking, orientation, open-plan spaces, colour tones… AI reads this to tailor the result.",
+        "placeholder": "e.g. 3 bedrooms, car parking, open kitchen, warm tones…"
+      },
+      "submit": "Get my estimate"
+    },
+    "progress": {
+      "estimate": {
+        "title": "AI is analysing and building your estimate…",
+        "stages": [
+          "Reading the photo and detecting the plot shape…",
+          "Laying out the floor plan around your needs…",
+          "Analysing material quantities…",
+          "Costing against regional unit rates…"
+        ]
+      },
+      "dossier": {
+        "title": "Rendering your construction dossier…",
+        "stages": [
+          "Drafting the 2D floor plan…",
+          "Rendering the exterior…",
+          "Building the detailed estimate…",
+          "Packaging the PDF dossier…"
+        ]
+      }
+    },
+    "estimate": {
+      "title": "Estimate",
+      "grandTotal": "Total estimate",
+      "sections": {
+        "structure": "Structure",
+        "finishing": "Finishing",
+        "interior": "Interior"
+      },
+      "sectionTotal": "Subtotal",
+      "viewDetail": "VIEW DETAILS",
+      "downloadXlsx": "Download the estimate (.xlsx)",
+      "breakdownTitle": "Cost breakdown",
+      "advisoryTitle": "Advice for your project",
+      "advisory": {
+        "defaultName": "there",
+        "unknownBuilding": "your building",
+        "unknownAddress": "the selected area",
+        "intro": "Hi {name}, based on what you shared — {building} at {address}, with an AI-estimated floor area of about {area} m² — SAVICO AI has prepared a preliminary estimate totalling {total}.",
+        "unitCost": "The average investment rate for this option is around {unitCost}/m² of floor area, in line with the {package} package you picked.",
+        "unitCostWithScale": "The average investment rate for this option is around {unitCost}/m² of floor area for a {scale} layout, in line with the {package} package you picked.",
+        "breakdown": "Cost split: structure {structure}%, finishing {finishing}% and interior {interior}%.",
+        "dominant": {
+          "structure": "Structure carries the largest share — common for taller builds or soft ground that needs reinforced foundations. To optimise, review the structural option and floor count before you commit.",
+          "finishing": "Finishing carries the largest share — this is the part most sensitive to material choices. Switching to same-tier tiles, stone and fixtures from another brand can cut the figure noticeably without hurting the look.",
+          "interior": "Interior carries the largest share — you can split it in two phases: built-in joinery first, loose furniture added after you move in."
+        },
+        "style": "The {style} style you chose matches the layouts in the Handbook — open the Handbook to browse samples in the same style and save the ones you like.",
+        "disclaimer": "This estimate is indicative and generated automatically from regional market rates at the time of writing. Actual costs may vary with site conditions, material prices and the construction schedule. For a firm quote, please contact a SAVICO architect."
+      },
+      "xlsx": {
+        "fileName": "SAVICO-estimate-{project}.xlsx",
+        "untitledProject": "SAVICO",
+        "sheet": "Detailed estimate",
+        "title": "DETAILED COST ESTIMATE",
+        "project": "Project",
+        "address": "Address",
+        "floorArea": "Floor area (m²)",
+        "columns": {
+          "no": "No.",
+          "item": "Item",
+          "unit": "Unit",
+          "quantity": "Qty",
+          "unitPrice": "Unit price (VND)",
+          "amount": "Amount (VND)"
+        },
+        "note": "Prepared automatically by SAVICO AI and indicative only. Actual costs may change with site conditions and material prices."
+      },
+      "continue": "Get the construction dossier",
+      "readyToast": "Your estimate is ready"
+    },
+    "dossier": {
+      "infoTitle": "Project information",
+      "info": {
+        "customerName": "Customer",
+        "projectName": "Project",
+        "phone": "Phone",
+        "address": "Site address",
+        "createdAt": "Created",
+        "buildingType": "Building type",
+        "scale": "Scale",
+        "floorArea": "Total floor area",
+        "package": "Package",
+        "architecture": "Architectural style",
+        "interior": "Interior style"
+      },
+      "floorAreaValue": "{value} m² (AI estimate)",
+      "previewTitle": "The dossier includes",
+      "preview": {
+        "cover": "Cover page",
+        "floorPlan": "2D floor plan",
+        "exterior": "Exterior render",
+        "estimate": "Detailed estimate"
+      },
+      "render": "Render dossier",
+      "actions": {
+        "downloadPdf": "Download PDF",
+        "shareLink": "Create share link",
+        "email": "Send by email",
+        "qr": "QR code"
+      },
+      "lockedHint": "Render the dossier first",
+      "readyTitle": "Your construction dossier is ready",
+      "readyThanks": "Thank you for trusting SAVICO AI.",
+      "readyToast": "Your dossier is ready",
+      "privacyNote": "Only you and the people you share it with can view this dossier.",
+      "ctaTitle": "Talk to a SAVICO architect — free consultation",
+      "ctaCall": "Call now",
+      "ctaZalo": "Chat on Zalo",
+      "pdfSize": "({size} MB)",
+      "pdf": {
+        "fileName": "SAVICO-dossier-{project}.pdf",
+        "documentTitle": "DESIGN & COST DOSSIER",
+        "coverEyebrow": "Construction dossier",
+        "coverIssued": "Issued on",
+        "page": "Page {page}/{total}"
+      },
+      "share": {
+        "preparing": "Creating the share link…",
+        "privacyNote": "Anyone with the link can view the dossier. Share it only with people you trust.",
+        "link": {
+          "title": "Dossier share link",
+          "description": "Copy the link below so others can view the dossier without signing in.",
+          "copy": "Copy link"
+        },
+        "qr": {
+          "title": "Dossier QR code",
+          "description": "Scan it with a phone camera to open the dossier right away."
+        },
+        "email": {
+          "title": "Email the dossier",
+          "description": "Enter an email address and we'll send the view link.",
+          "placeholder": "email@example.com",
+          "submit": "Send dossier",
+          "sent": "Dossier sent to {email}."
+        }
+      }
+    },
+    "share": {
+      "eyebrow": "Shared dossier",
+      "floorArea": "Floor area {value} m²",
+      "invalidTitle": "This link is no longer valid",
+      "invalidDescription": "The share link has expired or does not exist. Ask the sender for a new one."
+    },
+    "help": {
+      "label": "View guide",
+      "tooltip": "Open the guide video for this step"
+    },
+    "coverSample": {
+      "kicker": "Design & estimate dossier",
+      "title": "Tan Loi townhouse, 3 floors",
+      "project": "SVC-0001 · 128 Nguyen Van Cu, Buon Ma Thuot",
+      "rows": {
+        "scale": {
+          "label": "Scale",
+          "value": "Ground + 2, with attic"
+        },
+        "package": {
+          "label": "Package",
+          "value": "Standard"
+        },
+        "date": {
+          "label": "Created",
+          "value": "21 Jul 2026"
+        }
+      }
+    },
+    "planSample": {
+      "label": "Sample 2D floor plan",
+      "rooms": {
+        "living": "LIVING",
+        "kitchen": "KITCHEN + DINING",
+        "bed1": "BEDROOM 1",
+        "wc": "WC",
+        "stairs": "STAIRS",
+        "bed2": "BEDROOM 2"
+      }
+    }
+  },
+  "account": {
+    "title": "My account",
+    "info": {
+      "title": "Account information",
+      "name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "edit": "Edit",
+      "notProvided": "Not set",
+      "description": "Used to pre-fill your construction dossier."
+    },
+    "projects": {
+      "title": "My projects",
+      "step": "Step {step}/3",
+      "empty": {
+        "title": "No projects yet",
+        "description": "Create a project to get started."
+      },
+      "description": "Open a project to continue from where you left off.",
+      "open": "Continue"
+    },
+    "favorites": {
+      "title": "Saved favorites",
+      "remove": "Remove from favorites",
+      "kind": {
+        "layout": "Layout",
+        "interior": "Interior",
+        "architecture": "Architecture"
+      },
+      "empty": {
+        "title": "Nothing saved yet",
+        "description": "Tap ♥ on any handbook item to save it here."
+      },
+      "savedAt": "Saved {date}",
+      "description": "Samples you saved with ♥ in the Handbook and on the Step 2 / Step 3 waiting screens.",
+      "count": "{count} samples"
+    },
+    "subtitle": "Your account details, projects in progress and saved samples."
+  }
+}

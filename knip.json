@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/features/*/index.ts",
+    "src/shared/*/index.ts",
+    "src/shared/lib/api/index.ts",
+    "src/i18n/index.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["tw-animate-css", "tailwindcss", "@commitlint/types"]
+}
