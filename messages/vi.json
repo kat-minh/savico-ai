@@ -229,7 +229,8 @@
     "account": "Tài khoản của tôi",
     "logout": "Đăng xuất",
     "menu": "Menu",
-    "preferences": "Tùy chọn"
+    "guest": "Khách",
+    "guestHint": "Đăng nhập để lưu và xem lại dự án của bạn"
   },
   "footer": {
     "tagline": "AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút.",

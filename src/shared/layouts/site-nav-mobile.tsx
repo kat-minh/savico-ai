@@ -1,7 +1,7 @@
 'use client'
 
 import { Menu } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { Link, usePathname } from '@/i18n/navigation'
@@ -10,18 +10,14 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/sh
 import { cn } from '@/shared/lib/utils'
 import { SITE_NAV } from './site-nav.config'
 
-interface SiteNavMobileProps {
-  /** Khối tài khoản (đăng nhập hoặc menu người dùng) do lớp app truyền vào. */
-  account?: ReactNode
-}
-
 /**
  * Menu điều hướng cho màn hình hẹp (mục II.1).
  *
  * Dưới `md` thanh ngang không đủ chỗ cho 3 mục; ẩn chúng đi mà không có lối vào
  * khác đồng nghĩa người dùng điện thoại không tới được Cẩm nang / Hướng dẫn.
+ * Chỉ chứa điều hướng — tài khoản nằm ở avatar cạnh bên, hiện ở mọi bề rộng.
  */
-export function SiteNavMobile({ account }: SiteNavMobileProps) {
+export function SiteNavMobile() {
   const t = useTranslations('nav')
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -58,8 +54,6 @@ export function SiteNavMobile({ account }: SiteNavMobileProps) {
             )
           })}
         </nav>
-
-        {account ? <div className='mt-auto border-t p-4'>{account}</div> : null}
       </SheetContent>
     </Sheet>
   )

@@ -2,12 +2,12 @@
 
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { type ComponentType, type ReactNode } from 'react'
+import { type ComponentType } from 'react'
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
 import { Logo } from '@/shared/components/common'
-import { PreferencesMenu } from '@/shared/components/preferences-menu'
+import { GuestMenu } from '@/shared/components/guest-menu'
 import { Button } from '@/shared/components/ui/button'
 import { ROUTES } from '@/shared/constants/routes'
 import { useMounted } from '@/shared/hooks'
@@ -16,12 +16,7 @@ import { SiteNavMobile } from './site-nav-mobile'
 import { SITE_NAV } from './site-nav.config'
 
 interface SiteHeaderProps {
-  /**
-   * App-layer slot wrapping its children in the guest auth popup trigger.
-   * `shared/` may not import `features/auth`, so the app layer injects this.
-   */
-  AuthTrigger?: ComponentType<{ children: ReactNode; className?: string }>
-  /** App-layer account dropdown, shown instead of the CTA once signed in. */
+  /** App-layer account dropdown, shown once signed in. Falls back to GuestMenu. */
   UserMenu?: ComponentType
   /** Opens the "Tạo dự án" modal (mục III.1). Injected by the app layer. */
   onCreateProject?: () => void
@@ -32,9 +27,8 @@ interface SiteHeaderProps {
  * Nền sáng, logo bên trái, 3 mục điều hướng ở giữa, nút "Tạo dự án mới" và
  * avatar bên phải. Mục đang mở được gạch chân bằng màu thương hiệu.
  */
-export function SiteHeader({ AuthTrigger, UserMenu, onCreateProject }: SiteHeaderProps = {}) {
+export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) {
   const t = useTranslations('nav')
-  const tAuth = useTranslations('auth.login')
   const { isAuthenticated } = useAuth()
   const pathname = usePathname()
 
@@ -79,25 +73,11 @@ export function SiteHeader({ AuthTrigger, UserMenu, onCreateProject }: SiteHeade
           </Button>
 
           {/* Avatar luôn hiện — mục IV: bấm avatar mở Cửa sổ cá nhân. Khách chưa
-              đăng nhập không có menu đó nên được một dropdown tuỳ chọn riêng. */}
-          {authed && UserMenu ? (
-            <UserMenu />
-          ) : AuthTrigger ? (
-            <>
-              <PreferencesMenu />
-              <AuthTrigger className='hidden sm:inline-flex'>{tAuth('submit')}</AuthTrigger>
-            </>
-          ) : (
-            <Button asChild size='sm' variant='ghost' className='hidden sm:inline-flex'>
-              <Link href={ROUTES.LOGIN}>{tAuth('submit')}</Link>
-            </Button>
-          )}
+              đăng nhập thấy cùng một biểu tượng, chỉ khác nội dung dropdown, để
+              thanh công cụ không đổi bố cục khi đăng nhập / đăng xuất. */}
+          {authed && UserMenu ? <UserMenu /> : <GuestMenu />}
 
-          <SiteNavMobile
-            account={
-              authed ? null : AuthTrigger ? <AuthTrigger className='w-full'>{tAuth('submit')}</AuthTrigger> : null
-            }
-          />
+          <SiteNavMobile />
         </div>
       </div>
     </header>

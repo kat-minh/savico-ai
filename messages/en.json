@@ -229,7 +229,8 @@
     "account": "My account",
     "logout": "Sign out",
     "menu": "Menu",
-    "preferences": "Preferences"
+    "guest": "Guest",
+    "guestHint": "Sign in to save and revisit your projects"
   },
   "footer": {
     "tagline": "AI-generated drawings, renders and cost estimates in minutes.",
