@@ -31,6 +31,19 @@ export function GuestMenu() {
   const tRegister = useTranslations('auth.register')
   const open = useAuthDialogStore((s) => s.open)
 
+  // Mở popup ở tick sau, không mở ngay trong handler của menu item.
+  //
+  // Cả dropdown lẫn popup đều là lớp "modal" của Radix: khi mở, lớp ghi lại
+  // `pointer-events` hiện tại của <body> rồi đặt thành `none`, lúc đóng thì trả
+  // lại đúng giá trị đã ghi. Mở popup ngay trong handler nghĩa là popup mount
+  // khi dropdown chưa tháo xong, nên nó ghi lại `none` — và tới khi người dùng
+  // đăng nhập xong, popup đóng và áp `none` trở lại cho <body>: cả trang không
+  // bấm được gì cho tới khi F5. Lùi một tick là dropdown đã tháo và trả
+  // `pointer-events` về bình thường trước khi popup ghi lại.
+  const openAfterMenuCloses = (mode: 'login' | 'register') => {
+    setTimeout(() => open(mode), 0)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,11 +61,11 @@ export function GuestMenu() {
           <span className='text-muted-foreground text-xs font-normal text-pretty'>{t('guestHint')}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => open('login')}>
+        <DropdownMenuItem onClick={() => openAfterMenuCloses('login')}>
           <LogIn />
           {tLogin('submit')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => open('register')}>
+        <DropdownMenuItem onClick={() => openAfterMenuCloses('register')}>
           <UserPlus />
           {tRegister('submit')}
         </DropdownMenuItem>
