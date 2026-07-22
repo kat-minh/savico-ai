@@ -21,6 +21,8 @@ export interface HandbookTemplate {
   imageUrl: string
   /** Nhãn phong cách hiển thị trên thẻ. */
   styleLabel: string
+  /** Đoạn mô tả hiện dưới ảnh trong popup xem chi tiết mẫu (mục IV). */
+  description: string
   tags: HandbookTags
   /** `layout` cho mẫu bố trí nội thất (Bước 2), `interior` cho mẫu nội thất (Bước 3). */
   kind: 'layout' | 'interior'
@@ -31,6 +33,8 @@ export interface HandbookArticle {
   id: string
   title: string
   excerpt: string
+  /** Nội dung bài viết, mỗi phần tử một đoạn — hiện trong popup đọc bài. */
+  body: string[]
   imageUrl: string
   /** `architecture` cho màn chờ Bước 2, `interior` cho màn chờ Bước 3. */
   topic: 'architecture' | 'interior'

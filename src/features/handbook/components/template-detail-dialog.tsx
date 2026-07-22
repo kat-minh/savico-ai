@@ -19,7 +19,11 @@ export function TemplateDetailDialog({ template, onClose }: TemplateDetailDialog
 
   return (
     <Dialog open={Boolean(template)} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className='sm:max-w-2xl'>
+      {/* `flex flex-col` chứ không dùng `grid` mặc định: khi nội dung cao hơn
+          max-height, grid bóp hàng lại cho vừa, còn ảnh vẫn giữ đúng tỉ lệ nên
+          tràn ra ngoài hàng của nó và đè lên đoạn mô tả bên dưới. Với flex,
+          `shrink-0` giữ ảnh nguyên kích thước và phần dư được cuộn. */}
+      <DialogContent className='flex flex-col sm:max-w-2xl'>
         {template ? (
           <>
             <DialogHeader>
@@ -27,11 +31,15 @@ export function TemplateDetailDialog({ template, onClose }: TemplateDetailDialog
             </DialogHeader>
 
             <Photo
-              className='aspect-4/3 w-full rounded-xl'
+              className='aspect-4/3 w-full shrink-0 rounded-xl'
               src={template.imageUrl}
               alt={template.name}
               sizes='(max-width: 640px) 100vw, 640px'
             />
+
+            {/* Đoạn mô tả nằm ngay dưới ảnh: ảnh + tag không nói được mẫu này
+                hợp với ai, còn thiếu gì — người dùng phải đoán. */}
+            <p className='text-sm leading-relaxed'>{template.description}</p>
 
             <div className='flex flex-wrap items-center gap-2'>
               <Badge>{template.styleLabel}</Badge>

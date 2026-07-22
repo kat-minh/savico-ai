@@ -4,7 +4,9 @@ import { Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
 import { FavoriteButton } from '@/shared/favorite'
 import { cn } from '@/shared/lib/utils'
+import { useHandbookReadStore } from '../store/handbook-read.store'
 import type { HandbookTemplate } from '../types/handbook.types'
+import { ReadBadge } from './read-badge'
 
 interface TemplateCardProps {
   template: HandbookTemplate
@@ -22,6 +24,8 @@ interface TemplateCardProps {
  * swallow its clicks.
  */
 export function TemplateCard({ template, className, onOpen }: TemplateCardProps) {
+  const markRead = useHandbookReadStore((s) => s.markRead)
+
   return (
     <article
       className={cn(
@@ -46,13 +50,19 @@ export function TemplateCard({ template, className, onOpen }: TemplateCardProps)
 
       <div className='space-y-2 p-3'>
         <h3 className='line-clamp-2 text-sm font-semibold'>{template.name}</h3>
-        <Badge variant='secondary'>{template.styleLabel}</Badge>
+        <div className='flex flex-wrap items-center gap-2'>
+          <Badge variant='secondary'>{template.styleLabel}</Badge>
+          <ReadBadge id={template.id} />
+        </div>
       </div>
 
       {onOpen ? (
         <button
           type='button'
-          onClick={() => onOpen(template)}
+          onClick={() => {
+            markRead(template.id)
+            onOpen(template)
+          }}
           className='focus-visible:ring-ring absolute inset-0 focus-visible:ring-2 focus-visible:outline-none'
         >
           <span className='sr-only'>{template.name}</span>

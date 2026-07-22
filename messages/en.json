@@ -316,7 +316,11 @@
       "restore": "Open handbook"
     },
     "detail": {
-      "note": "Reference layout curated by SAVICO. Actual output depends on your project details."
+      "note": "Reference layout curated by SAVICO. Actual output depends on your project details.",
+      "articleNote": "General guidance only. Contact SAVICO for advice specific to your project."
+    },
+    "read": {
+      "badge": "Read"
     }
   },
   "guide": {

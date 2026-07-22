@@ -316,7 +316,11 @@
       "restore": "Mở cẩm nang"
     },
     "detail": {
-      "note": "Mẫu tham khảo do SAVICO biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn."
+      "note": "Mẫu tham khảo do SAVICO biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn.",
+      "articleNote": "Bài viết mang tính tham khảo. Liên hệ SAVICO để được tư vấn theo đúng công trình của bạn."
+    },
+    "read": {
+      "badge": "Đã đọc"
     }
   },
   "guide": {

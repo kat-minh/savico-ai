@@ -13,8 +13,9 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { useDebouncedValue } from '@/shared/hooks'
 import { useHandbookArticles, useHandbookTemplates } from '../hooks/use-handbook'
-import type { HandbookTemplate } from '../types/handbook.types'
+import type { HandbookArticle, HandbookTemplate } from '../types/handbook.types'
 import { ArticleCard } from './article-card'
+import { ArticleDetailDialog } from './article-detail-dialog'
 import { TemplateCard } from './template-card'
 import { TemplateDetailDialog } from './template-detail-dialog'
 
@@ -38,6 +39,7 @@ export function HandbookBrowser() {
   const [buildingType, setBuildingType] = useState(ALL)
   const [interiorStyle, setInteriorStyle] = useState(ALL)
   const [selected, setSelected] = useState<HandbookTemplate | null>(null)
+  const [selectedArticle, setSelectedArticle] = useState<HandbookArticle | null>(null)
 
   const hasFilters = buildingType !== ALL || interiorStyle !== ALL
   function clearFilters() {
@@ -157,7 +159,7 @@ export function HandbookBrowser() {
           ) : (
             <div className='grid gap-4 sm:grid-cols-2'>
               {visibleArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+                <ArticleCard key={article.id} article={article} onOpen={setSelectedArticle} />
               ))}
             </div>
           )}
@@ -165,6 +167,7 @@ export function HandbookBrowser() {
       </Tabs>
 
       <TemplateDetailDialog template={selected} onClose={() => setSelected(null)} />
+      <ArticleDetailDialog article={selectedArticle} onClose={() => setSelectedArticle(null)} />
     </div>
   )
 }
