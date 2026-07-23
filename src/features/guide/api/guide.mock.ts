@@ -6,29 +6,29 @@ const VIDEOS: GuideVideo[] = [
   {
     id: 'vid-01',
     topic: 'land-photo',
-    title: 'Chụp ảnh lô đất đúng cách',
-    description: 'Đứng ở đâu, lấy khung ra sao để AI nhận diện được ranh giới.',
+    title: 'Hướng dẫn nhập liệu dự án',
+    description: 'Chụp ảnh, nhập thông tin và lựa chọn phong cách.',
     thumbnailUrl: TOPIC_IMAGE.site,
     videoUrl: '',
-    durationSeconds: 45
+    durationSeconds: 168
   },
   {
     id: 'vid-02',
     topic: 'input',
-    title: 'Nhập thông tin dự án trong 1 phút',
-    description: 'Đi qua từng trường ở Bước 1 và ý nghĩa của chúng.',
-    thumbnailUrl: TOPIC_IMAGE.blueprint,
+    title: 'AI tạo bản vẽ & phối cảnh 3D',
+    description: 'Tạo mặt bằng, phối cảnh và chỉnh sửa theo nhu cầu.',
+    thumbnailUrl: BUILDING_IMAGE.townhouse,
     videoUrl: '',
-    durationSeconds: 58
+    durationSeconds: 195
   },
   {
     id: 'vid-03',
     topic: 'read-estimate',
-    title: 'Cách đọc bảng dự toán',
-    description: 'Phần thô, hoàn thiện, nội thất và ý nghĩa của biểu đồ tỷ trọng.',
+    title: 'Xem dự toán & hồ sơ thi công',
+    description: 'Kiểm tra dự toán chi tiết và xuất hồ sơ đầy đủ.',
     thumbnailUrl: INTERIOR_IMAGE.modern,
     videoUrl: '',
-    durationSeconds: 52
+    durationSeconds: 182
   },
   {
     id: 'vid-04',

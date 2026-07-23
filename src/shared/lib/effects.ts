@@ -1,5 +1,7 @@
 export const primaryControlShadowClasses =
-  'shadow-[0_1px_--theme(--color-white/0.07)_inset,0_1px_3px_--theme(--color-gray-900/0.2)]'
+  // Quầng bóng xanh lá toả xuống dưới giống ref: highlight mảnh ở trên + glow màu
+  // primary lan đều, làm nút như "nổi" trên nền.
+  'shadow-[0_1px_--theme(--color-white/0.12)_inset,0_2px_6px_--theme(--color-primary/0.35),0_8px_22px_-6px_--theme(--color-primary/0.5)]'
 
 export const lightControlShadowClasses =
   'shadow-[0_1px_--theme(--color-white/0.6)_inset,0_1px_2px_--theme(--color-gray-900/0.04)]'
@@ -11,9 +13,9 @@ export const primaryOverlayAfterClasses =
   'after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-linear-to-b after:from-white/15 after:from-44% after:via-transparent after:via-50% after:to-black/12 after:to-56% after:mix-blend-overlay'
 
 export const primaryControlEffectClasses = [
-  // Nút chính là dải chuyển xanh lá theo bộ nhận diện khách duyệt: sáng ở trên,
-  // đậm dần xuống dưới.
-  'relative isolate overflow-hidden bg-primary bg-linear-to-b from-primary to-primary-strong',
+  // Nút chính phủ dải gradient thương hiệu (xanh đậm → xanh chanh) giống bản
+  // deploy SAVICO.
+  'relative isolate overflow-hidden brand-gradient',
   primaryControlShadowClasses,
   primaryOverlayBeforeClasses,
   'before:opacity-50',

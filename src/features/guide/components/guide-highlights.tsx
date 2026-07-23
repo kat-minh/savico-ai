@@ -19,7 +19,7 @@ export function GuideHighlights() {
   const { data: videos, isPending } = useGuideVideos()
 
   return (
-    <section className='mx-auto w-full max-w-6xl px-4 py-16 lg:px-8'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 py-16 lg:px-8'>
       <header className='mb-8 flex flex-wrap items-end justify-between gap-4'>
         <div className='space-y-2'>
           <h2 className='text-2xl font-semibold tracking-tight sm:text-3xl'>{t('title')}</h2>
@@ -39,7 +39,9 @@ export function GuideHighlights() {
           ? Array.from({ length: HOME_GUIDE_HIGHLIGHT_COUNT }, (_, i) => (
               <Skeleton key={i} className='h-56 w-full rounded-xl' />
             ))
-          : videos?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT).map((video) => <VideoCard key={video.id} video={video} />)}
+          : videos
+              ?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT)
+              .map((video, i) => <VideoCard key={video.id} video={video} index={i + 1} layout='row' />)}
       </div>
     </section>
   )

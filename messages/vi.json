@@ -45,7 +45,8 @@
     "chatTab": "Chatbot AI",
     "title": "Trợ lý AI",
     "subtitle": "Hỏi bất cứ điều gì về dự án của bạn",
-    "close": "Đóng"
+    "close": "Đóng",
+    "fab": "SAVICO AI Assistant"
   },
   "auth": {
     "login": {
@@ -226,6 +227,7 @@
     "handbook": "Cẩm nang",
     "guide": "Hướng dẫn",
     "createProject": "Tạo dự án mới",
+    "bgToggle": { "toPlain": "Nền trơn", "toAura": "Nền động" },
     "account": "Tài khoản của tôi",
     "logout": "Đăng xuất",
     "menu": "Menu",
@@ -246,30 +248,45 @@
   },
   "landing": {
     "hero": {
-      "title": "Thiết kế và dự toán công trình bằng AI",
+      "titleLead": "Chụp 1 tấm ảnh lô đất —",
+      "titleAccent": "nhận ngay thiết kế & dự toán",
       "subtitle": "AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút",
       "primaryCta": "Tạo dự án mới",
       "secondaryCta": "Xem hướng dẫn",
       "promises": {
-        "fast": "Nhanh chóng",
-        "accurate": "Chính xác",
-        "secure": "Bảo mật"
+        "fast": { "title": "Nhanh chóng", "hint": "Chỉ trong vài phút" },
+        "accurate": { "title": "Chính xác", "hint": "AI + KTS kiểm duyệt" },
+        "secure": { "title": "Bảo mật", "hint": "An toàn dữ liệu" }
       }
     },
     "showcase": {
       "label": "Kết quả mẫu",
+      "title": "Dự toán chi phí",
       "tabs": {
         "floorPlan": "Mặt bằng",
         "render3d": "Phối cảnh 3D",
         "dossier": "Hồ sơ",
         "estimate": "Dự toán"
       },
+      "cols": {
+        "item": "Hạng mục",
+        "unit": "Đơn vị",
+        "qty": "Khối lượng",
+        "amount": "Thành tiền (đ)"
+      },
+      "units": {
+        "area": "m²",
+        "package": "gói"
+      },
       "rows": {
+        "foundation": "Phần móng",
         "structure": "Phần thô",
-        "finishing": "Phần hoàn thiện",
-        "interior": "Phần nội thất",
+        "finishing": "Hoàn thiện",
+        "mep": "Điện nước",
+        "interior": "Nội thất cơ bản",
         "total": "Tổng cộng"
-      }
+      },
+      "currency": "đ"
     },
     "steps": {
       "input": {

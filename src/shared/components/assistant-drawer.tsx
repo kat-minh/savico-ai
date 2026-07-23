@@ -23,26 +23,41 @@ export function AssistantDrawer({ open, onClose, children }: AssistantDrawerProp
   const t = useTranslations('assistant')
 
   return (
-    <aside
-      aria-hidden={!open}
-      className={cn(
-        'bg-background/85 fixed top-16 right-0 bottom-0 z-30 flex w-full max-w-[380px] flex-col border-l shadow-xl backdrop-blur-xl transition-transform duration-300 ease-out',
-        open ? 'translate-x-0' : 'pointer-events-none translate-x-full'
-      )}
-    >
-      <header className='flex items-center gap-3 border-b px-4 py-3'>
-        <div className='bg-primary/10 text-primary flex size-9 items-center justify-center rounded-full'>
-          <Bot className='size-5' />
-        </div>
-        <div className='min-w-0 flex-1'>
-          <p className='truncate text-sm font-semibold'>{t('title')}</p>
-          <p className='text-muted-foreground truncate text-xs'>{t('subtitle')}</p>
-        </div>
-        <Button variant='ghost' size='icon' onClick={onClose} aria-label={t('close')}>
-          <X className='size-4' />
-        </Button>
-      </header>
-      <div className='min-h-0 flex-1 p-3'>{children}</div>
-    </aside>
+    <>
+      {/* Lớp nền tối làm mờ phần còn lại của trang (cả header) khi drawer mở;
+          bấm ra ngoài để đóng. */}
+      <div
+        aria-hidden
+        onClick={onClose}
+        className={cn(
+          'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out',
+          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+      />
+      <aside
+        aria-hidden={!open}
+        className={cn(
+          // Thẻ nổi bo tròn, cách mép phải/trên/dưới một chút; z cao hơn header
+          // (z-40) nên vẫn đè lên header.
+          'bg-background/85 fixed top-3 right-3 bottom-3 z-50 flex w-full max-w-[380px] flex-col overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-out',
+          // Đóng: trượt hẳn ra ngoài kể cả phần cách mép phải.
+          open ? 'translate-x-0' : 'pointer-events-none translate-x-[calc(100%+0.75rem)]'
+        )}
+      >
+        <header className='flex items-center gap-3 border-b px-4 py-3'>
+          <div className='bg-primary/10 text-primary flex size-9 items-center justify-center rounded-full'>
+            <Bot className='size-5' />
+          </div>
+          <div className='min-w-0 flex-1'>
+            <p className='truncate text-sm font-semibold'>{t('title')}</p>
+            <p className='text-muted-foreground truncate text-xs'>{t('subtitle')}</p>
+          </div>
+          <Button variant='ghost' size='icon' onClick={onClose} aria-label={t('close')}>
+            <X className='size-4' />
+          </Button>
+        </header>
+        <div className='min-h-0 flex-1 p-3'>{children}</div>
+      </aside>
+    </>
   )
 }

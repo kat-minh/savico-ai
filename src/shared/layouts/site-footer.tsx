@@ -17,7 +17,7 @@ export function SiteFooter() {
   return (
     // Nền tối ở cả light lẫn dark (quy ước xuyên suốt, mục I).
     <footer className='bg-footer text-footer-foreground mt-auto'>
-      <div className='mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-8'>
+      <div className='mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-12 lg:flex-row lg:items-center lg:justify-between lg:px-8'>
         <div>
           <p className='text-base font-semibold'>{siteConfig.name}</p>
           <p className='text-footer-foreground/70 mt-2 max-w-sm text-sm leading-relaxed'>{t('tagline')}</p>
@@ -44,7 +44,7 @@ export function SiteFooter() {
       </div>
 
       <div className='border-footer-foreground/15 border-t'>
-        <div className='text-footer-foreground/60 mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-5 text-xs sm:flex-row sm:items-center sm:justify-between lg:px-8'>
+        <div className='text-footer-foreground/60 mx-auto flex w-full max-w-[90rem] flex-col gap-3 px-4 py-5 text-xs sm:flex-row sm:items-center sm:justify-between lg:px-8'>
           <p>
             © {year} {siteConfig.name}. {t('rights')}
           </p>

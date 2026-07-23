@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus } from 'lucide-react'
+import { Plus, Sparkles, Square } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type ComponentType } from 'react'
 
@@ -20,6 +20,13 @@ interface SiteHeaderProps {
   UserMenu?: ComponentType
   /** Opens the "Tạo dự án" modal (mục III.1). Injected by the app layer. */
   onCreateProject?: () => void
+  /** Nền trang chủ đang ở chế độ trơn (`true`) hay quầng động (`false`). */
+  plainBackground?: boolean
+  /**
+   * Bật/tắt giữa nền động và nền trơn giống bản client. Chỉ được app layer truyền
+   * vào ở trang chủ; khi không có, nút switch ẩn đi.
+   */
+  onToggleBackground?: () => void
 }
 
 /**
@@ -27,7 +34,12 @@ interface SiteHeaderProps {
  * Nền sáng, logo bên trái, 3 mục điều hướng ở giữa, nút "Tạo dự án mới" và
  * avatar bên phải. Mục đang mở được gạch chân bằng màu thương hiệu.
  */
-export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) {
+export function SiteHeader({
+  UserMenu,
+  onCreateProject,
+  plainBackground = false,
+  onToggleBackground
+}: SiteHeaderProps = {}) {
   const t = useTranslations('nav')
   const { isAuthenticated } = useAuth()
   const pathname = usePathname()
@@ -40,12 +52,12 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
 
   return (
     <header className='bg-background/85 sticky top-0 z-40 border-b backdrop-blur-xl backdrop-saturate-150'>
-      <div className='mx-auto flex h-16 w-full max-w-6xl items-center gap-6 px-4 lg:px-8'>
+      <div className='relative mx-auto flex h-16 w-full max-w-[90rem] items-center gap-6 px-4 lg:px-8'>
         <Link href={ROUTES.HOME} aria-label={t('home')} className='shrink-0'>
           <Logo />
         </Link>
 
-        <nav className='hidden items-center gap-1 md:flex'>
+        <nav className='absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex'>
           {SITE_NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
             return (
@@ -67,10 +79,26 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
         </nav>
 
         <div className='ml-auto flex items-center gap-2'>
-          <Button size='sm' className='rounded-full' onClick={onCreateProject}>
+          <Button size='sm' className='rounded-xl' onClick={onCreateProject}>
             <Plus className='size-4' />
             <span className='hidden sm:inline'>{createLabel}</span>
           </Button>
+
+          {/* Switch nền trang chủ: đối chiếu nền động với nền trơn của bản client.
+              Chỉ hiện khi app layer truyền handler (tức ở trang chủ). */}
+          {onToggleBackground ? (
+            <Button
+              type='button'
+              size='sm'
+              variant='outline'
+              className='rounded-xl'
+              onClick={onToggleBackground}
+              aria-pressed={plainBackground}
+            >
+              {plainBackground ? <Sparkles className='size-4' /> : <Square className='size-4' />}
+              <span className='hidden sm:inline'>{t(plainBackground ? 'bgToggle.toAura' : 'bgToggle.toPlain')}</span>
+            </Button>
+          ) : null}
 
           {/* Avatar luôn hiện — mục IV: bấm avatar mở Cửa sổ cá nhân. Khách chưa
               đăng nhập thấy cùng một biểu tượng, chỉ khác nội dung dropdown, để

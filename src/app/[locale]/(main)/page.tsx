@@ -1,9 +1,9 @@
 import { setRequestLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
-import { AmbientAura } from '@/shared/components/common'
 import { HomeSteps } from '@/features/landing'
 import { GuideHighlights } from '@/features/guide'
+import { HomeBackdrop } from './home-backdrop'
 import { HomeHeroSection } from './home-hero-section'
 
 interface PageProps {
@@ -17,7 +17,7 @@ export default async function HomePage({ params }: PageProps) {
 
   return (
     <div className='relative'>
-      <AmbientAura className='fixed' />
+      <HomeBackdrop />
       <HomeHeroSection />
       <HomeSteps />
       <GuideHighlights />

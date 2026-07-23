@@ -32,6 +32,10 @@
   --primary: oklch(0.63 0.17 149);
   --primary-foreground: oklch(1 0 0);
   --primary-strong: oklch(0.55 0.155 150);
+  /* Dải gradient thương hiệu (giống bản deploy SAVICO): xanh lá đậm → xanh chanh.
+   * Dùng cho nút chính, vòng icon 3 bước, nút chatbot, nút play video, chữ accent. */
+  --brand-gradient-from: #006400;
+  --brand-gradient-to: #9acd32;
   --secondary: oklch(0.97 0.012 150);
   --secondary-foreground: oklch(0.33 0.05 150);
   --muted: oklch(0.968 0.006 150);
@@ -400,6 +404,20 @@
 }
 
 @layer components {
+  /* Bề mặt phủ gradient thương hiệu — nút chính, vòng icon 3 bước, nút chatbot,
+     nút play video. Chéo 135deg: xanh chanh nhạt góc trên-trái → xanh lá đậm
+     dần xuống dưới-phải. */
+  .brand-gradient {
+    background-image: linear-gradient(135deg, var(--brand-gradient-to), var(--brand-gradient-from));
+  }
+  /* Chữ tô gradient thương hiệu (accent tiêu đề hero). */
+  .brand-gradient-text {
+    background-image: linear-gradient(90deg, var(--brand-gradient-from), var(--brand-gradient-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   /* Shared liquid-glass surface behaviour (rim + inner glow + stacking). */
   .glass-panel,
   .glass-panel-strong,

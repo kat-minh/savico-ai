@@ -45,7 +45,8 @@
     "chatTab": "AI Chatbot",
     "title": "AI Assistant",
     "subtitle": "Ask anything about your project",
-    "close": "Close"
+    "close": "Close",
+    "fab": "SAVICO AI Assistant"
   },
   "auth": {
     "login": {
@@ -226,6 +227,7 @@
     "handbook": "Handbook",
     "guide": "Guide",
     "createProject": "New project",
+    "bgToggle": { "toPlain": "Plain background", "toAura": "Dynamic background" },
     "account": "My account",
     "logout": "Sign out",
     "menu": "Menu",
@@ -246,30 +248,45 @@
   },
   "landing": {
     "hero": {
-      "title": "Design and estimate your build with AI",
+      "titleLead": "Snap one photo of your plot —",
+      "titleAccent": "get an instant design & estimate",
       "subtitle": "AI generates drawings, renders and a cost estimate in minutes",
       "primaryCta": "New project",
       "secondaryCta": "Watch the guide",
       "promises": {
-        "fast": "Fast",
-        "accurate": "Accurate",
-        "secure": "Secure"
+        "fast": { "title": "Fast", "hint": "Ready in minutes" },
+        "accurate": { "title": "Accurate", "hint": "AI + architect reviewed" },
+        "secure": { "title": "Secure", "hint": "Your data is safe" }
       }
     },
     "showcase": {
       "label": "Sample output",
+      "title": "Cost estimate",
       "tabs": {
         "floorPlan": "Floor plan",
         "render3d": "3D render",
         "dossier": "Dossier",
         "estimate": "Estimate"
       },
+      "cols": {
+        "item": "Item",
+        "unit": "Unit",
+        "qty": "Qty",
+        "amount": "Amount (đ)"
+      },
+      "units": {
+        "area": "m²",
+        "package": "pkg"
+      },
       "rows": {
+        "foundation": "Foundation",
         "structure": "Structure",
         "finishing": "Finishing",
-        "interior": "Interior",
+        "mep": "M&E",
+        "interior": "Basic interior",
         "total": "Total"
-      }
+      },
+      "currency": "đ"
     },
     "steps": {
       "input": {
