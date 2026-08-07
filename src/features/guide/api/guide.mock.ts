@@ -2,49 +2,63 @@ import { mockDelay } from '@/shared/lib/mock'
 import { BUILDING_IMAGE, INTERIOR_IMAGE, TOPIC_IMAGE } from '@/shared/lib/imagery'
 import type { GuideArticle, GuideVideo } from '../types/guide.types'
 
+/**
+ * Danh sách video khởi điểm theo mục VI — tiêu đề, thứ tự và thời lượng đúng
+ * như spec. Admin thêm / sửa / sắp thứ tự và chọn video nổi bật (mục X, #3).
+ */
 const VIDEOS: GuideVideo[] = [
   {
     id: 'vid-01',
     topic: 'land-photo',
-    title: 'Hướng dẫn nhập liệu dự án',
-    description: 'Chụp ảnh, nhập thông tin và lựa chọn phong cách.',
+    title: 'Chụp ảnh lô đất đúng cách',
+    description: 'Góc chụp, ánh sáng và cách lấy trọn ranh giới lô đất.',
     thumbnailUrl: TOPIC_IMAGE.site,
     videoUrl: '',
-    durationSeconds: 168
+    durationSeconds: 45,
+    featured: true
   },
   {
     id: 'vid-02',
     topic: 'input',
-    title: 'AI tạo bản vẽ & phối cảnh 3D',
-    description: 'Tạo mặt bằng, phối cảnh và chỉnh sửa theo nhu cầu.',
+    title: 'Nhập liệu tạo dự án',
+    description: 'Điền thông tin công trình và chọn gói hoàn thiện.',
     thumbnailUrl: BUILDING_IMAGE.townhouse,
     videoUrl: '',
-    durationSeconds: 195
+    durationSeconds: 58
   },
   {
     id: 'vid-03',
     topic: 'read-estimate',
-    title: 'Xem dự toán & hồ sơ thi công',
-    description: 'Kiểm tra dự toán chi tiết và xuất hồ sơ đầy đủ.',
+    title: 'Cách đọc bảng dự toán',
+    description: 'Hiểu ba phần chi phí và tỷ trọng của từng phần.',
     thumbnailUrl: INTERIOR_IMAGE.modern,
     videoUrl: '',
-    durationSeconds: 182
+    durationSeconds: 60
   },
   {
     id: 'vid-04',
-    topic: 'dossier',
-    title: 'Bộ hồ sơ gồm những gì',
-    description: 'Trang bìa, mặt bằng 2D, phối cảnh và bảng dự toán chi tiết.',
-    thumbnailUrl: BUILDING_IMAGE.house,
+    topic: 'input',
+    title: 'Chọn phong cách phù hợp',
+    description: 'So sánh các phong cách và ảnh hưởng tới dự toán nội thất.',
+    thumbnailUrl: INTERIOR_IMAGE.indochine,
     videoUrl: '',
     durationSeconds: 40
   },
   {
     id: 'vid-05',
+    topic: 'dossier',
+    title: 'Bộ hồ sơ gồm những gì',
+    description: 'Trang bìa, mặt bằng 2D, phối cảnh và bảng dự toán chi tiết.',
+    thumbnailUrl: BUILDING_IMAGE.garden,
+    videoUrl: '',
+    durationSeconds: 52
+  },
+  {
+    id: 'vid-06',
     topic: 'share',
-    title: 'Chia sẻ hồ sơ cho nhà thầu',
+    title: 'Chia sẻ hồ sơ cho người thân',
     description: 'Tạo link, gửi email hoặc quét QR để xem online.',
-    thumbnailUrl: BUILDING_IMAGE.townhouse,
+    thumbnailUrl: BUILDING_IMAGE.villa,
     videoUrl: '',
     durationSeconds: 35
   }

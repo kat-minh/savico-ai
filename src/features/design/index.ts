@@ -5,10 +5,14 @@
 
 // Components
 export { CreateProjectDialog } from './components/create-project-dialog'
+export { PhonePromptDialog } from './components/phone-prompt-dialog'
 export { StepProgress } from './components/step-progress'
 export { HelpLink } from './components/help-link'
 export { StepInputForm } from './components/step-input-form'
 export { GenerationWaiting } from './components/generation-waiting'
+export { BlueprintIllustration } from './components/blueprint-illustration'
+export { ArchitectAvatar } from './components/architect-avatar'
+export { RenderProgressBars } from './components/render-progress-bars'
 export { DesignStepLayout } from './components/design-step-layout'
 export { EstimateResultView } from './components/estimate-result-view'
 export { EstimateTable } from './components/estimate-table'
@@ -19,9 +23,12 @@ export { DossierReady } from './components/dossier-ready'
 export { DossierShareDialog, type ShareMode } from './components/dossier-share-dialog'
 export { SharedDossierView } from './components/shared-dossier-view'
 export { MyProjects } from './components/my-projects'
+export { ProjectBoard } from './components/project-board'
+export { ProjectCard } from './components/project-card'
 
 // Hooks
-export { useProjects, useProject, useCreateProject } from './hooks/use-projects'
+export { useProjects, useProject, useCreateProject, useRenameProject, useDeleteProject } from './hooks/use-projects'
+export { useDesignQuota } from './hooks/use-design-quota'
 export { useEstimate } from './hooks/use-estimate'
 export { useDownloadEstimate } from './hooks/use-download-estimate'
 export { useDossier, useRenderDossier, useCreateShareLink, useSendDossierEmail } from './hooks/use-dossier'
@@ -38,6 +45,7 @@ export {
   EMPTY_DESIGN_INPUT,
   emptyDesignInput,
   composeAddress,
+  stylesFor,
   visibleFields,
   applyBuildingTypeChange,
   missingRequiredFields,
@@ -57,6 +65,20 @@ export {
 } from './services/estimate.service'
 export { advisoryFacts, type AdvisoryFacts } from './services/advisory.service'
 export {
+  countProjects,
+  filterProjects,
+  matchesQuery,
+  miniStepState,
+  pageCount,
+  paginate,
+  projectStatus,
+  selectProjects,
+  sortProjects,
+  type MiniStepState,
+  type ProjectCounts,
+  type ProjectListFilter
+} from './services/project-list.service'
+export {
   buildEstimateSheet,
   ESTIMATE_XLSX_COLUMNS,
   type EstimateXlsxContext,
@@ -64,6 +86,7 @@ export {
 } from './services/estimate-xlsx.service'
 
 // Schemas
+export { isValidPhone, normalizePhone } from './schemas/phone.schema'
 export {
   createProjectSchema,
   PROJECT_NAME_MAX_LENGTH,
@@ -74,15 +97,21 @@ export { createDesignInputSchema, type DesignInputFormValues } from './schemas/d
 
 // Constants & types
 export {
-  ARCHITECTURE_STYLES,
   BUILDING_TYPES,
+  DESIGN_STYLES,
+  STYLES_BY_BUILDING_TYPE,
   COST_SECTIONS,
   DEFAULT_PACKAGE_TIER,
+  DEFAULT_PROJECT_SORT,
   DESIGN_STEPS,
+  PROJECT_SORTS,
+  PROJECT_STAT_CARDS,
+  PROJECT_STATUSES,
+  PROJECTS_PAGE_SIZE,
+  type ProjectStatCard,
   STEP_HELP_TOPIC,
   FIELDS_BY_BUILDING_TYPE,
   FLOOR_COUNTS,
-  INTERIOR_STYLES,
   LAND_PHOTO_ACCEPT,
   LAND_PHOTO_MAX_BYTES,
   PACKAGE_TIERS,
@@ -90,11 +119,12 @@ export {
 } from './constants/design.constants'
 export type {
   AddressDetail,
-  ArchitectureStyle,
   BuildingType,
   CostSection,
   DesignInput,
+  DesignQuota,
   DesignStep,
+  DesignStyle,
   Dossier,
   DossierStatus,
   EstimateLineItem,
@@ -103,8 +133,9 @@ export type {
   EstimateSubItem,
   FloorCount,
   GenerationProgress,
-  InteriorStyle,
   PackageTier,
   Project,
+  ProjectSort,
+  ProjectStatus,
   SharedDossier
 } from './types/design.types'

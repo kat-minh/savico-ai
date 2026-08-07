@@ -15,17 +15,39 @@ const UNSPLASH = 'https://images.unsplash.com/'
 /** Build a sized Unsplash URL. */
 const photo = (id: string, width = 900) => `${UNSPLASH}${id}?w=${width}&q=80&auto=format&fit=crop`
 
-/** Kiểu kiến trúc — mặt ngoài công trình (mục III.2, trường 7). */
-export const ARCHITECTURE_IMAGE = {
-  /** Nhà mái Thái / Nhật / ngói truyền thống — mái dốc, lợp ngói. */
-  roofed: photo('photo-1449844908441-8829872d2607'),
-  /** Nhà phố hiện đại — khối hộp, vật liệu gỗ + kính. */
-  'modern-townhouse': photo('photo-1600047509807-ba8f99d2cdde'),
-  /** Nhà tân cổ điển — gạch, mái đầu hồi, chi tiết cổ điển. */
-  neoclassical: photo('photo-1592595896551-12b371d546d5')
+/**
+ * Thẻ ảnh của trường "Kiểu kiến trúc & phong cách" (Phụ lục A, trường 7).
+ *
+ * Một trường gộp nên mỗi phong cách chỉ có MỘT ảnh; Hình 04 dùng ảnh ngoại thất
+ * cho nhà đất. Danh mục và ảnh sẽ do admin thay (mục X, #6) — các id dưới đây
+ * là seed đã kiểm tra resolve được.
+ */
+export const STYLE_IMAGE = {
+  /** Nhà phố / villa hiện đại — khối hộp, gỗ + kính. */
+  modern: photo('photo-1600047509807-ba8f99d2cdde'),
+  /** Wabi-sabi — vật liệu thô, tông ấm. */
+  'wabi-sabi': photo('photo-1502672260266-1c1ef2d93688'),
+  /** Tân cổ điển — phào chỉ, mái đầu hồi. */
+  neoclassical: photo('photo-1592595896551-12b371d546d5'),
+  /** Tối giản (Minimalism) — mặt phẳng, ít chi tiết. */
+  minimal: photo('photo-1600585154340-be6161a56a0c'),
+  /** Indochine — Đông Dương, gạch bông, cửa lá sách. */
+  indochine: photo('photo-1616137466211-f939a420be84'),
+  /** Nhà mái Thái hiện đại — mái dốc lợp ngói. */
+  'thai-roof': photo('photo-1449844908441-8829872d2607'),
+  /** Nhà mái Nhật hiện đại — mái dốc thấp, hiên rộng. */
+  'japanese-roof': photo('photo-1580587771525-78b9dba3b914'),
+  /** Nhà vườn mái Thái — dùng lại ảnh mái Thái cho tới khi có ảnh riêng. */
+  'garden-thai-roof': photo('photo-1449844908441-8829872d2607'),
+  /** Nhà vườn mái Nhật — dùng lại ảnh mái Nhật cho tới khi có ảnh riêng. */
+  'garden-japanese-roof': photo('photo-1580587771525-78b9dba3b914'),
+  /** Biệt thự / villa sân vườn. */
+  'garden-villa': photo('photo-1613490493576-7fde63acd811'),
+  /** Nhà cấp 4 hiện đại. */
+  'level4-modern': photo('photo-1523217582562-09d0def993a6')
 } as const
 
-/** Phong cách nội thất — không gian bên trong (mục III.2, trường 8). */
+/** Phong cách nội thất — không gian bên trong, dùng cho cẩm nang & minh họa. */
 export const INTERIOR_IMAGE = {
   modern: photo('photo-1600607687939-ce8a6c25118c'),
   minimal: photo('photo-1583847268964-b28dc8f51f92'),
@@ -35,8 +57,10 @@ export const INTERIOR_IMAGE = {
 
 /** Loại công trình — dùng cho thẻ minh họa và ảnh bìa. */
 export const BUILDING_IMAGE = {
-  house: photo('photo-1580587771525-78b9dba3b914'),
   townhouse: photo('photo-1600585154340-be6161a56a0c'),
+  villa: photo('photo-1613490493576-7fde63acd811'),
+  roofed: photo('photo-1449844908441-8829872d2607'),
+  garden: photo('photo-1580587771525-78b9dba3b914'),
   apartment: photo('photo-1522708323590-d24dbb6b0267')
 } as const
 

@@ -227,20 +227,48 @@
     "handbook": "Handbook",
     "guide": "Guide",
     "createProject": "New project",
-    "bgToggle": { "toPlain": "Plain background", "toAura": "Dynamic background" },
+    "bgToggle": {
+      "toPlain": "Plain background",
+      "toAura": "Dynamic background"
+    },
     "account": "My account",
     "logout": "Sign out",
     "menu": "Menu",
     "guest": "Guest",
-    "guestHint": "Sign in to save and revisit your projects"
+    "guestHint": "Sign in to save and revisit your projects",
+    "plans": "Pricing"
   },
   "footer": {
-    "tagline": "AI-generated drawings, renders and cost estimates in minutes.",
+    "tagline": "SAVICO's AI platform turns one photo of your lot into drawings, 3D renders and a full cost estimate in minutes — with regional unit prices and a SAVICO architect alongside you.",
+    "contactTitle": "Contact",
+    "quickLinksTitle": "Quick links",
+    "policyTitle": "Policies",
+    "socialTitle": "Follow SAVICO",
     "hotline": "Hotline",
-    "zalo": "Chat on Zalo",
+    "zalo": "Zalo",
+    "address": "123 Nguyen Van Cu, Tan Loi Ward, Buon Ma Thuot, Dak Lak",
+    "workingHours": "Mon – Sat: 8:00 AM – 5:30 PM",
+    "comingSoon": "Coming soon",
+    "links": {
+      "design": "Design & Estimate",
+      "handbook": "Handbook",
+      "guide": "Guide",
+      "plans": "Pricing plans",
+      "consult": "1:1 consultation",
+      "createProject": "New project",
+      "privacy": "Privacy policy",
+      "terms": "Terms of use",
+      "payment": "Payment policy"
+    },
+    "social": {
+      "facebook": "SAVICO on Facebook",
+      "zaloOa": "SAVICO Zalo OA",
+      "youtube": "SAVICO on YouTube",
+      "tiktok": "SAVICO on TikTok"
+    },
     "rights": "All rights reserved.",
-    "privacy": "Privacy policy",
-    "terms": "Terms of use"
+    "company": "SAVICO Joint Stock Company",
+    "taxCode": "Tax ID"
   },
   "favorite": {
     "add": "Save to favorites",
@@ -254,9 +282,18 @@
       "primaryCta": "New project",
       "secondaryCta": "Watch the guide",
       "promises": {
-        "fast": { "title": "Fast", "hint": "Ready in minutes" },
-        "accurate": { "title": "Accurate", "hint": "AI + architect reviewed" },
-        "secure": { "title": "Secure", "hint": "Your data is safe" }
+        "fast": {
+          "title": "Fast",
+          "hint": "Ready in minutes"
+        },
+        "accurate": {
+          "title": "Accurate",
+          "hint": "AI + architect reviewed"
+        },
+        "secure": {
+          "title": "Secure",
+          "hint": "Your data is safe"
+        }
       }
     },
     "showcase": {
@@ -343,7 +380,7 @@
   "guide": {
     "title": "How to use",
     "subtitle": "Short videos and articles for every key step.",
-    "searchPlaceholder": "Search the guide…",
+    "searchPlaceholder": "Search videos or guides…",
     "articlesTitle": "Written guides",
     "empty": {
       "title": "No guide found",
@@ -361,7 +398,11 @@
       "subtitle": "Get up to speed in under a minute.",
       "viewAll": "View all"
     },
-    "videosTitle": "Guide videos, step by step"
+    "videoComingSoon": "This video is being produced — coming soon.",
+    "carouselLabel": "Guide videos",
+    "prev": "Previous page",
+    "next": "Next page",
+    "goToPage": "Page {page}"
   },
   "design": {
     "steps": {
@@ -372,23 +413,24 @@
       "status": {
         "done": "Completed",
         "current": "In progress",
-        "pending": "Not started"
+        "pending": "Not started",
+        "justDone": "Just completed"
       }
     },
     "entry": {
       "title": "Design & Estimate",
-      "subtitle": "Pick a project to continue, or start a new one.",
+      "subtitle": "Manage your designs, cost estimates and construction dossiers in one place.",
       "create": "New project"
     },
     "createProject": {
       "title": "New project",
-      "subtitle": "Give it a name you will recognise later.",
+      "subtitle": "Give it a name so you can find it later.",
       "nameLabel": "Project name",
       "nameHint": "Use a memorable name, e.g. \"Tan Loi townhouse, 3 floors\".",
-      "namePlaceholder": "Tan Loi townhouse, 3 floors",
-      "descriptionLabel": "Description",
+      "namePlaceholder": "e.g. Tan Loi townhouse, 3 floors",
+      "descriptionLabel": "Description (optional)",
       "descriptionHint": "Private notes about this project — only you can see them.",
-      "descriptionPlaceholder": "Notes about this project…",
+      "descriptionPlaceholder": "Add a description (optional)...",
       "submit": "Create project"
     },
     "input": {
@@ -405,7 +447,8 @@
         "constraints": "JPG, PNG, HEIC — up to 10MB",
         "remove": "Remove photo",
         "errorType": "Only JPG, PNG or HEIC are supported.",
-        "errorSize": "The image exceeds 10MB."
+        "errorSize": "The image exceeds 10MB.",
+        "fallbackNote": "No photo yet? Just describe it — the AI can still work."
       },
       "address": {
         "label": "Site address",
@@ -420,19 +463,21 @@
       },
       "buildingType": {
         "label": "Building type",
-        "hint": "Pick the building type. The following options adapt to your choice.",
+        "hint": "Pick the building type. The next options adapt to what you choose.",
         "placeholder": "Select a building type",
         "options": {
-          "house": "House",
           "townhouse": "Townhouse",
+          "villa": "Villa",
+          "roofed": "Pitched-roof house",
+          "garden": "Garden / single-storey house",
           "apartment": "Apartment"
         }
       },
       "floorCount": {
-        "label": "Scale (floors)",
-        "hint": "Pick the number of floors. Used for total floor area and the estimate.",
+        "label": "Floors",
+        "hint": "Pick the number of floors you plan to build. Used to compute total floor area and the estimate.",
         "options": {
-          "ground": "Ground floor",
+          "ground": "Ground",
           "ground+1": "Ground + 1",
           "ground+2": "Ground + 2",
           "ground+3": "Ground + 3",
@@ -456,31 +501,40 @@
           "vip": "VIP"
         }
       },
-      "architectureStyle": {
-        "label": "Architectural style",
-        "hint": "Pick the exterior style. Drawings and renders follow this choice.",
-        "options": {
-          "roofed": "Pitched roof (Thai / Japanese / tile)",
-          "modern-townhouse": "Modern townhouse",
-          "neoclassical": "Neoclassical"
-        }
+      "wishes": {
+        "label": "Detailed description",
+        "hint": "Add what you want: number of bedrooms, car parking, orientation, open-plan spaces, colour tones… The AI reads this to tailor the result.",
+        "placeholder": "e.g. 5×20m lot facing south-east, 3 bedrooms, car parking, kitchen open to the living room, warm tones."
       },
-      "interiorStyle": {
-        "label": "Interior style",
-        "hint": "Pick the interior style. Used for the layout, interior costing and handbook suggestions.",
+      "submit": "Get my estimate",
+      "pageTitle": "New project",
+      "groups": {
+        "media": "Photo & description",
+        "location": "Site location",
+        "scope": "Building type & scale"
+      },
+      "style": {
+        "label": "Style (architecture & interior)",
+        "hint": "Pick one style for the whole project — it drives both the exterior architecture and the interior. Your 2D drawings, interior layout renders and interior cost estimate all follow this choice.",
         "options": {
           "modern": "Modern",
-          "minimal": "Minimalist",
+          "wabi-sabi": "Wabi-sabi",
           "neoclassical": "Neoclassical",
-          "indochine": "Indochine"
+          "minimal": "Minimalism",
+          "indochine": "Indochine",
+          "thai-roof": "Modern Thai roof",
+          "japanese-roof": "Modern Japanese roof",
+          "garden-thai-roof": "Garden house, Thai roof",
+          "garden-japanese-roof": "Garden house, Japanese roof",
+          "garden-villa": "Garden villa",
+          "level4-modern": "Modern single-storey house"
         }
       },
-      "wishes": {
-        "label": "What you have in mind",
-        "hint": "Add anything else: bedrooms, parking, orientation, open-plan spaces, colour tones… AI reads this to tailor the result.",
-        "placeholder": "e.g. 3 bedrooms, car parking, open kitchen, warm tones…"
-      },
-      "submit": "Get my estimate"
+      "quota": {
+        "free": "{count} free design credits left",
+        "plan": "Design & estimate credits: {remaining}/{total} left",
+        "upgrade": "Upgrade your plan to continue"
+      }
     },
     "progress": {
       "estimate": {
@@ -490,7 +544,14 @@
           "Laying out the floor plan around your needs…",
           "Analysing material quantities…",
           "Costing against regional unit rates…"
-        ]
+        ],
+        "pageTitle": "AI is preparing your estimate",
+        "unknownProvince": "your area",
+        "checklist": {
+          "0": "Read your photo / description",
+          "1": "Analysing quantities…",
+          "2": "Pricing against {province} unit rates"
+        }
       },
       "dossier": {
         "title": "Rendering your construction dossier…",
@@ -499,7 +560,16 @@
           "Rendering the exterior…",
           "Building the detailed estimate…",
           "Packaging the PDF dossier…"
-        ]
+        ],
+        "pageTitle": "Rendering your dossier",
+        "pending": "Queued",
+        "tipLabel": "Tip:",
+        "tip": "you can keep browsing interior templates or advice articles while the system finishes.",
+        "tasks": {
+          "drawings": "Processing drawings ({done}/{total})",
+          "renders": "Rendering views ({done}/{total})",
+          "package": "Packaging PDF"
+        }
       }
     },
     "estimate": {
@@ -510,11 +580,11 @@
         "finishing": "Finishing",
         "interior": "Interior"
       },
-      "sectionTotal": "Subtotal",
+      "sectionTotal": "{section} total:",
       "viewDetail": "VIEW DETAILS",
       "downloadXlsx": "Download the estimate (.xlsx)",
       "breakdownTitle": "Cost breakdown",
-      "advisoryTitle": "Advice for your project",
+      "advisoryTitle": "Advice from SAVICO",
       "advisory": {
         "defaultName": "there",
         "unknownBuilding": "your building",
@@ -550,10 +620,15 @@
         "note": "Prepared automatically by SAVICO AI and indicative only. Actual costs may change with site conditions and material prices."
       },
       "continue": "Get the construction dossier",
-      "readyToast": "Your estimate is ready"
+      "readyToast": "Your estimate is ready",
+      "pageTitle": "Your estimate",
+      "columns": {
+        "item": "Item",
+        "amount": "Amount"
+      }
     },
     "dossier": {
-      "infoTitle": "Project information",
+      "infoTitle": "Project details",
       "info": {
         "customerName": "Customer",
         "projectName": "Project",
@@ -564,11 +639,10 @@
         "scale": "Scale",
         "floorArea": "Total floor area",
         "package": "Package",
-        "architecture": "Architectural style",
-        "interior": "Interior style"
+        "style": "Style"
       },
       "floorAreaValue": "{value} m² (AI estimate)",
-      "previewTitle": "The dossier includes",
+      "previewTitle": "Dossier preview",
       "preview": {
         "cover": "Cover page",
         "floorPlan": "2D floor plan",
@@ -584,13 +658,13 @@
       },
       "lockedHint": "Render the dossier first",
       "readyTitle": "Your construction dossier is ready",
-      "readyThanks": "Thank you for trusting SAVICO AI.",
+      "readyThanks": "Thank you for trusting SAVICO AI. Your complete, detailed dossier is ready.",
       "readyToast": "Your dossier is ready",
-      "privacyNote": "Only you and the people you share it with can view this dossier.",
+      "privacyNote": "Your dossier is fully private. Only you and the people you share it with can view it.",
       "ctaTitle": "Talk to a SAVICO architect — free consultation",
       "ctaCall": "Call now",
       "ctaZalo": "Chat on Zalo",
-      "pdfSize": "({size} MB)",
+      "pdfSize": "~{size} MB",
       "pdf": {
         "fileName": "SAVICO-dossier-{project}.pdf",
         "documentTitle": "DESIGN & COST DOSSIER",
@@ -617,7 +691,20 @@
           "submit": "Send dossier",
           "sent": "Dossier sent to {email}."
         }
-      }
+      },
+      "pageTitle": "Construction dossier",
+      "previewAction": "Preview",
+      "exportTitle": "Export dossier",
+      "statusPending": "Not rendered",
+      "filesTitle": "Dossier files",
+      "files": {
+        "exterior": "3D exterior render",
+        "architecture": "Architectural drawings",
+        "structure": "Structural drawings",
+        "estimate": "Detailed cost estimate"
+      },
+      "downloadTitle": "Download & share",
+      "packagedNote": "The download is already packaged for you."
     },
     "share": {
       "eyebrow": "Shared dossier",
@@ -658,6 +745,94 @@
         "stairs": "STAIRS",
         "bed2": "BEDROOM 2"
       }
+    },
+    "projects": {
+      "title": "My projects",
+      "stats": {
+        "total": "Total projects",
+        "designing": "In design",
+        "review": "Awaiting approval",
+        "completed": "Completed"
+      },
+      "search": {
+        "label": "Search projects",
+        "placeholder": "Search by name or project code..."
+      },
+      "filters": {
+        "all": "All",
+        "input": "Collecting input",
+        "designing": "In design",
+        "review": "Awaiting approval",
+        "completed": "Completed"
+      },
+      "sort": {
+        "label": "Sort",
+        "recent": "Recently updated",
+        "oldest": "Oldest first",
+        "name": "Name A → Z"
+      },
+      "status": {
+        "input": "Collecting input",
+        "designing": "In design",
+        "review": "Awaiting approval",
+        "completed": "Completed"
+      },
+      "steps": {
+        "1": "Input",
+        "2": "Estimate",
+        "3": "Dossier"
+      },
+      "updatedAt": "Updated {date}",
+      "action": {
+        "continueInput": "Continue input",
+        "viewEstimate": "View estimate",
+        "viewDossier": "View dossier",
+        "open": "Open"
+      },
+      "menu": {
+        "label": "Project options",
+        "rename": "Rename",
+        "delete": "Delete"
+      },
+      "createTile": {
+        "title": "New project",
+        "description": "Start from a photo of your lot and what you need"
+      },
+      "count": "Showing {count} projects",
+      "pagination": {
+        "label": "Project list pagination",
+        "previous": "Previous page",
+        "next": "Next page",
+        "page": "Page {page}"
+      },
+      "empty": {
+        "title": "You have no projects yet",
+        "description": "Create a project to start from a photo of your lot and what you need.",
+        "action": "New project"
+      },
+      "noMatch": {
+        "title": "No matching projects",
+        "description": "Try a different keyword or clear some filters."
+      },
+      "rename": {
+        "title": "Rename project",
+        "label": "Project name",
+        "submit": "Save",
+        "success": "Renamed to \"{name}\"."
+      },
+      "delete": {
+        "title": "Delete this project?",
+        "description": "Project \"{name}\" and all of its input, estimate and dossier data will be deleted. This cannot be undone.",
+        "confirm": "Delete project",
+        "success": "Project deleted."
+      }
+    },
+    "phonePrompt": {
+      "title": "Add your phone number",
+      "description": "So we can send your dossier and have an architect support you for free, please share your phone number with SAVICO.",
+      "placeholder": "e.g. 0905 123 456",
+      "error": "That phone number looks wrong (10 digits starting with 0, or +84)",
+      "submit": "Confirm & continue"
     }
   },
   "account": {
@@ -679,7 +854,14 @@
         "description": "Create a project to get started."
       },
       "description": "Open a project to continue from where you left off.",
-      "open": "Continue"
+      "open": "Continue",
+      "createdAt": "Created {date}",
+      "completed": "Completed",
+      "menu": {
+        "label": "Project options",
+        "rename": "Rename",
+        "delete": "Delete"
+      }
     },
     "favorites": {
       "title": "Saved favorites",
@@ -690,13 +872,37 @@
         "architecture": "Architecture"
       },
       "empty": {
-        "title": "Nothing saved yet",
-        "description": "Tap ♥ on any handbook item to save it here."
+        "title": "You haven't saved any templates",
+        "description": "Tap ♡ on a template to save it here."
       },
       "savedAt": "Saved {date}",
-      "description": "Samples you saved with ♥ in the Handbook and on the Step 2 / Step 3 waiting screens.",
+      "description": "Templates you saved.",
       "count": "{count} samples"
     },
-    "subtitle": "Your account details, projects in progress and saved samples."
+    "subtitle": "Your account details, projects in progress and saved samples.",
+    "plan": {
+      "title": "My plan",
+      "expiresAt": "Valid until {date}",
+      "designAllowance": "Design & estimate credits: {remaining}/{total} left",
+      "libraryAllowance": "Library lookups: {remaining}/{total} left",
+      "upgrade": "Upgrade plan"
+    }
+  },
+  "plans": {
+    "title": "Pricing plans",
+    "subtitle": "One plan covers both Design & Estimate and the template library.",
+    "popular": "Popular",
+    "period": "/ {days} days",
+    "designCredits": "design & estimate credits",
+    "libraryCredits": "library lookups",
+    "audience": "Best for: {audience}",
+    "choosePlan": "Choose plan",
+    "choosePlanSoon": "Checkout is being wired up — subscriptions open soon.",
+    "paymentNote": "Pay by bank-transfer QR or through the payment gateway. Credits are valid for the plan period.",
+    "tiers": {
+      "basic": "Basic",
+      "advanced": "Advanced",
+      "pro": "Pro"
+    }
   }
 }

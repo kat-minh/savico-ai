@@ -1,5 +1,5 @@
 import { mockDelay } from '@/shared/lib/mock'
-import { ARCHITECTURE_IMAGE, BUILDING_IMAGE, INTERIOR_IMAGE, TOPIC_IMAGE } from '@/shared/lib/imagery'
+import { BUILDING_IMAGE, INTERIOR_IMAGE, STYLE_IMAGE, TOPIC_IMAGE } from '@/shared/lib/imagery'
 import type { HandbookArticle, HandbookTemplate } from '../types/handbook.types'
 
 /**
@@ -20,7 +20,7 @@ const TEMPLATES: HandbookTemplate[] = [
       buildingType: 'townhouse',
       floorCount: 'ground+2',
       hasAttic: false,
-      architectureStyle: 'modern-townhouse',
+      architectureStyle: 'modern',
       interiorStyle: 'modern'
     }
   },
@@ -33,10 +33,10 @@ const TEMPLATES: HandbookTemplate[] = [
       'Mẫu nhà mái Thái có gác lửng làm phòng thờ và kho, phù hợp lô đất vuông vắn ở ngoại thành. Đường nét đơn giản, ít phào chỉ nên chi phí hoàn thiện dễ kiểm soát.',
     kind: 'layout',
     tags: {
-      buildingType: 'house',
+      buildingType: 'garden',
       floorCount: 'ground+1',
       hasAttic: true,
-      architectureStyle: 'roofed',
+      architectureStyle: 'thai-roof',
       interiorStyle: 'minimal'
     }
   },
@@ -93,32 +93,32 @@ const TEMPLATES: HandbookTemplate[] = [
   {
     id: 'tpl-08',
     name: 'Biệt thự hiện đại 2 tầng có hồ bơi',
-    imageUrl: BUILDING_IMAGE.house,
+    imageUrl: BUILDING_IMAGE.garden,
     styleLabel: 'Hiện đại',
     description:
       'Khối nhà vuông vức, mảng kính lớn hướng ra hồ bơi và sân sau. Cần lô đất tối thiểu 200m² và ngân sách hoàn thiện cao hơn mặt bằng chung do diện tích kính và sân vườn.',
     kind: 'layout',
     tags: {
-      buildingType: 'house',
+      buildingType: 'garden',
       floorCount: 'ground+1',
       hasAttic: false,
-      architectureStyle: 'modern-townhouse',
+      architectureStyle: 'modern',
       interiorStyle: 'modern'
     }
   },
   {
     id: 'tpl-09',
     name: 'Nhà mái ngói truyền thống sân vườn',
-    imageUrl: ARCHITECTURE_IMAGE.roofed,
+    imageUrl: STYLE_IMAGE['thai-roof'],
     styleLabel: 'Tân cổ điển',
     description:
       'Nhà một tầng mái ngói, hiên rộng chạy dọc mặt trước để che nắng xiên và mưa tạt. Bố cục trải ngang nên phù hợp đất vườn, gia đình có người lớn tuổi ngại cầu thang.',
     kind: 'layout',
     tags: {
-      buildingType: 'house',
+      buildingType: 'garden',
       floorCount: 'ground',
       hasAttic: false,
-      architectureStyle: 'roofed',
+      architectureStyle: 'thai-roof',
       interiorStyle: 'neoclassical'
     }
   }
@@ -135,9 +135,9 @@ const ARTICLES: HandbookArticle[] = [
       'Mái bằng rẻ nhất và tận dụng được sân thượng, nhưng bắt buộc chống thấm kỹ và nên có lớp cách nhiệt. Không có lớp này thì tầng áp mái nóng hầm vào buổi chiều, chi phí điện lạnh bù lại phần tiết kiệm ban đầu.',
       'Kinh nghiệm chọn nhanh: nhà phố chen giữa hai nhà liền kề thì mái bằng hoặc mái Nhật là hợp lý; nhà có sân vườn, muốn dáng truyền thống thì mái Thái hoặc mái ngói dốc.'
     ],
-    imageUrl: ARCHITECTURE_IMAGE.roofed,
+    imageUrl: STYLE_IMAGE['thai-roof'],
     topic: 'architecture',
-    tags: { architectureStyle: 'roofed' }
+    tags: { architectureStyle: 'thai-roof' }
   },
   {
     id: 'art-02',
@@ -149,7 +149,7 @@ const ARTICLES: HandbookArticle[] = [
       'Cầu thang đặt lệch về một bên và làm bậc hở sẽ cho gió và sáng đi xuyên tầng thay vì bị chặn lại. Nếu nhà có trẻ nhỏ, bậc hở cần lan can dày thanh hoặc kính để an toàn.',
       'Cuối cùng, chừa ô thông tầng phía sau bếp giúp mùi thoát lên thay vì luẩn quẩn trong phòng khách. Đây là chi tiết nhỏ nhưng ảnh hưởng rõ tới cảm giác ở hằng ngày.'
     ],
-    imageUrl: ARCHITECTURE_IMAGE['modern-townhouse'],
+    imageUrl: STYLE_IMAGE.modern,
     topic: 'architecture',
     tags: { buildingType: 'townhouse' }
   },

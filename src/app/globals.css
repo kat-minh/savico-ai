@@ -55,6 +55,9 @@
   --success-foreground: oklch(1 0 0);
   --warning: oklch(0.812 0.141 80.97);
   --warning-foreground: oklch(0.164 0.007 270.998);
+  /* Chữ cảnh báo trên nền vàng nhạt (badge "Chờ duyệt", mục IV.1) — `--warning`
+     quá sáng để đọc khi dùng làm màu chữ. */
+  --warning-strong: oklch(0.56 0.13 66);
 
   /* Borders, inputs, focus rings --------------------------------------- */
   --border: oklch(0.912 0.012 150);
@@ -106,6 +109,7 @@
   --success-foreground: oklch(1 0 0);
   --warning: oklch(0.812 0.141 80.97);
   --warning-foreground: oklch(0.164 0.007 270.998);
+  --warning-strong: oklch(0.84 0.13 78);
 
   --border: oklch(0.988 0.004 91.446 / 14%);
   --input: oklch(0.988 0.004 91.446 / 18%);
@@ -156,6 +160,7 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-warning-strong: var(--warning-strong);
   --color-footer: var(--footer);
   --color-footer-foreground: var(--footer-foreground);
   --color-border: var(--border);
@@ -371,6 +376,18 @@
   /* gentle warm haze so frosted glass has something to refract (no loud wash) */
   --warm-1: oklch(0.9 0.07 152 / 0.3);
   --warm-2: oklch(0.86 0.05 148 / 0.2);
+
+  /* Thanh công cụ (mục II.1) — mặt kính đặc hơn nền trang + quầng động xanh
+   * thương hiệu. Trạng thái `scrolled` đặc thêm để header tách hẳn khỏi nội
+   * dung đang cuộn bên dưới. */
+  --header-bg: oklch(1 0 0 / 0.6);
+  --header-bg-scrolled: oklch(1 0 0 / 0.8);
+  --header-shadow: 0 1px 2px -1px oklch(0.3 0.03 60 / 0.1), 0 10px 30px -22px oklch(0.3 0.03 60 / 0.35);
+  --header-shadow-scrolled: 0 1px 3px -1px oklch(0.3 0.03 60 / 0.16), 0 18px 42px -24px oklch(0.3 0.03 60 / 0.5);
+  --header-aurora-1: oklch(0.78 0.13 150 / 0.32);
+  --header-aurora-2: oklch(0.85 0.09 96 / 0.26);
+  --header-rim: oklch(0.63 0.17 149 / 0.14);
+  --header-rim-hot: oklch(0.63 0.17 149 / 0.42);
 }
 
 .dark {
@@ -397,6 +414,15 @@
   --vignette: oklch(0 0 0 / 0.55);
   --warm-1: oklch(0.6 0.12 150 / 0.16);
   --warm-2: oklch(0.5 0.08 152 / 0.12);
+
+  --header-bg: oklch(0.235 0.012 60 / 0.62);
+  --header-bg-scrolled: oklch(0.26 0.014 60 / 0.82);
+  --header-shadow: 0 1px 2px -1px oklch(0 0 0 / 0.5), 0 12px 32px -22px oklch(0 0 0 / 0.7);
+  --header-shadow-scrolled: 0 1px 3px -1px oklch(0 0 0 / 0.6), 0 20px 44px -24px oklch(0 0 0 / 0.85);
+  --header-aurora-1: oklch(0.6 0.14 150 / 0.3);
+  --header-aurora-2: oklch(0.58 0.1 96 / 0.2);
+  --header-rim: oklch(0.68 0.16 149 / 0.18);
+  --header-rim-hot: oklch(0.68 0.16 149 / 0.5);
 }
 
 @theme inline {
@@ -416,6 +442,67 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* --- Thanh công cụ (mục II.1) -------------------------------------------
+   * ★ Yêu cầu mới: header phải nổi bật hơn nền trang. Ba lớp:
+   *   1. mặt kính đặc hơn `--background` + bóng đổ nhẹ → tách khỏi nền;
+   *   2. quầng xanh thương hiệu trôi ngang rất chậm bên dưới lớp mờ (nền động);
+   *   3. viền dưới sáng dần về giữa thay cho `border-b` xám phẳng.
+   * Cuộn khỏi đỉnh trang → `data-scrolled="true"`: đặc thêm, bóng sâu hơn. */
+  .site-header-shell {
+    position: relative;
+    isolation: isolate;
+    /* Lớp quầng `::before` rộng hơn header để trôi ngang mà không lộ mép
+       gradient — không cắt thì nó đẩy ra ngoài viewport và sinh scroll ngang. */
+    overflow: hidden;
+    background: var(--header-bg);
+    -webkit-backdrop-filter: blur(22px) saturate(190%) brightness(1.04);
+    backdrop-filter: blur(22px) saturate(190%) brightness(1.04);
+    box-shadow: var(--header-shadow);
+    transition:
+      background var(--duration-slow) var(--ease-out-soft),
+      box-shadow var(--duration-slow) var(--ease-out-soft);
+  }
+  .site-header-shell[data-scrolled='true'] {
+    background: var(--header-bg-scrolled);
+    box-shadow: var(--header-shadow-scrolled);
+  }
+  /* Quầng động — rộng hơn header rồi trôi ngang nên không lộ mép gradient. */
+  .site-header-shell::before {
+    content: '';
+    position: absolute;
+    inset: -80% -25%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(22rem 12rem at 16% 50%, var(--header-aurora-1), transparent 66%),
+      radial-gradient(18rem 10rem at 50% 46%, var(--header-aurora-2), transparent 64%),
+      radial-gradient(24rem 12rem at 84% 52%, var(--header-aurora-1), transparent 68%);
+    filter: blur(16px);
+    animation: header-aurora 24s var(--ease-out-soft) infinite;
+  }
+  /* Viền dưới thay `border-b`: sáng màu thương hiệu ở giữa, tan dần hai mép. */
+  .site-header-shell::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 2;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--header-rim) 16%,
+      var(--header-rim-hot) 50%,
+      var(--header-rim) 84%,
+      transparent
+    );
+  }
+  .site-header-shell > * {
+    position: relative;
+    z-index: 1;
   }
 
   /* Shared liquid-glass surface behaviour (rim + inner glow + stacking). */
@@ -772,6 +859,17 @@
   }
 }
 
+/* Quầng động của thanh công cụ — trôi ngang chậm, biên độ nhỏ (mục II.1). */
+@keyframes header-aurora {
+  0%,
+  100% {
+    transform: translate3d(-3%, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 0, 0) scale(1.06);
+  }
+}
+
 /* Sheen sweep used by hero surfaces + the generating overlay. */
 @keyframes glass-sheen {
   0% {
@@ -783,6 +881,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .site-header-shell::before,
   .ambient-orb,
   .ambient-grid,
   .ambient-grid::after,

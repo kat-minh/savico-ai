@@ -5,3 +5,6 @@
  */
 export { AccountInfo } from './components/account-info'
 export { FavoriteGrid } from './components/favorite-grid'
+export { PlanCard } from './components/plan-card'
+export { useAccountPlan } from './hooks/use-account-plan'
+export type { AccountPlan, PlanAllowance } from './types/account.types'

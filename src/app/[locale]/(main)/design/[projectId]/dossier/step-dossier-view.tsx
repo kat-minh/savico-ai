@@ -31,6 +31,7 @@ import { useProjectChatContext } from '../use-project-chat-context'
  */
 export function StepDossierView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.dossier')
+  const tWaiting = useTranslations('design.progress.dossier')
   const tInput = useTranslations('design.input')
   const { user } = useAuth()
 
@@ -46,7 +47,7 @@ export function StepDossierView({ projectId }: { projectId: string }) {
 
   const filter = useMemo<HandbookFilter>(
     () => ({
-      interiorStyle: draft?.interiorStyle ?? undefined,
+      interiorStyle: draft?.style ?? undefined,
       buildingType: draft?.buildingType ?? undefined,
       floorCount: draft?.floorCount ?? undefined
     }),
@@ -73,20 +74,24 @@ export function StepDossierView({ projectId }: { projectId: string }) {
       : '',
     floorArea: estimate?.estimatedFloorArea ?? 0,
     packageLabel: draft ? tInput(`packageTier.options.${draft.packageTier}`) : '',
-    architectureLabel: draft?.architectureStyle ? tInput(`architectureStyle.options.${draft.architectureStyle}`) : '',
-    interiorLabel: draft?.interiorStyle ? tInput(`interiorStyle.options.${draft.interiorStyle}`) : ''
+    styleLabel: draft?.style ? tInput(`style.options.${draft.style}`) : ''
   }
 
   return (
     <>
-      <StepProgress current={3} />
+      <StepProgress
+        current={3}
+        currentDone={dossier?.status === 'ready'}
+        title={render.isPending ? tWaiting('pageTitle') : t('pageTitle')}
+      />
 
       {render.isPending ? (
-        // Chỉ màn CHỜ render mới có panel cẩm nang (mục III.4b); màn trước và
+        // Chỉ màn CHỜ render mới có panel cẩm nang (mục IV.7); màn trước và
         // sau đó là bố cục riêng của Bước 3.
         <DesignStepLayout
           sidePanel={<PersonalizedPanel filter={filter} kind='interior' topic='interior' />}
           sidePanelCollapsed={panelMinimized}
+          waiting
         >
           <GenerationWaiting flow='dossier' complete={false} expectedMs={11_000} chatStream={<ProactiveChatStream />} />
         </DesignStepLayout>

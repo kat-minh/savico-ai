@@ -90,8 +90,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
           [t('info.scale'), info.scaleLabel],
           [t('info.floorArea'), t('floorAreaValue', { value: formatNumber(info.floorArea, locale) })],
           [t('info.package'), info.packageLabel],
-          [t('info.architecture'), info.architectureLabel],
-          [t('info.interior'), info.interiorLabel]
+          [t('info.style'), info.styleLabel]
         ]
           .filter(([, value]) => Boolean(value))
           .map(([label, value]) => ({ label: label ?? '', value: value ?? '' }))
@@ -112,8 +111,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
           scale: t('info.scale'),
           floorArea: t('info.floorArea'),
           package: t('info.package'),
-          architecture: t('info.architecture'),
-          interior: t('info.interior')
+          style: t('info.style')
         },
         estimateTitle: t('preview.estimate'),
         columns: {
@@ -143,5 +141,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
     }
   }, [isPending, remoteUrl, result, info, advisory, locale, t, tEstimate])
 
-  return { download, isPending, size: dossier?.pdfSize ?? generatedSize }
+  // Cỡ file VỪA DỰNG được ưu tiên: đó là cỡ thật của thứ người dùng tải về,
+  // còn `pdfSize` từ API chỉ là con số ước tính hiển thị kèm dấu "~".
+  return { download, isPending, size: generatedSize ?? dossier?.pdfSize ?? null }
 }

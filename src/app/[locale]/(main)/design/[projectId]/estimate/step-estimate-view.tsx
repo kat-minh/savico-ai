@@ -21,27 +21,31 @@ import { designDossierRoute } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
 /**
- * Bước 2 (mục III.3). Panel cẩm nang cá nhân hóa nằm ở cột phải trong CẢ màn
- * chờ lẫn màn kết quả — spec cho người dùng tự thu nhỏ nó để đọc dự toán, chứ
- * không tự biến mất. Lớp app dựng `HandbookFilter` từ draft vì hai feature
- * không được import lẫn nhau.
+ * Bước 2 (mục IV.4 + IV.5).
+ *
+ * Màn chờ theo Hình 07: cẩm nang cá nhân hóa chiếm cột trái rộng, cột tiến độ
+ * AI hẹp bên phải. Màn kết quả theo Hình 08: nội dung dự toán chiếm cột chính,
+ * cẩm nang lùi sang bên — người dùng tự thu nhỏ nó chứ nó không tự biến mất.
+ * Lớp app dựng `HandbookFilter` từ draft vì hai feature không import lẫn nhau.
  */
 export function StepEstimateView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.estimate')
+  const tWaiting = useTranslations('design.progress.estimate')
   const router = useRouter()
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
   const { data: project } = useProject(projectId)
   const { data: result, isSuccess } = useEstimate(projectId)
   const panelMinimized = useHandbookPanelStore((s) => s.minimized)
+  const setPanelMinimized = useHandbookPanelStore((s) => s.setMinimized)
 
   const filter = useMemo<HandbookFilter>(
     () => ({
       buildingType: draft?.buildingType ?? undefined,
       floorCount: draft?.floorCount ?? undefined,
       hasAttic: draft?.hasAttic ?? undefined,
-      architectureStyle: draft?.architectureStyle ?? undefined,
-      interiorStyle: draft?.interiorStyle ?? undefined
+      architectureStyle: draft?.style ?? undefined,
+      interiorStyle: draft?.style ?? undefined
     }),
     [draft]
   )
@@ -49,17 +53,25 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   // Chatbox AI nói theo dữ liệu thật của dự án; tự trò chuyện trong lúc chờ.
   useProjectChatContext(project?.name ?? '', draft, result ? null : 'estimate')
 
-  // Khi AI sinh xong: toast "Dự toán đã sẵn sàng" (mục III.3a).
+  // Khi AI sinh xong: toast "Dự toán đã sẵn sàng" (mục IV.4).
   useEffect(() => {
     if (isSuccess) toast.success(t('readyToast'))
   }, [isSuccess, t])
 
+  // Sang màn kết quả thì bảng dự toán là thứ cần đọc, nên panel cẩm nang lùi về
+  // nút nổi đúng như Hình 08. Chỉ thu MỘT lần khi kết quả vừa có — người dùng
+  // mở lại thì tôn trọng lựa chọn đó.
+  useEffect(() => {
+    if (isSuccess) setPanelMinimized(true)
+  }, [isSuccess, setPanelMinimized])
+
   return (
     <>
-      <StepProgress current={2} />
+      <StepProgress current={2} currentDone={Boolean(result)} title={result ? t('pageTitle') : tWaiting('pageTitle')} />
       <DesignStepLayout
         sidePanel={<PersonalizedPanel filter={filter} kind='layout' topic='architecture' />}
         sidePanelCollapsed={panelMinimized}
+        waiting={!result}
       >
         {result ? (
           <EstimateResultView
@@ -74,6 +86,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
             flow='estimate'
             complete={isSuccess}
             expectedMs={9_000}
+            province={draft?.addressDetail.provinceName}
             chatStream={<ProactiveChatStream />}
           />
         )}

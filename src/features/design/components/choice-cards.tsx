@@ -37,7 +37,9 @@ export function ChoiceCards({ options, value, onChange, compact, invalid, classN
             aria-pressed={option.value === value}
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+              // Gọn vừa đủ để hàng "Số tầng" (5 nút) và "Tum" (2 nút) nằm chung
+              // một dòng như Hình 04.
+              'rounded-lg border px-3 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors',
               option.value === value
                 ? 'border-primary bg-primary text-primary-foreground'
                 : 'hover:border-primary/50 hover:bg-muted/60',
@@ -52,7 +54,8 @@ export function ChoiceCards({ options, value, onChange, compact, invalid, classN
   }
 
   return (
-    <div className={cn('grid grid-cols-2 gap-3 sm:grid-cols-3', className)}>
+    // `items-stretch` để mọi ô trong cùng một hàng cao bằng nhau.
+    <div className={cn('grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3', className)}>
       {options.map((option) => {
         const selected = option.value === value
         return (
@@ -62,7 +65,9 @@ export function ChoiceCards({ options, value, onChange, compact, invalid, classN
             aria-pressed={selected}
             onClick={() => onChange(option.value)}
             className={cn(
-              'group overflow-hidden rounded-xl border text-left transition-all',
+              // `h-full` + cột dọc: mọi thẻ trong lưới cao bằng nhau, ảnh luôn
+              // bắt đầu cùng một mốc dù nhãn dài ngắn khác nhau.
+              'group flex h-full flex-col overflow-hidden rounded-xl border text-left transition-all',
               selected ? 'border-primary ring-primary/40 ring-2' : 'hover:border-primary/50',
               invalid && !selected && 'border-destructive/60'
             )}
@@ -79,7 +84,12 @@ export function ChoiceCards({ options, value, onChange, compact, invalid, classN
                 </span>
               ) : null}
             </div>
-            <span className='block px-3 py-2 text-sm font-medium'>{option.label}</span>
+            {/* Khung nhãn cao cố định 2 dòng: nhãn 1 dòng ("Tân cổ điển") và 2
+                dòng ("Tối giản (Minimalism)") chiếm cùng chiều cao nên các thẻ
+                không so le nhau. */}
+            <span className='flex min-h-[3.25rem] items-start px-3 py-2.5'>
+              <span className='line-clamp-2 text-sm leading-snug font-medium'>{option.label}</span>
+            </span>
           </button>
         )
       })}

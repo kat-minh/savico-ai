@@ -17,6 +17,12 @@ interface DesignStepLayoutProps {
    * lại về bề rộng dễ đọc thay vì kéo dài hết khung.
    */
   sidePanelCollapsed?: boolean
+  /**
+   * Màn hình chờ (mục IV.4 Hình 07, IV.7 Hình 10): panel cẩm nang chiếm cột
+   * TRÁI rộng, cột tiến độ AI hẹp bên phải. Màn kết quả thì ngược lại — nội
+   * dung chính rộng bên trái.
+   */
+  waiting?: boolean
 }
 
 /**
@@ -26,19 +32,53 @@ interface DesignStepLayoutProps {
  * sinh xong: theo spec người dùng chủ động thu nhỏ nó để đọc dự toán. Vì vậy
  * màn chờ và màn kết quả dùng chung một khung, chỉ đổi nội dung cột trái.
  */
-export function DesignStepLayout({ children, sidePanel, sidePanelCollapsed = false }: DesignStepLayoutProps) {
+export function DesignStepLayout({
+  children,
+  sidePanel,
+  sidePanelCollapsed = false,
+  waiting = false
+}: DesignStepLayoutProps) {
   const twoColumn = Boolean(sidePanel) && !sidePanelCollapsed
+
+  // Cột ngắn hơn là cột dính: màn chờ thì cột tiến độ dính để luôn thấy % khi
+  // cuộn danh sách cẩm nang; màn kết quả thì ngược lại.
+  const main = (
+    <div
+      className={cn(
+        'min-w-0',
+        waiting && twoColumn && 'lg:sticky lg:top-40 lg:self-start',
+        !twoColumn && 'mx-auto w-full max-w-4xl'
+      )}
+    >
+      {children}
+    </div>
+  )
+  // Khi thu nhỏ, panel tự render thành nút nổi nên vẫn phải được mount.
+  const aside = twoColumn ? (
+    <div className={cn(!waiting && 'lg:sticky lg:top-40 lg:self-start')}>{sidePanel}</div>
+  ) : (
+    sidePanel
+  )
 
   return (
     <div
       className={cn(
-        'mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 lg:px-8',
-        twoColumn && 'lg:grid-cols-[minmax(0,1fr)_360px]'
+        'mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 lg:px-8',
+        twoColumn && (waiting ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'lg:grid-cols-[minmax(0,1fr)_360px]')
       )}
     >
-      <div className={cn('min-w-0', !twoColumn && 'mx-auto w-full max-w-4xl')}>{children}</div>
-      {/* Khi thu nhỏ, panel tự render thành nút nổi nên vẫn phải được mount. */}
-      {twoColumn ? <div className='lg:sticky lg:top-40 lg:self-start'>{sidePanel}</div> : sidePanel}
+      {/* Màn chờ: cẩm nang trước (cột trái rộng), tiến độ sau (cột phải hẹp). */}
+      {waiting ? (
+        <>
+          {aside}
+          {main}
+        </>
+      ) : (
+        <>
+          {main}
+          {aside}
+        </>
+      )}
     </div>
   )
 }

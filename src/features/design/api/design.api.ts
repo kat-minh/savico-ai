@@ -1,6 +1,6 @@
 import { env } from '@/shared/config/env'
 import { http } from '@/shared/lib/api'
-import type { DesignInput, Dossier, EstimateResult, Project, SharedDossier } from '../types/design.types'
+import type { DesignInput, DesignQuota, Dossier, EstimateResult, Project, SharedDossier } from '../types/design.types'
 import { mockDesignApi } from './design.mock'
 
 export interface CreateProjectPayload {
@@ -15,11 +15,20 @@ export interface CreateProjectPayload {
  * Set `NEXT_PUBLIC_USE_MOCK_API=true` to route these through an in-browser mock.
  */
 const DesignApi = {
+  /** Hạn mức lượt thiết kế còn lại của tài khoản (mục IV.3.c). */
+  getQuota: () => http.get<DesignQuota>('/me/design-quota'),
+
   listProjects: () => http.get<Project[]>('/projects'),
 
   createProject: (payload: CreateProjectPayload) => http.post<Project>('/projects', payload),
 
   getProject: (projectId: string) => http.get<Project>(`/projects/${projectId}`),
+
+  /** Menu ⋮ → Đổi tên (mục IV.1). */
+  renameProject: (projectId: string, name: string) => http.patch<Project>(`/projects/${projectId}`, { name }),
+
+  /** Menu ⋮ → Xóa, sau khi người dùng xác nhận ở hộp thoại (mục IV.1). */
+  deleteProject: (projectId: string) => http.delete<void>(`/projects/${projectId}`),
 
   getInput: (projectId: string) => http.get<DesignInput>(`/projects/${projectId}/input`),
 

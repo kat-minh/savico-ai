@@ -1,8 +1,10 @@
 import { mockDelay } from '@/shared/lib/mock'
 import { emptyDesignInput } from '../services/design-input.service'
 import { grandTotal, rollUpSections, subItemAmount, type DraftSection } from '../services/estimate.service'
+import { projectStatus } from '../services/project-list.service'
 import type {
   DesignInput,
+  DesignQuota,
   Dossier,
   EstimateResult,
   EstimateSection,
@@ -26,6 +28,12 @@ const ESTIMATE_DELAY_MS = 9_000
 const RENDER_DELAY_MS = 11_000
 
 /**
+ * Dung lượng ước tính của bộ hồ sơ PDF, chỉ để nút "Tải hồ sơ PDF ~{cỡ}" có số
+ * mà hiển thị khi chưa dựng file (mục IV.8). Backend thật thay bằng cỡ thật.
+ */
+const ESTIMATED_PDF_BYTES = 18_000_000
+
+/**
  * Dữ liệu mock nằm ở localStorage chứ không phải bộ nhớ tab: luồng 3 bước kéo
  * dài qua nhiều lần tải trang (thoát ra vào lại vẫn còn nháp — mục III.2), nên
  * Map thuần sẽ làm mất dự án ngay khi F5. Backend thật thay hẳn chỗ này.
@@ -37,9 +45,17 @@ interface MockStore {
   projects: Record<string, Project>
   inputs: Record<string, DesignInput>
   dossiers: Record<string, Dossier>
+  /** Số lượt thiết kế miễn phí đã dùng — phục vụ hạn mức ở mục IV.3.c. */
+  designsUsed: number
 }
 
-const emptyStore = (): MockStore => ({ sequence: 0, projects: {}, inputs: {}, dossiers: {} })
+/**
+ * Lượt thiết kế miễn phí của khách chưa mua gói. Con số thật do admin cấu hình
+ * (mục X, #7); đây chỉ là seed cho bản mock.
+ */
+const FREE_DESIGN_LIMIT = 3
+
+const emptyStore = (): MockStore => ({ sequence: 0, projects: {}, inputs: {}, dossiers: {}, designsUsed: 0 })
 
 function loadStore(): MockStore {
   if (typeof window === 'undefined') return emptyStore()
@@ -68,7 +84,28 @@ function updateStore<T>(mutate: (store: MockStore) => T): T {
   return result
 }
 
-const nextId = (store: MockStore) => `SVC-${String(++store.sequence).padStart(4, '0')}`
+/** Mã dự án theo quy ước xuyên suốt (mục I): `SVC-YYYY-NNNN`. */
+const nextId = (store: MockStore) => `SVC-${new Date().getFullYear()}-${String(++store.sequence).padStart(4, '0')}`
+
+/**
+ * Dự án lưu bằng phiên bản mock cũ thiếu `updatedAt` / `status`. Bù lại lúc đọc
+ * để phần còn lại của feature luôn nhận đủ kiểu `Project` (backend thật trả
+ * sẵn hai trường này).
+ */
+function normalizeProject(project: Project): Project {
+  return {
+    ...project,
+    updatedAt: project.updatedAt ?? project.createdAt,
+    status: project.status ?? projectStatus(project.currentStep)
+  }
+}
+
+/** Mọi thao tác chạm vào dự án đều đẩy `updatedAt` — thẻ hiện "Cập nhật {ngày}". */
+function touchProject(store: MockStore, projectId: string, patch: Partial<Project> = {}): void {
+  const project = store.projects[projectId]
+  if (!project) return
+  store.projects[projectId] = normalizeProject({ ...project, ...patch, updatedAt: new Date().toISOString() })
+}
 
 /** Rút gọn khai báo hạng mục con: `[id, nhãn, đơn vị, khối lượng, đơn giá]`. */
 type SubItemSeed = readonly [string, string, string, number, number]
@@ -237,12 +274,19 @@ function persistShared(store: MockStore, projectId: string): void {
 }
 
 export const mockDesignApi = {
+  getQuota: async (): Promise<DesignQuota> => {
+    await mockDelay(120)
+    const used = loadStore().designsUsed
+    // Mock luôn là khách chưa mua gói → `planName: null`, `total: null`.
+    return { planName: null, remaining: Math.max(0, FREE_DESIGN_LIMIT - used), total: null }
+  },
+
   listProjects: async (): Promise<Project[]> => {
     await mockDelay(200)
     const store = loadStore()
     // Ảnh bìa lấy từ ảnh lô đất của Bước 1 — backend thật sẽ trả ảnh render.
     return Object.values(store.projects).map((project) => ({
-      ...project,
+      ...normalizeProject(project),
       coverUrl: store.inputs[project.id]?.landPhotoUrl ?? null
     }))
   },
@@ -250,12 +294,15 @@ export const mockDesignApi = {
   createProject: async (payload: CreateProjectPayload): Promise<Project> => {
     await mockDelay()
     return updateStore((store) => {
+      const now = new Date().toISOString()
       const project: Project = {
         id: nextId(store),
         name: payload.name,
         description: payload.description,
-        createdAt: new Date().toISOString(),
-        currentStep: 1
+        createdAt: now,
+        updatedAt: now,
+        currentStep: 1,
+        status: 'input'
       }
       store.projects[project.id] = project
       store.inputs[project.id] = emptyDesignInput()
@@ -267,7 +314,25 @@ export const mockDesignApi = {
     await mockDelay(150)
     const project = loadStore().projects[projectId]
     if (!project) throw new Error(`Unknown project: ${projectId}`)
-    return project
+    return normalizeProject(project)
+  },
+
+  renameProject: async (projectId: string, name: string): Promise<Project> => {
+    await mockDelay()
+    return updateStore((store) => {
+      if (!store.projects[projectId]) throw new Error(`Unknown project: ${projectId}`)
+      touchProject(store, projectId, { name })
+      return store.projects[projectId]!
+    })
+  },
+
+  deleteProject: async (projectId: string): Promise<void> => {
+    await mockDelay()
+    updateStore((store) => {
+      delete store.projects[projectId]
+      delete store.inputs[projectId]
+      delete store.dossiers[projectId]
+    })
   },
 
   getInput: async (projectId: string): Promise<DesignInput> => {
@@ -278,6 +343,9 @@ export const mockDesignApi = {
   saveInput: async (projectId: string, input: DesignInput): Promise<DesignInput> => {
     await mockDelay(200)
     return updateStore((store) => {
+      // Chỉ trừ lượt ở lần chốt nhập liệu đầu tiên của dự án — sửa lại bản nháp
+      // rồi gửi lại không được tính thành lượt mới.
+      if (!store.inputs[projectId]?.buildingType) store.designsUsed += 1
       store.inputs[projectId] = input
       return input
     })
@@ -286,8 +354,9 @@ export const mockDesignApi = {
   generateEstimate: async (projectId: string): Promise<EstimateResult> => {
     await mockDelay(ESTIMATE_DELAY_MS)
     updateStore((store) => {
-      const project = store.projects[projectId]
-      if (project) project.currentStep = 2
+      // Dự toán đã dựng xong → dự án chuyển sang "Chờ duyệt" (Hình 02), khách
+      // xem rồi mới bấm sang Bước 3.
+      touchProject(store, projectId, { currentStep: 2, status: 'review' })
     })
     return {
       projectId,
@@ -304,16 +373,17 @@ export const mockDesignApi = {
   renderDossier: async (projectId: string): Promise<Dossier> => {
     await mockDelay(RENDER_DELAY_MS)
     return updateStore((store) => {
-      const project = store.projects[projectId]
-      if (project) project.currentStep = 3
+      touchProject(store, projectId, { currentStep: 3, status: 'completed' })
 
       const dossier: Dossier = {
         projectId,
         status: 'ready',
         pdfUrl: '#',
-        // Mock không có file thật nên không bịa dung lượng — hồ sơ được dựng
-        // ngay trong trình duyệt lúc bấm tải, biết cỡ sau khi dựng xong.
-        pdfSize: null,
+        // Dung lượng ƯỚC TÍNH — nút hiển thị kèm dấu "~" đúng như mục IV.8.
+        // Backend thật trả cỡ file thật; ở chế độ mock, cỡ thật chỉ biết sau khi
+        // hồ sơ được dựng trong trình duyệt và sẽ thay số này (xem
+        // `use-download-dossier`).
+        pdfSize: ESTIMATED_PDF_BYTES,
         shareToken: `share-${projectId.toLowerCase()}`
       }
       store.dossiers[projectId] = dossier

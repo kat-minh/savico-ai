@@ -1,9 +1,10 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 
-import { AccountInfo, FavoriteGrid } from '@/features/account'
+import { FavoriteGrid } from '@/features/account'
 import { MyProjects } from '@/features/design'
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
+import { AccountSide } from './account-side'
 import { AccountTabs } from './account-tabs'
 
 interface PageProps {
@@ -11,8 +12,8 @@ interface PageProps {
 }
 
 /**
- * Màn hình 11 — Cửa sổ cá nhân (mục IV).
- * Ba khu vực: Thông tin tài khoản, Dự án của tôi, Dự án yêu thích.
+ * Trang "Tài khoản của tôi" (mục IX, Hình 17–18).
+ * Ba khu vực: hồ sơ + gói đang dùng, Dự án của tôi, Dự án yêu thích.
  *
  * Bố cục hai cột: hồ sơ tài khoản là thẻ cố định bên trái (nội dung ngắn, ít
  * thay đổi); hai danh sách còn lại là hai tab của cột phải.
@@ -36,7 +37,8 @@ export default async function AccountPage({ params }: PageProps) {
 
         <div className='grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]'>
           <div className='lg:sticky lg:top-24 lg:self-start'>
-            <AccountInfo />
+            {/* Thẻ hồ sơ + thẻ "GÓI CỦA TÔI" (mục IX, Hình 17). */}
+            <AccountSide />
           </div>
 
           <div className='min-w-0'>

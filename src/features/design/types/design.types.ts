@@ -1,5 +1,8 @@
-/** Loại công trình — quyết định các trường hiển thị phía sau (mục III.2, trường 3). */
-export type BuildingType = 'house' | 'townhouse' | 'apartment'
+/**
+ * Loại công trình — 5 nhóm theo Phụ lục A, trường 3. Quyết định các trường hiển
+ * thị phía sau và danh mục "Kiểu kiến trúc & phong cách".
+ */
+export type BuildingType = 'townhouse' | 'villa' | 'roofed' | 'garden' | 'apartment'
 
 /** Quy mô — số tầng (mục III.2, trường 4). Căn hộ bị khóa 1 mặt sàn. */
 export type FloorCount = 'ground' | 'ground+1' | 'ground+2' | 'ground+3' | 'ground+4'
@@ -7,29 +10,55 @@ export type FloorCount = 'ground' | 'ground+1' | 'ground+2' | 'ground+3' | 'grou
 /** Gói hoàn thiện & nội thất — slider 3 nấc (mục III.2, trường 6). */
 export type PackageTier = 'basic' | 'standard' | 'vip'
 
-/** Kiểu kiến trúc (mục III.2, trường 7) — ẩn với Căn hộ. */
-export type ArchitectureStyle = 'roofed' | 'modern-townhouse' | 'neoclassical'
-
 /**
- * Phong cách nội thất (mục III.2, trường 8) — danh mục do admin cấu hình.
- * Union of the seeded catalogue in `INTERIOR_STYLES`; see that constant.
+ * Kiểu kiến trúc & phong cách — MỘT trường gộp (Phụ lục A, trường 7), quyết
+ * định cả kiến trúc bên ngoài lẫn nội thất bên trong. Danh mục hiển thị đổi
+ * theo loại công trình (`STYLES_BY_BUILDING_TYPE`) và do admin cấu hình
+ * (mục X, #6).
  */
-export type InteriorStyle = 'modern' | 'minimal' | 'neoclassical' | 'indochine'
+export type DesignStyle =
+  | 'modern'
+  | 'wabi-sabi'
+  | 'neoclassical'
+  | 'minimal'
+  | 'indochine'
+  | 'thai-roof'
+  | 'japanese-roof'
+  | 'garden-thai-roof'
+  | 'garden-japanese-roof'
+  | 'garden-villa'
+  | 'level4-modern'
 
 /** Ba bước của luồng Thiết kế & Dự toán (stepper, mục III). */
 export type DesignStep = 1 | 2 | 3
 
+/**
+ * Trạng thái dự án — badge trên thẻ và chip lọc ở trang "Dự án của tôi"
+ * (mục IV.1, theo Hình 02): Đang nhập liệu → Đang thiết kế → Chờ duyệt →
+ * Hoàn tất. Backend chưa chốt trường này nên suy ra từ bước đang dừng
+ * (`projectStatus` trong `project-list.service`).
+ */
+export type ProjectStatus = 'input' | 'designing' | 'review' | 'completed'
+
+/** Thứ tự sắp xếp lưới dự án — dropdown "Mới cập nhật" (mục IV.1). */
+export type ProjectSort = 'recent' | 'oldest' | 'name'
+
 /** Ba phần chi phí trong bảng dự toán (mục III.3b). */
 export type CostSection = 'structure' | 'finishing' | 'interior'
 
-/** Dự án do người dùng tạo ở modal Tạo dự án (mục III.1). */
+/** Dự án do người dùng tạo ở modal Tạo dự án (mục IV.2). */
 export interface Project {
+  /** Mã dự án, định dạng `SVC-YYYY-NNNN` (quy ước xuyên suốt, mục I). */
   id: string
   name: string
   description?: string
   createdAt: string
+  /** Lần chạm gần nhất — dòng "Cập nhật {ngày}" trên thẻ (mục IV.1). */
+  updatedAt: string
   /** Bước người dùng đang dừng lại — hiển thị trong "Dự án của tôi". */
   currentStep: DesignStep
+  /** Badge trạng thái + chip lọc ở trang Dự án của tôi (mục IV.1). */
+  status: ProjectStatus
   /** Ảnh lô đất đã tải ở Bước 1, dùng làm ảnh bìa thẻ dự án. */
   coverUrl?: string | null
 }
@@ -56,16 +85,26 @@ export interface DesignInput {
   /** Các phần rời của địa chỉ, phục vụ hiển thị lại trên giao diện. */
   addressDetail: AddressDetail
   buildingType: BuildingType | null
-  /** Nhà ở / Nhà phố only. */
+  /** Ẩn với Căn hộ (khóa 1 mặt sàn) — Phụ lục A, trường 4. */
   floorCount: FloorCount | null
-  /** Nhà ở / Nhà phố only. */
+  /** Ẩn với Căn hộ (mặc định Không tum) — Phụ lục A, trường 5. */
   hasAttic: boolean | null
   packageTier: PackageTier
-  /** Nhà ở / Nhà phố only. */
-  architectureStyle: ArchitectureStyle | null
-  interiorStyle: InteriorStyle | null
+  /** Kiểu kiến trúc & phong cách — hiện với MỌI loại. Phụ lục A, trường 7. */
+  style: DesignStyle | null
   /** Tùy chọn, tối đa 500 ký tự. */
   wishes: string
+}
+
+/**
+ * Hạn mức lượt thiết kế hiển thị trên nút "Nhận dự toán ngay" (mục IV.3.c).
+ * `planName: null` = khách chưa mua gói, đang dùng lượt miễn phí.
+ */
+export interface DesignQuota {
+  planName: string | null
+  remaining: number
+  /** Tổng lượt của gói; `null` khi đang dùng lượt miễn phí. */
+  total: number | null
 }
 
 /**

@@ -31,7 +31,7 @@ export function useAdvisory(result: EstimateResult | undefined, customerName: st
     : t('unknownBuilding')
   const scaleLabel = input?.floorCount ? tInput(`floorCount.options.${input.floorCount}`).toLowerCase() : ''
   const packageLabel = input ? tInput(`packageTier.options.${input.packageTier}`) : ''
-  const interiorLabel = input?.interiorStyle ? tInput(`interiorStyle.options.${input.interiorStyle}`) : ''
+  const interiorLabel = input?.style ? tInput(`style.options.${input.style}`) : ''
 
   return [
     t('intro', {

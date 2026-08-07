@@ -35,7 +35,7 @@ export function useProjectChatContext(
         ? `${t(`floorCount.options.${input.floorCount}`)}${input.hasAttic ? ` · ${t('attic.options.yes')}` : ''}`
         : '',
       packageLabel: t(`packageTier.options.${input.packageTier}`),
-      interiorStyleLabel: input.interiorStyle ? t(`interiorStyle.options.${input.interiorStyle}`) : '',
+      interiorStyleLabel: input.style ? t(`style.options.${input.style}`) : '',
       hasLandPhoto: Boolean(input.landPhotoUrl)
     }
   }, [projectName, input, t])

@@ -49,3 +49,46 @@ export function useCreateProject() {
     }
   })
 }
+
+/** Menu ⋮ → Đổi tên trên thẻ dự án (mục IV.1). */
+export function useRenameProject() {
+  const queryClient = useQueryClient()
+  const t = useTranslations('errors')
+  const tProjects = useTranslations('design.projects')
+
+  return useMutation({
+    mutationFn: ({ projectId, name }: { projectId: string; name: string }) => designApi.renameProject(projectId, name),
+    onSuccess: (project) => {
+      queryClient.invalidateQueries({ queryKey: designKeys.projects() })
+      toast.success(tProjects('rename.success', { name: project.name }))
+    },
+    onError: (error) => {
+      toast.error(isApiError(error) ? error.message : t('generic'))
+    }
+  })
+}
+
+/**
+ * Menu ⋮ → Xóa (mục IV.1). Chỉ chạy sau khi người dùng xác nhận ở hộp thoại —
+ * hook không tự hỏi lại.
+ */
+export function useDeleteProject() {
+  const queryClient = useQueryClient()
+  const clearDraft = useDesignStore((s) => s.clearDraft)
+  const t = useTranslations('errors')
+  const tProjects = useTranslations('design.projects')
+
+  return useMutation({
+    mutationFn: (projectId: string) => designApi.deleteProject(projectId),
+    onSuccess: (_data, projectId) => {
+      // Bản nháp Bước 1 nằm ở localStorage, xóa dự án mà bỏ quên nháp thì mã
+      // dự án cũ vẫn chiếm chỗ và có thể bị dùng lại nhầm.
+      clearDraft(projectId)
+      queryClient.invalidateQueries({ queryKey: designKeys.projects() })
+      toast.success(tProjects('delete.success'))
+    },
+    onError: (error) => {
+      toast.error(isApiError(error) ? error.message : t('generic'))
+    }
+  })
+}

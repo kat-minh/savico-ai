@@ -1,19 +1,18 @@
 'use client'
 
-import { FileText, Image as ImageIcon, LayoutPanelTop, Table2, Wand2 } from 'lucide-react'
+import { Eye, FileDown, FileText, Info, Link2, Mail, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import type { LucideIcon } from 'lucide-react'
 
 import type { Locale } from '@/i18n/routing'
 import { DossierCover, EstimateSheet, Photo, PlanDrawing, type CoverRow } from '@/shared/components/common'
 import { RENDER_IMAGE } from '@/shared/lib/imagery'
 import { Button } from '@/shared/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
-import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
 import { costShares } from '../services/estimate.service'
 import type { EstimateResult } from '../types/design.types'
 
-/** Khối THÔNG TIN DỰ ÁN ở đầu trang Bước 3 (mục III.4a). */
+/** Khối THÔNG TIN DỰ ÁN ở đầu trang Bước 3 (mục IV.6). */
 export interface DossierProjectInfo {
   customerName: string
   projectName: string
@@ -26,8 +25,8 @@ export interface DossierProjectInfo {
   /** Tổng diện tích sàn do AI ước tính (m²). */
   floorArea: number
   packageLabel: string
-  architectureLabel: string
-  interiorLabel: string
+  /** Kiểu kiến trúc & phong cách — MỘT trường gộp (Phụ lục A, trường 7). */
+  styleLabel: string
 }
 
 interface DossierOverviewProps {
@@ -38,20 +37,20 @@ interface DossierOverviewProps {
   isRendering: boolean
 }
 
-/**
- * 4 thành phần của bộ hồ sơ, xếp lớp cạnh nhau ở trạng thái xem trước.
- * Mỗi thẻ hiện đúng nội dung của nó: bìa và bảng dự toán dựng bằng markup,
- * mặt bằng là bản vẽ SVG, phối cảnh là ảnh render.
- */
-const PREVIEW_PARTS = [
-  { key: 'cover', icon: FileText },
-  { key: 'floorPlan', icon: LayoutPanelTop },
-  { key: 'exterior', icon: ImageIcon },
-  { key: 'estimate', icon: Table2 }
-] as const
+/** Bốn thành phần của bộ hồ sơ ở khối "Xem trước hồ sơ" (Hình 09). */
+const PREVIEW_PARTS = ['cover', 'floorPlan', 'exterior', 'estimate'] as const
+type PreviewPart = (typeof PREVIEW_PARTS)[number]
+
+/** Các nút chỉ kích hoạt sau khi render xong (mục IV.6). */
+const LOCKED_ACTIONS: readonly { key: 'downloadPdf' | 'shareLink' | 'email' | 'qr'; icon: LucideIcon }[] = [
+  { key: 'downloadPdf', icon: FileDown },
+  { key: 'shareLink', icon: Link2 },
+  { key: 'email', icon: Mail },
+  { key: 'qr', icon: QrCode }
+]
 
 interface PreviewBodyProps {
-  part: (typeof PREVIEW_PARTS)[number]['key']
+  part: PreviewPart
   alt: string
   /** Dữ liệu thật của dự án — thẻ xem trước phải khớp hồ sơ sắp render. */
   cover: { title: string; subtitle: string; rows: CoverRow[] }
@@ -63,23 +62,22 @@ interface PreviewBodyProps {
 function PreviewBody({ part, alt, cover, grandTotal, percents }: PreviewBodyProps) {
   switch (part) {
     case 'cover':
-      return <DossierCover className='aspect-3/4 w-full' project={cover} />
+      return <DossierCover className='aspect-4/3 w-full' project={cover} />
     case 'floorPlan':
-      return <PlanDrawing className='aspect-3/4 w-full' />
+      return <PlanDrawing className='aspect-4/3 w-full' />
     case 'exterior':
-      return <Photo className='aspect-3/4 w-full' src={RENDER_IMAGE.villa} alt={alt} sizes='200px' />
+      return <Photo className='aspect-4/3 w-full' src={RENDER_IMAGE.villa} alt={alt} sizes='240px' />
     case 'estimate':
-      return <EstimateSheet className='aspect-3/4 w-full' total={grandTotal} percents={percents} />
+      return <EstimateSheet className='aspect-4/3 w-full' total={grandTotal} percents={percents} />
   }
 }
 
-/** Các nút chỉ kích hoạt sau khi render xong (mục III.4a). */
-const LOCKED_ACTIONS = ['downloadPdf', 'shareLink', 'email', 'qr'] as const
-
 /**
- * Bước 3 — trạng thái CHƯA render (mục III.4a).
- * Thông tin dự án, dải thẻ xem trước 4 thành phần, cột phải với nút
- * "Render hồ sơ" và các nút tải / chia sẻ ở trạng thái mờ.
+ * Bước 3 — trạng thái CHƯA render (mục IV.6, Hình 09).
+ *
+ * Cột trái: khối "THÔNG TIN DỰ ÁN" hai cột và khối "Xem trước hồ sơ" gồm 4 thẻ.
+ * Cột phải: thẻ "Xuất hồ sơ" với nút chính "Render hồ sơ", 4 nút mờ chờ render,
+ * dòng nhắc và badge trạng thái "Chưa render".
  */
 export function DossierOverview({ info, result, onRender, isRendering }: DossierOverviewProps) {
   const t = useTranslations('design.dossier')
@@ -96,27 +94,38 @@ export function DossierOverview({ info, result, onRender, isRendering }: Dossier
     | 'scale'
     | 'floorArea'
     | 'package'
-    | 'architecture'
-    | 'interior'
+    | 'style'
 
-  const rows = (
-    [
-      { labelKey: 'customerName', value: info.customerName },
-      { labelKey: 'projectName', value: `${info.projectName} (${info.projectId})` },
-      { labelKey: 'phone', value: info.phone },
-      { labelKey: 'address', value: info.address },
-      { labelKey: 'createdAt', value: formatDate(info.createdAt, locale) },
-      { labelKey: 'buildingType', value: info.buildingTypeLabel },
-      { labelKey: 'scale', value: info.scaleLabel },
-      // Diện tích do AI ước tính ở Bước 2; chưa có thì bỏ dòng chứ đừng in "0 m²".
-      { labelKey: 'floorArea', value: info.floorArea > 0 ? t('floorAreaValue', { value: info.floorArea }) : '' },
-      { labelKey: 'package', value: info.packageLabel },
-      { labelKey: 'architecture', value: info.architectureLabel },
-      { labelKey: 'interior', value: info.interiorLabel }
-    ] satisfies { labelKey: InfoKey; value: string }[]
-  )
-    // Trường nào chưa có dữ liệu thì bỏ hẳn dòng, đừng để nhãn treo lơ lửng.
-    .filter((row) => Boolean(row.value))
+  type InfoRow = { labelKey: InfoKey; value: string }
+
+  // Hai cột cố định theo Hình 09 — không dùng grid tự chảy, vì kiểu đó xếp
+  // dòng 1 và dòng 2 cạnh nhau chứ không phải "5 dòng trái, 5 dòng phải".
+  const leftRows: InfoRow[] = [
+    { labelKey: 'customerName', value: info.customerName },
+    { labelKey: 'projectName', value: `${info.projectName} (${info.projectId})` },
+    { labelKey: 'phone', value: info.phone },
+    { labelKey: 'address', value: info.address },
+    { labelKey: 'createdAt', value: formatDate(info.createdAt, locale) }
+  ]
+  const rightRows: InfoRow[] = [
+    { labelKey: 'buildingType', value: info.buildingTypeLabel },
+    { labelKey: 'scale', value: info.scaleLabel },
+    // Diện tích do AI ước tính ở Bước 2; chưa có thì bỏ dòng chứ đừng in "0 m²".
+    { labelKey: 'floorArea', value: info.floorArea > 0 ? t('floorAreaValue', { value: info.floorArea }) : '' },
+    { labelKey: 'package', value: info.packageLabel },
+    { labelKey: 'style', value: info.styleLabel }
+  ]
+
+  /** Trường nào chưa có dữ liệu thì bỏ hẳn dòng, đừng để nhãn treo lơ lửng. */
+  const renderRows = (rows: InfoRow[]) =>
+    rows
+      .filter((row) => Boolean(row.value))
+      .map((row) => (
+        <div key={row.labelKey} className='flex items-start justify-between gap-4 border-b py-2.5 text-sm'>
+          <dt className='text-muted-foreground'>{t(`info.${row.labelKey}`)}</dt>
+          <dd className='text-right font-medium'>{row.value}</dd>
+        </div>
+      ))
 
   const shares = result ? costShares(result.sections) : null
   const cover = {
@@ -130,32 +139,25 @@ export function DossierOverview({ info, result, onRender, isRendering }: Dossier
   }
 
   return (
-    <div className='mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1fr_300px] lg:px-8'>
-      <div className='space-y-8'>
-        <section className='bg-card rounded-2xl border p-6'>
-          <h2 className='mb-5 text-lg font-semibold tracking-tight'>{t('infoTitle')}</h2>
-          <dl className='grid gap-x-8 gap-y-3 sm:grid-cols-2'>
-            {rows.map((row) => (
-              <div key={row.labelKey} className='flex justify-between gap-4 border-b pb-2 text-sm'>
-                <dt className='text-muted-foreground'>{t(`info.${row.labelKey}`)}</dt>
-                <dd className='text-right font-medium'>{row.value}</dd>
-              </div>
-            ))}
-          </dl>
+    <div className='mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8'>
+      <div className='space-y-5'>
+        <section className='bg-card rounded-2xl border p-5 sm:p-6'>
+          <h2 className='text-muted-foreground mb-3 text-xs font-semibold tracking-[0.1em] uppercase'>
+            {t('infoTitle')}
+          </h2>
+          <div className='grid gap-x-10 sm:grid-cols-2'>
+            <dl>{renderRows(leftRows)}</dl>
+            <dl>{renderRows(rightRows)}</dl>
+          </div>
         </section>
 
-        <section>
-          <h2 className='mb-4 text-lg font-semibold tracking-tight'>{t('previewTitle')}</h2>
-          {/* Bốn thẻ bằng nhau, thẳng hàng đáy. Kiểu chồng mép (-ml) trước đây
-              làm các thẻ so le và che mất nội dung thẻ bên dưới. */}
+        <section className='bg-card rounded-2xl border p-5 sm:p-6'>
+          <h2 className='mb-4 font-semibold tracking-tight'>{t('previewTitle')}</h2>
           <div className='grid grid-cols-2 gap-4 sm:grid-cols-4'>
-            {PREVIEW_PARTS.map(({ key, icon: Icon }) => (
+            {PREVIEW_PARTS.map((key) => (
               <figure
                 key={key}
-                className={cn(
-                  'bg-card flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-300',
-                  'hover:border-primary/40 hover:-translate-y-1 hover:shadow-md'
-                )}
+                className='bg-card hover:border-primary/40 flex flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md'
               >
                 <PreviewBody
                   part={key}
@@ -172,9 +174,14 @@ export function DossierOverview({ info, result, onRender, isRendering }: Dossier
                       : undefined
                   }
                 />
-                <figcaption className='mt-auto flex items-center gap-2 border-t px-3 py-2.5 text-xs font-medium'>
-                  <Icon className='text-muted-foreground size-3.5 shrink-0' />
-                  <span className='truncate'>{t(`preview.${key}`)}</span>
+                <figcaption className='mt-auto space-y-1.5 border-t px-3 py-3 text-center'>
+                  <span className='block text-[13px] font-medium'>{t(`preview.${key}`)}</span>
+                  {/* Hồ sơ chưa render nên chưa có file để mở — liên kết ở đây
+                      chỉ báo thành phần nào sẽ có, kích hoạt sau khi render. */}
+                  <span className='text-muted-foreground/70 inline-flex items-center gap-1.5 text-xs'>
+                    <Eye className='size-3.5' />
+                    {t('previewAction')}
+                  </span>
                 </figcaption>
               </figure>
             ))}
@@ -182,26 +189,30 @@ export function DossierOverview({ info, result, onRender, isRendering }: Dossier
         </section>
       </div>
 
-      {/* Cột PHẢI */}
-      <aside className='space-y-3 lg:sticky lg:top-32 lg:self-start'>
-        <Button size='lg' className='w-full' onClick={onRender} disabled={isRendering}>
-          <Wand2 className='size-4' />
+      {/* Cột PHẢI — thẻ "Xuất hồ sơ" */}
+      <aside className='bg-card h-fit space-y-3 rounded-2xl border p-5 lg:sticky lg:top-32'>
+        <h2 className='font-semibold tracking-tight'>{t('exportTitle')}</h2>
+
+        <Button size='lg' className='h-14 w-full text-base' onClick={onRender} disabled={isRendering}>
+          <FileText className='size-5' />
           {t('render')}
         </Button>
 
-        {LOCKED_ACTIONS.map((action) => (
-          <Tooltip key={action}>
-            <TooltipTrigger asChild>
-              {/* Wrapper keeps the tooltip reachable while the button is disabled. */}
-              <span className='block'>
-                <Button variant='outline' className='w-full' disabled>
-                  {t(`actions.${action}`)}
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{t('lockedHint')}</TooltipContent>
-          </Tooltip>
+        {LOCKED_ACTIONS.map(({ key, icon: Icon }) => (
+          <Button key={key} variant='outline' size='lg' className='h-12 w-full' disabled>
+            <Icon className='size-4' />
+            {t(`actions.${key}`)}
+          </Button>
         ))}
+
+        <p className='text-muted-foreground flex items-start gap-2 pt-1 text-sm'>
+          <Info className='mt-0.5 size-4 shrink-0' />
+          {t('lockedHint')}
+        </p>
+
+        <span className='bg-warning/15 text-warning-strong inline-flex rounded-md px-2.5 py-1 text-xs font-medium'>
+          {t('statusPending')}
+        </span>
       </aside>
     </div>
   )

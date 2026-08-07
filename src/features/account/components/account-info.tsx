@@ -10,9 +10,9 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
 
 /**
- * Thẻ hồ sơ tài khoản (mục IV, khu vực 1): tên, số điện thoại, email, nút chỉnh
- * sửa. Là cột trái cố định của Cửa sổ cá nhân nên trình bày theo chiều dọc —
- * ảnh đại diện lớn, danh tính, rồi các dòng liên hệ.
+ * Thẻ hồ sơ tài khoản (mục IX, Hình 17): ảnh đại diện lớn, tên, số điện thoại,
+ * email và nút "Chỉnh sửa". Là thẻ trên cùng của cột trái trang Tài khoản; thẻ
+ * "GÓI CỦA TÔI" nằm ngay dưới (`PlanCard`).
  */
 export function AccountInfo() {
   const t = useTranslations('account.info')
@@ -36,39 +36,34 @@ export function AccountInfo() {
   ]
 
   return (
-    <section className='bg-card overflow-hidden rounded-2xl border'>
-      {/* Dải màu thương hiệu làm nền cho ảnh đại diện. */}
-      <div className='from-primary/18 to-accent h-20 bg-linear-to-br' />
+    <section className='bg-card rounded-2xl border p-6 text-center'>
+      <Avatar className='mx-auto size-24'>
+        <AvatarImage src={user.avatarUrl} alt={user.name} />
+        <AvatarFallback className='text-2xl font-semibold'>{initials}</AvatarFallback>
+      </Avatar>
 
-      <div className='-mt-10 px-6 pb-6 text-center'>
-        <Avatar className='border-card mx-auto size-20 border-4 shadow-sm'>
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
-          <AvatarFallback className='text-xl font-semibold'>{initials}</AvatarFallback>
-        </Avatar>
+      <h2 className='text-primary-strong mt-3 truncate text-xl font-bold'>{user.name}</h2>
 
-        <h2 className='mt-3 truncate text-lg font-semibold'>{user.name}</h2>
-        <p className='text-muted-foreground truncate text-sm'>{t('title')}</p>
+      {/* Hình 17: mỗi dòng liên hệ là icon tròn xanh nhạt + "Nhãn: giá trị". */}
+      <dl className='mt-4 space-y-2.5 text-left'>
+        {contacts.map(({ key, icon: Icon, value, muted }) => (
+          <div key={key} className='flex items-center gap-2.5'>
+            <span className='bg-accent text-primary-strong flex size-7 shrink-0 items-center justify-center rounded-full'>
+              <Icon className='size-3.5' />
+            </span>
+            <dt className='text-muted-foreground shrink-0 text-sm'>{t(key)}:</dt>
+            <dd className={cn('min-w-0 truncate text-sm font-medium', muted && 'text-muted-foreground font-normal')}>
+              {value}
+            </dd>
+          </div>
+        ))}
+      </dl>
 
-        <dl className='mt-6 space-y-3 text-left'>
-          {contacts.map(({ key, icon: Icon, value, muted }) => (
-            <div key={key} className='bg-muted/50 flex items-center gap-3 rounded-xl px-3 py-2.5'>
-              <Icon className='text-muted-foreground size-4 shrink-0' />
-              <div className='min-w-0'>
-                <dt className='text-muted-foreground text-xs'>{t(key)}</dt>
-                <dd className={cn('truncate text-sm font-medium', muted && 'text-muted-foreground font-normal')}>
-                  {value}
-                </dd>
-              </div>
-            </div>
-          ))}
-        </dl>
-
-        {/* TODO: open the profile edit form once the account endpoints exist. */}
-        <Button variant='outline' className='mt-5 w-full'>
-          <Pencil className='size-3.5' />
-          {t('edit')}
-        </Button>
-      </div>
+      {/* TODO: open the profile edit form once the account endpoints exist. */}
+      <Button variant='outline' className='mt-5 w-full'>
+        <Pencil className='size-3.5' />
+        {t('edit')}
+      </Button>
     </section>
   )
 }

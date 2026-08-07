@@ -104,7 +104,7 @@ export function HandbookBrowser() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={ALL}>{t('filters.allBuildingTypes')}</SelectItem>
-                    {(['house', 'townhouse', 'apartment'] as const).map((value) => (
+                    {(['townhouse', 'villa', 'roofed', 'garden', 'apartment'] as const).map((value) => (
                       <SelectItem key={value} value={value}>
                         {tInput(`buildingType.options.${value}`)}
                       </SelectItem>
@@ -113,14 +113,14 @@ export function HandbookBrowser() {
                 </Select>
 
                 <Select value={interiorStyle} onValueChange={setInteriorStyle}>
-                  <SelectTrigger className='sm:w-48' aria-label={tInput('interiorStyle.label')}>
+                  <SelectTrigger className='sm:w-48' aria-label={tInput('style.label')}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={ALL}>{t('filters.allInteriorStyles')}</SelectItem>
                     {(['modern', 'minimal', 'neoclassical', 'indochine'] as const).map((value) => (
                       <SelectItem key={value} value={value}>
-                        {tInput(`interiorStyle.options.${value}`)}
+                        {tInput(`style.options.${value}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>

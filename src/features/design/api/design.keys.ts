@@ -5,6 +5,8 @@
 export const designKeys = {
   all: ['design'] as const,
 
+  quota: () => [...designKeys.all, 'quota'] as const,
+
   projects: () => [...designKeys.all, 'projects'] as const,
   project: (projectId: string) => [...designKeys.projects(), projectId] as const,
 

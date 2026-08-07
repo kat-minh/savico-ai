@@ -4,6 +4,11 @@ interface LogoProps {
   className?: string
   /** Hide the wordmark, showing only the icon. */
   iconOnly?: boolean
+  /**
+   * Bản nền tối (footer — mục II.2): chữ "SAVI" chuyển sang màu chữ của footer
+   * vì `--primary-strong` quá tối để đọc trên nền `--footer`.
+   */
+  onDark?: boolean
 }
 
 /**
@@ -13,11 +18,18 @@ interface LogoProps {
  * Vẽ bằng SVG thay vì ảnh bitmap để nét luôn sắc ở mọi cỡ và tự đổi màu theo
  * token thương hiệu.
  */
-export function Logo({ className, iconOnly = false }: LogoProps) {
+export function Logo({ className, iconOnly = false, onDark = false }: LogoProps) {
   return (
     <span className={cn('flex items-center gap-1.5', className)}>
       {!iconOnly ? (
-        <span className='text-primary-strong text-2xl leading-none font-extrabold tracking-[-0.02em]'>SAVI</span>
+        <span
+          className={cn(
+            'text-2xl leading-none font-extrabold tracking-[-0.02em]',
+            onDark ? 'text-footer-foreground' : 'text-primary-strong'
+          )}
+        >
+          SAVI
+        </span>
       ) : null}
 
       {/* Vòng tuần hoàn: hai cung hở lồng nhau, tia chớp ở giữa. */}
@@ -36,7 +48,10 @@ export function Logo({ className, iconOnly = false }: LogoProps) {
           strokeLinecap='round'
           fill='none'
         />
-        <path d='M23.4 4.6 19 12.6h3.5L20.6 19.4 25.6 11h-3.4z' className='fill-primary-strong' />
+        <path
+          d='M23.4 4.6 19 12.6h3.5L20.6 19.4 25.6 11h-3.4z'
+          className={onDark ? 'fill-primary' : 'fill-primary-strong'}
+        />
       </svg>
     </span>
   )

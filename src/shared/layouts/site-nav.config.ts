@@ -1,7 +1,7 @@
 import { ROUTES } from '@/shared/constants/routes'
 
 /** Translation key under the `nav` namespace. */
-export type NavLabelKey = 'design' | 'handbook' | 'guide'
+export type NavLabelKey = 'design' | 'handbook' | 'guide' | 'plans'
 
 export interface SiteNavItem {
   labelKey: NavLabelKey
@@ -16,5 +16,6 @@ export interface SiteNavItem {
 export const SITE_NAV: readonly SiteNavItem[] = [
   { labelKey: 'design', href: ROUTES.DESIGN },
   { labelKey: 'handbook', href: ROUTES.HANDBOOK },
-  { labelKey: 'guide', href: ROUTES.GUIDE }
+  { labelKey: 'guide', href: ROUTES.GUIDE },
+  { labelKey: 'plans', href: ROUTES.PLANS }
 ] as const

@@ -11,6 +11,11 @@ export interface GuideVideo {
   videoUrl: string
   /** Thời lượng tính bằng giây. */
   durationSeconds: number
+  /**
+   * Video nổi bật hiện lớn ở đầu trang Hướng dẫn (mục VI). Admin chọn video nào
+   * là nổi bật (mục X, #3); chỉ MỘT video mang cờ này.
+   */
+  featured?: boolean
 }
 
 /** Bài hướng dẫn dạng chữ kèm ảnh. */

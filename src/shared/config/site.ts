@@ -17,8 +17,24 @@ export const siteConfig = {
     hotline: '1900 0000',
     email: 'hello@savico.ai',
     zaloUrl: 'https://zalo.me/0000000000',
-    messengerUrl: 'https://m.me/savico',
-    facebookUrl: 'https://facebook.com/savico'
+    messengerUrl: 'https://m.me/savico'
+  },
+  /**
+   * Mạng xã hội hiện ở cột 4 của footer (mục II.2). Placeholder cho tới khi
+   * Bên A gửi link Fanpage / Zalo OA / YouTube / TikTok thật.
+   */
+  social: {
+    facebookUrl: 'https://facebook.com/savico',
+    zaloOaUrl: 'https://zalo.me/0000000000',
+    youtubeUrl: 'https://youtube.com/@savico',
+    tiktokUrl: 'https://tiktok.com/@savico'
+  },
+  /**
+   * Thông tin pháp lý ở hàng đáy footer (mục II.2). Placeholder — Bên A chốt
+   * tên công ty và MST.
+   */
+  legal: {
+    taxCode: '0000000000'
   }
 } as const
 

@@ -1,10 +1,12 @@
 import type {
-  ArchitectureStyle,
   BuildingType,
   CostSection,
   DesignStep,
+  DesignStyle,
   FloorCount,
-  PackageTier
+  PackageTier,
+  ProjectSort,
+  ProjectStatus
 } from '../types/design.types'
 
 /** Ảnh lô đất — JPG, PNG, HEIC tối đa 10MB (mục III.2, trường 1). */
@@ -14,7 +16,8 @@ export const LAND_PHOTO_ACCEPT = ['image/jpeg', 'image/png', 'image/heic'] as co
 /** Mô tả mong muốn — tối đa 500 ký tự (mục III.2, trường 9). */
 export const WISHES_MAX_LENGTH = 500
 
-export const BUILDING_TYPES: readonly BuildingType[] = ['house', 'townhouse', 'apartment'] as const
+/** 5 nhóm loại công trình theo Phụ lục A, trường 3 — thứ tự cố định. */
+export const BUILDING_TYPES: readonly BuildingType[] = ['townhouse', 'villa', 'roofed', 'garden', 'apartment'] as const
 
 export const FLOOR_COUNTS: readonly FloorCount[] = ['ground', 'ground+1', 'ground+2', 'ground+3', 'ground+4'] as const
 
@@ -22,21 +25,57 @@ export const FLOOR_COUNTS: readonly FloorCount[] = ['ground', 'ground+1', 'groun
 export const PACKAGE_TIERS: readonly PackageTier[] = ['basic', 'standard', 'vip'] as const
 export const DEFAULT_PACKAGE_TIER: PackageTier = 'standard'
 
-export const ARCHITECTURE_STYLES: readonly ArchitectureStyle[] = ['roofed', 'modern-townhouse', 'neoclassical'] as const
-
 /**
- * Phong cách nội thất — danh mục do admin cấu hình; giá trị dưới đây là seed
- * mặc định cho bản mock cho tới khi CMS cung cấp danh sách thật.
+ * Danh mục "Kiểu kiến trúc & phong cách" theo từng loại công trình
+ * (Phụ lục A, bảng cuối). Admin cấu hình được (mục X, #6) — bảng dưới là seed
+ * mặc định cho tới khi CMS trả danh sách thật.
  *
- * Kept as a literal tuple so `design.input.interiorStyle.options.*` message
- * keys stay type-checked; widen to `string[]` only once the list comes from the
- * API and the labels move with it.
+ * Giữ dạng tuple literal để các khóa dịch `design.input.style.options.*` vẫn
+ * được kiểm kiểu; chỉ nới thành `string[]` khi danh sách đến từ API kèm nhãn.
  */
-export const INTERIOR_STYLES = ['modern', 'minimal', 'neoclassical', 'indochine'] as const
+export const STYLES_BY_BUILDING_TYPE: Record<BuildingType, readonly DesignStyle[]> = {
+  townhouse: ['modern', 'wabi-sabi', 'neoclassical', 'minimal', 'indochine'],
+  villa: ['neoclassical', 'modern'],
+  roofed: ['thai-roof', 'japanese-roof'],
+  garden: ['garden-thai-roof', 'garden-japanese-roof', 'garden-villa', 'level4-modern'],
+  apartment: ['modern', 'minimal', 'wabi-sabi']
+}
+
+/** Mọi giá trị phong cách đang dùng — phục vụ kiểm kiểu và ảnh minh họa. */
+export const DESIGN_STYLES: readonly DesignStyle[] = [
+  'modern',
+  'wabi-sabi',
+  'neoclassical',
+  'minimal',
+  'indochine',
+  'thai-roof',
+  'japanese-roof',
+  'garden-thai-roof',
+  'garden-japanese-roof',
+  'garden-villa',
+  'level4-modern'
+] as const
 
 export const COST_SECTIONS: readonly CostSection[] = ['structure', 'finishing', 'interior'] as const
 
 export const DESIGN_STEPS: readonly DesignStep[] = [1, 2, 3] as const
+
+/** Chip lọc & badge trạng thái ở trang "Dự án của tôi" (mục IV.1, Hình 02). */
+export const PROJECT_STATUSES: readonly ProjectStatus[] = ['input', 'designing', 'review', 'completed'] as const
+
+/**
+ * 4 thẻ đếm nhanh theo Hình 02 — không có thẻ "Đang nhập liệu"; trạng thái đó
+ * chỉ xuất hiện ở hàng chip lọc.
+ */
+export const PROJECT_STAT_CARDS = ['total', 'designing', 'review', 'completed'] as const
+export type ProjectStatCard = (typeof PROJECT_STAT_CARDS)[number]
+
+/** Dropdown sắp xếp — mặc định "Mới cập nhật" (mục IV.1). */
+export const PROJECT_SORTS: readonly ProjectSort[] = ['recent', 'oldest', 'name'] as const
+export const DEFAULT_PROJECT_SORT: ProjectSort = 'recent'
+
+/** Lưới 3 cột × 3 hàng rồi mới phân trang (mục IV.1). */
+export const PROJECTS_PAGE_SIZE = 9
 
 /**
  * Nút "?" của mỗi bước trỏ tới nhóm hướng dẫn nào trên trang Hướng dẫn
@@ -50,16 +89,16 @@ export const STEP_HELP_TOPIC: Record<DesignStep, string> = {
 }
 
 /**
- * Trường nào áp dụng cho loại công trình nào (mục III.2, ghi chú).
- * Nhà ở và Nhà phố dùng chung bộ trường; Căn hộ ẩn Số tầng, Tum, Kiểu kiến trúc.
+ * Trường nào áp dụng cho loại công trình nào (Phụ lục A, cột "Hiển thị").
+ * Bốn nhóm nhà đất dùng chung bộ trường; Căn hộ ẩn Số tầng và Tum.
  */
-export const FIELDS_BY_BUILDING_TYPE: Record<
-  BuildingType,
-  { floorCount: boolean; attic: boolean; architectureStyle: boolean }
-> = {
-  house: { floorCount: true, attic: true, architectureStyle: true },
-  townhouse: { floorCount: true, attic: true, architectureStyle: true },
-  apartment: { floorCount: false, attic: false, architectureStyle: false }
+export const FIELDS_BY_BUILDING_TYPE: Record<BuildingType, { floorCount: boolean; attic: boolean }> = {
+  townhouse: { floorCount: true, attic: true },
+  villa: { floorCount: true, attic: true },
+  roofed: { floorCount: true, attic: true },
+  garden: { floorCount: true, attic: true },
+  // Căn hộ: ẩn Số tầng (khóa 1 mặt sàn) và Tum (mặc định Không tum).
+  apartment: { floorCount: false, attic: false }
 }
 
 /** Autosave nháp Bước 1 — thoát ra vào lại vẫn còn nguyên (mục III.2). */

@@ -21,8 +21,7 @@ export interface DossierPdfLabels {
     | 'scale'
     | 'floorArea'
     | 'package'
-    | 'architecture'
-    | 'interior',
+    | 'style',
     string
   >
   estimateTitle: string

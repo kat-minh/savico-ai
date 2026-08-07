@@ -12,6 +12,7 @@ export const ROUTES = {
   HOME: '/', // 1. Trang chủ
   HANDBOOK: '/handbook', // 2. Cẩm nang
   GUIDE: '/guide', // 3. Hướng dẫn
+  PLANS: '/plans', // Gói đăng ký (mục VII)
   TERMS: '/terms',
   PRIVACY: '/privacy',
 

@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 import { DossierCover, Photo, PlanDrawing } from '@/shared/components/common'
-import { ARCHITECTURE_IMAGE, RENDER_IMAGE } from '@/shared/lib/imagery'
+import { RENDER_IMAGE, STYLE_IMAGE } from '@/shared/lib/imagery'
 import { formatNumber } from '@/shared/utils'
 import { cn } from '@/shared/lib/utils'
 import { SHOWCASE_TABS, type ShowcaseTab } from '../constants/landing.constants'
@@ -51,7 +51,7 @@ export function HeroShowcase() {
         {/* Ảnh phối cảnh — mỏ neo "công trình của bạn", luôn hiện. */}
         <div className='bg-muted relative hidden h-full min-h-[21rem] overflow-hidden rounded-xl border sm:block'>
           <Photo
-            src={ARCHITECTURE_IMAGE['modern-townhouse']}
+            src={STYLE_IMAGE.modern}
             alt={t('title')}
             priority
             sizes='(max-width: 1024px) 40vw, 220px'

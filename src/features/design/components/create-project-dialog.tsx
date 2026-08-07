@@ -7,14 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/shared/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/shared/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -126,15 +119,17 @@ export function CreateProjectDialog() {
               )}
             />
 
-            <DialogFooter className='gap-2 sm:gap-2'>
-              <Button type='button' variant='ghost' onClick={close}>
-                {tCommon('cancel')}
-              </Button>
-              <Button type='submit' disabled={createProject.isPending}>
+            {/* Hình 03: hai nút bằng nhau, chia đôi bề ngang — "Tạo dự án" là
+                nút chính bên trái, "Hủy" viền nhạt bên phải. */}
+            <div className='grid grid-cols-2 gap-3 pt-1'>
+              <Button type='submit' size='lg' disabled={createProject.isPending}>
                 {createProject.isPending ? <Loader2 className='size-4 animate-spin' /> : null}
                 {t('submit')}
               </Button>
-            </DialogFooter>
+              <Button type='button' size='lg' variant='outline' onClick={close}>
+                {tCommon('cancel')}
+              </Button>
+            </div>
           </form>
         </Form>
       </DialogContent>

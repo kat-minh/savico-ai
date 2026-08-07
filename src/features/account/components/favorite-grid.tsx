@@ -13,9 +13,11 @@ import { useFavorites, type FavoriteEntry } from '@/shared/favorite'
 import { formatDate } from '@/shared/utils'
 
 /**
- * "Dự án yêu thích" (mục IV, khu vực 3): lưới toàn bộ mẫu người dùng đã bấm ♥.
- * Mỗi thẻ: ảnh mẫu, tên mẫu, tag, ngày lưu. Bấm thẻ mở xem chi tiết mẫu;
- * bấm ♥ để bỏ yêu thích — thẻ biến mất khỏi danh sách ngay.
+ * Tab "Dự án yêu thích" ở trang Tài khoản (mục IX, Hình 18).
+ *
+ * Lưới 2 cột thẻ mẫu đã ♥: ảnh kèm nút tim ĐỎ góc phải, tên mẫu, 2 tag và dòng
+ * "Lưu ngày {ngày}". Bấm thẻ mở chi tiết mẫu; bấm tim bỏ lưu — thẻ biến mất
+ * khỏi danh sách ngay.
  */
 export function FavoriteGrid() {
   const t = useTranslations('account.favorites')
@@ -29,7 +31,8 @@ export function FavoriteGrid() {
 
   return (
     <>
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+      {/* Hình 18: lưới 2 cột, không phải 3. */}
+      <div className='grid gap-4 sm:grid-cols-2'>
         {favorites.map((entry) => (
           <article
             key={entry.templateId}
@@ -43,9 +46,10 @@ export function FavoriteGrid() {
                 aria-label={t('remove')}
                 title={t('remove')}
                 onClick={() => remove(entry.templateId)}
-                className='bg-background/80 hover:bg-background absolute top-2 right-2 z-10 rounded-full backdrop-blur'
+                className='bg-background hover:bg-background absolute top-2 right-2 z-10 rounded-full shadow-sm'
               >
-                <Heart className='fill-primary text-primary size-4' />
+                {/* Hình 18: tim ĐỎ đặc — quy ước "đã lưu", không dùng màu thương hiệu. */}
+                <Heart className='fill-destructive text-destructive size-4' />
               </Button>
             </div>
 
@@ -56,7 +60,9 @@ export function FavoriteGrid() {
                   <Badge variant='secondary'>{entry.tagLabel}</Badge>
                   <Badge variant='outline'>{t(`kind.${entry.kind}`)}</Badge>
                 </div>
-                <span className='text-muted-foreground shrink-0 text-xs'>{formatDate(entry.savedAt, locale)}</span>
+                <span className='text-muted-foreground shrink-0 text-xs'>
+                  {t('savedAt', { date: formatDate(entry.savedAt, locale) })}
+                </span>
               </div>
             </div>
 

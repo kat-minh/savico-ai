@@ -227,20 +227,48 @@
     "handbook": "Cẩm nang",
     "guide": "Hướng dẫn",
     "createProject": "Tạo dự án mới",
-    "bgToggle": { "toPlain": "Nền trơn", "toAura": "Nền động" },
+    "bgToggle": {
+      "toPlain": "Nền trơn",
+      "toAura": "Nền động"
+    },
     "account": "Tài khoản của tôi",
     "logout": "Đăng xuất",
     "menu": "Menu",
     "guest": "Khách",
-    "guestHint": "Đăng nhập để lưu và xem lại dự án của bạn"
+    "guestHint": "Đăng nhập để lưu và xem lại dự án của bạn",
+    "plans": "Gói đăng ký"
   },
   "footer": {
-    "tagline": "AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút.",
+    "tagline": "Nền tảng AI của SAVICO giúp bạn dựng thiết kế, phối cảnh 3D và dự toán chi phí xây nhà chỉ trong vài phút. Hồ sơ thi công đầy đủ, đơn giá theo khu vực, có kiến trúc sư SAVICO đồng hành.",
+    "contactTitle": "Liên hệ",
+    "quickLinksTitle": "Liên kết nhanh",
+    "policyTitle": "Chính sách",
+    "socialTitle": "Kết nối với SAVICO",
     "hotline": "Hotline",
-    "zalo": "Chat Zalo",
-    "rights": "Bảo lưu mọi quyền.",
-    "privacy": "Chính sách bảo mật",
-    "terms": "Điều khoản sử dụng"
+    "zalo": "Zalo",
+    "address": "123 Nguyễn Văn Cừ, Phường Tân Lợi, TP. Buôn Ma Thuột, Đắk Lắk",
+    "workingHours": "Thứ 2 – Thứ 7: 8:00 – 17:30",
+    "comingSoon": "Sắp ra mắt",
+    "links": {
+      "design": "Thiết kế & Dự toán",
+      "handbook": "Cẩm nang",
+      "guide": "Hướng dẫn",
+      "plans": "Gói đăng ký",
+      "consult": "Tư vấn 1:1",
+      "createProject": "Tạo dự án mới",
+      "privacy": "Chính sách bảo mật",
+      "terms": "Điều khoản sử dụng",
+      "payment": "Chính sách thanh toán"
+    },
+    "social": {
+      "facebook": "Facebook SAVICO",
+      "zaloOa": "Zalo OA SAVICO",
+      "youtube": "YouTube SAVICO",
+      "tiktok": "TikTok SAVICO"
+    },
+    "rights": "Tất cả quyền được bảo lưu.",
+    "company": "Công ty Cổ phần SAVICO",
+    "taxCode": "MST"
   },
   "favorite": {
     "add": "Yêu thích",
@@ -254,9 +282,18 @@
       "primaryCta": "Tạo dự án mới",
       "secondaryCta": "Xem hướng dẫn",
       "promises": {
-        "fast": { "title": "Nhanh chóng", "hint": "Chỉ trong vài phút" },
-        "accurate": { "title": "Chính xác", "hint": "AI + KTS kiểm duyệt" },
-        "secure": { "title": "Bảo mật", "hint": "An toàn dữ liệu" }
+        "fast": {
+          "title": "Nhanh chóng",
+          "hint": "Chỉ trong vài phút"
+        },
+        "accurate": {
+          "title": "Chính xác",
+          "hint": "AI + KTS kiểm duyệt"
+        },
+        "secure": {
+          "title": "Bảo mật",
+          "hint": "An toàn dữ liệu"
+        }
       }
     },
     "showcase": {
@@ -343,7 +380,7 @@
   "guide": {
     "title": "Hướng dẫn sử dụng",
     "subtitle": "Video ngắn và bài viết cho từng thao tác chính.",
-    "searchPlaceholder": "Tìm hướng dẫn…",
+    "searchPlaceholder": "Tìm video hoặc bài hướng dẫn...",
     "articlesTitle": "Bài hướng dẫn",
     "empty": {
       "title": "Không tìm thấy hướng dẫn",
@@ -361,7 +398,11 @@
       "subtitle": "Xem nhanh cách dùng trong chưa đầy một phút.",
       "viewAll": "Xem tất cả"
     },
-    "videosTitle": "Video hướng dẫn theo bước"
+    "videoComingSoon": "Video đang được biên tập — sẽ cập nhật sớm.",
+    "carouselLabel": "Video hướng dẫn",
+    "prev": "Trang trước",
+    "next": "Trang sau",
+    "goToPage": "Trang {page}"
   },
   "design": {
     "steps": {
@@ -372,23 +413,24 @@
       "status": {
         "done": "Hoàn thành",
         "current": "Đang thực hiện",
-        "pending": "Chưa bắt đầu"
+        "pending": "Chưa bắt đầu",
+        "justDone": "Vừa hoàn thành"
       }
     },
     "entry": {
       "title": "Thiết kế & Dự toán",
-      "subtitle": "Chọn một dự án để mở tiếp, hoặc tạo dự án mới.",
+      "subtitle": "Quản lý thiết kế, dự toán và hồ sơ thi công của bạn tại một nơi.",
       "create": "Tạo dự án mới"
     },
     "createProject": {
-      "title": "Tạo dự án",
+      "title": "Tạo dự án mới",
       "subtitle": "Đặt tên để dễ tìm lại dự án sau này.",
       "nameLabel": "Tên dự án",
       "nameHint": "Đặt tên gợi nhớ, ví dụ \"Nhà phố Tân Lợi 3 tầng\".",
-      "namePlaceholder": "Nhà phố Tân Lợi 3 tầng",
-      "descriptionLabel": "Mô tả",
+      "namePlaceholder": "VD: Nhà phố Tân Lợi 3 tầng",
+      "descriptionLabel": "Mô tả (không bắt buộc)",
       "descriptionHint": "Ghi chú riêng về dự án, chỉ bạn nhìn thấy.",
-      "descriptionPlaceholder": "Ghi chú thêm về dự án…",
+      "descriptionPlaceholder": "Nhập mô tả dự án (nếu có)...",
       "submit": "Tạo dự án"
     },
     "input": {
@@ -405,7 +447,8 @@
         "constraints": "JPG, PNG, HEIC — tối đa 10MB",
         "remove": "Xóa ảnh",
         "errorType": "Chỉ hỗ trợ JPG, PNG hoặc HEIC.",
-        "errorSize": "Ảnh vượt quá 10MB."
+        "errorSize": "Ảnh vượt quá 10MB.",
+        "fallbackNote": "Chưa có ảnh? Chỉ cần mô tả, AI vẫn dựng được."
       },
       "address": {
         "label": "Địa chỉ công trình",
@@ -420,16 +463,18 @@
       },
       "buildingType": {
         "label": "Loại công trình",
-        "hint": "Chọn loại công trình. Các lựa chọn tiếp theo (số tầng, kiểu kiến trúc…) sẽ hiển thị phù hợp với loại bạn chọn.",
+        "hint": "Chọn loại công trình. Các lựa chọn tiếp theo sẽ hiển thị phù hợp với loại bạn chọn.",
         "placeholder": "Chọn loại công trình",
         "options": {
-          "house": "Nhà ở",
           "townhouse": "Nhà phố",
+          "villa": "Villa - Biệt thự",
+          "roofed": "Nhà mái",
+          "garden": "Nhà vườn - Nhà cấp 4",
           "apartment": "Căn hộ"
         }
       },
       "floorCount": {
-        "label": "Quy mô (số tầng)",
+        "label": "Số tầng",
         "hint": "Chọn số tầng dự kiến xây. Dùng để tính tổng diện tích sàn và dự toán.",
         "options": {
           "ground": "Trệt",
@@ -456,31 +501,40 @@
           "vip": "VIP"
         }
       },
-      "architectureStyle": {
-        "label": "Kiểu kiến trúc",
-        "hint": "Chọn kiểu dáng bên ngoài của công trình. Bản vẽ và phối cảnh sẽ được tạo theo kiểu kiến trúc này.",
-        "options": {
-          "roofed": "Nhà mái (Thái / Nhật / ngói)",
-          "modern-townhouse": "Nhà phố hiện đại",
-          "neoclassical": "Nhà tân cổ điển"
-        }
+      "wishes": {
+        "label": "Mô tả chi tiết",
+        "hint": "Mô tả thêm mong muốn: số phòng ngủ, chỗ đậu ô tô, hướng nhà, không gian mở, tông màu... AI đọc hiểu để tùy chỉnh kết quả.",
+        "placeholder": "VD: Đất 5×20m hướng Đông Nam, 3 phòng ngủ, có chỗ đậu ô tô, bếp mở thông phòng khách, tông màu ấm."
       },
-      "interiorStyle": {
-        "label": "Phong cách nội thất",
-        "hint": "Chọn phong cách không gian bên trong. Dùng để bố trí nội thất, tính dự toán nội thất và gợi ý mẫu trong cẩm nang.",
+      "submit": "Nhận dự toán ngay",
+      "pageTitle": "Tạo dự án mới",
+      "groups": {
+        "media": "Hình ảnh & mô tả",
+        "location": "Vị trí công trình",
+        "scope": "Loại công trình & quy mô"
+      },
+      "style": {
+        "label": "Phong cách (kiến trúc & nội thất)",
+        "hint": "Chọn kiểu dáng & phong cách cho công trình - một lựa chọn quyết định cả kiến trúc bên ngoài lẫn nội thất bên trong. Bản vẽ 2D, ảnh bố trí nội thất và dự toán nội thất được tạo theo lựa chọn này.",
         "options": {
           "modern": "Hiện đại",
-          "minimal": "Tối giản",
+          "wabi-sabi": "Wabi (Wabi-sabi)",
           "neoclassical": "Tân cổ điển",
-          "indochine": "Indochine"
+          "minimal": "Tối giản (Minimalism)",
+          "indochine": "Indochine",
+          "thai-roof": "Nhà mái Thái hiện đại",
+          "japanese-roof": "Nhà mái Nhật hiện đại",
+          "garden-thai-roof": "Nhà vườn mái Thái",
+          "garden-japanese-roof": "Nhà vườn mái Nhật",
+          "garden-villa": "Biệt thự / Villa sân vườn",
+          "level4-modern": "Nhà cấp 4 hiện đại"
         }
       },
-      "wishes": {
-        "label": "Mô tả mong muốn",
-        "hint": "Mô tả thêm mong muốn: số phòng ngủ, chỗ đậu ô tô, hướng nhà, không gian mở, tông màu… AI đọc hiểu để tùy chỉnh kết quả.",
-        "placeholder": "Ví dụ: 3 phòng ngủ, có chỗ đậu ô tô, bếp mở, tông màu ấm…"
-      },
-      "submit": "Nhận dự toán ngay"
+      "quota": {
+        "free": "Còn {count} lượt thiết kế miễn phí",
+        "plan": "Lượt thiết kế - dự toán: còn {remaining}/{total}",
+        "upgrade": "Nâng cấp gói để tiếp tục"
+      }
     },
     "progress": {
       "estimate": {
@@ -490,16 +544,32 @@
           "Đang bố trí mặt bằng theo nhu cầu của bạn…",
           "Đang phân tích khối lượng vật tư…",
           "Đang tính chi phí theo đơn giá khu vực…"
-        ]
+        ],
+        "pageTitle": "AI đang lập dự toán",
+        "unknownProvince": "khu vực của bạn",
+        "checklist": {
+          "0": "Đã đọc dữ liệu ảnh / mô tả",
+          "1": "Đang phân tích khối lượng...",
+          "2": "Tính chi phí theo đơn giá khu vực {province}"
+        }
       },
       "dossier": {
-        "title": "Đang render bộ hồ sơ thi công…",
+        "title": "Đang render bộ hồ sơ thi công...",
         "stages": [
           "Đang dựng bản vẽ mặt bằng 2D…",
           "Đang render phối cảnh ngoại thất…",
           "Đang lập bảng dự toán chi tiết…",
           "Đang đóng gói bộ hồ sơ PDF…"
-        ]
+        ],
+        "pageTitle": "Đang render bộ hồ sơ",
+        "pending": "Chờ xử lý",
+        "tipLabel": "Mẹo nhỏ:",
+        "tip": "bạn có thể tiếp tục xem mẫu nội thất hoặc bài viết tư vấn trong lúc chờ hệ thống hoàn tất.",
+        "tasks": {
+          "drawings": "Đang xử lý bản vẽ ({done}/{total})",
+          "renders": "Đang render phối cảnh ({done}/{total})",
+          "package": "Đóng gói PDF"
+        }
       }
     },
     "estimate": {
@@ -510,11 +580,11 @@
         "finishing": "Phần hoàn thiện",
         "interior": "Phần nội thất"
       },
-      "sectionTotal": "Tổng",
+      "sectionTotal": "Tổng {section}:",
       "viewDetail": "XEM CHI TIẾT",
       "downloadXlsx": "Tải bảng dự toán Excel (.xlsx)",
       "breakdownTitle": "Tỷ trọng chi phí",
-      "advisoryTitle": "Tư vấn cho dự án của bạn",
+      "advisoryTitle": "Tư vấn từ SAVICO",
       "advisory": {
         "defaultName": "Quý khách",
         "unknownBuilding": "công trình",
@@ -550,7 +620,12 @@
         "note": "Bảng dự toán do SAVICO AI lập tự động, mang tính tham khảo. Chi phí thực tế có thể thay đổi theo hiện trạng công trình và biến động giá vật tư."
       },
       "continue": "Nhận hồ sơ thi công",
-      "readyToast": "Dự toán đã sẵn sàng"
+      "readyToast": "Dự toán đã sẵn sàng",
+      "pageTitle": "Kết quả dự toán",
+      "columns": {
+        "item": "Hạng mục",
+        "amount": "Thành tiền"
+      }
     },
     "dossier": {
       "infoTitle": "Thông tin dự án",
@@ -564,11 +639,10 @@
         "scale": "Quy mô",
         "floorArea": "Tổng diện tích sàn",
         "package": "Gói đã chọn",
-        "architecture": "Kiểu kiến trúc",
-        "interior": "Phong cách nội thất"
+        "style": "Phong cách"
       },
       "floorAreaValue": "{value} m² (AI ước tính)",
-      "previewTitle": "Bộ hồ sơ gồm",
+      "previewTitle": "Xem trước hồ sơ",
       "preview": {
         "cover": "Trang bìa hồ sơ",
         "floorPlan": "Bản vẽ mặt bằng 2D",
@@ -584,13 +658,13 @@
       },
       "lockedHint": "Bấm Render hồ sơ trước",
       "readyTitle": "Bộ hồ sơ thi công của bạn đã sẵn sàng",
-      "readyThanks": "Cảm ơn bạn đã tin tưởng SAVICO AI.",
+      "readyThanks": "Cảm ơn bạn đã tin tưởng SAVICO AI. Hồ sơ chi tiết, đầy đủ đã được chuẩn bị sẵn sàng.",
       "readyToast": "Bộ hồ sơ đã sẵn sàng",
-      "privacyNote": "Hồ sơ chỉ bạn và người được chia sẻ mới xem được.",
+      "privacyNote": "Hồ sơ được bảo mật tuyệt đối. Chỉ bạn và người được chia sẻ mới có thể xem.",
       "ctaTitle": "Liên hệ SAVICO để được kiến trúc sư tư vấn trực tiếp, miễn phí",
       "ctaCall": "Gọi ngay",
       "ctaZalo": "Chat Zalo",
-      "pdfSize": "({size} MB)",
+      "pdfSize": "~{size} MB",
       "pdf": {
         "fileName": "Ho-so-thi-cong-{project}.pdf",
         "documentTitle": "HỒ SƠ THIẾT KẾ & DỰ TOÁN",
@@ -617,7 +691,20 @@
           "submit": "Gửi hồ sơ",
           "sent": "Đã gửi hồ sơ tới {email}."
         }
-      }
+      },
+      "pageTitle": "Hồ sơ thi công",
+      "previewAction": "Xem trước",
+      "exportTitle": "Xuất hồ sơ",
+      "statusPending": "Chưa render",
+      "filesTitle": "Tệp hồ sơ",
+      "files": {
+        "exterior": "Phối cảnh 3D ngoại thất",
+        "architecture": "Bản vẽ kiến trúc",
+        "structure": "Bản vẽ kết cấu",
+        "estimate": "Bảng dự toán chi tiết"
+      },
+      "downloadTitle": "Tải xuống & chia sẻ",
+      "packagedNote": "Tệp tải về đã được đóng gói sẵn."
     },
     "share": {
       "eyebrow": "Hồ sơ được chia sẻ",
@@ -658,6 +745,94 @@
         "stairs": "CẦU THANG",
         "bed2": "PHÒNG NGỦ 2"
       }
+    },
+    "projects": {
+      "title": "Dự án của tôi",
+      "stats": {
+        "total": "Tổng dự án",
+        "designing": "Đang thiết kế",
+        "review": "Chờ duyệt",
+        "completed": "Đã hoàn tất"
+      },
+      "search": {
+        "label": "Tìm dự án",
+        "placeholder": "Tìm theo tên hoặc mã dự án..."
+      },
+      "filters": {
+        "all": "Tất cả",
+        "input": "Đang nhập liệu",
+        "designing": "Đang thiết kế",
+        "review": "Chờ duyệt",
+        "completed": "Hoàn tất"
+      },
+      "sort": {
+        "label": "Sắp xếp",
+        "recent": "Mới cập nhật",
+        "oldest": "Cũ nhất",
+        "name": "Tên A → Z"
+      },
+      "status": {
+        "input": "Đang nhập liệu",
+        "designing": "Đang thiết kế",
+        "review": "Chờ duyệt",
+        "completed": "Hoàn tất"
+      },
+      "steps": {
+        "1": "Nhập liệu",
+        "2": "Dự toán",
+        "3": "Hồ sơ"
+      },
+      "updatedAt": "Cập nhật {date}",
+      "action": {
+        "continueInput": "Tiếp tục nhập",
+        "viewEstimate": "Xem dự toán",
+        "viewDossier": "Xem hồ sơ",
+        "open": "Mở tiếp"
+      },
+      "menu": {
+        "label": "Tùy chọn dự án",
+        "rename": "Đổi tên",
+        "delete": "Xóa"
+      },
+      "createTile": {
+        "title": "Tạo dự án mới",
+        "description": "Bắt đầu từ ảnh lô đất và nhu cầu của bạn"
+      },
+      "count": "Hiển thị {count} dự án",
+      "pagination": {
+        "label": "Phân trang danh sách dự án",
+        "previous": "Trang trước",
+        "next": "Trang sau",
+        "page": "Trang {page}"
+      },
+      "empty": {
+        "title": "Bạn chưa có dự án nào",
+        "description": "Tạo dự án mới để bắt đầu từ ảnh lô đất và nhu cầu của bạn.",
+        "action": "Tạo dự án mới"
+      },
+      "noMatch": {
+        "title": "Không có dự án nào khớp",
+        "description": "Thử đổi từ khóa hoặc bỏ bớt bộ lọc."
+      },
+      "rename": {
+        "title": "Đổi tên dự án",
+        "label": "Tên dự án",
+        "submit": "Lưu",
+        "success": "Đã đổi tên thành \"{name}\"."
+      },
+      "delete": {
+        "title": "Xóa dự án?",
+        "description": "Dự án \"{name}\" cùng toàn bộ dữ liệu nhập liệu, dự toán và hồ sơ sẽ bị xóa. Thao tác này không hoàn tác được.",
+        "confirm": "Xóa dự án",
+        "success": "Đã xóa dự án."
+      }
+    },
+    "phonePrompt": {
+      "title": "Bổ sung số điện thoại",
+      "description": "Để nhận hồ sơ và được kiến trúc sư hỗ trợ miễn phí, vui lòng cho SAVICO số điện thoại của bạn.",
+      "placeholder": "VD: 0905 123 456",
+      "error": "Số điện thoại chưa đúng định dạng (10 số bắt đầu bằng 0 hoặc +84)",
+      "submit": "Xác nhận & tiếp tục"
     }
   },
   "account": {
@@ -679,7 +854,14 @@
         "description": "Tạo dự án mới để bắt đầu."
       },
       "description": "Bấm vào một dự án để mở tiếp từ bước đang dừng.",
-      "open": "Mở tiếp"
+      "open": "Mở tiếp",
+      "createdAt": "Tạo ngày {date}",
+      "completed": "Hoàn tất",
+      "menu": {
+        "label": "Tùy chọn dự án",
+        "rename": "Đổi tên",
+        "delete": "Xóa"
+      }
     },
     "favorites": {
       "title": "Dự án yêu thích",
@@ -690,13 +872,37 @@
         "architecture": "Kiến trúc"
       },
       "empty": {
-        "title": "Chưa lưu mẫu nào",
-        "description": "Bấm ♥ trên các mẫu trong cẩm nang để lưu lại."
+        "title": "Bạn chưa lưu mẫu nào",
+        "description": "Bấm ♡ trên các mẫu để lưu vào đây."
       },
-      "savedAt": "Đã lưu {date}",
-      "description": "Mẫu bạn đã bấm ♥ trong Cẩm nang và ở màn chờ của Bước 2, Bước 3.",
+      "savedAt": "Lưu ngày {date}",
+      "description": "Các mẫu bạn đã lưu.",
       "count": "{count} mẫu"
     },
-    "subtitle": "Thông tin tài khoản, các dự án đang làm và mẫu bạn đã lưu."
+    "subtitle": "Thông tin tài khoản, các dự án đang làm và mẫu bạn đã lưu.",
+    "plan": {
+      "title": "Gói của tôi",
+      "expiresAt": "Hạn dùng: đến {date}",
+      "designAllowance": "Lượt thiết kế - dự toán: còn {remaining}/{total}",
+      "libraryAllowance": "Lượt tra thư viện: còn {remaining}/{total}",
+      "upgrade": "Nâng cấp gói"
+    }
+  },
+  "plans": {
+    "title": "Gói đăng ký",
+    "subtitle": "Một gói dùng chung cho cả Thiết kế & Dự toán và Thư viện mẫu.",
+    "popular": "Phổ biến",
+    "period": "/ {days} ngày",
+    "designCredits": "lượt thiết kế - dự toán",
+    "libraryCredits": "lượt tra thư viện mẫu",
+    "audience": "Phù hợp: {audience}",
+    "choosePlan": "Chọn gói",
+    "choosePlanSoon": "Cổng thanh toán đang được nối — SAVICO sẽ mở đăng ký sớm.",
+    "paymentNote": "Thanh toán qua QR chuyển khoản hoặc cổng thanh toán. Lượt có hiệu lực trong thời hạn gói.",
+    "tiers": {
+      "basic": "Cơ bản",
+      "advanced": "Nâng cao",
+      "pro": "Pro"
+    }
   }
 }

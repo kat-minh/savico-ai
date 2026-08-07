@@ -10,7 +10,7 @@ import { Logo } from '@/shared/components/common'
 import { GuestMenu } from '@/shared/components/guest-menu'
 import { Button } from '@/shared/components/ui/button'
 import { ROUTES } from '@/shared/constants/routes'
-import { useMounted } from '@/shared/hooks'
+import { useMounted, useScrolled } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { SiteNavMobile } from './site-nav-mobile'
 import { SITE_NAV } from './site-nav.config'
@@ -33,6 +33,10 @@ interface SiteHeaderProps {
  * Thanh công cụ cố định trên cùng mọi trang (mục II.1).
  * Nền sáng, logo bên trái, 3 mục điều hướng ở giữa, nút "Tạo dự án mới" và
  * avatar bên phải. Mục đang mở được gạch chân bằng màu thương hiệu.
+ *
+ * ★ Nền động (mục II.1): mặt kính đặc hơn nền trang, quầng xanh thương hiệu
+ * trôi ngang và viền dưới sáng ở giữa — xem `.site-header-shell` trong
+ * `globals.css`. Cuộn khỏi đỉnh trang thì header đặc thêm và đổ bóng sâu hơn.
  */
 export function SiteHeader({
   UserMenu,
@@ -47,11 +51,12 @@ export function SiteHeader({
   // Auth state is client-only; gate on hydration so SSR and first paint match.
   const mounted = useMounted()
   const authed = mounted && isAuthenticated
+  const scrolled = useScrolled()
 
   const createLabel = t('createProject')
 
   return (
-    <header className='bg-background/85 sticky top-0 z-40 border-b backdrop-blur-xl backdrop-saturate-150'>
+    <header data-scrolled={scrolled} className='site-header-shell sticky top-0 z-40'>
       <div className='relative mx-auto flex h-16 w-full max-w-[90rem] items-center gap-6 px-4 lg:px-8'>
         <Link href={ROUTES.HOME} aria-label={t('home')} className='shrink-0'>
           <Logo />

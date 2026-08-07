@@ -6,6 +6,9 @@ import type { GuideTopic } from '../types/guide.types'
  */
 export const GUIDE_TOPICS: readonly GuideTopic[] = ['land-photo', 'input', 'read-estimate', 'dossier', 'share'] as const
 
+/** Số thẻ video mỗi trang của carousel trang Hướng dẫn — lưới 3 cột × 2 hàng (Hình 12). */
+export const GUIDE_PAGE_SIZE = 6
+
 /** Số video nổi bật hiển thị ở khu "Hướng dẫn sử dụng" trên trang chủ (mục II.2). */
 export const HOME_GUIDE_HIGHLIGHT_COUNT = 3
 

@@ -15,17 +15,19 @@ const SECTION_COLOR = {
 } as const
 
 /**
- * Biểu đồ tròn tỷ trọng chi phí 3 phần (mục III.3b, khối 2).
+ * Biểu đồ tròn tỷ trọng chi phí 3 phần (mục IV.5, Hình 08).
  *
- * Số % hiển thị TRỰC TIẾP trên từng phần của hình tròn; chú thích bên cạnh ghi
- * đủ: chấm màu + tên phần + % + số tiền (VNĐ).
+ * Hình tròn ĐẶC (không khoét lỗ) như demo; số % nằm trực tiếp trên từng miếng.
+ * Chú thích bên phải: chấm màu + tên phần, số tiền xuống dòng bên dưới.
  */
 export function CostDonut({ sections }: { sections: readonly EstimateSection[] }) {
   const t = useTranslations('design.estimate')
   const locale = useLocale() as Locale
   const shares = costShares(sections)
 
-  const radius = 70
+  // Hình tròn đặc: vẽ bằng nét dày bằng bán kính trên đường tròn bán kính r/2,
+  // nên cung vẫn tính theo `strokeDasharray` mà không để lại lỗ ở giữa.
+  const radius = 50
   const circumference = 2 * Math.PI * radius
 
   // Precompute each slice's arc length and its start offset, so rendering stays
@@ -40,8 +42,8 @@ export function CostDonut({ sections }: { sections: readonly EstimateSection[] }
   }, [])
 
   return (
-    <div className='flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:justify-center'>
-      <div className='relative size-56 shrink-0'>
+    <div className='flex flex-col items-center gap-6 sm:flex-row sm:items-center'>
+      <div className='relative size-44 shrink-0'>
         <svg viewBox='0 0 200 200' className='size-full -rotate-90'>
           {slices.map((slice) => (
             <circle
@@ -50,7 +52,7 @@ export function CostDonut({ sections }: { sections: readonly EstimateSection[] }
               cy='100'
               r={radius}
               fill='none'
-              strokeWidth='34'
+              strokeWidth='100'
               stroke={SECTION_COLOR[slice.section]}
               strokeDasharray={`${slice.length} ${circumference - slice.length}`}
               strokeDashoffset={-slice.start}
@@ -65,14 +67,16 @@ export function CostDonut({ sections }: { sections: readonly EstimateSection[] }
             if (slice.percent < 5) return null
             const midFraction = (slice.start + slice.length / 2) / circumference
             const angle = midFraction * 2 * Math.PI - Math.PI / 2
+            // Nhãn đặt ở ~60% bán kính ngoài để nằm gọn trong miếng bánh đặc.
+            const labelRadius = radius * 1.2
             return (
               <text
                 key={slice.section}
-                x={100 + Math.cos(angle) * radius}
-                y={100 + Math.sin(angle) * radius}
+                x={100 + Math.cos(angle) * labelRadius}
+                y={100 + Math.sin(angle) * labelRadius}
                 textAnchor='middle'
                 dominantBaseline='central'
-                className='fill-background text-[13px] font-semibold'
+                className='fill-background text-[15px] font-bold'
               >
                 {slice.percent}%
               </text>
@@ -81,18 +85,21 @@ export function CostDonut({ sections }: { sections: readonly EstimateSection[] }
         </svg>
       </div>
 
-      {/* Chú thích: chấm màu + tên phần + % + số tiền. */}
-      <ul className='w-full max-w-xs space-y-3'>
+      {/* `min-w-0` để số tiền dài không bị cắt khi cột nội dung hẹp. */}
+      <ul className='w-full min-w-0 space-y-3.5'>
         {shares.map((share) => (
-          <li key={share.section} className='flex items-center gap-3'>
+          <li key={share.section} className='flex items-start gap-2.5'>
             <span
               aria-hidden
-              className='size-3 shrink-0 rounded-full'
+              className='mt-1.5 size-2.5 shrink-0 rounded-full'
               style={{ backgroundColor: SECTION_COLOR[share.section] }}
             />
-            <span className='flex-1 text-sm font-medium'>{t(`sections.${share.section}`)}</span>
-            <span className='text-muted-foreground text-sm tabular-nums'>{share.percent}%</span>
-            <span className='text-sm font-semibold tabular-nums'>{formatCurrency(share.amount, locale)}</span>
+            <span className='min-w-0'>
+              <span className='block text-sm font-medium'>{t(`sections.${share.section}`)}</span>
+              <span className='text-muted-foreground block text-sm whitespace-nowrap tabular-nums'>
+                {formatCurrency(share.amount, locale)}
+              </span>
+            </span>
           </li>
         ))}
       </ul>
