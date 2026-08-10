@@ -33,6 +33,7 @@ export function StepDossierView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.dossier')
   const tWaiting = useTranslations('design.progress.dossier')
   const tInput = useTranslations('design.input')
+  const tPanel = useTranslations('handbook.panel')
   const { user } = useAuth()
 
   const draft = useDesignStore((s) => s.drafts[projectId])
@@ -53,6 +54,15 @@ export function StepDossierView({ projectId }: { projectId: string }) {
     }),
     [draft]
   )
+
+  // Dòng ghi rõ căn cứ lọc trên panel (Phần 1.3): Bước 3 ưu tiên phong cách nội thất.
+  const filterLabel = useMemo(() => {
+    if (!draft?.style || !draft.buildingType) return undefined
+    return tPanel('filterLabel3d', {
+      style: tInput(`style.options.${draft.style}`),
+      building: tInput(`buildingType.options.${draft.buildingType}`)
+    })
+  }, [draft, tInput, tPanel])
 
   // Chatbox AI chuyển sang kịch bản render hồ sơ trong lúc chờ (mục III.4b).
   useProjectChatContext(project?.name ?? '', draft, render.isPending ? 'dossier' : null)
@@ -89,7 +99,7 @@ export function StepDossierView({ projectId }: { projectId: string }) {
         // Chỉ màn CHỜ render mới có panel cẩm nang (mục IV.7); màn trước và
         // sau đó là bố cục riêng của Bước 3.
         <DesignStepLayout
-          sidePanel={<PersonalizedPanel filter={filter} kind='interior' topic='interior' />}
+          sidePanel={<PersonalizedPanel filter={filter} kind='3d' topic='interior' filterLabel={filterLabel} />}
           sidePanelCollapsed={panelMinimized}
           waiting
         >

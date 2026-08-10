@@ -31,6 +31,8 @@ import { useProjectChatContext } from '../use-project-chat-context'
 export function StepEstimateView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.estimate')
   const tWaiting = useTranslations('design.progress.estimate')
+  const tInput = useTranslations('design.input')
+  const tPanel = useTranslations('handbook.panel')
   const router = useRouter()
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
@@ -49,6 +51,16 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     }),
     [draft]
   )
+
+  // Dòng ghi rõ căn cứ lọc trên panel (Phần 1.1). Nhãn nằm ở namespace của Bước 1
+  // nên phải dịch tại đây rồi truyền xuống — `features/handbook` không đọc được.
+  const filterLabel = useMemo(() => {
+    if (!draft?.buildingType) return undefined
+    return tPanel('filterLabel2d', {
+      building: tInput(`buildingType.options.${draft.buildingType}`),
+      scale: draft.floorCount ? tInput(`floorCount.options.${draft.floorCount}`) : ''
+    })
+  }, [draft, tInput, tPanel])
 
   // Chatbox AI nói theo dữ liệu thật của dự án; tự trò chuyện trong lúc chờ.
   useProjectChatContext(project?.name ?? '', draft, result ? null : 'estimate')
@@ -69,7 +81,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     <>
       <StepProgress current={2} currentDone={Boolean(result)} title={result ? t('pageTitle') : tWaiting('pageTitle')} />
       <DesignStepLayout
-        sidePanel={<PersonalizedPanel filter={filter} kind='layout' topic='architecture' />}
+        sidePanel={<PersonalizedPanel filter={filter} kind='2d' topic='architecture' filterLabel={filterLabel} />}
         sidePanelCollapsed={panelMinimized}
         waiting={!result}
       >

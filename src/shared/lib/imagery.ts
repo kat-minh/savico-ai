@@ -81,6 +81,32 @@ export const TOPIC_IMAGE = {
 } as const
 
 /**
+ * Ảnh thi công dùng cho cẩm nang và tin tức xây dựng. Mỗi id đã kiểm tra
+ * resolve và xem tận mắt để chắc đúng chủ đề; admin sẽ thay bằng ảnh chụp công
+ * trình SAVICO khi có CMS.
+ */
+export const CONSTRUCTION_IMAGE = {
+  /** Sàn thép chờ đổ bê tông — phần thô, kết cấu. */
+  rebar: photo('photo-1504307651254-35680f356dfd'),
+  /** Thợ đấu nối điện tại công trình — hệ thống kỹ thuật. */
+  electrician: photo('photo-1621905251189-08b45d6a269e'),
+  /** Cao ốc đang xây kèm cần cẩu — tin tức thị trường, vật liệu. */
+  crane: photo('photo-1565008447742-97f6f38c985c'),
+  /** Vòi nước, thiết bị vệ sinh. */
+  faucet: photo('photo-1517646287270-a5a9ca602e5c')
+} as const
+
+/** Ba giai đoạn xây nhà của cẩm nang nền tảng (Phần 3.1). */
+export const STAGE_IMAGE = {
+  /** Phần thô — công trường, kết cấu chưa hoàn thiện. */
+  structure: CONSTRUCTION_IMAGE.rebar,
+  /** Phần hoàn thiện — kỹ sư đọc bản vẽ tại công trình. */
+  finishing: photo('photo-1503387762-592deb58ef4e'),
+  /** Trang trí nội thất — không gian đã hoàn thiện. */
+  interior: photo('photo-1600607687939-ce8a6c25118c')
+} as const
+
+/**
  * Phối cảnh 3D mẫu — model kiến trúc trắng, ảnh dựng sẵn trong `/public`.
  * Dùng ở khung minh họa trang chủ và thẻ xem trước hồ sơ.
  */

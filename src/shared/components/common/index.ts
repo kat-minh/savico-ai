@@ -12,7 +12,7 @@ export { PageHeader } from './page-header'
 export { PasswordInput } from './password-input'
 export { PreferenceSwitches } from './preference-switches'
 export { Photo } from './photo'
-export { PlanDrawing } from './plan-drawing'
+export { PlanDrawing, type PlanVariant } from './plan-drawing'
 export {
   Reveal,
   RevealStagger,

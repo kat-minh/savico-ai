@@ -14,13 +14,19 @@ import type { HandbookArticle, HandbookFilter, HandbookPanelTab, HandbookTemplat
 import { ArticleCard } from './article-card'
 import { ArticleDetailDialog } from './article-detail-dialog'
 import { TemplateCard } from './template-card'
-import { TemplateDetailDialog } from './template-detail-dialog'
+import { TemplateQuickView } from './template-quick-view'
 
 interface PersonalizedPanelProps {
   /** Tag filter dựng từ các trường Bước 1 bởi lớp app. */
   filter: HandbookFilter
-  /** `layout` cho màn chờ Bước 2, `interior` cho màn chờ render Bước 3. */
+  /** `2d` (mẫu bản vẽ) cho màn chờ Bước 2, `3d` (mẫu nội thất) cho màn chờ Bước 3. */
   kind: HandbookTemplate['kind']
+  /**
+   * Dòng ghi rõ căn cứ lọc, ví dụ "Mẫu bản vẽ 2D phù hợp với Nhà phố Trệt + 1
+   * lầu của bạn" (Phần 1.1). Nhãn đã dịch do lớp app dựng, vì `features/handbook`
+   * không biết vocabulary của Bước 1.
+   */
+  filterLabel?: string
   /** Chủ đề bài viết: kiến trúc (Bước 2) hoặc nội thất (Bước 3). */
   topic: 'architecture' | 'interior'
 }
@@ -32,7 +38,7 @@ interface PersonalizedPanelProps {
  * theo mục đang chọn. Bấm thu nhỏ → panel co thành nút nổi ở góc màn hình;
  * bấm nút nổi để mở lại bất cứ lúc nào.
  */
-export function PersonalizedPanel({ filter, kind, topic }: PersonalizedPanelProps) {
+export function PersonalizedPanel({ filter, kind, topic, filterLabel }: PersonalizedPanelProps) {
   const t = useTranslations('handbook.panel')
   const tab = useHandbookPanelStore((s) => s.tab)
   const setTab = useHandbookPanelStore((s) => s.setTab)
@@ -109,33 +115,47 @@ export function PersonalizedPanel({ filter, kind, topic }: PersonalizedPanelProp
         <div className='flex min-w-0 flex-1 flex-col'>
           <header className='flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3'>
             <div className='min-w-0'>
-              <h2 className='truncate text-sm font-semibold'>{t('title')}</h2>
-              <p className='text-muted-foreground truncate text-xs'>{t(`tabs.${tab}`)}</p>
+              {/* Hình 1: dòng nhãn nhỏ màu thương hiệu nằm trên tiêu đề panel. */}
+              <p className='text-primary truncate text-[0.7rem] font-semibold tracking-wide uppercase'>
+                {t('eyebrow')}
+              </p>
+              <h2 className='truncate text-base font-semibold'>{t('title')}</h2>
+              <p className='text-muted-foreground truncate text-xs'>
+                {tab === 'templates' && filterLabel ? filterLabel : t(`tabs.${tab}`)}
+              </p>
             </div>
             <Button variant='ghost' size='icon' aria-label={t('minimize')} onClick={() => setMinimized(true)}>
               <Minimize2 className='size-4' />
             </Button>
           </header>
 
-          <div className='min-h-0 flex-1 space-y-3 overflow-y-auto p-4'>
+          <div className='min-h-0 flex-1 overflow-y-auto p-4'>
             {tab === 'templates' ? (
               templatesPending ? (
                 <PanelSkeleton />
               ) : (
-                templates.map((template) => (
-                  <TemplateCard key={template.id} template={template} onOpen={setSelectedTemplate} />
-                ))
+                /* Lưới thay vì danh sách dọc: màn chờ dành cả cột trái rộng cho
+                   panel nên xếp một cột sẽ phải cuộn ngay từ mẫu thứ ba. */
+                <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+                  {templates.map((template) => (
+                    <TemplateCard key={template.id} template={template} onOpen={setSelectedTemplate} />
+                  ))}
+                </div>
               )
             ) : articlesPending ? (
               <PanelSkeleton />
             ) : (
-              articles?.map((article) => <ArticleCard key={article.id} article={article} onOpen={setSelectedArticle} />)
+              <div className='space-y-3'>
+                {articles?.map((article) => (
+                  <ArticleCard key={article.id} article={article} onOpen={setSelectedArticle} />
+                ))}
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      <TemplateDetailDialog template={selectedTemplate} onClose={() => setSelectedTemplate(null)} />
+      <TemplateQuickView template={selectedTemplate} onClose={() => setSelectedTemplate(null)} />
       <ArticleDetailDialog article={selectedArticle} onClose={() => setSelectedArticle(null)} />
     </>
   )

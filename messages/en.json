@@ -271,8 +271,8 @@
     "taxCode": "Tax ID"
   },
   "favorite": {
-    "add": "Save to favorites",
-    "remove": "Remove from favorites"
+    "add": "Save template",
+    "remove": "Remove from saved"
   },
   "landing": {
     "hero": {
@@ -343,35 +343,153 @@
   "handbook": {
     "page": {
       "title": "Handbook",
-      "subtitle": "Reference layouts and advisory articles on architecture and interiors.",
+      "subtitle": "Floor-plan library, 3D interior templates and a knowledge base on house building.",
       "tabs": {
-        "templates": "Reference layouts",
-        "articles": "Articles"
-      },
-      "searchPlaceholder": "Search layouts or articles…",
-      "empty": {
-        "title": "Nothing matches",
-        "description": "Try a different keyword or clear a filter."
-      },
-      "filters": {
-        "allBuildingTypes": "All building types",
-        "allInteriorStyles": "All styles",
-        "clear": "Clear filters"
-      },
-      "resultCount": "{count} results"
+        "library": "Template library",
+        "news": "News"
+      }
     },
-    "panel": {
-      "title": "Personalised handbook",
-      "tabs": {
-        "templates": "Layout ideas",
-        "articles": "Articles"
+    "card": {
+      "imageCount": "{count} 3D images"
+    },
+    "library": {
+      "kind": {
+        "2d": "2D floor plans",
+        "3d": "3D templates"
       },
-      "minimize": "Minimise",
-      "restore": "Open handbook"
+      "allBuildingTypes": "All building types",
+      "allScales": "All scales",
+      "allStyles": "All styles",
+      "buildingTypePrefix": "Building type: {value}",
+      "floorOption": "{count} floors",
+      "searchPlaceholder2d": "Search by name or lot size…",
+      "searchPlaceholder3d": "Search by name or style…",
+      "resultCount": "Showing {shown} of {total} templates",
+      "pagination": "Pagination",
+      "goToPage": "Page {page}",
+      "empty": {
+        "title": "No matching template",
+        "description": "Try another keyword or clear some filters."
+      },
+      "optionAll": "All",
+      "scalePrefix": "Scale: {value}",
+      "stylePrefix": "Style: {value}"
+    },
+    "quota": {
+      "lookupRemaining": "Lookups today: {remaining}/{total}",
+      "detailRemaining": "You have {remaining}/{total} detail views left today",
+      "exhausted": "No lookups left today — upgrade your plan"
+    },
+    "info": {
+      "planTitle": "Drawing details",
+      "templateTitle": "Template details",
+      "buildingType": "Building type",
+      "floors": "Scale",
+      "lotSize": "Lot size",
+      "floorArea": "Floor area",
+      "style": "Architecture & style",
+      "imageCountLabel": "3D images",
+      "imageCountValue": "{count} images",
+      "planDescription": "Layout description",
+      "templateDescription": "Description",
+      "floorsPlan": "Floors"
+    },
+    "quickView": {
+      "openFullPage": "Open full page"
     },
     "detail": {
-      "note": "Reference layout curated by SAVICO. Actual output depends on your project details.",
-      "articleNote": "General guidance only. Contact SAVICO for advice specific to your project."
+      "back": "Back",
+      "breadcrumbRoot": "Handbook",
+      "breadcrumbLibrary": "Template library",
+      "similar": "Similar templates",
+      "notFound": "Template not found",
+      "notFoundHint": "It may have been removed. Go back to the library to pick another one.",
+      "note": "Reference template curated by SAVICO. Actual results depend on your project details.",
+      "articleNote": "This article is for reference. Contact SAVICO for advice on your specific project."
+    },
+    "foundation": {
+      "eyebrow": "Core handbook",
+      "kicker": "Read this before you build",
+      "title": "The essential handbook for building a house",
+      "description": "Foundational knowledge to help you control quality, cost and schedule from groundbreaking to handover.",
+      "start": "Start reading",
+      "stagesTitle": "3 key stages of building a house",
+      "stepLabel": "Step {order}",
+      "stageHeading": "{stage} handbook",
+      "articleCount": "({count} articles)",
+      "readingTime": "{minutes} min read",
+      "topicEmpty": "No article in this topic yet."
+    },
+    "newsletter": {
+      "title": "SAVICO newsletter",
+      "featured": "Featured article",
+      "related": "Related articles",
+      "seeAllRelated": "See all related articles",
+      "readingTime": "{minutes} min read",
+      "categories": {
+        "experience": "Building experience",
+        "material": "Materials",
+        "interior": "Interior",
+        "legal": "Legal"
+      },
+      "topics": "Building knowledge · Architecture · Interior"
+    },
+    "articles": {
+      "title": "All articles",
+      "all": "All",
+      "searchPlaceholder": "Search articles…",
+      "readMore": "Read more",
+      "readingTime": "{minutes} min read",
+      "pagination": "Pagination",
+      "categories": {
+        "experience": "Building experience",
+        "material": "Materials",
+        "interior": "Interior",
+        "legal": "Legal"
+      },
+      "empty": {
+        "title": "No matching article",
+        "description": "Try another keyword or a different category."
+      },
+      "previousPage": "Previous page",
+      "nextPage": "Next page"
+    },
+    "article": {
+      "breadcrumbRoot": "Handbook",
+      "updatedAt": "Updated {date}",
+      "readingTime": "{minutes} min read",
+      "inTopic": "In topic {topic}",
+      "ctaTitle": "Not sure which option to pick? Create a project and let AI estimate for your lot",
+      "ctaButton": "New project",
+      "related": "Related articles",
+      "notFound": "Article not found",
+      "notFoundHint": "It may have been removed. Go back to the Handbook to read something else.",
+      "categories": {
+        "experience": "Building experience",
+        "material": "Materials",
+        "interior": "Interior",
+        "legal": "Legal"
+      }
+    },
+    "consult": {
+      "cta": "Book a 1:1 consultation",
+      "title": "Book a 1:1 consultation",
+      "subtitle": "A SAVICO architect will advise you on your specific project.",
+      "call": "Call {hotline}",
+      "zalo": "Chat on Zalo",
+      "note": "Free consultation during working hours: Mon – Sat, 8:00 – 17:30."
+    },
+    "panel": {
+      "title": "Handbook for your project",
+      "tabs": {
+        "templates": "Suggested templates",
+        "articles": "Advice"
+      },
+      "minimize": "Minimize",
+      "restore": "Open handbook",
+      "filterLabel2d": "2D plans matching your {building} {scale}",
+      "filterLabel3d": "{style} interior ideas for your {building}",
+      "eyebrow": "Personalised handbook"
     },
     "read": {
       "badge": "Read"
@@ -743,7 +861,16 @@
         "bed1": "BEDROOM 1",
         "wc": "WC",
         "stairs": "STAIRS",
-        "bed2": "BEDROOM 2"
+        "bed2": "BEDROOM 2",
+        "frontYard": "FRONT YARD",
+        "backYard": "BACK YARD",
+        "balcony": "BALCONY",
+        "worship": "WORSHIP",
+        "laundry": "LAUNDRY",
+        "roof": "ROOF",
+        "bed3": "BEDROOM 3",
+        "garage": "GARAGE",
+        "void": "LIGHT WELL"
       }
     },
     "projects": {
@@ -867,9 +994,8 @@
       "title": "Saved favorites",
       "remove": "Remove from favorites",
       "kind": {
-        "layout": "Layout",
-        "interior": "Interior",
-        "architecture": "Architecture"
+        "2d": "2D plan",
+        "3d": "3D interior"
       },
       "empty": {
         "title": "You haven't saved any templates",

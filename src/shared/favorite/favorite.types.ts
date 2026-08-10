@@ -1,5 +1,8 @@
-/** What kind of catalogue item a ♥ points at. */
-export type FavoriteKind = 'layout' | 'interior' | 'architecture'
+/**
+ * What kind of catalogue item a ♥ points at — mẫu bản vẽ 2D hay mẫu nội thất 3D,
+ * đúng hai loại nội dung của thư viện mẫu trong Cẩm nang.
+ */
+export type FavoriteKind = '2d' | '3d'
 
 /**
  * A saved ♥ (mục VI — "lưu theo tài khoản: user_id, mã mẫu, thời điểm lưu").

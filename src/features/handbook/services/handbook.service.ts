@@ -1,5 +1,16 @@
-import { PERSONALIZED_TEMPLATE_COUNT, TAG_RELAXATION_ORDER } from '../constants/handbook.constants'
-import type { HandbookFilter, HandbookTags, HandbookTemplate } from '../types/handbook.types'
+import {
+  PERSONALIZED_TEMPLATE_COUNT,
+  RELATED_ARTICLE_COUNT,
+  SIMILAR_TEMPLATE_COUNT,
+  TAG_RELAXATION_ORDER
+} from '../constants/handbook.constants'
+import type {
+  HandbookArticle,
+  HandbookFilter,
+  HandbookTags,
+  HandbookTemplate,
+  HandbookTemplateKind
+} from '../types/handbook.types'
 
 /** A template matches when every tag the filter specifies is equal on the template. */
 export function matchesTags(tags: HandbookTags, filter: HandbookFilter): boolean {
@@ -11,11 +22,16 @@ export function matchesTags(tags: HandbookTags, filter: HandbookFilter): boolean
 }
 
 /**
- * Chọn mẫu cho panel cẩm nang cá nhân hóa (mục III.3a + mục VI).
+ * Chọn mẫu cho panel cẩm nang cá nhân hóa (Phần 1.1 + mục VI).
  *
- * Lọc theo tag khớp các trường Bước 1 rồi lấy ngẫu nhiên 3 mẫu. Nếu không đủ 3
- * mẫu khớp hết tag thì nới lỏng dần tiêu chí theo {@link TAG_RELAXATION_ORDER}
- * để LUÔN đủ 3 mẫu — panel không bao giờ được hiện ít hơn số này.
+ * Lọc theo tag khớp các trường Bước 1 rồi lấy ngẫu nhiên đủ số mẫu. Nếu không
+ * đủ mẫu khớp hết tag thì nới lỏng dần tiêu chí theo {@link TAG_RELAXATION_ORDER}
+ * — panel không bao giờ được hiện ít hơn {@link PERSONALIZED_TEMPLATE_COUNT}.
+ *
+ * Mỗi vòng nới lỏng chỉ BÙ THÊM cho đủ số chứ không chọn lại từ đầu: mẫu khớp
+ * chặt nhất luôn được giữ và đứng trước. Bản cũ thay nguyên danh sách ở mỗi
+ * vòng nên khi kho mẫu mỏng, đúng những mẫu khớp phong cách lại bị loại hết và
+ * panel hiện toàn mẫu lệch phong cách.
  *
  * `pick` is injected so the caller controls randomness (and tests stay
  * deterministic); it receives the eligible pool and returns the chosen slice.
@@ -26,11 +42,20 @@ export function selectPersonalizedTemplates(
   pick: (candidates: readonly HandbookTemplate[], count: number) => HandbookTemplate[] = takeRandom,
   count = PERSONALIZED_TEMPLATE_COUNT
 ): HandbookTemplate[] {
+  const chosen: HandbookTemplate[] = []
+  const taken = new Set<string>()
   let active: HandbookFilter = { ...filter }
 
+  const add = (candidates: readonly HandbookTemplate[]) => {
+    for (const template of pick(candidates, count - chosen.length)) {
+      chosen.push(template)
+      taken.add(template.id)
+    }
+  }
+
   for (let relaxed = 0; relaxed <= TAG_RELAXATION_ORDER.length; relaxed++) {
-    const matches = pool.filter((template) => matchesTags(template.tags, active))
-    if (matches.length >= count) return pick(matches, count)
+    add(pool.filter((template) => !taken.has(template.id) && matchesTags(template.tags, active)))
+    if (chosen.length >= count) return chosen
 
     const next = TAG_RELAXATION_ORDER[relaxed]
     if (!next) break
@@ -38,8 +63,9 @@ export function selectPersonalizedTemplates(
     active = rest
   }
 
-  // Every criterion relaxed and the pool is still short — show what exists.
-  return pick(pool, count)
+  // Every criterion relaxed and the pool is still short — bù nốt bằng mẫu còn lại.
+  add(pool.filter((template) => !taken.has(template.id)))
+  return chosen
 }
 
 /** Fisher–Yates over a copy, then take the first `count`. */
@@ -55,4 +81,136 @@ function takeRandom<T>(items: readonly T[], count: number): T[] {
     }
   }
   return copy.slice(0, count)
+}
+
+export interface LibraryFilter {
+  kind: HandbookTemplateKind
+  /** Bộ lọc thứ nhất — loại công trình. `undefined` là "tất cả". */
+  buildingType?: string
+  /**
+   * Bộ lọc thứ hai. Thư viện 2D lọc theo QUY MÔ (số tầng), thư viện 3D đổi sang
+   * PHONG CÁCH kiến trúc / nội thất (Phần 2.2).
+   */
+  secondary?: string
+  /** Từ khóa tìm theo tên và thông số hiển thị trên thẻ. */
+  query?: string
+}
+
+/**
+ * Lọc lưới thư viện mẫu (Phần 2.1 / 2.2).
+ *
+ * Ô tìm kiếm quét cả tên lẫn dòng thông số vì Hình 5 gợi ý "Tìm mẫu theo tên,
+ * kích thước…" — người dùng gõ "5×20" phải ra được mẫu.
+ */
+export function filterTemplates(
+  pool: readonly HandbookTemplate[],
+  { kind, buildingType, secondary, query }: LibraryFilter
+): HandbookTemplate[] {
+  const term = query?.trim().toLowerCase()
+
+  return pool.filter((template) => {
+    if (template.kind !== kind) return false
+    if (buildingType && template.tags.buildingType !== buildingType) return false
+    if (secondary) {
+      const matchesSecondary =
+        kind === '2d'
+          ? template.tags.floorCount === secondary
+          : template.tags.interiorStyle === secondary || template.tags.architectureStyle === secondary
+      if (!matchesSecondary) return false
+    }
+    if (!term) return true
+
+    const haystack = [
+      template.name,
+      template.styleLabel,
+      template.specs.floorLabel,
+      template.specs.lotSize ?? '',
+      template.specs.floorArea ?? ''
+    ]
+      .join(' ')
+      .toLowerCase()
+    return haystack.includes(term)
+  })
+}
+
+/** Số bài của từng chủ đề — nguồn của dòng "(6 bài)" trên bảng chủ đề (Hình 10). */
+export function countArticlesByTopic(articles: readonly HandbookArticle[]): Record<string, number> {
+  const counts: Record<string, number> = {}
+  for (const article of articles) {
+    if (!article.topicId) continue
+    counts[article.topicId] = (counts[article.topicId] ?? 0) + 1
+  }
+  return counts
+}
+
+/** Bài của một chủ đề, mới nhất trước. */
+export function articlesOfTopic(articles: readonly HandbookArticle[], topicId: string): HandbookArticle[] {
+  return articles.filter((article) => article.topicId === topicId).sort(byNewest)
+}
+
+/** Bài đẩy lên Bản tin, xếp theo `featuredRank` (1 = bài nổi bật lớn). */
+export function featuredArticles(articles: readonly HandbookArticle[]): HandbookArticle[] {
+  return articles
+    .filter((article) => article.featuredRank !== undefined)
+    .sort((a, b) => (a.featuredRank ?? 0) - (b.featuredRank ?? 0))
+}
+
+/**
+ * Mẫu tương tự ở cuối trang chi tiết (Phần 2.3).
+ *
+ * Ưu tiên cùng loại công trình rồi tới cùng quy mô; luôn trả đủ số thẻ bằng
+ * cách bù thêm mẫu cùng `kind` nếu không đủ mẫu thật sự giống.
+ */
+export function selectSimilarTemplates(
+  pool: readonly HandbookTemplate[],
+  current: HandbookTemplate,
+  count = SIMILAR_TEMPLATE_COUNT
+): HandbookTemplate[] {
+  const others = pool.filter((template) => template.kind === current.kind && template.id !== current.id)
+  const scored = others
+    .map((template) => ({
+      template,
+      score:
+        (template.tags.buildingType === current.tags.buildingType ? 2 : 0) +
+        (template.tags.floorCount === current.tags.floorCount ? 1 : 0) +
+        (template.tags.interiorStyle === current.tags.interiorStyle ? 1 : 0)
+    }))
+    .sort((a, b) => b.score - a.score)
+
+  return scored.slice(0, count).map((item) => item.template)
+}
+
+/**
+ * Bài viết liên quan ở cuối trang bài viết (Phần 3.3).
+ * Cùng chủ đề trước, hết thì lấy cùng chuyên mục.
+ */
+export function selectRelatedArticles(
+  articles: readonly HandbookArticle[],
+  current: HandbookArticle,
+  count = RELATED_ARTICLE_COUNT
+): HandbookArticle[] {
+  const others = articles.filter((article) => article.id !== current.id)
+  const sameTopic = others.filter((article) => article.topicId && article.topicId === current.topicId)
+  const sameCategory = others.filter((article) => article.category === current.category && !sameTopic.includes(article))
+  return [...sameTopic, ...sameCategory].slice(0, count)
+}
+
+/** Cắt trang cho lưới mẫu và danh sách bài viết. `page` đếm từ 1. */
+export function pageSlice<T>(items: readonly T[], page: number, size: number): T[] {
+  const start = (page - 1) * size
+  return items.slice(start, start + size)
+}
+
+/** Tổng số trang, tối thiểu 1 để thanh phân trang không biến mất khi rỗng. */
+export function pageCount(total: number, size: number): number {
+  return Math.max(1, Math.ceil(total / size))
+}
+
+function byNewest(a: HandbookArticle, b: HandbookArticle): number {
+  return b.publishedAt.localeCompare(a.publishedAt)
+}
+
+/** Danh sách bài mới nhất trước — dùng ở Bản tin và "Tất cả bài viết". */
+export function sortByNewest(articles: readonly HandbookArticle[]): HandbookArticle[] {
+  return [...articles].sort(byNewest)
 }

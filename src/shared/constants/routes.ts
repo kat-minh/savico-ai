@@ -30,6 +30,12 @@ export const ROUTES = {
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
 
+/** Trang chi tiết một mẫu trong thư viện Cẩm nang (mẫu bản vẽ 2D / nội thất 3D). */
+export const handbookTemplateRoute = (id: string) => `${ROUTES.HANDBOOK}/mau/${id}`
+
+/** Trang bài viết trong Cẩm nang / Tin tức. */
+export const handbookArticleRoute = (slug: string) => `${ROUTES.HANDBOOK}/bai-viet/${slug}`
+
 /** Bước 1 — Nhập liệu. */
 export const designInputRoute = (projectId: string) => `${ROUTES.DESIGN}/${projectId}/input`
 

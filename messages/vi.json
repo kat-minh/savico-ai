@@ -271,8 +271,8 @@
     "taxCode": "MST"
   },
   "favorite": {
-    "add": "Yêu thích",
-    "remove": "Bỏ yêu thích"
+    "add": "Lưu mẫu",
+    "remove": "Bỏ lưu mẫu"
   },
   "landing": {
     "hero": {
@@ -343,35 +343,153 @@
   "handbook": {
     "page": {
       "title": "Cẩm nang",
-      "subtitle": "Mẫu tham khảo và bài viết tư vấn về kiến trúc, nội thất.",
+      "subtitle": "Thư viện mẫu bản vẽ, mẫu nội thất 3D và kho bài viết kiến thức về xây nhà.",
       "tabs": {
-        "templates": "Mẫu tham khảo",
-        "articles": "Bài viết tư vấn"
+        "library": "Thư viện mẫu",
+        "news": "Tin tức"
+      }
+    },
+    "card": {
+      "imageCount": "{count} ảnh 3D"
+    },
+    "library": {
+      "kind": {
+        "2d": "Mẫu bản vẽ 2D",
+        "3d": "Mẫu bản vẽ 3D"
       },
-      "searchPlaceholder": "Tìm mẫu hoặc bài viết…",
+      "allBuildingTypes": "Tất cả loại công trình",
+      "allScales": "Tất cả quy mô",
+      "allStyles": "Tất cả phong cách",
+      "buildingTypePrefix": "Loại công trình: {value}",
+      "floorOption": "{count} tầng",
+      "searchPlaceholder2d": "Tìm mẫu theo tên, kích thước…",
+      "searchPlaceholder3d": "Tìm mẫu theo tên, phong cách…",
+      "resultCount": "Hiển thị {shown} / {total} mẫu",
+      "pagination": "Chuyển trang",
+      "goToPage": "Trang {page}",
       "empty": {
-        "title": "Chưa có nội dung phù hợp",
+        "title": "Chưa có mẫu phù hợp",
         "description": "Thử từ khóa khác hoặc bỏ bớt bộ lọc."
       },
-      "filters": {
-        "allBuildingTypes": "Tất cả loại công trình",
-        "allInteriorStyles": "Tất cả phong cách",
-        "clear": "Xóa lọc"
-      },
-      "resultCount": "{count} kết quả"
+      "optionAll": "Tất cả",
+      "scalePrefix": "Quy mô: {value}",
+      "stylePrefix": "Phong cách: {value}"
     },
-    "panel": {
-      "title": "Cẩm nang cá nhân hóa",
-      "tabs": {
-        "templates": "Mẫu bố trí nội thất",
-        "articles": "Bài viết tư vấn"
-      },
-      "minimize": "Thu nhỏ",
-      "restore": "Mở cẩm nang"
+    "quota": {
+      "lookupRemaining": "Lượt tra hôm nay: {remaining}/{total}",
+      "detailRemaining": "Bạn còn {remaining}/{total} lượt xem chi tiết hôm nay",
+      "exhausted": "Hết lượt hôm nay — nâng cấp gói"
+    },
+    "info": {
+      "planTitle": "Thông tin bản vẽ",
+      "templateTitle": "Thông tin mẫu",
+      "buildingType": "Loại công trình",
+      "floors": "Quy mô",
+      "lotSize": "Kích thước lô",
+      "floorArea": "Diện tích",
+      "style": "Kiểu kiến trúc & phong cách",
+      "imageCountLabel": "Số ảnh 3D",
+      "imageCountValue": "{count} ảnh",
+      "planDescription": "Mô tả bản vẽ",
+      "templateDescription": "Mô tả",
+      "floorsPlan": "Số tầng"
+    },
+    "quickView": {
+      "openFullPage": "Mở trang đầy đủ"
     },
     "detail": {
+      "back": "Quay lại",
+      "breadcrumbRoot": "Cẩm nang",
+      "breadcrumbLibrary": "Thư viện mẫu",
+      "similar": "Mẫu tương tự",
+      "notFound": "Không tìm thấy mẫu",
+      "notFoundHint": "Mẫu có thể đã bị gỡ. Quay lại thư viện để chọn mẫu khác.",
       "note": "Mẫu tham khảo do SAVICO biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn.",
       "articleNote": "Bài viết mang tính tham khảo. Liên hệ SAVICO để được tư vấn theo đúng công trình của bạn."
+    },
+    "foundation": {
+      "eyebrow": "Cẩm nang nền tảng",
+      "kicker": "Nội dung nên đọc trước khi xây nhà",
+      "title": "Cẩm nang bắt buộc cho xây nhà",
+      "description": "Tổng hợp kiến thức nền tảng giúp bạn kiểm soát chất lượng, chi phí và tiến độ từ lúc khởi công đến khi hoàn thiện.",
+      "start": "Bắt đầu xem cẩm nang",
+      "stagesTitle": "3 nội dung quan trọng trong quá trình xây nhà",
+      "stepLabel": "Bước {order}",
+      "stageHeading": "Cẩm nang {stage}",
+      "articleCount": "({count} bài)",
+      "readingTime": "{minutes} phút đọc",
+      "topicEmpty": "Chủ đề này chưa có bài viết."
+    },
+    "newsletter": {
+      "title": "Bản tin SAVICO",
+      "featured": "Bài viết nổi bật",
+      "related": "Bài viết liên quan",
+      "seeAllRelated": "Xem tất cả bài liên quan",
+      "readingTime": "{minutes} phút đọc",
+      "categories": {
+        "experience": "Kinh nghiệm xây nhà",
+        "material": "Vật liệu",
+        "interior": "Nội thất",
+        "legal": "Pháp lý"
+      },
+      "topics": "Kiến thức xây dựng · Kiến trúc · Nội thất"
+    },
+    "articles": {
+      "title": "Tất cả bài viết",
+      "all": "Tất cả",
+      "searchPlaceholder": "Tìm kiếm bài viết…",
+      "readMore": "Xem chi tiết",
+      "readingTime": "{minutes} phút đọc",
+      "pagination": "Chuyển trang",
+      "categories": {
+        "experience": "Kinh nghiệm xây nhà",
+        "material": "Vật liệu",
+        "interior": "Nội thất",
+        "legal": "Pháp lý"
+      },
+      "empty": {
+        "title": "Chưa có bài viết phù hợp",
+        "description": "Thử từ khóa khác hoặc chọn chuyên mục khác."
+      },
+      "previousPage": "Trang trước",
+      "nextPage": "Trang sau"
+    },
+    "article": {
+      "breadcrumbRoot": "Cẩm nang",
+      "updatedAt": "Cập nhật {date}",
+      "readingTime": "{minutes} phút đọc",
+      "inTopic": "Trong chủ đề {topic}",
+      "ctaTitle": "Chưa chắc nên chọn phương án nào? Tạo dự án để AI dự toán theo lô đất của bạn",
+      "ctaButton": "Tạo dự án mới",
+      "related": "Bài viết liên quan",
+      "notFound": "Không tìm thấy bài viết",
+      "notFoundHint": "Bài viết có thể đã bị gỡ. Quay lại Cẩm nang để đọc bài khác.",
+      "categories": {
+        "experience": "Kinh nghiệm xây nhà",
+        "material": "Vật liệu",
+        "interior": "Nội thất",
+        "legal": "Pháp lý"
+      }
+    },
+    "consult": {
+      "cta": "Đặt lịch tư vấn 1:1",
+      "title": "Đặt lịch tư vấn 1:1",
+      "subtitle": "Kiến trúc sư SAVICO sẽ tư vấn trực tiếp theo đúng công trình của bạn.",
+      "call": "Gọi ngay {hotline}",
+      "zalo": "Chat Zalo",
+      "note": "Tư vấn miễn phí trong giờ làm việc: Thứ 2 – Thứ 7, 8:00 – 17:30."
+    },
+    "panel": {
+      "title": "Cẩm nang cho dự án của bạn",
+      "tabs": {
+        "templates": "Mẫu gợi ý",
+        "articles": "Bài tư vấn"
+      },
+      "minimize": "Thu nhỏ",
+      "restore": "Mở cẩm nang",
+      "filterLabel2d": "Mẫu bản vẽ 2D phù hợp với {building} {scale} của bạn",
+      "filterLabel3d": "Gợi ý nội thất {style} cho {building} của bạn",
+      "eyebrow": "Cẩm nang cá nhân hóa"
     },
     "read": {
       "badge": "Đã đọc"
@@ -743,7 +861,16 @@
         "bed1": "PHÒNG NGỦ 1",
         "wc": "WC",
         "stairs": "CẦU THANG",
-        "bed2": "PHÒNG NGỦ 2"
+        "bed2": "PHÒNG NGỦ 2",
+        "frontYard": "SÂN TRƯỚC",
+        "backYard": "SÂN SAU",
+        "balcony": "BAN CÔNG",
+        "worship": "PHÒNG THỜ",
+        "laundry": "SÂN PHƠI",
+        "roof": "MẶT MÁI",
+        "bed3": "PHÒNG NGỦ 3",
+        "garage": "ĐỂ XE",
+        "void": "GIẾNG TRỜI"
       }
     },
     "projects": {
@@ -867,9 +994,8 @@
       "title": "Dự án yêu thích",
       "remove": "Bỏ yêu thích",
       "kind": {
-        "layout": "Bố trí nội thất",
-        "interior": "Nội thất",
-        "architecture": "Kiến trúc"
+        "2d": "Bản vẽ 2D",
+        "3d": "Nội thất 3D"
       },
       "empty": {
         "title": "Bạn chưa lưu mẫu nào",

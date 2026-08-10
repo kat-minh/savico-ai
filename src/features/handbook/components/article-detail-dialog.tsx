@@ -34,9 +34,18 @@ export function ArticleDetailDialog({ article, onClose }: ArticleDetailDialogPro
               sizes='(max-width: 640px) 100vw, 640px'
             />
 
-            <div className='space-y-3 text-sm leading-relaxed'>
-              {article.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+            <div className='space-y-4 text-sm leading-relaxed'>
+              {article.body.map((section, index) => (
+                <section key={section.heading ?? index} className='space-y-2'>
+                  {section.heading ? (
+                    <h3 className='text-primary font-semibold'>
+                      {index + 1}. {section.heading}
+                    </h3>
+                  ) : null}
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </section>
               ))}
             </div>
 
