@@ -1,7 +1,30 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowRight, BookOpenCheck, Blocks, Brush, Clock, Minus, Plus, Sofa } from 'lucide-react'
+import {
+  Anchor,
+  ArrowRight,
+  Blocks,
+  BookOpenCheck,
+  BrickWall,
+  Brush,
+  ClipboardCheck,
+  Clock,
+  DoorOpen,
+  Footprints,
+  Grid2x2,
+  Hammer,
+  Home,
+  Layers,
+  Lightbulb,
+  Minus,
+  PencilRuler,
+  PlugZap,
+  Plus,
+  ShowerHead,
+  Sofa,
+  Wallet
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
@@ -19,6 +42,37 @@ const STAGE_ICON: Record<HandbookStageId, typeof Blocks> = {
   structure: Blocks,
   finishing: Brush,
   interior: Sofa
+}
+
+/**
+ * Biểu tượng của từng chủ đề trong bảng chủ đề (Hình 10). Chủ đề nào chưa có
+ * biểu tượng riêng thì dùng `Layers` — bảng vẫn đều mắt.
+ */
+const TOPIC_ICON: Record<string, typeof Blocks> = {
+  foundation: Layers,
+  piling: Anchor,
+  frame: Blocks,
+  masonry: BrickWall,
+  roofing: Home,
+  stairs: Footprints,
+  mep: PlugZap,
+  'structure-handover': ClipboardCheck,
+  tiling: Grid2x2,
+  painting: Brush,
+  doors: DoorOpen,
+  sanitary: ShowerHead,
+  lighting: Lightbulb,
+  'finishing-handover': ClipboardCheck,
+  'interior-design': PencilRuler,
+  joinery: Hammer,
+  'loose-furniture': Sofa,
+  'interior-budget': Wallet
+}
+
+/** Biểu tượng của một chủ đề, cỡ đồng nhất trong bảng chủ đề. */
+function TopicIcon({ topicId }: { topicId: string }) {
+  const Icon = TOPIC_ICON[topicId] ?? Layers
+  return <Icon className='size-4' />
 }
 
 /**
@@ -167,9 +221,17 @@ export function FoundationBlock() {
                     topic.id === openTopic ? 'border-primary bg-primary/5' : 'hover:border-primary/40'
                   )}
                 >
-                  <span className='block text-sm font-medium'>{topic.title}</span>
-                  <span className='text-muted-foreground block text-xs'>
-                    {t('articleCount', { count: counts[topic.id] ?? 0 })}
+                  {/* Hình 10: mỗi thẻ chủ đề có biểu tượng bên trái tên. */}
+                  <span className='flex items-start gap-2.5'>
+                    <span className='text-primary mt-0.5 shrink-0'>
+                      <TopicIcon topicId={topic.id} />
+                    </span>
+                    <span className='min-w-0'>
+                      <span className='block text-sm font-medium'>{topic.title}</span>
+                      <span className='text-muted-foreground block text-xs'>
+                        {t('articleCount', { count: counts[topic.id] ?? 0 })}
+                      </span>
+                    </span>
                   </span>
                 </button>
               </li>
@@ -190,7 +252,10 @@ export function FoundationBlock() {
                       <Clock className='size-3.5' />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
-                    <ArrowRight className='text-primary size-4 shrink-0' />
+                    {/* Hình 10: cuối mỗi dòng là nút tròn ⊕ xanh, không phải mũi tên. */}
+                    <span className='bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full'>
+                      <Plus className='size-3.5' />
+                    </span>
                   </Link>
                 </li>
               ))}

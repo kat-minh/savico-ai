@@ -88,9 +88,20 @@ export function TemplateCard({ template, className, onOpen, variant = 'library' 
             {[specs.buildingTypeLabel, template.styleLabel].filter(Boolean).join(' · ')}
           </p>
         ) : (
+          /* Cặp chip theo ảnh: mẫu 2D là "Nhà phố · 2 tầng" (Hình 5), mẫu 3D là
+             "Nhà phố · Hiện đại" (Hình 6) — tức 3D lấy phong cách thay quy mô. */
           <div className='flex flex-wrap items-center gap-2'>
-            <Badge variant='secondary'>{template.styleLabel}</Badge>
-            <Badge variant='outline'>{template.specs.floorLabel}</Badge>
+            {template.kind === '3d' ? (
+              <>
+                <Badge variant='secondary'>{specs.buildingTypeLabel}</Badge>
+                <Badge variant='outline'>{template.styleLabel}</Badge>
+              </>
+            ) : (
+              <>
+                <Badge variant='secondary'>{template.styleLabel}</Badge>
+                <Badge variant='outline'>{specs.floorLabel}</Badge>
+              </>
+            )}
             <ReadBadge id={template.id} />
           </div>
         )}

@@ -9,6 +9,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { handbookTemplateRoute } from '@/shared/constants/routes'
 import { FavoriteButton } from '@/shared/favorite'
+import { cn } from '@/shared/lib/utils'
 import type { HandbookTemplate } from '../types/handbook.types'
 import { FloorSwitcher, resolveFloor } from './floor-switcher'
 import { TemplateFigure } from './template-figure'
@@ -78,11 +79,19 @@ export function TemplateQuickView({ template, onClose }: TemplateQuickViewProps)
                 <TemplateFigure
                   template={template}
                   floor={activeFloor}
-                  className='aspect-4/3 w-full shrink-0 rounded-xl border'
+                  /* Mẫu 2D để bản vẽ tự quyết chiều cao (như trang chi tiết) —
+                     ép tỉ lệ 4/3 làm bản vẽ ngang lọt thỏm giữa khung trắng. */
+                  className={cn('w-full shrink-0 rounded-xl border', template.kind === '3d' && 'aspect-16/9')}
                   sizes='(max-width: 768px) 100vw, 560px'
                   watermark
                 />
-                <FloorSwitcher template={template} activeId={activeFloor?.id ?? ''} onChange={selectFloor} />
+                {/* Hình 2: dưới nút chuyển tầng còn dải ảnh xem trước, y như trang chi tiết. */}
+                <FloorSwitcher
+                  template={template}
+                  activeId={activeFloor?.id ?? ''}
+                  onChange={selectFloor}
+                  showThumbnails
+                />
               </div>
 
               <div className='space-y-4'>
