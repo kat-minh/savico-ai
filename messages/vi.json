@@ -461,8 +461,10 @@
       "readingTime": "{minutes} phút đọc",
       "inTopic": "Trong chủ đề {topic}",
       "ctaTitle": "Chưa chắc nên chọn phương án nào? Tạo dự án để AI dự toán theo lô đất của bạn",
+      "ctaTitleTopic": "Chưa chắc nên chọn {topic} nào? Tạo dự án để AI dự toán theo lô đất của bạn",
       "ctaButton": "Tạo dự án mới",
       "related": "Bài viết liên quan",
+      "readMore": "Đọc thêm",
       "notFound": "Không tìm thấy bài viết",
       "notFoundHint": "Bài viết có thể đã bị gỡ. Quay lại Cẩm nang để đọc bài khác.",
       "categories": {
@@ -483,13 +485,16 @@
     "panel": {
       "title": "Cẩm nang cho dự án của bạn",
       "tabs": {
-        "templates": "Mẫu gợi ý",
+        "templates": "Mẫu nội thất 3D",
         "articles": "Bài tư vấn"
       },
+      "cardHint": "Nhấn vào một mẫu để xem chi tiết và áp dụng cho dự án của bạn.",
       "minimize": "Thu nhỏ",
       "restore": "Mở cẩm nang",
       "filterLabel2d": "Mẫu bản vẽ 2D phù hợp với {building} {scale} của bạn",
       "filterLabel3d": "Gợi ý nội thất {style} cho {building} của bạn",
+      "fallback2d": "Mẫu bản vẽ 2D gợi ý cho dự án của bạn",
+      "fallback3d": "Gợi ý mẫu nội thất cho dự án của bạn",
       "eyebrow": "Cẩm nang cá nhân hóa"
     },
     "read": {
@@ -676,7 +681,8 @@
           "Đang tính chi phí theo đơn giá khu vực…"
         ],
         "pageTitle": "AI đang lập dự toán",
-        "unknownProvince": "khu vực của bạn",
+        "unknownProvince": "của bạn",
+        "waitHint": "Bạn có thể xem cẩm nang trong lúc chờ.",
         "checklist": {
           "0": "Đã đọc dữ liệu ảnh / mô tả",
           "1": "Đang phân tích khối lượng...",

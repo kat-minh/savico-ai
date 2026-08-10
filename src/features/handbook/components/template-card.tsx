@@ -20,6 +20,13 @@ interface TemplateCardProps {
    * là liên kết sang trang chi tiết, đúng luồng của lưới thư viện.
    */
   onOpen?: (template: HandbookTemplate) => void
+  /**
+   * `library` (mặc định) — thẻ trong lưới thư viện (Hình 5, Hình 6): tên, dòng
+   * thông số và chip.
+   * `panel` — thẻ trong panel màn chờ: Hình 1 chỉ có tên + 2 chip, Hình 4 chỉ
+   * có tên + dòng "loại công trình · phong cách". Không có dòng thông số.
+   */
+  variant?: 'library' | 'panel'
 }
 
 /**
@@ -32,10 +39,11 @@ interface TemplateCardProps {
  * — nesting the ♥ inside another button would be invalid markup and would
  * swallow its clicks.
  */
-export function TemplateCard({ template, className, onOpen }: TemplateCardProps) {
+export function TemplateCard({ template, className, onOpen, variant = 'library' }: TemplateCardProps) {
   const t = useTranslations('handbook.card')
   const markRead = useHandbookReadStore((s) => s.markRead)
   const { specs } = template
+  const inPanel = variant === 'panel'
 
   const specLine = (
     template.kind === '2d'
@@ -69,14 +77,23 @@ export function TemplateCard({ template, className, onOpen }: TemplateCardProps)
 
       <div className='space-y-2 p-3'>
         <h3 className='line-clamp-2 text-sm font-semibold'>{template.name}</h3>
+
         {/* Dòng thông số màu thương hiệu theo Hình 5 — nó là thông tin để chọn
-            mẫu, không phải chú thích phụ. */}
-        {specLine.length > 0 ? <p className='text-primary text-xs'>{specLine.join(' · ')}</p> : null}
-        <div className='flex flex-wrap items-center gap-2'>
-          <Badge variant='secondary'>{template.styleLabel}</Badge>
-          <Badge variant='outline'>{template.specs.floorLabel}</Badge>
-          <ReadBadge id={template.id} />
-        </div>
+            mẫu, không phải chú thích phụ. Panel màn chờ không có dòng này. */}
+        {!inPanel && specLine.length > 0 ? <p className='text-primary text-xs'>{specLine.join(' · ')}</p> : null}
+
+        {/* Hình 4: thẻ nội thất trong panel chỉ ghi "loại công trình · phong cách". */}
+        {inPanel && template.kind === '3d' ? (
+          <p className='text-muted-foreground text-xs'>
+            {[specs.buildingTypeLabel, template.styleLabel].filter(Boolean).join(' · ')}
+          </p>
+        ) : (
+          <div className='flex flex-wrap items-center gap-2'>
+            <Badge variant='secondary'>{template.styleLabel}</Badge>
+            <Badge variant='outline'>{template.specs.floorLabel}</Badge>
+            <ReadBadge id={template.id} />
+          </div>
+        )}
       </div>
 
       {onOpen ? (

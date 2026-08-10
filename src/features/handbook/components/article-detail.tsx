@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Clock, FileText, Plus } from 'lucide-react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import { ErrorState, Photo } from '@/shared/components/common'
@@ -37,7 +37,6 @@ interface ArticleDetailProps {
  */
 export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   const t = useTranslations('handbook.article')
-  const format = useFormatter()
 
   const { data: article, isPending, isError } = useHandbookArticle(slug)
   const { data: articles } = useHandbookArticles()
@@ -102,9 +101,9 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
           <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>
 
           <p className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
-            {t('updatedAt', {
-              date: format.dateTime(new Date(article.publishedAt), { month: '2-digit', year: 'numeric' })
-            })}
+            {/* Hình 12 ghi "Cập nhật 08/2026" — dựng chuỗi MM/YYYY thay vì để
+                Intl tự chọn ("tháng 08, 2026" ở locale vi). */}
+            {t('updatedAt', { date: formatMonthYear(article.publishedAt) })}
             <span aria-hidden>·</span>
             <Clock className='size-4' />
             {t('readingTime', { minutes: article.readingMinutes })}
@@ -126,7 +125,14 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
                     {index + 1}. {section.heading}
                   </h2>
                 ) : null}
-                <div className={cn('space-y-2', section.imageUrl && 'sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0')}>
+                {/* Hình 12: đoạn có ảnh thì chữ chiếm cột trái rộng hơn, ảnh
+                    nằm phải và căn theo đầu đoạn — không kéo cao bằng cột chữ. */}
+                <div
+                  className={cn(
+                    'space-y-2',
+                    section.imageUrl && 'sm:grid sm:grid-cols-[1.35fr_1fr] sm:items-start sm:gap-4 sm:space-y-0'
+                  )}
+                >
                   <div className='space-y-2'>
                     {section.paragraphs.map((paragraph) => (
                       <p key={paragraph} className='text-sm leading-relaxed'>
@@ -173,7 +179,10 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
           {/* Khối mời tạo dự án — chuyển người đọc từ tra cứu sang dùng sản phẩm. */}
           <section className='bg-primary/5 border-primary/30 space-y-3 rounded-2xl border p-5'>
             <FileText className='text-primary size-8' />
-            <p className='font-semibold text-balance'>{t('ctaTitle')}</p>
+            {/* Hình 12 gọi đích danh chủ đề: "Chưa chắc nên chọn móng nào?" */}
+            <p className='font-semibold text-balance'>
+              {topic ? t('ctaTitleTopic', { topic: topic.title.toLocaleLowerCase('vi') }) : t('ctaTitle')}
+            </p>
             <Button className='w-full' onClick={onCreateProject}>
               <Plus className='size-4' />
               {t('ctaButton')}
@@ -199,9 +208,16 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
                   <Photo className='size-16 shrink-0 rounded-lg' src={item.imageUrl} alt={item.title} sizes='64px' />
                   <span className='min-w-0 space-y-1'>
                     <span className='line-clamp-2 block text-sm font-medium'>{item.title}</span>
+                    {/* Hình 12: "Phần thô · 5 phút đọc" rồi tới liên kết "Đọc thêm". */}
                     <span className='text-muted-foreground block text-xs'>
-                      {t('readingTime', { minutes: item.readingMinutes })}
+                      {[
+                        stages?.find((s) => s.id === item.stage)?.title,
+                        t('readingTime', { minutes: item.readingMinutes })
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </span>
+                    <span className='text-primary block text-xs font-medium'>{t('readMore')} →</span>
                   </span>
                 </Link>
               </li>
@@ -211,6 +227,12 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
       ) : null}
     </div>
   )
+}
+
+/** "2026-08-06" → "08/2026" (Hình 12). */
+function formatMonthYear(iso: string): string {
+  const date = new Date(iso)
+  return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`
 }
 
 function ArticleDetailSkeleton() {

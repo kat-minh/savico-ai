@@ -91,6 +91,9 @@ export function GenerationWaiting({ flow, complete, expectedMs, province, chatSt
           </ol>
 
           <BlueprintIllustration className='mt-7' />
+
+          {/* Hình 1: dòng nhắc dưới hình minh họa. */}
+          <p className='text-muted-foreground mt-4 text-xs'>{t('waitHint')}</p>
         </>
       )}
 

@@ -461,8 +461,10 @@
       "readingTime": "{minutes} min read",
       "inTopic": "In topic {topic}",
       "ctaTitle": "Not sure which option to pick? Create a project and let AI estimate for your lot",
+      "ctaTitleTopic": "Not sure which {topic} to pick? Create a project and let AI estimate for your lot",
       "ctaButton": "New project",
       "related": "Related articles",
+      "readMore": "Read more",
       "notFound": "Article not found",
       "notFoundHint": "It may have been removed. Go back to the Handbook to read something else.",
       "categories": {
@@ -483,13 +485,16 @@
     "panel": {
       "title": "Handbook for your project",
       "tabs": {
-        "templates": "Suggested templates",
+        "templates": "3D interior templates",
         "articles": "Advice"
       },
+      "cardHint": "Tap a template to see details and apply it to your project.",
       "minimize": "Minimize",
       "restore": "Open handbook",
       "filterLabel2d": "2D plans matching your {building} {scale}",
       "filterLabel3d": "{style} interior ideas for your {building}",
+      "fallback2d": "2D plan templates suggested for your project",
+      "fallback3d": "Interior templates suggested for your project",
       "eyebrow": "Personalised handbook"
     },
     "read": {
@@ -677,6 +682,7 @@
         ],
         "pageTitle": "AI is preparing your estimate",
         "unknownProvince": "your area",
+        "waitHint": "You can browse the handbook while you wait.",
         "checklist": {
           "0": "Read your photo / description",
           "1": "Analysing quantities…",

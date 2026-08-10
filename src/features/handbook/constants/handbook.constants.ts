@@ -1,10 +1,11 @@
 import type { HandbookCategory, HandbookStageId, HandbookTags } from '../types/handbook.types'
 
 /**
- * Màn chờ hiển thị năm mẫu gợi ý (Phần 1.1). Con số này cố định — panel không
- * bao giờ được hiện ít hơn, kể cả khi phải nới lỏng tiêu chí lọc.
+ * Màn chờ hiển thị sáu mẫu gợi ý, xếp lưới 3×2 đúng Hình 1 và Hình 4. Con số
+ * này cố định — panel không bao giờ được hiện ít hơn, kể cả khi phải nới lỏng
+ * tiêu chí lọc. (Phần 1.1 viết "năm mẫu" nhưng khách chốt lấy theo ảnh.)
  */
-export const PERSONALIZED_TEMPLATE_COUNT = 5
+export const PERSONALIZED_TEMPLATE_COUNT = 6
 
 /**
  * Thứ tự nới lỏng tiêu chí khi không đủ mẫu khớp hết tag (mục VI):

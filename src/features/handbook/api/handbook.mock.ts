@@ -755,6 +755,87 @@ const ARTICLES: HandbookArticle[] = [
     tags: {}
   },
   {
+    id: 'art-15',
+    slug: 'sai-lam-thuong-gap-khi-lam-mong-nha-pho',
+    title: 'Sai lầm thường gặp khi làm móng nhà phố',
+    excerpt: 'Bỏ khảo sát địa chất, cắt thép chờ, đổ bê tông khi trời mưa — ba lỗi tốn tiền nhất.',
+    imageUrl: CONSTRUCTION_IMAGE.rebar,
+    category: 'experience',
+    stage: 'structure',
+    topicId: 'foundation',
+    publishedAt: '2026-08-01',
+    readingMinutes: 5,
+    body: [
+      {
+        heading: 'Bỏ qua khảo sát địa chất',
+        paragraphs: [
+          'Chọn loại móng theo nhà hàng xóm là cách làm phổ biến nhưng rủi ro: hai lô cạnh nhau vẫn có thể khác lớp đất yếu bên dưới. Một mũi khoan khảo sát rẻ hơn nhiều so với chi phí xử lý lún sau này.'
+        ]
+      },
+      {
+        heading: 'Cắt bớt thép chờ cổ cột',
+        paragraphs: [
+          'Thép chờ ngắn hơn thiết kế làm mối nối cổ cột yếu đi, đây là lỗi khó phát hiện sau khi đổ bê tông. Nghiệm thu thép trước khi đổ là bước không được bỏ.'
+        ]
+      }
+    ],
+    tags: { buildingType: 'townhouse' }
+  },
+  {
+    id: 'art-16',
+    slug: 'chi-phi-lam-mong-nha-pho-08-2026',
+    title: 'Chi phí làm móng nhà phố cập nhật 08/2026',
+    excerpt: 'Khoảng giá móng đơn, móng băng và móng cọc theo đơn giá vật tư tháng 8/2026.',
+    imageUrl: BUILDING_IMAGE.townhouse,
+    category: 'material',
+    stage: 'structure',
+    topicId: 'foundation',
+    publishedAt: '2026-07-30',
+    readingMinutes: 5,
+    body: [
+      {
+        heading: 'Khoảng giá theo loại móng',
+        paragraphs: [
+          'Móng đơn thường chiếm 2–3% tổng chi phí phần thô, móng băng 4–6%, móng cọc có thể lên 8–12% tuỳ chiều sâu cọc và địa chất khu vực.'
+        ]
+      },
+      {
+        heading: 'Phần hay phát sinh',
+        paragraphs: [
+          'Đào đất, vận chuyển đất thừa và ép cọc thử là ba khoản hay nằm ngoài báo giá ban đầu. Nên hỏi rõ nhà thầu ba mục này trước khi ký.'
+        ]
+      }
+    ],
+    tags: { buildingType: 'townhouse' }
+  },
+  {
+    id: 'art-17',
+    slug: 'kinh-nghiem-chon-mong-theo-dia-chat',
+    title: 'Kinh nghiệm chọn móng theo địa chất',
+    excerpt: 'Đất pha cát, đất sét yếu hay đất ruộng san lấp — mỗi nền đất hợp một phương án móng.',
+    imageUrl: TOPIC_IMAGE.blueprint,
+    category: 'experience',
+    stage: 'structure',
+    topicId: 'foundation',
+    publishedAt: '2026-07-28',
+    readingMinutes: 4,
+    body: [
+      {
+        heading: 'Đọc kết quả khảo sát',
+        paragraphs: [
+          'Chỉ số quan trọng nhất là độ sâu lớp đất tốt. Lớp đất tốt nông thì móng băng đủ dùng; nằm sâu quá 6–8 m thì gần như bắt buộc dùng cọc.'
+        ]
+      },
+      {
+        heading: 'Đất ruộng san lấp',
+        paragraphs: [
+          'Nền mới san lấp còn lún theo thời gian, nên ưu tiên cọc ép tới lớp đất chịu lực thay vì móng băng, kể cả khi nhà chỉ 2–3 tầng.'
+        ]
+      }
+    ],
+    tags: { buildingType: 'townhouse' }
+  },
+  {
     id: 'art-04',
     slug: 'khi-nao-can-ep-coc',
     title: 'Khi nào nhà phố cần ép cọc',

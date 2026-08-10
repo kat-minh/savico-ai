@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BookOpen, LayoutGrid, Minimize2, Newspaper } from 'lucide-react'
+import { BookOpen, Info, LayoutGrid, Minimize2, Newspaper } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { useChatContextStore } from '@/shared/chat-context'
@@ -82,6 +82,11 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
     { id: 'articles', icon: Newspaper }
   ]
 
+  // Hình 1 (Bước 2) không có thanh công cụ dọc, Hình 4 (Bước 3) có. Khi ẩn
+  // thanh này thì panel luôn hiện lưới mẫu, bất kể `tab` đang lưu là gì.
+  const showTabs = kind === '3d'
+  const activeTab: HandbookPanelTab = showTabs ? tab : 'templates'
+
   return (
     <>
       <section
@@ -92,24 +97,28 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
         // mẫu. Áp cho mọi bề rộng, không chỉ desktop.
         className='bg-card flex max-h-[calc(100svh-11rem)] overflow-hidden rounded-2xl border'
       >
-        {/* Thanh công cụ dọc bên trái panel */}
-        <nav className='bg-muted/40 flex shrink-0 flex-col items-center gap-1 border-r p-2'>
-          {tabs.map(({ id, icon: Icon }) => (
-            <button
-              key={id}
-              type='button'
-              onClick={() => setTab(id)}
-              aria-current={tab === id ? 'true' : undefined}
-              title={t(`tabs.${id}`)}
-              className={cn(
-                'flex size-10 items-center justify-center rounded-lg transition-colors',
-                tab === id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-foreground/[0.06]'
-              )}
-            >
-              <Icon className='size-5' />
-            </button>
-          ))}
-        </nav>
+        {/* Thanh công cụ dọc bên trái panel — chỉ có ở Bước 3 (Hình 4) */}
+        {showTabs ? (
+          <nav className='bg-muted/40 flex w-44 shrink-0 flex-col gap-1 border-r p-2'>
+            {tabs.map(({ id, icon: Icon }) => (
+              <button
+                key={id}
+                type='button'
+                onClick={() => setTab(id)}
+                aria-current={tab === id ? 'true' : undefined}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+                  tab === id
+                    ? 'bg-accent text-accent-foreground font-medium'
+                    : 'text-muted-foreground hover:bg-foreground/[0.06]'
+                )}
+              >
+                <Icon className='size-4 shrink-0' />
+                <span className='truncate'>{t(`tabs.${id}`)}</span>
+              </button>
+            ))}
+          </nav>
+        ) : null}
 
         {/* Vùng nội dung bên phải panel */}
         <div className='flex min-w-0 flex-1 flex-col'>
@@ -121,7 +130,9 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
               </p>
               <h2 className='truncate text-base font-semibold'>{t('title')}</h2>
               <p className='text-muted-foreground truncate text-xs'>
-                {tab === 'templates' && filterLabel ? filterLabel : t(`tabs.${tab}`)}
+                {activeTab === 'articles'
+                  ? t('tabs.articles')
+                  : (filterLabel ?? t(kind === '2d' ? 'fallback2d' : 'fallback3d'))}
               </p>
             </div>
             <Button variant='ghost' size='icon' aria-label={t('minimize')} onClick={() => setMinimized(true)}>
@@ -130,15 +141,14 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
           </header>
 
           <div className='min-h-0 flex-1 overflow-y-auto p-4'>
-            {tab === 'templates' ? (
+            {activeTab === 'templates' ? (
               templatesPending ? (
                 <PanelSkeleton />
               ) : (
-                /* Lưới thay vì danh sách dọc: màn chờ dành cả cột trái rộng cho
-                   panel nên xếp một cột sẽ phải cuộn ngay từ mẫu thứ ba. */
-                <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+                /* Lưới 3×2 đúng Hình 1 / Hình 4 — sáu mẫu, không phải danh sách dọc. */
+                <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
                   {templates.map((template) => (
-                    <TemplateCard key={template.id} template={template} onOpen={setSelectedTemplate} />
+                    <TemplateCard key={template.id} template={template} variant='panel' onOpen={setSelectedTemplate} />
                   ))}
                 </div>
               )
@@ -152,6 +162,14 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
               </div>
             )}
           </div>
+
+          {/* Dòng gợi ý dưới lưới mẫu — chỉ Bước 3 (Hình 4) */}
+          {activeTab === 'templates' && kind === '3d' ? (
+            <p className='text-muted-foreground flex shrink-0 items-center gap-1.5 border-t px-4 py-2.5 text-xs'>
+              <Info className='size-3.5 shrink-0' />
+              {t('cardHint')}
+            </p>
+          ) : null}
         </div>
       </section>
 
