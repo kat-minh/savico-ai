@@ -56,7 +56,15 @@ export function FloorSwitcher({ template, activeId, onChange, showThumbnails, cl
                   floor.id === activeId ? 'border-primary' : 'border-transparent hover:border-border'
                 )}
               >
-                <TemplateFigure template={template} floor={floor} className='aspect-4/3 w-full' sizes='160px' />
+                <TemplateFigure
+                  template={template}
+                  floor={floor}
+                  // Bản vẽ nhà phố nằm ngang; để 4:3 thì thumbnail cao gấp đôi
+                  // mockup và đẩy cả cột trái dài ra (Hình 7, Hình 8).
+                  className={cn('w-full', template.kind === '3d' && 'aspect-16/9')}
+                  autoHeight={template.kind === '2d'}
+                  sizes='200px'
+                />
                 <span className='block py-1.5 text-center text-xs font-medium'>{floor.label}</span>
               </button>
             </li>

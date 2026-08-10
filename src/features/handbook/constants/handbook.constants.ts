@@ -26,6 +26,9 @@ export const LIBRARY_PAGE_SIZE = 8
 /** Số bài trên một trang của khối "Tất cả bài viết" (Hình 11). */
 export const ARTICLE_PAGE_SIZE = 6
 
+/** Số bài ở khối "Tin tức mới nhất" cuối phần cẩm nang nền tảng (Phần 3.1). */
+export const LATEST_NEWS_COUNT = 3
+
 /** Số mẫu tương tự ở cuối trang chi tiết (Phần 2.3). */
 export const SIMILAR_TEMPLATE_COUNT = 4
 

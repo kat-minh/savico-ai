@@ -247,6 +247,17 @@ interface PlanDrawingProps {
   watermark?: boolean
   /** Chọn phương án bố trí. Cùng một mẫu luôn ra cùng một bản vẽ. */
   seed?: string
+  /**
+   * Nền lưới kiểu giấy can. Bật ở khung minh họa trang chủ và thẻ xem trước hồ
+   * sơ; thư viện mẫu tắt đi vì bản vẽ mẫu in trên nền trắng (Hình 5, Hình 7).
+   */
+  paper?: boolean
+  /**
+   * Để khung tự cao theo tỷ lệ bản vẽ thay vì lấp đầy một khung tỷ lệ cố định.
+   * Dùng ở khung lớn trang chi tiết, nơi bản vẽ phải chiếm trọn bề ngang; lưới
+   * thẻ vẫn dùng khung cố định để các thẻ cao bằng nhau.
+   */
+  autoHeight?: boolean
 }
 
 /**
@@ -256,11 +267,21 @@ interface PlanDrawingProps {
  * Dùng ở khung minh họa trang chủ (tab "Mặt bằng", mục II.2), thẻ xem trước bộ
  * hồ sơ (mục III.4a) và thư viện mẫu bản vẽ 2D trong Cẩm nang.
  */
-export function PlanDrawing({ className, variant = 'default', ratio, dimensions, watermark, seed }: PlanDrawingProps) {
+export function PlanDrawing({
+  className,
+  variant = 'default',
+  ratio,
+  dimensions,
+  watermark,
+  seed,
+  paper = true,
+  autoHeight = false
+}: PlanDrawingProps) {
   const t = useTranslations('design.planSample')
 
-  // Lô quá dài thì bản vẽ mỏng như sợi chỉ trong thẻ, nên kẹp tỷ lệ lại.
-  const safeRatio = Math.min(Math.max(ratio ?? 1.35, 1), 2.6)
+  // Vẫn kẹp để lô cực dài không thành sợi chỉ, nhưng phải đủ rộng cho lô
+  // 5×20m (tỷ lệ 4) vẽ đúng dáng nhà phố như Hình 7.
+  const safeRatio = Math.min(Math.max(ratio ?? 1.35, 1), 4.2)
   const walls: Box = {
     x: MARGIN.left,
     y: MARGIN.top,
@@ -280,18 +301,20 @@ export function PlanDrawing({ className, variant = 'default', ratio, dimensions,
   return (
     <div className={cn('bg-card relative overflow-hidden', className)}>
       {/* Lưới nền kiểu giấy can. */}
-      <div
-        aria-hidden
-        className='absolute inset-0 opacity-60'
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 20px), repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 20px)'
-        }}
-      />
+      {paper ? (
+        <div
+          aria-hidden
+          className='absolute inset-0 opacity-60'
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 20px), repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 20px)'
+          }}
+        />
+      ) : null}
 
       <svg
         viewBox={`0 0 ${canvasWidth} ${CANVAS_HEIGHT}`}
-        className='relative size-full'
+        className={cn('relative', autoHeight ? 'block h-auto w-full' : 'size-full')}
         role='img'
         aria-label={t('label')}
       >

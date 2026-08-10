@@ -418,7 +418,8 @@
       "stageHeading": "{stage} handbook",
       "articleCount": "({count} articles)",
       "readingTime": "{minutes} min read",
-      "topicEmpty": "No article in this topic yet."
+      "topicEmpty": "No article in this topic yet.",
+      "openStage": "Open handbook"
     },
     "newsletter": {
       "title": "SAVICO newsletter",
@@ -493,6 +494,17 @@
     },
     "read": {
       "badge": "Read"
+    },
+    "latest": {
+      "title": "Latest news",
+      "seeAll": "See all",
+      "readingTime": "{minutes} min read",
+      "categories": {
+        "experience": "Building experience",
+        "material": "Materials",
+        "interior": "Interior",
+        "legal": "Legal"
+      }
     }
   },
   "guide": {

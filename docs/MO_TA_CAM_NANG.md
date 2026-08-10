@@ -90,7 +90,7 @@ Nguyên tắc: **chữ thắng ảnh** — tài liệu tự ghi "các con số h
 | 3 | Hình 1 không có thanh công cụ dọc, Hình 4 có (Mẫu / Bài tư vấn) | Giữ thanh công cụ 2 mục ở cả hai bước — bám mục III.3a của spec cũ |
 | 4 | 2.2 gọi "mẫu bản vẽ 3D", 2.4 gọi "mẫu nội thất 3D" | Dùng "Mẫu bản vẽ 3D" ở công tắc thư viện, nội dung là phối cảnh nội thất |
 | 5 | 3.1 và 3.2 mô tả như hai trang, ảnh cho thấy cùng một tab "Tin tức" | Một tab, cuộn dọc: Cẩm nang nền tảng → Bản tin → Tất cả bài viết |
-| 6 | Thứ tự hai tab lớn khác nhau giữa Hình 5/6 và Hình 9/10 | "Thư viện mẫu" trước, mặc định mở tab này |
+| 6 | Thứ tự hai tab lớn khác nhau giữa Hình 5/6/11 và Hình 9/10 | Theo **Hình 9**: "Tin tức" trước và là tab mặc định; thư viện mẫu ở `?tab=library` |
 | 7 | Spec cũ (mục IV/VI) gom ♥ từ trang Cẩm nang, ảnh mới không có ♥ ở lưới | Giữ ♥ trên thẻ lưới — nếu bỏ thì mục "Dự án yêu thích" mất nguồn |
 | 8 | Bấm thẻ mẫu mở popup hay sang trang chi tiết? | **Popup chỉ ở màn chờ** (1.2 nêu lý do: "không phải rời khỏi trang đang chờ"). Ở lưới thư viện, bấm thẻ đi thẳng sang trang chi tiết — 2.1 nói thẻ đã "đủ để chọn mà không cần mở chi tiết" |
 

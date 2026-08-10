@@ -1,12 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowRight, BookOpen, Clock, Minus, Plus } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, Blocks, Brush, Clock, Minus, Plus, Sofa } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import { Photo } from '@/shared/components/common'
-import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
@@ -14,6 +13,13 @@ import { cn } from '@/shared/lib/utils'
 import { useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, countArticlesByTopic } from '../services/handbook.service'
 import type { HandbookStageId } from '../types/handbook.types'
+
+/** Biểu tượng tròn của từng giai đoạn trên thẻ (Hình 9). */
+const STAGE_ICON: Record<HandbookStageId, typeof Blocks> = {
+  structure: Blocks,
+  finishing: Brush,
+  interior: Sofa
+}
 
 /**
  * Khối "Cẩm nang nền tảng" (Phần 3.1, Hình 9 và Hình 10).
@@ -49,14 +55,18 @@ export function FoundationBlock() {
   }
 
   return (
-    <section className='border-primary/30 bg-card space-y-5 rounded-2xl border p-5'>
-      <Badge variant='secondary' className='gap-1.5 uppercase'>
-        <BookOpen className='size-3.5' />
-        {t('eyebrow')}
-      </Badge>
+    <section className='border-primary/40 bg-card space-y-5 rounded-2xl border p-5'>
+      {/* Hình 9: nhãn chữ xanh in hoa ở góc trên, không phải chip có nền. */}
+      <p className='text-primary text-sm font-bold tracking-wide uppercase'>{t('eyebrow')}</p>
 
-      {/* Băng giới thiệu: chữ bên trái, ảnh công trình bên phải (Hình 9). */}
-      <div className='bg-primary/5 grid gap-4 overflow-hidden rounded-xl md:grid-cols-[1.2fr_1fr]'>
+      {/* Băng giới thiệu ba phần: minh họa · chữ · ảnh công trình (Hình 9). */}
+      <div className='bg-primary/5 grid items-center gap-4 overflow-hidden rounded-xl md:grid-cols-[auto_1fr] lg:grid-cols-[auto_1.1fr_1fr]'>
+        <div className='flex justify-center p-6 pr-0 md:pl-8'>
+          <span className='bg-primary/15 text-primary flex size-32 items-center justify-center rounded-full'>
+            <BookOpenCheck className='size-16' strokeWidth={1.5} />
+          </span>
+        </div>
+
         <div className='space-y-3 p-6'>
           <p className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>{t('kicker')}</p>
           <h2 className='text-2xl font-semibold tracking-tight text-balance'>{t('title')}</h2>
@@ -71,12 +81,13 @@ export function FoundationBlock() {
             <ArrowRight className='size-4' />
           </Button>
         </div>
+
         {stages?.[0] ? (
           <Photo
-            className='min-h-44 w-full'
+            className='hidden h-full min-h-56 w-full lg:block'
             src={stages[0].imageUrl}
             alt={t('title')}
-            sizes='(max-width: 768px) 100vw, 420px'
+            sizes='(max-width: 1024px) 100vw, 520px'
           />
         ) : null}
       </div>
@@ -86,40 +97,55 @@ export function FoundationBlock() {
       {isPending ? (
         <div className='grid gap-4 lg:grid-cols-3'>
           {[0, 1, 2].map((index) => (
-            <Skeleton key={index} className='h-28 rounded-xl' />
+            <Skeleton key={index} className='h-36 rounded-xl' />
           ))}
         </div>
       ) : (
         <div className='grid gap-4 lg:grid-cols-3'>
           {stages?.map((stage) => {
             const open = stage.id === openStage
+            const Icon = STAGE_ICON[stage.id]
             return (
-              <button
+              <article
                 key={stage.id}
-                type='button'
-                onClick={() => toggleStage(stage.id, stage.topics[0]?.id)}
-                aria-expanded={open}
                 className={cn(
-                  'flex items-center gap-3 rounded-xl border p-3 text-left transition-colors',
+                  'relative flex overflow-hidden rounded-xl border transition-colors',
                   open ? 'border-primary bg-primary/5' : 'hover:border-primary/40'
                 )}
               >
-                <Photo className='size-20 shrink-0 rounded-lg' src={stage.imageUrl} alt={stage.title} sizes='80px' />
-                <span className='min-w-0 flex-1'>
-                  <span className='text-muted-foreground block text-xs'>{t('stepLabel', { order: stage.order })}</span>
-                  <span className='block text-base font-semibold'>{stage.title}</span>
-                  <span className='text-muted-foreground line-clamp-2 block text-xs'>{stage.description}</span>
-                </span>
-                <span
-                  className={cn(
-                    'flex size-8 shrink-0 items-center justify-center rounded-full',
-                    open ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
-                  )}
-                  aria-hidden
+                <Photo className='w-40 shrink-0' src={stage.imageUrl} alt={stage.title} sizes='160px' />
+
+                <div className='flex min-w-0 flex-1 items-start gap-3 p-3 pr-12'>
+                  <span className='bg-primary/10 text-primary mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full'>
+                    <Icon className='size-5' />
+                  </span>
+                  <div className='min-w-0 space-y-1'>
+                    <p className='text-muted-foreground text-xs'>{t('stepLabel', { order: stage.order })}</p>
+                    <h4 className='text-lg leading-tight font-semibold'>{stage.title}</h4>
+                    <p className='text-muted-foreground line-clamp-2 text-xs leading-relaxed'>{stage.description}</p>
+                    {/* Hình 9: mỗi thẻ có liên kết "Xem cẩm nang →" ở dưới cùng. */}
+                    <button
+                      type='button'
+                      onClick={() => toggleStage(stage.id, stage.topics[0]?.id)}
+                      className='text-primary inline-flex items-center gap-1.5 pt-1 text-xs font-medium hover:underline'
+                    >
+                      {t('openStage')}
+                      <ArrowRight className='size-3.5' />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Nút ⊕ / ⊖ ở góc trên phải thẻ (Hình 9, Hình 10). */}
+                <button
+                  type='button'
+                  onClick={() => toggleStage(stage.id, stage.topics[0]?.id)}
+                  aria-expanded={open}
+                  aria-label={t('openStage')}
+                  className='bg-primary text-primary-foreground absolute top-3 right-3 flex size-8 items-center justify-center rounded-full transition-transform hover:scale-105'
                 >
                   {open ? <Minus className='size-4' /> : <Plus className='size-4' />}
-                </span>
-              </button>
+                </button>
+              </article>
             )
           })}
         </div>

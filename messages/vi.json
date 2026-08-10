@@ -418,7 +418,8 @@
       "stageHeading": "Cẩm nang {stage}",
       "articleCount": "({count} bài)",
       "readingTime": "{minutes} phút đọc",
-      "topicEmpty": "Chủ đề này chưa có bài viết."
+      "topicEmpty": "Chủ đề này chưa có bài viết.",
+      "openStage": "Xem cẩm nang"
     },
     "newsletter": {
       "title": "Bản tin SAVICO",
@@ -493,6 +494,17 @@
     },
     "read": {
       "badge": "Đã đọc"
+    },
+    "latest": {
+      "title": "Tin tức mới nhất",
+      "seeAll": "Xem tất cả",
+      "readingTime": "{minutes} phút đọc",
+      "categories": {
+        "experience": "Kinh nghiệm xây nhà",
+        "material": "Vật liệu",
+        "interior": "Nội thất",
+        "legal": "Pháp lý"
+      }
     }
   },
   "guide": {

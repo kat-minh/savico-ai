@@ -83,9 +83,10 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
 
         <h1 className='text-2xl font-semibold tracking-tight sm:text-3xl'>{template.name}</h1>
 
-        {/* Hình 7 và Hình 8: nút "Lưu mẫu" đứng ngay sau tag cuối. Đẩy nó ra
-            mép phải bằng `ml-auto` sẽ hở một khoảng lớn ở mẫu chỉ có 2 tag. */}
-        <div className='flex flex-wrap items-center gap-2'>
+        {/* Hình 7: nút "Lưu mẫu" canh mép phải của CỘT TRÁI, không phải mép
+            phải trang. Bề rộng khớp cột trái của lưới bên dưới (2.1fr trên
+            tổng 3.1fr, trừ nửa khoảng cách 1.5rem). */}
+        <div className='flex flex-wrap items-center gap-2 lg:w-[calc(67.74%-1.02rem)]'>
           <Badge variant='secondary'>{template.specs.buildingTypeLabel}</Badge>
           {template.kind === '3d' ? <Badge variant='secondary'>{template.styleLabel}</Badge> : null}
           <Badge variant='secondary'>{template.specs.floorLabel}</Badge>
@@ -104,19 +105,20 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
               imageUrl: template.imageUrl ?? template.floors[0]?.imageUrl ?? '',
               tagLabel: template.styleLabel
             }}
-            className='ml-1'
+            className='ml-auto'
           />
         </div>
       </div>
 
-      <div className='grid gap-6 lg:grid-cols-[1.6fr_1fr]'>
+      <div className='grid gap-6 lg:grid-cols-[2.1fr_1fr]'>
         <section className='bg-card space-y-4 rounded-2xl border p-4'>
           <TemplateFigure
             template={template}
             floor={activeFloor}
             // Bản vẽ nhà phố nằm ngang nên khung 16/9 để thừa hai dải trắng
             // rất lớn; mẫu 3D vẫn dùng 16/9 vì là ảnh chụp.
-            className={cn('w-full rounded-xl border', template.kind === '2d' ? 'aspect-[12/5]' : 'aspect-16/9')}
+            className={cn('w-full rounded-xl border', template.kind === '3d' && 'aspect-16/9')}
+            autoHeight={template.kind === '2d'}
             sizes='(max-width: 1024px) 100vw, 720px'
             priority
             watermark
@@ -185,7 +187,7 @@ function TemplateDetailSkeleton() {
     <div className='space-y-6'>
       <Skeleton className='h-5 w-64' />
       <Skeleton className='h-9 w-96 max-w-full' />
-      <div className='grid gap-6 lg:grid-cols-[1.6fr_1fr]'>
+      <div className='grid gap-6 lg:grid-cols-[2.1fr_1fr]'>
         <Skeleton className='aspect-16/9 w-full rounded-2xl' />
         <Skeleton className='h-80 rounded-2xl' />
       </div>

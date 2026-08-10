@@ -8,15 +8,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import type { HandbookPageTab } from '../types/handbook.types'
 import { ArticleList } from './article-list'
 import { FoundationBlock } from './foundation-block'
+import { LatestNews } from './latest-news'
 import { NewsletterBlock } from './newsletter-block'
 import { TemplateLibrary } from './template-library'
 
 /**
  * Trang Cẩm nang — hai tab lớn (Hình 5 và Hình 9).
  *
- * "Thư viện mẫu" gom mẫu bản vẽ 2D và mẫu nội thất 3D; "Tin tức" gom cẩm nang
- * nền tảng (kiến thức có cấu trúc cố định) và dòng bài cập nhật theo thời điểm.
+ * "Tin tức" gom cẩm nang nền tảng (kiến thức có cấu trúc cố định) và dòng bài
+ * cập nhật theo thời điểm; "Thư viện mẫu" gom mẫu bản vẽ 2D và mẫu nội thất 3D.
  * Cả hai mở cho mọi người xem, không cần tạo dự án.
+ *
+ * Thứ tự tab và tab mặc định theo Hình 9. Hình 5/6/11 vẽ ngược lại — bộ ảnh tự
+ * mâu thuẫn, chọn theo Hình 9 vì đó là hình mô tả chính trang Cẩm nang.
  *
  * Tab đang mở nằm ở `?tab=` chứ không phải state cục bộ: người dùng gửi link
  * cho nhau phải mở đúng tab, và nút Back của trình duyệt phải quay lại được.
@@ -27,11 +31,11 @@ export function HandbookBrowser() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const tab: HandbookPageTab = searchParams.get('tab') === 'news' ? 'news' : 'library'
+  const tab: HandbookPageTab = searchParams.get('tab') === 'library' ? 'library' : 'news'
 
   function selectTab(value: string) {
-    // `library` là mặc định nên không cần nằm trong URL — giữ link ngắn gọn.
-    const query = value === 'news' ? '?tab=news' : ''
+    // `news` là tab mặc định (Hình 9) nên không cần nằm trong URL.
+    const query = value === 'library' ? '?tab=library' : ''
     router.replace(`${pathname}${query}`, { scroll: false })
   }
 
@@ -43,7 +47,7 @@ export function HandbookBrowser() {
         {/* Tab gạch chân theo Hình 5 / Hình 11, không dùng kiểu viên thuốc mặc
             định của shadcn: đây là điều hướng cấp trang, không phải bộ lọc. */}
         <TabsList className='h-auto w-full justify-start gap-7 rounded-none border-b bg-transparent p-0'>
-          {(['library', 'news'] as const).map((value) => (
+          {(['news', 'library'] as const).map((value) => (
             <TabsTrigger
               key={value}
               value={value}
@@ -63,6 +67,7 @@ export function HandbookBrowser() {
 
         <TabsContent value='news' className='mt-6 space-y-6'>
           <FoundationBlock />
+          <LatestNews />
           <NewsletterBlock />
           <ArticleList />
         </TabsContent>

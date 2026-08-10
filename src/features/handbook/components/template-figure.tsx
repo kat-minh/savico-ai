@@ -11,6 +11,8 @@ interface TemplateFigureProps {
   priority?: boolean
   /** Đóng dấu bản quyền SAVICO — bật ở ảnh lớn, tắt ở thumbnail. */
   watermark?: boolean
+  /** Bản vẽ tự cao theo tỷ lệ lô thay vì lấp đầy khung tỷ lệ cố định. */
+  autoHeight?: boolean
 }
 
 /**
@@ -20,7 +22,15 @@ interface TemplateFigureProps {
  * SVG (`PlanDrawing`) theo `planVariant` của tầng — cùng một component sẽ hiển
  * thị ảnh thật ngay khi admin tải bản vẽ lên, không phải sửa nơi gọi.
  */
-export function TemplateFigure({ template, floor, className, sizes, priority, watermark }: TemplateFigureProps) {
+export function TemplateFigure({
+  template,
+  floor,
+  className,
+  sizes,
+  priority,
+  watermark,
+  autoHeight
+}: TemplateFigureProps) {
   const target = floor ?? template.floors[0]
   const src = floor?.imageUrl ?? (floor ? undefined : template.imageUrl) ?? target?.imageUrl
 
@@ -54,6 +64,8 @@ export function TemplateFigure({ template, floor, className, sizes, priority, wa
       ratio={lot ? lot.depth / lot.frontage : undefined}
       dimensions={lot ? { width: toMillimetres(lot.depth), depth: toMillimetres(lot.frontage) } : undefined}
       watermark={watermark}
+      paper={false}
+      autoHeight={autoHeight}
       seed={`${template.id}-${target?.id ?? ''}`}
     />
   )
