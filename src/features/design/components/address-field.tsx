@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/
 import { useGetProvinces, useGetWards } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import type { AddressDetail } from '../types/design.types'
-import { FieldLabel } from './field-label'
+import { FieldLabel } from '@/shared/components/common'
 
 interface AddressFieldProps {
   value: AddressDetail

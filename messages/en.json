@@ -127,7 +127,7 @@
     "passwordMin": "Password must be at least {min} characters",
     "passwordMismatch": "Passwords do not match",
     "agreeTerms": "You must agree to the terms",
-    "phone": "Enter a valid phone number",
+    "phone": "Invalid phone number (10 digits starting with 0, or +84)",
     "positiveNumber": "Enter a number greater than 0"
   },
   "legal": {
@@ -236,7 +236,8 @@
     "menu": "Menu",
     "guest": "Guest",
     "guestHint": "Sign in to save and revisit your projects",
-    "plans": "Pricing"
+    "plans": "Pricing",
+    "consult": "1:1 consulting"
   },
   "footer": {
     "tagline": "SAVICO's AI platform turns one photo of your lot into drawings, 3D renders and a full cost estimate in minutes — with regional unit prices and a SAVICO architect alongside you.",
@@ -475,12 +476,7 @@
       }
     },
     "consult": {
-      "cta": "Book a 1:1 consultation",
-      "title": "Book a 1:1 consultation",
-      "subtitle": "A SAVICO architect will advise you on your specific project.",
-      "call": "Call {hotline}",
-      "zalo": "Chat on Zalo",
-      "note": "Free consultation during working hours: Mon – Sat, 8:00 – 17:30."
+      "cta": "Book a 1:1 consultation"
     },
     "panel": {
       "title": "Handbook for your project",
@@ -1047,6 +1043,70 @@
       "basic": "Basic",
       "advanced": "Advanced",
       "pro": "Pro"
+    }
+  },
+  "consult": {
+    "directory": {
+      "title": "1:1 consulting with SAVICO architects",
+      "subtitle": "Book for free - an architect calls to advise you directly.",
+      "searchPlaceholder": "Search architects by name or expertise...",
+      "specialty": "Expertise",
+      "allSpecialties": "All expertise",
+      "count": "{count} architects",
+      "lead": "Pick the architect you want to talk to",
+      "empty": {
+        "title": "No matching architect",
+        "description": "Try another keyword or pick a different expertise."
+      }
+    },
+    "card": {
+      "experience": "{years} years of experience",
+      "projects": "{count}+ projects",
+      "viewProfile": "View profile"
+    },
+    "rail": {
+      "searchPlaceholder": "Search architects..."
+    },
+    "profile": {
+      "reviews": "({count} reviews)",
+      "experience": "{years}+ years of experience",
+      "specialtyPrefix": "Expertise: {value}",
+      "bookCta": "Book a consultation",
+      "notFound": "Architect not found"
+    },
+    "slots": {
+      "title": "Choose a consultation slot",
+      "session": {
+        "morning": "Morning",
+        "afternoon": "Afternoon"
+      },
+      "full": "Full",
+      "weekday": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
+    },
+    "booking": {
+      "title": "Confirm your consultation",
+      "phoneLabel": "Contact phone number",
+      "phoneHint": "The number the architect calls back. Prefilled from your account; change it to take the call on another number.",
+      "phonePlaceholder": "e.g. 0905 123 456",
+      "phoneNote": "The architect will call you on this number",
+      "noteLabel": "Note (optional)",
+      "noteHint": "Tell the architect what you need up front: building type, floor area, expected budget.",
+      "notePlaceholder": "e.g. townhouse 5×20m, budget 1.8 billion VND",
+      "submit": "Confirm booking",
+      "successToast": "Booked - SAVICO will call to confirm within 24 working hours."
+    },
+    "home": {
+      "title": "1:1 consulting with SAVICO architects",
+      "subtitle": "Book for free - an architect calls to advise you directly",
+      "cta": "Book a free consultation"
     }
   }
 }

@@ -107,6 +107,25 @@ export const STAGE_IMAGE = {
 } as const
 
 /**
+ * Ảnh chân dung kiến trúc sư của trang Tư vấn 1:1 (mục VIII.1, Hình 14).
+ * Toàn bộ là ảnh SEED — admin tải ảnh thật của KTS lên và thay ở mục X, #5.
+ */
+export const PORTRAIT_IMAGE = {
+  /** Nam, vest tối — KTS trưởng. */
+  man1: photo('photo-1560250097-0b93528c311a', 600),
+  /** Nam, chân dung sáng. */
+  man2: photo('photo-1507003211169-0a1dd7228f2d', 600),
+  /** Nam, đeo kính. */
+  man3: photo('photo-1568602471122-7832951cc4c5', 600),
+  /** Nữ, trang phục công sở. */
+  woman1: photo('photo-1573496359142-b8d87734a5a2', 600),
+  /** Nữ, chân dung sáng. */
+  woman2: photo('photo-1580489944761-15a19d654956', 600),
+  /** Nữ, chân dung ngoài trời. */
+  woman3: photo('photo-1544005313-94ddf0286df2', 600)
+} as const
+
+/**
  * Phối cảnh 3D mẫu — model kiến trúc trắng, ảnh dựng sẵn trong `/public`.
  * Dùng ở khung minh họa trang chủ và thẻ xem trước hồ sơ.
  */

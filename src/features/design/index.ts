@@ -86,7 +86,6 @@ export {
 } from './services/estimate-xlsx.service'
 
 // Schemas
-export { isValidPhone, normalizePhone } from './schemas/phone.schema'
 export {
   createProjectSchema,
   PROJECT_NAME_MAX_LENGTH,

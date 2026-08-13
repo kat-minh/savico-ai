@@ -6,7 +6,7 @@ import { Slider } from '@/shared/components/ui/slider'
 import { cn } from '@/shared/lib/utils'
 import { PACKAGE_TIERS } from '../constants/design.constants'
 import type { PackageTier } from '../types/design.types'
-import { FieldLabel } from './field-label'
+import { FieldLabel } from '@/shared/components/common'
 
 interface PackageSliderProps {
   value: PackageTier

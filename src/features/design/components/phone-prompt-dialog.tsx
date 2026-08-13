@@ -9,7 +9,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
-import { isValidPhone, normalizePhone } from '../schemas/phone.schema'
+import { isValidPhone, normalizePhone } from '@/shared/utils'
 
 interface PhonePromptDialogProps {
   open: boolean

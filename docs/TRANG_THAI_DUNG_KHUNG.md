@@ -3,6 +3,11 @@
 Đối chiếu 11 màn hình ở [MO_TA_GIAO_DIEN.md](./MO_TA_GIAO_DIEN.md) mục V với code hiện có.
 Cập nhật file này mỗi khi hoàn thiện một màn hình.
 
+> Trang **Tư vấn 1:1** (dòng 12, 13, 13a) dựng theo **mục VIII, Hình 14–16** của bản
+> "Mô tả giao diện web SAVICO **v2.0 — 05/08/2026**" (bản Bên A gửi qua Google Docs,
+> chưa đưa vào repo). Bản v2.0 cũng thêm section Tư vấn 1:1 ở trang chủ (mục III.2)
+> và mục "Tư vấn 1:1" trên thanh công cụ (mục II.1) — cả hai đã làm.
+
 ## Bản đồ màn hình → route → code
 
 | # | Màn hình | Route | Code chính | Trạng thái |
@@ -20,6 +25,9 @@ Cập nhật file này mỗi khi hoàn thiện một màn hình.
 | 9 | Bước 3 — màn chờ render | `/design/[projectId]/dossier` | `GenerationWaiting` (flow `dossier`) | Dùng lại bố cục Bước 2, panel đổi sang mẫu **nội thất 3D**, 3 thanh tiến trình kèm số n/N |
 | 10 | Bước 3 — hoàn tất | `/design/[projectId]/dossier` | `DossierReady` + `DossierShareDialog` | 4 nút đã chạy: tải PDF thật, link chia sẻ, QR, gửi email (mock) |
 | 11 | Cửa sổ cá nhân | `/account` | `features/account` + `MyProjects` (từ `features/design`) | Đủ 3 khu vực |
+| 12 | Tư vấn 1:1 — danh sách KTS | `/consult` | `features/consultation` (`ConsultantDirectory` + `ConsultantCard`) | Tìm + lọc chuyên môn, đếm KTS, lưới 3 cột; danh sách nhóm theo chuyên môn |
+| 13 | Tư vấn 1:1 — hồ sơ + chọn giờ | `/consult/[consultantId]` | `ConsultantDetail` = `ConsultantRail` + `ConsultantProfile` + `SlotPicker` | Cột trái danh sách thu gọn, hồ sơ + 4 ảnh công trình, chip 7 ngày, slot 30 phút, slot kín hiện "Kín" |
+| 13a | Modal xác nhận đặt lịch | (modal) | `BookingDialog` | Dòng tóm tắt KTS · thứ ngày · khung giờ, SĐT (i) + ghi chú, toast góc phải trên, slot vừa đặt chuyển "Kín" |
 | — | Xem hồ sơ qua link | `/share/[token]` | `SharedDossierView` | Đọc-chỉ: thông tin dự án + bảng dự toán 3 phần; token sai → trạng thái hết hạn |
 
 ## Việc còn lại (theo thứ tự ưu tiên)
@@ -34,7 +42,10 @@ Cập nhật file này mỗi khi hoàn thiện một màn hình.
 5. **Gửi email thật** — `sendDossierEmail` đang là mock, backend cần gửi kèm link chia sẻ.
 6. **Link chia sẻ dùng được liên phiên** — mock giữ dữ liệu trong bộ nhớ tab nên link chỉ mở được ở chính tab đã tạo; backend cấp token thật sẽ hết vấn đề.
 7. **Hạn mức Cẩm nang theo ngày** — `useHandbookQuota` chờ backend trả `{lookupRemaining, lookupTotal, detailRemaining, detailTotal}` reset mỗi ngày; chưa định nghĩa cách đếm cho khách chưa đăng nhập (xem MO_TA_CAM_NANG.md, phần III).
-8. **Đặt lịch tư vấn 1:1** — `POST /handbook/consultations` đang là mock; cần chốt nơi nhận yêu cầu.
+8. **Tư vấn 1:1 — phần backend** (màn hình đã dựng xong theo mục VIII của bản mô tả giao diện v2.0, Hình 14–16):
+   - `GET /consultants`, `GET /consultants/{id}`, `GET /consultants/{id}/availability`, `POST /consultations` đang chạy mock; lịch trống 7 ngày và slot "Kín" do mock sinh theo băm cố định.
+   - **SMS xác nhận sau khi đặt lịch (mục VIII.4)** là việc của backend: gửi SMS cho khách + báo lịch mới cho KTS / quản trị; Bên B còn phải đề xuất nhà cung cấp SMS brandname (mục XII.5).
+   - Hồ sơ KTS, danh mục chuyên môn, lịch làm việc (khóa / mở slot) và danh sách lịch đã đặt do admin quản lý (mục X, #5) — ảnh chân dung hiện là ảnh seed trong `shared/lib/imagery.ts` (`PORTRAIT_IMAGE`).
 9. **Trang quản trị (admin)** — spec mục VI nói dữ liệu cẩm nang do admin biên soạn nhưng không có màn hình admin trong danh mục. Code admin cũ vẫn còn nguyên ở `../bmt/src/app/[locale]/(admin)/` nếu cần bê sang.
 
 ## Quyết định kiến trúc đáng lưu ý

@@ -9,7 +9,7 @@ import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { LAND_PHOTO_ACCEPT, LAND_PHOTO_MAX_BYTES } from '../constants/design.constants'
 import type { BuildingType } from '../types/design.types'
-import { FieldLabel } from './field-label'
+import { FieldLabel } from '@/shared/components/common'
 
 interface LandPhotoFieldProps {
   value: string | null

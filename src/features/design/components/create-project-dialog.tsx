@@ -19,7 +19,7 @@ import {
   type CreateProjectFormValues
 } from '../schemas/create-project.schema'
 import { useDesignStore } from '../store/design.store'
-import { FieldLabel } from './field-label'
+import { FieldLabel } from '@/shared/components/common'
 
 /**
  * Cửa sổ Tạo dự án (mục III.1) — hiện trước Bước 1.

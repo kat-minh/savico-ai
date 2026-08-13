@@ -2,6 +2,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
 import { HomeSteps } from '@/features/landing'
+import { ConsultantHighlights } from '@/features/consultation'
 import { GuideHighlights } from '@/features/guide'
 import { HomeBackdrop } from './home-backdrop'
 import { HomeHeroSection } from './home-hero-section'
@@ -21,6 +22,8 @@ export default async function HomePage({ params }: PageProps) {
       <HomeHeroSection />
       <HomeSteps />
       <GuideHighlights />
+      {/* ★ Section Tư vấn 1:1 (mục III.2) — khối chuyển đổi cuối trang chủ. */}
+      <ConsultantHighlights />
     </div>
   )
 }

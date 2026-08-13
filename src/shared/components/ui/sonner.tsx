@@ -14,6 +14,9 @@ function Toaster({ ...props }: ToasterProps) {
     <Sonner
       theme={theme as ToasterProps['theme']}
       className='toaster group'
+      // Góc phải TRÊN theo Hình 16 (mục VIII.3) — cũng tránh che nút chatbox nổi
+      // và các nút hành động chính nằm ở đáy màn hình.
+      position='top-right'
       richColors
       closeButton
       style={

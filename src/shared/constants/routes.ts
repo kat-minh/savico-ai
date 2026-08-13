@@ -13,6 +13,7 @@ export const ROUTES = {
   HANDBOOK: '/handbook', // 2. Cẩm nang
   GUIDE: '/guide', // 3. Hướng dẫn
   PLANS: '/plans', // Gói đăng ký (mục VII)
+  CONSULT: '/consult', // Tư vấn 1:1 (mục VIII)
   TERMS: '/terms',
   PRIVACY: '/privacy',
 
@@ -35,6 +36,9 @@ export const handbookTemplateRoute = (id: string) => `${ROUTES.HANDBOOK}/mau/${i
 
 /** Trang bài viết trong Cẩm nang / Tin tức. */
 export const handbookArticleRoute = (slug: string) => `${ROUTES.HANDBOOK}/bai-viet/${slug}`
+
+/** Hồ sơ một kiến trúc sư + khối chọn khung giờ tư vấn (mục VIII.2). */
+export const consultantRoute = (consultantId: string) => `${ROUTES.CONSULT}/${consultantId}`
 
 /** Bước 1 — Nhập liệu. */
 export const designInputRoute = (projectId: string) => `${ROUTES.DESIGN}/${projectId}/input`

@@ -2,6 +2,10 @@
  * Số điện thoại liên lạc (mục IV.3.d): 10 chữ số bắt đầu bằng 0, hoặc dạng
  * +84 bỏ số 0 đầu. Chấp nhận khoảng trắng / dấu chấm / gạch nối khi người dùng
  * gõ, nhưng chuẩn hóa về dạng liền trước khi lưu.
+ *
+ * Nằm ở `shared/` vì hai feature dùng chung: modal "Bổ sung số điện thoại" của
+ * Bước 1 (`features/design`) và modal xác nhận đặt lịch tư vấn
+ * (`features/consultation`, mục VIII.3) — hai feature không được import lẫn nhau.
  */
 const VN_PHONE = /^(0\d{9}|\+84\d{9})$/
 

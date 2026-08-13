@@ -127,7 +127,7 @@
     "passwordMin": "Mật khẩu phải có ít nhất {min} ký tự",
     "passwordMismatch": "Mật khẩu xác nhận không khớp",
     "agreeTerms": "Bạn cần đồng ý với điều khoản",
-    "phone": "Số điện thoại không hợp lệ",
+    "phone": "Số điện thoại chưa đúng định dạng (10 số bắt đầu bằng 0 hoặc +84)",
     "positiveNumber": "Nhập một số lớn hơn 0"
   },
   "legal": {
@@ -236,7 +236,8 @@
     "menu": "Menu",
     "guest": "Khách",
     "guestHint": "Đăng nhập để lưu và xem lại dự án của bạn",
-    "plans": "Gói đăng ký"
+    "plans": "Gói đăng ký",
+    "consult": "Tư vấn 1:1"
   },
   "footer": {
     "tagline": "Nền tảng AI của SAVICO giúp bạn dựng thiết kế, phối cảnh 3D và dự toán chi phí xây nhà chỉ trong vài phút. Hồ sơ thi công đầy đủ, đơn giá theo khu vực, có kiến trúc sư SAVICO đồng hành.",
@@ -475,12 +476,7 @@
       }
     },
     "consult": {
-      "cta": "Đặt lịch tư vấn 1:1",
-      "title": "Đặt lịch tư vấn 1:1",
-      "subtitle": "Kiến trúc sư SAVICO sẽ tư vấn trực tiếp theo đúng công trình của bạn.",
-      "call": "Gọi ngay {hotline}",
-      "zalo": "Chat Zalo",
-      "note": "Tư vấn miễn phí trong giờ làm việc: Thứ 2 – Thứ 7, 8:00 – 17:30."
+      "cta": "Đặt lịch tư vấn 1:1"
     },
     "panel": {
       "title": "Cẩm nang cho dự án của bạn",
@@ -1047,6 +1043,70 @@
       "basic": "Cơ bản",
       "advanced": "Nâng cao",
       "pro": "Pro"
+    }
+  },
+  "consult": {
+    "directory": {
+      "title": "Tư vấn 1:1 cùng kiến trúc sư SAVICO",
+      "subtitle": "Đặt lịch miễn phí - kiến trúc sư gọi tư vấn trực tiếp cho bạn.",
+      "searchPlaceholder": "Tìm kiến trúc sư theo tên hoặc chuyên môn...",
+      "specialty": "Chuyên môn",
+      "allSpecialties": "Tất cả chuyên môn",
+      "count": "{count} kiến trúc sư",
+      "lead": "Chọn kiến trúc sư bạn muốn trao đổi",
+      "empty": {
+        "title": "Không tìm thấy kiến trúc sư phù hợp",
+        "description": "Thử đổi từ khóa tìm kiếm hoặc chọn chuyên môn khác."
+      }
+    },
+    "card": {
+      "experience": "{years} năm kinh nghiệm",
+      "projects": "{count}+ công trình",
+      "viewProfile": "Xem hồ sơ"
+    },
+    "rail": {
+      "searchPlaceholder": "Tìm kiến trúc sư..."
+    },
+    "profile": {
+      "reviews": "({count} đánh giá)",
+      "experience": "{years}+ năm kinh nghiệm",
+      "specialtyPrefix": "Chuyên: {value}",
+      "bookCta": "Đặt lịch tư vấn",
+      "notFound": "Không tìm thấy kiến trúc sư này"
+    },
+    "slots": {
+      "title": "Chọn khung giờ tư vấn",
+      "session": {
+        "morning": "Sáng",
+        "afternoon": "Chiều"
+      },
+      "full": "Kín",
+      "weekday": {
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7",
+        "sun": "CN"
+      }
+    },
+    "booking": {
+      "title": "Xác nhận đặt lịch tư vấn",
+      "phoneLabel": "Số điện thoại liên lạc",
+      "phoneHint": "Số để kiến trúc sư gọi lại. Mặc định lấy theo tài khoản, bạn sửa được nếu muốn nhận cuộc gọi ở số khác.",
+      "phonePlaceholder": "VD: 0905 123 456",
+      "phoneNote": "Kiến trúc sư sẽ gọi cho bạn qua số này",
+      "noteLabel": "Ghi chú (không bắt buộc)",
+      "noteHint": "Nói trước nhu cầu để kiến trúc sư chuẩn bị: loại công trình, diện tích, ngân sách dự kiến.",
+      "notePlaceholder": "VD: cần tư vấn nhà phố 5×20m, ngân sách 1,8 tỷ",
+      "submit": "Xác nhận đặt lịch",
+      "successToast": "Đặt lịch thành công - SAVICO sẽ gọi xác nhận trong 24h làm việc."
+    },
+    "home": {
+      "title": "Tư vấn 1:1 cùng kiến trúc sư SAVICO",
+      "subtitle": "Đặt lịch miễn phí - kiến trúc sư gọi tư vấn trực tiếp cho bạn",
+      "cta": "Đặt lịch tư vấn miễn phí"
     }
   }
 }
