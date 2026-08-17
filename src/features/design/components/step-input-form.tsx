@@ -11,17 +11,16 @@ import { ROUTES } from '@/shared/constants/routes'
 import { Button } from '@/shared/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { STYLE_IMAGE } from '@/shared/lib/imagery'
 import { cn } from '@/shared/lib/utils'
-import { BUILDING_TYPES, FLOOR_COUNTS, WISHES_MAX_LENGTH } from '../constants/design.constants'
+import { FLOOR_COUNTS, WISHES_MAX_LENGTH } from '../constants/design.constants'
 import {
   composeAddress,
   EMPTY_DESIGN_INPUT,
   missingRequiredFields,
-  stylesFor,
   visibleFields,
   type RequiredInputField
 } from '../services/design-input.service'
+import { useDesignCatalog } from '../hooks/use-design-catalog'
 import { useDesignQuota } from '../hooks/use-design-quota'
 import { useSaveInput } from '../hooks/use-save-input'
 import { useDesignStore } from '../store/design.store'
@@ -64,6 +63,8 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
   const patchDraft = useDesignStore((s) => s.patchDraft)
   const setBuildingType = useDesignStore((s) => s.setBuildingType)
   const saveInput = useSaveInput(projectId)
+  // Loại công trình + phong cách do admin cấu hình (mục X, #6).
+  const catalog = useDesignCatalog(draft.buildingType)
   const { data: quota } = useDesignQuota()
   const phone = useAuthStore((s) => s.user?.phone)
 
@@ -86,11 +87,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
     { value: 'no', label: t('attic.options.no') }
   ]
   // Thẻ ảnh chọn nhanh — danh mục đổi theo loại công trình (Phụ lục A).
-  const styleOptions: ChoiceOption[] = stylesFor(draft.buildingType).map((value) => ({
-    value,
-    label: t(`style.options.${value}`),
-    imageUrl: STYLE_IMAGE[value]
-  }))
+  const styleOptions: ChoiceOption[] = catalog.styles
 
   /** Ghi Bước 1 lên server rồi mới sang màn chờ Bước 2. */
   function save() {
@@ -183,9 +180,9 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                   <SelectValue placeholder={t('buildingType.placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {BUILDING_TYPES.map((value) => (
-                    <SelectItem key={value} value={value}>
-                      {t(`buildingType.options.${value}`)}
+                  {catalog.buildingTypes.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -1,5 +1,5 @@
 import { DEFAULT_PACKAGE_TIER, FIELDS_BY_BUILDING_TYPE, STYLES_BY_BUILDING_TYPE } from '../constants/design.constants'
-import type { BuildingType, DesignInput, DesignStyle } from '../types/design.types'
+import type { BuildingType, DesignInput } from '../types/design.types'
 
 /**
  * Frozen empty Bước 1 state — gói Tiêu chuẩn được chọn sẵn (mục III.2, trường 6).
@@ -39,11 +39,6 @@ export function composeAddress(detail: DesignInput['addressDetail']): string {
 export function visibleFields(buildingType: BuildingType | null) {
   if (!buildingType) return { floorCount: false, attic: false }
   return FIELDS_BY_BUILDING_TYPE[buildingType]
-}
-
-/** Danh mục phong cách của loại công trình đang chọn (Phụ lục A, bảng cuối). */
-export function stylesFor(buildingType: BuildingType | null): readonly DesignStyle[] {
-  return buildingType ? STYLES_BY_BUILDING_TYPE[buildingType] : []
 }
 
 /**

@@ -45,7 +45,6 @@ export {
   EMPTY_DESIGN_INPUT,
   emptyDesignInput,
   composeAddress,
-  stylesFor,
   visibleFields,
   applyBuildingTypeChange,
   missingRequiredFields,
