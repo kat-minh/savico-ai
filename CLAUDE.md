@@ -52,9 +52,11 @@ app/ (routes)  →  features/ (business)  →  shared/ (reusable infra & UI)
 
 **Feature anatomy** (`features/design` is the canonical template): each feature is a vertical slice with `api/` (`*.api.ts` thin fns + `*.keys.ts` query-key factory + `*.mock.ts`), `components/`, `hooks/` (TanStack Query + custom), `schemas/` (Zod), `services/` (pure, no React/HTTP), `store/` (feature-scoped Zustand), `types/`, `constants/`, and a single `index.ts` public surface.
 
-Current features: `auth`, `design` (luồng 3 bước), `handbook` (Cẩm nang + panel cá nhân hóa), `guide` (Hướng dẫn), `landing` (trang chủ), `account`, `chatbot`.
+Current features: `auth`, `design` (luồng 3 bước), `handbook` (Cẩm nang + panel cá nhân hóa), `guide` (Hướng dẫn), `landing` (trang chủ), `consultation` (Tư vấn 1:1), `plans` (Gói đăng ký), `account`, `chatbot`, `admin` (khu quản trị).
 
-**Composing across features**: two features that must appear together are joined at the **app layer**, never by importing each other. Two patterns in use — a `ReactNode` slot prop (the Bước 2/3 waiting screen takes `sidePanel`, the app passes `features/handbook`'s panel), and a page composing both barrels (`/account` renders `features/account` + `features/design`'s `MyProjects`). Genuinely cross-cutting state goes to `shared/` instead: `shared/auth` and `shared/favorite` (the ♥ toggle, mục VI).
+**Composing across features**: two features that must appear together are joined at the **app layer**, never by importing each other. Two patterns in use — a `ReactNode` slot prop (the Bước 2/3 waiting screen takes `sidePanel`, the app passes `features/handbook`'s panel), and a page composing both barrels (`/account` renders `features/account` + `features/design`'s `MyProjects`). Genuinely cross-cutting state goes to `shared/` instead: `shared/auth`, `shared/favorite` (the ♥ toggle, mục VI) and `shared/cms` — the content store `features/admin` writes to and the public features read from (localStorage while there is no backend; swap the body of `cmsDb` for HTTP calls when the API lands).
+
+**Admin area**: `app/[locale]/(admin)` is an isolated route group — its layout wraps `AntdProvider` → `ProtectedRoute` → `AdminGuard`, so **Ant Design is only bundled there** and the public site stays Tailwind + shadcn. New admin screens are declarations, not layouts: `ResourceManager` (table + search + drawer form) for collections, `DocumentEditor` for single documents.
 
 **State**: server state → TanStack Query (each feature owns a hierarchical key factory for safe invalidation); client/UI state → feature-scoped Zustand. The only cross-cutting store is auth (`shared/auth`).
 
