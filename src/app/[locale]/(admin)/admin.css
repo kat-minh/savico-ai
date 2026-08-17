@@ -1,0 +1,83 @@
+/* =============================================================================
+ * Khu quản trị — chỉ nạp trong route group `(admin)`.
+ *
+ * Ant Design dùng CSS-in-JS còn site công khai dùng Tailwind v4. Hai hệ sống
+ * chung được vì preflight của Tailwind nằm trong `@layer base`, mà style không
+ * layer (antd) luôn thắng style có layer — không cần hack đè ngược.
+ *
+ * File này chỉ khai:
+ *   1. Biến màu để style inline của khu này đọc chung một nguồn và tự đổi theo
+ *      light/dark do next-themes bật trên <html>.
+ *   2. Màu chữ cho `Link` của next-intl khi nằm trong component antd — link
+ *      thừa hưởng màu của site, trong menu/thẻ phải để antd quyết định.
+ *   3. Cách cuộn của menu trái — thứ Sider không tự lo.
+ * ========================================================================== */
+
+:root {
+  --admin-border: rgba(5, 5, 5, 0.08);
+  --admin-tint: #ecfdf3;
+  --admin-placeholder: #eef1ee;
+  --admin-muted: rgba(5, 5, 5, 0.35);
+}
+
+.dark {
+  --admin-border: rgba(255, 255, 255, 0.12);
+  --admin-tint: rgba(22, 163, 74, 0.16);
+  --admin-placeholder: rgba(255, 255, 255, 0.08);
+  --admin-muted: rgba(255, 255, 255, 0.4);
+}
+
+.ant-menu a,
+.ant-menu a:hover,
+.ant-card a,
+.ant-card a:hover,
+.ant-layout-header a {
+  color: inherit;
+}
+
+/* -----------------------------------------------------------------------------
+ * Menu trái cuộn riêng.
+ *
+ * Sider dính đỉnh và cao đúng 100svh, nhưng logo + 14 mục menu cao hơn màn hình
+ * 730px — mà Sider không tự cuộn, nên các mục cuối (Dự án, Người dùng, Danh mục,
+ * Đơn giá) bị cắt và phải cuộn cả trang mới với tới. Cho phần menu cuộn riêng,
+ * logo đứng yên.
+ * -------------------------------------------------------------------------- */
+.ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-layout-sider-children > .ant-menu {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* Thu gọn: nhãn nhóm không còn chỗ nên bị cắt cụt ("Tổng q…") — bỏ hẳn, thay
+   bằng một vạch ngăn giữa các nhóm. */
+.ant-layout-sider-collapsed .ant-menu-item-group-title {
+  display: none;
+}
+
+.ant-layout-sider-collapsed .ant-menu-item-group + .ant-menu-item-group {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--admin-border);
+}
+
+/* Tiêu đề nhóm trong form (Divider có chữ) — antd chừa sẵn một đoạn gạch 5%
+   trước chữ, nhìn như bị lỗi hơn là có chủ đích. Bỏ đoạn gạch đó để tiêu đề
+   thẳng hàng với nhãn của các trường bên dưới. */
+.ant-divider-with-text-start .ant-divider-rail-start {
+  display: none;
+}
+
+/* Nhãn "Nội dung" cạnh công tắc ngôn ngữ — ẩn khi hẹp để thanh trên không vỡ. */
+@media (max-width: 720px) {
+  .admin-hide-sm {
+    display: none;
+  }
+}

@@ -1,8 +1,11 @@
+'use client'
+
 import { Clock, Facebook, Mail, MapPin, Phone, Youtube } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import { cmsText, useCmsDocument } from '@/shared/cms'
 import { TikTokIcon, Logo, ZaloIcon } from '@/shared/components/common'
 import { siteConfig } from '@/shared/config/site'
 import { cn } from '@/shared/lib/utils'
@@ -76,12 +79,27 @@ export function SiteFooter({ createProjectAction }: SiteFooterProps = {}) {
   const t = useTranslations('footer')
   const year = new Date().getFullYear()
   const { contact, social, legal } = siteConfig
+  // Nội dung liên hệ / mạng xã hội / pháp lý do admin sửa (mục X). Chưa sửa thì
+  // rơi về hằng số trong `shared/config/site.ts` và bản dịch i18n.
+  const settings = useCmsDocument('settings')
+
+  const hotline = cmsText(settings.hotline, contact.hotline)
+  const email = cmsText(settings.email, contact.email)
+  const zaloUrl = cmsText(settings.zaloUrl, contact.zaloUrl)
 
   const socialLinks = [
-    { href: social.facebookUrl, label: t('social.facebook'), icon: <Facebook className='size-4' /> },
-    { href: social.zaloOaUrl, label: t('social.zaloOa'), icon: <ZaloIcon /> },
-    { href: social.youtubeUrl, label: t('social.youtube'), icon: <Youtube className='size-4' /> },
-    { href: social.tiktokUrl, label: t('social.tiktok'), icon: <TikTokIcon /> }
+    {
+      href: cmsText(settings.facebookUrl, social.facebookUrl),
+      label: t('social.facebook'),
+      icon: <Facebook className='size-4' />
+    },
+    { href: cmsText(settings.zaloUrl, social.zaloOaUrl), label: t('social.zaloOa'), icon: <ZaloIcon /> },
+    {
+      href: cmsText(settings.youtubeUrl, social.youtubeUrl),
+      label: t('social.youtube'),
+      icon: <Youtube className='size-4' />
+    },
+    { href: cmsText(settings.tiktokUrl, social.tiktokUrl), label: t('social.tiktok'), icon: <TikTokIcon /> }
   ]
 
   const pendingLabel = t('comingSoon')
@@ -93,7 +111,9 @@ export function SiteFooter({ createProjectAction }: SiteFooterProps = {}) {
         {/* Cột 1 — Thương hiệu */}
         <div>
           <Logo onDark />
-          <p className='text-footer-foreground/70 mt-4 max-w-sm text-sm leading-relaxed'>{t('tagline')}</p>
+          <p className='text-footer-foreground/70 mt-4 max-w-sm text-sm leading-relaxed'>
+            {cmsText(settings.tagline, t('tagline'))}
+          </p>
         </div>
 
         {/* Cột 2 — Liên hệ */}
@@ -102,28 +122,28 @@ export function SiteFooter({ createProjectAction }: SiteFooterProps = {}) {
           <ul className='space-y-3'>
             <ContactRow icon={<Phone className='size-4' />}>
               <a
-                href={`tel:${contact.hotline.replace(/\s/g, '')}`}
+                href={`tel:${hotline.replace(/\s/g, '')}`}
                 className='hover:text-footer-foreground font-medium transition-colors'
               >
-                {t('hotline')}: {contact.hotline}
+                {t('hotline')}: {hotline}
               </a>
             </ContactRow>
             <ContactRow icon={<ZaloIcon />}>
               <a
-                href={contact.zaloUrl}
+                href={zaloUrl}
                 target='_blank'
                 rel='noreferrer'
                 className='hover:text-footer-foreground transition-colors'
               >
-                {t('zalo')}: {contact.hotline}
+                {t('zalo')}: {hotline}
               </a>
             </ContactRow>
             <ContactRow icon={<Mail className='size-4' />}>
-              <a href={`mailto:${contact.email}`} className='hover:text-footer-foreground transition-colors'>
-                {contact.email}
+              <a href={`mailto:${email}`} className='hover:text-footer-foreground transition-colors'>
+                {email}
               </a>
             </ContactRow>
-            <ContactRow icon={<MapPin className='size-4' />}>{t('address')}</ContactRow>
+            <ContactRow icon={<MapPin className='size-4' />}>{cmsText(settings.address, t('address'))}</ContactRow>
             <ContactRow icon={<Clock className='size-4' />}>{t('workingHours')}</ContactRow>
           </ul>
         </div>
@@ -186,10 +206,10 @@ export function SiteFooter({ createProjectAction }: SiteFooterProps = {}) {
             nút chat sẽ đè lên dòng thông tin pháp lý. */}
         <div className='text-footer-foreground/60 mx-auto flex w-full max-w-[90rem] flex-col gap-2 px-4 py-5 pb-24 text-xs sm:flex-row sm:items-center sm:justify-between sm:pb-5 sm:pe-44 lg:px-8 lg:pe-52'>
           <p>
-            © {year} {siteConfig.name}. {t('rights')}
+            © {year} {cmsText(settings.brandName, siteConfig.name)}. {t('rights')}
           </p>
           <p>
-            {t('company')} · {t('taxCode')}: {legal.taxCode}
+            {cmsText(settings.companyName, t('company'))} · {t('taxCode')}: {cmsText(settings.taxCode, legal.taxCode)}
           </p>
         </div>
       </div>

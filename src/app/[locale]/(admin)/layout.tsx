@@ -1,0 +1,30 @@
+import type { ReactNode } from 'react'
+
+import { AdminShell } from '@/features/admin'
+import { AdminGuard, ProtectedRoute } from '@/shared/auth'
+import { AntdProvider } from '@/shared/providers'
+import { AdminAccount } from './admin-account'
+
+import './admin.css'
+
+/**
+ * Khung khu quản trị — route group `(admin)` nên URL vẫn là `/admin/...`.
+ *
+ * Ba lớp bọc, từ ngoài vào:
+ *   1. `AntdProvider` — chỉ nhánh này nạp Ant Design, site công khai không dính.
+ *   2. `ProtectedRoute` — chưa đăng nhập thì bật popup đăng nhập ở trang chủ.
+ *   3. `AdminGuard`   — đăng nhập rồi nhưng không phải admin thì hiện "không có
+ *      quyền" thay vì nội dung. Cả hai lớp guard là UX; backend .NET mới là nơi
+ *      phân quyền thật sự.
+ */
+export default function AdminLayout({ children }: { children: ReactNode }) {
+  return (
+    <AntdProvider>
+      <ProtectedRoute>
+        <AdminGuard>
+          <AdminShell userSlot={<AdminAccount />}>{children}</AdminShell>
+        </AdminGuard>
+      </ProtectedRoute>
+    </AntdProvider>
+  )
+}

@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
-import { useAuthDialogStore, useAuthStore } from '@/shared/auth'
-import { ROUTES } from '@/shared/constants/routes'
+import { ROLES, useAuthDialogStore, useAuthStore } from '@/shared/auth'
+import { ADMIN_ROUTES, ROUTES } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { authApi } from '../api/auth.api'
 import { authKeys } from '../api/auth.keys'
@@ -38,6 +38,7 @@ export function useLogin(redirectTo?: string) {
       // admins land in the isolated admin area rather than the customer shell.
       if (pending) pending()
       else if (redirectTo) router.replace(redirectTo)
+      else if (user.roles.includes(ROLES.ADMIN)) router.replace(ADMIN_ROUTES.DASHBOARD)
       else router.replace(ROUTES.HOME)
     },
     onError: (error) => {

@@ -60,9 +60,10 @@ export default function proxy(request: NextRequest) {
   }
 
   // Keep authenticated users away from guest-only routes (login, register…).
+  // Không có màn `/dashboard` trong bản SAVICO — đưa về trang chủ.
   if (GUEST_ONLY_ROUTES.includes(path) && isAuthenticated) {
     const url = request.nextUrl.clone()
-    url.pathname = `/${locale}/dashboard`
+    url.pathname = `/${locale}`
     url.search = ''
     return NextResponse.redirect(url)
   }

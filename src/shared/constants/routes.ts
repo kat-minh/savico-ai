@@ -31,6 +31,43 @@ export const ROUTES = {
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
 
+/**
+ * Khu quản trị — route group `(admin)` riêng, không dùng chung khung với site
+ * công khai. Mọi đường dẫn bắt đầu bằng `/admin` nên chỉ cần MỘT tiền tố trong
+ * `PROTECTED_ROUTE_PREFIXES` là proxy chặn được cả khu.
+ */
+export const ADMIN_ROUTES = {
+  /** Tổng quan — số liệu nhanh toàn hệ thống. */
+  DASHBOARD: '/admin',
+
+  // Nội dung site (CMS)
+  HOME_CONTENT: '/admin/content/home',
+  STATIC_PAGES: '/admin/content/pages',
+  SETTINGS: '/admin/settings',
+
+  // Cẩm nang — mục VI
+  TEMPLATES: '/admin/handbook/templates',
+  ARTICLES: '/admin/handbook/articles',
+
+  // Hướng dẫn — mục VI
+  GUIDE: '/admin/guide',
+
+  // Tư vấn 1:1 — mục VIII
+  CONSULTANTS: '/admin/consultants',
+  BOOKINGS: '/admin/bookings',
+
+  // Kinh doanh & vận hành
+  PLANS: '/admin/plans',
+  PROJECTS: '/admin/projects',
+  CUSTOMERS: '/admin/customers',
+
+  // Danh mục cấu hình — mục X, #6
+  CATALOG: '/admin/catalog',
+  PRICING: '/admin/pricing'
+} as const
+
+export type AdminRoute = (typeof ADMIN_ROUTES)[keyof typeof ADMIN_ROUTES]
+
 /** Trang chi tiết một mẫu trong thư viện Cẩm nang (mẫu bản vẽ 2D / nội thất 3D). */
 export const handbookTemplateRoute = (id: string) => `${ROUTES.HANDBOOK}/mau/${id}`
 
@@ -60,4 +97,11 @@ export const shareRoute = (token: string) => `/share/${token}`
 export const GUEST_ONLY_ROUTES: readonly string[] = [ROUTES.FORGOT_PASSWORD]
 
 /** Route prefixes that require authentication. */
-export const PROTECTED_ROUTE_PREFIXES: readonly string[] = [ROUTES.DESIGN, ROUTES.ACCOUNT]
+export const PROTECTED_ROUTE_PREFIXES: readonly string[] = [ROUTES.DESIGN, ROUTES.ACCOUNT, ADMIN_ROUTES.DASHBOARD]
+
+/**
+ * Khu chỉ dành vai trò `admin`. Proxy chỉ biết "đã đăng nhập hay chưa" (nó đọc
+ * cookie, không giải mã token) nên lớp chặn theo vai trò nằm ở `AdminGuard`
+ * trong layout — và backend vẫn là nơi phân quyền thật sự.
+ */
+export const ADMIN_ROUTE_PREFIX: string = ADMIN_ROUTES.DASHBOARD

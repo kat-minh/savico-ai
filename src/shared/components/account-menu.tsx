@@ -1,10 +1,10 @@
 'use client'
 
-import { LayoutDashboard, LogOut, UserRound } from 'lucide-react'
+import { LayoutDashboard, LogOut, ShieldCheck, UserRound } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
-import type { AuthUser } from '@/shared/auth'
+import { ROLES, type AuthUser } from '@/shared/auth'
 import { PreferenceSwitches } from '@/shared/components/common/preference-switches'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
-import { ROUTES } from '@/shared/constants/routes'
+import { ADMIN_ROUTES, ROUTES } from '@/shared/constants/routes'
 
 /** Two-letter initials for the avatar fallback (first + last word). */
 function initialsOf(name: string): string {
@@ -36,11 +36,12 @@ export function AccountMenu({
   user,
   onLogout
 }: {
-  user: Pick<AuthUser, 'name' | 'email' | 'avatarUrl'>
+  user: Pick<AuthUser, 'name' | 'email' | 'avatarUrl' | 'roles'>
   onLogout?: () => void
 }) {
   const t = useTranslations('nav')
   const initials = initialsOf(user.name)
+  const isAdmin = user.roles?.includes(ROLES.ADMIN) ?? false
 
   return (
     <DropdownMenu>
@@ -70,6 +71,15 @@ export function AccountMenu({
             {t('account')}
           </Link>
         </DropdownMenuItem>
+        {/* Lối vào khu quản trị — chỉ hiện với vai trò admin (mục X). */}
+        {isAdmin ? (
+          <DropdownMenuItem asChild>
+            <Link href={ADMIN_ROUTES.DASHBOARD}>
+              <ShieldCheck />
+              {t('admin')}
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         {/* Ngôn ngữ + giao diện là tuỳ chọn cá nhân nên nằm trong menu tài khoản,
             không chiếm chỗ thường trực trên thanh công cụ. */}

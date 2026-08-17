@@ -1,45 +1,10 @@
 /**
- * Chuyên môn của kiến trúc sư — danh mục do admin cấu hình (mục X, #5).
- * Id ổn định để lọc; nhãn hiển thị do backend/mock trả kèm nên feature này
- * không cần biết vocabulary của Bước 1 (`features/design`).
+ * Kiểu dữ liệu của Tư vấn 1:1 (mục VIII).
+ *
+ * Hồ sơ kiến trúc sư là nội dung admin biên soạn (mục X, #5) nên type nằm ở
+ * `shared/cms`; lịch trống và lịch hẹn thì thuộc về feature này.
  */
-export interface ConsultantSpecialty {
-  id: string
-  label: string
-}
-
-/** Một ảnh trong dải "công trình tiêu biểu" của hồ sơ KTS (Hình 15). */
-export interface ConsultantWork {
-  imageUrl: string
-  label: string
-}
-
-/**
- * Một kiến trúc sư trong trang Tư vấn 1:1 (mục VIII.1, Hình 14).
- * Cùng một object phục vụ cả thẻ lưới, danh sách thu gọn bên trái và hồ sơ
- * chi tiết — thẻ chỉ đọc phần nó cần.
- */
-export interface Consultant {
-  id: string
-  /** Đã gồm tiền tố học hàm, ví dụ "KTS. Nguyễn Minh Trí". */
-  name: string
-  /** Chức danh dưới tên: "Kiến trúc sư SAVICO", "Kiến trúc sư trưởng SAVICO". */
-  title: string
-  avatarUrl: string
-  /** Hai chip chuyên môn trên thẻ; phần tử đầu là chuyên môn chính. */
-  specialties: ConsultantSpecialty[]
-  yearsExperience: number
-  /** Số công trình đã thực hiện — hiển thị dạng "{n}+ công trình". */
-  projectCount: number
-  /** Mô tả 1-2 dòng trên thẻ lưới. */
-  headline: string
-  /** Giới thiệu 2-3 dòng ở hồ sơ chi tiết, mỗi phần tử một dòng. */
-  bio: string[]
-  rating: number
-  reviewCount: number
-  /** 4 ảnh công trình tiêu biểu (Hình 15). */
-  works: ConsultantWork[]
-}
+export type { Consultant, ConsultantSpecialty, ConsultantWork } from '@/shared/cms'
 
 /** Hai hàng khung giờ của khối "CHỌN KHUNG GIỜ TƯ VẤN" (mục VIII.2). */
 export type ConsultationSession = 'morning' | 'afternoon'
