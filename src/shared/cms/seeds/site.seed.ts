@@ -6,32 +6,24 @@ import type { CmsHomeContent, CmsSiteSettings, CmsStaticPage } from '../cms.type
  * seed ở đây KHÔNG phá bản dịch tiếng Anh.
  */
 export const HOME_CONTENT_SEED: CmsHomeContent = {
-  heroTitleLead: 'Chụp 1 tấm ảnh lô đất —',
-  heroTitleAccent: 'nhận ngay thiết kế & dự toán',
-  heroSubtitle: 'AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút',
-  heroPrimaryCta: 'Tạo dự án mới',
-  heroSecondaryCta: 'Xem hướng dẫn',
+  // RỖNG có chủ đích: `cmsText(doc, t(...))` lấy doc TRƯỚC, nên seed mà chứa chữ
+  // thật thì nó đè lên bản dịch — trang chủ tiếng Anh từng hiện tiếng Việt vì
+  // đúng lỗi này. Chữ hero giờ ở `messages/*.json` + ghi đè `uiStrings`; tài liệu
+  // này chỉ giữ CẤU TRÚC (id khớp icon) chờ backend.
+  heroTitleLead: '',
+  heroTitleAccent: '',
+  heroSubtitle: '',
+  heroPrimaryCta: '',
+  heroSecondaryCta: '',
   promises: [
-    { id: 'fast', title: 'Nhanh chóng', hint: 'Chỉ trong vài phút' },
-    { id: 'accurate', title: 'Chính xác', hint: 'AI + KTS kiểm duyệt' },
-    { id: 'secure', title: 'Bảo mật', hint: 'An toàn dữ liệu' }
+    { id: 'fast', title: '', hint: '' },
+    { id: 'accurate', title: '', hint: '' },
+    { id: 'secure', title: '', hint: '' }
   ],
   steps: [
-    {
-      id: 'input',
-      title: 'Nhập liệu',
-      description: 'Chụp ảnh lô đất, nhập thông tin nhu cầu và phong cách mong muốn'
-    },
-    {
-      id: 'estimate',
-      title: 'Nhận dự toán',
-      description: 'AI tạo bản vẽ, phối cảnh 3D và dự toán chi phí chi tiết'
-    },
-    {
-      id: 'dossier',
-      title: 'Hồ sơ thi công',
-      description: 'Render và nhận đầy đủ hồ sơ thiết kế, dự toán để thi công'
-    }
+    { id: 'input', title: '', description: '' },
+    { id: 'estimate', title: '', description: '' },
+    { id: 'dossier', title: '', description: '' }
   ]
 }
 

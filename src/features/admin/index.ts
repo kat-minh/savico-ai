@@ -8,18 +8,31 @@
 export { AdminShell } from './components/layout/admin-shell'
 export { AdminOverview } from './components/dashboard/admin-overview'
 
-export { HomeContentEditor } from './components/content/home-content-editor'
-export { StaticPagesEditor } from './components/content/static-pages-editor'
-export { SiteSettingsEditor } from './components/content/site-settings-editor'
+/**
+ * Nội dung site — MỘT màn cho mỗi trang công khai. Các trình soạn và bảng dữ
+ * liệu bên trong không xuất ra ngoài nữa: chúng là TAB của `ContentWorkspace`,
+ * không còn là màn đứng riêng.
+ */
+export { ContentWorkspace } from './components/pages/content-workspace'
+export {
+  ADMIN_CONTENT_PAGES,
+  adminContentPageOf,
+  type AdminContentPage,
+  type AdminContentPageKey
+} from './constants/admin-pages.config'
 
-export { TemplateManager } from './components/handbook/template-manager'
-export { ArticleManager } from './components/handbook/article-manager'
-export { GuideManager } from './components/guide/guide-manager'
-
-export { ConsultantManager } from './components/consult/consultant-manager'
-export { BookingManager } from './components/consult/booking-manager'
-
+// Cấu hình hệ thống — con số điều khiển cách hệ thống chạy.
 export { PlanManager } from './components/business/plan-manager'
+export { QuotaEditor } from './components/business/quota-editor'
+export { ConsultPackageManager } from './components/consult/package-manager'
+
+// Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
+export { BookingCalendar } from './components/consult/booking-calendar'
+export { RescheduleManager } from './components/consult/reschedule-manager'
+export { SubscriptionManager } from './components/business/subscription-manager'
+export { TransactionManager } from './components/business/transaction-manager'
+export { ReviewManager } from './components/consult/review-manager'
+export { ReportManager } from './components/business/report-manager'
 export { ProjectManager } from './components/business/project-manager'
 export { CustomerManager } from './components/business/customer-manager'
 

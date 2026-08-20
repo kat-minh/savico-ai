@@ -5,12 +5,14 @@
  * chung được vì preflight của Tailwind nằm trong `@layer base`, mà style không
  * layer (antd) luôn thắng style có layer — không cần hack đè ngược.
  *
- * File này chỉ khai:
- *   1. Biến màu để style inline của khu này đọc chung một nguồn và tự đổi theo
- *      light/dark do next-themes bật trên <html>.
- *   2. Màu chữ cho `Link` của next-intl khi nằm trong component antd — link
- *      thừa hưởng màu của site, trong menu/thẻ phải để antd quyết định.
- *   3. Cách cuộn của menu trái — thứ Sider không tự lo.
+ * HỆ QUẢ, và cũng là quy tắc của cả khu này: utility của Tailwind nằm trong
+ * `@layer utilities` nên cũng THUA style không layer của antd. Vì vậy:
+ *   · `div`/`span` thuần (bố cục do mình dựng)  → dùng thẳng class Tailwind;
+ *   · đè lên DOM bên trong của antd (`.ant-*`)  → phải viết ở file này, hoặc
+ *     dùng prop `style` của chính component antd (inline luôn thắng).
+ *
+ * File này CHỈ chứa loại thứ hai, cộng vài biến màu để cả hai bên đọc chung một
+ * nguồn và tự đổi theo light/dark do next-themes bật trên <html>.
  * ========================================================================== */
 
 :root {
@@ -18,6 +20,9 @@
   --admin-tint: #ecfdf3;
   --admin-placeholder: #eef1ee;
   --admin-muted: rgba(5, 5, 5, 0.35);
+  /* Nền vùng nội dung — khớp `Layout.bodyBg` khai trong AntdProvider. Khối đầu
+     trang dính phải tô đúng màu này thì chữ bên dưới mới không cuộn xuyên qua. */
+  --admin-surface: #f6f8f6;
 }
 
 .dark {
@@ -25,8 +30,11 @@
   --admin-tint: rgba(22, 163, 74, 0.16);
   --admin-placeholder: rgba(255, 255, 255, 0.08);
   --admin-muted: rgba(255, 255, 255, 0.4);
+  --admin-surface: #0f1113;
 }
 
+/* Link của next-intl nằm trong component antd — link thừa hưởng màu của site,
+   còn trong menu/thẻ thì phải để antd quyết định. */
 .ant-menu a,
 .ant-menu a:hover,
 .ant-card a,
@@ -39,16 +47,17 @@
  * Menu trái cuộn riêng.
  *
  * Sider dính đỉnh và cao đúng 100svh, nhưng logo + 14 mục menu cao hơn màn hình
- * 730px — mà Sider không tự cuộn, nên các mục cuối (Dự án, Người dùng, Danh mục,
- * Đơn giá) bị cắt và phải cuộn cả trang mới với tới. Cho phần menu cuộn riêng,
- * logo đứng yên.
+ * 730px — mà Sider không tự cuộn, nên các mục cuối bị cắt và phải cuộn cả trang
+ * mới với tới. Cho phần menu cuộn riêng, logo đứng yên. Ngăn kéo trên màn hẹp
+ * cũng vậy.
  * -------------------------------------------------------------------------- */
 .ant-layout-sider-children {
   display: flex;
   flex-direction: column;
 }
 
-.ant-layout-sider-children > .ant-menu {
+.ant-layout-sider-children > .ant-menu,
+.ant-drawer-body > .ant-menu {
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
@@ -75,9 +84,55 @@
   display: none;
 }
 
-/* Nhãn "Nội dung" cạnh công tắc ngôn ngữ — ẩn khi hẹp để thanh trên không vỡ. */
-@media (max-width: 720px) {
-  .admin-hide-sm {
-    display: none;
+/* -----------------------------------------------------------------------------
+ * Bảng đặt trong Card có body padding 0.
+ *
+ * Bỏ padding của body là để đường kẻ ngang của bảng chạy hết bề ngang thẻ — nhìn
+ * đúng kiểu bảng. Nhưng khi đó CHỮ trong ô cũng dính sát mép: ô đầu chỉ cách mép
+ * 8px (padding mặc định của ô) trong khi ô tìm kiếm ở đầu thẻ cách 24px, nên hai
+ * thứ lệch nhau 16px và cả bảng trông như bị tràn ra ngoài thẻ.
+ *
+ * Trả lại đúng 24px cho ô đầu / ô cuối và cho thanh phân trang, để mọi thứ trong
+ * thẻ thẳng một hàng dọc; các ô giữa vẫn giữ padding gọn của antd.
+ * -------------------------------------------------------------------------- */
+/* Selector dài đúng như vậy là có lý do. Quy tắc của antd là
+   `.ant-table-wrapper .ant-table.ant-table-medium .ant-table-thead > tr > th`
+   — đặc hiệu (0,4,2). Bỏ `.ant-table` đi thì rule ở đây cũng (0,4,2), HÒA, mà
+   stylesheet của antd nạp sau nên nó thắng. Thêm `.ant-table` để lên (0,5,2). */
+.admin-table-card .ant-table-wrapper .ant-table .ant-table-thead > tr > th:first-child,
+.admin-table-card .ant-table-wrapper .ant-table .ant-table-tbody > tr > td:first-child {
+  padding-inline-start: 24px;
+}
+
+.admin-table-card .ant-table-wrapper .ant-table .ant-table-thead > tr > th:last-child,
+.admin-table-card .ant-table-wrapper .ant-table .ant-table-tbody > tr > td:last-child {
+  padding-inline-end: 24px;
+}
+
+.admin-table-card .ant-table-pagination {
+  padding-inline: 24px;
+}
+
+/* Tiêu đề cột không xuống dòng. "Số tầng ảnh" bị bẻ làm hai dòng khiến cả hàng
+   tiêu đề cao gấp đôi trong khi các cột khác vẫn một dòng — nhìn như lỗi. Bảng
+   đã bật cuộn ngang (`scroll.x`) nên để tiêu đề đẩy cột rộng ra là an toàn. */
+.admin-table-card .ant-table-wrapper .ant-table .ant-table-thead > tr > th {
+  white-space: nowrap;
+}
+
+/* Màn hẹp: bám theo padding hẹp hơn của Card head. */
+@media (max-width: 575px) {
+  .admin-table-card .ant-table-wrapper .ant-table .ant-table-thead > tr > th:first-child,
+  .admin-table-card .ant-table-wrapper .ant-table .ant-table-tbody > tr > td:first-child {
+    padding-inline-start: 16px;
+  }
+
+  .admin-table-card .ant-table-wrapper .ant-table .ant-table-thead > tr > th:last-child,
+  .admin-table-card .ant-table-wrapper .ant-table .ant-table-tbody > tr > td:last-child {
+    padding-inline-end: 16px;
+  }
+
+  .admin-table-card .ant-table-pagination {
+    padding-inline: 16px;
   }
 }

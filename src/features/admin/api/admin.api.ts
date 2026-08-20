@@ -28,14 +28,23 @@ const ENDPOINTS: Record<CmsCollection, string> = {
   designProjects: '/admin/projects',
   buildingTypes: '/admin/catalog/building-types',
   styleOptions: '/admin/catalog/styles',
-  unitPrices: '/admin/catalog/unit-prices'
+  unitPrices: '/admin/catalog/unit-prices',
+  subscriptions: '/admin/subscriptions',
+  transactions: '/admin/transactions',
+  rescheduleRequests: '/admin/bookings/reschedule-requests',
+  consultPackages: '/admin/consult/packages',
+  packageReviews: '/admin/consult/package-reviews',
+  reports: '/admin/reports'
 }
 
 const DOCUMENT_ENDPOINTS: Record<CmsDocument, string> = {
   home: '/admin/content/home',
   settings: '/admin/content/settings',
   termsPage: '/admin/content/pages/terms',
-  privacyPage: '/admin/content/pages/privacy'
+  privacyPage: '/admin/content/pages/privacy',
+  quotas: '/admin/quotas',
+  uiStrings: '/admin/content/strings',
+  uiAssets: '/admin/content/assets'
 }
 
 const AdminApi = {

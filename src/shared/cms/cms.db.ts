@@ -5,9 +5,18 @@ import type {
   CmsCustomer,
   CmsDesignProject,
   CmsHomeContent,
+  CmsConsultPackage,
+  CmsPackageReview,
+  CmsQuotas,
+  CmsReport,
+  CmsRescheduleRequest,
   CmsSiteSettings,
+  CmsSubscription,
+  CmsTransaction,
   CmsStaticPage,
   CmsStyleOption,
+  CmsUiAssets,
+  CmsUiStrings,
   CmsUnitPrice,
   Consultant,
   GuideArticle,
@@ -20,6 +29,12 @@ import type {
 import {
   BOOKINGS_SEED,
   BUILDING_TYPES_SEED,
+  CONSULT_PACKAGES_SEED,
+  PACKAGE_REVIEWS_SEED,
+  REPORTS_SEED,
+  RESCHEDULE_REQUESTS_SEED,
+  SUBSCRIPTIONS_SEED,
+  TRANSACTIONS_SEED,
   CONSULTANTS_SEED,
   CUSTOMERS_SEED,
   DESIGN_PROJECTS_SEED,
@@ -31,6 +46,7 @@ import {
   HOME_CONTENT_SEED,
   PLANS_SEED,
   PRIVACY_PAGE_SEED,
+  QUOTAS_SEED,
   SITE_SETTINGS_SEED,
   STYLE_OPTIONS_SEED,
   TERMS_PAGE_SEED,
@@ -72,6 +88,12 @@ export interface CmsCollectionMap {
   buildingTypes: CmsBuildingTypeOption
   styleOptions: CmsStyleOption
   unitPrices: CmsUnitPrice
+  subscriptions: CmsSubscription
+  transactions: CmsTransaction
+  rescheduleRequests: CmsRescheduleRequest
+  consultPackages: CmsConsultPackage
+  packageReviews: CmsPackageReview
+  reports: CmsReport
 }
 
 export type CmsCollection = keyof CmsCollectionMap
@@ -82,6 +104,12 @@ export interface CmsDocumentMap {
   settings: CmsSiteSettings
   termsPage: CmsStaticPage
   privacyPage: CmsStaticPage
+  /** Hạn mức miễn phí & theo ngày — con số, không có bản dịch riêng. */
+  quotas: CmsQuotas
+  /** Ghi đè chuỗi giao diện — phủ nốt chữ không nằm trong các bảng trên. */
+  uiStrings: CmsUiStrings
+  /** Ghi đè ảnh minh họa dùng chung của giao diện. */
+  uiAssets: CmsUiAssets
 }
 
 export type CmsDocument = keyof CmsDocumentMap
@@ -90,7 +118,16 @@ export type CmsDocument = keyof CmsDocumentMap
  * Bảng KHÔNG có bản dịch — dữ liệu vận hành do backend sinh, tên khách và ghi
  * chú của nhân viên không dịch theo giao diện.
  */
-const SHARED_COLLECTIONS: readonly CmsCollection[] = ['bookings', 'customers', 'designProjects']
+const SHARED_COLLECTIONS: readonly CmsCollection[] = [
+  'bookings',
+  'customers',
+  'designProjects',
+  'subscriptions',
+  'transactions',
+  'rescheduleRequests',
+  'packageReviews',
+  'reports'
+]
 
 /** Ngăn lưu: một ngăn cho mỗi ngôn ngữ, cộng ngăn `shared` cho dữ liệu vận hành. */
 const SHARED_BUCKET = 'shared'
@@ -104,6 +141,16 @@ function bucketOf(collection: CmsCollection, locale: Locale): Bucket {
 export function isLocalizedCollection(collection: CmsCollection): boolean {
   return !SHARED_COLLECTIONS.includes(collection)
 }
+
+/**
+ * Tài liệu KHÔNG rơi về bản ngôn ngữ mặc định.
+ *
+ * Với nội dung thường, chưa có bản EN thì hiện bản VI mới nhất còn hơn hiện
+ * seed cũ. Nhưng `uiStrings` là chữ GHI ĐÈ lên `messages/en.json` — mà bản dịch
+ * trong đó vốn đã là tiếng Anh đúng nghĩa. Rơi về bản VI ở đây nghĩa là dán chữ
+ * tiếng Việt đè lên site tiếng Anh: tệ hơn hẳn việc không ghi đè gì cả.
+ */
+const NO_LOCALE_FALLBACK_DOCUMENTS: readonly CmsDocument[] = ['uiStrings']
 
 /** Ngôn ngữ nào có bản dịch riêng — dùng cho công tắc "ngôn ngữ nội dung". */
 export const CMS_LOCALES: readonly Locale[] = LOCALES
@@ -121,14 +168,29 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   designProjects: DESIGN_PROJECTS_SEED,
   buildingTypes: BUILDING_TYPES_SEED,
   styleOptions: STYLE_OPTIONS_SEED,
-  unitPrices: UNIT_PRICES_SEED
+  unitPrices: UNIT_PRICES_SEED,
+  subscriptions: SUBSCRIPTIONS_SEED,
+  transactions: TRANSACTIONS_SEED,
+  rescheduleRequests: RESCHEDULE_REQUESTS_SEED,
+  consultPackages: CONSULT_PACKAGES_SEED,
+  packageReviews: PACKAGE_REVIEWS_SEED,
+  reports: REPORTS_SEED
 }
+
+/** Không có gì bị ghi đè — dùng chung một tham chiếu cho cả hai tài liệu. */
+const EMPTY_OVERRIDES: Record<string, string> = {}
 
 const DOCUMENT_SEEDS: { [K in CmsDocument]: CmsDocumentMap[K] } = {
   home: HOME_CONTENT_SEED,
   settings: SITE_SETTINGS_SEED,
   termsPage: TERMS_PAGE_SEED,
-  privacyPage: PRIVACY_PAGE_SEED
+  privacyPage: PRIVACY_PAGE_SEED,
+  quotas: QUOTAS_SEED,
+  // Rỗng = chưa sửa gì: site chạy nguyên bản dịch trong `messages/` và sổ ảnh
+  // trong `shared/lib/imagery`. Hai hằng này phải là THAM CHIẾU CỐ ĐỊNH, vì
+  // `useSyncExternalStore` so sánh theo tham chiếu khi chưa có bản ghi nào.
+  uiStrings: EMPTY_OVERRIDES,
+  uiAssets: EMPTY_OVERRIDES
 }
 
 /** Khóa localStorage. Đổi `VERSION` để bỏ bản ghi cũ khi cấu trúc thay đổi. */
@@ -279,6 +341,8 @@ export const cmsDb = {
     const stored = load().documents
     const own = stored[locale]?.[document] as CmsDocumentMap[K] | undefined
     if (own) return own
+
+    if (NO_LOCALE_FALLBACK_DOCUMENTS.includes(document)) return DOCUMENT_SEEDS[document]
 
     const fallback = stored[DEFAULT_LOCALE]?.[document] as CmsDocumentMap[K] | undefined
     return fallback ?? DOCUMENT_SEEDS[document]

@@ -1,10 +1,10 @@
 'use client'
 
-import { Col, Form, Input, InputNumber, Row, Select, Tag, Typography } from 'antd'
+import { Alert, Descriptions, Form, Select, Tag, Typography } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
-import type { CmsProjectStatus } from '@/shared/cms'
+import type { CmsDesignProject, CmsProjectStatus } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
 import { ResourceManager } from '../common/resource-manager'
 
@@ -22,13 +22,34 @@ const STATUS_COLOR: Record<CmsProjectStatus, string> = {
 /**
  * Dự án khách hàng — theo dõi luồng 3 bước (mục III) từ phía vận hành.
  *
- * Đây là dữ liệu backend sinh ra, không phải nội dung site: admin chỉ đổi trạng
- * thái (ví dụ duyệt xong hồ sơ thì chuyển "Hoàn tất") chứ không tạo dự án hộ
- * khách, nên màn này không có nút Thêm mới.
+ * ĐÂY LÀ DỮ LIỆU CỦA KHÁCH, không phải nội dung site. Tên dự án, địa chỉ, loại
+ * công trình, phong cách là do khách tự nhập ở Bước 1; bước hiện tại và tổng dự
+ * toán là do hệ thống tính. Admin sửa được những thứ đó nghĩa là đổi số của
+ * người khác mà họ không hay biết — nên toàn bộ nằm ở khối CHỈ ĐỌC.
+ *
+ * Việc của vận hành ở màn này đúng một thứ: đổi trạng thái duyệt (ví dụ duyệt
+ * xong hồ sơ thì chuyển "Hoàn tất"). Không tạo dự án hộ khách, không xóa.
  */
 export function ProjectManager() {
   const t = useTranslations('admin')
   const locale = useLocale() as Locale
+
+  /** Dữ liệu khách nhập / hệ thống tính — bày ra để đối chiếu, không cho sửa. */
+  const detailItems = (project: CmsDesignProject) => [
+    { key: 'id', label: t('projects.code'), children: <Text code>{project.id}</Text> },
+    { key: 'name', label: t('projects.name'), children: project.name },
+    { key: 'customer', label: t('projects.customer'), children: `${project.customerName} · ${project.customerEmail}` },
+    { key: 'address', label: t('projects.address'), children: project.address },
+    { key: 'buildingType', label: t('projects.buildingType'), children: project.buildingTypeLabel },
+    { key: 'style', label: t('projects.style'), children: project.styleLabel },
+    { key: 'step', label: t('projects.step'), children: t('projects.stepValue', { step: project.currentStep }) },
+    {
+      key: 'total',
+      label: t('projects.estimateTotal'),
+      children: project.estimateTotal === null ? '—' : formatCurrency(project.estimateTotal, locale)
+    },
+    { key: 'updatedAt', label: t('projects.updatedAt'), children: project.updatedAt }
+  ]
 
   return (
     <ResourceManager
@@ -96,63 +117,16 @@ export function ProjectManager() {
         },
         { title: t('projects.updatedAt'), dataIndex: 'updatedAt', width: 120 }
       ]}
-      renderForm={() => (
+      renderDetail={(project) => (
         <>
-          <Form.Item name='name' label={t('projects.name')}>
-            <Input />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item name='customerName' label={t('projects.customer')}>
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item name='customerEmail' label={t('projects.customerEmail')}>
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item name='address' label={t('projects.address')}>
-            <Input />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item name='buildingTypeLabel' label={t('projects.buildingType')}>
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item name='styleLabel' label={t('projects.style')}>
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={8}>
-              <Form.Item name='currentStep' label={t('projects.step')}>
-                <Select
-                  options={[1, 2, 3].map((step) => ({ label: t('projects.stepValue', { step }), value: step }))}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={12} md={8}>
-              <Form.Item name='status' label={t('projects.status')}>
-                <Select options={STATUSES.map((value) => ({ label: t(`projectStatus.${value}`), value }))} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={8}>
-              <Form.Item name='estimateTotal' label={t('projects.estimateTotal')}>
-                <InputNumber<number>
-                  min={0}
-                  step={1_000_000}
-                  style={{ width: '100%' }}
-                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                  parser={(value) => Number(`${value}`.replace(/\./g, ''))}
-                  addonAfter='₫'
-                />
-              </Form.Item>
-            </Col>
-          </Row>
+          <Alert type='info' showIcon message={t('projects.readOnlyNote')} style={{ marginBottom: 16 }} />
+          <Descriptions size='small' column={1} bordered items={detailItems(project)} />
         </>
+      )}
+      renderForm={() => (
+        <Form.Item name='status' label={t('projects.status')} tooltip={t('projects.statusHint')}>
+          <Select options={STATUSES.map((value) => ({ label: t(`projectStatus.${value}`), value }))} />
+        </Form.Item>
       )}
     />
   )

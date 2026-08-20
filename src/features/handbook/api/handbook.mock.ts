@@ -8,12 +8,20 @@ import type { HandbookArticle, HandbookQuota, HandbookStage, HandbookTemplate } 
  * đúng mô hình "dữ liệu tĩnh do admin biên soạn" ở mục VI.
  */
 
-/** Hạn mức mẫu — backend thật trả theo tài khoản và reset mỗi ngày. */
-const QUOTA: HandbookQuota = {
-  lookupRemaining: 3,
-  lookupTotal: 3,
-  detailRemaining: 2,
-  detailTotal: 3
+/**
+ * Hạn mức tra cứu — backend thật đếm theo tài khoản và reset mỗi ngày.
+ *
+ * Tổng số lượt lấy từ kho nội dung (`quotas`) để vận hành đổi được; phần "còn
+ * lại" ở mock giả định người dùng chưa tra lượt nào hôm nay.
+ */
+function currentQuota(): HandbookQuota {
+  const { handbookLookupPerDay, handbookDetailPerDay } = cmsDb.getDocument('quotas')
+  return {
+    lookupRemaining: handbookLookupPerDay,
+    lookupTotal: handbookLookupPerDay,
+    detailRemaining: handbookDetailPerDay,
+    detailTotal: handbookDetailPerDay
+  }
 }
 
 export const mockHandbookApi = {
@@ -46,6 +54,6 @@ export const mockHandbookApi = {
 
   getQuota: async (): Promise<HandbookQuota> => {
     await mockDelay()
-    return QUOTA
+    return currentQuota()
   }
 }

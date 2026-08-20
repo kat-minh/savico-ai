@@ -40,24 +40,44 @@ export const ADMIN_ROUTES = {
   /** Tổng quan — số liệu nhanh toàn hệ thống. */
   DASHBOARD: '/admin',
 
-  // Nội dung site (CMS)
-  HOME_CONTENT: '/admin/content/home',
-  STATIC_PAGES: '/admin/content/pages',
-  SETTINGS: '/admin/settings',
+  /* ---------------------------------------------------------------------------
+   * Nội dung site — MỘT MÀN CHO MỖI TRANG CÔNG KHAI.
+   *
+   * Chia theo trang chứ không theo loại thứ: sửa trang Cẩm nang thì chữ, ảnh và
+   * các bảng của chính nó nằm chung một chỗ, không phải đi ba mục khác nhau.
+   * Tất cả chạy qua route động `/admin/content/[page]` — xem
+   * `features/admin/constants/admin-pages.config.ts`.
+   * ------------------------------------------------------------------------ */
+  PAGE_HOME: '/admin/content/home',
+  PAGE_HANDBOOK: '/admin/content/handbook',
+  PAGE_GUIDE: '/admin/content/guide',
+  PAGE_PLANS: '/admin/content/plans',
+  PAGE_CONSULT: '/admin/content/consult',
+  PAGE_DESIGN: '/admin/content/design',
+  PAGE_ACCOUNT: '/admin/content/account',
+  PAGE_LEGAL: '/admin/content/legal',
+  /** Thanh điều hướng, chân trang, thông báo lỗi + thông tin liên hệ & SEO. */
+  PAGE_SHELL: '/admin/content/shell',
+  /** Chữ không thuộc riêng trang nào — nút chung, popup đăng nhập, thông báo lỗi. */
+  PAGE_COMMON: '/admin/content/common',
 
-  // Cẩm nang — mục VI
-  TEMPLATES: '/admin/handbook/templates',
-  ARTICLES: '/admin/handbook/articles',
+  /* ---------------------------------------------------------------------------
+   * Cấu hình hệ thống — CON SỐ điều khiển cách hệ thống chạy, không phải chữ
+   * khách đọc. Tách hẳn khỏi nhóm nội dung: sửa giá gói hay hạn mức lượt AI là
+   * việc khác hẳn với sửa tiêu đề một trang, trộn chung thì không ai biết mình
+   * đang đụng vào cái gì.
+   * ------------------------------------------------------------------------ */
+  PLAN_TABLE: '/admin/plans',
+  QUOTAS: '/admin/quotas',
+  CONSULT_PACKAGES: '/admin/consult-packages',
 
-  // Hướng dẫn — mục VI
-  GUIDE: '/admin/guide',
-
-  // Tư vấn 1:1 — mục VIII
-  CONSULTANTS: '/admin/consultants',
+  // Vận hành — dữ liệu backend sinh ra, không phải nội dung biên tập
   BOOKINGS: '/admin/bookings',
-
-  // Kinh doanh & vận hành
-  PLANS: '/admin/plans',
+  RESCHEDULE: '/admin/bookings/reschedule',
+  SUBSCRIPTIONS: '/admin/subscriptions',
+  TRANSACTIONS: '/admin/transactions',
+  REVIEWS: '/admin/reviews',
+  REPORTS: '/admin/reports',
   PROJECTS: '/admin/projects',
   CUSTOMERS: '/admin/customers',
 

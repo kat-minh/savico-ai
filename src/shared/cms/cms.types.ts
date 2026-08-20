@@ -285,8 +285,10 @@ export interface CmsCustomer {
   planTier: PlanTier | null
   /** Ngày hết hạn gói (ISO), bỏ trống khi chưa mua gói. */
   planExpiresAt?: string
-  /** Lượt thiết kế còn lại trong kỳ. */
+  /** Lượt thiết kế - dự toán còn lại trong kỳ. */
   designCreditsLeft: number
+  /** Lượt tra thư viện mẫu còn lại trong kỳ. */
+  libraryCreditsLeft: number
   status: CmsCustomerStatus
   createdAt: string
 }
@@ -407,6 +409,60 @@ export interface CmsStaticPage {
   sections: CmsStaticSection[]
 }
 
+/**
+ * HẠN MỨC dùng thử & hạn mức theo ngày — mọi con số không gắn với gói trả tiền.
+ *
+ * Trước đây ba nhóm số này nằm rải rác và cứng trong code: hạn mức chat ở
+ * `features/chatbot/constants`, hạn mức tra Cẩm nang ở `handbook.mock`, còn lượt
+ * cho người chưa mua gói thì không tồn tại ở đâu — muốn đổi phải sửa code rồi
+ * deploy. Gom về một tài liệu để vận hành tự chỉnh.
+ *
+ * Hạn mức của các gói TRẢ TIỀN vẫn nằm trong bảng `plans` (mỗi gói một dòng);
+ * đây chỉ là phần miễn phí và phần tính theo ngày.
+ *
+ * Không có bản dịch riêng — con số thì ngôn ngữ nào cũng như nhau.
+ */
+export interface CmsQuotas {
+  /** Lượt thiết kế - dự toán cho tài khoản CHƯA mua gói. */
+  freeDesignCredits: number
+  /** Lượt tra thư viện mẫu cho tài khoản chưa mua gói. */
+  freeLibraryCredits: number
+  /** Tin nhắn AI mỗi ngày — khách vãng lai chưa đăng nhập (Q&A §2.3.5). */
+  chatDailyGuest: number
+  /** Tin nhắn AI mỗi ngày — tài khoản đã đăng nhập. */
+  chatDailyCustomer: number
+  /** Lượt TRA thư viện mẫu mỗi ngày (mục VI). */
+  handbookLookupPerDay: number
+  /** Lượt XEM CHI TIẾT một mẫu mỗi ngày. */
+  handbookDetailPerDay: number
+}
+
+/* ===========================================================================
+ * Ghi đè chữ & ảnh của giao diện — phủ nốt phần site không nằm trong các bảng
+ * nội dung ở trên (tiêu đề trang, nhãn nút, chữ trạng thái rỗng, ảnh minh họa).
+ * ======================================================================== */
+
+/**
+ * Chữ giao diện admin soạn lại: KHÓA DỊCH PHẲNG → chữ mới.
+ *
+ * Chỉ chứa những khóa admin ĐÃ sửa; khóa vắng mặt thì site dùng nguyên bản trong
+ * `messages/{locale}.json`. Nhờ vậy CMS chỉ GHI ĐÈ chứ không nhân bản toàn bộ
+ * catalog dịch — thêm chuỗi mới trong code vẫn chạy ngay, không cần đụng kho.
+ *
+ * Tài liệu này lưu theo ngôn ngữ như mọi tài liệu khác, nên bản tiếng Việt và
+ * tiếng Anh sửa độc lập.
+ */
+export type CmsUiStrings = Record<string, string>
+
+/**
+ * Ảnh minh họa admin thay: KHÓA TRONG SỔ ẢNH (`shared/lib/imagery`) → URL mới.
+ *
+ * Cùng nguyên tắc với {@link CmsUiStrings}: khóa vắng mặt thì dùng ảnh seed.
+ * Ảnh nằm TRONG các bảng nội dung (mẫu, bài viết, KTS, phong cách) đã sửa được
+ * ngay trên bảng của chúng — ở đây chỉ là các ảnh dùng chung của giao diện.
+ */
+export type CmsUiAssets = Record<string, string>
+
 /** Thông tin liên hệ + mạng xã hội + pháp lý ở footer (mục II.2). */
 export interface CmsSiteSettings {
   brandName: string
@@ -426,4 +482,110 @@ export interface CmsSiteSettings {
   seoDescription: string
   /** Tắt toàn site để bảo trì — banner cảnh báo, không chặn truy cập. */
   maintenanceNotice: string
+}
+
+/* ===========================================================================
+ * Vận hành mở rộng — subscription, giao dịch, đổi lịch, gói tư vấn, review,
+ * báo cáo. Toàn bộ là dữ liệu backend sinh / khách gửi; admin theo dõi và đổi
+ * trạng thái, không sáng tác hộ.
+ * ======================================================================== */
+
+export type CmsSubscriptionStatus = 'active' | 'cancelled' | 'expired'
+
+/** Một kỳ đăng ký gói của một người dùng. */
+export interface CmsSubscription {
+  id: string
+  customerName: string
+  customerEmail: string
+  tier: PlanTier
+  /** ISO date — ngày bắt đầu kỳ. */
+  startedAt: string
+  /** ISO date — ngày hết hạn kỳ. */
+  expiresAt: string
+  status: CmsSubscriptionStatus
+  /** Ghi chú vận hành: lý do hủy, lần gia hạn thủ công… */
+  note?: string
+}
+
+export type CmsTransactionStatus = 'paid' | 'pending' | 'failed' | 'refunded'
+export type CmsTransactionMethod = 'bank-qr' | 'card' | 'manual'
+
+/** Một giao dịch thanh toán trong hệ thống. */
+export interface CmsTransaction {
+  /** Mã giao dịch `TXN-...`. */
+  id: string
+  customerName: string
+  customerEmail: string
+  /** Gói được mua / gia hạn. */
+  tier: PlanTier
+  /** Số tiền, VND. */
+  amount: number
+  method: CmsTransactionMethod
+  status: CmsTransactionStatus
+  /** ISO datetime. */
+  createdAt: string
+  note?: string
+}
+
+export type CmsRescheduleStatus = 'pending' | 'approved' | 'rejected'
+
+/** Yêu cầu đổi lịch tư vấn — khách gửi, admin duyệt hoặc từ chối. */
+export interface CmsRescheduleRequest {
+  id: string
+  /** Mã lịch hẹn gốc (`BOOK-...`). */
+  bookingId: string
+  customerName: string
+  consultantName: string
+  /** Khung giờ cũ. */
+  fromDate: string
+  fromTime: string
+  /** Khung giờ khách muốn chuyển sang. */
+  toDate: string
+  toTime: string
+  reason?: string
+  status: CmsRescheduleStatus
+  createdAt: string
+}
+
+/** Gói tư vấn 1:1 bán kèm (số buổi, thời lượng, giá). */
+export interface CmsConsultPackage {
+  id: string
+  name: string
+  /** Số buổi tư vấn trong gói. */
+  sessions: number
+  /** Thời lượng một buổi, phút. */
+  durationMinutes: number
+  /** Giá gói, VND. 0 = miễn phí. */
+  price: number
+  description: string
+  enabled: boolean
+}
+
+export type CmsReviewStatus = 'pending' | 'approved' | 'rejected'
+
+/** Review của khách về một gói tư vấn — duyệt xong mới hiện công khai. */
+export interface CmsPackageReview {
+  id: string
+  packageName: string
+  customerName: string
+  /** 1–5 sao. */
+  rating: number
+  content: string
+  status: CmsReviewStatus
+  createdAt: string
+}
+
+export type CmsReportStatus = 'open' | 'resolved' | 'dismissed'
+
+/** Báo cáo vi phạm do người dùng gửi (review sai sự thật, nội dung xấu…). */
+export interface CmsReport {
+  id: string
+  reporterName: string
+  /** Đối tượng bị báo cáo. */
+  targetType: 'review' | 'consultant' | 'content'
+  /** Mô tả ngắn đối tượng, ví dụ tên review / tên KTS. */
+  targetLabel: string
+  reason: string
+  status: CmsReportStatus
+  createdAt: string
 }

@@ -1,11 +1,10 @@
 'use client'
 
-import { Avatar, Col, Form, Input, InputNumber, Row, Select, Tag, Typography } from 'antd'
+import { Alert, Avatar, Col, Descriptions, Form, Input, InputNumber, Row, Select, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 
 import type { CmsCustomer, PlanTier } from '@/shared/cms'
 import { getInitials } from '@/shared/utils'
-import { newAdminId, todayKey } from '../../services/admin.service'
 import { ResourceManager } from '../common/resource-manager'
 
 const { Text } = Typography
@@ -13,13 +12,24 @@ const { Text } = Typography
 const TIERS: PlanTier[] = ['basic', 'advanced', 'pro']
 
 /**
- * Người dùng. Ở bản mock đây là bảng đọc - sửa để dựng khung; khi có API .NET
- * thì tạo tài khoản, đổi mật khẩu và khóa tài khoản đều do backend làm, màn này
- * chỉ gửi lệnh.
+ * Người dùng.
+ *
+ * Tên, email, số điện thoại là THÔNG TIN CỦA CHÍNH NGƯỜI DÙNG — họ tự sửa ở màn
+ * Tài khoản. Vận hành sửa hộ thì khách không hề hay biết, nên ở đây chỉ đọc.
+ *
+ * Cái vận hành thực sự nắm: vai trò, gói và hạn gói, số lượt còn lại, và khóa /
+ * mở tài khoản. Không tạo tài khoản hộ và không xóa — đó là việc của backend
+ * .NET, có ghi vết.
  *
  * Vai trò `admin` mở toàn bộ khu quản trị nên đổi vai trò là thao tác nhạy cảm —
  * form để riêng một ô chứ không nhét chung dòng gói cước.
  */
+/** Hạn gói đã qua chưa. Bỏ trống = chưa mua gói, không tính là hết hạn. */
+function isExpired(planExpiresAt: string | undefined): boolean {
+  if (!planExpiresAt) return false
+  return new Date(planExpiresAt).getTime() < Date.now()
+}
+
 export function CustomerManager() {
   const t = useTranslations('admin')
 
@@ -28,17 +38,11 @@ export function CustomerManager() {
       collection='customers'
       title={t('nav.customers')}
       description={t('customers.description')}
+      // Không tạo và không xóa tài khoản từ đây: người dùng tự đăng ký, còn xóa
+      // là chuyện dữ liệu cá nhân — backend .NET làm, có ghi vết. Khóa tài khoản
+      // thì đã có ô "Trạng thái" bên dưới.
+      allowDelete={false}
       searchText={(item) => `${item.name} ${item.email} ${item.phone ?? ''}`}
-      createItem={(): CmsCustomer => ({
-        id: newAdminId('usr'),
-        name: '',
-        email: '',
-        role: 'customer',
-        planTier: null,
-        designCreditsLeft: 1,
-        status: 'active',
-        createdAt: todayKey()
-      })}
       columns={[
         {
           title: t('customers.name'),
@@ -81,13 +85,16 @@ export function CustomerManager() {
         {
           title: t('customers.plan'),
           dataIndex: 'planTier',
-          width: 150,
+          width: 160,
           render: (tier: PlanTier | null, record) =>
             tier ? (
               <div>
                 <Tag color='green'>{t(`planTier.${tier}`)}</Tag>
-                <Text type='secondary' style={{ fontSize: 12 }}>
+                {/* Gói hết hạn mà vẫn hiện ngày trơn thì phải tự nhẩm lịch mới
+                    biết — tô đỏ để lướt bảng là thấy ngay ai cần nhắc gia hạn. */}
+                <Text type={isExpired(record.planExpiresAt) ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
                   {record.planExpiresAt}
+                  {isExpired(record.planExpiresAt) ? ` · ${t('customers.planExpired')}` : ''}
                 </Text>
               </div>
             ) : (
@@ -95,10 +102,20 @@ export function CustomerManager() {
             )
         },
         {
-          title: t('customers.credits'),
+          title: t('customers.creditsColumn'),
           dataIndex: 'designCreditsLeft',
-          width: 110,
-          sorter: (a, b) => a.designCreditsLeft - b.designCreditsLeft
+          width: 150,
+          sorter: (a, b) => a.designCreditsLeft - b.designCreditsLeft,
+          render: (_, record) => (
+            <div style={{ minWidth: 0 }}>
+              <Text style={{ display: 'block' }}>
+                {t('customers.credits')}: <Text strong>{record.designCreditsLeft}</Text>
+              </Text>
+              <Text type='secondary' style={{ fontSize: 12 }}>
+                {t('customers.libraryCredits')}: {record.libraryCreditsLeft}
+              </Text>
+            </div>
+          )
         },
         {
           title: t('customers.status'),
@@ -110,32 +127,25 @@ export function CustomerManager() {
         },
         { title: t('customers.createdAt'), dataIndex: 'createdAt', width: 120 }
       ]}
+      renderDetail={(customer) => (
+        <>
+          <Alert type='info' showIcon message={t('customers.readOnlyNote')} style={{ marginBottom: 16 }} />
+          <Descriptions
+            size='small'
+            column={1}
+            bordered
+            items={[
+              { key: 'name', label: t('customers.name'), children: customer.name },
+              { key: 'email', label: t('customers.email'), children: customer.email },
+              { key: 'phone', label: t('customers.phone'), children: customer.phone || '—' },
+              { key: 'createdAt', label: t('customers.createdAt'), children: customer.createdAt }
+            ]}
+          />
+        </>
+      )}
       renderForm={() => (
         <>
           <Row gutter={16}>
-            <Col xs={24} md={12}>
-              <Form.Item
-                name='name'
-                label={t('customers.name')}
-                rules={[{ required: true, message: t('fields.requiredMessage') }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item
-                name='email'
-                label={t('customers.email')}
-                rules={[{ required: true, type: 'email', message: t('fields.emailMessage') }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
-              <Form.Item name='phone' label={t('customers.phone')}>
-                <Input />
-              </Form.Item>
-            </Col>
             <Col xs={24} md={12}>
               <Form.Item name='role' label={t('customers.role')} tooltip={t('customers.roleHint')}>
                 <Select
@@ -143,6 +153,16 @@ export function CustomerManager() {
                     { label: t('customers.roleCustomer'), value: 'customer' },
                     { label: t('customers.roleAdmin'), value: 'admin' }
                   ]}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name='status' label={t('customers.status')} tooltip={t('customers.statusHint')}>
+                <Select
+                  options={(['active', 'suspended'] as const).map((value) => ({
+                    label: t(`customerStatus.${value}`),
+                    value
+                  }))}
                 />
               </Form.Item>
             </Col>
@@ -160,30 +180,19 @@ export function CustomerManager() {
                 <Input placeholder='2026-12-31' />
               </Form.Item>
             </Col>
-            <Col xs={12}>
+            <Col xs={24} md={12}>
               <Form.Item name='designCreditsLeft' label={t('customers.credits')}>
                 <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col xs={12}>
-              <Form.Item name='status' label={t('customers.status')}>
-                <Select
-                  options={(['active', 'suspended'] as const).map((value) => ({
-                    label: t(`customerStatus.${value}`),
-                    value
-                  }))}
-                />
+            <Col xs={24} md={12}>
+              <Form.Item name='libraryCreditsLeft' label={t('customers.libraryCredits')}>
+                <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
         </>
       )}
-      fromFormValues={(values, current) => ({
-        ...current,
-        ...values,
-        // Select có allowClear trả `undefined`; kho dùng `null` cho "chưa mua gói".
-        planTier: (values.planTier as PlanTier | undefined) ?? null
-      })}
     />
   )
 }

@@ -5,9 +5,9 @@ import { useMutation } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 
 import { useAuth } from '@/shared/auth'
+import { useCmsDocument } from '@/shared/cms'
 import { useChatContextStore } from '@/shared/chat-context'
 import { chatbotApi } from '../api/chatbot.api'
-import { CHAT_DAILY_LIMIT } from '../constants/chatbot.constants'
 import { getServerCount, getTodayCount, incrementTodayCount, subscribeUsage } from '../services/chat-quota'
 import { useChatbotStore } from '../store/chatbot.store'
 
@@ -16,8 +16,9 @@ import { useChatbotStore } from '../store/chatbot.store'
  * the floating panel and the waiting-screen stream show the same conversation
  * (mục III.3a); no history is persisted, per spec.
  *
- * Enforces a per-day message quota (UX guard): 30/day for customers, 10/day for
- * guests. Câu AI tự nói trong lúc chờ không tính vào hạn mức.
+ * Enforces a per-day message quota (UX guard). Hai con số lấy từ kho nội dung
+ * (`quotas`) chứ không hardcode nữa — vận hành đổi được ở màn Gói đăng ký mà
+ * không cần deploy. Câu AI tự nói trong lúc chờ không tính vào hạn mức.
  */
 export function useChat() {
   const t = useTranslations('chatbot')
@@ -26,7 +27,8 @@ export function useChat() {
   const append = useChatbotStore((s) => s.append)
   const used = useSyncExternalStore(subscribeUsage, getTodayCount, getServerCount)
 
-  const dailyLimit = isAuthenticated ? CHAT_DAILY_LIMIT.customer : CHAT_DAILY_LIMIT.guest
+  const quotas = useCmsDocument('quotas')
+  const dailyLimit = isAuthenticated ? quotas.chatDailyCustomer : quotas.chatDailyGuest
   const remaining = Math.max(0, dailyLimit - used)
   const limitReached = remaining <= 0
 

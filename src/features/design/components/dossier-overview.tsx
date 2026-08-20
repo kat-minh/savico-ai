@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react'
 
 import type { Locale } from '@/i18n/routing'
 import { DossierCover, EstimateSheet, Photo, PlanDrawing, type CoverRow } from '@/shared/components/common'
-import { RENDER_IMAGE } from '@/shared/lib/imagery'
+import { useSiteImage } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { formatDate } from '@/shared/utils'
 import { costShares } from '../services/estimate.service'
@@ -60,13 +60,15 @@ interface PreviewBodyProps {
 
 /** Render the real artefact behind each preview card. */
 function PreviewBody({ part, alt, cover, grandTotal, percents }: PreviewBodyProps) {
+  const exteriorImage = useSiteImage('render.villa')
+
   switch (part) {
     case 'cover':
       return <DossierCover className='aspect-4/3 w-full' project={cover} />
     case 'floorPlan':
       return <PlanDrawing className='aspect-4/3 w-full' />
     case 'exterior':
-      return <Photo className='aspect-4/3 w-full' src={RENDER_IMAGE.villa} alt={alt} sizes='240px' />
+      return <Photo className='aspect-4/3 w-full' src={exteriorImage} alt={alt} sizes='240px' />
     case 'estimate':
       return <EstimateSheet className='aspect-4/3 w-full' total={grandTotal} percents={percents} />
   }

@@ -1,4 +1,4 @@
-import type { SubscriptionPlan } from '../cms.types'
+import type { CmsQuotas, SubscriptionPlan } from '../cms.types'
 
 /**
  * Ba gói theo bảng mục VII và Hình 13. Giá và số lượt là số MINH HỌA —
@@ -37,3 +37,19 @@ export const PLANS_SEED: SubscriptionPlan[] = [
     audience: 'nhà thầu / môi giới'
   }
 ]
+
+/**
+ * Hạn mức miễn phí & hạn mức theo ngày.
+ *
+ * Con số lấy đúng từ những chỗ trước đây hardcode: 30/10 tin nhắn chat mỗi ngày
+ * (Q&A §2.3.5), 3 lượt tra + 2 lượt xem chi tiết Cẩm nang mỗi ngày. Phần "chưa
+ * mua gói" trước không có ở đâu, đặt bằng đúng con số mock đang chạy.
+ */
+export const QUOTAS_SEED: CmsQuotas = {
+  freeDesignCredits: 1,
+  freeLibraryCredits: 10,
+  chatDailyGuest: 10,
+  chatDailyCustomer: 30,
+  handbookLookupPerDay: 3,
+  handbookDetailPerDay: 3
+}

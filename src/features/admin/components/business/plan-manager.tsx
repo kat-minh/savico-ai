@@ -27,7 +27,7 @@ export function PlanManager() {
   return (
     <ResourceManager
       collection='plans'
-      title={t('nav.plans')}
+      title={t('nav.planTable')}
       description={t('plans.description')}
       searchText={(item) => `${item.tier} ${item.perk} ${item.audience}`}
       createItem={(): SubscriptionPlan => ({

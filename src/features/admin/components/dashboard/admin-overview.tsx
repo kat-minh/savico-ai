@@ -125,7 +125,7 @@ export function AdminOverview() {
             icon={<DollarOutlined />}
             label={t('dashboard.revenue')}
             value={formatCurrency(data.revenue, locale)}
-            href={ADMIN_ROUTES.PLANS}
+            href={ADMIN_ROUTES.PAGE_PLANS}
           />
         </Col>
       </Row>
@@ -175,7 +175,7 @@ export function AdminOverview() {
             icon={<AppstoreOutlined />}
             label={t('dashboard.templates')}
             value={formatNumber(data.templates, locale)}
-            href={ADMIN_ROUTES.TEMPLATES}
+            href={`${ADMIN_ROUTES.PAGE_HANDBOOK}?tab=templates`}
           />
         </Col>
         <Col xs={24} sm={12}>
@@ -183,7 +183,7 @@ export function AdminOverview() {
             icon={<FileTextOutlined />}
             label={t('dashboard.articles')}
             value={formatNumber(data.articles, locale)}
-            href={ADMIN_ROUTES.ARTICLES}
+            href={`${ADMIN_ROUTES.PAGE_HANDBOOK}?tab=articles`}
           />
         </Col>
       </Row>

@@ -3,8 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
-import { cmsText, useCmsCollection } from '@/shared/cms'
-import { STYLE_IMAGE } from '@/shared/lib/imagery'
+import { cmsText, siteImage, useCmsCollection, useCmsDocument } from '@/shared/cms'
 
 import { catalogBuildingTypes, catalogStyles } from '../services/design-catalog.service'
 import type { BuildingType } from '../types/design.types'
@@ -33,6 +32,7 @@ export function useDesignCatalog(buildingType: BuildingType | null): DesignCatal
   const t = useTranslations('design.input')
   const cmsBuildingTypes = useCmsCollection('buildingTypes')
   const cmsStyles = useCmsCollection('styleOptions')
+  const assets = useCmsDocument('uiAssets')
 
   return useMemo(
     () => ({
@@ -43,9 +43,9 @@ export function useDesignCatalog(buildingType: BuildingType | null): DesignCatal
       styles: catalogStyles(cmsStyles, buildingType).map((option) => ({
         value: option.value,
         label: cmsText(option.label, t(`style.options.${option.value}`)),
-        imageUrl: cmsText(option.imageUrl, STYLE_IMAGE[option.value])
+        imageUrl: cmsText(option.imageUrl, siteImage(assets, `style.${option.value}`))
       }))
     }),
-    [cmsBuildingTypes, cmsStyles, buildingType, t]
+    [cmsBuildingTypes, cmsStyles, assets, buildingType, t]
   )
 }

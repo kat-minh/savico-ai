@@ -1,8 +1,7 @@
 'use client'
 
-import { Form, Input, Segmented } from 'antd'
+import { Form, Input } from 'antd'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import { SectionListField } from '../common/field-kit'
 import { DocumentEditor } from '../common/document-editor'
@@ -10,34 +9,19 @@ import { DocumentEditor } from '../common/document-editor'
 type StaticPageKey = 'termsPage' | 'privacyPage'
 
 /**
- * Sửa hai trang tĩnh ở chân trang (mục II.2): Điều khoản sử dụng và Chính sách
+ * Sửa một trang tĩnh ở chân trang (mục II.2): Điều khoản sử dụng hoặc Chính sách
  * bảo mật. Bên A gửi bản chính thức trước go-live (Q&A §8.2) nên đây là màn phải
  * dùng ngay ngày bàn giao.
  *
- * `key` ép DocumentEditor mount lại khi đổi trang — nếu không form sẽ giữ giá
- * trị của trang trước.
+ * Hai trang là hai TAB của màn "Trang tĩnh", không phải một `Segmented` nhét
+ * cạnh nút Lưu như trước — bộ chọn trang mà đứng chung hàng với nút hành động
+ * thì trông y như một cái nút, rất dễ bấm nhầm.
  */
-export function StaticPagesEditor() {
+function StaticPageEditor({ document, label }: { document: StaticPageKey; label: string }) {
   const t = useTranslations('admin')
-  const [page, setPage] = useState<StaticPageKey>('termsPage')
 
   return (
-    <DocumentEditor
-      key={page}
-      document={page}
-      title={t('nav.staticPages')}
-      description={t('staticPages.description')}
-      extraActions={
-        <Segmented
-          value={page}
-          onChange={(value) => setPage(value as StaticPageKey)}
-          options={[
-            { label: t('staticPages.terms'), value: 'termsPage' },
-            { label: t('staticPages.privacy'), value: 'privacyPage' }
-          ]}
-        />
-      }
-    >
+    <DocumentEditor document={document} title={label} description={t('staticPages.description')}>
       {() => (
         <>
           <Form.Item name='title' label={t('staticPages.title')}>
@@ -59,4 +43,14 @@ export function StaticPagesEditor() {
       )}
     </DocumentEditor>
   )
+}
+
+export function TermsPageEditor() {
+  const t = useTranslations('admin')
+  return <StaticPageEditor document='termsPage' label={t('staticPages.terms')} />
+}
+
+export function PrivacyPageEditor() {
+  const t = useTranslations('admin')
+  return <StaticPageEditor document='privacyPage' label={t('staticPages.privacy')} />
 }

@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 import { DossierCover, Photo, PlanDrawing } from '@/shared/components/common'
-import { RENDER_IMAGE, STYLE_IMAGE } from '@/shared/lib/imagery'
+import { useSiteImage } from '@/shared/cms'
 import { formatNumber } from '@/shared/utils'
 import { cn } from '@/shared/lib/utils'
 import { SHOWCASE_TABS, type ShowcaseTab } from '../constants/landing.constants'
@@ -40,6 +40,9 @@ const ESTIMATE_ROWS = [
  */
 export function HeroShowcase() {
   const t = useTranslations('landing.showcase')
+  // Ảnh minh họa lấy từ kho nội dung — admin thay ở màn "Hình ảnh site".
+  const facadeImage = useSiteImage('style.modern')
+  const renderImage = useSiteImage('render.villa')
   const locale = useLocale() as Locale
   const [tab, setTab] = useState<ShowcaseTab>('estimate')
 
@@ -51,7 +54,7 @@ export function HeroShowcase() {
         {/* Ảnh phối cảnh — mỏ neo "công trình của bạn", luôn hiện. */}
         <div className='bg-muted relative hidden h-full min-h-[21rem] overflow-hidden rounded-xl border sm:block'>
           <Photo
-            src={STYLE_IMAGE.modern}
+            src={facadeImage}
             alt={t('title')}
             priority
             sizes='(max-width: 1024px) 40vw, 220px'
@@ -101,7 +104,7 @@ export function HeroShowcase() {
 
           {tab === 'render3d' ? (
             <Photo
-              src={RENDER_IMAGE.villa}
+              src={renderImage}
               alt={t('tabs.render3d')}
               sizes='(max-width: 1024px) 60vw, 320px'
               className='aspect-4/3 size-full rounded-xl'

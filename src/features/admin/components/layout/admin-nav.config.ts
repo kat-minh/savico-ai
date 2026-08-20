@@ -4,27 +4,42 @@ import {
   AppstoreOutlined,
   BookOutlined,
   CalendarOutlined,
+  CreditCardOutlined,
   DashboardOutlined,
   DollarOutlined,
   FileTextOutlined,
+  FlagOutlined,
+  GiftOutlined,
   HomeOutlined,
   LayoutOutlined,
+  MenuOutlined,
   PlayCircleOutlined,
   ProjectOutlined,
-  SettingOutlined,
+  StarOutlined,
+  SwapOutlined,
   TeamOutlined,
+  ThunderboltOutlined,
+  ToolOutlined,
+  TranslationOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type { ComponentType } from 'react'
 
-import { ADMIN_ROUTES, type AdminRoute } from '@/shared/constants'
+import { ADMIN_ROUTES, ROUTES, type AdminRoute, type AppRoute } from '@/shared/constants'
 
 /**
- * Menu trái của khu quản trị.
+ * Menu trái, chia theo BẢN CHẤT của việc chứ không theo module.
  *
- * Nhóm theo đúng cách spec chia việc: Nội dung site (mục II, X) · Cẩm nang
- * (mục VI) · Hướng dẫn · Tư vấn 1:1 (mục VIII) · Kinh doanh & vận hành ·
- * Danh mục cấu hình (mục X, #6).
+ *   · Nội dung site — chữ, ảnh, bài viết: thứ khách ĐỌC.
+ *   · Cấu hình hệ thống — giá gói, hạn mức, danh mục, đơn giá: con số điều khiển
+ *     cách hệ thống CHẠY.
+ *   · Vận hành — lịch hẹn, dự án, người dùng: dữ liệu phát sinh hằng ngày.
+ *
+ * Trộn ba thứ này vào nhau — bảng giá gói từng nằm chung trang với chữ của trang
+ * Gói đăng ký — là nguồn gốc của câu "không biết mình đang sửa cái gì".
+ *
+ * Nhóm "Nội dung site" KHÔNG khai ở đây: nó dựng từ `admin-pages.config` để chỉ
+ * có một nguồn sự thật (xem `admin-menu.tsx`).
  *
  * `key` là hậu tố khóa dịch dưới namespace `admin.nav`.
  */
@@ -34,41 +49,26 @@ export const ADMIN_NAV = [
     items: [{ key: 'dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: DashboardOutlined }]
   },
   {
-    key: 'content',
+    key: 'config',
     items: [
-      { key: 'homeContent', href: ADMIN_ROUTES.HOME_CONTENT, icon: HomeOutlined },
-      { key: 'staticPages', href: ADMIN_ROUTES.STATIC_PAGES, icon: LayoutOutlined },
-      { key: 'settings', href: ADMIN_ROUTES.SETTINGS, icon: SettingOutlined }
-    ]
-  },
-  {
-    key: 'handbook',
-    items: [
-      { key: 'templates', href: ADMIN_ROUTES.TEMPLATES, icon: AppstoreOutlined },
-      { key: 'articles', href: ADMIN_ROUTES.ARTICLES, icon: BookOutlined },
-      { key: 'guide', href: ADMIN_ROUTES.GUIDE, icon: PlayCircleOutlined }
-    ]
-  },
-  {
-    key: 'consult',
-    items: [
-      { key: 'consultants', href: ADMIN_ROUTES.CONSULTANTS, icon: TeamOutlined },
-      { key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined }
-    ]
-  },
-  {
-    key: 'business',
-    items: [
-      { key: 'plans', href: ADMIN_ROUTES.PLANS, icon: DollarOutlined },
-      { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
-      { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined }
-    ]
-  },
-  {
-    key: 'catalog',
-    items: [
+      { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: DollarOutlined },
+      { key: 'quotas', href: ADMIN_ROUTES.QUOTAS, icon: ThunderboltOutlined },
+      { key: 'consultPackages', href: ADMIN_ROUTES.CONSULT_PACKAGES, icon: GiftOutlined },
       { key: 'catalog', href: ADMIN_ROUTES.CATALOG, icon: AppstoreOutlined },
       { key: 'pricing', href: ADMIN_ROUTES.PRICING, icon: FileTextOutlined }
+    ]
+  },
+  {
+    key: 'ops',
+    items: [
+      { key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined },
+      { key: 'reschedule', href: ADMIN_ROUTES.RESCHEDULE, icon: SwapOutlined },
+      { key: 'subscriptions', href: ADMIN_ROUTES.SUBSCRIPTIONS, icon: CreditCardOutlined },
+      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: DollarOutlined },
+      { key: 'reviews', href: ADMIN_ROUTES.REVIEWS, icon: StarOutlined },
+      { key: 'reports', href: ADMIN_ROUTES.REPORTS, icon: FlagOutlined },
+      { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
+      { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined }
     ]
   }
 ] as const satisfies readonly {
@@ -76,12 +76,34 @@ export const ADMIN_NAV = [
   items: readonly { key: string; href: AdminRoute; icon: ComponentType }[]
 }[]
 
-/**
- * Kiểu suy ra từ chính bảng trên nên `key` là hằng chuỗi cụ thể chứ không phải
- * `string` — nhờ vậy `t(`nav.${item.key}`)` được next-intl kiểm khóa dịch.
- */
 export type AdminNavGroup = (typeof ADMIN_NAV)[number]
 export type AdminNavItem = AdminNavGroup['items'][number]
 
-/** Mọi mục menu, phẳng — dùng để tra tiêu đề trang theo pathname. */
+/** Mọi mục ngoài nhóm nội dung, phẳng — dùng để tra tiêu đề trang theo pathname. */
 export const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = ADMIN_NAV.flatMap<AdminNavItem>((group) => [...group.items])
+
+/** Icon của từng trang nội dung, tra theo `key` trong `admin-pages.config`. */
+export const CONTENT_PAGE_ICON: Record<string, ComponentType> = {
+  home: HomeOutlined,
+  handbook: BookOutlined,
+  guide: PlayCircleOutlined,
+  plans: DollarOutlined,
+  consult: TeamOutlined,
+  design: ToolOutlined,
+  account: UserOutlined,
+  legal: LayoutOutlined,
+  shell: MenuOutlined,
+  common: TranslationOutlined
+}
+
+/** Trang công khai tương ứng — nút "Mở site" mở đúng trang đang sửa. */
+export const CONTENT_PAGE_PUBLIC_HREF: Record<string, AppRoute> = {
+  home: ROUTES.HOME,
+  handbook: ROUTES.HANDBOOK,
+  guide: ROUTES.GUIDE,
+  plans: ROUTES.PLANS,
+  consult: ROUTES.CONSULT,
+  design: ROUTES.DESIGN,
+  account: ROUTES.ACCOUNT,
+  legal: ROUTES.TERMS
+}

@@ -1,16 +1,16 @@
 import { setRequestLocale } from 'next-intl/server'
 
-import { TemplateManager } from '@/features/admin'
+import { ReportManager } from '@/features/admin'
 import type { Locale } from '@/i18n/routing'
 
 interface PageProps {
   params: Promise<{ locale: Locale }>
 }
 
-/** Thư viện mẫu 2D/3D của Cẩm nang (mục VI, Phần 2). */
-export default async function AdminTemplatesPage({ params }: PageProps) {
+/** Báo cáo vi phạm người dùng gửi. */
+export default async function AdminReportsPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <TemplateManager />
+  return <ReportManager />
 }

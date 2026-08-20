@@ -19,7 +19,7 @@ import type { Locale } from '@/i18n/routing'
 import { siteConfig } from '@/shared/config/site'
 import { EstimateSheet, Photo, PlanDrawing } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
-import { RENDER_IMAGE } from '@/shared/lib/imagery'
+import { useSiteImage } from '@/shared/cms'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
 import { useDownloadDossier } from '../hooks/use-download-dossier'
@@ -61,6 +61,8 @@ type FileKey = (typeof FILES)[number]['key']
  */
 export function DossierReady({ dossier, result, info, advisory, onRequestShareLink, onSendEmail }: DossierReadyProps) {
   const t = useTranslations('design.dossier')
+  // Ảnh phối cảnh mẫu — admin thay ở màn "Hình ảnh site".
+  const exteriorImage = useSiteImage('render.villa')
   const locale = useLocale() as Locale
   const { contact } = siteConfig
   const [shareMode, setShareMode] = useState<ShareMode>(null)
@@ -81,7 +83,7 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
   function thumbnail(key: FileKey) {
     switch (key) {
       case 'exterior':
-        return <Photo className='size-full' src={RENDER_IMAGE.villa} alt={t(`files.${key}`)} sizes='140px' />
+        return <Photo className='size-full' src={exteriorImage} alt={t(`files.${key}`)} sizes='140px' />
       case 'architecture':
         return <PlanDrawing className='size-full' />
       case 'structure':

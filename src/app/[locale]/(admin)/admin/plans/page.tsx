@@ -7,8 +7,8 @@ interface PageProps {
   params: Promise<{ locale: Locale }>
 }
 
-/** Gói đăng ký — giá và hạn mức (mục VII, mục X #4). */
-export default async function AdminPlansPage({ params }: PageProps) {
+/** Bảng giá ba gói — cấu hình hệ thống, không phải chữ trên trang. */
+export default async function AdminPlanTablePage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 

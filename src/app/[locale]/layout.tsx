@@ -1,4 +1,5 @@
 import { AuthBootstrap } from '@/features/auth'
+import { CmsMessagesProvider } from '@/shared/cms'
 import { routing } from '@/i18n/routing'
 import { siteConfig } from '@/shared/config/site'
 import { AppProviders } from '@/shared/providers'
@@ -66,11 +67,16 @@ export default async function LocaleLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} ${beVietnamPro.variable} font-sans antialiased`}>
         {/* Messages are provided automatically from i18n/request.ts */}
         <NextIntlClientProvider>
-          <AppProviders>
-            {/* Resolves the session once for the whole app so auth guards
-                never deadlock waiting for initialization. */}
-            <AuthBootstrap>{children}</AuthBootstrap>
-          </AppProviders>
+          {/* Re-provides the catalogue with the copy the admin edited in the
+              CMS layered on top, so every string on the site is editable
+              without a deploy. No-ops until something is actually overridden. */}
+          <CmsMessagesProvider>
+            <AppProviders>
+              {/* Resolves the session once for the whole app so auth guards
+                  never deadlock waiting for initialization. */}
+              <AuthBootstrap>{children}</AuthBootstrap>
+            </AppProviders>
+          </CmsMessagesProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -17,6 +17,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     planTier: 'advanced',
     planExpiresAt: '2026-09-12',
     designCreditsLeft: 4,
+    libraryCreditsLeft: 40,
     status: 'active',
     createdAt: '2026-06-02'
   },
@@ -29,6 +30,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     planTier: 'basic',
     planExpiresAt: '2026-08-28',
     designCreditsLeft: 1,
+    libraryCreditsLeft: 10,
     status: 'active',
     createdAt: '2026-06-14'
   },
@@ -41,6 +43,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     planTier: 'pro',
     planExpiresAt: '2026-11-01',
     designCreditsLeft: 16,
+    libraryCreditsLeft: 160,
     status: 'active',
     createdAt: '2026-05-21'
   },
@@ -51,6 +54,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     role: 'customer',
     planTier: null,
     designCreditsLeft: 1,
+    libraryCreditsLeft: 10,
     status: 'active',
     createdAt: '2026-07-30'
   },
@@ -63,6 +67,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     planTier: 'advanced',
     planExpiresAt: '2026-08-19',
     designCreditsLeft: 0,
+    libraryCreditsLeft: 0,
     status: 'active',
     createdAt: '2026-07-19'
   },
@@ -74,6 +79,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     role: 'customer',
     planTier: null,
     designCreditsLeft: 0,
+    libraryCreditsLeft: 0,
     status: 'suspended',
     createdAt: '2026-04-08'
   },
@@ -86,6 +92,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     planTier: 'basic',
     planExpiresAt: '2026-09-05',
     designCreditsLeft: 2,
+    libraryCreditsLeft: 20,
     status: 'active',
     createdAt: '2026-08-06'
   },
@@ -98,6 +105,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     planTier: 'pro',
     planExpiresAt: '2026-10-15',
     designCreditsLeft: 9,
+    libraryCreditsLeft: 90,
     status: 'active',
     createdAt: '2026-03-27'
   },
@@ -108,6 +116,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     role: 'customer',
     planTier: null,
     designCreditsLeft: 1,
+    libraryCreditsLeft: 10,
     status: 'active',
     createdAt: '2026-08-11'
   },
@@ -119,6 +128,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     role: 'admin',
     planTier: null,
     designCreditsLeft: 0,
+    libraryCreditsLeft: 0,
     status: 'active',
     createdAt: '2026-01-05'
   }

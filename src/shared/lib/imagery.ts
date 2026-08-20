@@ -134,3 +134,43 @@ export const RENDER_IMAGE = {
   townhouse: '/images/townhouse-light.png',
   apartment: '/images/appartment-light.png'
 } as const
+
+/* ===========================================================================
+ * SỔ ẢNH PHẲNG — nguồn cho màn "Hình ảnh site" của khu quản trị.
+ * ======================================================================== */
+
+/** Gắn tiền tố nhóm vào khóa: `modern` → `style.modern`. */
+function prefixed(prefix: string, group: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(Object.entries(group).map(([key, url]) => [`${prefix}.${key}`, url]))
+}
+
+/** `{ modern: … }` + tiền tố `style` → `{ 'style.modern': string }`, giữ khóa hằng. */
+type Prefixed<P extends string, T> = { [K in keyof T & string as `${P}.${K}`]: string }
+
+/**
+ * Mọi ảnh dùng chung của giao diện, gộp về một bảng phẳng để khu quản trị liệt
+ * kê và thay từng cái.
+ *
+ * Ảnh nằm TRONG các bảng nội dung (mẫu, bài viết, hồ sơ KTS, thẻ phong cách) đã
+ * sửa được ngay trên bảng của chúng — chỗ này chỉ gom những ảnh mà trước đây
+ * phải sửa code mới đổi được.
+ */
+export const SITE_IMAGE = {
+  ...prefixed('style', STYLE_IMAGE),
+  ...prefixed('interior', INTERIOR_IMAGE),
+  ...prefixed('building', BUILDING_IMAGE),
+  ...prefixed('topic', TOPIC_IMAGE),
+  ...prefixed('construction', CONSTRUCTION_IMAGE),
+  ...prefixed('stage', STAGE_IMAGE),
+  ...prefixed('portrait', PORTRAIT_IMAGE),
+  ...prefixed('render', RENDER_IMAGE)
+} as Prefixed<'style', typeof STYLE_IMAGE> &
+  Prefixed<'interior', typeof INTERIOR_IMAGE> &
+  Prefixed<'building', typeof BUILDING_IMAGE> &
+  Prefixed<'topic', typeof TOPIC_IMAGE> &
+  Prefixed<'construction', typeof CONSTRUCTION_IMAGE> &
+  Prefixed<'stage', typeof STAGE_IMAGE> &
+  Prefixed<'portrait', typeof PORTRAIT_IMAGE> &
+  Prefixed<'render', typeof RENDER_IMAGE>
+
+export type SiteImageKey = keyof typeof SITE_IMAGE

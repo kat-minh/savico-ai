@@ -1,8 +1,7 @@
 'use client'
 
-import { Col, Form, Input, InputNumber, Row, Segmented, Select, Switch, Tag, Typography } from 'antd'
+import { Col, Form, Input, InputNumber, Row, Select, Switch, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import type { GuideArticle, GuideVideo } from '@/shared/cms'
 import { newAdminId } from '../../services/admin.service'
@@ -14,83 +13,77 @@ const { Text } = Typography
 const TOPICS = ['land-photo', 'input', 'read-estimate', 'dossier', 'share'] as const
 
 /**
- * Trang Hướng dẫn (mục VI) — hai bảng dùng chung một màn: video ngắn 20–60s và
- * bài hướng dẫn dạng chữ.
+ * Bài hướng dẫn dạng chữ của trang Hướng dẫn (mục VI).
+ *
+ * Trước đây bảng này và bảng video dùng chung một màn, chuyển qua lại bằng một
+ * `Segmented` nhét cạnh nút "Thêm mới" — trông như một cái nút chứ không ra bộ
+ * chọn dữ liệu. Giờ mỗi bảng là một TAB thật của màn Trang Hướng dẫn.
+ */
+export function GuideArticleManager() {
+  const t = useTranslations('admin')
+  const topicOptions = TOPICS.map((value) => ({ label: t(`guide.topics.${value}`), value }))
+
+  return (
+    <ResourceManager
+      collection='guideArticles'
+      title={t('guide.articles')}
+      description={t('guide.articlesDescription')}
+      searchText={(item) => `${item.title} ${item.excerpt}`}
+      createItem={(): GuideArticle => ({
+        id: newAdminId('gart'),
+        topic: 'land-photo',
+        title: '',
+        excerpt: '',
+        imageUrl: ''
+      })}
+      columns={[
+        { title: t('guide.title'), dataIndex: 'title' },
+        {
+          title: t('guide.topic'),
+          dataIndex: 'topic',
+          width: 170,
+          render: (topic: GuideArticle['topic']) => <Tag>{t(`guide.topics.${topic}`)}</Tag>
+        },
+        { title: t('guide.excerpt'), dataIndex: 'excerpt', ellipsis: true }
+      ]}
+      renderForm={(form) => (
+        <>
+          <Form.Item
+            name='title'
+            label={t('guide.title')}
+            rules={[{ required: true, message: t('fields.requiredMessage') }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name='topic' label={t('guide.topic')}>
+            <Select options={topicOptions} />
+          </Form.Item>
+          <Form.Item name='excerpt' label={t('guide.excerpt')}>
+            <Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
+          </Form.Item>
+          <ImageUrlField form={form} name='imageUrl' label={t('guide.cover')} />
+        </>
+      )}
+    />
+  )
+}
+
+/**
+ * Video ngắn 20–60 giây của trang Hướng dẫn (mục VI).
  *
  * Chỉ MỘT video được đánh dấu nổi bật (mục X, #3). Giao diện trang Hướng dẫn lấy
  * video `featured` đầu tiên nên bật cờ cho video thứ hai không làm vỡ gì, nhưng
  * form vẫn nhắc để admin biết.
  */
-export function GuideManager() {
+export function GuideVideoManager() {
   const t = useTranslations('admin')
-  const [tab, setTab] = useState<'videos' | 'articles'>('videos')
-
   const topicOptions = TOPICS.map((value) => ({ label: t(`guide.topics.${value}`), value }))
-
-  const switcher = (
-    <Segmented
-      value={tab}
-      onChange={(value) => setTab(value as 'videos' | 'articles')}
-      options={[
-        { label: t('guide.videos'), value: 'videos' },
-        { label: t('guide.articles'), value: 'articles' }
-      ]}
-    />
-  )
-
-  if (tab === 'articles') {
-    return (
-      <ResourceManager
-        collection='guideArticles'
-        title={t('nav.guide')}
-        description={t('guide.articlesDescription')}
-        extraActions={switcher}
-        searchText={(item) => `${item.title} ${item.excerpt}`}
-        createItem={(): GuideArticle => ({
-          id: newAdminId('gart'),
-          topic: 'land-photo',
-          title: '',
-          excerpt: '',
-          imageUrl: ''
-        })}
-        columns={[
-          { title: t('guide.title'), dataIndex: 'title' },
-          {
-            title: t('guide.topic'),
-            dataIndex: 'topic',
-            width: 170,
-            render: (topic: GuideArticle['topic']) => <Tag>{t(`guide.topics.${topic}`)}</Tag>
-          },
-          { title: t('guide.excerpt'), dataIndex: 'excerpt', ellipsis: true }
-        ]}
-        renderForm={(form) => (
-          <>
-            <Form.Item
-              name='title'
-              label={t('guide.title')}
-              rules={[{ required: true, message: t('fields.requiredMessage') }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item name='topic' label={t('guide.topic')}>
-              <Select options={topicOptions} />
-            </Form.Item>
-            <Form.Item name='excerpt' label={t('guide.excerpt')}>
-              <Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
-            </Form.Item>
-            <ImageUrlField form={form} name='imageUrl' label={t('guide.cover')} />
-          </>
-        )}
-      />
-    )
-  }
 
   return (
     <ResourceManager
       collection='guideVideos'
-      title={t('nav.guide')}
+      title={t('guide.videos')}
       description={t('guide.videosDescription')}
-      extraActions={switcher}
       searchText={(item) => `${item.title} ${item.description}`}
       createItem={(): GuideVideo => ({
         id: newAdminId('vid'),
