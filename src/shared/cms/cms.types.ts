@@ -638,6 +638,193 @@ export interface CmsPackageReview {
 
 export type CmsReportStatus = 'open' | 'resolved' | 'dismissed'
 
+/** Bốn nấc trạng thái của một lời mời báo giá (S18, R4). */
+export type CmsInvitationStatus = 'sent' | 'received' | 'accepted' | 'done'
+
+/** Một nấc đã đi qua trên thanh trạng thái lời mời. */
+export interface CmsInvitationStep {
+  status: CmsInvitationStatus
+  at: string
+}
+
+/** Lịch khảo sát khách chọn khi gửi lời mời (S16). */
+export interface CmsSurveyBooking {
+  contractorId: string
+  /** ISO date `YYYY-MM-DD`. */
+  date: string
+  slotId: string
+  note: string
+  phone: string
+  email: string
+}
+
+/**
+ * Một lời mời báo giá đã gửi (S17, S18).
+ *
+ * Nằm ở `shared/cms` chứ không ở `features/contractors` vì R4 giao việc đẩy bốn
+ * nấc trạng thái cho ĐỘI VẬN HÀNH: màn admin phải ghi được, trang khách phải
+ * đọc được, mà `features/admin` thì không được import `features/contractors`.
+ * Để mỗi bên giữ một kho riêng thì admin sửa một nơi khách xem một nẻo.
+ *
+ * `contractorName` / `projectName` là dữ liệu lặp lại có chủ đích: bảng admin
+ * cần tên để hiển thị và tìm kiếm, mà danh bạ nhà thầu nằm trong feature —
+ * backend thật cũng trả kèm tên chứ không bắt admin join tay.
+ *
+ * R2/R3: không có trường tiền, không có "báo giá đã nhận" — sau khi nhà thầu
+ * nhận lời mời, hai bên làm việc trực tiếp ngoài web.
+ */
+export interface CmsContractorInvitation {
+  /** Mã lời mời `INV-YYYY-NNNN`. */
+  id: string
+  projectId: string
+  projectName: string
+  contractorId: string
+  contractorName: string
+  sentAt: string
+  status: CmsInvitationStatus
+  /** Lần cập nhật gần nhất, do đội hỗ trợ SAVICO thực hiện (R4). */
+  updatedAt: string
+  steps: CmsInvitationStep[]
+  /** Phiên bản hồ sơ đã gửi kèm — "Hồ sơ v1 · 2 tệp". */
+  dossierVersion: string
+  fileCount: number
+  survey: CmsSurveyBooking
+}
+
+/* ---------------------------------------------------------------------------
+ * GIÁM SÁT THI CÔNG (S19–S24).
+ *
+ * Cả cây dữ liệu này nằm ở `shared/cms` chứ không ở `features/supervision` vì
+ * R5 giao việc XÁC NHẬN GIAI ĐOẠN cho kỹ sư Giám sát của SAVICO: màn quản trị
+ * phải ghi được kết quả kiểm tra mà bảng điều khiển của khách đang đọc, mà
+ * `features/admin` thì không được import `features/supervision`.
+ * ------------------------------------------------------------------------ */
+
+/** 6 giai đoạn cố định (R5). Thứ tự mảng cũng là thứ tự thi công. */
+export type CmsStageKey = 'legal' | 'foundation' | 'structure' | 'mep' | 'finishing' | 'handover'
+
+/** Trạng thái một giai đoạn — quyết định luôn màn S20 / S21 / S22 / S23. */
+export type CmsStageStatus = 'confirmed' | 'inProgress' | 'upcoming'
+
+/** Vai trò trong lịch sử và trên nhãn tệp. */
+export type CmsActor = 'GS' | 'KH' | 'SYS'
+
+/** Phiên bản hồ sơ giai đoạn. Khóa ở v1, duyệt sửa đổi thì lên v2, v3... */
+export type CmsStageVersion = string
+
+/** Một tệp trong khối "Ảnh & tài liệu" của giai đoạn. */
+export interface CmsStageFile {
+  id: string
+  name: string
+  kind: 'photo' | 'document'
+  /** Ai tải lên — nhãn KH / GS trên góc ảnh. */
+  by: CmsActor
+  /** Thời gian chụp lấy từ EXIF; tài liệu thì trống. */
+  capturedAt?: string
+  uploadedAt: string
+  /** Ảnh do Giám sát chụp khi kiểm tra hiện trường. */
+  fromInspection?: boolean
+  /** Ảnh được thêm ở phiên bản nào — hiện nhãn "thêm ở v2". */
+  addedInVersion?: CmsStageVersion
+}
+
+/** Một nhận xét trong khối "Nhận xét & trao đổi". */
+export interface CmsStageComment {
+  id: string
+  author: string
+  role: CmsActor
+  at: string
+  text: string
+  /** Nhận xét gắn với một yêu cầu sửa đổi. */
+  changeRequestId?: string
+}
+
+/** Kết quả kiểm tra thực tế của Giám sát — có thì giai đoạn mới khóa được. */
+export interface CmsStageInspection {
+  confirmedAt: string
+  engineer: string
+  /** Kỹ sư có tới công trình hay chỉ xét hồ sơ. */
+  onSite: boolean
+  note: string
+}
+
+/** Trạng thái một yêu cầu sửa đổi (CR). */
+export type CmsChangeRequestStatus = 'pending' | 'applied' | 'rejected'
+
+/**
+ * Yêu cầu sửa đổi hồ sơ đã khóa.
+ *
+ * `by` quyết định AI DUYỆT: Giám sát đề xuất thì khách duyệt (S22), khách đề
+ * xuất thì Giám sát duyệt (S23). Không có đường nào tự sửa hồ sơ đã khóa.
+ */
+export interface CmsChangeRequest {
+  /** Mã hiển thị `CR-01`. */
+  id: string
+  by: CmsActor
+  proposedAt: string
+  status: CmsChangeRequestStatus
+  /** Hạn bên kia phải trả lời (chỉ CR đang chờ). */
+  dueAt?: string
+  reason: string
+  /** Phản hồi của bên duyệt. */
+  response?: string
+  /** Phiên bản sinh ra khi CR được duyệt. */
+  resultVersion?: CmsStageVersion
+}
+
+/** Một sự kiện trong "Lịch sử & phiên bản" — không bao giờ bị xóa (R5). */
+export interface CmsStageEvent {
+  id: string
+  at: string
+  actor: CmsActor
+  text: string
+  /** Sự kiện mốc (hoàn thành, xác nhận, duyệt CR) — tô đậm trên dòng thời gian. */
+  milestone?: boolean
+}
+
+/** Một giai đoạn trong bảng điều khiển. */
+export interface CmsSupervisionStage {
+  key: CmsStageKey
+  /** 1..6 — hiện trong "Giai đoạn 4/6". */
+  index: number
+  plannedStart: string
+  plannedEnd: string
+  actualStart?: string
+  actualEnd?: string
+  status: CmsStageStatus
+  version: CmsStageVersion
+  files: CmsStageFile[]
+  comments: CmsStageComment[]
+  inspection?: CmsStageInspection
+  changeRequests: CmsChangeRequest[]
+  history: CmsStageEvent[]
+  /** Gợi ý chuẩn bị cho giai đoạn sắp tới (S21) — admin sửa được. */
+  prepHint?: string
+}
+
+/** Toàn bộ dữ liệu một dự án đang được giám sát. */
+export interface CmsSupervisionProject {
+  /** Mã dự án `SVC-YYYY-NNNN` — cũng là khóa của bản ghi trong kho. */
+  id: string
+  projectName: string
+  /** Gói đang dùng: `check` hoặc `control`. */
+  packageTier: 'check' | 'control'
+  /** Mã gói hiển thị trên thẻ dự án, ví dụ `SVG-2026-0001-AT`. */
+  packageCode: string
+  engineer: string
+  /** Ngày kích hoạt gói — mốc tính lịch chuẩn. */
+  activatedAt: string
+  /** Hạn sử dụng gói (ISO) — hết hạn thì gia hạn qua add-on. */
+  expiresAt: string
+  /** Ngày bàn giao dự kiến, cập nhật theo tiến độ thực tế. */
+  handoverDate: string
+  /** Ngày bàn giao theo kế hoạch ban đầu — để nói "sớm/chậm hơn kế hoạch". */
+  plannedHandoverDate: string
+  inspectionsUsed: number
+  inspectionsTotal: number
+  stages: CmsSupervisionStage[]
+}
+
 /** Báo cáo vi phạm do người dùng gửi (review sai sự thật, nội dung xấu…). */
 export interface CmsReport {
   id: string

@@ -35,7 +35,9 @@ const ENDPOINTS: Record<CmsCollection, string> = {
   rescheduleRequests: '/admin/bookings/reschedule-requests',
   consultPackages: '/admin/consult/packages',
   packageReviews: '/admin/consult/package-reviews',
-  reports: '/admin/reports'
+  reports: '/admin/reports',
+  contractorInvitations: '/admin/contractor-invitations',
+  supervisionProjects: '/admin/supervision/projects'
 }
 
 const DOCUMENT_ENDPOINTS: Record<CmsDocument, string> = {

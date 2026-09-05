@@ -14,6 +14,8 @@ export const contractorKeys = {
   invitations: () => [...contractorKeys.all, 'invitations'] as const,
   /** Lời mời báo giá đã gửi của một dự án (S18). */
   invitationList: (projectId: string) => [...contractorKeys.invitations(), projectId] as const,
+  /** Đánh giá nhà thầu của một dự án — mở form ở S18 sau khi lời mời hoàn tất. */
+  reviewList: (projectId: string) => [...contractorKeys.all, 'reviews', projectId] as const,
   /** Một yêu cầu khảo sát vừa gửi (S17). */
   surveyRequest: (requestId: string) => [...contractorKeys.all, 'survey-request', requestId] as const,
   /** Khung giờ còn trống của một nhà thầu trong một ngày (S16). */

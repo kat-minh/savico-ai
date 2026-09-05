@@ -1283,6 +1283,8 @@
       "consultants": "Kiến trúc sư",
       "bookings": "Lịch hẹn",
       "projects": "Dự án khách hàng",
+      "invitations": "Lời mời báo giá",
+      "inspections": "Giám sát thi công",
       "customers": "Người dùng",
       "catalog": "Danh mục Bước 1",
       "pricing": "Đơn giá dự toán",
@@ -2009,6 +2011,51 @@
       "approvedToast": "Đã duyệt — lịch {booking} dời theo khung giờ mới.",
       "rejectedToast": "Đã từ chối yêu cầu đổi lịch."
     },
+    "invitations": {
+      "description": "Lời mời báo giá khách gửi cho nhà thầu. Khách chỉ xem thanh trạng thái — đội hỗ trợ SAVICO là bên đẩy từng nấc, mỗi lần một nấc và không lùi lại.",
+      "code": "Mã lời mời",
+      "project": "Dự án",
+      "contractor": "Nhà thầu",
+      "survey": "Lịch khảo sát",
+      "status": "Trạng thái",
+      "dossier": "Hồ sơ {version} · {count} tệp",
+      "updatedAt": "Cập nhật lúc {time}",
+      "advance": "Chuyển nấc",
+      "advanceConfirmTitle": "Chuyển sang \"{status}\"?",
+      "advanceConfirmBody": "Khách sẽ thấy nấc mới ngay trên thẻ lời mời. Đã chuyển thì không lùi lại được.",
+      "advancedToast": "Lời mời {code} đã chuyển sang \"{status}\".",
+      "finished": "Đã ở nấc cuối"
+    },
+    "invitationStatus": {
+      "sent": "Đã gửi",
+      "received": "Đã tiếp nhận",
+      "accepted": "Nhà thầu đã nhận",
+      "done": "Hoàn tất"
+    },
+    "inspections": {
+      "description": "Kỹ sư Giám sát ghi kết quả kiểm tra từng giai đoạn. Xác nhận là hồ sơ giai đoạn khóa lại và giai đoạn kế tiếp mở ra — sau đó chỉ đổi được qua Yêu cầu sửa đổi.",
+      "project": "Dự án",
+      "package": "Gói",
+      "engineer": "Kỹ sư phụ trách",
+      "currentStage": "Giai đoạn đang chờ",
+      "stageOf": "Giai đoạn {index}/{total}",
+      "visits": "Lượt kiểm tra",
+      "confirm": "Xác nhận kiểm tra",
+      "confirmTitle": "Xác nhận giai đoạn \"{stage}\"",
+      "readyToConfirm": "Khách đã tải hồ sơ hoàn thành",
+      "pendingUpload": "Khách chưa tải hồ sơ hoàn thành",
+      "pendingUploadBody": "Giai đoạn này chưa được khách đánh dấu hoàn thành. Xác nhận bây giờ vẫn khóa hồ sơ lại như thường.",
+      "allConfirmed": "Đã xác nhận đủ 6 giai đoạn",
+      "engineerLabel": "Kỹ sư xác nhận",
+      "engineerRequired": "Nhập tên kỹ sư xác nhận.",
+      "onSiteLabel": "Có tới công trình",
+      "onSiteHint": "Bật thì tính một lượt kiểm tra hiện trường của gói; tắt là chỉ xét hồ sơ từ xa.",
+      "noteLabel": "Kết quả kiểm tra",
+      "noteRequired": "Nhập kết quả kiểm tra — khách sẽ đọc đúng dòng này.",
+      "notePlaceholder": "Ví dụ: Cốt thép và cốp pha đúng bản vẽ, đủ điều kiện đổ bê tông.",
+      "lockNote": "Xác nhận xong hồ sơ giai đoạn sẽ khóa; mọi thay đổi sau đó phải đi qua Yêu cầu sửa đổi (R5).",
+      "confirmedToast": "Đã xác nhận giai đoạn \"{stage}\" và mở giai đoạn kế tiếp."
+    },
     "rescheduleStatus": {
       "pending": "Chờ duyệt",
       "approved": "Đã duyệt",
@@ -2340,6 +2387,23 @@
         "startWindow": "Dự kiến khởi công"
       }
     },
+    "rating": {
+      "action": "Đánh giá nhà thầu",
+      "title": "Đánh giá {name}",
+      "subtitle": "Chỉ khách đã làm việc qua SAVICO mới đánh giá được, và mỗi lời mời đánh giá một lần.",
+      "ratingLabel": "Mức độ hài lòng",
+      "ratingHint": "Chấm từ 1 đến 5 sao cho toàn bộ quá trình làm việc với nhà thầu này.",
+      "ratingRequired": "Hãy chọn số sao.",
+      "commentLabel": "Nhận xét",
+      "commentHint": "Điều gì làm bạn hài lòng hoặc chưa hài lòng. Không bắt buộc.",
+      "commentPlaceholder": "VD: Đúng tiến độ, báo giá rõ ràng, thợ giữ vệ sinh công trường.",
+      "submit": "Gửi đánh giá",
+      "cancel": "Hủy",
+      "sent": "Đã gửi đánh giá. Cảm ơn bạn.",
+      "failed": "Chưa gửi được đánh giá. Vui lòng thử lại.",
+      "done": "Đã đánh giá {rating}/5",
+      "starLabel": "{count} sao"
+    },
     "start": {
       "title": "Bạn muốn bắt đầu như thế nào?",
       "subtitle": "Chọn cách phù hợp với bạn lúc này — lượt trong gói vẫn còn nguyên cho tới khi bạn dùng.",
@@ -2372,6 +2436,22 @@
         "p2": "Gợi ý hướng thiết kế phù hợp ngân sách",
         "p3": "Giải đáp quy trình và cách dùng nền tảng",
         "action": "Đặt lịch tư vấn"
+      },
+      "turnkeyForm": {
+        "title": "Đăng ký triển khai trọn gói",
+        "subtitle": "Để lại thông tin liên hệ, đội ngũ SAVICO sẽ gọi lại để khảo sát và tư vấn.",
+        "name": "Họ và tên",
+        "phone": "Số điện thoại",
+        "email": "Email",
+        "note": "Nhu cầu của bạn",
+        "notePlaceholder": "VD: Nhà phố 2 tầng ở Tân Lợi, muốn khởi công trong quý sau.",
+        "contactNote": "Thông tin chỉ dùng để đội ngũ SAVICO liên hệ về dự án của bạn.",
+        "cancel": "Hủy",
+        "nameHint": "Tên người SAVICO sẽ liên hệ về dự án này.",
+        "phoneHint": "Số điện thoại đội ngũ SAVICO gọi lại để hẹn khảo sát.",
+        "emailHint": "Email nhận xác nhận và tài liệu liên quan.",
+        "noteHint": "Mô tả càng rõ, SAVICO càng chuẩn bị đúng nội dung buổi khảo sát. Không bắt buộc.",
+        "submit": "Gửi đăng ký"
       },
       "turnkeyRegistered": "Đã ghi nhận. Đội ngũ SAVICO sẽ liên hệ với bạn trong giờ làm việc gần nhất."
     },

@@ -74,7 +74,7 @@ export function SupervisionSummary({ projectId }: SupervisionSummaryProps) {
         </div>
 
         <Button asChild>
-          <Link href={supervisionRoute(project.projectId)}>
+          <Link href={supervisionRoute(project.id)}>
             {t('open')}
             <ArrowRight className='size-4' />
           </Link>

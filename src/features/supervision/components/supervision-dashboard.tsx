@@ -237,7 +237,7 @@ function DashboardBanner({
         </Button>
       ) : (
         <Button asChild variant='outline'>
-          <Link href={supervisionRoute(project.projectId, stage.index)}>
+          <Link href={supervisionRoute(project.id, stage.index)}>
             {t('goTo', { index: stage.index })}
             <ArrowRight className='size-4' />
           </Link>
@@ -273,7 +273,7 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
       </div>
 
       <p className='text-muted-foreground mt-1 font-mono text-xs'>
-        {project.projectId} · {t('engineer')}: {project.engineer} · {t('packageCode')}: {project.packageCode}
+        {project.id} · {t('engineer')}: {project.engineer} · {t('packageCode')}: {project.packageCode}
       </p>
 
       <dl className='mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5'>

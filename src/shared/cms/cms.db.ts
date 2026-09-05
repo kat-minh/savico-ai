@@ -2,6 +2,7 @@ import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/routing'
 import type {
   CmsBooking,
   CmsBuildingTypeOption,
+  CmsContractorInvitation,
   CmsCustomer,
   CmsDesignProject,
   CmsHomeContent,
@@ -12,6 +13,7 @@ import type {
   CmsRescheduleRequest,
   CmsSiteSettings,
   CmsSubscription,
+  CmsSupervisionProject,
   CmsTransaction,
   CmsStaticPage,
   CmsStyleOption,
@@ -98,6 +100,10 @@ export interface CmsCollectionMap {
   consultPackages: CmsConsultPackage
   packageReviews: CmsPackageReview
   reports: CmsReport
+  /** Lời mời báo giá — khách chỉ xem, vận hành đẩy trạng thái (S18, R4). */
+  contractorInvitations: CmsContractorInvitation
+  /** Dự án đang được giám sát — Giám sát xác nhận từng giai đoạn (S20, R5). */
+  supervisionProjects: CmsSupervisionProject
 }
 
 export type CmsCollection = keyof CmsCollectionMap
@@ -130,7 +136,9 @@ const SHARED_COLLECTIONS: readonly CmsCollection[] = [
   'transactions',
   'rescheduleRequests',
   'packageReviews',
-  'reports'
+  'reports',
+  'contractorInvitations',
+  'supervisionProjects'
 ]
 
 /** Ngăn lưu: một ngăn cho mỗi ngôn ngữ, cộng ngăn `shared` cho dữ liệu vận hành. */
@@ -179,7 +187,12 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   rescheduleRequests: RESCHEDULE_REQUESTS_SEED,
   consultPackages: CONSULT_PACKAGES_SEED,
   packageReviews: PACKAGE_REVIEWS_SEED,
-  reports: REPORTS_SEED
+  reports: REPORTS_SEED,
+  // Lời mời do khách gửi ở S16/S17 nên không có bản mẫu — bảng bắt đầu rỗng.
+  contractorInvitations: [],
+  // Dự án giám sát sinh ra khi khách mua gói; bản demo dựng dữ liệu mẫu ở lần
+  // mở bảng điều khiển đầu tiên, nên bảng cũng bắt đầu rỗng.
+  supervisionProjects: []
 }
 
 /** Không có gì bị ghi đè — dùng chung một tham chiếu cho cả hai tài liệu. */

@@ -15,6 +15,8 @@ import {
   MenuOutlined,
   PlayCircleOutlined,
   ProjectOutlined,
+  SafetyCertificateOutlined,
+  SendOutlined,
   StarOutlined,
   SwapOutlined,
   TeamOutlined,
@@ -68,6 +70,8 @@ export const ADMIN_NAV = [
       { key: 'reviews', href: ADMIN_ROUTES.REVIEWS, icon: StarOutlined },
       { key: 'reports', href: ADMIN_ROUTES.REPORTS, icon: FlagOutlined },
       { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
+      { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined },
+      { key: 'inspections', href: ADMIN_ROUTES.INSPECTIONS, icon: SafetyCertificateOutlined },
       { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined }
     ]
   }

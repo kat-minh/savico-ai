@@ -1,3 +1,5 @@
+import type { CmsContractorInvitation, CmsInvitationStatus, CmsInvitationStep, CmsSurveyBooking } from '@/shared/cms'
+
 /**
  * Kiểu dữ liệu của luồng TÌM NHÀ THẦU (S09–S18).
  *
@@ -37,7 +39,31 @@ export type ServiceRegion = 'north' | 'central' | 'south'
  * Thanh 4 nấc trên mỗi thẻ lời mời (S18). Trạng thái do đội hỗ trợ SAVICO cập
  * nhật trong khu quản trị, khách chỉ xem (R4).
  */
-export type InvitationStatus = 'sent' | 'received' | 'accepted' | 'done'
+/**
+ * Bản ghi lời mời báo giá sống ở `shared/cms` chứ không ở feature này: R4 giao
+ * việc đẩy bốn nấc trạng thái cho đội vận hành, nên màn admin phải ghi được và
+ * trang khách phải đọc được cùng MỘT kho. `features/admin` thì không được import
+ * `features/contractors`, vậy kiểu phải nằm ở tầng dùng chung.
+ */
+export type InvitationStatus = CmsInvitationStatus
+
+/**
+ * Đánh giá của khách về một nhà thầu.
+ *
+ * S09 hứa "chỉ khách đã làm việc qua SAVICO mới được đánh giá" nhưng bản mô tả
+ * không vẽ màn nào — nên điều kiện mở form lấy đúng câu đó: chỉ lời mời đã ở
+ * nấc cuối (`done`) mới đánh giá được, mỗi lời mời một lần.
+ */
+export interface ContractorReview {
+  /** Trùng mã lời mời: một lời mời chỉ đánh giá được một lần. */
+  invitationId: string
+  contractorId: string
+  projectId: string
+  /** 1–5 sao. */
+  rating: number
+  comment: string
+  createdAt: string
+}
 
 /** Tệp đính kèm hồ sơ dự án (S10, S11). */
 export interface BriefDocument {
@@ -159,48 +185,14 @@ export interface SurveySlot {
 }
 
 /** Lịch khảo sát khách chọn cho MỘT nhà thầu (S16). */
-export interface SurveyBooking {
-  contractorId: string
-  /** ISO date `YYYY-MM-DD`. */
-  date: string
-  slotId: string
-  note: string
-  phone: string
-  email: string
-}
+export type SurveyBooking = CmsSurveyBooking
 
 /** Một nấc trên thanh trạng thái lời mời (S18). */
-export interface InvitationStep {
-  status: InvitationStatus
-  at: string
-}
+export type InvitationStep = CmsInvitationStep
 
-/**
- * Một lời mời báo giá đã gửi (S17, S18).
- *
- * R2/R3: không có trường tiền, không có "báo giá đã nhận" — sau khi nhà thầu
- * nhận lời mời, hai bên làm việc trực tiếp ngoài web.
- */
-export interface Invitation {
-  /** Mã lời mời `INV-YYYY-NNNN`. */
-  id: string
-  projectId: string
-  contractorId: string
-  sentAt: string
-  status: InvitationStatus
-  /** Lần cập nhật gần nhất, do đội hỗ trợ SAVICO thực hiện (R4). */
-  updatedAt: string
-  steps: InvitationStep[]
-  /** Phiên bản hồ sơ đã gửi kèm — "Hồ sơ v1 · 2 tệp". */
-  dossierVersion: string
-  fileCount: number
-  survey: SurveyBooking
-}
+/** Một lời mời báo giá đã gửi (S17, S18). */
+export type Invitation = CmsContractorInvitation
 
-/**
- * Yêu cầu khảo sát gộp cho một lần gửi (S17) — mã `KS-YYYY-NNNN`. Khi mời nhiều
- * nhà thầu một lượt, khối "Chi tiết yêu cầu" liệt kê tất cả (≤ 3, R1).
- */
 export interface SurveyRequest {
   id: string
   projectId: string

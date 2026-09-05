@@ -61,3 +61,33 @@ export function useSurveyRequest(requestId: string) {
     enabled: Boolean(requestId)
   })
 }
+
+/** Đánh giá nhà thầu đã gửi của dự án (S18). */
+export function useContractorReviews(projectId: string) {
+  return useQuery({
+    queryKey: contractorKeys.reviewList(projectId),
+    queryFn: () => contractorsApi.listReviews(projectId),
+    enabled: Boolean(projectId)
+  })
+}
+
+/**
+ * Gửi đánh giá cho một lời mời đã hoàn tất (S09: "chỉ khách đã làm việc qua
+ * SAVICO mới được đánh giá").
+ */
+export function useSubmitContractorReview(projectId: string) {
+  const queryClient = useQueryClient()
+  const t = useTranslations('contractors.rating')
+
+  return useMutation({
+    mutationFn: ({ invitationId, rating, comment }: { invitationId: string; rating: number; comment: string }) =>
+      contractorsApi.submitReview(invitationId, rating, comment),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contractorKeys.reviewList(projectId) })
+      toast.success(t('sent'))
+    },
+    onError: (error) => {
+      toast.error(isApiError(error) ? error.message : t('failed'))
+    }
+  })
+}

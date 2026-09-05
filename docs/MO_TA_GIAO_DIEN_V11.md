@@ -160,8 +160,11 @@ Những chỗ code **cố ý khác** ảnh demo hoặc bổ sung so với phần
 
 ### Còn thiếu / chờ chốt
 
-- **Form "Đăng ký triển khai"** (từ S08) chưa có trong danh mục màn — hiện đang là thông báo đã ghi nhận + Ops liên hệ.
-- **Luồng đánh giá nhà thầu**: S09 quảng cáo "chỉ khách đã làm việc qua SAVICO mới được đánh giá" nhưng không có màn nào để đánh giá.
-- **Màn admin cho Ops** cập nhật 4 nấc trạng thái lời mời (R4) và kết quả kiểm tra của Giám sát — chưa dựng (đợt này chưa làm admin).
+- ~~**Form "Đăng ký triển khai"** (từ S08) chưa có trong danh mục màn~~ — ĐÃ DỰNG: hộp thoại thu họ tên / SĐT / email / nhu cầu, tự điền theo tài khoản. Bản mô tả không liệt kê trường nào nên bộ trường lấy theo tiền lệ S16 (liên hệ nhận xác nhận) và S17 (Ops gọi để làm rõ nhu cầu). Gửi xong mới chỉ báo đã ghi nhận — chờ endpoint .NET.
+- ~~**Luồng đánh giá nhà thầu**~~ — ĐÃ DỰNG: nút "Đánh giá nhà thầu" trên thẻ ở S18, chỉ hiện khi lời mời đã ở nấc "Hoàn tất" (đúng câu S09 quảng cáo), mỗi lời mời một lần. Form thu 1–5 sao + nhận xét; đánh giá xong thẻ đổi thành "Đã đánh giá n/5". Mock chặn cả ở tầng dữ liệu để backend chỉ việc lặp lại luật. Nấc "Hoàn tất" nay do màn Ops bên dưới đẩy, nên luồng chạy được trọn vẹn trong bản demo.
+- ~~**Màn admin cho Ops** cập nhật 4 nấc trạng thái lời mời (R4) và kết quả kiểm tra của Giám sát~~ — ĐÃ DỰNG, hai màn trong nhóm *Vận hành*:
+  - **Lời mời báo giá** (`/admin/invitations`) — đẩy trạng thái từng nấc một, không nhảy cóc và không lùi; mỗi lần bấm ghi thêm một mốc vào `steps` để dòng thời gian ở S18 là bản ghi chứ không phải suy ra. Đúng R4: khách chỉ xem.
+  - **Giám sát thi công** (`/admin/inspections`) — kỹ sư ghi kết quả kiểm tra (người xác nhận, có tới công trình hay không, nội dung). Xác nhận làm ba việc cùng lúc vì thực tế chúng là một: khóa giai đoạn, mở giai đoạn kế tiếp, ghi mốc vào lịch sử (R5). `inspectionsUsed` chỉ tăng khi có tới công trình.
+  - Kèm theo đó, lời mời và dự án giám sát chuyển sang sống ở `shared/cms` (`contractorInvitations`, `supervisionProjects`) — khu quản trị ghi và trang khách đọc cùng MỘT kho, vì `features/admin` không được import hai feature kia.
 - **Cổng nhà thầu** — giai đoạn 2 theo phần chữ.
 - **Nội dung Cẩm nang** trong thư mục Google Drive — chưa có quyền truy cập.

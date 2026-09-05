@@ -1,7 +1,19 @@
 'use client'
 
-import { ArrowRight, BadgeCheck, CalendarCheck, Check, FileText, HardHat, Headset, Info, Lock } from 'lucide-react'
+import {
+  ArrowRight,
+  BadgeCheck,
+  CalendarCheck,
+  Check,
+  FileText,
+  HardHat,
+  Headset,
+  Info,
+  Lock,
+  Star
+} from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Link } from '@/i18n/navigation'
@@ -20,8 +32,9 @@ import { formatDate } from '@/shared/utils'
 import { INVITATION_STEPS, MAX_INVITATIONS, SURVEY_SLOTS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractors } from '../hooks/use-contractors'
-import { useInvitations } from '../hooks/use-invitations'
-import type { Contractor, Invitation } from '../types/contractor.types'
+import { useContractorReviews, useInvitations } from '../hooks/use-invitations'
+import type { Contractor, ContractorReview, Invitation } from '../types/contractor.types'
+import { ContractorReviewDialog } from './contractor-review-dialog'
 import { ContractorLogo } from './contractor-logo'
 import { ContractorStats } from './contractor-stats'
 import { ProjectContextBar } from './project-context-bar'
@@ -47,6 +60,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
   const { data: brief } = useBrief(projectId)
   const { data: contractors } = useContractors(projectId)
   const { data: invitations, isPending } = useInvitations(projectId)
+  const { data: reviews } = useContractorReviews(projectId)
 
   const sent = invitations ?? []
 
@@ -91,6 +105,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
                 invitation={invitation}
                 contractor={contractors?.find((c) => c.id === invitation.contractorId)}
                 projectId={projectId}
+                review={reviews?.find((item) => item.invitationId === invitation.id)}
               />
             ))}
 
@@ -138,16 +153,22 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
 function InvitationCard({
   invitation,
   contractor,
-  projectId
+  projectId,
+  review
 }: {
   invitation: Invitation
   contractor?: Contractor
   projectId: string
+  /** Đánh giá đã gửi cho chính lời mời này, nếu có. */
+  review?: ContractorReview
 }) {
   const t = useTranslations('contractors.invitations')
   const tCommon = useTranslations('contractors.common')
   const tStatus = useTranslations('contractors.status')
+  const tRating = useTranslations('contractors.rating')
   const locale = useLocale() as Locale
+
+  const [reviewOpen, setReviewOpen] = useState(false)
 
   const currentIndex = INVITATION_STEPS.indexOf(invitation.status)
   const stampOf = (status: string) => invitation.steps.find((step) => step.status === status)?.at
@@ -168,7 +189,7 @@ function InvitationCard({
           {contractor ? <ContractorStats contractor={contractor} dense className='mt-1.5' /> : null}
         </div>
 
-        <div className='flex shrink-0 items-center gap-2'>
+        <div className='flex shrink-0 flex-wrap items-center gap-2'>
           <span className='bg-accent text-primary-strong rounded-md px-2.5 py-1 text-xs font-medium'>
             {tStatus(invitation.status)}
           </span>
@@ -179,6 +200,23 @@ function InvitationCard({
                 {tCommon('viewProfile')}
               </Link>
             </Button>
+          ) : null}
+
+          {/* S09 hứa "chỉ khách đã làm việc qua SAVICO mới được đánh giá" — nên
+              nút chỉ hiện khi lời mời đã ở nấc cuối, và biến mất sau khi đánh
+              giá xong (mỗi lời mời một lần). */}
+          {invitation.status === 'done' && contractor ? (
+            review ? (
+              <span className='text-warning-strong inline-flex items-center gap-1.5 text-xs font-medium'>
+                <Star className='fill-warning text-warning size-3.5' />
+                {tRating('done', { rating: review.rating })}
+              </span>
+            ) : (
+              <Button variant='outline' size='sm' onClick={() => setReviewOpen(true)}>
+                <Star className='size-4' />
+                {tRating('action')}
+              </Button>
+            )
           ) : null}
         </div>
       </div>
@@ -243,6 +281,15 @@ function InvitationCard({
           )
         })}
       </ol>
+      {contractor ? (
+        <ContractorReviewDialog
+          open={reviewOpen}
+          onOpenChange={setReviewOpen}
+          projectId={projectId}
+          invitationId={invitation.id}
+          contractorName={contractor.name}
+        />
+      ) : null}
     </article>
   )
 }

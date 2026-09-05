@@ -1,3 +1,4 @@
+import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import type {
   ChangeRequest,
@@ -17,26 +18,11 @@ import type {
  * tới, có yêu cầu sửa đổi chờ duyệt) và chúng chỉ cùng tồn tại khi lịch chạy
  * quanh hiện tại. Ngày cứng thì vài tuần nữa mở lên chỉ còn "quá hạn tất cả".
  */
-const STORE_KEY = 'savico.mock-supervision'
-
-interface MockStore {
-  projects: Record<string, SupervisionProject>
-}
-
-function loadStore(): MockStore {
-  if (typeof window === 'undefined') return { projects: {} }
-  try {
-    const raw = window.localStorage.getItem(STORE_KEY)
-    return raw ? (JSON.parse(raw) as MockStore) : { projects: {} }
-  } catch {
-    return { projects: {} }
-  }
-}
-
-function saveStore(store: MockStore): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STORE_KEY, JSON.stringify(store))
-}
+/**
+ * Dự án giám sát nằm ở bảng `supervisionProjects` của `shared/cms`, không ở một
+ * kho riêng của feature: R5 giao việc XÁC NHẬN GIAI ĐOẠN cho kỹ sư Giám sát,
+ * nên khu quản trị phải ghi được đúng bản ghi mà màn này đang đọc.
+ */
 
 /** `now + days` ở dạng ISO. Số âm là lùi về quá khứ. */
 function shift(days: number): string {
@@ -331,7 +317,7 @@ function seedProject(projectId: string, projectName: string): SupervisionProject
   }
 
   return {
-    projectId,
+    id: projectId,
     projectName,
     packageTier: 'check',
     packageCode: `SVG-${new Date().getFullYear()}-0001-AT`,
@@ -347,12 +333,10 @@ function seedProject(projectId: string, projectName: string): SupervisionProject
 }
 
 /** Lấy dự án trong kho, dựng dữ liệu mẫu ở lần mở đầu tiên. */
-function ensureProject(store: MockStore, projectId: string): SupervisionProject {
-  const existing = store.projects[projectId]
+function ensureProject(projectId: string): SupervisionProject {
+  const existing = cmsDb.find('supervisionProjects', projectId)
   if (existing) return existing
-  const created = seedProject(projectId, 'Nhà phố Tân Lợi 2 tầng')
-  store.projects[projectId] = created
-  return created
+  return cmsDb.upsert('supervisionProjects', seedProject(projectId, 'Nhà phố Tân Lợi 2 tầng'))
 }
 
 function replaceStage(
@@ -374,16 +358,12 @@ function nextVersion(version: string): string {
 export const mockSupervisionApi = {
   getProject: async (projectId: string): Promise<SupervisionProject> => {
     await mockDelay(300)
-    const store = loadStore()
-    const project = ensureProject(store, projectId)
-    saveStore(store)
-    return project
+    return ensureProject(projectId)
   },
 
   uploadStage: async (projectId: string, payload: StageUploadPayload): Promise<SupervisionProject> => {
     await mockDelay(500)
-    const store = loadStore()
-    const project = ensureProject(store, projectId)
+    const project = ensureProject(projectId)
     const now = new Date().toISOString()
 
     const updated = replaceStage(project, payload.stageKey, (stage) => ({
@@ -415,15 +395,12 @@ export const mockSupervisionApi = {
       ]
     }))
 
-    store.projects[projectId] = updated
-    saveStore(store)
-    return updated
+    return cmsDb.upsert('supervisionProjects', updated)
   },
 
   addComment: async (projectId: string, stageKey: StageKey, text: string): Promise<SupervisionProject> => {
     await mockDelay(250)
-    const store = loadStore()
-    const project = ensureProject(store, projectId)
+    const project = ensureProject(projectId)
     const now = new Date().toISOString()
 
     const updated = replaceStage(project, stageKey, (stage) => ({
@@ -431,9 +408,7 @@ export const mockSupervisionApi = {
       comments: [...stage.comments, { id: `${Date.now()}`, author: 'Chủ nhà', role: 'KH', at: now, text }]
     }))
 
-    store.projects[projectId] = updated
-    saveStore(store)
-    return updated
+    return cmsDb.upsert('supervisionProjects', updated)
   },
 
   decideChangeRequest: async (
@@ -443,8 +418,7 @@ export const mockSupervisionApi = {
     approve: boolean
   ): Promise<SupervisionProject> => {
     await mockDelay(400)
-    const store = loadStore()
-    const project = ensureProject(store, projectId)
+    const project = ensureProject(projectId)
     const now = new Date().toISOString()
 
     const updated = replaceStage(project, stageKey, (stage) => {
@@ -478,15 +452,12 @@ export const mockSupervisionApi = {
       }
     })
 
-    store.projects[projectId] = updated
-    saveStore(store)
-    return updated
+    return cmsDb.upsert('supervisionProjects', updated)
   },
 
   createChangeRequest: async (projectId: string, stageKey: StageKey, reason: string): Promise<SupervisionProject> => {
     await mockDelay(400)
-    const store = loadStore()
-    const project = ensureProject(store, projectId)
+    const project = ensureProject(projectId)
     const now = new Date().toISOString()
 
     const updated = replaceStage(project, stageKey, (stage) => {
@@ -501,8 +472,6 @@ export const mockSupervisionApi = {
       }
     })
 
-    store.projects[projectId] = updated
-    saveStore(store)
-    return updated
+    return cmsDb.upsert('supervisionProjects', updated)
   }
 }

@@ -2,12 +2,13 @@
 
 import { CalendarClock, Check, HardHat, Search, Star } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
+import { useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { ROUTES } from '@/shared/constants/routes'
+import { TurnkeyRequestDialog } from './turnkey-request-dialog'
 import { cn } from '@/shared/lib/utils'
 
 interface StartOptionsProps {
@@ -29,6 +30,7 @@ interface StartOptionsProps {
  */
 export function StartOptions({ findHref }: StartOptionsProps) {
   const t = useTranslations('contractors.start')
+  const [turnkeyOpen, setTurnkeyOpen] = useState(false)
 
   return (
     <ul className='grid items-stretch gap-4 pt-3 md:grid-cols-3'>
@@ -53,9 +55,14 @@ export function StartOptions({ findHref }: StartOptionsProps) {
         subtitle={t('turnkey.subtitle')}
         points={[t('turnkey.p1'), t('turnkey.p2'), t('turnkey.p3'), t('turnkey.p4'), t('turnkey.p5')]}
         action={
-          <Button className='w-full' onClick={() => toast.success(t('turnkeyRegistered'))}>
-            {t('turnkey.action')}
-          </Button>
+          <>
+            {/* S08: "Đăng ký triển khai → form đăng ký, Ops liên hệ" — nút mở
+                form thật, không còn chỉ bắn toast. */}
+            <Button className='w-full' onClick={() => setTurnkeyOpen(true)}>
+              {t('turnkey.action')}
+            </Button>
+            <TurnkeyRequestDialog open={turnkeyOpen} onOpenChange={setTurnkeyOpen} />
+          </>
         }
       />
 

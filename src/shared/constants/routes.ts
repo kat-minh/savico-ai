@@ -81,6 +81,10 @@ export const ADMIN_ROUTES = {
   REVIEWS: '/admin/reviews',
   REPORTS: '/admin/reports',
   PROJECTS: '/admin/projects',
+  /** Lời mời báo giá — vận hành đẩy 4 nấc trạng thái của S18 (R4). */
+  INVITATIONS: '/admin/invitations',
+  /** Giám sát thi công — kỹ sư ghi kết quả kiểm tra và khóa giai đoạn (R5). */
+  INSPECTIONS: '/admin/inspections',
   CUSTOMERS: '/admin/customers',
 
   // Danh mục cấu hình — mục X, #6

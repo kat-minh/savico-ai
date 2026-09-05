@@ -1283,6 +1283,8 @@
       "consultants": "Architects",
       "bookings": "Bookings",
       "projects": "Customer projects",
+      "invitations": "Quote invitations",
+      "inspections": "Construction supervision",
       "customers": "Users",
       "catalog": "Step 1 catalogue",
       "pricing": "Unit prices",
@@ -2009,6 +2011,51 @@
       "approvedToast": "Approved — booking {booking} moved to the new slot.",
       "rejectedToast": "Reschedule request rejected."
     },
+    "invitations": {
+      "description": "Quote invitations customers sent to contractors. Customers only watch the status bar — the SAVICO support team moves it one step at a time, and steps never go back.",
+      "code": "Invitation code",
+      "project": "Project",
+      "contractor": "Contractor",
+      "survey": "Survey slot",
+      "status": "Status",
+      "dossier": "Dossier {version} · {count} files",
+      "updatedAt": "Updated at {time}",
+      "advance": "Move on",
+      "advanceConfirmTitle": "Move to \"{status}\"?",
+      "advanceConfirmBody": "The customer sees the new step on their invitation card right away. This cannot be undone.",
+      "advancedToast": "Invitation {code} moved to \"{status}\".",
+      "finished": "Final step"
+    },
+    "invitationStatus": {
+      "sent": "Sent",
+      "received": "Received",
+      "accepted": "Accepted by contractor",
+      "done": "Completed"
+    },
+    "inspections": {
+      "description": "Site engineers record the inspection result for each stage. Confirming locks the stage dossier and opens the next stage — after that, only a change request can alter it.",
+      "project": "Project",
+      "package": "Package",
+      "engineer": "Assigned engineer",
+      "currentStage": "Stage awaiting confirmation",
+      "stageOf": "Stage {index}/{total}",
+      "visits": "Site visits",
+      "confirm": "Confirm inspection",
+      "confirmTitle": "Confirm stage \"{stage}\"",
+      "readyToConfirm": "Customer uploaded the completion dossier",
+      "pendingUpload": "Customer has not uploaded the completion dossier",
+      "pendingUploadBody": "The customer has not marked this stage complete. Confirming now still locks the dossier.",
+      "allConfirmed": "All 6 stages confirmed",
+      "engineerLabel": "Confirming engineer",
+      "engineerRequired": "Enter the name of the confirming engineer.",
+      "onSiteLabel": "Visited the site",
+      "onSiteHint": "On counts one site visit against the package; off means a remote dossier review only.",
+      "noteLabel": "Inspection result",
+      "noteRequired": "Enter the inspection result — the customer reads this exact line.",
+      "notePlaceholder": "E.g. Rebar and formwork match the drawings, ready for the concrete pour.",
+      "lockNote": "Once confirmed the stage dossier is locked; any later change must go through a change request (R5).",
+      "confirmedToast": "Stage \"{stage}\" confirmed and the next stage opened."
+    },
     "rescheduleStatus": {
       "pending": "Pending",
       "approved": "Approved",
@@ -2340,6 +2387,23 @@
         "startWindow": "Expected start"
       }
     },
+    "rating": {
+      "action": "Rate this contractor",
+      "title": "Rate {name}",
+      "subtitle": "Only customers who worked through SAVICO can rate, once per invitation.",
+      "ratingLabel": "How satisfied were you",
+      "ratingHint": "Score the whole experience with this contractor from 1 to 5 stars.",
+      "ratingRequired": "Please pick a star rating.",
+      "commentLabel": "Comment",
+      "commentHint": "What went well or not. Optional.",
+      "commentPlaceholder": "e.g. On schedule, clear quote, tidy site.",
+      "submit": "Send rating",
+      "cancel": "Cancel",
+      "sent": "Rating sent. Thank you.",
+      "failed": "Could not send the rating. Please try again.",
+      "done": "Rated {rating}/5",
+      "starLabel": "{count} stars"
+    },
     "start": {
       "title": "How would you like to start?",
       "subtitle": "Pick what suits you right now — your package credits stay untouched until you use them.",
@@ -2372,6 +2436,22 @@
         "p2": "Design direction that fits your budget",
         "p3": "Answers on the process and the platform",
         "action": "Book a consultation"
+      },
+      "turnkeyForm": {
+        "title": "Register for turnkey delivery",
+        "subtitle": "Leave your contact details and the SAVICO team will call you back to survey and advise.",
+        "name": "Full name",
+        "phone": "Phone number",
+        "email": "Email",
+        "note": "What you need",
+        "notePlaceholder": "e.g. Two-storey townhouse in Tan Loi, aiming to break ground next quarter.",
+        "contactNote": "Used only so the SAVICO team can contact you about your project.",
+        "cancel": "Cancel",
+        "nameHint": "The person SAVICO will contact about this project.",
+        "phoneHint": "The number the SAVICO team calls back to book the survey.",
+        "emailHint": "Where the confirmation and related documents are sent.",
+        "noteHint": "The clearer the description, the better SAVICO can prepare the survey. Optional.",
+        "submit": "Send request"
       },
       "turnkeyRegistered": "Noted. The SAVICO team will contact you during the next working hours."
     },

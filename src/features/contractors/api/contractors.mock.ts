@@ -1,8 +1,10 @@
+import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import { MAX_INVITATIONS, SURVEY_SLOTS } from '../constants/contractors.constants'
 import { emptyBrief } from '../services/brief.service'
 import type {
   Contractor,
+  ContractorReview,
   Invitation,
   InvitationStatus,
   ProjectBrief,
@@ -23,13 +25,21 @@ import { CONTRACTORS_SEED } from './contractors.seed'
  */
 const STORE_KEY = 'savico.mock-contractors'
 
+/**
+ * LỜI MỜI KHÔNG nằm trong kho này mà ở bảng `contractorInvitations` của
+ * `shared/cms`. R4 giao việc đẩy bốn nấc trạng thái cho đội vận hành, nên màn
+ * quản trị phải ghi được đúng bản ghi mà trang khách đang đọc — hai kho riêng
+ * thì admin bấm một nơi, khách xem một nẻo.
+ */
+
 interface MockStore {
   sequence: number
   invitationSequence: number
   requestSequence: number
   briefs: Record<string, ProjectBrief>
-  invitations: Record<string, Invitation[]>
   requests: Record<string, SurveyRequest>
+  /** Đánh giá nhà thầu, khoá theo mã lời mời — mỗi lời mời một lần. */
+  reviews: Record<string, ContractorReview>
 }
 
 const emptyStore = (): MockStore => ({
@@ -37,8 +47,8 @@ const emptyStore = (): MockStore => ({
   invitationSequence: 141,
   requestSequence: 141,
   briefs: {},
-  invitations: {},
-  requests: {}
+  requests: {},
+  reviews: {}
 })
 
 function loadStore(): MockStore {
@@ -85,6 +95,19 @@ function notFound(what: string): never {
  */
 function initialSteps(sentAt: string): Invitation['steps'] {
   return [{ status: 'sent' as InvitationStatus, at: sentAt }]
+}
+
+/**
+ * Lời mời của một dự án, cũ trước mới sau.
+ *
+ * `cmsDb.upsert` đẩy bản ghi mới lên ĐẦU bảng để bảng quản trị thấy việc mới
+ * nhất trước; thẻ ở S18 thì phải giữ đúng thứ tự khách đã gửi.
+ */
+function invitationsOf(projectId: string): Invitation[] {
+  return cmsDb
+    .list('contractorInvitations')
+    .filter((invitation) => invitation.projectId === projectId)
+    .sort((a, b) => a.sentAt.localeCompare(b.sentAt))
 }
 
 export const mockContractorsApi = {
@@ -153,13 +176,13 @@ export const mockContractorsApi = {
 
   listInvitations: async (projectId: string): Promise<Invitation[]> => {
     await mockDelay(200)
-    return loadStore().invitations[projectId] ?? []
+    return invitationsOf(projectId)
   },
 
   createInvitations: async (projectId: string, bookings: SurveyBooking[]): Promise<SurveyRequestDetail> => {
     await mockDelay(400)
     const store = loadStore()
-    const existing = store.invitations[projectId] ?? []
+    const existing = invitationsOf(projectId)
 
     // R1 — chặn ở lớp dữ liệu chứ không chỉ ở nút bấm: mở hai tab rồi mời song
     // song vẫn không vượt được 3 lời mời.
@@ -167,16 +190,21 @@ export const mockContractorsApi = {
     if (room <= 0) throw new Error('Mock: dự án đã đủ 3 lời mời')
 
     const sentAt = new Date().toISOString()
+    const brief = store.briefs[projectId]
     const created = bookings.slice(0, room).map<Invitation>((booking) => ({
       id: nextInvitationId(store),
       projectId,
+      // Tên lặp lại trong bản ghi là có chủ đích — bảng quản trị cần tên để hiện
+      // và tìm kiếm, mà danh bạ nhà thầu thì nằm trong feature này.
+      projectName: brief?.name ?? projectId,
       contractorId: booking.contractorId,
+      contractorName: CONTRACTORS_SEED.find((c) => c.id === booking.contractorId)?.name ?? booking.contractorId,
       sentAt,
       status: 'sent',
       updatedAt: sentAt,
       steps: initialSteps(sentAt),
       dossierVersion: 'v1',
-      fileCount: store.briefs[projectId]?.documents.length ?? 0,
+      fileCount: brief?.documents.length ?? 0,
       survey: booking
     }))
 
@@ -187,9 +215,8 @@ export const mockContractorsApi = {
       invitationIds: created.map((invitation) => invitation.id)
     }
 
-    store.invitations[projectId] = [...existing, ...created]
+    created.forEach((invitation) => cmsDb.upsert('contractorInvitations', invitation))
     store.requests[request.id] = request
-    const brief = store.briefs[projectId]
     if (brief) store.briefs[projectId] = { ...brief, status: 'inviting' }
     saveStore(store)
 
@@ -200,7 +227,38 @@ export const mockContractorsApi = {
     await mockDelay(200)
     const store = loadStore()
     const request = store.requests[requestId] ?? notFound(`yêu cầu khảo sát ${requestId}`)
-    const all = store.invitations[request.projectId] ?? []
+    const all = invitationsOf(request.projectId)
     return { request, invitations: all.filter((invitation) => request.invitationIds.includes(invitation.id)) }
+  },
+
+  listReviews: async (projectId: string): Promise<ContractorReview[]> => {
+    await mockDelay(150)
+    const store = loadStore()
+    return Object.values(store.reviews).filter((review) => review.projectId === projectId)
+  },
+
+  submitReview: async (invitationId: string, rating: number, comment: string): Promise<ContractorReview> => {
+    await mockDelay(250)
+    const store = loadStore()
+
+    // Chỉ lời mời đã ở nấc cuối mới đánh giá được — đúng câu S09 quảng cáo
+    // "chỉ khách đã làm việc qua SAVICO mới được đánh giá". Chặn ở mock để khi
+    // nối API thật, backend chỉ cần lặp lại đúng luật này.
+    const invitation = cmsDb.find('contractorInvitations', invitationId) ?? notFound(`lời mời ${invitationId}`)
+    const projectId = invitation.projectId
+    if (invitation.status !== 'done') throw new Error(`Lời mời ${invitationId} chưa hoàn tất nên chưa đánh giá được.`)
+    if (store.reviews[invitationId]) throw new Error(`Lời mời ${invitationId} đã được đánh giá.`)
+
+    const review: ContractorReview = {
+      invitationId,
+      contractorId: invitation.contractorId,
+      projectId,
+      rating,
+      comment,
+      createdAt: new Date().toISOString()
+    }
+    store.reviews[invitationId] = review
+    saveStore(store)
+    return review
   }
 }

@@ -2,6 +2,7 @@ import { env } from '@/shared/config/env'
 import { http } from '@/shared/lib/api'
 import type {
   Contractor,
+  ContractorReview,
   Invitation,
   ProjectBrief,
   SurveyBooking,
@@ -37,6 +38,10 @@ const ContractorsApi = {
     http.get<SurveySlot[]>(`/contractors/${contractorId}/slots`, { params: { date } }),
 
   listInvitations: (projectId: string) => http.get<Invitation[]>(`/projects/${projectId}/invitations`),
+
+  listReviews: (projectId: string) => http.get<ContractorReview[]>(`/projects/${projectId}/contractor-reviews`),
+  submitReview: (invitationId: string, rating: number, comment: string) =>
+    http.post<ContractorReview>(`/invitations/${invitationId}/review`, { rating, comment }),
   createInvitations: (projectId: string, bookings: SurveyBooking[]) =>
     http.post<SurveyRequestDetail>(`/projects/${projectId}/invitations`, { bookings }),
   getSurveyRequest: (requestId: string) => http.get<SurveyRequestDetail>(`/survey-requests/${requestId}`)

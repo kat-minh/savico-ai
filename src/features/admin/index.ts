@@ -34,6 +34,8 @@ export { TransactionManager } from './components/business/transaction-manager'
 export { ReviewManager } from './components/consult/review-manager'
 export { ReportManager } from './components/business/report-manager'
 export { ProjectManager } from './components/business/project-manager'
+export { InvitationManager } from './components/business/invitation-manager'
+export { InspectionManager } from './components/business/inspection-manager'
 export { CustomerManager } from './components/business/customer-manager'
 
 export { CatalogManager } from './components/catalog/catalog-manager'
