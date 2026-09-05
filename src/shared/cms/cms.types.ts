@@ -174,8 +174,30 @@ export interface GuideArticle {
  * Gói đăng ký — mục VII
  * ======================================================================== */
 
-/** Mã gói đăng ký (mục VII). */
+/**
+ * Mã gói đăng ký (mục VII).
+ *
+ * Nhãn hiển thị (BASIC / PLUS / PRO theo S01) nằm ở `messages/*.json`, không
+ * phải ở đây: đổi tên thương mại là việc của nội dung, đổi mã gói là việc của dữ
+ * liệu — gộp hai thứ lại thì mỗi lần marketing đổi tên gói là phải chạy migration.
+ */
 export type PlanTier = 'basic' | 'advanced' | 'pro'
+
+/**
+ * Khối "Quà tặng đặc biệt" của gói cao nhất (S01 thẻ PRO, S02 popup).
+ * Vắng mặt ở các gói khác — không phải gói nào cũng có quà.
+ */
+export interface PlanGift {
+  /** "Bộ thiết bị vệ sinh châu Âu". */
+  title: string
+  /** Giá trị quy đổi, VND — hiển thị "trị giá 100 triệu đồng". */
+  value: number
+  /** Khối "+ Ưu đãi thêm": phí gói được khấu trừ vào giá trị hợp đồng thi công. */
+  extraTitle: string
+  extraBody: string
+  /** Dòng điều kiện áp dụng ở đáy popup. */
+  conditions: string
+}
 
 /** Một gói đăng ký hiển thị trên trang Gói đăng ký (mục VII, Hình 13). */
 export interface SubscriptionPlan {
@@ -199,6 +221,45 @@ export interface SubscriptionPlan {
   audience: string
   /** Thẻ nổi bật giữa trang, gắn badge "Phổ biến". */
   popular?: boolean
+  /** Câu "Phù hợp khi bạn..." ngay dưới ảnh thẻ gói (S01). */
+  fitLine?: string
+  /** Danh sách tính năng in trên thẻ gói (S01). */
+  features?: string[]
+  /** Ảnh minh họa trên đầu thẻ gói (S01). */
+  imageUrl?: string
+  /** Quà tặng kèm — chỉ gói cao nhất có (S01, S02). */
+  gift?: PlanGift
+}
+
+/* ===========================================================================
+ * Gói giám sát thi công — S19
+ * ======================================================================== */
+
+/** Ba lựa chọn quản lý thi công (S19). */
+export type SupervisionTier = 'self' | 'check' | 'control'
+
+/**
+ * Một lựa chọn trên trang Gói giám sát thi công (S19).
+ *
+ * `self` là gói 0đ (khách tự theo dõi) nên vẫn nằm chung bảng: nó là một lựa
+ * chọn thật trong luồng "Chọn cách quản lý thi công" (R8), không phải chỗ trống.
+ */
+export interface SupervisionPackage {
+  id: string
+  tier: SupervisionTier
+  /** Giá cho MỘT dự án, đơn vị VND. Gói tự quản lý là 0. */
+  price: number
+  /** Thời hạn áp dụng, tính theo tháng; hết hạn thì gia hạn qua add-on. */
+  durationMonths: number
+  /** Số lượt kỹ sư kiểm tra thực tế trong gói; `null` với gói tự quản lý. */
+  inspections: number | null
+  /** Câu "Phù hợp khi bạn..." trên thẻ. */
+  fitLine: string
+  /** Các dòng lợi ích in trên thẻ. */
+  benefits: string[]
+  /** Thẻ được khuyến nghị — gắn badge trên đầu thẻ. */
+  recommended?: boolean
+  imageUrl?: string
 }
 
 /* ===========================================================================

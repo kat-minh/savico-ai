@@ -199,15 +199,23 @@ const PAGES = [
           'plans.tiers.basic',
           'plans.tiers.advanced',
           'plans.tiers.pro',
-          'plans.period',
-          'plans.designCredits',
-          'plans.libraryCredits',
+          'plans.tierTags.basic',
+          'plans.tierTags.advanced',
+          'plans.tierTags.pro',
+          'plans.oneTime',
+          'plans.featuresTitle',
           'plans.popular',
-          'plans.choosePlan',
-          'plans.choosePlanSoon'
+          'plans.cta.basic',
+          'plans.cta.advanced',
+          'plans.cta.pro'
         ]
       },
-      { key: 'footer', keys: ['plans.paymentNote'] }
+      { key: 'gift', keys: ['plans.gift.badge', 'plans.gift.open', 'plans.gift.understood'] },
+      { key: 'comparison', keys: ['plans.comparison.title', 'plans.value.title'] },
+      {
+        key: 'footer',
+        keys: ['plans.notes.payment', 'plans.notes.credits', 'plans.notes.estimate', 'plans.notes.gift']
+      }
     ],
     copyNamespaces: ['plans'],
     route: ADMIN_ROUTES.PAGE_PLANS

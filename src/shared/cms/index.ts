@@ -58,6 +58,9 @@ export type {
   HandbookTemplateKind,
   HandbookTemplateSpecs,
   HandbookTopic,
+  PlanGift,
   PlanTier,
-  SubscriptionPlan
+  SubscriptionPlan,
+  SupervisionPackage,
+  SupervisionTier
 } from './cms.types'

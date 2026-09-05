@@ -24,7 +24,8 @@ import type {
   HandbookArticle,
   HandbookStage,
   HandbookTemplate,
-  SubscriptionPlan
+  SubscriptionPlan,
+  SupervisionPackage
 } from './cms.types'
 import {
   BOOKINGS_SEED,
@@ -45,6 +46,7 @@ import {
   HANDBOOK_TEMPLATES_SEED,
   HOME_CONTENT_SEED,
   PLANS_SEED,
+  SUPERVISION_PACKAGES_SEED,
   PRIVACY_PAGE_SEED,
   QUOTAS_SEED,
   SITE_SETTINGS_SEED,
@@ -81,6 +83,8 @@ export interface CmsCollectionMap {
   guideVideos: GuideVideo
   guideArticles: GuideArticle
   plans: SubscriptionPlan
+  /** Ba lựa chọn quản lý thi công của trang Gói giám sát (S19). */
+  supervisionPackages: SupervisionPackage
   consultants: Consultant
   bookings: CmsBooking
   customers: CmsCustomer
@@ -162,6 +166,7 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   guideVideos: GUIDE_VIDEOS_SEED,
   guideArticles: GUIDE_ARTICLES_SEED,
   plans: PLANS_SEED,
+  supervisionPackages: SUPERVISION_PACKAGES_SEED,
   consultants: CONSULTANTS_SEED,
   bookings: BOOKINGS_SEED,
   customers: CUSTOMERS_SEED,

@@ -26,10 +26,12 @@ export function ConsultantCard({ consultant, className }: ConsultantCardProps) {
   const t = useTranslations('consult.card')
 
   return (
-    <article className={cn('group bg-card hover:border-primary/50 rounded-xl border p-3 transition-colors', className)}>
-      <div className='flex gap-3'>
+    <article
+      className={cn('group bg-card hover:border-primary/50 h-full rounded-xl border p-3 transition-colors', className)}
+    >
+      <div className='flex h-full items-stretch gap-3'>
         <Photo
-          className='aspect-3/4 w-24 shrink-0 rounded-lg sm:w-28'
+          className='min-h-36 w-24 shrink-0 self-stretch rounded-lg sm:w-28'
           src={consultant.avatarUrl}
           alt={consultant.name}
           sizes='112px'

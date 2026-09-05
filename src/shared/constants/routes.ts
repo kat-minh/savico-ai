@@ -12,7 +12,9 @@ export const ROUTES = {
   HOME: '/', // 1. Trang chủ
   HANDBOOK: '/handbook', // 2. Cẩm nang
   GUIDE: '/guide', // 3. Hướng dẫn
-  PLANS: '/plans', // Gói đăng ký (mục VII)
+  PLANS: '/plans', // Gói đăng ký — tab Gói thiết kế (S01)
+  PLANS_SUPERVISION: '/plans/supervision', // Gói đăng ký — tab Gói giám sát (S19)
+  CONTRACTORS: '/contractors', // Landing Tìm nhà thầu (S09)
   CONSULT: '/consult', // Tư vấn 1:1 (mục VIII)
   TERMS: '/terms',
   PRIVACY: '/privacy',
@@ -25,7 +27,7 @@ export const ROUTES = {
   // Thiết kế & Dự toán — luồng 3 bước (screens 4–10)
   DESIGN: '/design',
 
-  // Account (screen 11)
+  // Account (screen 11 + S24)
   ACCOUNT: '/account'
 } as const
 
@@ -109,6 +111,75 @@ export const designDossierRoute = (projectId: string) => `${ROUTES.DESIGN}/${pro
 /** Public, no-login dossier view opened from a share link. */
 export const shareRoute = (token: string) => `/share/${token}`
 
+/* ===========================================================================
+ * Mua gói — checkout 4 bước (S03, S04, S06, S07, S08).
+ *
+ * Số thứ tự màn của bản mô tả giữ nguyên kể cả S05 đã bỏ (chỉ QR chuyển khoản,
+ * R10), nên đường dẫn đặt theo TRẠNG THÁI ĐƠN chứ không theo số bước.
+ * ======================================================================== */
+
+/** Bước 2/4 — Xác nhận đơn hàng (S03). `plan` là gói được chọn ở S01/S19. */
+export const checkoutConfirmRoute = (plan: string, projectId?: string) =>
+  `/checkout/confirm?plan=${plan}${projectId ? `&project=${projectId}` : ''}`
+
+/** Bước 3/4 — Thanh toán QR (S04). */
+export const checkoutPaymentRoute = (orderId: string) => `/checkout/${orderId}/payment`
+
+/** Đang xác nhận chuyển khoản (S06). */
+export const checkoutVerifyingRoute = (orderId: string) => `/checkout/${orderId}/verifying`
+
+/** Chưa nhận được thanh toán (S07). */
+export const checkoutFailedRoute = (orderId: string) => `/checkout/${orderId}/failed`
+
+/** Bước 4/4 — Hoàn tất + popup "Bạn muốn bắt đầu như thế nào?" (S08). */
+export const checkoutDoneRoute = (orderId: string) => `/checkout/${orderId}/done`
+
+/* ===========================================================================
+ * Tìm nhà thầu (S09–S18) — mọi màn sau landing đều gắn với MỘT hồ sơ dự án,
+ * nên projectId nằm ngay trong đường dẫn (giống luồng thiết kế 3 bước).
+ * ======================================================================== */
+
+/** Bước 1 — Tự tạo / chỉnh sửa hồ sơ dự án (S10). */
+export const contractorBriefRoute = (projectId: string) => `${ROUTES.CONTRACTORS}/${projectId}/profile`
+
+/** Bước 2 — Kiểm tra hồ sơ dự án (S11). */
+export const contractorReviewRoute = (projectId: string) => `${ROUTES.CONTRACTORS}/${projectId}/review`
+
+/** Nhà thầu được đề xuất (S12). */
+export const contractorMatchesRoute = (projectId: string) => `${ROUTES.CONTRACTORS}/${projectId}/matches`
+
+/** So sánh hồ sơ nhà thầu (S15). */
+export const contractorCompareRoute = (projectId: string) => `${ROUTES.CONTRACTORS}/${projectId}/compare`
+
+/** Hồ sơ một nhà thầu — 4 tab dùng chung header (S13, S14). */
+export const contractorFirmRoute = (projectId: string, contractorId: string, tab?: string) =>
+  `${ROUTES.CONTRACTORS}/${projectId}/firm/${contractorId}${tab ? `?tab=${tab}` : ''}`
+
+/** Chọn thời gian khảo sát cho một nhà thầu (S16). */
+export const contractorInviteRoute = (projectId: string, contractorId: string) =>
+  `${ROUTES.CONTRACTORS}/${projectId}/invite/${contractorId}`
+
+/** Đã gửi lời mời & đăng ký khảo sát (S17). */
+export const contractorInviteSentRoute = (projectId: string, requestId: string) =>
+  `${ROUTES.CONTRACTORS}/${projectId}/invite/sent?request=${requestId}`
+
+/** Lời mời báo giá — theo dõi lời mời đã gửi (S18). */
+export const contractorInvitationsRoute = (projectId: string) => `${ROUTES.CONTRACTORS}/${projectId}/invitations`
+
+/* ===========================================================================
+ * Gói giám sát thi công (S19–S23)
+ * ======================================================================== */
+
+/**
+ * Tab Gói giám sát kèm dự án (R8): nút "Chọn cách quản lý thi công" link thẳng
+ * vào đây, không popup và không dựng trang riêng.
+ */
+export const supervisionPlansRoute = (projectId: string) => `${ROUTES.PLANS_SUPERVISION}?project=${projectId}`
+
+/** Bảng điều khiển giám sát — MỘT trang, 4 trạng thái giai đoạn (S20–S23). */
+export const supervisionRoute = (projectId: string, stage?: number) =>
+  `/supervision/${projectId}${stage ? `?stage=${stage}` : ''}`
+
 /**
  * Routes a guest may NOT access once authenticated (redirect home).
  * Login/register are a popup rather than pages, so only the standalone
@@ -117,7 +188,13 @@ export const shareRoute = (token: string) => `/share/${token}`
 export const GUEST_ONLY_ROUTES: readonly string[] = [ROUTES.FORGOT_PASSWORD]
 
 /** Route prefixes that require authentication. */
-export const PROTECTED_ROUTE_PREFIXES: readonly string[] = [ROUTES.DESIGN, ROUTES.ACCOUNT, ADMIN_ROUTES.DASHBOARD]
+export const PROTECTED_ROUTE_PREFIXES: readonly string[] = [
+  ROUTES.DESIGN,
+  ROUTES.ACCOUNT,
+  '/checkout',
+  '/supervision',
+  ADMIN_ROUTES.DASHBOARD
+]
 
 /**
  * Khu chỉ dành vai trò `admin`. Proxy chỉ biết "đã đăng nhập hay chưa" (nó đọc

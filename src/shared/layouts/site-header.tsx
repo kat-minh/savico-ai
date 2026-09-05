@@ -59,7 +59,7 @@ export function SiteHeader({
     <header data-scrolled={scrolled} className='site-header-shell sticky top-0 z-40'>
       <div className='relative mx-auto flex h-16 w-full max-w-[90rem] items-center gap-6 px-4 lg:px-8'>
         <Link href={ROUTES.HOME} aria-label={t('home')} className='shrink-0'>
-          <Logo />
+          <Logo tagline={t('brandTagline')} />
         </Link>
 
         <nav className='absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex'>

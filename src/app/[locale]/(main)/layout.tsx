@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { SiteFooter } from '@/shared/layouts'
-import { ChatDock } from './chat-dock'
+import { ChatDock } from '../chat-dock'
 import { MainChrome } from './main-chrome'
 import { FooterCreateProjectLink } from './main-footer'
 

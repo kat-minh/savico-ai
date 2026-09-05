@@ -22,6 +22,7 @@ const ENDPOINTS: Record<CmsCollection, string> = {
   guideVideos: '/admin/guide/videos',
   guideArticles: '/admin/guide/articles',
   plans: '/admin/plans',
+  supervisionPackages: '/admin/supervision-packages',
   consultants: '/admin/consultants',
   bookings: '/admin/bookings',
   customers: '/admin/customers',

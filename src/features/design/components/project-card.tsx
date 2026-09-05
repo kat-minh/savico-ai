@@ -127,8 +127,10 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
         {project.coverUrl ? (
           <Photo className='aspect-[16/9] w-full' src={project.coverUrl} alt={project.name} sizes='420px' />
         ) : (
-          <div className='bg-muted text-muted-foreground/40 flex aspect-[16/9] w-full items-center justify-center'>
-            <House className='size-9' strokeWidth={1.25} />
+          // Khung rỗng tô nhạt màu thương hiệu thay vì ô xám trơn: ô xám với
+          // biểu tượng mờ trông như ảnh vỡ chứ không như "chưa có ảnh".
+          <div className='from-accent to-accent/40 text-primary/40 flex aspect-[16/9] w-full items-center justify-center bg-linear-to-br'>
+            <House className='size-10' strokeWidth={1.25} />
           </div>
         )}
 

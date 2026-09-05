@@ -47,7 +47,10 @@ export function DesignStepLayout({
       className={cn(
         'min-w-0',
         waiting && twoColumn && 'lg:sticky lg:top-40 lg:self-start',
-        !twoColumn && 'mx-auto w-full max-w-4xl'
+        // Khi panel cẩm nang thu nhỏ, cột nội dung phải TRẢI HẾT khung chung.
+        // Bó lại `max-w-4xl` rồi canh giữa làm mép thẻ nội dung thụt vào so với
+        // thanh tiến trình ngay phía trên, nhìn như bị lệch.
+        !twoColumn && 'w-full'
       )}
     >
       {children}

@@ -9,6 +9,12 @@ interface LogoProps {
    * vì `--primary-strong` quá tối để đọc trên nền `--footer`.
    */
   onDark?: boolean
+  /**
+   * Dòng định vị nhỏ dưới chữ ký thương hiệu ("Nền tảng AI cho kiến trúc xây
+   * dựng"), như mọi ảnh thiết kế của Bên A. Chữ do nơi gọi truyền vào: `Logo`
+   * dùng được ở cả server lẫn client component nên không tự lấy bản dịch.
+   */
+  tagline?: string
 }
 
 /**
@@ -18,9 +24,9 @@ interface LogoProps {
  * Vẽ bằng SVG thay vì ảnh bitmap để nét luôn sắc ở mọi cỡ và tự đổi màu theo
  * token thương hiệu.
  */
-export function Logo({ className, iconOnly = false, onDark = false }: LogoProps) {
-  return (
-    <span className={cn('flex items-center gap-1.5', className)}>
+export function Logo({ className, iconOnly = false, onDark = false, tagline }: LogoProps) {
+  const mark = (
+    <span className={cn('flex items-center gap-1.5', tagline ? undefined : className)}>
       {!iconOnly ? (
         <span
           className={cn(
@@ -53,6 +59,22 @@ export function Logo({ className, iconOnly = false, onDark = false }: LogoProps)
           className={onDark ? 'fill-primary' : 'fill-primary-strong'}
         />
       </svg>
+    </span>
+  )
+
+  if (!tagline) return mark
+
+  return (
+    <span className={cn('flex flex-col items-start gap-0.5', className)}>
+      {mark}
+      <span
+        className={cn(
+          'text-[0.32em] leading-none font-medium tracking-[0.14em] whitespace-nowrap uppercase',
+          onDark ? 'text-footer-foreground/60' : 'text-muted-foreground'
+        )}
+      >
+        {tagline}
+      </span>
     </span>
   )
 }

@@ -36,6 +36,12 @@
    * Dùng cho nút chính, vòng icon 3 bước, nút chatbot, nút play video, chữ accent. */
   --brand-gradient-from: #006400;
   --brand-gradient-to: #9acd32;
+  /* Cam thương hiệu — màu nhấn của gói PLUS, nhóm "Đặc quyền gói PRO" và các
+   * điểm nhấn phụ trên bảng giá (Hình S01). Bảng giá trước đây mượn `--warning`
+   * (vàng hổ phách) nên thẻ PLUS ra vàng thay vì cam như ảnh. */
+  --brand-orange: oklch(0.655 0.19 41);
+  --brand-orange-foreground: oklch(1 0 0);
+  --brand-orange-soft: oklch(0.97 0.022 58);
   --secondary: oklch(0.97 0.012 150);
   --secondary-foreground: oklch(0.33 0.05 150);
   --muted: oklch(0.968 0.006 150);
@@ -93,6 +99,9 @@
   --primary: oklch(0.68 0.16 149);
   --primary-foreground: oklch(0.16 0.02 150);
   --primary-strong: oklch(0.6 0.16 150);
+  --brand-orange: oklch(0.7 0.18 42);
+  --brand-orange-foreground: oklch(0.16 0.02 40);
+  --brand-orange-soft: oklch(0.3 0.05 45);
   --secondary: oklch(0.29 0.02 150);
   --secondary-foreground: oklch(0.97 0.01 150);
   --muted: oklch(0.29 0.02 150);
@@ -161,6 +170,9 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-strong: var(--warning-strong);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-foreground: var(--brand-orange-foreground);
+  --color-brand-orange-soft: var(--brand-orange-soft);
   --color-footer: var(--footer);
   --color-footer-foreground: var(--footer-foreground);
   --color-border: var(--border);
@@ -436,6 +448,25 @@
   .brand-gradient {
     background-image: linear-gradient(135deg, var(--brand-gradient-to), var(--brand-gradient-from));
   }
+  /*
+   * Nút chính tô CAM — gói PLUS ở bảng giá (Hình S01) và lựa chọn nổi bật ở
+   * S08. PHẢI ghi đè `background-image`: biến thể `default` của Button phủ
+   * `.brand-gradient` lên nền, nên chỉ đặt `bg-brand-orange` thì gradient xanh
+   * vẫn nằm đè lên và nút vẫn ra xanh.
+   */
+  .brand-orange-button {
+    background-image: none;
+    background-color: var(--brand-orange);
+    color: var(--brand-orange-foreground);
+    box-shadow:
+      0 1px oklch(1 0 0 / 0.12) inset,
+      0 2px 6px color-mix(in oklch, var(--brand-orange) 35%, transparent),
+      0 8px 22px -6px color-mix(in oklch, var(--brand-orange) 50%, transparent);
+  }
+  .brand-orange-button:hover {
+    background-color: color-mix(in oklch, var(--brand-orange) 92%, black);
+  }
+
   /* Chữ tô gradient thương hiệu (accent tiêu đề hero). */
   .brand-gradient-text {
     background-image: linear-gradient(90deg, var(--brand-gradient-from), var(--brand-gradient-to));

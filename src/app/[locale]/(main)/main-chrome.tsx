@@ -1,5 +1,7 @@
 'use client'
 
+import { Suspense } from 'react'
+
 import { AuthDialog, useLogout } from '@/features/auth'
 import { CreateProjectDialog, useDesignStore } from '@/features/design'
 import { usePathname } from '@/i18n/navigation'
@@ -42,7 +44,14 @@ export function MainChrome() {
         plainBackground={plainBackground}
         onToggleBackground={isHome ? toggleBackground : undefined}
       />
-      <AuthDialog />
+      {/* `AuthDialog` đọc `?auth=` và `?redirect=` bằng `useSearchParams`, nên nó
+          phải nằm trong ranh giới Suspense của RIÊNG mình. Trước đây ranh giới
+          đó do `app/[locale]/loading.tsx` vô tình đảm nhiệm — mà chính file ấy
+          lại làm treo mọi route có đoạn cuối động khi tải thẳng URL. Bỏ file
+          kia thì phải khai báo ranh giới ở đúng chỗ cần, là đây. */}
+      <Suspense fallback={null}>
+        <AuthDialog />
+      </Suspense>
       <CreateProjectDialog />
     </>
   )

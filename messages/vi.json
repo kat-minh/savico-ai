@@ -229,6 +229,7 @@
     "handbook": "Cẩm nang",
     "guide": "Hướng dẫn",
     "createProject": "Tạo dự án mới",
+    "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
     "bgToggle": {
       "toPlain": "Nền trơn",
       "toAura": "Nền động"
@@ -240,7 +241,8 @@
     "guestHint": "Đăng nhập để lưu và xem lại dự án của bạn",
     "plans": "Gói đăng ký",
     "consult": "Tư vấn 1:1",
-    "admin": "Khu quản trị"
+    "admin": "Khu quản trị",
+    "contractors": "Tìm nhà thầu"
   },
   "footer": {
     "tagline": "Nền tảng AI của SAVICO giúp bạn dựng thiết kế, phối cảnh 3D và dự toán chi phí xây nhà chỉ trong vài phút. Hồ sơ thi công đầy đủ, đơn giá theo khu vực, có kiến trúc sư SAVICO đồng hành.",
@@ -457,7 +459,10 @@
         "description": "Thử từ khóa khác hoặc chọn chuyên mục khác."
       },
       "previousPage": "Trang trước",
-      "nextPage": "Trang sau"
+      "nextPage": "Trang sau",
+      "expand": "Mở nhanh bài viết",
+      "collapse": "Thu gọn",
+      "viewDetail": "Xem chi tiết"
     },
     "article": {
       "breadcrumbRoot": "Cẩm nang",
@@ -1032,20 +1037,147 @@
     }
   },
   "plans": {
-    "title": "Gói đăng ký",
-    "subtitle": "Một gói dùng chung cho cả Thiết kế & Dự toán và Thư viện mẫu.",
-    "popular": "Phổ biến",
-    "period": "/ {days} ngày",
+    "title": "Bảng gói thiết kế SAVICO",
+    "subtitle": "Tạo phương án – So sánh lựa chọn – Tối ưu ngân sách trước khi thi công",
+    "tabs": {
+      "design": "Gói thiết kế",
+      "supervision": "Gói giám sát"
+    },
+    "tiers": {
+      "basic": "BASIC",
+      "advanced": "PLUS",
+      "pro": "PRO"
+    },
+    "tierTags": {
+      "basic": "Bắt đầu nhanh",
+      "advanced": "Chọn đúng",
+      "pro": "Tối ưu ngân sách"
+    },
+    "popular": "Phổ biến nhất",
+    "oneTime": "Thanh toán 1 lần",
+    "featuresTitleByTier": {
+      "basic": "Bao gồm các tính năng",
+      "advanced": "Bao gồm tất cả tính năng BASIC",
+      "pro": "Bao gồm tất cả tính năng PLUS"
+    },
     "designCredits": "lượt thiết kế - dự toán",
     "libraryCredits": "lượt tra thư viện mẫu",
     "audience": "Phù hợp: {audience}",
     "choosePlan": "Chọn gói",
-    "choosePlanSoon": "Cổng thanh toán đang được nối — SAVICO sẽ mở đăng ký sớm.",
-    "paymentNote": "Thanh toán qua QR chuyển khoản hoặc cổng thanh toán. Lượt có hiệu lực trong thời hạn gói.",
-    "tiers": {
-      "basic": "Cơ bản",
-      "advanced": "Nâng cao",
-      "pro": "Pro"
+    "cta": {
+      "basic": "Bắt đầu ngay",
+      "advanced": "Lập kế hoạch",
+      "pro": "Triển khai ngay"
+    },
+    "ctaBand": {
+      "title": "Bắt đầu hành trình thiết kế ngôi nhà của bạn ngay hôm nay!",
+      "subtitle": "Lựa chọn gói phù hợp và nhận tư vấn từ đội ngũ chuyên gia của SAVICO.",
+      "action": "Đăng ký ngay"
+    },
+    "gift": {
+      "badge": "Quà tặng đặc biệt",
+      "open": "Xem chi tiết quà tặng",
+      "valueLine": "{title} trị giá {value}",
+      "valueMillionsUnit": "triệu đồng",
+      "valuePrefix": "trị giá",
+      "understood": "Tôi đã hiểu",
+      "conditionsLabel": "Điều kiện áp dụng"
+    },
+    "comparison": {
+      "title": "So sánh chi tiết 3 gói",
+      "criterion": "Hạng mục",
+      "choosePlanRow": "Chọn gói",
+      "groups": {
+        "core": "Quyền lợi chính",
+        "design": "Tính năng thiết kế & dự toán",
+        "compare": "So sánh & tối ưu",
+        "support": "Hỗ trợ",
+        "proOnly": "Đặc quyền gói PRO"
+      },
+      "core": {
+        "designOptions": "Số phương án thiết kế mới",
+        "editCredits": "Lượt chỉnh sửa phương án",
+        "libraryCredits": "Tra cứu thư viện mẫu",
+        "optionUnit": "{count} phương án",
+        "editUnit": "{count} lượt",
+        "libraryUnit": "{count} lượt"
+      },
+      "rows": {
+        "uploadPhoto": "Upload ảnh khu đất / hiện trạng",
+        "siteInfo": "Nhập diện tích, vị trí, quy mô",
+        "buildingType": "Chọn loại công trình",
+        "style": "Chọn phong cách / màu sắc",
+        "layout": "Bố trí công năng",
+        "renderImages": "Phương án hình ảnh thiết kế",
+        "structureEstimate": "Dự toán phần thô",
+        "finishingEstimate": "Dự toán hoàn thiện",
+        "interiorEstimate": "Dự toán nội thất",
+        "materialList": "Danh mục vật liệu đề xuất",
+        "boq": "Bảng khối lượng & dự toán",
+        "exportDossier": "Xuất hồ sơ thi công",
+        "contractorPack": "Bộ dữ liệu tổng hợp gửi nhà thầu",
+        "compareOptions": "So sánh các phương án thiết kế",
+        "compareCost": "So sánh chi phí giữa các phương án",
+        "compareMaterial": "So sánh phương án vật liệu",
+        "optimizeBudget": "Tối ưu theo ngân sách mục tiêu",
+        "costDelta": "Phân tích chênh lệch chi phí khi thay đổi",
+        "materialAlternatives": "Đề xuất vật liệu thay thế theo ngân sách",
+        "advisory": "Hỗ trợ tư vấn",
+        "render3d": "Phối cảnh 3D chân thực",
+        "gift": "Quà tặng đặc biệt",
+        "giftCondition": "Điều kiện áp dụng"
+      },
+      "values": {
+        "layoutBasic": "Cơ bản",
+        "layout2d3d": "2D & 3D",
+        "layout2d3dPlus": "2D & 3D nâng cao",
+        "estimateRough": "Sơ bộ",
+        "estimateDetailed": "Chi tiết",
+        "estimateOptimized": "Chi tiết & tối ưu",
+        "advisoryOnline": "Tư vấn online",
+        "advisoryPriority": "Tư vấn ưu tiên",
+        "advisoryExpert": "Tư vấn 1:1 cùng chuyên gia",
+        "giftValue": "Bộ thiết bị vệ sinh châu Âu trị giá 100 triệu đồng",
+        "giftConditionValue": "Áp dụng khi khách hàng chọn gói triển khai trọn gói cùng SAVICO"
+      }
+    },
+    "value": {
+      "title": "Giá trị khách hàng nhận được",
+      "rows": {
+        "easy": "Dễ dàng",
+        "time": "Tiết kiệm thời gian",
+        "budget": "Kiểm soát ngân sách",
+        "ready": "Sẵn sàng thi công"
+      },
+      "cells": {
+        "easy": {
+          "basic": "Thao tác đơn giản, bắt đầu nhanh",
+          "advanced": "Dễ thử và so sánh nhiều lựa chọn",
+          "pro": "Có chuyên gia đồng hành"
+        },
+        "time": {
+          "basic": "Tạo phương án và dự toán nhanh",
+          "advanced": "So sánh trước khi ra quyết định",
+          "pro": "Rút ngắn bước tối ưu trước triển khai"
+        },
+        "budget": {
+          "basic": "Có mức dự toán ban đầu",
+          "advanced": "So sánh chi phí giữa các phương án",
+          "pro": "Tối ưu ngân sách & vật liệu chuyên sâu"
+        },
+        "ready": {
+          "basic": "Có hồ sơ và dữ liệu gửi nhà thầu",
+          "advanced": "Hồ sơ rõ hơn để chốt phương án",
+          "pro": "Hỗ trợ + tư vấn + định hướng triển khai"
+        }
+      }
+    },
+    "notes": {
+      "payment": "Thanh toán qua QR chuyển khoản ngân hàng.",
+      "credits": "Lượt không hết hạn. Dữ liệu dự án lưu theo tài khoản.",
+      "estimate": "Dự toán chi tiết xem trực tiếp trên nền tảng SAVICO.",
+      "gift": "Quà tặng gói PRO áp dụng khi khách hàng chọn gói triển khai trọn gói cùng SAVICO; chi tiết theo điều khoản chương trình.",
+      "scope": "Hồ sơ xuất ra phục vụ trao đổi và làm việc với nhà thầu, không thay thế hồ sơ thiết kế kỹ thuật hoặc hồ sơ xin phép xây dựng."
     }
   },
   "consult": {
@@ -1972,6 +2104,889 @@
       "design_input": "Bước 1 — Nhập liệu",
       "design_estimate": "Bước 2 — Bảng dự toán",
       "consult_cards": "Thẻ kiến trúc sư trong lưới"
+    }
+  },
+  "contractors": {
+    "common": {
+      "selfCreated": "Hồ sơ tự tạo",
+      "editBrief": "Chỉnh sửa hồ sơ",
+      "backToList": "Quay lại danh sách nhà thầu",
+      "seekingContractor": "Dự án đang tìm nhà thầu",
+      "viewProfile": "Xem hồ sơ",
+      "invite": "Mời báo giá",
+      "invited": "Đã mời",
+      "inviteFull": "Đã đủ {max} nhà thầu",
+      "verified": "Đã xác minh",
+      "similarProjects": "{count} dự án tương tự",
+      "distance": "{km} km từ công trình",
+      "serviceAreas": "Phục vụ",
+      "surveyWithin": "Khảo sát trong {hours}h",
+      "accepting": "Đang nhận dự án",
+      "notAccepting": "Tạm ngưng nhận dự án",
+      "reviewCount": "({count} đánh giá)",
+      "noPriceNote": "SAVICO không hiển thị báo giá của nhà thầu trên nền tảng."
+    },
+    "scope": {
+      "turnkey": "Thi công trọn gói",
+      "shell": "Phần thô",
+      "finishing": "Hoàn thiện",
+      "interior": "Nội thất"
+    },
+    "scopeHint": {
+      "turnkey": "Nhà thầu lo từ móng tới bàn giao",
+      "shell": "Kết cấu, tường bao, mái",
+      "finishing": "Trát, ốp lát, sơn, thiết bị",
+      "interior": "Đồ gỗ, đồ rời, trang trí"
+    },
+    "siteCondition": {
+      "empty": "Đất trống",
+      "demolish": "Có nhà cũ cần phá dỡ",
+      "renovate": "Cải tạo"
+    },
+    "scale": {
+      "ground": "Trệt",
+      "ground+1": "Trệt + 1 lầu",
+      "ground+2": "Trệt + 2 lầu",
+      "ground+3": "Trệt + 3 lầu"
+    },
+    "startWindow": {
+      "asap": "Càng sớm càng tốt",
+      "in-1-3-months": "Trong 1–3 tháng tới",
+      "in-3-6-months": "Trong 3–6 tháng tới",
+      "undecided": "Chưa xác định"
+    },
+    "sort": {
+      "match": "Phù hợp nhất",
+      "distance": "Gần công trình",
+      "rating": "Đánh giá tốt",
+      "survey": "Khảo sát sớm"
+    },
+    "region": {
+      "north": "Bắc",
+      "central": "Trung",
+      "south": "Nam"
+    },
+    "status": {
+      "sent": "Đã gửi",
+      "received": "Đã tiếp nhận",
+      "accepted": "Nhà thầu đã nhận",
+      "done": "Hoàn tất"
+    },
+    "statusMeaning": {
+      "sent": "Lời mời và hồ sơ đã được gửi đi.",
+      "received": "Đội hỗ trợ SAVICO đã tiếp nhận và chuyển cho nhà thầu.",
+      "accepted": "Nhà thầu xác nhận và sẽ liên hệ trực tiếp với bạn.",
+      "done": "Đã chốt hợp tác hoặc kết thúc lời mời."
+    },
+    "landing": {
+      "hero": {
+        "title": "Tìm đúng nhà thầu cho công trình của bạn",
+        "subtitle": "Kết nối với mạng lưới nhà thầu đã xác minh trên SAVICO: xem năng lực, so sánh minh bạch và chọn đối tác phù hợp cho công trình của bạn.",
+        "createBrief": "Tạo hồ sơ",
+        "bestMatch": "Phù hợp nhất với dự án của bạn",
+        "viewContractors": "Xem nhà thầu"
+      },
+      "promises": {
+        "free": "Miễn phí cho chủ nhà",
+        "verified": "Nhà thầu đã xác minh",
+        "transparent": "So sánh minh bạch",
+        "privacy": "Thông tin liên hệ được bảo vệ"
+      },
+      "criteria": {
+        "title": "Tìm đúng người theo đúng tiêu chí",
+        "area": "Khu vực & bán kính",
+        "type": "Loại công trình",
+        "typeHint": "xây mới / sửa chữa / cải tạo / nội thất",
+        "scale": "Quy mô công trình",
+        "experience": "Kinh nghiệm dự án tương tự",
+        "rating": "Đánh giá & số dự án hoàn thành",
+        "schedule": "Lịch nhận việc & thời gian khảo sát"
+      },
+      "ranking": {
+        "title": "Nhà thầu tiêu biểu",
+        "note": "Xếp hạng = mức độ phù hợp dự án + khoảng cách + kinh nghiệm + đánh giá + lịch nhận việc + thời gian khảo sát.",
+        "detail": "Xem chi tiết",
+        "choose": "Chọn & gửi hồ sơ"
+      },
+      "compare": {
+        "title": "So sánh minh bạch",
+        "lead": "Bảng so sánh trên nền tảng chỉ đối chiếu NĂNG LỰC. Báo giá do nhà thầu gửi trực tiếp cho bạn sau buổi khảo sát.",
+        "criterion": "Tiêu chí",
+        "note": "Mọi thông tin được tổng hợp từ hồ sơ nhà thầu và thông tin do nhà thầu cung cấp."
+      },
+      "safety": {
+        "title": "An toàn & minh bạch",
+        "privacyTitle": "Thông tin liên hệ được bảo vệ",
+        "privacyBody": "Số điện thoại và email của bạn chỉ hiển thị khi bạn xác nhận lịch khảo sát.",
+        "recordTitle": "Hồ sơ lưu trên nền tảng",
+        "recordBody": "Mọi lời mời đều có mã riêng và mốc thời gian, không lo tam sao thất bản.",
+        "reviewTitle": "Đánh giá từ dự án thật",
+        "reviewBody": "Chỉ khách đã làm việc qua SAVICO mới được đánh giá nhà thầu."
+      },
+      "boundary": {
+        "title": "Ranh giới dịch vụ",
+        "designTitle": "Gói thiết kế",
+        "designBody": "Thiết kế + khối lượng dự kiến + dự toán",
+        "arrow": "Hoàn thành thiết kế → Tìm nhà thầu",
+        "findTitle": "Tìm nhà thầu",
+        "findBody": "Tìm người thực hiện + khảo sát + đánh giá thực tế"
+      },
+      "faq": {
+        "title": "Câu hỏi thường gặp",
+        "q1": "Tôi có mất phí không?",
+        "a1": "Không. SAVICO hỗ trợ bạn tìm kiếm và kết nối với nhà thầu uy tín hoàn toàn miễn phí.",
+        "q2": "Cần gì để bắt đầu?",
+        "a2": "Chỉ cần thông tin cơ bản về công trình và nhu cầu thi công. Bạn có thể tự tạo hồ sơ miễn phí, không cần mua gói.",
+        "q3": "Tôi được mời bao nhiêu nhà thầu?",
+        "a3": "Tối đa 3 nhà thầu cho mỗi dự án. Giới hạn này giúp bạn theo dõi được từng buổi khảo sát thay vì nhận quá nhiều liên hệ cùng lúc.",
+        "q4": "Tôi có xem được báo giá trên web không?",
+        "a4": "Không. Sau buổi khảo sát, nhà thầu gửi báo giá trực tiếp cho bạn; SAVICO không lưu và không hiển thị số tiền trên nền tảng.",
+        "q5": "SAVICO có nhận thi công không?",
+        "a5": "Không. SAVICO là nền tảng kết nối trung lập, không thi công và không bán vật tư."
+      },
+      "cta": {
+        "title": "Đã có hồ sơ thiết kế? Tạo hồ sơ để kết nối với nhà thầu phù hợp ngay.",
+        "action": "Tạo hồ sơ"
+      },
+      "partner": {
+        "text": "Bạn là nhà thầu? Nhận dự án chất lượng, minh bạch và phù hợp.",
+        "action": "Trở thành đối tác"
+      }
+    },
+    "brief": {
+      "badge": "Miễn phí · Không cần đăng ký gói",
+      "back": "Quay lại lựa chọn",
+      "title": "Tự tạo hồ sơ dự án",
+      "subtitle": "Hoàn tất thông tin công trình và nhu cầu thi công, SAVICO đề xuất nhà thầu phù hợp.",
+      "steps": {
+        "one": "Thông tin & nhu cầu",
+        "two": "Kiểm tra hồ sơ"
+      },
+      "site": {
+        "title": "Thông tin công trình",
+        "requiredHint": "Các trường có dấu * là bắt buộc",
+        "name": "Tên dự án",
+        "namePlaceholder": "VD: Nhà phố Tân Lợi 2 tầng",
+        "buildingType": "Loại công trình",
+        "buildingTypePlaceholder": "Chọn loại công trình",
+        "landArea": "Diện tích đất (m²)",
+        "condition": "Hiện trạng",
+        "scale": "Quy mô",
+        "address": "Địa chỉ công trình",
+        "province": "Tỉnh / Thành phố",
+        "ward": "Phường / Xã",
+        "budget": "Ngân sách dự kiến",
+        "budgetSuffix": "đ",
+        "budgetHint": "Chỉ SAVICO xem để đề xuất nhà thầu phù hợp — không nằm trong hồ sơ gửi cho nhà thầu.",
+        "startWindow": "Dự kiến khởi công",
+        "street": "Số nhà, đường",
+        "streetPlaceholder": "VD: 12 Nguyễn Tất Thành",
+        "addressHint": "Chọn tỉnh/thành trước, danh sách phường/xã sẽ lọc theo."
+      },
+      "needs": {
+        "title": "Nhu cầu thi công",
+        "subtitle": "Cho SAVICO biết phạm vi và yêu cầu chính của dự án.",
+        "scope": "Phạm vi thi công",
+        "note": "Mô tả nhu cầu",
+        "notePlaceholder": "VD: Cần nhà thầu thi công trọn gói nhà phố 2 tầng, có kinh nghiệm và có thể khảo sát hiện trạng vào cuối tuần.",
+        "noteHint": "Mô tả càng rõ, SAVICO càng dễ đề xuất đúng nhà thầu.",
+        "counter": "{current} / {max}"
+      },
+      "documents": {
+        "title": "Tài liệu hiện có",
+        "optional": "không bắt buộc",
+        "dropzone": "Bản vẽ, ảnh hiện trạng hoặc dự toán",
+        "formats": "PDF, JPG, PNG, XLSX · Tối đa 10 MB",
+        "choose": "Chọn tệp",
+        "remove": "Xóa tệp",
+        "tooLarge": "Tệp {name} vượt quá 10 MB.",
+        "wrongType": "Tệp {name} không thuộc định dạng được hỗ trợ."
+      },
+      "notice": "Hồ sơ tự tạo không bao gồm bản vẽ và dự toán do SAVICO phát hành.",
+      "noticeAction": "Xem gói Thiết kế & Dự toán",
+      "saveDraft": "Lưu nháp",
+      "continue": "Tiếp tục: Kiểm tra hồ sơ",
+      "draftSaved": "Đã lưu nháp hồ sơ dự án."
+    },
+    "review": {
+      "back": "Quay lại thông tin & nhu cầu",
+      "title": "Kiểm tra hồ sơ dự án",
+      "subtitle": "Xác nhận thông tin trước khi SAVICO bắt đầu đề xuất nhà thầu.",
+      "siteTitle": "Thông tin công trình",
+      "needsTitle": "Nhu cầu thi công",
+      "documentsTitle": "Tài liệu đính kèm",
+      "noDocuments": "Chưa có tài liệu nào.",
+      "edit": "Chỉnh sửa",
+      "addFile": "Thêm tệp",
+      "scopeLabel": "Phạm vi",
+      "noteLabel": "Mô tả",
+      "ready": "Hồ sơ đã sẵn sàng",
+      "readyInfo": "Đủ thông tin để ghép nhà thầu",
+      "readyEditable": "Có thể chỉnh sửa sau",
+      "readyFree": "Miễn phí tìm kiếm và so sánh",
+      "quoteNote": "Nhà thầu sẽ báo giá dựa trên thông tin và tài liệu bạn cung cấp, sau khi khảo sát thực tế.",
+      "confirm": "Tôi xác nhận thông tin trên là chính xác.",
+      "submit": "Hoàn tất & tìm nhà thầu",
+      "saveAndExit": "Lưu nháp và thoát",
+      "incomplete": "Hồ sơ còn thiếu thông tin bắt buộc — quay lại Bước 1 để bổ sung.",
+      "labels": {
+        "name": "Tên dự án",
+        "buildingType": "Loại công trình",
+        "scale": "Quy mô",
+        "landArea": "Diện tích đất",
+        "condition": "Hiện trạng",
+        "address": "Địa chỉ",
+        "budget": "Ngân sách dự kiến",
+        "startWindow": "Dự kiến khởi công"
+      }
+    },
+    "start": {
+      "title": "Bạn muốn bắt đầu như thế nào?",
+      "subtitle": "Chọn cách phù hợp với bạn lúc này — lượt trong gói vẫn còn nguyên cho tới khi bạn dùng.",
+      "option": "Lựa chọn {index}",
+      "popular": "Lựa chọn phổ biến nhất",
+      "find": {
+        "title": "Tìm nhà thầu phù hợp",
+        "subtitle": "Chủ động lựa chọn, so sánh và chọn nhà thầu ưng ý",
+        "p1": "SAVICO đề xuất nhà thầu phù hợp quanh công trình",
+        "p2": "Xem hồ sơ năng lực & dự án thực tế",
+        "p3": "Chọn tối đa 3 nhà thầu để mời khảo sát",
+        "p4": "Nhà thầu khảo sát rồi báo giá trực tiếp cho bạn",
+        "p5": "Tự chọn nhà thầu cuối cùng",
+        "action": "Tìm nhà thầu"
+      },
+      "turnkey": {
+        "title": "Triển khai trọn gói cùng SAVICO",
+        "subtitle": "Để SAVICO đồng hành từ khảo sát đến bàn giao",
+        "p1": "Khảo sát & tư vấn chuyên sâu",
+        "p2": "Thi công & quản lý tiến độ",
+        "p3": "Cung ứng vật liệu, nội thất",
+        "p4": "Kiểm soát chất lượng & chi phí",
+        "p5": "Nghiệm thu & bàn giao",
+        "action": "Đăng ký triển khai"
+      },
+      "expert": {
+        "title": "Nói chuyện với chuyên gia",
+        "subtitle": "Cần người hướng dẫn trước khi bắt tay vào làm",
+        "p1": "Tư vấn 1:1 cùng kiến trúc sư",
+        "p2": "Gợi ý hướng thiết kế phù hợp ngân sách",
+        "p3": "Giải đáp quy trình và cách dùng nền tảng",
+        "action": "Đặt lịch tư vấn"
+      },
+      "turnkeyRegistered": "Đã ghi nhận. Đội ngũ SAVICO sẽ liên hệ với bạn trong giờ làm việc gần nhất."
+    },
+    "matches": {
+      "title": "Nhà thầu được đề xuất",
+      "subtitle": "Chọn nhà thầu để xem hồ sơ, so sánh hoặc mời báo giá.",
+      "radius": "Bán kính tìm kiếm",
+      "radiusOption": "{km} km",
+      "empty": "Chưa có nhà thầu nào trong bán kính {km} km. Thử mở rộng bán kính tìm kiếm.",
+      "compareTitle": "Đã chọn so sánh",
+      "compareCount": "({selected}/{max})",
+      "compareHint": "Chọn từ {min} đến {max} nhà thầu",
+      "compareAction": "So sánh {count} nhà thầu",
+      "compareCheckbox": "So sánh",
+      "whyTitle": "Vì sao SAVICO đề xuất?",
+      "why1": "Phù hợp loại công trình",
+      "why2": "Có dự án tương tự trong khu vực",
+      "why3": "Còn lịch khảo sát sớm",
+      "limitNote": "Mỗi dự án mời tối đa {max} nhà thầu. Đã mời {used}/{max}.",
+      "trackInvites": "Theo dõi lời mời"
+    },
+    "firm": {
+      "tabs": {
+        "overview": "Tổng quan",
+        "projects": "Dự án đã thực hiện",
+        "legal": "Năng lực pháp lý",
+        "partnership": "Hợp tác SAVICO"
+      },
+      "introTitle": "Giới thiệu doanh nghiệp",
+      "founded": "Thành lập năm {year}",
+      "team": "{count} kiến trúc sư & kỹ sư",
+      "office": "Văn phòng tại {address}",
+      "strengths": "Thế mạnh",
+      "featured": "Dự án tiêu biểu",
+      "viewProject": "Xem dự án",
+      "legalTitle": "Năng lực & xác minh",
+      "activity": "Thông tin hoạt động",
+      "warranty": "Bảo hành {months} tháng",
+      "contactLocked": "Thông tin liên hệ được mở sau khi lịch khảo sát được xác nhận.",
+      "report": "Báo cáo hồ sơ",
+      "reportSent": "Đã ghi nhận báo cáo. Đội hỗ trợ SAVICO sẽ kiểm tra hồ sơ này.",
+      "addToCompare": "Thêm vào so sánh",
+      "inCompare": "Đã thêm vào so sánh",
+      "partnership": {
+        "title": "Đối tác hợp tác cùng SAVICO",
+        "body": "{name} đã ký thỏa thuận hợp tác và được SAVICO xác minh hồ sơ doanh nghiệp.",
+        "verified": "Đối tác đã xác minh",
+        "since": "Hợp tác từ {since}",
+        "scanTitle": "Bản scan hợp đồng hợp tác",
+        "agreement": "Thỏa thuận hợp tác",
+        "code": "Mã hồ sơ",
+        "signedAt": "Ngày ký",
+        "pages": "Số trang",
+        "state": "Trạng thái",
+        "stateVerified": "Đã xác minh",
+        "checked": "Bản scan được SAVICO đối chiếu với hồ sơ doanh nghiệp.",
+        "page": "Trang {current} / {total}",
+        "fullscreen": "Xem toàn màn hình",
+        "download": "Tải bản PDF",
+        "unavailable": "Bản scan đang được đội vận hành cập nhật.",
+        "privacyNote": "Chỉ hiển thị trang thông tin đã che các nội dung bảo mật của hai bên."
+      }
+    },
+    "compare": {
+      "title": "So sánh hồ sơ nhà thầu",
+      "subtitle": "Đối chiếu năng lực trước khi gửi lời mời báo giá.",
+      "lead": "Đây là so sánh hồ sơ NĂNG LỰC trước khi gửi lời mời báo giá — bảng không chứa thông tin giá.",
+      "criterion": "Tiêu chí",
+      "criteria": {
+        "rating": "Đánh giá",
+        "similarProjects": "Dự án tương tự",
+        "distance": "Khoảng cách",
+        "surveyTime": "Thời gian khảo sát",
+        "serviceAreas": "Phạm vi phục vụ",
+        "legal": "Hồ sơ pháp lý",
+        "warranty": "Bảo hành",
+        "accepting": "Đang nhận dự án"
+      },
+      "legalVerified": "Đã xác minh",
+      "select": "Chọn nhà thầu",
+      "selected": "Đã chọn nhà thầu",
+      "footerHint": "Chọn tối đa {max} nhà thầu để mời báo giá",
+      "footerSelected": "Đã chọn: {names}",
+      "footerEmpty": "Chưa chọn nhà thầu nào",
+      "back": "Quay lại danh sách",
+      "invite": "Mời nhà thầu đã chọn báo giá",
+      "tooFew": "Chọn ít nhất {min} nhà thầu để so sánh."
+    },
+    "survey": {
+      "title": "Chọn thời gian khảo sát",
+      "subtitle": "Chọn thời gian phù hợp để {name} đến khảo sát công trình.",
+      "queue": "Nhà thầu {current}/{total}",
+      "dateTitle": "Chọn ngày khảo sát",
+      "dateHint": "Nhà thầu chỉ có thể khảo sát trong vòng {days} ngày tới",
+      "available": "Ngày có thể chọn",
+      "unavailable": "Không khả dụng",
+      "slotTitle": "Chọn khung giờ",
+      "slotOffice": "Giờ hành chính",
+      "slotTaken": "Khung giờ này đã có lịch",
+      "workingHours": "Khung giờ làm việc: 08:00 – 17:00 (Thứ 2 – Thứ 7)",
+      "callAhead": "Nhà thầu sẽ liên hệ trước 30 phút để xác nhận.",
+      "noteTitle": "Ghi chú cho buổi khảo sát",
+      "notePlaceholder": "VD: Khảo sát hiện trạng và trao đổi phạm vi thi công trọn gói.",
+      "suggestNote": "Đề xuất ghi chú",
+      "locationTitle": "Địa điểm khảo sát",
+      "contactTitle": "Thông tin liên hệ nhận xác nhận",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "cancel": "Hủy",
+      "submit": "Xác nhận thời gian khảo sát",
+      "submitNext": "Xác nhận & chọn nhà thầu tiếp theo",
+      "privacy": "Thông tin của bạn được bảo mật và chỉ chia sẻ với nhà thầu sau khi xác nhận.",
+      "limitReached": "Dự án đã đủ {max} lời mời — không thể mời thêm nhà thầu.",
+      "invalid": "Còn thông tin bắt buộc chưa điền — kiểm tra lại ngày, khung giờ và thông tin liên hệ."
+    },
+    "sent": {
+      "title": "Đã gửi lời mời & đăng ký khảo sát",
+      "subtitle": "Yêu cầu khảo sát của bạn đã được gửi đến {names}.",
+      "requestCode": "Mã yêu cầu: {code}",
+      "sentAt": "Gửi lúc {time}",
+      "detailTitle": "Chi tiết yêu cầu",
+      "location": "Địa điểm khảo sát",
+      "note": "Ghi chú cho buổi khảo sát",
+      "noNote": "Không có ghi chú",
+      "supportTitle": "Đội ngũ hỗ trợ SAVICO sẽ liên hệ với bạn",
+      "supportBody": "Chúng tôi sẽ chủ động gọi điện để xác nhận lịch khảo sát, làm rõ nhu cầu và phối hợp chi tiết với nhà thầu.",
+      "supportTime": "Thời gian dự kiến: Trong giờ làm việc gần nhất.",
+      "track": "Theo dõi yêu cầu",
+      "backToList": "Quay lại danh sách nhà thầu",
+      "privacy": "Thông tin liên hệ được bảo mật cho đến khi lịch khảo sát được xác nhận.",
+      "afterNote": "Sau bước này, khảo sát · báo giá · thương thảo · hợp đồng diễn ra trực tiếp giữa bạn và nhà thầu."
+    },
+    "invitations": {
+      "title": "Lời mời báo giá",
+      "subtitle": "Bạn đã gửi lời mời báo giá đến {count} nhà thầu. Trạng thái do đội hỗ trợ SAVICO cập nhật.",
+      "counter": "Đã mời {used} / {max} nhà thầu tối đa",
+      "empty": "Chưa gửi lời mời nào cho dự án này.",
+      "emptyAction": "Xem nhà thầu được đề xuất",
+      "code": "Mã lời mời {code}",
+      "sentAt": "Gửi lúc {time}",
+      "dossier": "Hồ sơ {version} · {count} tệp",
+      "updatedBy": "Cập nhật {time} · đội hỗ trợ SAVICO",
+      "surveyAt": "Khảo sát {date}, {slot}",
+      "meaningTitle": "Ý nghĩa trạng thái",
+      "dossierTitle": "Hồ sơ đã gửi",
+      "dossierType": "Loại công trình",
+      "dossierScale": "Quy mô",
+      "dossierScope": "Phạm vi",
+      "dossierFiles": "Tệp đính kèm",
+      "dossierFileCount": "{count} tệp",
+      "dossierView": "Xem hồ sơ đã gửi",
+      "dossierNoBudget": "Hồ sơ gửi đi không chứa ngân sách hay bất kỳ thông tin giá nào.",
+      "supportTitle": "Đội hỗ trợ SAVICO",
+      "supportBody": "Cập nhật trạng thái từng lời mời và hỗ trợ khi bạn muốn ngưng lời mời hoặc đổi nhà thầu.",
+      "supportAction": "Liên hệ đội hỗ trợ",
+      "footerNote": "Sau khi nhà thầu nhận lời mời, hai bên trao đổi trực tiếp về khảo sát, báo giá và hợp đồng. SAVICO không lưu báo giá hay số tiền. Muốn ngưng một lời mời hoặc đổi nhà thầu, hãy liên hệ đội hỗ trợ.",
+      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn qua số điện thoại đã đăng ký."
+    }
+  },
+  "checkout": {
+    "headerSupport": "Bạn cần hỗ trợ?",
+    "steps": {
+      "plan": "Chọn gói",
+      "confirm": "Xác nhận đơn hàng",
+      "payment": "Thanh toán",
+      "done": "Hoàn tất"
+    },
+    "stepState": {
+      "done": "Đã xong",
+      "current": "Đang làm",
+      "pending": "Chưa tới",
+      "error": "Cần xử lý"
+    },
+    "confirm": {
+      "title": "Xác nhận đơn hàng",
+      "subtitle": "Kiểm tra thông tin trước khi tiến hành thanh toán.",
+      "buyerTitle": "Thông tin người mua",
+      "buyerEditable": "Có thể chỉnh sửa",
+      "name": "Họ và tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "receiptNote": "Biên nhận và hồ sơ sẽ gửi tới email và Zalo theo số này.",
+      "paymentTitle": "Hình thức thanh toán",
+      "qrTitle": "QR chuyển khoản ngân hàng",
+      "qrBody": "Quét mã bằng app ngân hàng. Hệ thống tự xác nhận trong 1–5 phút.",
+      "qrFree": "Không mất phí",
+      "qrOnly": "SAVICO chỉ nhận thanh toán qua QR chuyển khoản.",
+      "invoiceTitle": "Xuất hóa đơn",
+      "invoiceHint": "Bật nếu bạn cần hóa đơn giá trị gia tăng.",
+      "company": "Tên công ty",
+      "taxCode": "Mã số thuế",
+      "address": "Địa chỉ",
+      "invoiceEmail": "Email nhận hóa đơn",
+      "orderTitle": "Đơn hàng của bạn",
+      "changePlan": "Đổi gói",
+      "forProject": "Cho dự án {project}",
+      "discountLabel": "Mã giảm giá",
+      "discountPlaceholder": "Nhập mã",
+      "apply": "Áp dụng",
+      "discountApplied": "Đã áp dụng mã {code} — giảm {percent}%",
+      "discountInvalid": "Mã giảm giá không hợp lệ hoặc đã hết hạn.",
+      "subtotal": "Tạm tính",
+      "discount": "Giảm giá",
+      "total": "Tổng thanh toán",
+      "vat": "Đã bao gồm thuế GTGT.",
+      "submit": "Tiến hành thanh toán",
+      "refund": "Hoàn 100% trong {hours} giờ nếu bạn chưa dùng lượt nào.",
+      "noCardNote": "SAVICO không thu và không lưu thông tin thẻ.",
+      "terms": "Tôi đã đọc và đồng ý với Điều khoản sử dụng và Chính sách thanh toán của SAVICO.",
+      "termsRequired": "Bạn cần đồng ý với điều khoản trước khi thanh toán.",
+      "missingProduct": "Không tìm thấy gói bạn chọn. Quay lại bảng giá để chọn lại.",
+      "backToPlans": "Về bảng giá"
+    },
+    "payment": {
+      "title": "Thanh toán",
+      "waiting": "Đang chờ thanh toán",
+      "waitingBody": "Hệ thống tự động xác nhận sau khi nhận được tiền, bạn không cần bấm gì thêm.",
+      "expiresIn": "Mã hết hạn sau",
+      "expired": "Mã QR đã hết hạn.",
+      "regenerate": "Tạo lại mã QR",
+      "qrTitle": "Quét mã QR để thanh toán",
+      "downloadQr": "Tải ảnh QR",
+      "copyOrder": "Sao chép mã đơn",
+      "manualTitle": "Hoặc chuyển khoản thủ công",
+      "manualBody": "Sử dụng thông tin dưới đây nếu bạn không thể quét mã QR.",
+      "bank": "Ngân hàng",
+      "accountNumber": "Số tài khoản",
+      "accountName": "Chủ tài khoản",
+      "amount": "Số tiền",
+      "content": "Nội dung chuyển khoản",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "guideTitle": "Ba bước thanh toán",
+      "guide1": "Mở app ngân hàng của bạn",
+      "guide2": "Quét mã QR ở trên",
+      "guide3": "Giữ nguyên nội dung chuyển khoản khi xác nhận",
+      "keepContent": "Vui lòng giữ nguyên nội dung chuyển khoản. Sai nội dung, đơn hàng sẽ cần xác nhận thủ công và mất thêm thời gian.",
+      "transferred": "Tôi đã chuyển khoản",
+      "support": "Cần hỗ trợ?",
+      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn qua số điện thoại đã đăng ký."
+    },
+    "verifying": {
+      "title": "Đang xác nhận chuyển khoản",
+      "subtitle": "Chúng tôi đã ghi nhận đơn hàng của bạn. Ngân hàng thường xác nhận trong 1–5 phút.",
+      "orderCode": "Mã đơn hàng",
+      "amount": "Số tiền",
+      "content": "Nội dung chuyển khoản đã dùng",
+      "waited": "Đã chờ {time} — trang sẽ tự cập nhật khi nhận được tiền.",
+      "refresh": "Tải lại trạng thái",
+      "notSeen": "Tôi đã chuyển nhưng chưa thấy cập nhật",
+      "keepPage": "Bạn có thể giữ nguyên trang này. Hệ thống sẽ tự động cập nhật."
+    },
+    "failed": {
+      "title": "Chưa nhận được thanh toán",
+      "subtitle": "Đơn hàng của bạn vẫn được giữ. Bạn có thể thử lại ngay.",
+      "reasonsTitle": "Một số lý do thường gặp",
+      "reasonExpired": "Mã QR đã hết hạn",
+      "reasonContent": "Sai nội dung chuyển khoản",
+      "reasonBank": "Ngân hàng đang xử lý chậm",
+      "retry": "Thử lại thanh toán",
+      "support": "Liên hệ hỗ trợ",
+      "holdNote": "Mã đơn hàng {code} được giữ trên hệ thống trong {hours} giờ."
+    },
+    "done": {
+      "title": "Thanh toán thành công",
+      "designActivated": "Đã kích hoạt gói {plan}! Bạn có thể bắt đầu ngay.",
+      "supervisionActivated": "Đã kích hoạt {plan} cho dự án của bạn.",
+      "subtitle": "Lượt trong gói đã sẵn sàng. Chọn một cách bắt đầu ở bên dưới.",
+      "planTitle": "Gói của tôi",
+      "activated": "Đã kích hoạt",
+      "designCredits": "{count} phương án thiết kế",
+      "editCredits": "{count} lượt chỉnh sửa phương án",
+      "libraryCredits": "{count} lượt tra thư viện mẫu",
+      "noExpiry": "Lượt không hết hạn.",
+      "receipt": "Xem biên nhận",
+      "receiptSent": "Biên nhận đã gửi tới email và Zalo của bạn.",
+      "myProjects": "Vào dự án của tôi",
+      "dashboard": "Bảng điều khiển giám sát",
+      "dataNote": "Dữ liệu dự án của bạn được lưu riêng và bảo mật trên hệ thống SAVICO.",
+      "assignNote": "Đội hỗ trợ sẽ phân công kỹ sư và mở 6 giai đoạn giám sát cho dự án của bạn."
+    }
+  },
+  "supervision": {
+    "tiers": {
+      "self": "Tự quản lý",
+      "check": "SVC CHECK",
+      "control": "SVC CONTROL"
+    },
+    "tierAlias": {
+      "self": "Tự quản lý",
+      "check": "Gói An Tâm",
+      "control": "Gói Toàn Diện"
+    },
+    "tierTags": {
+      "self": "Bạn tự theo dõi",
+      "check": "Kiểm tra các mốc quan trọng",
+      "control": "Kiểm soát xuyên suốt"
+    },
+    "stages": {
+      "legal": "Hồ sơ pháp lý",
+      "foundation": "Móng & khởi công",
+      "structure": "Phần thô – kết cấu",
+      "mep": "Hệ thống kỹ thuật & chống thấm",
+      "finishing": "Hoàn thiện",
+      "handover": "Nghiệm thu & bàn giao"
+    },
+    "stageHints": {
+      "legal": "Giấy phép xây dựng, hồ sơ thiết kế, hợp đồng thi công.",
+      "foundation": "Định vị tim trục, hố móng, cốt thép móng, đổ bê tông móng.",
+      "structure": "Cột, dầm, sàn, tường xây và tô trát.",
+      "mep": "Điện nước âm, chống thấm, thử áp lực đường ống.",
+      "finishing": "Trát, ốp lát, trần thạch cao, sơn nước, cửa, thiết bị vệ sinh.",
+      "handover": "Kiểm tra tổng thể, khắc phục lỗi, bàn giao hồ sơ hoàn công."
+    },
+    "pricing": {
+      "title": "Gói giám sát thi công SAVICO",
+      "subtitle": "Giám sát theo mốc quan trọng, kết hợp theo dõi số hóa trên nền tảng SAVICO",
+      "recommended": "Khuyến nghị cho nhà ở",
+      "perProject": "/ dự án",
+      "duration": "tối đa {months} tháng",
+      "inspections": "{count} lượt kỹ sư kiểm tra thực tế",
+      "noInspection": "Không có kỹ sư kiểm tra tại công trình",
+      "free": "Miễn phí",
+      "choose": "Chọn {tier}",
+      "chooseSelf": "Tiếp tục tự quản lý",
+      "selfChosen": "Đã ghi nhận. Dự án của bạn sẽ ở chế độ tự quản lý — bạn có thể nâng cấp bất kỳ lúc nào.",
+      "costNote": "Chi phí giám sát thường chiếm khoảng 0,6–1,3% giá trị công trình. Với công trình 1,5 tỷ, gói CHECK tương đương 0,6% và gói CONTROL tương đương 1,3%.",
+      "comparison": {
+        "title": "So sánh chi tiết 3 lựa chọn",
+        "criterion": "Hạng mục",
+        "groups": {
+          "core": "Quyền lợi chính",
+          "platform": "Theo dõi số hóa trên nền tảng",
+          "engineer": "Kỹ sư kiểm tra thực tế",
+          "handover": "Nghiệm thu & bàn giao"
+        },
+        "rows": {
+          "inspectionCount": "Số lần kỹ sư kiểm tra thực tế",
+          "duration": "Thời gian áp dụng",
+          "price": "Chi phí",
+          "dossier": "Lưu hồ sơ dự án trên SAVICO",
+          "dashboard": "Bảng điều khiển 6 giai đoạn",
+          "timeline": "Timeline thi công",
+          "progress": "Theo dõi % tiến độ",
+          "photos": "Hình ảnh hiện trường theo giai đoạn",
+          "materials": "Theo dõi vật liệu đã cam kết",
+          "issues": "Ghi nhận sai khác",
+          "extras": "Ghi nhận phát sinh",
+          "followUp": "Theo dõi vấn đề cần xử lý",
+          "structureCheck": "Kiểm tra phần thô",
+          "dampCheck": "Kiểm tra đấm mốc ẩm",
+          "waterproofCheck": "Kiểm tra móng thấm",
+          "finishingCheck": "Kiểm tra hoàn thiện",
+          "materialCheck": "Đối chiếu vật liệu thực tế",
+          "reportAfter": "Báo cáo sau mỗi lần kiểm tra",
+          "milestoneHandover": "Nghiệm thu theo giai đoạn",
+          "defectTracking": "Theo dõi xử lý lỗi",
+          "finalInspection": "Kiểm tra tổng thể trước bàn giao",
+          "handoverChecklist": "Biên bản bàn giao",
+          "finalReport": "Báo cáo tổng kết công trình"
+        },
+        "values": {
+          "unlimited": "Không giới hạn",
+          "months": "{count} tháng",
+          "onePoint": "1 mốc",
+          "mainMilestones": "Theo các mốc chính",
+          "allMilestones": "Tất cả các mốc",
+          "perVisit": "Theo lần kiểm tra",
+          "everyVisit": "Mọi lần kiểm tra",
+          "full": "Đầy đủ"
+        }
+      },
+      "addons": {
+        "title": "Add-on & phụ phí",
+        "item": "Hạng mục",
+        "price": "Giá đề xuất",
+        "note": "Ghi chú",
+        "extraVisit": "Thêm 01 lượt kiểm tra",
+        "extraVisitPrice": "990.000đ – 1.290.000đ",
+        "extraVisitNote": "Khi cần thêm mốc ngoài gói",
+        "urgent": "Kiểm tra khẩn / ngoài kế hoạch",
+        "urgentPrice": "1.490.000đ",
+        "urgentNote": "Tùy khối lượng bố trí sự việc",
+        "outOfArea": "Ngoài khu vực phục vụ chuẩn",
+        "outOfAreaPrice": "Theo thực tế",
+        "outOfAreaNote": "Tính thêm phí di chuyển nếu có",
+        "extend": "Gia hạn dự án trên {months} tháng",
+        "extendPrice": "Theo tháng / phạm vi",
+        "extendNote": "Báo giá theo tiến độ còn lại"
+      },
+      "scope": {
+        "title": "Nguyên tắc phạm vi dịch vụ",
+        "r1": "SAVICO kiểm tra, ghi nhận, cảnh báo, báo cáo và theo dõi xử lý trong phạm vi gói đã chọn.",
+        "r2": "Nhà thầu vẫn chịu trách nhiệm tổ chức thi công, chất lượng phần việc, an toàn lao động và bảo hành.",
+        "r3": "Gói không bao gồm kỹ sư thường trực tại công trình."
+      },
+      "journey": {
+        "title": "Hành trình khách hàng",
+        "s1": "Thiết kế & dự toán",
+        "s1Body": "Khách mua và sử dụng gói thiết kế trên SAVICO.",
+        "s2": "Tìm nhà thầu",
+        "s2Body": "Khách tìm, so sánh và chọn nhà thầu.",
+        "s3": "Chọn cách quản lý thi công",
+        "s3Body": "Khách chọn \"Tự quản lý\" hoặc gói giám sát.",
+        "s4a": "Tự quản lý",
+        "s4aBody": "Khách làm việc trực tiếp với nhà thầu.",
+        "s4b": "SAVICO giám sát",
+        "s4bBody": "Khách chọn gói CHECK hoặc CONTROL.",
+        "s5": "Thi công",
+        "s5Body": "Kỹ sư kiểm tra theo các mốc đã cam kết.",
+        "s6": "Kiểm soát",
+        "s6Body": "Theo dõi tiến độ, vật liệu, phát sinh, sai lệch.",
+        "s7": "Nghiệm thu",
+        "s7Body": "Kiểm tra theo giai đoạn và nhận kết quả.",
+        "s8": "Bàn giao",
+        "s8Body": "Kiểm tra tổng thể, biên bản bàn giao, báo cáo tổng kết."
+      },
+      "value": {
+        "title": "Giá trị khách hàng nhận được",
+        "rows": {
+          "calm": "Yên tâm",
+          "transparent": "Minh bạch",
+          "quality": "Kiểm soát chất lượng",
+          "handover": "Bàn giao gọn"
+        },
+        "cells": {
+          "calm": {
+            "self": "Tự chủ động theo dõi",
+            "check": "Có kỹ sư kiểm tra tại các mốc quan trọng",
+            "control": "Có người theo sát suốt quá trình"
+          },
+          "transparent": {
+            "self": "Hồ sơ dự án được lưu lại",
+            "check": "Báo cáo sau từng lần kiểm tra",
+            "control": "Báo cáo và ảnh hiện trường liên tục"
+          },
+          "quality": {
+            "self": "Tự đối chiếu với hồ sơ",
+            "check": "Kiểm tra đấm mốc ẩm, móng thấm, hoàn thiện",
+            "control": "Kiểm soát cả phần thô và vật liệu thực tế"
+          },
+          "handover": {
+            "self": "Tự nghiệm thu với nhà thầu",
+            "check": "Kiểm tra tổng thể và biên bản bàn giao",
+            "control": "Nghiệm thu theo giai đoạn, theo dõi đến khi hết lỗi"
+          }
+        }
+      },
+      "notes": {
+        "payment": "Thanh toán qua QR chuyển khoản ngân hàng.",
+        "scope": "Gói tính theo dự án, áp dụng cho nhà ở đến 3 tầng và 300 m² sàn; ngoài phạm vi này tính theo add-on.",
+        "area": "Khu vực phục vụ chuẩn trong bán kính 30 km từ điểm có kỹ sư; ngoài khu vực tính thêm chi phí di chuyển."
+      }
+    },
+    "dashboard": {
+      "title": "Bảng điều khiển giám sát",
+      "breadcrumbProjects": "Dự án của tôi",
+      "lead": "6 giai đoạn cố định từ hồ sơ pháp lý đến nghiệm thu & bàn giao. Tải ảnh/tài liệu kèm tên là giai đoạn hoàn thành và đường tiến độ chạy tiếp; Giám sát kiểm tra thực tế và xác nhận. Hồ sơ đã xác nhận chỉ thay đổi khi cả hai bên đồng ý.",
+      "backToProject": "Về dự án",
+      "banner": {
+        "remaining": "Còn {days} ngày",
+        "body": "Giai đoạn {index} – {stage}: hạn hoàn thành {due}. Tải ảnh/tài liệu kèm tên để hoàn thành giai đoạn.",
+        "overdue": "Quá hạn {days} ngày",
+        "overdueBody": "Giai đoạn {index} – {stage} đã quá hạn {due}. Tải hồ sơ hoặc liên hệ đội hỗ trợ để điều chỉnh lịch.",
+        "upload": "Tải hồ sơ giai đoạn {index}",
+        "goTo": "Đến giai đoạn {index}",
+        "approve": "Xem & duyệt yêu cầu sửa đổi"
+      },
+      "project": {
+        "service": "Dịch vụ SAVICO",
+        "code": "Mã dự án",
+        "engineer": "Kỹ sư",
+        "packageCode": "Mã gói",
+        "progress": "Tiến độ 6 giai đoạn",
+        "progressDone": "{done}/6 hoàn thành",
+        "elapsed": "Vạch cam: thời gian đã trôi {percent}%",
+        "currentStage": "Giai đoạn hiện tại",
+        "due": "Hạn hoàn thành",
+        "daysLeft": "Còn {days} ngày",
+        "handover": "Bàn giao dự kiến",
+        "handoverEarly": "Sớm hơn kế hoạch",
+        "handoverLate": "Chậm hơn kế hoạch",
+        "inspections": "Lượt kiểm tra kỹ sư",
+        "inspectionsUsed": "{used}/{total}"
+      },
+      "thread": {
+        "today": "Hôm nay",
+        "startsIn": "Bắt đầu sau {days} ngày",
+        "confirmedOn": "Xác nhận {date}"
+      },
+      "schedule": {
+        "title": "Lịch trình 6 giai đoạn",
+        "note": "Lịch chuẩn {days} ngày kể từ khi kích hoạt. Giám sát điều chỉnh theo thực tế, bạn được thông báo khi lịch đổi.",
+        "toggleOpen": "Thu gọn bảng lịch trình",
+        "toggleClosed": "Xem bảng lịch trình",
+        "stage": "Giai đoạn",
+        "plan": "Kế hoạch",
+        "actual": "Thực tế",
+        "status": "Trạng thái",
+        "reminder": "Nhắc lịch",
+        "files": "Hồ sơ",
+        "days": "({count} ngày)",
+        "fileCount": "{count} tệp",
+        "notStarted": "—"
+      },
+      "status": {
+        "confirmed": "Đã xác nhận",
+        "inProgress": "Đang thực hiện",
+        "upcoming": "Sắp tới"
+      },
+      "stageList": {
+        "title": "6 giai đoạn",
+        "doneCount": "{count} hoàn thành",
+        "needsApproval": "Cần bạn duyệt"
+      },
+      "stage": {
+        "heading": "Giai đoạn {index}/6",
+        "planned": "Lịch {start} → {end}",
+        "actualStart": "Bắt đầu thực tế {date}",
+        "confirmedEarly": "Xác nhận {date} · sớm {days} ngày",
+        "confirmedLate": "Xác nhận {date} · trễ {days} ngày",
+        "upcomingTitle": "Chưa đến giai đoạn này",
+        "upcomingBody": "Bắt đầu {date} (sau {days} ngày) sau khi giai đoạn {previous} hoàn thành.",
+        "prepHint": "Gợi ý chuẩn bị: {hint}",
+        "uploadCta": "Tải hồ sơ để hoàn thành",
+        "lockedNotice": "Giám sát đã kiểm tra thực tế và xác nhận {date} — hồ sơ khóa ở {version}. Muốn bổ sung ảnh/tài liệu hay đính chính nhận xét, hãy gửi yêu cầu sửa đổi để Giám sát duyệt.",
+        "requestChange": "Yêu cầu sửa đổi",
+        "filesTitle": "Ảnh & tài liệu",
+        "filesLocked": "Đã khóa ở {version} — thay đổi cần yêu cầu sửa đổi",
+        "fileBy": {
+          "KH": "Khách hàng",
+          "GS": "Giám sát"
+        },
+        "fileTagInspection": "Kiểm tra hiện trường",
+        "fileTagAddedIn": "Thêm ở {version}",
+        "noFiles": "Chưa có ảnh hoặc tài liệu nào.",
+        "commentsTitle": "Nhận xét & trao đổi",
+        "commentsLocked": "Đã khóa — bổ sung/đính chính nhận xét cần yêu cầu sửa đổi",
+        "commentPlaceholder": "Trao đổi với Giám sát về giai đoạn này (kỹ sư được thông báo)...",
+        "commentSend": "Gửi nhận xét",
+        "commentSent": "Đã gửi nhận xét cho Giám sát.",
+        "inspectionTitle": "Kết quả kiểm tra của Giám sát",
+        "inspectionEmpty": "Chưa có kết quả kiểm tra",
+        "inspectionEmptyBody": "Sau khi giai đoạn hoàn thành, Giám sát kiểm tra thực tế, ghi nhận và xác nhận.",
+        "inspectionVisited": "có kiểm tra thực tế",
+        "historyTitle": "Lịch sử & phiên bản",
+        "historyNote": "Không xóa lịch sử; mọi thay đổi lưu người, vai trò, thời gian, phiên bản.",
+        "eventCount": "{count} sự kiện",
+        "uploadHint": "Tải ảnh/tài liệu kèm tên để đánh dấu giai đoạn này hoàn thành. Giám sát sẽ kiểm tra thực tế và xác nhận sau."
+      },
+      "upload": {
+        "title": "Tải hồ sơ · Giai đoạn {index} – {stage}",
+        "lead": "Tải lên là giai đoạn hoàn thành — Giám sát kiểm tra thực tế và xác nhận sau. Người tải: {user} · lưu thời gian chụp (EXIF) và thời gian tải.",
+        "kind": "Loại",
+        "kindPhoto": "Ảnh (JPG/PNG/HEIC)",
+        "kindDocument": "Tài liệu (PDF/DOCX/XLSX)",
+        "files": "Tệp",
+        "dropzone": "Kéo thả hoặc chọn tệp · ≤ 10 MB mỗi tệp",
+        "choose": "Chọn tệp",
+        "name": "Tên / ghi chú",
+        "namePlaceholder": "VD: Ống điện âm tường, Đồng hồ thử áp, Ngâm thử nước WC",
+        "remove": "Bỏ tệp",
+        "cancel": "Hủy",
+        "submit": "Tải lên & hoàn thành giai đoạn",
+        "submitCount": "Tải lên {count} tệp & hoàn thành giai đoạn",
+        "needFile": "Chọn ít nhất một tệp trước khi hoàn thành giai đoạn.",
+        "needName": "Đặt tên cho hồ sơ để Giám sát biết bạn tải gì.",
+        "done": "Đã tải hồ sơ. Giai đoạn {index} chuyển sang chờ Giám sát kiểm tra."
+      },
+      "change": {
+        "pendingBadge": "Yêu cầu sửa đổi {code}",
+        "bannerTitle": "Giám sát đề xuất sửa đổi hồ sơ đã xác nhận ({code})",
+        "bannerBody": "Cần bạn duyệt trước {due}. Hồ sơ chỉ thay đổi khi bạn đồng ý; từ chối thì giữ nguyên {version}.",
+        "review": "Xem & duyệt",
+        "dialogTitle": "Yêu cầu sửa đổi {code}",
+        "reason": "Lý do",
+        "response": "Phản hồi",
+        "proposedBy": "Người đề xuất",
+        "proposedAt": "Thời điểm",
+        "approve": "Duyệt — lên {version}",
+        "reject": "Từ chối — giữ {version}",
+        "approved": "Đã duyệt yêu cầu sửa đổi. Hồ sơ giai đoạn lên {version}.",
+        "rejected": "Đã từ chối yêu cầu sửa đổi. Hồ sơ giữ nguyên {version}.",
+        "applied": "Đã áp dụng → {version}",
+        "rejectedState": "Đã từ chối",
+        "pendingState": "Chờ duyệt",
+        "createTitle": "Gửi yêu cầu sửa đổi",
+        "createBody": "Mô tả thứ bạn muốn bổ sung hoặc đính chính. Giám sát sẽ duyệt trước khi hồ sơ lên phiên bản mới.",
+        "createPlaceholder": "VD: Bổ sung ảnh cột chờ C3 sau khi tháo cốp pha để hồ sơ giai đoạn đầy đủ hơn.",
+        "send": "Gửi yêu cầu",
+        "sent": "Đã gửi yêu cầu sửa đổi cho Giám sát."
+      },
+      "actor": {
+        "GS": "Giám sát",
+        "KH": "Khách hàng",
+        "SYS": "Hệ thống"
+      },
+      "empty": {
+        "title": "Dự án này chưa có gói giám sát",
+        "body": "Chọn cách quản lý thi công để mở bảng điều khiển 6 giai đoạn.",
+        "action": "Chọn cách quản lý thi công"
+      }
+    },
+    "account": {
+      "title": "Giám sát của tôi",
+      "stage": "Giai đoạn {current}/6",
+      "progress": "Tiến độ {percent}%",
+      "daysLeft": "Còn {days} ngày",
+      "inspections": "Lượt kiểm tra kỹ sư: đã dùng {used}/{total}",
+      "packageUntil": "Hạn gói {date}",
+      "handover": "Bàn giao {date}",
+      "open": "Bảng điều khiển giám sát",
+      "chooseManagement": "Chọn cách quản lý thi công",
+      "selfManaged": "Tự quản lý",
+      "upgrade": "Nâng cấp gói giám sát"
     }
   }
 }

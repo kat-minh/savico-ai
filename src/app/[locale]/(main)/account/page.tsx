@@ -5,6 +5,7 @@ import { MyProjects } from '@/features/design'
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
 import { AccountSide } from './account-side'
+import { AccountSupervision } from './account-supervision'
 import { AccountTabs } from './account-tabs'
 
 interface PageProps {
@@ -12,8 +13,9 @@ interface PageProps {
 }
 
 /**
- * Trang "Tài khoản của tôi" (mục IX, Hình 17–18).
- * Ba khu vực: hồ sơ + gói đang dùng, Dự án của tôi, Dự án yêu thích.
+ * Trang "Tài khoản của tôi" (mục IX, Hình 17–18; S24 của bản mô tả v1.1).
+ * Bốn khu vực: hồ sơ + gói đang dùng, Giám sát của tôi, Dự án của tôi, Dự án
+ * yêu thích.
  *
  * Bố cục hai cột: hồ sơ tài khoản là thẻ cố định bên trái (nội dung ngắn, ít
  * thay đổi); hai danh sách còn lại là hai tab của cột phải.
@@ -46,7 +48,15 @@ export default async function AccountPage({ params }: PageProps) {
               projects={{
                 label: t('projects.title'),
                 description: t('projects.description'),
-                content: <MyProjects />
+                content: (
+                  <>
+                    {/* S24 — khối giám sát đặt TRÊN lưới dự án, và chỉ ở đây.
+                        Bản mô tả vẽ nó hai lần trên cùng một màn (cột trái và
+                        trong thẻ dự án) với gần như cùng một bộ số. */}
+                    <AccountSupervision />
+                    <MyProjects />
+                  </>
+                )
               }}
               favorites={{
                 label: t('favorites.title'),

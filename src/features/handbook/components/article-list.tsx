@@ -1,13 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowRight, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import { EmptyState, Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
-import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
@@ -21,8 +20,14 @@ import type { HandbookCategory } from '../types/handbook.types'
 const ALL = 'all'
 
 /**
- * Khối "Tất cả bài viết" (Phần 3.2, nửa dưới Hình 11):
- * danh sách đầy đủ, lọc theo chuyên mục, kèm ô tìm kiếm và phân trang.
+ * Khối "Tất cả bài viết" (Phần 3.2, nửa dưới Hình 11): danh sách đầy đủ, lọc
+ * theo chuyên mục, kèm ô tìm kiếm và phân trang.
+ *
+ * PHỤ LỤC bản mô tả v1.1 — dấu (+) trên dòng bài: bấm dấu (+) hoặc bất kỳ đâu
+ * trên dòng thì dòng MỞ NHẸ TẠI CHỖ, hiện sapo 1–2 câu kèm liên kết "Xem chi
+ * tiết"; dấu + xoay thành ×, bấm lại để đóng. Không rời trang, không đổi URL —
+ * chỉ khi bấm "Xem chi tiết" mới mở trọn bài. Trước đây dấu (+) nhảy thẳng sang
+ * trang bài viết, đó chính là lỗi phụ lục yêu cầu sửa.
  */
 export function ArticleList() {
   const t = useTranslations('handbook.articles')
@@ -31,6 +36,8 @@ export function ArticleList() {
   const [category, setCategory] = useState<HandbookCategory | typeof ALL>(ALL)
   const [term, setTerm] = useState('')
   const [page, setPage] = useState(1)
+  /** Dòng bài đang mở nhanh; chỉ một dòng mở tại một thời điểm (phụ lục Cẩm nang). */
+  const [openId, setOpenId] = useState<string | null>(null)
 
   const query = useDebouncedValue(term, 250).trim().toLowerCase()
   const { data: articles, isPending } = useHandbookArticles()
@@ -99,27 +106,67 @@ export function ArticleList() {
         <EmptyState title={t('empty.title')} description={t('empty.description')} />
       ) : (
         <ul className='divide-y'>
-          {visible.map((article) => (
-            <li key={article.id} className='flex flex-wrap items-center gap-4 py-3 first:pt-0'>
-              <Photo className='size-16 shrink-0 rounded-lg' src={article.imageUrl} alt={article.title} sizes='64px' />
-              <div className='min-w-0 flex-1 space-y-1'>
-                <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
-                <h3 className='text-sm font-semibold'>{article.title}</h3>
-                <p className='text-muted-foreground line-clamp-1 text-xs'>{article.excerpt}</p>
-              </div>
-              <p className='text-muted-foreground shrink-0 text-xs'>
-                {format.dateTime(new Date(article.publishedAt), { dateStyle: 'short' })}
-                <span aria-hidden> · </span>
-                {t('readingTime', { minutes: article.readingMinutes })}
-              </p>
-              <Button asChild variant='outline' size='sm' className='shrink-0'>
-                <Link href={handbookArticleRoute(article.slug)}>
-                  {t('readMore')}
-                  <ArrowRight className='size-4' />
-                </Link>
-              </Button>
-            </li>
-          ))}
+          {visible.map((article) => {
+            const expanded = openId === article.id
+            return (
+              <li key={article.id}>
+                {/* Cả dòng là vùng bấm — trên mobile dòng bài trở thành thẻ nên
+                    chạm đâu cũng mở, đúng hành vi phụ lục yêu cầu. */}
+                <button
+                  type='button'
+                  onClick={() => setOpenId(expanded ? null : article.id)}
+                  aria-expanded={expanded}
+                  className='hover:bg-muted/40 flex w-full flex-wrap items-center gap-4 rounded-lg px-1 py-3 text-left transition-colors'
+                >
+                  <Photo
+                    className='size-16 shrink-0 rounded-lg'
+                    src={article.imageUrl}
+                    alt={article.title}
+                    sizes='64px'
+                  />
+                  <div className='min-w-0 flex-1 space-y-1'>
+                    <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
+                    <h3 className='text-sm font-semibold'>{article.title}</h3>
+                  </div>
+                  <p className='text-muted-foreground shrink-0 text-xs'>
+                    {format.dateTime(new Date(article.publishedAt), { dateStyle: 'short' })}
+                    <span aria-hidden> · </span>
+                    {t('readingTime', { minutes: article.readingMinutes })}
+                  </p>
+                  <span
+                    aria-label={expanded ? t('collapse') : t('expand')}
+                    className={cn(
+                      'flex size-7 shrink-0 items-center justify-center rounded-full transition-transform duration-200',
+                      expanded ? 'bg-primary text-primary-foreground rotate-45' : 'bg-accent text-primary-strong'
+                    )}
+                  >
+                    <Plus className='size-4' />
+                  </span>
+                </button>
+
+                {/* Mở nhẹ tại chỗ (~¼ giây), không rời trang, không đổi URL. */}
+                <div
+                  className={cn(
+                    'grid transition-all duration-200 ease-out',
+                    expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                  )}
+                >
+                  <div className='overflow-hidden'>
+                    <div className='px-1 pb-3 sm:pl-20'>
+                      <p className='text-muted-foreground text-sm text-pretty'>{article.excerpt}</p>
+                      <Link
+                        href={handbookArticleRoute(article.slug)}
+                        className='text-primary hover:text-primary/80 mt-2 inline-flex items-center gap-1.5 text-sm font-medium'
+                      >
+                        {t('viewDetail')}
+                        <ArrowRight className='size-4' />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
 

@@ -1,6 +1,7 @@
 # Trạng thái dựng khung — SAVICO AI
 
-Đối chiếu 11 màn hình ở [MO_TA_GIAO_DIEN.md](./MO_TA_GIAO_DIEN.md) mục V với code hiện có,
+Đối chiếu 11 màn hình ở [MO_TA_GIAO_DIEN.md](./MO_TA_GIAO_DIEN.md) mục V **và 24 màn của
+bộ giao diện v1.1** ở [MO_TA_GIAO_DIEN_V11.md](./MO_TA_GIAO_DIEN_V11.md) với code hiện có,
 kèm phần **Khu quản trị (admin)** dựng theo những chỗ spec giao việc cho admin.
 Cập nhật file này mỗi khi hoàn thiện một màn hình.
 
@@ -30,6 +31,65 @@ Cập nhật file này mỗi khi hoàn thiện một màn hình.
 | 13 | Tư vấn 1:1 — hồ sơ + chọn giờ | `/consult/[consultantId]` | `ConsultantDetail` = `ConsultantRail` + `ConsultantProfile` + `SlotPicker` | Cột trái danh sách thu gọn, hồ sơ + 4 ảnh công trình, chip 7 ngày, slot 30 phút, slot kín hiện "Kín" |
 | 13a | Modal xác nhận đặt lịch | (modal) | `BookingDialog` | Dòng tóm tắt KTS · thứ ngày · khung giờ, SĐT (i) + ghi chú, toast góc phải trên, slot vừa đặt chuyển "Kín" |
 | — | Xem hồ sơ qua link | `/share/[token]` | `SharedDossierView` | Đọc-chỉ: thông tin dự án + bảng dự toán 3 phần; token sai → trạng thái hết hạn |
+
+## Bộ giao diện v1.1 — Mua gói · Tìm nhà thầu · Giám sát thi công (S01–S24)
+
+Dựng theo [MO_TA_GIAO_DIEN_V11.md](./MO_TA_GIAO_DIEN_V11.md). Ba module mới, **chưa
+có phần admin cho Ops** (xem "Việc còn lại" bên dưới). Mọi màn chạy trên mock trong
+trình duyệt (`NEXT_PUBLIC_USE_MOCK_API=true`), dữ liệu nằm ở `localStorage`.
+
+| # | Màn hình | Route | Code chính | Trạng thái |
+|---|----------|-------|-----------|-----------|
+| S01 | Bảng giá gói thiết kế | `/plans` | `features/plans` (`PlanPricing`) + `app/.../plans/plan-tabs.tsx` | 3 thẻ, bảng so sánh 5 nhóm, bảng giá trị, 5 ghi chú; chọn gói → S03 |
+| S02 | Popup Quà tặng đặc biệt | (modal trên `/plans`) | `PlanGiftDialog` | Nội dung quà đọc từ bản ghi gói trong `shared/cms` |
+| S03 | Xác nhận đơn hàng | `/checkout/confirm?plan=&project=` | `features/checkout` (`OrderConfirm`) | Chỉ QR (R10), mã giảm giá, xuất hóa đơn, cột phải sticky |
+| S04 | Thanh toán QR | `/checkout/[orderId]/payment` | `QrPayment` | QR thật (`qrcode.react`), đếm ngược 15 phút, sao chép từng dòng, "Tôi đã chuyển khoản" |
+| S05 | *(Bỏ)* | — | — | Không dựng — R10 |
+| S06 | Đang xác nhận chuyển khoản | `/checkout/[orderId]/verifying` | `VerifyingTransfer` | Tự hỏi lại server 3 giây/lần; tiền về → S08 |
+| S07 | Chưa nhận được thanh toán | `/checkout/[orderId]/failed` | `PaymentFailed` | Stepper ở trạng thái lỗi; thử lại → mã QR mới |
+| S08 | Hoàn tất + 3 lựa chọn | `/checkout/[orderId]/done` | `CheckoutDone` + `shared/components/common/start-options.tsx` | Ba lựa chọn inline; bản hộp thoại dùng lại ở S11 (R7) |
+| S09 | Landing Tìm nhà thầu | `/contractors` | `features/contractors` (`ContractorLanding`) | Trang công khai; FAQ và khối so sánh bám R1/R2 |
+| S10 | Tự tạo hồ sơ – Bước 1 | `/contractors/[projectId]/profile` | `BriefForm` | 2 cột, chọn tỉnh/phường từ danh mục hành chính, tải tệp ≤ 10 MB |
+| S11 | Kiểm tra hồ sơ – Bước 2 | `/contractors/[projectId]/review` | `BriefReview` | Hoàn tất → mở `StartOptionsDialog` (R7) |
+| S12 | Nhà thầu được đề xuất | `/contractors/[projectId]/matches` | `ContractorMatches` + `ContractorCard` | Một hàng bộ lọc; panel so sánh sticky; đủ 3 lời mời thì khóa nút mời |
+| S13 | Hồ sơ nhà thầu – Tổng quan | `/contractors/[projectId]/firm/[contractorId]` | `ContractorProfile` | 4 tab dùng chung header |
+| S14 | Hồ sơ nhà thầu – Hợp tác SAVICO | `…/firm/[contractorId]?tab=partnership` | `ContractorProfile` | Siêu dữ liệu đã xác minh; bản scan hiển thị dạng đã che (xem điểm lệch #11) |
+| S15 | So sánh hồ sơ nhà thầu | `/contractors/[projectId]/compare` | `ContractorCompare` | 8 tiêu chí, không có giá; chọn tối đa 3 để mời |
+| S16 | Chọn thời gian khảo sát | `/contractors/[projectId]/invite/[contractorId]` | `SurveyScheduler` | 7 ngày tới, 8 khung giờ, chỉ báo "Nhà thầu x/3" |
+| S17 | Đã gửi lời mời | `/contractors/[projectId]/invite/sent?request=` | `InviteSent` | Liệt kê tất cả nhà thầu của lượt mời (≤ 3) |
+| S18 | Lời mời báo giá | `/contractors/[projectId]/invitations` | `InvitationTracker` | Thanh 4 nấc, khách chỉ xem (R4); có lối vào "Chọn cách quản lý thi công" (R8) |
+| S19 | Trang Gói giám sát thi công | `/plans/supervision?project=` | `features/supervision` (`SupervisionPricing`) | 3 lựa chọn, bảng so sánh, add-on, hành trình 8 bước |
+| S20–S23 | Bảng điều khiển giám sát | `/supervision/[projectId]?stage=` | `SupervisionDashboard` + `StageDetail` + `StageUploadDialog` + `ChangeRequestDialog` | MỘT trang, 4 trạng thái giai đoạn; bảng lịch trình gấp được |
+| S24 | Tài khoản — Giám sát của tôi | `/account` | `SupervisionSummary` (qua `account-supervision.tsx`) | Một khối duy nhất, đặt trên lưới dự án |
+| PL | Cẩm nang — dấu (+) | `/handbook` | `features/handbook/components/article-list.tsx` | Mở nhẹ tại chỗ, không đổi URL; "Xem chi tiết" mới mở trọn bài |
+
+**Hai lỗi khung app đã sửa trong đợt này** (cả hai có TRƯỚC bộ v1.1, chỉ lộ ra khi
+mở thẳng URL thay vì bấm link):
+
+1. `app/[locale]/[...rest]/page.tsx` đứng NGANG HÀNG route group `(main)` → Next 16
+   chọn catch-all cho mọi đường dẫn từ một đoạn trở lên, `/vi/handbook`, `/vi/plans`,
+   `/vi/consult`… đều ra 404. Đã chuyển vào trong `(main)`.
+2. `app/[locale]/loading.tsx` làm **treo vĩnh viễn** ở khung chờ mọi route trong
+   `(main)` có đoạn cuối ĐỘNG khi tải thẳng URL / F5: `/vi/consult/[consultantId]`,
+   `/vi/handbook/mau/[id]`, `/vi/handbook/bai-viet/[slug]`, `/vi/supervision/[projectId]`.
+   Server trả 200 kèm đủ HTML, nhưng phía client boundary không bao giờ được commit
+   nên chỉ thấy spinner. Điều hướng bằng cách bấm link thì không dính, nên trước giờ
+   không ai thấy. Đã BỎ `loading.tsx`; đặt nó xuống `(main)/loading.tsx` cũng dính y
+   như vậy. Mọi màn đều đã có skeleton riêng theo trạng thái dữ liệu nên không mất gì.
+
+**Việc còn lại của bộ v1.1**
+
+1. **Màn admin cho Ops** — cập nhật 4 nấc trạng thái lời mời (R4), nhập kết quả kiểm tra
+   và gửi yêu cầu sửa đổi của Giám sát. Hiện mock giữ lời mời đứng ở nấc "Đã gửi" đúng
+   như thực tế: không có Ops thì không có gì đẩy trạng thái.
+2. **Form "Đăng ký triển khai"** từ S08 — hiện chỉ báo đã ghi nhận.
+3. **Luồng đánh giá nhà thầu** — S09 có nói tới nhưng chưa có màn.
+4. **Cổng nhà thầu** — bản mô tả ghi rõ "làm sau".
+5. Danh bạ nhà thầu đang là seed trong `features/contractors/api/contractors.seed.ts`;
+   khi có admin thì chuyển sang `shared/cms` như các danh mục khác.
+6. Ba nhánh khóa dịch mới (`contractors`, `checkout`, `supervision`) chưa được trang admin
+   nào nhận, nên `ContentWorkspace` in cảnh báo ở chế độ dev. Khi dựng admin cho các màn
+   này thì thêm chúng vào `copyNamespaces` trong `admin-pages.config.ts`.
 
 ## Khu quản trị (admin)
 

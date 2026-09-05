@@ -42,30 +42,50 @@ export function StepProgress({ current, title, currentDone = false }: StepProgre
           thẳng hàng mép phải của nội dung, không dán vào mép màn hình. */}
       <nav aria-label={t('label')} className='bg-background/85 sticky top-16 z-30 backdrop-blur-xl'>
         <div className='mx-auto w-full max-w-6xl px-4 py-4 lg:px-8'>
-          <div className='bg-card flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm sm:px-6'>
-            <ol className='flex flex-1 items-center gap-2'>
+          {/*
+           * Bố cục theo thanh tiến trình trong bản mô tả (Hình S03/S04): vòng
+           * tròn nằm TRÊN, nhãn nằm DƯỚI và canh giữa theo vòng tròn, đường nối
+           * chạy ngang qua tâm hai vòng liền nhau, ba nấc chia ĐỀU cả chiều
+           * rộng. Bản cũ đặt nhãn nằm cạnh vòng tròn nên các nấc so le nhau, cả
+           * thanh dồn về trái và chừa một mảng trống bên phải.
+           */}
+          <div className='bg-card relative rounded-2xl border px-4 py-4 shadow-sm sm:px-6'>
+            <ol className='flex items-start'>
               {DESIGN_STEPS.map((step, index) => {
                 const done = step < current || (step === current && currentDone)
                 const active = step === current && !currentDone
                 return (
-                  <li key={step} className='flex flex-1 items-center gap-3'>
+                  <li key={step} className='relative flex min-w-0 flex-1 flex-col items-center gap-1.5'>
+                    {/* Đường nối vẽ bằng nấc SAU, kéo từ tâm nấc trước sang tâm
+                        nấc này — cách duy nhất giữ nó luôn đúng giữa hai vòng
+                        tròn khi các cột co giãn theo nhau. */}
+                    {index > 0 ? (
+                      <span
+                        aria-hidden
+                        className={cn(
+                          'absolute top-[1.125rem] -left-1/2 h-0.5 w-full rounded-full',
+                          done || active ? 'bg-primary' : 'bg-border'
+                        )}
+                      />
+                    ) : null}
+
                     <span
                       aria-current={active ? 'step' : undefined}
                       className={cn(
-                        'flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors',
+                        'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors',
                         done && 'bg-primary text-primary-foreground',
                         active && 'bg-primary text-primary-foreground',
-                        !done && !active && 'bg-muted text-muted-foreground'
+                        !done && !active && 'bg-muted text-muted-foreground border'
                       )}
                     >
                       {done ? <Check className='size-4.5' /> : step}
                     </span>
 
-                    <span className={cn('min-w-0', !active && 'hidden sm:block')}>
+                    <span className='min-w-0 px-2 text-center'>
                       <span
                         className={cn(
                           'block truncate text-sm font-semibold',
-                          active || done ? 'text-foreground' : 'text-muted-foreground'
+                          active ? 'text-primary-strong' : done ? 'text-foreground' : 'text-muted-foreground'
                         )}
                       >
                         {t(`${step}`)}
@@ -76,24 +96,14 @@ export function StepProgress({ current, title, currentDone = false }: StepProgre
                           : t(done ? 'status.done' : active ? 'status.current' : 'status.pending')}
                       </span>
                     </span>
-
-                    {/* Nối hai nấc bằng đường nét đứt; đoạn đã qua tô màu thương hiệu. */}
-                    {index < DESIGN_STEPS.length - 1 ? (
-                      <span
-                        aria-hidden
-                        className={cn(
-                          'mx-1 hidden h-0.5 flex-1 rounded-full sm:block',
-                          done ? 'bg-primary' : 'bg-border'
-                        )}
-                      />
-                    ) : null}
                   </li>
                 )
               })}
             </ol>
 
-            {/* Nút "?" mở đúng video hướng dẫn của bước đang làm. */}
-            <HelpLink topic={STEP_HELP_TOPIC[current]} className='shrink-0' />
+            {/* Nút "?" mở đúng video hướng dẫn của bước đang làm. Đặt tuyệt đối
+                ở góc phải để không chiếm một cột trong lưới chia đều. */}
+            <HelpLink topic={STEP_HELP_TOPIC[current]} className='absolute top-3 right-3 shrink-0' />
           </div>
         </div>
       </nav>

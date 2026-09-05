@@ -135,6 +135,15 @@ export const RENDER_IMAGE = {
   apartment: '/images/appartment-light.png'
 } as const
 
+/**
+ * Ảnh minh hoạ nền cho khối hero trang "Tìm nhà thầu" (Hình S09): một tấm bản
+ * đồ / ảnh chụp khu dân cư từ trên cao, KHÔNG phải bản đồ tương tác — thẻ nhà
+ * thầu được đặt nổi lên trên bằng CSS.
+ */
+export const MAP_IMAGE = {
+  contractors: photo('photo-1449824913935-59a10b8d2000', 1200)
+} as const
+
 /* ===========================================================================
  * SỔ ẢNH PHẲNG — nguồn cho màn "Hình ảnh site" của khu quản trị.
  * ======================================================================== */
@@ -163,7 +172,8 @@ export const SITE_IMAGE = {
   ...prefixed('construction', CONSTRUCTION_IMAGE),
   ...prefixed('stage', STAGE_IMAGE),
   ...prefixed('portrait', PORTRAIT_IMAGE),
-  ...prefixed('render', RENDER_IMAGE)
+  ...prefixed('render', RENDER_IMAGE),
+  ...prefixed('map', MAP_IMAGE)
 } as Prefixed<'style', typeof STYLE_IMAGE> &
   Prefixed<'interior', typeof INTERIOR_IMAGE> &
   Prefixed<'building', typeof BUILDING_IMAGE> &
@@ -171,6 +181,7 @@ export const SITE_IMAGE = {
   Prefixed<'construction', typeof CONSTRUCTION_IMAGE> &
   Prefixed<'stage', typeof STAGE_IMAGE> &
   Prefixed<'portrait', typeof PORTRAIT_IMAGE> &
-  Prefixed<'render', typeof RENDER_IMAGE>
+  Prefixed<'render', typeof RENDER_IMAGE> &
+  Prefixed<'map', typeof MAP_IMAGE>
 
 export type SiteImageKey = keyof typeof SITE_IMAGE

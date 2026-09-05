@@ -25,5 +25,6 @@ export {
   revealSpring,
   revealEase
 } from './reveal'
+export { StartOptions, StartOptionsDialog } from './start-options'
 export { StepDots, type StepStatus } from './step-dots'
 export { ThemeToggle } from './theme-toggle'

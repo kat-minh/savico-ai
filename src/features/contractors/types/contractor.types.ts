@@ -1,0 +1,209 @@
+/**
+ * Kiểu dữ liệu của luồng TÌM NHÀ THẦU (S09–S18).
+ *
+ * Hai quy tắc chi phối toàn bộ file này, nên chúng được nhắc lại ở từng chỗ
+ * dễ vi phạm nhất:
+ * - **R1** — mỗi dự án mời TỐI ĐA 3 nhà thầu, không có bước so sánh báo giá.
+ * - **R2** — web KHÔNG hiển thị giá / báo giá của nhà thầu. Vì vậy không type
+ *   nào ở đây có trường tiền của nhà thầu; `ProjectBrief.budget` là ngân sách
+ *   dự kiến của CHỦ NHÀ và không nằm trong hồ sơ gửi đi (S18).
+ */
+
+/** Phạm vi thi công — 4 thẻ chọn ở Bước 1 (S10). */
+export type ConstructionScope = 'turnkey' | 'shell' | 'finishing' | 'interior'
+
+/** Hiện trạng khu đất — hàng chọn ở Bước 1 (S10). */
+export type SiteCondition = 'empty' | 'demolish' | 'renovate'
+
+/** Quy mô công trình — hàng chọn ở Bước 1 (S10). */
+export type ProjectScale = 'ground' | 'ground+1' | 'ground+2' | 'ground+3'
+
+/** Mốc khởi công dự kiến (S10). */
+export type StartWindow = 'asap' | 'in-1-3-months' | 'in-3-6-months' | 'undecided'
+
+/** Trạng thái hồ sơ dự án trong luồng tìm nhà thầu. */
+export type BriefStatus = 'draft' | 'ready' | 'inviting'
+
+/** Chip sắp xếp danh sách nhà thầu (S12) và tab xếp hạng ở landing (S09). */
+export type ContractorSort = 'match' | 'distance' | 'rating' | 'survey'
+
+/** Bán kính tìm kiếm — 4 nấc ở header dự án (S12). */
+export type SearchRadiusKm = 5 | 10 | 20 | 50
+
+/** Vùng phục vụ — tab Bắc / Trung / Nam (S12). */
+export type ServiceRegion = 'north' | 'central' | 'south'
+
+/**
+ * Thanh 4 nấc trên mỗi thẻ lời mời (S18). Trạng thái do đội hỗ trợ SAVICO cập
+ * nhật trong khu quản trị, khách chỉ xem (R4).
+ */
+export type InvitationStatus = 'sent' | 'received' | 'accepted' | 'done'
+
+/** Tệp đính kèm hồ sơ dự án (S10, S11). */
+export interface BriefDocument {
+  id: string
+  name: string
+  /** Cỡ tệp tính theo byte — hiển thị "2,4 MB" trên danh sách (S11). */
+  sizeBytes: number
+  kind: 'image' | 'document'
+}
+
+/**
+ * Địa chỉ công trình, giữ rời từng phần để mở lại nháp vẫn chọn đúng ô (S10).
+ *
+ * Hai cấp tỉnh/phường giống hệt luồng thiết kế — dùng chung danh mục hành chính
+ * ở `shared/hooks`, không dựng thêm cấp quận/huyện mà nguồn dữ liệu không có.
+ */
+export interface BriefAddress {
+  provinceCode: number | null
+  provinceName: string
+  wardCode: number | null
+  wardName: string
+  street: string
+}
+
+/**
+ * HỒ SƠ DỰ ÁN của luồng tìm nhà thầu (S10, S11).
+ *
+ * Luồng B (`selfCreated: true`) là hồ sơ khách tự khai, KHÔNG gồm bản vẽ và dự
+ * toán do SAVI phát hành — badge "Hồ sơ tự tạo" theo hồ sơ suốt các màn sau.
+ */
+export interface ProjectBrief {
+  /** Mã dự án `SVC-YYYY-NNNN` — cùng quy ước với luồng thiết kế. */
+  id: string
+  name: string
+  buildingType: string
+  /** Diện tích đất (m²). */
+  landArea: number
+  siteCondition: SiteCondition
+  scale: ProjectScale
+  address: BriefAddress
+  /** Ngân sách dự kiến (VND) của chủ nhà — KHÔNG gửi cho nhà thầu (S18). */
+  budget: number
+  startWindow: StartWindow
+  scope: ConstructionScope
+  scopeNote: string
+  documents: BriefDocument[]
+  selfCreated: boolean
+  status: BriefStatus
+  createdAt: string
+  updatedAt: string
+}
+
+/** Ảnh công trình trong hồ sơ năng lực (S13). */
+export interface ContractorPhoto {
+  url?: string
+  caption: string
+}
+
+/** Dự án tiêu biểu của nhà thầu (S13). */
+export interface ContractorProject {
+  id: string
+  name: string
+  year: number
+  imageUrl?: string
+}
+
+/**
+ * Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14).
+ *
+ * `pageCount` để dựng dải thumbnail bên trái viewer; bản scan thật do đội vận
+ * hành tải lên, ở mock chỉ có siêu dữ liệu.
+ */
+export interface ContractorPartnership {
+  verified: boolean
+  /** Hợp tác từ tháng/năm — hiển thị "08/2026". */
+  since: string
+  contractCode: string
+  signedAt: string
+  pageCount: number
+  scanUrl?: string
+}
+
+/** Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. */
+export interface Contractor {
+  id: string
+  name: string
+  logoUrl?: string
+  /** Dòng phụ dưới tên: "Nhà thầu xây dựng". */
+  kind: string
+  verified: boolean
+  rating: number
+  reviewCount: number
+  /** Số dự án tương tự dự án đang xét — cơ sở của xếp hạng "Phù hợp nhất". */
+  similarProjects: number
+  distanceKm: number
+  serviceAreas: string[]
+  region: ServiceRegion
+  /** Có thể khảo sát trong bao nhiêu giờ — 24 hoặc 48 (S12, S15). */
+  surveyWithinHours: number
+  acceptingProjects: boolean
+  intro: string
+  strengths: string[]
+  photos: ContractorPhoto[]
+  foundedYear: number
+  teamSize: string
+  officeAddress: string
+  warrantyMonths: number
+  legalChecks: string[]
+  featuredProjects: ContractorProject[]
+  partnership: ContractorPartnership
+}
+
+/** Một khung giờ khảo sát (S16). */
+export interface SurveySlot {
+  id: string
+  /** "08:00 – 09:00". */
+  label: string
+  available: boolean
+}
+
+/** Lịch khảo sát khách chọn cho MỘT nhà thầu (S16). */
+export interface SurveyBooking {
+  contractorId: string
+  /** ISO date `YYYY-MM-DD`. */
+  date: string
+  slotId: string
+  note: string
+  phone: string
+  email: string
+}
+
+/** Một nấc trên thanh trạng thái lời mời (S18). */
+export interface InvitationStep {
+  status: InvitationStatus
+  at: string
+}
+
+/**
+ * Một lời mời báo giá đã gửi (S17, S18).
+ *
+ * R2/R3: không có trường tiền, không có "báo giá đã nhận" — sau khi nhà thầu
+ * nhận lời mời, hai bên làm việc trực tiếp ngoài web.
+ */
+export interface Invitation {
+  /** Mã lời mời `INV-YYYY-NNNN`. */
+  id: string
+  projectId: string
+  contractorId: string
+  sentAt: string
+  status: InvitationStatus
+  /** Lần cập nhật gần nhất, do đội hỗ trợ SAVICO thực hiện (R4). */
+  updatedAt: string
+  steps: InvitationStep[]
+  /** Phiên bản hồ sơ đã gửi kèm — "Hồ sơ v1 · 2 tệp". */
+  dossierVersion: string
+  fileCount: number
+  survey: SurveyBooking
+}
+
+/**
+ * Yêu cầu khảo sát gộp cho một lần gửi (S17) — mã `KS-YYYY-NNNN`. Khi mời nhiều
+ * nhà thầu một lượt, khối "Chi tiết yêu cầu" liệt kê tất cả (≤ 3, R1).
+ */
+export interface SurveyRequest {
+  id: string
+  projectId: string
+  createdAt: string
+  invitationIds: string[]
+}
