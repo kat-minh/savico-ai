@@ -13,7 +13,7 @@ export const SESSION_TIMES: Record<ConsultationSession, readonly string[]> = {
 } as const
 
 /** Số thẻ KTS ghim ở section "Tư vấn 1:1" trang chủ (mục III.2: 3-4 thẻ). */
-export const HOME_CONSULTANT_COUNT = 4
+export const HOME_CONSULTANT_COUNT = 3
 
 /** Mỗi buổi tư vấn kéo dài 30 phút — dùng để hiện "9:00 - 9:30". */
 export const SLOT_MINUTES = 30

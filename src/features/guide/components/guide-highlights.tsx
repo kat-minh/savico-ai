@@ -19,11 +19,13 @@ export function GuideHighlights() {
   const { data: videos, isPending } = useGuideVideos()
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 py-16 lg:px-8'>
-      <header className='mb-8 flex flex-wrap items-end justify-between gap-4'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
+      {/* Cùng khuôn đầu khối với các dải khác của trang chủ: nhãn nhỏ màu thương
+          hiệu ở trên, tiêu đề ở dưới, liên kết "Xem tất cả" căn lên đỉnh. */}
+      <header className='mb-8 flex flex-wrap items-start justify-between gap-4'>
         <div className='space-y-2'>
-          <h2 className='text-2xl font-semibold tracking-tight sm:text-3xl'>{t('title')}</h2>
-          <p className='text-muted-foreground'>{t('subtitle')}</p>
+          <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('title')}</p>
+          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('subtitle')}</h2>
         </div>
         <Link
           href={ROUTES.GUIDE}
@@ -37,11 +39,11 @@ export function GuideHighlights() {
       <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
         {isPending
           ? Array.from({ length: HOME_GUIDE_HIGHLIGHT_COUNT }, (_, i) => (
-              <Skeleton key={i} className='h-56 w-full rounded-xl' />
+              <Skeleton key={i} className='h-56 w-full rounded-2xl' />
             ))
           : videos
               ?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT)
-              .map((video, i) => <VideoCard key={video.id} video={video} index={i + 1} layout='row' />)}
+              .map((video) => <VideoCard key={video.id} video={video} hideDescription durationInTitle={false} />)}
       </div>
     </section>
   )

@@ -230,10 +230,6 @@
     "guide": "Hướng dẫn",
     "createProject": "Tạo dự án mới",
     "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
-    "bgToggle": {
-      "toPlain": "Nền trơn",
-      "toAura": "Nền động"
-    },
     "account": "Tài khoản của tôi",
     "logout": "Đăng xuất",
     "menu": "Menu",
@@ -246,26 +242,24 @@
     "contractors": "Tìm nhà thầu"
   },
   "footer": {
-    "tagline": "Nền tảng AI của SAVICO giúp bạn dựng thiết kế, phối cảnh 3D và dự toán chi phí xây nhà chỉ trong vài phút. Hồ sơ thi công đầy đủ, đơn giá theo khu vực, có kiến trúc sư SAVICO đồng hành.",
+    "tagline": "Nền tảng thiết kế & dự toán AI, kết nối nhà thầu đã xác minh và giám sát thi công.",
     "contactTitle": "Liên hệ",
-    "quickLinksTitle": "Liên kết nhanh",
-    "policyTitle": "Chính sách",
-    "socialTitle": "Kết nối với SAVICO",
     "hotline": "Hotline",
-    "zalo": "Zalo",
     "address": "123 Nguyễn Văn Cừ, Phường Tân Lợi, TP. Buôn Ma Thuột, Đắk Lắk",
-    "workingHours": "Thứ 2 – Thứ 7: 8:00 – 17:30",
     "comingSoon": "Sắp ra mắt",
     "links": {
       "design": "Thiết kế & Dự toán",
+      "services": "Gói dịch vụ",
+      "contractors": "Tìm nhà thầu",
+      "supervision": "Giám sát thi công",
+      "turnkey": "Thi công trọn gói",
+      "guide": "Hướng dẫn sử dụng",
       "handbook": "Cẩm nang",
-      "guide": "Hướng dẫn",
-      "plans": "Gói đăng ký",
       "consult": "Tư vấn 1:1",
-      "createProject": "Tạo dự án mới",
+      "faq": "Câu hỏi thường gặp",
+      "about": "Giới thiệu",
       "privacy": "Chính sách bảo mật",
-      "terms": "Điều khoản sử dụng",
-      "payment": "Chính sách thanh toán"
+      "terms": "Điều khoản sử dụng"
     },
     "social": {
       "facebook": "Facebook SAVICO",
@@ -274,8 +268,12 @@
       "tiktok": "TikTok SAVICO"
     },
     "rights": "Tất cả quyền được bảo lưu.",
-    "company": "Công ty Cổ phần SAVICO",
-    "taxCode": "MST"
+    "brandTagline": "Kết nối hành trình xây dựng",
+    "productTitle": "Sản phẩm",
+    "supportTitle": "Hỗ trợ",
+    "aboutTitle": "Về SAVICO",
+    "emailLabel": "Email",
+    "addressLabel": "Địa chỉ"
   },
   "favorite": {
     "add": "Lưu mẫu",
@@ -283,23 +281,179 @@
   },
   "landing": {
     "hero": {
-      "titleLead": "Chụp 1 tấm ảnh lô đất —",
-      "titleAccent": "nhận ngay thiết kế & dự toán",
-      "subtitle": "AI tạo bản vẽ, phối cảnh và dự toán chỉ trong vài phút",
-      "primaryCta": "Tạo dự án mới",
-      "secondaryCta": "Xem hướng dẫn",
-      "promises": {
-        "fast": {
-          "title": "Nhanh chóng",
-          "hint": "Chỉ trong vài phút"
+      "eyebrow": "SAVICO — NỀN TẢNG THIẾT KẾ & DỰ TOÁN AI",
+      "note": "Từ ảnh lô đất đến ngôi nhà hoàn thiện",
+      "titleLead": "Chụp 1 tấm ảnh lô đất, nhận ngay",
+      "titleAccent": "thiết kế & dự toán",
+      "subtitle": "AI tạo mặt bằng, phối cảnh 3D và dự toán khối lượng từ ảnh lô đất.\nMời nhà thầu đã xác minh và giám sát thi công trên cùng một nền tảng.",
+      "primaryCta": "Tạo dự án ngay",
+      "secondaryCta": "Xem hướng dẫn 1 phút",
+      "card": {
+        "title": "Hồ sơ dự án",
+        "rows": {
+          "area": {
+            "label": "Diện tích",
+            "value": "120 m²"
+          },
+          "type": {
+            "label": "Loại công trình",
+            "value": "Nhà phố"
+          },
+          "style": {
+            "label": "Phong cách",
+            "value": "Hiện đại"
+          },
+          "options": {
+            "label": "Phương án",
+            "value": "5 bản"
+          }
         },
-        "accurate": {
-          "title": "Chính xác",
-          "hint": "AI + KTS kiểm duyệt"
+        "totalLabel": "Tổng cộng",
+        "totalValue": "Xem trong hồ sơ",
+        "cta": "Xem hồ sơ mẫu"
+      }
+    },
+    "stats": {
+      "photo": {
+        "value": "1 tấm ảnh",
+        "label": "Là đủ để bắt đầu"
+      },
+      "steps": {
+        "value": "3 bước",
+        "label": "Nhận hồ sơ, dự toán minh bạch"
+      },
+      "options": {
+        "value": "8 phương án",
+        "label": "Thiết kế tối ưu cho nhu cầu"
+      },
+      "contractors": {
+        "value": "3 nhà thầu",
+        "label": "Đã xác minh, mời miễn phí"
+      },
+      "inspections": {
+        "value": "12 lượt",
+        "label": "Kỹ sư kiểm tra thực tế"
+      }
+    },
+    "painPoints": {
+      "eyebrow": "XÂY NHÀ KHÔNG KHÓ",
+      "title": "Khó là kiểm soát mọi thứ cùng lúc",
+      "subtitle": "Từ ngân sách, thiết kế đến chọn nhà thầu và giám sát thi công — SAVICO giúp bạn chủ động và dễ dàng hơn ở từng bước.",
+      "note": "Bạn cũng đang\ngặp những vấn đề này?",
+      "items": {
+        "budget": {
+          "title": "Không biết chi phí thực tế sẽ bao nhiêu?",
+          "description": "Khó kiểm soát ngân sách, dễ phát sinh ngoài dự kiến."
         },
-        "secure": {
-          "title": "Bảo mật",
-          "hint": "An toàn dữ liệu"
+        "design": {
+          "title": "Thiết kế chưa phù hợp nhu cầu và ngân sách?",
+          "description": "Thiết kế chưa tối ưu công năng, phong cách và chi phí."
+        },
+        "contractor": {
+          "title": "Không biết đánh giá và chọn nhà thầu thế nào?",
+          "description": "Khó tìm nhà thầu uy tín, đã được xác minh."
+        },
+        "dossier": {
+          "title": "Hồ sơ thiết kế không đủ để thi công?",
+          "description": "Thiếu bản vẽ, khối lượng chi tiết, dễ phát sinh khi làm."
+        },
+        "supervision": {
+          "title": "Không có thời gian giám sát tiến độ và chất lượng?",
+          "description": "Quản lý thi công phức tạp, dễ phát sinh rủi ro."
+        }
+      }
+    },
+    "journey": {
+      "eyebrow": "SAVICO ĐỒNG HÀNH CÙNG BẠN",
+      "title": "Từ ý tưởng đến ngôi nhà hoàn thiện chỉ trong 5 bước",
+      "note": "Bạn luôn biết mình đang ở đâu,\nvà trạng thái từng bước.",
+      "cta": "Tạo dự án mới",
+      "ctaHint": "Chỉ cần 1 tấm ảnh lô đất",
+      "items": {
+        "project": {
+          "title": "Tạo dự án",
+          "description": "Chụp ảnh lô đất, nhập nhu cầu và phong cách."
+        },
+        "design": {
+          "title": "Thiết kế & Dự toán",
+          "description": "AI tạo mặt bằng, phối cảnh 3D và dự toán khối lượng."
+        },
+        "dossier": {
+          "title": "Hồ sơ thi công",
+          "description": "Render và nhận đầy đủ hồ sơ thiết kế, dự toán."
+        },
+        "contractor": {
+          "title": "Mời nhà thầu",
+          "description": "Mời tối đa 3 nhà thầu đã xác minh, theo dõi trạng thái lời mời."
+        },
+        "build": {
+          "title": "Thi công & Giám sát",
+          "description": "Kỹ sư SAVICO kiểm tra theo mốc, đảm bảo đúng thiết kế và tiến độ."
+        }
+      }
+    },
+    "services": {
+      "eyebrow": "GÓI DỊCH VỤ SAVICO",
+      "title": "Chọn gói phù hợp với giai đoạn của bạn",
+      "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
+      "viewAll": "Xem tất cả gói",
+      "note": "Đúng gói,\nđúng giai đoạn!",
+      "items": {
+        "design": {
+          "title": "Gói thiết kế",
+          "description": "Cơ bản · Chi tiết · Tối ưu — 2/5/8 phương án, 2/4/6 lượt chỉnh sửa.",
+          "action": "Xem các gói"
+        },
+        "contractors": {
+          "title": "Tìm nhà thầu",
+          "description": "SAVICO đề xuất nhà thầu đã xác minh, mời tối đa 3 nhà thầu.",
+          "action": "Tìm nhà thầu"
+        },
+        "supervision": {
+          "title": "Giám sát thi công",
+          "description": "An Tâm (6 lượt) · Toàn Diện (12 lượt) kỹ sư kiểm tra thực tế.",
+          "action": "Xem gói giám sát"
+        },
+        "turnkey": {
+          "title": "Thi công trọn gói",
+          "description": "SAVICO khảo sát, ký hợp đồng và thi công đến bàn giao.",
+          "action": "Đăng ký triển khai"
+        }
+      }
+    },
+    "dossiers": {
+      "eyebrow": "HỒ SƠ MẪU",
+      "title": "Khám phá hồ sơ thiết kế & dự toán mẫu",
+      "viewAll": "Xem tất cả hồ sơ mẫu",
+      "viewOne": "Xem hồ sơ mẫu",
+      "items": {
+        "townhouse": {
+          "badge": "Nhà phố",
+          "title": "Nhà phố hiện đại",
+          "area": "120 m²",
+          "floors": "2 tầng",
+          "options": "5 phương án"
+        },
+        "villa": {
+          "badge": "Biệt thự",
+          "title": "Biệt thự tân cổ điển",
+          "area": "250 m²",
+          "floors": "3 tầng",
+          "options": "8 phương án"
+        },
+        "resort": {
+          "badge": "Biệt thự nghỉ dưỡng",
+          "title": "Biệt thự nghỉ dưỡng",
+          "area": "300 m²",
+          "floors": "1 tầng",
+          "options": "5 phương án"
+        },
+        "garden": {
+          "badge": "Nhà vườn",
+          "title": "Nhà vườn hiện đại",
+          "area": "150 m²",
+          "floors": "1 tầng",
+          "options": "2 phương án"
         }
       }
     },
@@ -332,19 +486,42 @@
       },
       "currency": "đ"
     },
-    "steps": {
-      "input": {
-        "title": "Nhập liệu",
-        "description": "Chụp ảnh lô đất, nhập thông tin nhu cầu và phong cách mong muốn"
-      },
-      "estimate": {
-        "title": "Nhận dự toán",
-        "description": "AI tạo bản vẽ, phối cảnh 3D và dự toán chi phí chi tiết"
-      },
-      "dossier": {
-        "title": "Hồ sơ thi công",
-        "description": "Render và nhận đầy đủ hồ sơ thiết kế, dự toán để thi công"
+    "brands": {
+      "label": "SAVICO ĐƯỢC TIN TƯỞNG BỞI",
+      "items": {
+        "hoaphat": "Hòa Phát",
+        "inax": "INAX",
+        "viglacera": "Viglacera",
+        "dulux": "Dulux",
+        "ancuong": "An Cường",
+        "cadivi": "CADIVI",
+        "scg": "SCG"
       }
+    },
+    "testimonials": {
+      "label": "KHÁCH HÀNG NÓI VỀ SAVICO",
+      "items": {
+        "tuan": {
+          "quote": "“Tôi rất hài lòng vì SAVICO giúp tôi có thiết kế đẹp, chi phí rõ ràng và tìm được nhà thầu uy tín.”",
+          "name": "Anh Minh Tuấn",
+          "meta": "Nhà phố · Buôn Ma Thuột"
+        },
+        "hang": {
+          "quote": "“Quy trình đơn giản, dễ sử dụng. Mọi thông tin minh bạch đã giúp tôi yên tâm hơn rất nhiều.”",
+          "name": "Chị Thu Hằng",
+          "meta": "Biệt thự · Đắk Lắk"
+        },
+        "bao": {
+          "quote": "“SAVICO giúp tôi tiết kiệm rất nhiều thời gian và kiểm soát tốt chi phí xây dựng.”",
+          "name": "Anh Quốc Bảo",
+          "meta": "Villa · Đà Lạt"
+        }
+      }
+    },
+    "cta": {
+      "title": "Sẵn sàng bắt đầu dự án của bạn?",
+      "subtitle": "Chụp 1 tấm ảnh lô đất — nhận thiết kế & dự toán ngay hôm nay.",
+      "action": "Tạo dự án mới"
     }
   },
   "handbook": {
@@ -355,6 +532,11 @@
         "library": "Thư viện mẫu",
         "news": "Tin tức"
       }
+    },
+    "home": {
+      "eyebrow": "CẨM NANG XÂY NHÀ",
+      "title": "Kiến thức thực tế cho hành trình xây nhà",
+      "viewAll": "Xem tất cả bài viết"
     },
     "card": {
       "imageCount": "{count} ảnh 3D"
@@ -536,7 +718,7 @@
     "highlights": {
       "title": "Hướng dẫn sử dụng",
       "subtitle": "Xem nhanh cách dùng trong chưa đầy một phút.",
-      "viewAll": "Xem tất cả"
+      "viewAll": "Xem tất cả hướng dẫn"
     },
     "videoComingSoon": "Video đang được biên tập — sẽ cập nhật sớm.",
     "carouselLabel": "Video hướng dẫn",
@@ -1255,9 +1437,11 @@
       "successToast": "Đặt lịch thành công - SAVICO sẽ gọi xác nhận trong 24h làm việc."
     },
     "home": {
-      "title": "Tư vấn 1:1 cùng kiến trúc sư SAVICO",
-      "subtitle": "Đặt lịch miễn phí - kiến trúc sư gọi tư vấn trực tiếp cho bạn",
-      "cta": "Đặt lịch tư vấn miễn phí"
+      "title": "Đặt lịch tư vấn cùng kiến trúc sư SAVICO",
+      "subtitle": "Kiến trúc sư gợi ý giải pháp phù hợp với nhu cầu của bạn.",
+      "eyebrow": "TƯ VẤN 1:1",
+      "viewAll": "Xem tất cả chuyên gia",
+      "book": "Đặt lịch"
     }
   },
   "admin": {
@@ -1923,8 +2107,7 @@
       "nav_plans": "Menu — Gói đăng ký",
       "nav_consult": "Menu — Tư vấn 1:1",
       "nav_createProject": "Nút “Tạo dự án mới” trên thanh menu",
-      "footer_tagline": "Câu giới thiệu ở chân trang",
-      "footer_workingHours": "Giờ làm việc",
+      "footer_tagline": "Mô tả thương hiệu ở chân trang",
       "footer_rights": "Dòng bản quyền",
       "assistant_title": "Tên trợ lý AI",
       "chatbot_greeting": "Lời chào mở đầu của trợ lý AI",
@@ -1936,18 +2119,6 @@
       "landing_hero_subtitle": "Mô tả ngắn dưới tiêu đề",
       "landing_hero_primaryCta": "Nút chính",
       "landing_hero_secondaryCta": "Nút phụ",
-      "landing_hero_promises_fast_title": "Cam kết 1 — tiêu đề",
-      "landing_hero_promises_fast_hint": "Cam kết 1 — dòng phụ",
-      "landing_hero_promises_accurate_title": "Cam kết 2 — tiêu đề",
-      "landing_hero_promises_accurate_hint": "Cam kết 2 — dòng phụ",
-      "landing_hero_promises_secure_title": "Cam kết 3 — tiêu đề",
-      "landing_hero_promises_secure_hint": "Cam kết 3 — dòng phụ",
-      "landing_steps_input_title": "Bước 1 — tên",
-      "landing_steps_input_description": "Bước 1 — mô tả",
-      "landing_steps_estimate_title": "Bước 2 — tên",
-      "landing_steps_estimate_description": "Bước 2 — mô tả",
-      "landing_steps_dossier_title": "Bước 3 — tên",
-      "landing_steps_dossier_description": "Bước 3 — mô tả",
       "design_createProject_title": "Popup tạo dự án — tiêu đề",
       "design_createProject_subtitle": "Popup tạo dự án — mô tả",
       "design_input_pageTitle": "Tiêu đề trên thanh tiến trình",
@@ -1972,10 +2143,146 @@
       "consult_booking_phoneLabel": "Nhãn ô số điện thoại",
       "consult_booking_noteLabel": "Nhãn ô ghi chú",
       "guide_searchPlaceholder": "Chữ mờ trong ô tìm kiếm",
-      "footer_contactTitle": "Tiêu đề cột “Liên hệ”",
-      "footer_quickLinksTitle": "Tiêu đề cột “Liên kết nhanh”",
-      "footer_policyTitle": "Tiêu đề cột “Chính sách”",
-      "footer_socialTitle": "Tiêu đề cột “Kết nối với SAVICO”"
+      "footer_contactTitle": "Tiêu đề cột Liên hệ",
+      "landing_hero_eyebrow": "Dòng nhãn nhỏ trên tiêu đề",
+      "landing_hero_card_title": "Thẻ hồ sơ — tiêu đề",
+      "landing_hero_card_rows_area_label": "Thẻ hồ sơ — dòng 1, nhãn",
+      "landing_hero_card_rows_area_value": "Thẻ hồ sơ — dòng 1, giá trị",
+      "landing_hero_card_rows_type_label": "Thẻ hồ sơ — dòng 2, nhãn",
+      "landing_hero_card_rows_type_value": "Thẻ hồ sơ — dòng 2, giá trị",
+      "landing_hero_card_rows_style_label": "Thẻ hồ sơ — dòng 3, nhãn",
+      "landing_hero_card_rows_style_value": "Thẻ hồ sơ — dòng 3, giá trị",
+      "landing_hero_card_rows_options_label": "Thẻ hồ sơ — dòng 4, nhãn",
+      "landing_hero_card_rows_options_value": "Thẻ hồ sơ — dòng 4, giá trị",
+      "landing_hero_card_totalLabel": "Thẻ hồ sơ — nhãn dòng tổng",
+      "landing_hero_card_totalValue": "Thẻ hồ sơ — giá trị dòng tổng",
+      "landing_hero_card_cta": "Thẻ hồ sơ — nút dưới cùng",
+      "landing_stats_photo_value": "Số liệu 1 — con số",
+      "landing_stats_photo_label": "Số liệu 1 — dòng phụ",
+      "landing_stats_steps_value": "Số liệu 2 — con số",
+      "landing_stats_steps_label": "Số liệu 2 — dòng phụ",
+      "landing_stats_options_value": "Số liệu 3 — con số",
+      "landing_stats_options_label": "Số liệu 3 — dòng phụ",
+      "landing_stats_contractors_value": "Số liệu 4 — con số",
+      "landing_stats_contractors_label": "Số liệu 4 — dòng phụ",
+      "landing_stats_inspections_value": "Số liệu 5 — con số",
+      "landing_stats_inspections_label": "Số liệu 5 — dòng phụ",
+      "landing_hero_note": "Dòng chữ viết tay góc phải",
+      "landing_painPoints_eyebrow": "Nhãn nhỏ trên tiêu đề",
+      "landing_painPoints_title": "Tiêu đề dải",
+      "landing_painPoints_subtitle": "Mô tả dưới tiêu đề",
+      "landing_painPoints_note": "Dòng chữ viết tay bên phải",
+      "landing_painPoints_items_budget_title": "Thẻ 1 (chi phí) — tiêu đề",
+      "landing_painPoints_items_budget_description": "Thẻ 1 (chi phí) — mô tả",
+      "landing_painPoints_items_design_title": "Thẻ 2 (thiết kế) — tiêu đề",
+      "landing_painPoints_items_design_description": "Thẻ 2 (thiết kế) — mô tả",
+      "landing_painPoints_items_contractor_title": "Thẻ 3 (nhà thầu) — tiêu đề",
+      "landing_painPoints_items_contractor_description": "Thẻ 3 (nhà thầu) — mô tả",
+      "landing_painPoints_items_dossier_title": "Thẻ 4 (hồ sơ) — tiêu đề",
+      "landing_painPoints_items_dossier_description": "Thẻ 4 (hồ sơ) — mô tả",
+      "landing_painPoints_items_supervision_title": "Thẻ 5 (giám sát) — tiêu đề",
+      "landing_painPoints_items_supervision_description": "Thẻ 5 (giám sát) — mô tả",
+      "landing_journey_eyebrow": "Nhãn nhỏ trên tiêu đề",
+      "landing_journey_title": "Tiêu đề dải 5 bước",
+      "landing_journey_note": "Ghi chú bên phải tiêu đề",
+      "landing_journey_cta": "Nút cuối dải",
+      "landing_journey_ctaHint": "Dòng chữ cạnh nút",
+      "landing_journey_items_project_title": "Bước 01 — tên",
+      "landing_journey_items_project_description": "Bước 01 — mô tả",
+      "landing_journey_items_design_title": "Bước 02 — tên",
+      "landing_journey_items_design_description": "Bước 02 — mô tả",
+      "landing_journey_items_dossier_title": "Bước 03 — tên",
+      "landing_journey_items_dossier_description": "Bước 03 — mô tả",
+      "landing_journey_items_contractor_title": "Bước 04 — tên",
+      "landing_journey_items_contractor_description": "Bước 04 — mô tả",
+      "landing_journey_items_build_title": "Bước 05 — tên",
+      "landing_journey_items_build_description": "Bước 05 — mô tả",
+      "landing_services_eyebrow": "Nhãn nhỏ trên tiêu đề",
+      "landing_services_title": "Tiêu đề dải gói dịch vụ",
+      "landing_services_subtitle": "Mô tả dưới tiêu đề",
+      "landing_services_viewAll": "Liên kết “Xem tất cả gói”",
+      "landing_services_note": "Chữ trên mẩu giấy nhớ",
+      "landing_services_items_design_title": "Thẻ 1 (gói thiết kế) — tiêu đề",
+      "landing_services_items_design_description": "Thẻ 1 (gói thiết kế) — mô tả",
+      "landing_services_items_design_action": "Thẻ 1 (gói thiết kế) — nút",
+      "landing_services_items_contractors_title": "Thẻ 2 (tìm nhà thầu) — tiêu đề",
+      "landing_services_items_contractors_description": "Thẻ 2 (tìm nhà thầu) — mô tả",
+      "landing_services_items_contractors_action": "Thẻ 2 (tìm nhà thầu) — nút",
+      "landing_services_items_supervision_title": "Thẻ 3 (giám sát) — tiêu đề",
+      "landing_services_items_supervision_description": "Thẻ 3 (giám sát) — mô tả",
+      "landing_services_items_supervision_action": "Thẻ 3 (giám sát) — nút",
+      "landing_services_items_turnkey_title": "Thẻ 4 (trọn gói) — tiêu đề",
+      "landing_services_items_turnkey_description": "Thẻ 4 (trọn gói) — mô tả",
+      "landing_services_items_turnkey_action": "Thẻ 4 (trọn gói) — nút",
+      "landing_dossiers_eyebrow": "Nhãn nhỏ trên tiêu đề",
+      "landing_dossiers_title": "Tiêu đề khối hồ sơ mẫu",
+      "landing_dossiers_viewAll": "Liên kết “Xem tất cả hồ sơ mẫu”",
+      "landing_dossiers_viewOne": "Liên kết trên từng thẻ",
+      "landing_dossiers_items_townhouse_badge": "Thẻ 1 (nhà phố) — nhãn",
+      "landing_dossiers_items_townhouse_title": "Thẻ 1 (nhà phố) — tên",
+      "landing_dossiers_items_townhouse_area": "Thẻ 1 (nhà phố) — diện tích",
+      "landing_dossiers_items_townhouse_floors": "Thẻ 1 (nhà phố) — số tầng",
+      "landing_dossiers_items_townhouse_options": "Thẻ 1 (nhà phố) — số phương án",
+      "landing_dossiers_items_villa_badge": "Thẻ 2 (biệt thự) — nhãn",
+      "landing_dossiers_items_villa_title": "Thẻ 2 (biệt thự) — tên",
+      "landing_dossiers_items_villa_area": "Thẻ 2 (biệt thự) — diện tích",
+      "landing_dossiers_items_villa_floors": "Thẻ 2 (biệt thự) — số tầng",
+      "landing_dossiers_items_villa_options": "Thẻ 2 (biệt thự) — số phương án",
+      "landing_dossiers_items_resort_badge": "Thẻ 3 (nghỉ dưỡng) — nhãn",
+      "landing_dossiers_items_resort_title": "Thẻ 3 (nghỉ dưỡng) — tên",
+      "landing_dossiers_items_resort_area": "Thẻ 3 (nghỉ dưỡng) — diện tích",
+      "landing_dossiers_items_resort_floors": "Thẻ 3 (nghỉ dưỡng) — số tầng",
+      "landing_dossiers_items_resort_options": "Thẻ 3 (nghỉ dưỡng) — số phương án",
+      "landing_dossiers_items_garden_badge": "Thẻ 4 (nhà vườn) — nhãn",
+      "landing_dossiers_items_garden_title": "Thẻ 4 (nhà vườn) — tên",
+      "landing_dossiers_items_garden_area": "Thẻ 4 (nhà vườn) — diện tích",
+      "landing_dossiers_items_garden_floors": "Thẻ 4 (nhà vườn) — số tầng",
+      "landing_dossiers_items_garden_options": "Thẻ 4 (nhà vườn) — số phương án",
+      "handbook_home_eyebrow": "Nhãn nhỏ trên tiêu đề (trang chủ)",
+      "handbook_home_title": "Tiêu đề khối Cẩm nang trên trang chủ",
+      "handbook_home_viewAll": "Liên kết “Xem tất cả bài viết”",
+      "consult_home_eyebrow": "Nhãn nhỏ trên tiêu đề (trang chủ)",
+      "consult_home_viewAll": "Liên kết “Xem tất cả chuyên gia”",
+      "consult_home_book": "Nút đặt lịch trên thẻ",
+      "landing_brands_label": "Nhãn dải thương hiệu",
+      "landing_brands_items_hoaphat": "Tên thương hiệu — Hòa Phát",
+      "landing_brands_items_inax": "Tên thương hiệu — INAX",
+      "landing_brands_items_viglacera": "Tên thương hiệu — Viglacera",
+      "landing_brands_items_dulux": "Tên thương hiệu — Dulux",
+      "landing_brands_items_ancuong": "Tên thương hiệu — An Cường",
+      "landing_brands_items_cadivi": "Tên thương hiệu — CADIVI",
+      "landing_brands_items_scg": "Tên thương hiệu — SCG",
+      "landing_testimonials_label": "Nhãn dải đánh giá",
+      "landing_testimonials_items_tuan_quote": "Đánh giá 1 — nội dung",
+      "landing_testimonials_items_tuan_name": "Đánh giá 1 — tên khách",
+      "landing_testimonials_items_tuan_meta": "Đánh giá 1 — loại công trình & nơi ở",
+      "landing_testimonials_items_hang_quote": "Đánh giá 2 — nội dung",
+      "landing_testimonials_items_hang_name": "Đánh giá 2 — tên khách",
+      "landing_testimonials_items_hang_meta": "Đánh giá 2 — loại công trình & nơi ở",
+      "landing_testimonials_items_bao_quote": "Đánh giá 3 — nội dung",
+      "landing_testimonials_items_bao_name": "Đánh giá 3 — tên khách",
+      "landing_testimonials_items_bao_meta": "Đánh giá 3 — loại công trình & nơi ở",
+      "landing_cta_title": "Tiêu đề dải CTA cuối trang",
+      "landing_cta_subtitle": "Mô tả dải CTA cuối trang",
+      "landing_cta_action": "Nút dải CTA cuối trang",
+      "footer_brandTagline": "Dòng chữ nhỏ dưới logo (chân trang)",
+      "footer_productTitle": "Tiêu đề cột Sản phẩm",
+      "footer_supportTitle": "Tiêu đề cột Hỗ trợ",
+      "footer_aboutTitle": "Tiêu đề cột Về SAVICO",
+      "footer_emailLabel": "Nhãn dòng email",
+      "footer_addressLabel": "Nhãn dòng địa chỉ",
+      "footer_links_design": "Liên kết chân trang — Thiết kế & Dự toán",
+      "footer_links_services": "Liên kết chân trang — Gói dịch vụ",
+      "footer_links_contractors": "Liên kết chân trang — Tìm nhà thầu",
+      "footer_links_supervision": "Liên kết chân trang — Giám sát thi công",
+      "footer_links_turnkey": "Liên kết chân trang — Thi công trọn gói",
+      "footer_links_guide": "Liên kết chân trang — Hướng dẫn sử dụng",
+      "footer_links_handbook": "Liên kết chân trang — Cẩm nang",
+      "footer_links_consult": "Liên kết chân trang — Tư vấn 1:1",
+      "footer_links_faq": "Liên kết chân trang — Câu hỏi thường gặp",
+      "footer_links_about": "Liên kết chân trang — Giới thiệu",
+      "footer_links_privacy": "Liên kết chân trang — Chính sách bảo mật",
+      "footer_links_terms": "Liên kết chân trang — Điều khoản sử dụng"
     },
     "subscriptions": {
       "description": "Mỗi dòng là một kỳ đăng ký gói của một người dùng. Gia hạn thủ công khi khách chuyển khoản tay; hủy thì kỳ dừng ngay nhưng vẫn giữ làm lịch sử đối soát.",
@@ -2131,7 +2438,13 @@
     "imageFields": {
       "home_style_modern": "Ảnh mặt tiền — bên trái khung minh họa dự toán",
       "home_render_villa": "Ảnh phối cảnh — tab “Phối cảnh 3D” của khung minh họa",
-      "design_render_villa": "Ảnh phối cảnh mẫu — thẻ xem trước hồ sơ ở Bước 3"
+      "design_render_villa": "Ảnh phối cảnh mẫu — thẻ xem trước hồ sơ ở Bước 3",
+      "home_home_hero": "Ảnh nền khối hero trang chủ",
+      "home_home_services": "Ảnh minh hoạ cạnh khối Gói dịch vụ",
+      "home_home_dossierTownhouse": "Ảnh thẻ hồ sơ mẫu 1 (nhà phố)",
+      "home_home_dossierVilla": "Ảnh thẻ hồ sơ mẫu 2 (biệt thự)",
+      "home_home_dossierResort": "Ảnh thẻ hồ sơ mẫu 3 (nghỉ dưỡng)",
+      "home_home_dossierGarden": "Ảnh thẻ hồ sơ mẫu 4 (nhà vườn)"
     },
     "pageSections": {
       "home_showcase": "Khung minh họa dự toán (bên phải hero)",
@@ -2156,9 +2469,8 @@
       "shell_footer": "Chân trang (mọi trang)",
       "shell_assistant": "Trợ lý AI góc phải dưới",
       "shell_notFound": "Trang 404 khi vào link hỏng",
-      "home_hero": "Khối hero — thông điệp chính & hai nút",
+      "home_hero": "Khối hero — ảnh nền, thông điệp chính & hai nút",
       "home_promises": "Ba điểm cam kết dưới nút",
-      "home_steps": "Dải 3 bước dưới hero",
       "home_guideBlock": "Khối “Hướng dẫn sử dụng” (dưới dải 3 bước)",
       "home_consultBlock": "Khối “Tư vấn 1:1” cuối trang",
       "account_side": "Cột trái — hồ sơ & thẻ “Gói của tôi”",
@@ -2166,7 +2478,17 @@
       "design_create": "Popup tạo dự án mới",
       "design_input": "Bước 1 — Nhập liệu",
       "design_estimate": "Bước 2 — Bảng dự toán",
-      "consult_cards": "Thẻ kiến trúc sư trong lưới"
+      "consult_cards": "Thẻ kiến trúc sư trong lưới",
+      "home_heroCard": "Thẻ “Hồ sơ dự án” nổi trên ảnh hero",
+      "home_stats": "Dải 5 con số dưới hero",
+      "home_painPoints": "Dải xanh “Khó là kiểm soát mọi thứ cùng lúc”",
+      "home_journey": "Dải 5 bước “Từ ý tưởng đến ngôi nhà hoàn thiện”",
+      "home_services": "Dải xanh “Gói dịch vụ SAVICO”",
+      "home_dossiers": "Khối “Hồ sơ mẫu” (4 thẻ)",
+      "home_handbookBlock": "Khối “Cẩm nang xây nhà” trên trang chủ",
+      "home_brands": "Dải “SAVICO được tin tưởng bởi”",
+      "home_testimonials": "Dải “Khách hàng nói về SAVICO”",
+      "home_cta": "Dải CTA cuối trang “Sẵn sàng bắt đầu dự án?”"
     }
   },
   "contractors": {
@@ -2180,7 +2502,7 @@
       "invited": "Đã mời",
       "inviteFull": "Đã đủ {max} nhà thầu",
       "verified": "Đã xác minh",
-      "similarProjects": "{count} dự án tương tự",
+      "similarProjects": "{count} dự án đã thực hiện",
       "distance": "{km} km từ công trình",
       "serviceAreas": "Phạm vi phục vụ",
       "surveyWithin": "Khảo sát trong {hours}h",
@@ -2190,7 +2512,7 @@
       "noPriceNote": "SAVICO không hiển thị báo giá của nhà thầu trên nền tảng.",
       "fromDesignPackage": "Hồ sơ từ gói thiết kế",
       "similarShort": "{count} dự án",
-      "similarSuffix": "tương tự",
+      "similarSuffix": "đã thực hiện",
       "distanceShort": "{km} km",
       "distanceSuffix": "từ công trình",
       "surveyEarly": "Có thể khảo sát sớm",
@@ -2559,7 +2881,7 @@
       "compareCheckbox": "So sánh",
       "whyTitle": "Vì sao SAVICO đề xuất?",
       "why1": "Phù hợp loại công trình",
-      "why2": "{count} dự án tương tự",
+      "why2": "{count} dự án đã thực hiện",
       "why3": "Có thể khảo sát trong {hours}h",
       "projectLabel": "Dự án đang chọn",
       "invitedPill": "Đã mời {used}/{max} · còn {left} lượt",

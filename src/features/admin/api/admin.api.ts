@@ -41,7 +41,6 @@ const ENDPOINTS: Record<CmsCollection, string> = {
 }
 
 const DOCUMENT_ENDPOINTS: Record<CmsDocument, string> = {
-  home: '/admin/content/home',
   settings: '/admin/content/settings',
   termsPage: '/admin/content/pages/terms',
   privacyPage: '/admin/content/pages/privacy',

@@ -1,11 +1,13 @@
 import { setRequestLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
-import { HomeSteps } from '@/features/landing'
+import { HomeBrands, HomeDossiers, HomePainPoints, HomeServices, HomeStats, HomeTestimonials } from '@/features/landing'
 import { ConsultantHighlights } from '@/features/consultation'
 import { GuideHighlights } from '@/features/guide'
-import { HomeBackdrop } from './home-backdrop'
+import { HandbookHighlights } from '@/features/handbook'
+import { HomeCtaSection } from './home-cta-section'
 import { HomeHeroSection } from './home-hero-section'
+import { HomeJourneySection } from './home-journey-section'
 
 interface PageProps {
   params: Promise<{ locale: Locale }>
@@ -18,12 +20,19 @@ export default async function HomePage({ params }: PageProps) {
 
   return (
     <div className='relative'>
-      <HomeBackdrop />
       <HomeHeroSection />
-      <HomeSteps />
+      <HomeStats />
+      <HomePainPoints />
+      <HomeJourneySection />
+      <HomeServices />
+      <HomeDossiers />
+      <HandbookHighlights />
       <GuideHighlights />
       {/* ★ Section Tư vấn 1:1 (mục III.2) — khối chuyển đổi cuối trang chủ. */}
       <ConsultantHighlights />
+      <HomeBrands />
+      <HomeTestimonials />
+      <HomeCtaSection />
     </div>
   )
 }

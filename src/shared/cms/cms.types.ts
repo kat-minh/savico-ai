@@ -429,35 +429,6 @@ export interface CmsUnitPrice {
  * Tài liệu (singleton) — mỗi thứ chỉ có MỘT bản
  * ======================================================================== */
 
-/** Một điểm cam kết dưới CTA hero (mục II.2). */
-export interface CmsHomePromise {
-  id: string
-  title: string
-  hint: string
-}
-
-/** Một bước trong dải "3 bước" dưới hero (mục II.2). */
-export interface CmsHomeStep {
-  id: string
-  title: string
-  description: string
-}
-
-/**
- * Nội dung trang chủ admin sửa được (mục II.2). Bỏ trống một trường thì giao
- * diện quay về chuỗi trong `messages/*.json` — CMS chỉ GHI ĐÈ, không thay thế
- * hệ i18n, nên site vẫn chạy khi kho nội dung rỗng.
- */
-export interface CmsHomeContent {
-  heroTitleLead: string
-  heroTitleAccent: string
-  heroSubtitle: string
-  heroPrimaryCta: string
-  heroSecondaryCta: string
-  promises: CmsHomePromise[]
-  steps: CmsHomeStep[]
-}
-
 /** Một mục đánh số của trang tĩnh (Điều khoản, Bảo mật). */
 export interface CmsStaticSection {
   heading: string

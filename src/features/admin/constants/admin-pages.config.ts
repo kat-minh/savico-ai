@@ -64,8 +64,9 @@ const PAGES = [
    * ------------------------------------------------------------------------ */
   {
     key: 'home',
-    // Thứ tự khối = ĐÚNG thứ tự trong `(main)/page.tsx`: Hero (cam kết + khung
-    // minh họa nằm ngay trong hero) → dải 3 bước → khối Hướng dẫn → khối Tư vấn.
+    // Thứ tự khối = ĐÚNG thứ tự trong `(main)/page.tsx`: Hero (ảnh nền + thẻ
+    // "Hồ sơ dự án") → dải 5 số liệu → khung minh họa → dải 3 bước → khối
+    // Hướng dẫn → khối Tư vấn.
     // Hai khối cuối dùng khóa của nhánh `guide`/`consult` nhưng chúng HIỂN THỊ
     // trên trang chủ nên phải sửa được từ đây — đứng ở trang nào thì sửa ở
     // trang đó.
@@ -73,42 +74,187 @@ const PAGES = [
       {
         key: 'hero',
         keys: [
+          'landing.hero.eyebrow',
+          'landing.hero.note',
           'landing.hero.titleLead',
           'landing.hero.titleAccent',
           'landing.hero.subtitle',
           'landing.hero.primaryCta',
           'landing.hero.secondaryCta'
-        ]
+        ],
+        imageKeys: ['home.hero']
       },
       {
-        key: 'promises',
+        key: 'heroCard',
         keys: [
-          'landing.hero.promises.fast.title',
-          'landing.hero.promises.fast.hint',
-          'landing.hero.promises.accurate.title',
-          'landing.hero.promises.accurate.hint',
-          'landing.hero.promises.secure.title',
-          'landing.hero.promises.secure.hint'
+          'landing.hero.card.title',
+          'landing.hero.card.rows.area.label',
+          'landing.hero.card.rows.area.value',
+          'landing.hero.card.rows.type.label',
+          'landing.hero.card.rows.type.value',
+          'landing.hero.card.rows.style.label',
+          'landing.hero.card.rows.style.value',
+          'landing.hero.card.rows.options.label',
+          'landing.hero.card.rows.options.value',
+          'landing.hero.card.totalLabel',
+          'landing.hero.card.totalValue',
+          'landing.hero.card.cta'
         ]
       },
       {
-        key: 'showcase',
-        keys: ['landing.showcase.label', 'landing.showcase.title'],
-        imageKeys: ['style.modern', 'render.villa']
-      },
-      {
-        key: 'steps',
+        key: 'stats',
         keys: [
-          'landing.steps.input.title',
-          'landing.steps.input.description',
-          'landing.steps.estimate.title',
-          'landing.steps.estimate.description',
-          'landing.steps.dossier.title',
-          'landing.steps.dossier.description'
+          'landing.stats.photo.value',
+          'landing.stats.photo.label',
+          'landing.stats.steps.value',
+          'landing.stats.steps.label',
+          'landing.stats.options.value',
+          'landing.stats.options.label',
+          'landing.stats.contractors.value',
+          'landing.stats.contractors.label',
+          'landing.stats.inspections.value',
+          'landing.stats.inspections.label'
         ]
+      },
+      {
+        key: 'painPoints',
+        keys: [
+          'landing.painPoints.eyebrow',
+          'landing.painPoints.title',
+          'landing.painPoints.subtitle',
+          'landing.painPoints.note',
+          'landing.painPoints.items.budget.title',
+          'landing.painPoints.items.budget.description',
+          'landing.painPoints.items.design.title',
+          'landing.painPoints.items.design.description',
+          'landing.painPoints.items.contractor.title',
+          'landing.painPoints.items.contractor.description',
+          'landing.painPoints.items.dossier.title',
+          'landing.painPoints.items.dossier.description',
+          'landing.painPoints.items.supervision.title',
+          'landing.painPoints.items.supervision.description'
+        ]
+      },
+      {
+        key: 'journey',
+        keys: [
+          'landing.journey.eyebrow',
+          'landing.journey.title',
+          'landing.journey.note',
+          'landing.journey.cta',
+          'landing.journey.ctaHint',
+          'landing.journey.items.project.title',
+          'landing.journey.items.project.description',
+          'landing.journey.items.design.title',
+          'landing.journey.items.design.description',
+          'landing.journey.items.dossier.title',
+          'landing.journey.items.dossier.description',
+          'landing.journey.items.contractor.title',
+          'landing.journey.items.contractor.description',
+          'landing.journey.items.build.title',
+          'landing.journey.items.build.description'
+        ]
+      },
+      {
+        key: 'services',
+        keys: [
+          'landing.services.eyebrow',
+          'landing.services.title',
+          'landing.services.subtitle',
+          'landing.services.viewAll',
+          'landing.services.note',
+          'landing.services.items.design.title',
+          'landing.services.items.design.description',
+          'landing.services.items.design.action',
+          'landing.services.items.contractors.title',
+          'landing.services.items.contractors.description',
+          'landing.services.items.contractors.action',
+          'landing.services.items.supervision.title',
+          'landing.services.items.supervision.description',
+          'landing.services.items.supervision.action',
+          'landing.services.items.turnkey.title',
+          'landing.services.items.turnkey.description',
+          'landing.services.items.turnkey.action'
+        ],
+        imageKeys: ['home.services']
+      },
+      {
+        key: 'dossiers',
+        keys: [
+          'landing.dossiers.eyebrow',
+          'landing.dossiers.title',
+          'landing.dossiers.viewAll',
+          'landing.dossiers.viewOne',
+          'landing.dossiers.items.townhouse.badge',
+          'landing.dossiers.items.townhouse.title',
+          'landing.dossiers.items.townhouse.area',
+          'landing.dossiers.items.townhouse.floors',
+          'landing.dossiers.items.townhouse.options',
+          'landing.dossiers.items.villa.badge',
+          'landing.dossiers.items.villa.title',
+          'landing.dossiers.items.villa.area',
+          'landing.dossiers.items.villa.floors',
+          'landing.dossiers.items.villa.options',
+          'landing.dossiers.items.resort.badge',
+          'landing.dossiers.items.resort.title',
+          'landing.dossiers.items.resort.area',
+          'landing.dossiers.items.resort.floors',
+          'landing.dossiers.items.resort.options',
+          'landing.dossiers.items.garden.badge',
+          'landing.dossiers.items.garden.title',
+          'landing.dossiers.items.garden.area',
+          'landing.dossiers.items.garden.floors',
+          'landing.dossiers.items.garden.options'
+        ],
+        imageKeys: ['home.dossierTownhouse', 'home.dossierVilla', 'home.dossierResort', 'home.dossierGarden']
+      },
+      {
+        key: 'handbookBlock',
+        keys: ['handbook.home.eyebrow', 'handbook.home.title', 'handbook.home.viewAll']
       },
       { key: 'guideBlock', keys: ['guide.highlights.title', 'guide.highlights.subtitle', 'guide.highlights.viewAll'] },
-      { key: 'consultBlock', keys: ['consult.home.title', 'consult.home.subtitle', 'consult.home.cta'] }
+      {
+        key: 'brands',
+        keys: [
+          'landing.brands.label',
+          'landing.brands.items.hoaphat',
+          'landing.brands.items.inax',
+          'landing.brands.items.viglacera',
+          'landing.brands.items.dulux',
+          'landing.brands.items.ancuong',
+          'landing.brands.items.cadivi',
+          'landing.brands.items.scg'
+        ]
+      },
+      {
+        key: 'testimonials',
+        keys: [
+          'landing.testimonials.label',
+          'landing.testimonials.items.tuan.quote',
+          'landing.testimonials.items.tuan.name',
+          'landing.testimonials.items.tuan.meta',
+          'landing.testimonials.items.hang.quote',
+          'landing.testimonials.items.hang.name',
+          'landing.testimonials.items.hang.meta',
+          'landing.testimonials.items.bao.quote',
+          'landing.testimonials.items.bao.name',
+          'landing.testimonials.items.bao.meta'
+        ]
+      },
+      {
+        key: 'cta',
+        keys: ['landing.cta.title', 'landing.cta.subtitle', 'landing.cta.action']
+      },
+      {
+        key: 'consultBlock',
+        keys: [
+          'consult.home.eyebrow',
+          'consult.home.title',
+          'consult.home.subtitle',
+          'consult.home.viewAll',
+          'consult.home.book'
+        ]
+      }
     ],
     copyNamespaces: ['landing'],
     route: ADMIN_ROUTES.PAGE_HOME
@@ -214,76 +360,17 @@ const PAGES = [
       { key: 'comparison', keys: ['plans.comparison.title', 'plans.value.title'] },
       {
         key: 'footer',
-        keys: ['plans.notes.payment', 'plans.notes.credits', 'plans.notes.estimate', 'plans.notes.gift']
-      }
-    ],
-    copyNamespaces: ['plans'],
-    route: ADMIN_ROUTES.PAGE_PLANS
-  },
-  {
-    key: 'consult',
-    featuredSections: [
-      {
-        key: 'header',
         keys: [
-          'consult.directory.title',
-          'consult.directory.subtitle',
-          'consult.directory.searchPlaceholder',
-          'consult.directory.allSpecialties',
-          'consult.directory.lead'
-        ]
-      },
-      { key: 'cards', keys: ['consult.card.viewProfile'] },
-      { key: 'profile', keys: ['consult.profile.bookCta', 'consult.slots.title'] },
-      {
-        key: 'booking',
-        keys: [
-          'consult.booking.title',
-          'consult.booking.phoneLabel',
-          'consult.booking.noteLabel',
-          'consult.booking.submit',
-          'consult.booking.successToast'
-        ]
-      }
-    ],
-    copyNamespaces: ['consult'],
-    route: ADMIN_ROUTES.PAGE_CONSULT,
-    panels: ['consultants']
-  },
-  {
-    key: 'account',
-    // Thứ tự thật trên trang: đầu trang → cột trái (thông tin + thẻ GÓI CỦA
-    // TÔI) → cột phải (hai tab Dự án / Mẫu đã lưu).
-    featuredSections: [
-      { key: 'header', keys: ['account.title', 'account.subtitle'] },
-      { key: 'side', keys: ['account.info.title', 'account.plan.title', 'account.plan.upgrade'] },
-      { key: 'main', keys: ['account.projects.title', 'account.favorites.title'] }
-    ],
-    copyNamespaces: ['account'],
-    route: ADMIN_ROUTES.PAGE_ACCOUNT
-  },
-  {
-    key: 'legal',
-    copyNamespaces: ['legal'],
-    route: ADMIN_ROUTES.PAGE_LEGAL,
-    panels: ['termsPage', 'privacyPage']
-  },
-  {
-    key: 'shell',
-    featuredSections: [
-      {
-        key: 'nav',
-        keys: ['nav.home', 'nav.design', 'nav.handbook', 'nav.guide', 'nav.plans', 'nav.consult', 'nav.createProject']
-      },
-      {
-        key: 'footer',
-        keys: [
+          'footer.brandTagline',
           'footer.tagline',
+          'footer.productTitle',
+          'footer.supportTitle',
+          'footer.aboutTitle',
           'footer.contactTitle',
-          'footer.workingHours',
-          'footer.quickLinksTitle',
-          'footer.policyTitle',
-          'footer.socialTitle',
+          'footer.hotline',
+          'footer.emailLabel',
+          'footer.addressLabel',
+          'footer.address',
           'footer.rights'
         ]
       },

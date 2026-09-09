@@ -160,6 +160,26 @@ export const RENDER_IMAGE = {
 } as const
 
 /**
+ * Ảnh nền khối hero trang chủ — đang là ẢNH TẠM (placeholder) chờ ảnh thật của
+ * khách: lô đất / ngôi nhà hoàn thiện chụp ngang. Để tạm một tấm stock ở đây thì
+ * khách dễ tưởng đó là ảnh chốt, nên chỗ này cố ý trung tính. Thay bằng URL ảnh
+ * thật ở màn "Hình ảnh site" là xong, khóa `home.hero` giữ nguyên.
+ */
+export const HOME_IMAGE = {
+  hero: '/images/placeholder-hero.svg',
+  /**
+   * Ảnh minh hoạ cạnh khối "Gói dịch vụ" — ảnh TẠM, nền trong suốt vì nó nằm
+   * trên dải xanh đậm: một khung ảnh xám đặc đặt ở đó nhìn như lỗi giao diện.
+   */
+  services: '/images/placeholder-illustration.svg',
+  /** Bốn thẻ "Hồ sơ mẫu" — mỗi thẻ một khóa để admin thay từng ảnh. */
+  dossierTownhouse: '/images/placeholder-hero.svg',
+  dossierVilla: '/images/placeholder-hero.svg',
+  dossierResort: '/images/placeholder-hero.svg',
+  dossierGarden: '/images/placeholder-hero.svg'
+} as const
+
+/**
  * Ảnh minh hoạ nền cho khối hero trang "Tìm nhà thầu" (Hình S09): một tấm bản
  * đồ / ảnh chụp khu dân cư từ trên cao, KHÔNG phải bản đồ tương tác — thẻ nhà
  * thầu được đặt nổi lên trên bằng CSS.
@@ -198,7 +218,8 @@ export const SITE_IMAGE = {
   ...prefixed('supervision', SUPERVISION_IMAGE),
   ...prefixed('portrait', PORTRAIT_IMAGE),
   ...prefixed('render', RENDER_IMAGE),
-  ...prefixed('map', MAP_IMAGE)
+  ...prefixed('map', MAP_IMAGE),
+  ...prefixed('home', HOME_IMAGE)
 } as Prefixed<'style', typeof STYLE_IMAGE> &
   Prefixed<'interior', typeof INTERIOR_IMAGE> &
   Prefixed<'building', typeof BUILDING_IMAGE> &
@@ -208,6 +229,7 @@ export const SITE_IMAGE = {
   Prefixed<'supervision', typeof SUPERVISION_IMAGE> &
   Prefixed<'portrait', typeof PORTRAIT_IMAGE> &
   Prefixed<'render', typeof RENDER_IMAGE> &
-  Prefixed<'map', typeof MAP_IMAGE>
+  Prefixed<'map', typeof MAP_IMAGE> &
+  Prefixed<'home', typeof HOME_IMAGE>
 
 export type SiteImageKey = keyof typeof SITE_IMAGE

@@ -6,7 +6,7 @@ import { AppProviders } from '@/shared/providers'
 import type { Metadata } from 'next'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
-import { Be_Vietnam_Pro, Geist, Geist_Mono } from 'next/font/google'
+import { Be_Vietnam_Pro, Geist, Geist_Mono, Sriracha } from 'next/font/google'
 import { notFound } from 'next/navigation'
 
 import '../globals.css'
@@ -29,6 +29,20 @@ const beVietnamPro = Be_Vietnam_Pro({
   variable: '--font-be-vietnam',
   subsets: ['latin', 'latin-ext', 'vietnamese'],
   weight: ['400', '500', '600', '700'],
+  display: 'swap'
+})
+
+/**
+ * Chữ viết tay — chỉ dùng cho các dòng ghi chú nghiêng trên trang chủ (theo ảnh
+ * mockup khách gửi). Phải có subset `vietnamese`: dấu tiếng Việt dựng sẵn (ệ,
+ * ấ, ộ…) nằm ngoài `latin-ext`, thiếu nó là chữ rơi về font dự phòng giữa câu,
+ * mỗi chữ một kiểu — Caveat (giống ảnh mockup nhất) rơi đúng vào lỗi đó nên
+ * loại. Sriracha là font bút lông nghiêng gần kiểu trong ảnh và có tiếng Việt.
+ */
+const handwriting = Sriracha({
+  variable: '--font-handwriting',
+  subsets: ['latin', 'latin-ext', 'vietnamese'],
+  weight: '400',
   display: 'swap'
 })
 
@@ -64,7 +78,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${beVietnamPro.variable} font-sans antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${beVietnamPro.variable} ${handwriting.variable} font-sans antialiased`}
+      >
         {/* Messages are provided automatically from i18n/request.ts */}
         <NextIntlClientProvider>
           {/* Re-provides the catalogue with the copy the admin edited in the

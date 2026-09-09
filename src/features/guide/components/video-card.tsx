@@ -22,6 +22,12 @@ interface VideoCardProps extends Omit<ComponentProps<'article'>, 'children' | 'o
   layout?: 'stacked' | 'row'
   /** Ẩn dòng mô tả — trang Hướng dẫn chỉ hiện tiêu đề đánh số (Hình 12). */
   hideDescription?: boolean
+  /**
+   * Ghi thời lượng ngay sau tiêu đề. Trang Hướng dẫn cần (Hình 12); khu trang
+   * chủ thì không — ở đó thời lượng đã nằm trên ảnh nên nhắc lại là thừa.
+   * Mặc định bám theo `hideDescription` để mọi nơi gọi cũ giữ nguyên.
+   */
+  durationInTitle?: boolean
   /** Bấm thẻ mở trình phát phóng to ngay trên trang (mục VI). */
   onOpenVideo?: (video: GuideVideo) => void
 }
@@ -37,12 +43,14 @@ export function VideoCard({
   index,
   layout = 'stacked',
   hideDescription = false,
+  durationInTitle,
   onOpenVideo,
   ...props
 }: VideoCardProps) {
   const row = layout === 'row'
   const duration = formatDuration(video.durationSeconds)
   const interactive = Boolean(onOpenVideo)
+  const showDuration = durationInTitle ?? hideDescription
 
   return (
     <article
@@ -73,8 +81,9 @@ export function VideoCard({
           src={video.thumbnailUrl}
           alt={video.title}
         />
-        {/* Hình 12: nút play NỀN TRẮNG, tam giác xanh — nổi rõ trên mọi ảnh bìa. */}
-        <span className='bg-background text-primary absolute inset-0 m-auto flex size-12 items-center justify-center rounded-full shadow-lg transition-transform group-hover:scale-110'>
+        {/* Nút play nền XANH thương hiệu, tam giác trắng (ảnh mockup khách gửi —
+            khác Hình 12 của bản mô tả cũ là nền trắng tam giác xanh). */}
+        <span className='bg-primary text-primary-foreground absolute inset-0 m-auto flex size-12 items-center justify-center rounded-full shadow-lg transition-transform group-hover:scale-110'>
           <Play className='size-5 translate-x-0.5 fill-current' />
         </span>
         {/* Hình 12: nhãn thời lượng nền TỐI chữ trắng, góc phải dưới ảnh. */}
@@ -90,7 +99,7 @@ export function VideoCard({
         <h3 className='text-sm font-semibold'>
           {index != null ? <span>{index}. </span> : null}
           {video.title}
-          {hideDescription ? <span className='text-muted-foreground font-normal'> ({duration})</span> : null}
+          {showDuration ? <span className='text-muted-foreground font-normal'> ({duration})</span> : null}
         </h3>
         {hideDescription ? null : (
           <p className='text-muted-foreground line-clamp-2 text-xs leading-relaxed'>{video.description}</p>

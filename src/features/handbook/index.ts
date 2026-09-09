@@ -8,6 +8,7 @@ export { TemplateDetail } from './components/template-detail'
 export { ArticleList } from './components/article-list'
 export { ArticleDetail } from './components/article-detail'
 export { FoundationBlock } from './components/foundation-block'
+export { HandbookHighlights } from './components/handbook-highlights'
 export { LatestNews } from './components/latest-news'
 export { NewsletterBlock } from './components/newsletter-block'
 export { PersonalizedPanel } from './components/personalized-panel'
@@ -47,6 +48,7 @@ export {
   PERSONALIZED_TEMPLATE_COUNT,
   TAG_RELAXATION_ORDER,
   LIBRARY_PAGE_SIZE,
+  HOME_HANDBOOK_COUNT,
   LATEST_NEWS_COUNT,
   ARTICLE_PAGE_SIZE,
   HANDBOOK_STAGES,

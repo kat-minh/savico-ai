@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Sparkles, Square } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type ComponentType } from 'react'
 
@@ -20,13 +20,6 @@ interface SiteHeaderProps {
   UserMenu?: ComponentType
   /** Opens the "Tạo dự án" modal (mục III.1). Injected by the app layer. */
   onCreateProject?: () => void
-  /** Nền trang chủ đang ở chế độ trơn (`true`) hay quầng động (`false`). */
-  plainBackground?: boolean
-  /**
-   * Bật/tắt giữa nền động và nền trơn giống bản client. Chỉ được app layer truyền
-   * vào ở trang chủ; khi không có, nút switch ẩn đi.
-   */
-  onToggleBackground?: () => void
 }
 
 /**
@@ -38,12 +31,7 @@ interface SiteHeaderProps {
  * trôi ngang và viền dưới sáng ở giữa — xem `.site-header-shell` trong
  * `globals.css`. Cuộn khỏi đỉnh trang thì header đặc thêm và đổ bóng sâu hơn.
  */
-export function SiteHeader({
-  UserMenu,
-  onCreateProject,
-  plainBackground = false,
-  onToggleBackground
-}: SiteHeaderProps = {}) {
+export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) {
   const t = useTranslations('nav')
   const { isAuthenticated } = useAuth()
   const pathname = usePathname()
@@ -90,22 +78,6 @@ export function SiteHeader({
             <Plus className='size-4' />
             <span className='hidden sm:inline'>{createLabel}</span>
           </Button>
-
-          {/* Switch nền trang chủ: đối chiếu nền động với nền trơn của bản client.
-              Chỉ hiện khi app layer truyền handler (tức ở trang chủ). */}
-          {onToggleBackground ? (
-            <Button
-              type='button'
-              size='sm'
-              variant='outline'
-              className='rounded-xl'
-              onClick={onToggleBackground}
-              aria-pressed={plainBackground}
-            >
-              {plainBackground ? <Sparkles className='size-4' /> : <Square className='size-4' />}
-              <span className='hidden sm:inline'>{t(plainBackground ? 'bgToggle.toAura' : 'bgToggle.toPlain')}</span>
-            </Button>
-          ) : null}
 
           {/* Avatar luôn hiện — mục IV: bấm avatar mở Cửa sổ cá nhân. Khách chưa
               đăng nhập thấy cùng một biểu tượng, chỉ khác nội dung dropdown, để

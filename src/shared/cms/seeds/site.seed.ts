@@ -1,31 +1,4 @@
-import type { CmsHomeContent, CmsSiteSettings, CmsStaticPage } from '../cms.types'
-
-/**
- * Nội dung site khởi điểm — bản sao tiếng Việt của các chuỗi đang nằm trong
- * `messages/vi.json`. Giao diện đọc CMS trước, rỗng thì rơi về i18n, nên đổi
- * seed ở đây KHÔNG phá bản dịch tiếng Anh.
- */
-export const HOME_CONTENT_SEED: CmsHomeContent = {
-  // RỖNG có chủ đích: `cmsText(doc, t(...))` lấy doc TRƯỚC, nên seed mà chứa chữ
-  // thật thì nó đè lên bản dịch — trang chủ tiếng Anh từng hiện tiếng Việt vì
-  // đúng lỗi này. Chữ hero giờ ở `messages/*.json` + ghi đè `uiStrings`; tài liệu
-  // này chỉ giữ CẤU TRÚC (id khớp icon) chờ backend.
-  heroTitleLead: '',
-  heroTitleAccent: '',
-  heroSubtitle: '',
-  heroPrimaryCta: '',
-  heroSecondaryCta: '',
-  promises: [
-    { id: 'fast', title: '', hint: '' },
-    { id: 'accurate', title: '', hint: '' },
-    { id: 'secure', title: '', hint: '' }
-  ],
-  steps: [
-    { id: 'input', title: '', description: '' },
-    { id: 'estimate', title: '', description: '' },
-    { id: 'dossier', title: '', description: '' }
-  ]
-}
+import type { CmsSiteSettings, CmsStaticPage } from '../cms.types'
 
 const LEGAL_UPDATED_NOTE = 'Cập nhật lần cuối: nội dung mẫu — SAVICO cung cấp nội dung chính thức trước khi go-live.'
 

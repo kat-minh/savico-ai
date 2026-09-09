@@ -5,7 +5,6 @@ import type {
   CmsContractorInvitation,
   CmsCustomer,
   CmsDesignProject,
-  CmsHomeContent,
   CmsConsultPackage,
   CmsPackageReview,
   CmsQuotas,
@@ -47,7 +46,6 @@ import {
   HANDBOOK_ARTICLES_SEED,
   HANDBOOK_STAGES_SEED,
   HANDBOOK_TEMPLATES_SEED,
-  HOME_CONTENT_SEED,
   PLANS_SEED,
   SUPERVISION_PACKAGES_SEED,
   PRIVACY_PAGE_SEED,
@@ -111,7 +109,6 @@ export type CmsCollection = keyof CmsCollectionMap
 
 /** Các tài liệu đơn (chỉ có MỘT bản cho mỗi ngôn ngữ). */
 export interface CmsDocumentMap {
-  home: CmsHomeContent
   settings: CmsSiteSettings
   termsPage: CmsStaticPage
   privacyPage: CmsStaticPage
@@ -199,7 +196,6 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
 const EMPTY_OVERRIDES: Record<string, string> = {}
 
 const DOCUMENT_SEEDS: { [K in CmsDocument]: CmsDocumentMap[K] } = {
-  home: HOME_CONTENT_SEED,
   settings: SITE_SETTINGS_SEED,
   termsPage: TERMS_PAGE_SEED,
   privacyPage: PRIVACY_PAGE_SEED,

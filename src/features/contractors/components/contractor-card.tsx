@@ -34,7 +34,7 @@ interface ContractorCardProps {
  * ngăn dọc, phải là hai nút xếp chồng.
  *
  * Mỗi ô chỉ số là hai dòng — giá trị ở trên, nhãn nhỏ ở dưới ("18 dự án" /
- * "tương tự") — chứ không phải một dãy chip một dòng như bản trước: cùng một bộ
+ * "đã thực hiện") — chứ không phải một dãy chip một dòng như bản trước: cùng một bộ
  * số nhưng đọc lướt nhanh hơn hẳn khi so ba nhà thầu chồng lên nhau.
  *
  * Nút "Mời báo giá" khóa khi dự án đã đủ 3 lời mời (R1) — khóa chứ không ẩn, để
@@ -54,7 +54,7 @@ export function ContractorCard({
 
   const disabled = invited || inviteLocked
 
-  /** Bốn ô hàng trên: đánh giá · dự án tương tự · khoảng cách · phạm vi phục vụ. */
+  /** Bốn ô hàng trên: đánh giá · số dự án · khoảng cách · phạm vi phục vụ. */
   const facts = [
     {
       key: 'rating',

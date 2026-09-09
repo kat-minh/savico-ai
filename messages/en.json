@@ -230,10 +230,6 @@
     "guide": "Guide",
     "createProject": "New project",
     "brandTagline": "AI platform for architecture & construction",
-    "bgToggle": {
-      "toPlain": "Plain background",
-      "toAura": "Dynamic background"
-    },
     "account": "My account",
     "logout": "Sign out",
     "menu": "Menu",
@@ -246,26 +242,24 @@
     "contractors": "Find a contractor"
   },
   "footer": {
-    "tagline": "SAVICO's AI platform turns one photo of your lot into drawings, 3D renders and a full cost estimate in minutes — with regional unit prices and a SAVICO architect alongside you.",
+    "tagline": "An AI design & estimate platform that connects verified contractors and supervises the build.",
     "contactTitle": "Contact",
-    "quickLinksTitle": "Quick links",
-    "policyTitle": "Policies",
-    "socialTitle": "Follow SAVICO",
     "hotline": "Hotline",
-    "zalo": "Zalo",
     "address": "123 Nguyen Van Cu, Tan Loi Ward, Buon Ma Thuot, Dak Lak",
-    "workingHours": "Mon – Sat: 8:00 AM – 5:30 PM",
     "comingSoon": "Coming soon",
     "links": {
-      "design": "Design & Estimate",
+      "design": "Design & estimate",
+      "services": "Service packages",
+      "contractors": "Find a contractor",
+      "supervision": "Site supervision",
+      "turnkey": "Turnkey construction",
+      "guide": "How to use",
       "handbook": "Handbook",
-      "guide": "Guide",
-      "plans": "Pricing plans",
       "consult": "1:1 consultation",
-      "createProject": "New project",
+      "faq": "FAQ",
+      "about": "About us",
       "privacy": "Privacy policy",
-      "terms": "Terms of use",
-      "payment": "Payment policy"
+      "terms": "Terms of use"
     },
     "social": {
       "facebook": "SAVICO on Facebook",
@@ -274,8 +268,12 @@
       "tiktok": "SAVICO on TikTok"
     },
     "rights": "All rights reserved.",
-    "company": "SAVICO Joint Stock Company",
-    "taxCode": "Tax ID"
+    "brandTagline": "Connecting your build",
+    "productTitle": "Product",
+    "supportTitle": "Support",
+    "aboutTitle": "About SAVICO",
+    "emailLabel": "Email",
+    "addressLabel": "Address"
   },
   "favorite": {
     "add": "Save template",
@@ -283,23 +281,179 @@
   },
   "landing": {
     "hero": {
-      "titleLead": "Snap one photo of your plot —",
-      "titleAccent": "get an instant design & estimate",
-      "subtitle": "AI generates drawings, renders and a cost estimate in minutes",
-      "primaryCta": "New project",
-      "secondaryCta": "Watch the guide",
-      "promises": {
-        "fast": {
-          "title": "Fast",
-          "hint": "Ready in minutes"
+      "eyebrow": "SAVICO — AI DESIGN & COST ESTIMATE PLATFORM",
+      "note": "From a photo of your lot to a finished home",
+      "titleLead": "One photo of your lot,",
+      "titleAccent": "design & estimate in minutes",
+      "subtitle": "AI turns a photo of your lot into floor plans, 3D renders and a quantity-based estimate.\nInvite verified contractors and supervise the build on the same platform.",
+      "primaryCta": "Start a project",
+      "secondaryCta": "Watch the 1-minute tour",
+      "card": {
+        "title": "Project dossier",
+        "rows": {
+          "area": {
+            "label": "Land area",
+            "value": "120 m²"
+          },
+          "type": {
+            "label": "Building type",
+            "value": "Townhouse"
+          },
+          "style": {
+            "label": "Style",
+            "value": "Modern"
+          },
+          "options": {
+            "label": "Design options",
+            "value": "5 sets"
+          }
         },
-        "accurate": {
-          "title": "Accurate",
-          "hint": "AI + architect reviewed"
+        "totalLabel": "Total",
+        "totalValue": "See in the dossier",
+        "cta": "View a sample dossier"
+      }
+    },
+    "stats": {
+      "photo": {
+        "value": "1 photo",
+        "label": "All it takes to start"
+      },
+      "steps": {
+        "value": "3 steps",
+        "label": "To a transparent dossier and estimate"
+      },
+      "options": {
+        "value": "8 options",
+        "label": "Designs tuned to your needs"
+      },
+      "contractors": {
+        "value": "3 contractors",
+        "label": "Verified, invited for free"
+      },
+      "inspections": {
+        "value": "12 visits",
+        "label": "On-site engineer inspections"
+      }
+    },
+    "painPoints": {
+      "eyebrow": "BUILDING A HOME ISN'T THE HARD PART",
+      "title": "The hard part is keeping it all under control",
+      "subtitle": "From budget and design to picking a contractor and supervising the build — SAVICO puts you in control at every step.",
+      "note": "Sound familiar?",
+      "items": {
+        "budget": {
+          "title": "No idea what it will actually cost?",
+          "description": "Budgets are hard to control and overruns creep in."
         },
-        "secure": {
-          "title": "Secure",
-          "hint": "Your data is safe"
+        "design": {
+          "title": "Design that fits neither your needs nor your budget?",
+          "description": "Layout, style and cost are rarely optimised together."
+        },
+        "contractor": {
+          "title": "No way to judge and choose a contractor?",
+          "description": "Reputable, verified contractors are hard to find."
+        },
+        "dossier": {
+          "title": "A design package too thin to build from?",
+          "description": "Missing drawings and quantities mean surprises on site."
+        },
+        "supervision": {
+          "title": "No time to supervise progress and quality?",
+          "description": "Running a site is complex and risk builds up fast."
+        }
+      }
+    },
+    "journey": {
+      "eyebrow": "SAVICO IS WITH YOU ALL THE WAY",
+      "title": "From idea to finished home in five steps",
+      "note": "You always know where you are\nand what each step is doing.",
+      "cta": "Start a project",
+      "ctaHint": "One photo of your lot is all it takes",
+      "items": {
+        "project": {
+          "title": "Create a project",
+          "description": "Photograph the lot, tell us your needs and style."
+        },
+        "design": {
+          "title": "Design & estimate",
+          "description": "AI produces floor plans, 3D renders and a quantity estimate."
+        },
+        "dossier": {
+          "title": "Construction dossier",
+          "description": "Render and receive the full design and estimate package."
+        },
+        "contractor": {
+          "title": "Invite contractors",
+          "description": "Invite up to three verified contractors and track each invitation."
+        },
+        "build": {
+          "title": "Build & supervise",
+          "description": "SAVICO engineers inspect at each milestone, keeping design and schedule on track."
+        }
+      }
+    },
+    "services": {
+      "eyebrow": "SAVICO SERVICE PACKAGES",
+      "title": "Pick the package that fits where you are",
+      "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
+      "viewAll": "See all packages",
+      "note": "Right package,\nright stage!",
+      "items": {
+        "design": {
+          "title": "Design package",
+          "description": "Basic · Detailed · Optimised — 2/5/8 design options, 2/4/6 revisions.",
+          "action": "See packages"
+        },
+        "contractors": {
+          "title": "Find a contractor",
+          "description": "SAVICO suggests verified contractors; invite up to three.",
+          "action": "Find contractors"
+        },
+        "supervision": {
+          "title": "Site supervision",
+          "description": "SVC CHECK (6 visits) · SVC CONTROL (12 visits) by our engineers.",
+          "action": "See supervision plans"
+        },
+        "turnkey": {
+          "title": "Turnkey construction",
+          "description": "SAVICO surveys, signs the contract and builds through to handover.",
+          "action": "Request a call"
+        }
+      }
+    },
+    "dossiers": {
+      "eyebrow": "SAMPLE DOSSIERS",
+      "title": "Explore sample design & estimate dossiers",
+      "viewAll": "See all sample dossiers",
+      "viewOne": "View sample dossier",
+      "items": {
+        "townhouse": {
+          "badge": "Townhouse",
+          "title": "Modern townhouse",
+          "area": "120 m²",
+          "floors": "2 floors",
+          "options": "5 options"
+        },
+        "villa": {
+          "badge": "Villa",
+          "title": "Neoclassical villa",
+          "area": "250 m²",
+          "floors": "3 floors",
+          "options": "8 options"
+        },
+        "resort": {
+          "badge": "Resort villa",
+          "title": "Resort villa",
+          "area": "300 m²",
+          "floors": "1 floor",
+          "options": "5 options"
+        },
+        "garden": {
+          "badge": "Garden house",
+          "title": "Modern garden house",
+          "area": "150 m²",
+          "floors": "1 floor",
+          "options": "2 options"
         }
       }
     },
@@ -332,19 +486,42 @@
       },
       "currency": "đ"
     },
-    "steps": {
-      "input": {
-        "title": "Enter details",
-        "description": "Photograph the plot, then enter your needs and preferred style"
-      },
-      "estimate": {
-        "title": "Get the estimate",
-        "description": "AI produces drawings, 3D renders and a detailed cost estimate"
-      },
-      "dossier": {
-        "title": "Construction dossier",
-        "description": "Render and download the full design and estimate package"
+    "brands": {
+      "label": "TRUSTED BY",
+      "items": {
+        "hoaphat": "Hòa Phát",
+        "inax": "INAX",
+        "viglacera": "Viglacera",
+        "dulux": "Dulux",
+        "ancuong": "An Cường",
+        "cadivi": "CADIVI",
+        "scg": "SCG"
       }
+    },
+    "testimonials": {
+      "label": "WHAT CUSTOMERS SAY",
+      "items": {
+        "tuan": {
+          "quote": "“I got a design I love, costs I understand and a contractor I trust.”",
+          "name": "Minh Tuan",
+          "meta": "Townhouse · Buon Ma Thuot"
+        },
+        "hang": {
+          "quote": "“The process is simple and everything is transparent — that put my mind at ease.”",
+          "name": "Thu Hang",
+          "meta": "Villa · Dak Lak"
+        },
+        "bao": {
+          "quote": "“SAVICO saved me a lot of time and kept construction costs under control.”",
+          "name": "Quoc Bao",
+          "meta": "Villa · Da Lat"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to start your project?",
+      "subtitle": "One photo of your lot — get the design and estimate today.",
+      "action": "Start a project"
     }
   },
   "handbook": {
@@ -355,6 +532,11 @@
         "library": "Template library",
         "news": "News"
       }
+    },
+    "home": {
+      "eyebrow": "HOME-BUILDING HANDBOOK",
+      "title": "Practical knowledge for your build",
+      "viewAll": "See all articles"
     },
     "card": {
       "imageCount": "{count} 3D images"
@@ -536,7 +718,7 @@
     "highlights": {
       "title": "How to use",
       "subtitle": "Get up to speed in under a minute.",
-      "viewAll": "View all"
+      "viewAll": "See all guides"
     },
     "videoComingSoon": "This video is being produced — coming soon.",
     "carouselLabel": "Guide videos",
@@ -1255,9 +1437,11 @@
       "successToast": "Booked - SAVICO will call to confirm within 24 working hours."
     },
     "home": {
-      "title": "1:1 consulting with SAVICO architects",
-      "subtitle": "Book for free - an architect calls to advise you directly",
-      "cta": "Book a free consultation"
+      "title": "Book a session with a SAVICO architect",
+      "subtitle": "An architect suggests the solution that fits your needs.",
+      "eyebrow": "1:1 CONSULTATION",
+      "viewAll": "See all experts",
+      "book": "Book"
     }
   },
   "admin": {
@@ -1923,8 +2107,7 @@
       "nav_plans": "Menu — Plans",
       "nav_consult": "Menu — 1:1 consultation",
       "nav_createProject": "“New project” button in the nav bar",
-      "footer_tagline": "Footer tagline",
-      "footer_workingHours": "Working hours",
+      "footer_tagline": "Brand description in the footer",
       "footer_rights": "Copyright line",
       "assistant_title": "AI assistant name",
       "chatbot_greeting": "AI assistant opening message",
@@ -1936,18 +2119,6 @@
       "landing_hero_subtitle": "Short description under the headline",
       "landing_hero_primaryCta": "Primary button",
       "landing_hero_secondaryCta": "Secondary button",
-      "landing_hero_promises_fast_title": "Promise 1 — title",
-      "landing_hero_promises_fast_hint": "Promise 1 — hint",
-      "landing_hero_promises_accurate_title": "Promise 2 — title",
-      "landing_hero_promises_accurate_hint": "Promise 2 — hint",
-      "landing_hero_promises_secure_title": "Promise 3 — title",
-      "landing_hero_promises_secure_hint": "Promise 3 — hint",
-      "landing_steps_input_title": "Step 1 — name",
-      "landing_steps_input_description": "Step 1 — description",
-      "landing_steps_estimate_title": "Step 2 — name",
-      "landing_steps_estimate_description": "Step 2 — description",
-      "landing_steps_dossier_title": "Step 3 — name",
-      "landing_steps_dossier_description": "Step 3 — description",
       "design_createProject_title": "New-project popup — title",
       "design_createProject_subtitle": "New-project popup — subtitle",
       "design_input_pageTitle": "Title on the progress bar",
@@ -1972,10 +2143,146 @@
       "consult_booking_phoneLabel": "Phone field label",
       "consult_booking_noteLabel": "Note field label",
       "guide_searchPlaceholder": "Search box placeholder",
-      "footer_contactTitle": "“Contact” column title",
-      "footer_quickLinksTitle": "“Quick links” column title",
-      "footer_policyTitle": "“Policies” column title",
-      "footer_socialTitle": "“Connect” column title"
+      "footer_contactTitle": "Contact column title",
+      "landing_hero_eyebrow": "Small label above the headline",
+      "landing_hero_card_title": "Dossier card — title",
+      "landing_hero_card_rows_area_label": "Dossier card — row 1 label",
+      "landing_hero_card_rows_area_value": "Dossier card — row 1 value",
+      "landing_hero_card_rows_type_label": "Dossier card — row 2 label",
+      "landing_hero_card_rows_type_value": "Dossier card — row 2 value",
+      "landing_hero_card_rows_style_label": "Dossier card — row 3 label",
+      "landing_hero_card_rows_style_value": "Dossier card — row 3 value",
+      "landing_hero_card_rows_options_label": "Dossier card — row 4 label",
+      "landing_hero_card_rows_options_value": "Dossier card — row 4 value",
+      "landing_hero_card_totalLabel": "Dossier card — total row label",
+      "landing_hero_card_totalValue": "Dossier card — total row value",
+      "landing_hero_card_cta": "Dossier card — bottom button",
+      "landing_stats_photo_value": "Stat 1 — number",
+      "landing_stats_photo_label": "Stat 1 — caption",
+      "landing_stats_steps_value": "Stat 2 — number",
+      "landing_stats_steps_label": "Stat 2 — caption",
+      "landing_stats_options_value": "Stat 3 — number",
+      "landing_stats_options_label": "Stat 3 — caption",
+      "landing_stats_contractors_value": "Stat 4 — number",
+      "landing_stats_contractors_label": "Stat 4 — caption",
+      "landing_stats_inspections_value": "Stat 5 — number",
+      "landing_stats_inspections_label": "Stat 5 — caption",
+      "landing_hero_note": "Handwritten note, top right",
+      "landing_painPoints_eyebrow": "Small label above the heading",
+      "landing_painPoints_title": "Band heading",
+      "landing_painPoints_subtitle": "Description under the heading",
+      "landing_painPoints_note": "Handwritten note on the right",
+      "landing_painPoints_items_budget_title": "Card 1 (cost) — title",
+      "landing_painPoints_items_budget_description": "Card 1 (cost) — description",
+      "landing_painPoints_items_design_title": "Card 2 (design) — title",
+      "landing_painPoints_items_design_description": "Card 2 (design) — description",
+      "landing_painPoints_items_contractor_title": "Card 3 (contractor) — title",
+      "landing_painPoints_items_contractor_description": "Card 3 (contractor) — description",
+      "landing_painPoints_items_dossier_title": "Card 4 (dossier) — title",
+      "landing_painPoints_items_dossier_description": "Card 4 (dossier) — description",
+      "landing_painPoints_items_supervision_title": "Card 5 (supervision) — title",
+      "landing_painPoints_items_supervision_description": "Card 5 (supervision) — description",
+      "landing_journey_eyebrow": "Small label above the heading",
+      "landing_journey_title": "Five-step heading",
+      "landing_journey_note": "Note on the right of the heading",
+      "landing_journey_cta": "Button under the steps",
+      "landing_journey_ctaHint": "Text next to the button",
+      "landing_journey_items_project_title": "Step 01 — title",
+      "landing_journey_items_project_description": "Step 01 — description",
+      "landing_journey_items_design_title": "Step 02 — title",
+      "landing_journey_items_design_description": "Step 02 — description",
+      "landing_journey_items_dossier_title": "Step 03 — title",
+      "landing_journey_items_dossier_description": "Step 03 — description",
+      "landing_journey_items_contractor_title": "Step 04 — title",
+      "landing_journey_items_contractor_description": "Step 04 — description",
+      "landing_journey_items_build_title": "Step 05 — title",
+      "landing_journey_items_build_description": "Step 05 — description",
+      "landing_services_eyebrow": "Small label above the heading",
+      "landing_services_title": "Service band heading",
+      "landing_services_subtitle": "Description under the heading",
+      "landing_services_viewAll": "“See all packages” link",
+      "landing_services_note": "Text on the sticky note",
+      "landing_services_items_design_title": "Card 1 (design) — title",
+      "landing_services_items_design_description": "Card 1 (design) — description",
+      "landing_services_items_design_action": "Card 1 (design) — button",
+      "landing_services_items_contractors_title": "Card 2 (contractors) — title",
+      "landing_services_items_contractors_description": "Card 2 (contractors) — description",
+      "landing_services_items_contractors_action": "Card 2 (contractors) — button",
+      "landing_services_items_supervision_title": "Card 3 (supervision) — title",
+      "landing_services_items_supervision_description": "Card 3 (supervision) — description",
+      "landing_services_items_supervision_action": "Card 3 (supervision) — button",
+      "landing_services_items_turnkey_title": "Card 4 (turnkey) — title",
+      "landing_services_items_turnkey_description": "Card 4 (turnkey) — description",
+      "landing_services_items_turnkey_action": "Card 4 (turnkey) — button",
+      "landing_dossiers_eyebrow": "Small label above the heading",
+      "landing_dossiers_title": "Sample-dossier heading",
+      "landing_dossiers_viewAll": "“See all” link",
+      "landing_dossiers_viewOne": "Per-card link",
+      "landing_dossiers_items_townhouse_badge": "Card 1 (townhouse) — badge",
+      "landing_dossiers_items_townhouse_title": "Card 1 (townhouse) — title",
+      "landing_dossiers_items_townhouse_area": "Card 1 (townhouse) — area",
+      "landing_dossiers_items_townhouse_floors": "Card 1 (townhouse) — floors",
+      "landing_dossiers_items_townhouse_options": "Card 1 (townhouse) — options",
+      "landing_dossiers_items_villa_badge": "Card 2 (villa) — badge",
+      "landing_dossiers_items_villa_title": "Card 2 (villa) — title",
+      "landing_dossiers_items_villa_area": "Card 2 (villa) — area",
+      "landing_dossiers_items_villa_floors": "Card 2 (villa) — floors",
+      "landing_dossiers_items_villa_options": "Card 2 (villa) — options",
+      "landing_dossiers_items_resort_badge": "Card 3 (resort) — badge",
+      "landing_dossiers_items_resort_title": "Card 3 (resort) — title",
+      "landing_dossiers_items_resort_area": "Card 3 (resort) — area",
+      "landing_dossiers_items_resort_floors": "Card 3 (resort) — floors",
+      "landing_dossiers_items_resort_options": "Card 3 (resort) — options",
+      "landing_dossiers_items_garden_badge": "Card 4 (garden) — badge",
+      "landing_dossiers_items_garden_title": "Card 4 (garden) — title",
+      "landing_dossiers_items_garden_area": "Card 4 (garden) — area",
+      "landing_dossiers_items_garden_floors": "Card 4 (garden) — floors",
+      "landing_dossiers_items_garden_options": "Card 4 (garden) — options",
+      "handbook_home_eyebrow": "Small label above the heading (home)",
+      "handbook_home_title": "Handbook block heading (home)",
+      "handbook_home_viewAll": "“See all articles” link",
+      "consult_home_eyebrow": "Small label above the heading (home)",
+      "consult_home_viewAll": "“See all experts” link",
+      "consult_home_book": "Booking button on the card",
+      "landing_brands_label": "Trusted-by label",
+      "landing_brands_items_hoaphat": "Brand name — Hòa Phát",
+      "landing_brands_items_inax": "Brand name — INAX",
+      "landing_brands_items_viglacera": "Brand name — Viglacera",
+      "landing_brands_items_dulux": "Brand name — Dulux",
+      "landing_brands_items_ancuong": "Brand name — An Cường",
+      "landing_brands_items_cadivi": "Brand name — CADIVI",
+      "landing_brands_items_scg": "Brand name — SCG",
+      "landing_testimonials_label": "Testimonials label",
+      "landing_testimonials_items_tuan_quote": "Review 1 — quote",
+      "landing_testimonials_items_tuan_name": "Review 1 — name",
+      "landing_testimonials_items_tuan_meta": "Review 1 — project & place",
+      "landing_testimonials_items_hang_quote": "Review 2 — quote",
+      "landing_testimonials_items_hang_name": "Review 2 — name",
+      "landing_testimonials_items_hang_meta": "Review 2 — project & place",
+      "landing_testimonials_items_bao_quote": "Review 3 — quote",
+      "landing_testimonials_items_bao_name": "Review 3 — name",
+      "landing_testimonials_items_bao_meta": "Review 3 — project & place",
+      "landing_cta_title": "Final CTA heading",
+      "landing_cta_subtitle": "Final CTA description",
+      "landing_cta_action": "Final CTA button",
+      "footer_brandTagline": "Small line under the logo (footer)",
+      "footer_productTitle": "Product column title",
+      "footer_supportTitle": "Support column title",
+      "footer_aboutTitle": "About column title",
+      "footer_emailLabel": "Email row label",
+      "footer_addressLabel": "Address row label",
+      "footer_links_design": "Footer link — Design & estimate",
+      "footer_links_services": "Footer link — Service packages",
+      "footer_links_contractors": "Footer link — Find a contractor",
+      "footer_links_supervision": "Footer link — Site supervision",
+      "footer_links_turnkey": "Footer link — Turnkey construction",
+      "footer_links_guide": "Footer link — How to use",
+      "footer_links_handbook": "Footer link — Handbook",
+      "footer_links_consult": "Footer link — 1:1 consultation",
+      "footer_links_faq": "Footer link — FAQ",
+      "footer_links_about": "Footer link — About us",
+      "footer_links_privacy": "Footer link — Privacy policy",
+      "footer_links_terms": "Footer link — Terms of use"
     },
     "subscriptions": {
       "description": "One row per subscription period. Extend manually for offline payments; cancelling stops the period immediately but keeps it for reconciliation.",
@@ -2131,7 +2438,13 @@
     "imageFields": {
       "home_style_modern": "Facade photo — left side of the estimate showcase",
       "home_render_villa": "Render photo — the showcase’s “3D render” tab",
-      "design_render_villa": "Sample render — dossier preview cards in step 3"
+      "design_render_villa": "Sample render — dossier preview cards in step 3",
+      "home_home_hero": "Home hero background photo",
+      "home_home_services": "Illustration beside the service band",
+      "home_home_dossierTownhouse": "Sample dossier card 1 (townhouse)",
+      "home_home_dossierVilla": "Sample dossier card 2 (villa)",
+      "home_home_dossierResort": "Sample dossier card 3 (resort)",
+      "home_home_dossierGarden": "Sample dossier card 4 (garden)"
     },
     "pageSections": {
       "home_showcase": "Estimate showcase (right of the hero)",
@@ -2156,9 +2469,8 @@
       "shell_footer": "Footer (every page)",
       "shell_assistant": "AI assistant, bottom right",
       "shell_notFound": "404 page for broken links",
-      "home_hero": "Hero — headline & the two buttons",
+      "home_hero": "Hero block — background photo, headline & buttons",
       "home_promises": "The three promises under the buttons",
-      "home_steps": "3-step strip under the hero",
       "home_guideBlock": "“How-to guide” block (under the 3 steps)",
       "home_consultBlock": "“1:1 consultation” block at the bottom",
       "account_side": "Left column — profile & “My plan” card",
@@ -2166,7 +2478,17 @@
       "design_create": "New-project popup",
       "design_input": "Step 1 — input",
       "design_estimate": "Step 2 — estimate table",
-      "consult_cards": "Architect cards in the grid"
+      "consult_cards": "Architect cards in the grid",
+      "home_heroCard": "“Project dossier” card floating on the hero",
+      "home_stats": "Five-number strip under the hero",
+      "home_painPoints": "Green band — “The hard part is keeping it all under control”",
+      "home_journey": "Five-step band — “From idea to finished home”",
+      "home_services": "Green band — “SAVICO service packages”",
+      "home_dossiers": "“Sample dossiers” block (4 cards)",
+      "home_handbookBlock": "“Handbook” block on the home page",
+      "home_brands": "“Trusted by” strip",
+      "home_testimonials": "“What customers say” strip",
+      "home_cta": "Final CTA band"
     }
   },
   "contractors": {
@@ -2180,7 +2502,7 @@
       "invited": "Invited",
       "inviteFull": "{max} contractors already invited",
       "verified": "Verified",
-      "similarProjects": "{count} similar projects",
+      "similarProjects": "{count} completed projects",
       "distance": "{km} km from site",
       "serviceAreas": "Service area",
       "surveyWithin": "Survey within {hours}h",
@@ -2190,7 +2512,7 @@
       "noPriceNote": "SAVICO does not display contractor quotes on the platform.",
       "fromDesignPackage": "Brief from a design package",
       "similarShort": "{count} projects",
-      "similarSuffix": "similar",
+      "similarSuffix": "completed",
       "distanceShort": "{km} km",
       "distanceSuffix": "from the site",
       "surveyEarly": "Can survey early",
@@ -2559,7 +2881,7 @@
       "compareCheckbox": "Compare",
       "whyTitle": "Why SAVICO suggests these",
       "why1": "Matches your building type",
-      "why2": "{count} similar projects",
+      "why2": "{count} completed projects",
       "why3": "Can survey within {hours}h",
       "projectLabel": "Selected project",
       "invitedPill": "Invited {used}/{max} · {left} left",

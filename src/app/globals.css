@@ -508,6 +508,20 @@
     background-color: color-mix(in oklch, var(--brand-orange) 92%, black);
   }
 
+  /* Nền xanh rất nhạt nhưng ĐẶC — dùng cho con số 01…05 nằm đè lên viền trên
+     của thẻ: `bg-primary/10` trong suốt nên đường viền lòi qua giữa con số. */
+  .bg-primary-soft {
+    background-color: color-mix(in oklch, var(--primary) 12%, var(--card));
+  }
+
+  /* Chữ viết tay — các dòng ghi chú nghiêng trên trang chủ (ảnh mockup khách
+     gửi). Viết thành class ở đây chứ KHÔNG khai `--font-hand` trong `@theme
+     inline`: token kiểu đó không sinh ra tiện ích `font-hand`, class im lặng
+     không ăn và chữ rơi về font body. */
+  .font-hand {
+    font-family: var(--font-handwriting), 'Segoe Script', cursive;
+  }
+
   /* Chữ tô gradient thương hiệu (accent tiêu đề hero). */
   .brand-gradient-text {
     background-image: linear-gradient(90deg, var(--brand-gradient-from), var(--brand-gradient-to));
