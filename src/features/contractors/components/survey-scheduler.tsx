@@ -557,17 +557,10 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
             </div>
           </div>
 
-          {/* Ba nút nằm NGOÀI thẻ, đúng ảnh S16. */}
-          <div className='flex flex-wrap items-start justify-between gap-3'>
-            <Button
-              type='button'
-              variant='outline'
-              className='border-primary/50 text-primary-strong'
-              onClick={() => form.setValue('note', t('notePlaceholder'), { shouldDirty: true })}
-            >
-              {t('suggestNote')}
-            </Button>
-
+          {/* Hai nút nằm NGOÀI thẻ. Bản mô tả S16 còn nút "Đề xuất ghi chú" nhưng
+              khách đã bỏ: nó chỉ chép nguyên placeholder vào ô ghi chú, tức là
+              gửi cho nhà thầu đúng cái câu mẫu khách chưa đọc. */}
+          <div className='flex flex-wrap items-start justify-end gap-3'>
             <div className='flex flex-col items-end gap-2'>
               <div className='flex flex-wrap gap-3'>
                 <Button
