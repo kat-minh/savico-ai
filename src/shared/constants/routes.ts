@@ -143,6 +143,23 @@ export const checkoutDoneRoute = (orderId: string) => `/checkout/${orderId}/done
  * nên projectId nằm ngay trong đường dẫn (giống luồng thiết kế 3 bước).
  * ======================================================================== */
 
+/**
+ * Mã dự án GIẢ cho chế độ XEM THỬ danh sách nhà thầu.
+ *
+ * Khách bấm "Xem nhà thầu" ở landing khi chưa có hồ sơ nào thì vẫn phải xem được
+ * danh sách — trước đây chỗ đó tự đẻ một hồ sơ rỗng rồi ném thẳng vào Bước 1,
+ * tức là bắt khai báo trước khi cho xem hàng.
+ *
+ * Dùng một mã giả thay vì dựng thêm bộ route không có `projectId`: mọi màn con
+ * (S12, S13, S15) giữ nguyên đường dẫn và mọi liên kết giữa chúng vẫn ở lại
+ * trong chế độ xem thử. Mã dự án thật luôn có dạng `SVC-YYYY-NNNN` nên không
+ * đụng nhau.
+ */
+export const CONTRACTOR_PREVIEW_ID = 'preview'
+
+/** Danh sách nhà thầu ở chế độ xem thử — chưa gắn hồ sơ dự án nào. */
+export const contractorPreviewRoute = () => `${ROUTES.CONTRACTORS}/${CONTRACTOR_PREVIEW_ID}/matches`
+
 /** Bước 1 — Tự tạo / chỉnh sửa hồ sơ dự án (S10). */
 export const contractorBriefRoute = (projectId: string) => `${ROUTES.CONTRACTORS}/${projectId}/profile`
 

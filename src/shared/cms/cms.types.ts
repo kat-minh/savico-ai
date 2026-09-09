@@ -195,8 +195,16 @@ export interface PlanGift {
   /** Khối "+ Ưu đãi thêm": phí gói được khấu trừ vào giá trị hợp đồng thi công. */
   extraTitle: string
   extraBody: string
-  /** Dòng điều kiện áp dụng ở đáy popup. */
+  /** Dòng điều kiện ĐẦY ĐỦ ở đáy popup S02. */
   conditions: string
+  /** Bản rút gọn in trong khối quà ở thẻ gói (S01) — bản mô tả ghi hai câu khác nhau. */
+  conditionsShort: string
+  /**
+   * Ảnh hộp quà / bộ sản phẩm — Hình S01 (khối quà thẻ PRO) và Hình S02 (popup).
+   * Khách gửi file sau; còn trống thì hai chỗ đó dùng icon cùng khung, bố cục
+   * không đổi khi ảnh về.
+   */
+  imageUrl?: string
 }
 
 /** Một gói đăng ký hiển thị trên trang Gói đăng ký (mục VII, Hình 13). */
@@ -765,6 +773,8 @@ export interface CmsChangeRequest {
   status: CmsChangeRequestStatus
   /** Hạn bên kia phải trả lời (chỉ CR đang chờ). */
   dueAt?: string
+  /** Thời điểm bên kia duyệt / từ chối — mốc của phiên bản hồ sơ sinh ra. */
+  decidedAt?: string
   reason: string
   /** Phản hồi của bên duyệt. */
   response?: string

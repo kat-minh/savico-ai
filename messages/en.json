@@ -240,6 +240,7 @@
     "guest": "Guest",
     "guestHint": "Sign in to save and revisit your projects",
     "plans": "Pricing",
+    "plansGuest": "Pricing",
     "consult": "1:1 consulting",
     "admin": "Admin area",
     "contractors": "Find a contractor"
@@ -974,7 +975,9 @@
         "description": "Project \"{name}\" and all of its input, estimate and dossier data will be deleted. This cannot be undone.",
         "confirm": "Delete project",
         "success": "Project deleted."
-      }
+      },
+      "createdAt": "Created {date}",
+      "progressLabel": "Design & estimate progress"
     },
     "phonePrompt": {
       "title": "Add your phone number",
@@ -993,7 +996,15 @@
       "email": "Email",
       "edit": "Edit",
       "notProvided": "Not set",
-      "description": "Used to pre-fill your construction dossier."
+      "description": "Used to pre-fill your construction dossier.",
+      "editDialog": {
+        "title": "Edit your details",
+        "description": "Update your full name and contact phone number.",
+        "phonePlaceholder": "e.g. 0912 345 678",
+        "emailLocked": "Your email is your sign-in account and cannot be changed here.",
+        "submit": "Save changes",
+        "success": "Account details updated."
+      }
     },
     "projects": {
       "title": "My projects",
@@ -1010,7 +1021,10 @@
         "label": "Project options",
         "rename": "Rename",
         "delete": "Delete"
-      }
+      },
+      "progressLabel": "Design & estimate progress",
+      "stepShort": "Step {step}",
+      "floorArea": "{area} m²"
     },
     "favorites": {
       "title": "Saved favorites",
@@ -1037,7 +1051,7 @@
     }
   },
   "plans": {
-    "title": "SAVICO design packages",
+    "title": "SVC design packages",
     "subtitle": "Create options – Compare choices – Optimise the budget before you build",
     "tabs": {
       "design": "Design packages",
@@ -1054,6 +1068,7 @@
       "pro": "Optimise budget"
     },
     "popular": "Most popular",
+    "popularShort": "Popular",
     "oneTime": "One-time payment",
     "featuresTitleByTier": {
       "basic": "Includes these features",
@@ -1071,7 +1086,7 @@
     },
     "ctaBand": {
       "title": "Start designing your home today",
-      "subtitle": "Pick the package that fits and get advice from the SAVICO team.",
+      "subtitle": "Pick the package that fits and get advice from the SVC team.",
       "action": "Sign up now"
     },
     "gift": {
@@ -1081,7 +1096,8 @@
       "valueMillionsUnit": "million VND",
       "valuePrefix": "worth",
       "understood": "Got it",
-      "conditionsLabel": "Terms"
+      "conditionsLabel": "Terms",
+      "imageSlot": "Gift photo — awaiting client asset"
     },
     "comparison": {
       "title": "Compare the three packages",
@@ -1090,7 +1106,7 @@
       "groups": {
         "core": "Core allowances",
         "design": "Design & estimate features",
-        "compare": "Compare & optimise",
+        "compare": "Comparison & optimisation features",
         "support": "Support",
         "proOnly": "PRO exclusive"
       },
@@ -1138,7 +1154,7 @@
         "advisoryPriority": "Priority advisory",
         "advisoryExpert": "One-on-one with an expert",
         "giftValue": "European bathroom set worth 100 million VND",
-        "giftConditionValue": "Applies when the customer takes full delivery with SAVICO"
+        "giftConditionValue": "Applies when the customer takes full delivery with SVC"
       }
     },
     "value": {
@@ -1175,8 +1191,8 @@
     "notes": {
       "payment": "Payment by bank-transfer QR.",
       "credits": "Credits never expire. Project data stays with your account.",
-      "estimate": "Detailed estimates are viewed on the SAVICO platform.",
-      "gift": "The PRO gift applies when the customer takes full delivery with SAVICO; see the programme terms.",
+      "estimate": "Detailed estimates are viewed on the SVC platform.",
+      "gift": "(*) The PRO gift applies when the customer takes full delivery with SVC; see the programme terms.",
       "scope": "The exported dossier is for working with contractors. It does not replace technical design documents or building-permit paperwork."
     }
   },
@@ -2166,12 +2182,23 @@
       "verified": "Verified",
       "similarProjects": "{count} similar projects",
       "distance": "{km} km from site",
-      "serviceAreas": "Serves",
+      "serviceAreas": "Service area",
       "surveyWithin": "Survey within {hours}h",
       "accepting": "Accepting projects",
       "notAccepting": "Not accepting projects",
       "reviewCount": "({count} reviews)",
-      "noPriceNote": "SAVICO does not display contractor quotes on the platform."
+      "noPriceNote": "SAVICO does not display contractor quotes on the platform.",
+      "fromDesignPackage": "Brief from a design package",
+      "similarShort": "{count} projects",
+      "similarSuffix": "similar",
+      "distanceShort": "{km} km",
+      "distanceSuffix": "from the site",
+      "surveyEarly": "Can survey early",
+      "readyToStart": "Ready to start",
+      "surveyLabel": "Can survey",
+      "surveyHours": "within {hours}h",
+      "acceptingLabel": "Accepting",
+      "acceptingSuffix": "projects"
     },
     "scope": {
       "turnkey": "Turnkey construction",
@@ -2217,7 +2244,8 @@
       "sent": "Sent",
       "received": "Received",
       "accepted": "Contractor accepted",
-      "done": "Completed"
+      "done": "Completed",
+      "receivedWaiting": "Received · waiting for contractor"
     },
     "statusMeaning": {
       "sent": "The invitation and brief have been sent.",
@@ -2228,10 +2256,22 @@
     "landing": {
       "hero": {
         "title": "Find the right contractor for your build",
-        "subtitle": "Connect with SAVICO's verified contractor network: review capability, compare transparently and pick the right partner for your build.",
+        "subtitle": "Connect with SAVICO's network of trusted contractors — search, compare capability and pick the right partner, transparently and with confidence.",
         "createBrief": "Create a brief",
         "bestMatch": "Best match for your project",
-        "viewContractors": "Browse contractors"
+        "viewContractors": "Browse contractors",
+        "card": {
+          "distance": "Distance",
+          "rating": "Rating",
+          "completed": "Projects completed",
+          "similar": "Similar projects",
+          "survey": "Can survey",
+          "status": "Status",
+          "distanceValue": "{km} km",
+          "completedValue": "{count} projects",
+          "similarValue": "{count} similar projects",
+          "surveyValue": "within {hours}h"
+        }
       },
       "promises": {
         "free": "Free for homeowners",
@@ -2250,23 +2290,66 @@
         "schedule": "Availability & survey lead time"
       },
       "ranking": {
-        "title": "Featured contractors",
-        "note": "Ranking = project fit + distance + experience + rating + availability + survey lead time.",
+        "note": "Ranking = project fit + distance + experience + rating + availability + survey readiness",
         "detail": "View details",
-        "choose": "Select & send brief"
+        "choose": "Select & send brief",
+        "tabs": {
+          "match": "Best match",
+          "distance": "Nearest",
+          "rating": "Best rated",
+          "survey": "Earliest survey"
+        },
+        "surveyWithin": "Can survey within {hours}h",
+        "bestMatch": "Best match"
       },
       "compare": {
         "title": "Transparent comparison",
-        "lead": "The comparison table covers CAPABILITY only. Quotes are sent to you directly by the contractor after the site survey.",
         "criterion": "Criterion",
-        "note": "All information is compiled from contractor records and details supplied by the contractor."
+        "note": "All information is compiled from contractor records and details supplied by the contractor.",
+        "columns": {
+          "a": "Contractor A",
+          "b": "Contractor B",
+          "c": "Contractor C"
+        },
+        "rows": {
+          "duration": {
+            "label": "Build time",
+            "a": "120 days",
+            "b": "130 days",
+            "c": "115 days"
+          },
+          "scope": {
+            "label": "What the quote covers",
+            "a": "See detail",
+            "b": "See detail",
+            "c": "See detail"
+          },
+          "material": {
+            "label": "Suggested material grade",
+            "a": "Mid – Good",
+            "b": "Mid",
+            "c": "Good – Premium"
+          },
+          "warranty": {
+            "label": "Warranty",
+            "a": "24 months",
+            "b": "24 months",
+            "c": "36 months"
+          },
+          "remark": {
+            "label": "Notes",
+            "a": "–",
+            "b": "–",
+            "c": "–"
+          }
+        }
       },
       "safety": {
         "title": "Safe & transparent",
         "privacyTitle": "Contact details protected",
         "privacyBody": "Your phone and email are only shared once you confirm a survey appointment.",
-        "recordTitle": "Records kept on the platform",
-        "recordBody": "Every invitation carries its own code and timestamps, so nothing gets lost in translation.",
+        "recordTitle": "Reports kept on the platform",
+        "recordBody": "Every report has its own code — nothing gets garbled in retelling.",
         "reviewTitle": "Reviews from real projects",
         "reviewBody": "Only customers who worked through SAVICO can review a contractor."
       },
@@ -2274,9 +2357,9 @@
         "title": "Where each service stops",
         "designTitle": "Design package",
         "designBody": "Design + estimated quantities + cost estimate",
-        "arrow": "Design done → Find a contractor",
+        "arrow": "Design finished\n→ Find a contractor",
         "findTitle": "Find a contractor",
-        "findBody": "Find the builder + site survey + real-world assessment"
+        "findBody": "Find who builds it + site visit + real reviews + comparison"
       },
       "faq": {
         "title": "Frequently asked questions",
@@ -2324,7 +2407,6 @@
         "ward": "Ward",
         "budget": "Expected budget",
         "budgetSuffix": "₫",
-        "budgetHint": "Only SAVICO sees this, to match you with suitable contractors — it is not part of the brief sent to them.",
         "startWindow": "Expected start",
         "street": "Street address",
         "streetPlaceholder": "e.g. 12 Nguyen Tat Thanh",
@@ -2349,16 +2431,23 @@
         "tooLarge": "{name} is larger than 10 MB.",
         "wrongType": "{name} is not a supported file type."
       },
-      "notice": "A self-made brief does not include drawings or cost estimates issued by SAVICO.",
+      "notice": "Note: a self-made brief does not include drawings or cost estimates issued by SAVICO.",
       "noticeAction": "See the Design & Estimate package",
-      "saveDraft": "Save draft",
-      "continue": "Continue: review brief",
-      "draftSaved": "Project brief draft saved."
+      "continue": "Continue: review brief"
     },
     "review": {
       "back": "Back to details & needs",
       "title": "Review your project brief",
       "subtitle": "Confirm the details before SAVICO starts matching contractors.",
+      "projectCard": {
+        "title": "Project",
+        "type": "Building type",
+        "scale": "Scale",
+        "address": "Address",
+        "budget": "Expected budget",
+        "budgetHidden": "Visible to SAVICO only",
+        "budgetLabel": "Budget"
+      },
       "siteTitle": "Build details",
       "needsTitle": "What you need built",
       "documentsTitle": "Attached documents",
@@ -2374,7 +2463,6 @@
       "quoteNote": "Contractors will quote based on the details and documents you provide, after surveying the site.",
       "confirm": "I confirm the information above is correct.",
       "submit": "Finish & find contractors",
-      "saveAndExit": "Save draft and exit",
       "incomplete": "Some required details are missing — go back to step 1 to complete them.",
       "labels": {
         "name": "Project name",
@@ -2412,12 +2500,13 @@
       "find": {
         "title": "Find the right contractor",
         "subtitle": "Choose, compare and pick a contractor yourself",
-        "p1": "SAVICO suggests contractors near your site",
-        "p2": "Review capability records & real projects",
-        "p3": "Invite up to 3 contractors to survey",
-        "p4": "Contractors survey, then quote you directly",
-        "p5": "You make the final choice",
-        "action": "Find contractors"
+        "p1": "SAVICO suggests 3–5 matching contractors",
+        "p2": "See credentials & real projects",
+        "p3": "Pick 2–3 contractors for a site visit",
+        "p4": "Receive quotes and compare in detail",
+        "p5": "Get a recommendation from SAVICO",
+        "action": "Find contractors",
+        "p6": "Make the final choice yourself"
       },
       "turnkey": {
         "title": "Full delivery with SAVICO",
@@ -2435,7 +2524,8 @@
         "p1": "One-on-one consultation with an architect",
         "p2": "Design direction that fits your budget",
         "p3": "Answers on the process and the platform",
-        "action": "Book a consultation"
+        "action": "Book a consultation",
+        "p4": "Already included in your plan"
       },
       "turnkeyForm": {
         "title": "Register for turnkey delivery",
@@ -2453,7 +2543,8 @@
         "noteHint": "The clearer the description, the better SAVICO can prepare the survey. Optional.",
         "submit": "Send request"
       },
-      "turnkeyRegistered": "Noted. The SAVICO team will contact you during the next working hours."
+      "turnkeyRegistered": "Noted. The SAVICO team will contact you during the next working hours.",
+      "exclusive": "Exclusive perk"
     },
     "matches": {
       "title": "Suggested contractors",
@@ -2468,10 +2559,22 @@
       "compareCheckbox": "Compare",
       "whyTitle": "Why SAVICO suggests these",
       "why1": "Matches your building type",
-      "why2": "Has similar projects nearby",
-      "why3": "Has an early survey slot",
-      "limitNote": "Each project may invite up to {max} contractors. {used}/{max} invited.",
-      "trackInvites": "Track invitations"
+      "why2": "{count} similar projects",
+      "why3": "Can survey within {hours}h",
+      "projectLabel": "Selected project",
+      "invitedPill": "Invited {used}/{max} · {left} left",
+      "viewInvites": "View invitations",
+      "switchProject": "Switch project",
+      "regionLabel": "Region",
+      "radiusShort": "Radius",
+      "regions": {
+        "north": "North",
+        "central": "Central",
+        "south": "South"
+      },
+      "previewTitle": "Preview mode — create a project brief to invite contractors",
+      "previewDescription": "A brief lets you keep your shortlist and send invitations.",
+      "previewAction": "Create a project brief"
     },
     "firm": {
       "tabs": {
@@ -2502,23 +2605,28 @@
         "since": "Partner since {since}",
         "scanTitle": "Scanned partnership agreement",
         "agreement": "Partnership agreement",
-        "code": "Record code",
-        "signedAt": "Signed on",
-        "pages": "Pages",
-        "state": "Status",
+        "code": "Document code:",
+        "signedAt": "Signed on:",
+        "pages": "Pages:",
+        "state": "Status:",
         "stateVerified": "Verified",
         "checked": "SAVICO checked the scan against the company records.",
         "page": "Page {current} of {total}",
         "fullscreen": "View full screen",
         "download": "Download PDF",
         "unavailable": "The scan is being updated by the operations team.",
-        "privacyNote": "Only the information page is shown, with both parties' confidential content redacted."
+        "privacyNote": "Only the information page is shown, with both parties' confidential content redacted.",
+        "parties": "SAVICO × {name}",
+        "zoomOut": "Zoom out",
+        "zoomIn": "Zoom in",
+        "zoomFit": "Fit to frame",
+        "goToPage": "Go to page {page}"
       }
     },
     "compare": {
       "title": "Compare contractor records",
       "subtitle": "Weigh up capability before sending an invitation to quote.",
-      "lead": "This compares CAPABILITY records before you send invitations — the table holds no pricing.",
+      "lead": "This compares capability profiles before you send a quote request.",
       "criterion": "Criterion",
       "criteria": {
         "rating": "Rating",
@@ -2533,12 +2641,14 @@
       "legalVerified": "Verified",
       "select": "Select contractor",
       "selected": "Contractor selected",
-      "footerHint": "Select up to {max} contractors to invite",
+      "footerHint": "Pick up to {max} of {total} contractors to invite",
       "footerSelected": "Selected: {names}",
       "footerEmpty": "No contractor selected yet",
       "back": "Back to list",
       "invite": "Invite selected contractors to quote",
-      "tooFew": "Select at least {min} contractors to compare."
+      "tooFew": "Select at least {min} contractors to compare.",
+      "surveyValue": "Within {hours}h",
+      "warrantyValue": "{months} months"
     },
     "survey": {
       "title": "Choose a survey time",
@@ -2555,7 +2665,7 @@
       "callAhead": "The contractor will call 30 minutes ahead to confirm.",
       "noteTitle": "Note for the survey",
       "notePlaceholder": "e.g. Survey the existing site and discuss turnkey scope.",
-      "suggestNote": "Suggest a note",
+      "suggestNote": "Suggest a note (optional)",
       "locationTitle": "Survey location",
       "contactTitle": "Contact details for confirmation",
       "phone": "Phone number",
@@ -2565,7 +2675,22 @@
       "submitNext": "Confirm & pick the next contractor",
       "privacy": "Your details stay private and are only shared with the contractor after confirmation.",
       "limitReached": "This project already has {max} invitations — no more contractors can be invited.",
-      "invalid": "Some required details are missing — check the date, time slot and contact details."
+      "invalid": "Some required details are missing — check the date, time slot and contact details.",
+      "weekdays": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "editContact": "Edit",
+      "contactMissing": "Not set",
+      "saveContact": "Save",
+      "cancelEdit": "Discard changes"
     },
     "sent": {
       "title": "Invitation sent & survey booked",
@@ -2580,19 +2705,19 @@
       "supportBody": "We will call to confirm the survey appointment, clarify your needs and coordinate the details with the contractor.",
       "supportTime": "Expected: during the next working hours.",
       "track": "Track this request",
-      "backToList": "Back to contractor list",
       "privacy": "Your contact details stay private until the survey appointment is confirmed.",
-      "afterNote": "From here on, the survey, quote, negotiation and contract happen directly between you and the contractor."
+      "statusSent": "Sent"
     },
     "invitations": {
       "title": "Invitations to quote",
       "subtitle": "You have invited {count} contractors to quote. Statuses are updated by the SAVICO support team.",
-      "counter": "{used} of {max} contractors invited",
+      "counter": "Invited <b>{used} / {max}</b> contractors max",
       "empty": "No invitations sent for this project yet.",
+      "back": "Back to the contractor list",
       "emptyAction": "See suggested contractors",
-      "code": "Invitation {code}",
-      "sentAt": "Sent at {time}",
-      "dossier": "Brief {version} · {count} files",
+      "code": "Invitation code <b>{code}</b>",
+      "sentAt": "Sent at <b>{time}</b>",
+      "dossier": "Dossier <b>{version} · {count} files</b>",
       "updatedBy": "Updated {time} · SAVICO support team",
       "surveyAt": "Survey {date}, {slot}",
       "meaningTitle": "What each status means",
@@ -2609,10 +2734,34 @@
       "supportAction": "Contact the support team",
       "footerNote": "Once a contractor accepts, the two of you deal directly on the survey, the quote and the contract. SAVICO stores no quotes or amounts. To stop an invitation or change contractor, contact the support team.",
       "supportToast": "The SAVICO support team will contact you on your registered phone number."
+    },
+    "picker": {
+      "title": "Pick a project to find contractors",
+      "subtitle": "Each project can invite up to {max} contractors. The brief we send carries no prices or budget.",
+      "emptyBadge": "No project yet",
+      "emptyTitle": "You have no projects yet",
+      "emptyDescription": "Create a free brief to start finding contractors, or buy a design package to get drawings and quantities with it.",
+      "createFirst": "Create a project brief",
+      "viewPlans": "View design packages",
+      "emptyFootnote": "Self-made briefs are free · up to {max} contractors per project",
+      "fromPlan": "From design package",
+      "notInvited": "Not invited yet",
+      "invitedCount": "Invited {used}/{max}",
+      "choose": "Select",
+      "current": "Selected",
+      "viewInvites": "View invitations",
+      "rowMenu": "Brief options",
+      "viewBrief": "View brief",
+      "noOther": "You have no other projects.",
+      "createMore": "New project brief (free)",
+      "buyPlan": "Buy a design package for drawings & quantities",
+      "contracted": "Contractor settled",
+      "untitled": "Untitled brief"
     }
   },
   "checkout": {
     "headerSupport": "Need help?",
+    "headerSupportAction": "Contact SAVI",
     "steps": {
       "plan": "Choose plan",
       "confirm": "Confirm order",
@@ -2646,6 +2795,7 @@
       "address": "Address",
       "invoiceEmail": "Invoice email",
       "orderTitle": "Your order",
+      "creditsNeverExpire": "Credits never expire.",
       "changePlan": "Change plan",
       "forProject": "For project {project}",
       "discountLabel": "Discount code",
@@ -2659,8 +2809,8 @@
       "vat": "VAT included.",
       "submit": "Proceed to payment",
       "refund": "Full refund within {hours} hours if you have not used any credits.",
-      "noCardNote": "SAVICO never collects or stores card details.",
-      "terms": "I have read and agree to SAVICO's Terms of Use and Payment Policy.",
+      "noCardNote": "SAVICO never collects or stores your payment details.",
+      "terms": "I have read and agree to the <terms>Terms of Use</terms> and <payment>Payment Policy</payment> of SAVICO.",
       "termsRequired": "Please accept the terms before paying.",
       "missingProduct": "We could not find the plan you picked. Go back to pricing and choose again.",
       "backToPlans": "Back to pricing"
@@ -2710,6 +2860,7 @@
       "reasonsTitle": "Common reasons",
       "reasonExpired": "The QR code expired",
       "reasonContent": "The transfer reference was wrong",
+      "reasonIncomplete": "The transfer was not completed",
       "reasonBank": "The bank is processing slowly",
       "retry": "Try paying again",
       "support": "Contact support",
@@ -2717,10 +2868,10 @@
     },
     "done": {
       "title": "Payment successful",
-      "designActivated": "Your {plan} plan is active — you can start right away.",
+      "designActivated": "{plan} plan activated!\nYou can start right away",
       "supervisionActivated": "{plan} is now active for your project.",
-      "subtitle": "Your credits are ready. Pick how you want to start below.",
-      "planTitle": "My plan",
+      "subtitle": "Your credits are ready.\nPick a way to start on the right.",
+      "planTitle": "Active plan",
       "activated": "Active",
       "designCredits": "{count} design options",
       "editCredits": "{count} revision credits",
@@ -2767,8 +2918,8 @@
       "handover": "Overall inspection, defect fixing, as-built handover."
     },
     "pricing": {
-      "title": "SAVICO construction supervision",
-      "subtitle": "Engineer checks at key milestones, paired with digital tracking on SAVICO",
+      "title": "SVC construction supervision",
+      "subtitle": "Milestone inspections combined with digital tracking on the SVC platform",
       "recommended": "Recommended for homes",
       "perProject": "/ project",
       "duration": "up to {months} months",
@@ -2776,12 +2927,11 @@
       "noInspection": "No engineer visits on site",
       "free": "Free",
       "choose": "Choose {tier}",
-      "chooseSelf": "Continue self-managed",
-      "selfChosen": "Noted. Your project stays self-managed — you can upgrade at any time.",
       "costNote": "Supervision typically costs 0.6–1.3% of the build value. On a 1.5 billion VND build, CHECK is about 0.6% and CONTROL about 1.3%.",
       "comparison": {
         "title": "Compare the three options",
         "criterion": "Item",
+        "choosePlanRow": "Choose a package",
         "groups": {
           "core": "Core",
           "platform": "Digital tracking on the platform",
@@ -2965,11 +3115,12 @@
       "stageList": {
         "title": "Six stages",
         "doneCount": "{count} complete",
-        "needsApproval": "Needs your approval"
+        "needsApproval": "Needs your approval",
+        "fileCount": "{count} files"
       },
       "stage": {
         "heading": "Stage {index} of 6",
-        "planned": "Planned {start} → {end}",
+        "planned": "Schedule {start} → {end} ({days} days)",
         "actualStart": "Actually started {date}",
         "confirmedEarly": "Confirmed {date} · {days} days early",
         "confirmedLate": "Confirmed {date} · {days} days late",
@@ -2977,7 +3128,7 @@
         "upcomingBody": "Starts {date} (in {days} days), once stage {previous} is complete.",
         "prepHint": "Worth preparing: {hint}",
         "uploadCta": "Upload records to complete",
-        "lockedNotice": "The supervisor inspected on site and confirmed on {date} — records are locked at {version}. To add photos or correct a comment, send a change request for the supervisor to approve.",
+        "lockedNotice": "<b>The supervisor inspected and confirmed on {date}</b> — the dossier is locked at {version}. To add files or correct a note, send a change request for the supervisor to approve.",
         "requestChange": "Request a change",
         "filesTitle": "Photos & documents",
         "filesLocked": "Locked at {version} — changes need a change request",
@@ -3000,7 +3151,8 @@
         "historyTitle": "History & versions",
         "historyNote": "History is never deleted; every change records who, which role, when and the version.",
         "eventCount": "{count} events",
-        "uploadHint": "Upload named photos or documents to mark this stage complete. The supervisor inspects on site and confirms afterwards."
+        "uploadHint": "Upload named photos or documents to mark this stage complete. The supervisor inspects on site and confirms afterwards.",
+        "startsIn": "Starts in {days} days"
       },
       "upload": {
         "title": "Upload records · Stage {index} – {stage}",
@@ -3042,7 +3194,8 @@
         "createBody": "Describe what you want added or corrected. The supervisor approves before records move to a new version.",
         "createPlaceholder": "e.g. Add photos of column starter bars after formwork removal so the stage record is complete.",
         "send": "Send request",
-        "sent": "Your change request was sent to the supervisor."
+        "sent": "Your change request was sent to the supervisor.",
+        "banner": "<b>The supervisor proposes a change to the confirmed dossier ({code})</b> — please review before {due}. Nothing changes without your approval; decline and {version} stands."
       },
       "actor": {
         "GS": "Supervisor",
@@ -3066,7 +3219,21 @@
       "open": "Supervision dashboard",
       "chooseManagement": "Choose how to manage the build",
       "selfManaged": "Self-managed",
-      "upgrade": "Upgrade supervision plan"
+      "upgrade": "Upgrade supervision plan",
+      "progressLine": "6-stage progress: {percent}% · Stage {current}/6 · {days} days left",
+      "dates": "Plan until {expires} · Handover {handover}",
+      "aheadOfPlan": "Ahead of plan",
+      "behindPlan": "Behind plan",
+      "stripTitle": "Supervision",
+      "handoverInline": "handover {date}"
+    },
+    "stagesShort": {
+      "legal": "Legal paperwork",
+      "foundation": "Foundation",
+      "structure": "Structural shell",
+      "mep": "MEP & waterproofing",
+      "finishing": "Finishing",
+      "handover": "Acceptance"
     }
   }
 }

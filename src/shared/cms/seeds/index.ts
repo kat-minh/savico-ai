@@ -13,3 +13,4 @@ export {
 } from './ops-extended.seed'
 export { PLANS_SEED, SUPERVISION_PACKAGES_SEED, QUOTAS_SEED } from './plans.seed'
 export { HOME_CONTENT_SEED, PRIVACY_PAGE_SEED, SITE_SETTINGS_SEED, TERMS_PAGE_SEED } from './site.seed'
+export { CONTRACTOR_INVITATIONS_SEED } from './invitations.seed'

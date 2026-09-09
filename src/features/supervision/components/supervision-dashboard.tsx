@@ -1,17 +1,16 @@
 'use client'
 
-import { AlertTriangle, ArrowRight, CalendarClock, ChevronDown, Clock, Upload } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { AlertTriangle, ArrowRight, CalendarClock, Check, Clock, Upload } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
-import type { Locale } from '@/i18n/routing'
 import { EmptyState } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, supervisionRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDate } from '@/shared/utils'
+import { formatDayMonth } from '@/shared/utils'
 import { STAGE_COUNT, STANDARD_SCHEDULE_DAYS } from '../constants/supervision.constants'
 import { useSupervisionProject } from '../hooks/use-supervision'
 import {
@@ -21,7 +20,8 @@ import {
   elapsedPercent,
   handoverDrift,
   needsCustomerApproval,
-  progressPercent
+  progressPercent,
+  stageReminder
 } from '../services/supervision.service'
 import type { SupervisionProject, SupervisionStage } from '../types/supervision.types'
 import { StageDetail } from './stage-detail'
@@ -40,15 +40,13 @@ interface SupervisionDashboardProps {
  * Thứ tự khối theo bản mô tả: banner nhắc hạn → thẻ dự án + 5 ô số → sợi chỉ 6
  * giai đoạn → bảng lịch trình → hai cột (danh sách giai đoạn | chi tiết).
  *
- * Bảng lịch trình GẤP LẠI được và mặc định đóng. R9 yêu cầu nó nằm trên danh
- * sách giai đoạn, nhưng để mở sẵn thì banner + thẻ 5 ô + sợi chỉ + bảng 6 dòng
- * đẩy phần chi tiết — chỗ khách thực sự làm việc — xuống dưới màn hình đầu. Sợi
- * chỉ ngay trên đó đã nói đủ về lịch; ai cần con số thì mở bảng ra.
+ * Bảng lịch trình MỞ SẴN, không có nút gấp: Hình S20/S21 vẽ nó ở trạng thái
+ * mở. Đổi lại, phần chi tiết bị đẩy xuống dưới màn hình đầu — chấp nhận, vì
+ * ngày tháng của cả sáu giai đoạn là thứ khách mở bảng điều khiển ra để xem.
  */
 export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashboardProps) {
   const t = useTranslations('supervision.dashboard')
   const tStages = useTranslations('supervision.stages')
-  const locale = useLocale() as Locale
   const { data: project, isPending } = useSupervisionProject(projectId)
 
   const [uploadStage, setUploadStage] = useState<SupervisionStage | null>(null)
@@ -117,67 +115,90 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
         </Button>
       </header>
 
-      <DashboardBanner project={project} onUpload={setUploadStage} />
-      <ProjectCard project={project} />
-      <StageThread project={project} selectedIndex={selected?.index} />
-      <ScheduleTable project={project} />
+      <DashboardBanner project={project} selectedIndex={selected?.index} onUpload={setUploadStage} />
+      {/* Thẻ dự án, dải 5 ô số và sợi chỉ 6 giai đoạn là MỘT khối liền, ngăn
+          nhau bằng vạch ngang — đúng Hình S20/S21. Tách thành ba thẻ rời làm
+          phần đầu bảng điều khiển vỡ vụn. */}
+      {/* MỘT khối duy nhất cho cả bảng điều khiển: thẻ dự án, dải 5 ô số, sợi
+          chỉ 6 giai đoạn, bảng lịch trình, cột giai đoạn và khung chi tiết đều
+          nói về cùng một dự án — tách thành nhiều thẻ rời thì màn hình vỡ vụn.
+          `divide-y` lo vạch ngăn giữa các phần, vạch dọc lo cột trong cùng. */}
+      <section className='bg-card divide-y overflow-hidden rounded-2xl border'>
+        <ProjectCard project={project} />
+        <StageThread project={project} />
+        <ScheduleTable project={project} />
 
-      <div className='grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]'>
-        <section className='bg-card rounded-2xl border p-3'>
-          <div className='flex items-center justify-between px-1.5 pb-2'>
-            <h2 className='text-muted-foreground text-[11px] font-semibold tracking-wide uppercase'>
-              {t('stageList.title')}
-            </h2>
-            <span className='text-muted-foreground text-[11px]'>
-              {t('stageList.doneCount', { count: confirmedCount(project) })}
-            </span>
+        {/* Không `items-start`: hai cột cao bằng nhau thì vạch dọc ngăn giữa
+            chúng mới chạy hết xuống đáy khối. */}
+        <div className='grid lg:grid-cols-[300px_minmax(0,1fr)]'>
+          <div className='border-b p-3 lg:border-r lg:border-b-0'>
+            <div className='flex items-center justify-between px-1.5 pb-2'>
+              <h2 className='text-muted-foreground text-[11px] font-semibold tracking-wide uppercase'>
+                {t('stageList.title')}
+              </h2>
+              <span className='text-muted-foreground text-[11px]'>
+                {t('stageList.doneCount', { count: confirmedCount(project) })}
+              </span>
+            </div>
+
+            <ul className='space-y-1.5'>
+              {project.stages.map((stage) => (
+                <li key={stage.key}>
+                  <Link
+                    href={supervisionRoute(projectId, stage.index)}
+                    scroll={false}
+                    aria-current={stage.index === selected?.index ? 'true' : undefined}
+                    className={cn(
+                      'block rounded-xl border p-3 transition-colors',
+                      stage.index === selected?.index
+                        ? 'border-primary bg-accent/40'
+                        : 'border-transparent hover:border-primary/30 hover:bg-muted/50'
+                    )}
+                  >
+                    <div className='flex items-center gap-2'>
+                      <span className='text-muted-foreground font-mono text-[11px]'>GĐ {stage.index}</span>
+                      <StageStatusBadge stage={stage} />
+                    </div>
+                    <p className='mt-1 text-sm font-medium'>{tStages(stage.key)}</p>
+
+                    {/* Ngày dự kiến và mốc nhắc lịch nằm CÙNG một hàng, đúng thẻ
+                      trong Hình S21 — nhìn một dòng là biết giai đoạn đó xong
+                      sớm hay còn bao nhiêu ngày. */}
+                    <p className='text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs'>
+                      <span>
+                        {formatDayMonth(stage.plannedStart)} – {formatDayMonth(stage.plannedEnd)}
+                      </span>
+                      <StageReminderChip stage={stage} />
+                    </p>
+
+                    <p className='text-muted-foreground mt-1.5 flex flex-wrap items-center gap-2 text-[11px]'>
+                      {stage.files.length > 0 ? (
+                        <>
+                          <span>{t('stageList.fileCount', { count: stage.files.length })}</span>
+                          <span className='bg-primary/10 text-primary-strong rounded-md px-1.5 py-0.5 font-medium'>
+                            {stage.version}
+                          </span>
+                        </>
+                      ) : null}
+                      {needsCustomerApproval(stage) ? (
+                        <span className='bg-warning/20 text-warning-strong rounded-md px-2 py-0.5 font-medium'>
+                          {t('stageList.needsApproval')}
+                        </span>
+                      ) : null}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <ul className='space-y-1.5'>
-            {project.stages.map((stage) => (
-              <li key={stage.key}>
-                <Link
-                  href={supervisionRoute(projectId, stage.index)}
-                  scroll={false}
-                  aria-current={stage.index === selected?.index ? 'true' : undefined}
-                  className={cn(
-                    'block rounded-xl border p-3 transition-colors',
-                    stage.index === selected?.index
-                      ? 'border-primary bg-accent/40'
-                      : 'border-transparent hover:border-primary/30 hover:bg-muted/50'
-                  )}
-                >
-                  <div className='flex items-center gap-2'>
-                    <span className='text-muted-foreground font-mono text-[11px]'>GĐ {stage.index}</span>
-                    <StageStatusBadge stage={stage} />
-                  </div>
-                  <p className='mt-1 text-sm font-medium'>{tStages(stage.key)}</p>
-                  <p className='text-muted-foreground mt-0.5 text-xs'>
-                    {formatDate(stage.plannedStart, locale, { day: '2-digit', month: '2-digit' })} –{' '}
-                    {formatDate(stage.plannedEnd, locale, { day: '2-digit', month: '2-digit' })}
-                  </p>
-                  {needsCustomerApproval(stage) ? (
-                    <span className='bg-warning/20 text-warning-strong mt-1.5 inline-block rounded-md px-2 py-0.5 text-[11px] font-medium'>
-                      {t('stageList.needsApproval')}
-                    </span>
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <div ref={detailRef} className='min-w-0 scroll-mt-24'>
-          {selected ? (
-            <StageDetail
-              projectId={projectId}
-              project={project}
-              stage={selected}
-              onUpload={() => setUploadStage(selected)}
-            />
-          ) : null}
+          <div ref={detailRef} className='min-w-0 scroll-mt-24'>
+            {selected ? (
+              <StageDetail projectId={projectId} stage={selected} onUpload={() => setUploadStage(selected)} />
+            ) : null}
+          </div>
         </div>
-      </div>
+      </section>
 
       <StageUploadDialog projectId={projectId} stage={uploadStage} onClose={() => setUploadStage(null)} />
     </div>
@@ -191,19 +212,21 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
  */
 function DashboardBanner({
   project,
+  selectedIndex,
   onUpload
 }: {
   project: SupervisionProject
+  /** Giai đoạn đang mở ở khung chi tiết bên dưới. */
+  selectedIndex?: number
   onUpload: (stage: SupervisionStage) => void
 }) {
   const t = useTranslations('supervision.dashboard.banner')
   const tStages = useTranslations('supervision.stages')
-  const locale = useLocale() as Locale
 
   const stage = currentStage(project)
   const remaining = daysUntil(stage.plannedEnd)
   const overdue = remaining < 0
-  const due = formatDate(stage.plannedEnd, locale, { day: '2-digit', month: '2-digit' })
+  const due = formatDayMonth(stage.plannedEnd)
 
   return (
     <section
@@ -230,13 +253,16 @@ function DashboardBanner({
           : t('body', { index: stage.index, stage: tStages(stage.key), due })}
       </p>
 
-      {stage.status === 'inProgress' ? (
+      {/* Nút tải hồ sơ chỉ hiện khi khung chi tiết ĐANG mở đúng giai đoạn
+          đang chạy (Hình S20). Đang xem một giai đoạn khác thì việc cần làm
+          trước là quay về giai đoạn đó — Hình S21 ghi "Đến giai đoạn 4". */}
+      {stage.status === 'inProgress' && selectedIndex === stage.index ? (
         <Button onClick={() => onUpload(stage)}>
           <Upload className='size-4' />
           {t('upload', { index: stage.index })}
         </Button>
       ) : (
-        <Button asChild variant='outline'>
+        <Button asChild>
           <Link href={supervisionRoute(project.id, stage.index)}>
             {t('goTo', { index: stage.index })}
             <ArrowRight className='size-4' />
@@ -253,16 +279,16 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
   const tStages = useTranslations('supervision.stages')
   const tAlias = useTranslations('supervision.tierAlias')
   const tTiers = useTranslations('supervision.tiers')
-  const locale = useLocale() as Locale
 
   const stage = currentStage(project)
   const percent = progressPercent(project)
   const elapsed = elapsedPercent(project)
+
   const drift = handoverDrift(project)
   const remaining = daysUntil(stage.plannedEnd)
 
   return (
-    <section className='bg-card rounded-2xl border p-5'>
+    <div className='p-5'>
       <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
         <h2 className='text-lg font-semibold'>{project.projectName}</h2>
         {/* Một gói, một tên: bảng giá bán "SVC CHECK" còn bảng điều khiển gọi
@@ -303,7 +329,7 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
 
         <div>
           <dt className='text-muted-foreground text-[11px] font-medium tracking-wide uppercase'>{t('due')}</dt>
-          <dd className='mt-1 text-sm font-semibold'>{formatDate(stage.plannedEnd, locale)}</dd>
+          <dd className='mt-1 text-sm font-semibold'>{formatDayMonth(stage.plannedEnd, { year: true })}</dd>
           <dd className={cn('text-xs', remaining < 0 ? 'text-destructive' : 'text-primary')}>
             {t('daysLeft', { days: remaining })}
           </dd>
@@ -311,7 +337,7 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
 
         <div>
           <dt className='text-muted-foreground text-[11px] font-medium tracking-wide uppercase'>{t('handover')}</dt>
-          <dd className='mt-1 text-sm font-semibold'>{formatDate(project.handoverDate, locale)}</dd>
+          <dd className='mt-1 text-sm font-semibold'>{formatDayMonth(project.handoverDate, { year: true })}</dd>
           <dd className='text-muted-foreground text-xs'>{drift.early ? t('handoverEarly') : t('handoverLate')}</dd>
         </div>
 
@@ -329,144 +355,233 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
           </dd>
         </div>
       </dl>
-    </section>
+    </div>
   )
 }
 
 /** Sợi chỉ 6 giai đoạn có mốc HÔM NAY. */
-function StageThread({ project, selectedIndex }: { project: SupervisionProject; selectedIndex?: number }) {
+function StageThread({ project }: { project: SupervisionProject }) {
   const t = useTranslations('supervision.dashboard.thread')
   const tStages = useTranslations('supervision.stages')
-  const locale = useLocale() as Locale
   const elapsed = elapsedPercent(project)
 
+  /**
+   * Đường ray vẽ MỘT LẦN cho cả sợi chỉ chứ không nối từng đoạn giữa hai chấm:
+   * chỗ chuyển từ nét liền sang nét đứt là mốc HÔM NAY, mà mốc đó rơi vào GIỮA
+   * một đoạn chứ không trùng chấm nào. Nối từng đoạn thì không cắt được ở đó.
+   *
+   * Tâm chấm thứ i nằm ở ((i + 0,5) / số giai đoạn) bề ngang lưới.
+   */
+  const centerAt = (index: number) => ((index + 0.5) / project.stages.length) * 100
+  const confirmed = project.stages.filter((item) => item.status === 'confirmed').length
+  const railStart = centerAt(0)
+  const railEnd = centerAt(project.stages.length - 1)
+  /** Hết phần xanh = tâm chấm cuối cùng đã xác nhận. */
+  const solidEnd = confirmed > 0 ? centerAt(confirmed - 1) : railStart
+  /** Mốc HÔM NAY, kẹp trong phạm vi đường ray. */
+  const todayAt = Math.min(railEnd, Math.max(railStart, elapsed))
+
   return (
-    <section className='bg-card relative rounded-2xl border px-5 pt-8 pb-5'>
+    <div className='relative px-5 pt-9 pb-5'>
+      {/* Mốc HÔM NAY: nhãn cam kèm một vạch dọc ngắn cắm xuống đúng vị trí
+          phần trăm thời gian đã trôi, đúng Hình S20/S21. */}
       <span
-        className='text-warning-strong absolute top-2 -translate-x-1/2 text-[10px] font-semibold tracking-wide uppercase'
-        style={{ left: `${Math.min(94, Math.max(6, elapsed))}%` }}
+        aria-hidden
+        className='absolute top-2 flex -translate-x-1/2 flex-col items-center'
+        style={{ left: `${todayAt}%` }}
       >
-        {t('today')}
+        <span className='text-warning-strong text-[10px] font-semibold tracking-wide uppercase'>{t('today')}</span>
+        <span className='bg-warning-strong mt-0.5 h-4 w-px' />
       </span>
 
-      <ol className='flex items-start'>
-        {project.stages.map((stage, index) => {
-          const done = stage.status === 'confirmed'
-          const running = stage.status === 'inProgress'
-          return (
-            <li key={stage.key} className='flex min-w-0 flex-1 items-start'>
-              <div className='flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center'>
+      {/* Lưới 6 cột dùng `grid-rows-subgrid`: bốn dòng (chấm · tên · ngày ·
+          viên nhãn) của cả sáu giai đoạn nằm trên CÙNG các dòng lưới, nên tên
+          dài ngắn khác nhau cũng không làm ngày và nhãn thụt lên thụt xuống.
+          Đường nối vẽ bằng một đoạn tuyệt đối chạy từ tâm chấm này sang tâm
+          chấm kế, thay vì là một phần tử anh em co giãn theo chiều cao ô. */}
+      <div className='overflow-x-auto pb-1'>
+        <ol className='relative grid min-w-[52rem] grid-cols-6 grid-rows-[auto_auto_auto_auto] gap-y-1.5'>
+          {/* Nền nét đứt chạy suốt, rồi phủ nét liền lên phần đã đi qua: xanh
+              tới giai đoạn đã xác nhận cuối cùng, cam từ đó tới mốc HÔM NAY. */}
+          <span
+            aria-hidden
+            className='border-border absolute top-3.5 h-0 border-t-2 border-dashed'
+            style={{ left: `${railStart}%`, right: `${100 - railEnd}%` }}
+          />
+          <span
+            aria-hidden
+            className='border-primary absolute top-3.5 h-0 border-t-2'
+            style={{ left: `${railStart}%`, width: `${Math.max(0, solidEnd - railStart)}%` }}
+          />
+          <span
+            aria-hidden
+            className='border-warning absolute top-3.5 h-0 border-t-2'
+            style={{ left: `${solidEnd}%`, width: `${Math.max(0, todayAt - solidEnd)}%` }}
+          />
+          {project.stages.map((stage) => {
+            const done = stage.status === 'confirmed'
+            const running = stage.status === 'inProgress'
+
+            return (
+              <li
+                key={stage.key}
+                className='relative row-span-4 grid grid-rows-subgrid justify-items-center gap-y-1.5 px-1.5 text-center'
+              >
                 <span
                   className={cn(
-                    'flex size-7 items-center justify-center rounded-full border-2 text-[11px] font-semibold',
+                    'relative z-10 flex size-7 items-center justify-center rounded-full border-2 text-[11px] font-semibold',
                     done && 'border-primary bg-primary text-primary-foreground',
                     running && 'border-warning text-warning-strong bg-card',
-                    !done && !running && 'border-border text-muted-foreground bg-card',
-                    stage.index === selectedIndex && 'ring-primary/40 ring-2 ring-offset-1'
+                    !done && !running && 'border-border text-muted-foreground bg-card'
                   )}
                 >
-                  {stage.index}
+                  {/* Giai đoạn đã xác nhận in DẤU TICK chứ không in số — số đã
+                      nằm ngay đầu tên bên dưới, in hai lần là thừa. */}
+                  {done ? <Check className='size-4' strokeWidth={3} /> : stage.index}
                 </span>
-                <span
-                  className={cn('text-[11px] leading-tight', done || running ? 'font-medium' : 'text-muted-foreground')}
-                >
-                  {tStages(stage.key)}
-                </span>
-                <span className='text-muted-foreground text-[10px]'>
-                  {formatDate(stage.plannedStart, locale, { day: '2-digit', month: '2-digit' })} –{' '}
-                  {formatDate(stage.plannedEnd, locale, { day: '2-digit', month: '2-digit' })}
-                </span>
-              </div>
 
-              {index < project.stages.length - 1 ? (
                 <span
-                  aria-hidden
-                  className={cn('mt-3.5 h-0.5 flex-1 rounded-full', done ? 'bg-primary' : 'bg-border')}
-                />
-              ) : null}
-            </li>
-          )
-        })}
-      </ol>
-    </section>
+                  className={cn(
+                    'text-[11px] leading-tight text-balance',
+                    done || running ? 'font-medium' : 'text-muted-foreground'
+                  )}
+                >
+                  {stage.index}. {tStages(stage.key)}
+                </span>
+
+                <span className='text-muted-foreground text-[10px]'>
+                  {formatDayMonth(stage.plannedStart)} – {formatDayMonth(stage.plannedEnd)}
+                </span>
+
+                {/* Bản mô tả S20: mỗi giai đoạn có chip nhắc lịch riêng —
+                    "Xác nhận 16/07", "Còn 16 ngày", "Bắt đầu sau 17 ngày". */}
+                <StageReminderChip stage={stage} />
+              </li>
+            )
+          })}
+        </ol>
+      </div>
+    </div>
   )
 }
 
-/** Bảng "Lịch trình 6 giai đoạn" — gấp lại được (xem ghi chú ở đầu file). */
+/** Số ngày theo LỊCH KẾ HOẠCH của một giai đoạn — "(45 ngày)" ở cột Kế hoạch. */
+function plannedDays(stage: SupervisionStage): number {
+  return Math.max(
+    1,
+    Math.round((new Date(stage.plannedEnd).getTime() - new Date(stage.plannedStart).getTime()) / 86_400_000)
+  )
+}
+
+/**
+ * Chip nhắc lịch của một giai đoạn (bản mô tả S20).
+ *
+ * Cùng một hàm sinh chữ cho cả sợi chỉ tiến độ lẫn cột "Nhắc lịch" của bảng lịch
+ * trình — hai chỗ này nói về cùng một mốc nên không được phép lệch nhau.
+ */
+function StageReminderChip({ stage, plain = false }: { stage: SupervisionStage; plain?: boolean }) {
+  const t = useTranslations('supervision.dashboard.thread')
+  const tBanner = useTranslations('supervision.dashboard.banner')
+
+  const reminder = stageReminder(stage)
+  if (!reminder) return plain ? <span className='text-muted-foreground'>—</span> : null
+
+  const label =
+    reminder.kind === 'confirmed'
+      ? t('confirmedOn', { date: formatDayMonth(reminder.date) })
+      : reminder.kind === 'remaining'
+        ? tBanner('remaining', { days: reminder.days })
+        : reminder.kind === 'overdue'
+          ? tBanner('overdue', { days: reminder.days })
+          : t('startsIn', { days: reminder.days })
+
+  /**
+   * Hình S20/S21 vẽ mốc nhắc lịch thành VIÊN NHÃN có nền, không phải chữ trần:
+   * xanh cho mốc đã xác nhận và mốc sẽ bắt đầu, xanh nước biển cho giai đoạn
+   * đang chạy, đỏ khi quá hạn.
+   */
+  const tone =
+    reminder.kind === 'confirmed'
+      ? 'text-primary-strong bg-primary/10'
+      : reminder.kind === 'overdue'
+        ? 'text-destructive bg-destructive/10'
+        : reminder.kind === 'remaining'
+          ? 'text-info-foreground bg-info-soft'
+          : 'text-primary-strong bg-primary/10'
+
+  if (plain) return <span className={tone}>{label}</span>
+
+  return <span className={cn('rounded-md px-2 py-0.5 text-[10px] leading-tight font-medium', tone)}>{label}</span>
+}
+
+/** Bảng "Lịch trình 6 giai đoạn" — luôn mở (xem ghi chú ở đầu file). */
 function ScheduleTable({ project }: { project: SupervisionProject }) {
   const t = useTranslations('supervision.dashboard.schedule')
   const tStages = useTranslations('supervision.stages')
   const tStatus = useTranslations('supervision.dashboard.status')
-  const locale = useLocale() as Locale
-  const [open, setOpen] = useState(false)
 
-  const short = (value?: string) => (value ? formatDate(value, locale, { day: '2-digit', month: '2-digit' }) : '—')
+  const short = (value?: string) => (value ? formatDayMonth(value) : '—')
 
   return (
-    <section className='bg-card rounded-2xl border'>
-      <button
-        type='button'
-        onClick={() => setOpen((current) => !current)}
-        aria-expanded={open}
-        className='flex w-full items-center justify-between gap-3 p-4 text-left'
-      >
-        <span className='flex items-center gap-2 font-semibold'>
+    <div>
+      {/* Ghi chú lịch chuẩn nằm bên PHẢI tiêu đề, cùng một hàng — đúng Hình
+          S20/S21, không phải một dòng riêng phía trên bảng. */}
+      <div className='flex flex-wrap items-center justify-between gap-x-4 gap-y-1 p-4'>
+        <h2 className='flex items-center gap-2 font-semibold'>
           <CalendarClock className='text-primary size-4' />
           {t('title')}
-        </span>
-        <span className='text-muted-foreground inline-flex items-center gap-1.5 text-xs'>
-          {open ? t('toggleOpen') : t('toggleClosed')}
-          <ChevronDown className={cn('size-4 transition-transform', open && 'rotate-180')} />
-        </span>
-      </button>
+        </h2>
+        <p className='text-muted-foreground text-xs text-pretty'>{t('note', { days: STANDARD_SCHEDULE_DAYS })}</p>
+      </div>
 
-      {open ? (
-        <div className='px-4 pb-4'>
-          <p className='text-muted-foreground mb-3 text-xs text-pretty'>
-            {t('note', { days: STANDARD_SCHEDULE_DAYS })}
-          </p>
-
-          <div className='overflow-x-auto rounded-xl border'>
-            <table className='w-full min-w-[640px] border-collapse text-sm'>
-              <thead>
-                <tr className='bg-primary text-primary-foreground text-xs'>
-                  <th className='p-2.5 text-left font-medium'>{t('stage')}</th>
-                  <th className='p-2.5 text-left font-medium'>{t('plan')}</th>
-                  <th className='p-2.5 text-left font-medium'>{t('actual')}</th>
-                  <th className='p-2.5 text-left font-medium'>{t('status')}</th>
-                  <th className='p-2.5 text-left font-medium'>{t('files')}</th>
+      <div className='px-4 pb-4'>
+        <div className='overflow-x-auto rounded-xl border'>
+          <table className='w-full min-w-[640px] border-collapse text-sm'>
+            <thead>
+              {/* `divide-x` kẻ vạch dọc giữa các cột; hàng tiêu đề nền xanh
+                  dùng vạch sáng mờ cho khỏi chìm. */}
+              <tr className='bg-primary text-primary-foreground divide-x divide-white/20 text-xs'>
+                <th className='p-2.5 text-left font-medium'>{t('stage')}</th>
+                <th className='p-2.5 text-left font-medium'>{t('plan')}</th>
+                <th className='p-2.5 text-left font-medium'>{t('actual')}</th>
+                <th className='p-2.5 text-left font-medium'>{t('status')}</th>
+                <th className='p-2.5 text-left font-medium'>{t('reminder')}</th>
+                <th className='p-2.5 text-left font-medium'>{t('files')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {project.stages.map((stage) => (
+                <tr key={stage.key} className='divide-x border-b last:border-b-0 even:bg-muted/20'>
+                  <td className='p-2.5 text-xs'>
+                    <strong>{stage.index}.</strong> {tStages(stage.key)}
+                  </td>
+                  <td className='p-2.5 text-xs'>
+                    {short(stage.plannedStart)} – {short(stage.plannedEnd)}{' '}
+                    <span className='text-muted-foreground'>{t('days', { count: plannedDays(stage) })}</span>
+                  </td>
+                  <td className='p-2.5 text-xs'>
+                    {stage.actualStart ? `${short(stage.actualStart)} – ${short(stage.actualEnd)}` : t('notStarted')}
+                  </td>
+                  <td className='p-2.5 text-xs'>{tStatus(stage.status)}</td>
+                  <td className='p-2.5 text-xs'>
+                    <StageReminderChip stage={stage} plain />
+                  </td>
+                  <td className='p-2.5 text-xs'>
+                    {stage.files.length > 0 ? (
+                      <>
+                        {t('fileCount', { count: stage.files.length })} · {stage.version}
+                      </>
+                    ) : (
+                      t('notStarted')
+                    )}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {project.stages.map((stage) => (
-                  <tr key={stage.key} className='even:bg-muted/20'>
-                    <td className='p-2.5 text-xs'>
-                      <strong>{stage.index}.</strong> {tStages(stage.key)}
-                    </td>
-                    <td className='p-2.5 text-xs'>
-                      {short(stage.plannedStart)} – {short(stage.plannedEnd)}
-                    </td>
-                    <td className='p-2.5 text-xs'>
-                      {stage.actualStart ? `${short(stage.actualStart)} – ${short(stage.actualEnd)}` : t('notStarted')}
-                    </td>
-                    <td className='p-2.5 text-xs'>{tStatus(stage.status)}</td>
-                    <td className='p-2.5 text-xs'>
-                      {stage.files.length > 0 ? (
-                        <>
-                          {t('fileCount', { count: stage.files.length })} · {stage.version}
-                        </>
-                      ) : (
-                        t('notStarted')
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : null}
-    </section>
+      </div>
+    </div>
   )
 }
 

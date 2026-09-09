@@ -1,4 +1,11 @@
-export { ALL_ROLES, AUTH_COOKIE_NAME, AUTH_STORAGE_KEY, ROLES, type Role } from './auth.constants'
+export {
+  ALL_ROLES,
+  AUTH_COOKIE_NAME,
+  AUTH_STORAGE_KEY,
+  MOCK_SESSION_USER_KEY,
+  ROLES,
+  type Role
+} from './auth.constants'
 export { useAuthStore } from './auth.store'
 export { useAuthDialogStore, type AuthDialogMode } from './auth-dialog.store'
 export type { AuthActions, AuthState, AuthStore, AuthUser } from './auth.types'

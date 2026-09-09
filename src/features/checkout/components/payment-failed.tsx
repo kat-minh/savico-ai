@@ -53,7 +53,10 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
       <section className='border-destructive/30 bg-destructive/5 rounded-2xl border p-5'>
         <h2 className='text-destructive text-sm font-semibold'>{t('reasonsTitle')}</h2>
         <ul className='mt-3 space-y-2'>
-          {[t('reasonExpired'), t('reasonContent'), t('reasonBank')].map((reason) => (
+          {/* Bản mô tả S07 liệt kê ba lý do: sai nội dung chuyển khoản, giao dịch
+              chưa hoàn tất, ngân hàng xử lý chậm (mã QR hết hạn là lý do thứ tư
+              app tự thêm vì QR có hạn thật). */}
+          {[t('reasonExpired'), t('reasonContent'), t('reasonIncomplete'), t('reasonBank')].map((reason) => (
             <li key={reason} className='flex items-start gap-2.5 border-b pb-2 text-sm last:border-b-0 last:pb-0'>
               <AlertCircle className='text-destructive mt-0.5 size-4 shrink-0' />
               <span className='text-pretty'>{reason}</span>

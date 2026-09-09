@@ -22,6 +22,10 @@ export function useLogout() {
     onSettled: () => {
       reset()
       queryClient.clear()
+      // Chiều ngược lại của `useLogin`: các route bảo vệ đã được prefetch lúc còn
+      // đăng nhập vẫn nằm trong Router Cache. Không dọn thì sau khi đăng xuất bấm
+      // vào vẫn thấy nội dung của phiên cũ cho tới khi cache hết hạn.
+      router.refresh()
       router.replace(ROUTES.HOME)
     }
   })

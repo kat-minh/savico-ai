@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
-import { contractorInviteSentRoute } from '@/shared/constants/routes'
+import { CONTRACTOR_PREVIEW_ID, contractorInviteSentRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { contractorsApi } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
@@ -16,7 +16,8 @@ export function useInvitations(projectId: string) {
   return useQuery({
     queryKey: contractorKeys.invitationList(projectId),
     queryFn: () => contractorsApi.listInvitations(projectId),
-    enabled: Boolean(projectId)
+    // Chế độ xem thử chưa có dự án nên cũng chưa có lời mời nào để đếm.
+    enabled: Boolean(projectId) && projectId !== CONTRACTOR_PREVIEW_ID
   })
 }
 

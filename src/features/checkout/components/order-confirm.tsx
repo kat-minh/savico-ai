@@ -1,6 +1,7 @@
 'use client'
 
-import { CheckCircle2, Info, QrCode, RotateCcw, ShieldCheck, SquarePen } from 'lucide-react'
+import { CheckCircle2, FileText, Info, Palette, QrCode, RotateCcw, ShieldCheck, SquarePen } from 'lucide-react'
+
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
@@ -37,9 +38,14 @@ interface OrderConfirmProps {
  * R10: chỉ còn MỘT hình thức thanh toán nên không có ô chọn phương thức, chỉ có
  * một khối thông tin QR. Cũng vì thế không còn dòng nào nói về thẻ hay ví.
  */
+/** Hình S03: icon của ba dòng quyền lợi trong thẻ đơn hàng, theo đúng thứ tự. */
+const BENEFIT_ICONS = [Palette, SquarePen, FileText] as const
+
 export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) {
   const t = useTranslations('checkout.confirm')
   const tPlans = useTranslations('plans.tiers')
+  const tPlanTags = useTranslations('plans.tierTags')
+  const tPlansRoot = useTranslations('plans')
   const tSupervision = useTranslations('supervision.tiers')
   const locale = useLocale() as Locale
   const { user } = useAuth()
@@ -52,14 +58,32 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
     if (kind === 'design') {
       const plan = plans.find((item) => item.id === productId)
       return plan
-        ? { name: tPlans(plan.tier), price: plan.price, benefits: plan.features?.slice(0, 3) ?? [plan.perk] }
+        ? {
+            name: tPlans(plan.tier),
+            // Hình S03: cạnh tên gói có hai nhãn — nhãn nhóm gói (xanh) và
+            // "Phổ biến" (cam) nếu đó là gói được đánh dấu phổ biến.
+            tierTag: tPlanTags(plan.tier),
+            popular: Boolean(plan.popular),
+            price: plan.price,
+            benefits: [
+              `${plan.designCredits} phương án thiết kế`,
+              `${plan.designCredits} lượt chỉnh sửa phương án`,
+              `${plan.libraryCredits} lượt tra cứu thư viện mẫu`
+            ]
+          }
         : null
     }
     const supervision = supervisionPackages.find((item) => item.id === productId)
     return supervision
-      ? { name: tSupervision(supervision.tier), price: supervision.price, benefits: supervision.benefits.slice(0, 3) }
+      ? {
+          name: tSupervision(supervision.tier),
+          tierTag: null,
+          popular: false,
+          price: supervision.price,
+          benefits: supervision.benefits.slice(0, 3)
+        }
       : null
-  }, [kind, productId, plans, supervisionPackages, tPlans, tSupervision])
+  }, [kind, productId, plans, supervisionPackages, tPlans, tPlanTags, tSupervision])
 
   const [buyer, setBuyer] = useState({
     name: user?.name ?? '',
@@ -126,8 +150,9 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
           <section className='bg-card rounded-2xl border p-5'>
             <div className='flex items-center justify-between gap-3'>
               <h2 className='text-lg font-semibold'>{t('buyerTitle')}</h2>
-              <span className='text-primary flex items-center gap-1.5 text-sm'>
-                <SquarePen className='size-4' />
+              {/* Hình S03: "Có thể chỉnh sửa" là chữ ĐEN (chỉ icon bút chì màu xanh). */}
+              <span className='text-foreground flex items-center gap-1.5 text-sm'>
+                <SquarePen className='text-primary size-4' />
                 {t('buyerEditable')}
               </span>
             </div>
@@ -238,7 +263,22 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
 
           <label className='flex cursor-pointer items-start gap-2.5 text-sm'>
             <Checkbox checked={agreed} onCheckedChange={(value) => setAgreed(value === true)} />
-            <span className='text-pretty'>{t('terms')}</span>
+            {/* Hình S03: hai cụm "Điều khoản sử dụng" và "Chính sách thanh toán"
+                là LIÊN KẾT màu xanh có gạch chân. */}
+            <span className='text-pretty'>
+              {t.rich('terms', {
+                terms: (chunks) => (
+                  <Link href={ROUTES.TERMS} className='text-primary underline underline-offset-4'>
+                    {chunks}
+                  </Link>
+                ),
+                payment: (chunks) => (
+                  <Link href={ROUTES.PRIVACY} className='text-primary underline underline-offset-4'>
+                    {chunks}
+                  </Link>
+                )
+              })}
+            </span>
           </label>
         </div>
 
@@ -247,25 +287,49 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
           <section className='bg-card rounded-2xl border p-5'>
             <div className='flex items-center justify-between gap-3'>
               <h2 className='text-base font-semibold'>{t('orderTitle')}</h2>
-              <Link href={ROUTES.PLANS} className='text-primary text-sm font-medium'>
+              {/* Hình S03: "Đổi gói" là liên kết CÓ GẠCH CHÂN. */}
+              <Link href={ROUTES.PLANS} className='text-primary text-sm font-medium underline underline-offset-4'>
                 {t('changePlan')}
               </Link>
             </div>
 
             <div className='bg-accent/40 mt-4 rounded-xl border p-4'>
-              <p className='text-primary-strong text-lg font-bold tracking-wide uppercase'>{product.name}</p>
+              {/* Hình S03: nhãn "Phổ biến" (cam) đẩy sát MÉP PHẢI của thẻ. */}
+              <div className='flex flex-wrap items-center gap-2'>
+                <p className='text-primary-strong text-lg font-bold tracking-wide uppercase'>{product.name}</p>
+                {product.tierTag ? (
+                  <span className='bg-accent text-primary-strong rounded-sm px-2.5 py-0.5 text-[11px] font-semibold'>
+                    {product.tierTag}
+                  </span>
+                ) : null}
+                {product.popular ? (
+                  <span className='bg-brand-orange text-brand-orange-foreground ml-auto rounded-sm px-2.5 py-0.5 text-[11px] font-semibold'>
+                    {tPlansRoot('popularShort')}
+                  </span>
+                ) : null}
+              </div>
               {projectId ? (
                 <p className='text-muted-foreground mt-0.5 text-xs'>{t('forProject', { project: projectId })}</p>
               ) : null}
 
+              {/* Hình S03: mỗi dòng quyền lợi có ICON RIÊNG (bảng màu · ô bút chì ·
+                  tài liệu), không dùng chung dấu tích; con số đứng đầu in đậm. */}
               <ul className='mt-3 space-y-2'>
-                {product.benefits.map((benefit) => (
-                  <li key={benefit} className='flex items-start gap-2 text-sm'>
-                    <CheckCircle2 className='text-primary mt-0.5 size-4 shrink-0' />
-                    <span className='text-pretty'>{benefit}</span>
-                  </li>
-                ))}
+                {product.benefits.map((benefit, index) => {
+                  const Icon = BENEFIT_ICONS[index] ?? CheckCircle2
+                  const [, amount, rest] = benefit.match(/^(\d[\d.]*)\s+(.*)$/) ?? []
+                  return (
+                    <li key={benefit} className='flex items-start gap-2 text-sm'>
+                      <Icon className='text-primary mt-0.5 size-4 shrink-0' />
+                      <span className='text-pretty'>
+                        {amount ? <strong className='font-semibold'>{amount}</strong> : null} {rest ?? benefit}
+                      </span>
+                    </li>
+                  )
+                })}
               </ul>
+              {/* Hình S03: dưới ba dòng quyền lợi có dòng nhắc lượt không hết hạn. */}
+              <p className='text-muted-foreground mt-2 text-xs'>{t('creditsNeverExpire')}</p>
             </div>
 
             <div className='mt-4 space-y-2'>

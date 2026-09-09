@@ -72,7 +72,10 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot='form-item' className={cn('grid gap-2', className)} {...props} />
+      {/* `content-start`: khi ô nằm trong một hàng grid cao hơn nội dung của nó
+          (ô bên cạnh có thêm dòng ghi chú hoặc báo lỗi), grid mặc định kéo giãn
+          các hàng auto — nhãn và ô nhập bị đẩy xuống, hai cột lệch nhau. */}
+      <div data-slot='form-item' className={cn('grid content-start gap-2', className)} {...props} />
     </FormItemContext.Provider>
   )
 }

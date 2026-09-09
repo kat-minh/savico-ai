@@ -10,7 +10,7 @@ import type { Locale } from '@/i18n/routing'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
-import { formatCurrency } from '@/shared/utils'
+import { formatPriceTag } from '@/shared/utils'
 import { QR_TTL_MINUTES } from '../constants/checkout.constants'
 import { useMarkTransferred, useOrder, useRegenerateQr } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
@@ -92,7 +92,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
     { label: t('bank'), value: order.transfer.bankName, copyable: false },
     { label: t('accountNumber'), value: order.transfer.accountNumber, copyable: true },
     { label: t('accountName'), value: order.transfer.accountName, copyable: false },
-    { label: t('amount'), value: formatCurrency(order.total, locale), copyable: true },
+    { label: t('amount'), value: formatPriceTag(order.total, locale), copyable: true },
     { label: t('content'), value: order.transfer.content, copyable: true, highlight: true }
   ]
 
@@ -102,15 +102,18 @@ export function QrPayment({ orderId }: QrPaymentProps) {
 
       <section
         className={cn(
-          'relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border p-4',
+          'relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border p-4 pb-7',
           expired ? 'border-destructive/40 bg-destructive/10' : 'border-primary/40 bg-accent/40'
         )}
       >
         {/* Hình S04: một thanh tiến độ chạy dọc đáy banner cho thấy còn bao
             nhiêu thời gian — không có nó thì con số đếm ngược đứng trơ một mình. */}
         {expired ? null : (
-          <span aria-hidden className='bg-primary/15 absolute inset-x-0 bottom-0 h-1.5'>
-            <span className='bg-primary block h-full transition-[width] duration-1000' style={{ width: `${ratio}%` }} />
+          <span aria-hidden className='bg-primary/15 absolute inset-x-4 bottom-3 h-1.5 overflow-hidden rounded-full'>
+            <span
+              className='bg-primary block h-full rounded-full transition-[width] duration-1000'
+              style={{ width: `${ratio}%` }}
+            />
           </span>
         )}
 
@@ -135,7 +138,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
         ) : (
           <div className='text-right'>
             <p className='text-muted-foreground text-xs'>{t('expiresIn')}</p>
-            <p className='text-primary-strong font-mono text-2xl font-bold'>{label}</p>
+            <p className='text-primary-strong text-4xl leading-none font-bold tracking-tight'>{label}</p>
           </div>
         )}
       </section>
@@ -167,7 +170,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
             </div>
           </div>
 
-          <p className='mt-4 text-2xl font-bold tracking-tight'>{formatCurrency(order.total, locale)}</p>
+          <p className='mt-4 text-2xl font-bold tracking-tight'>{formatPriceTag(order.total, locale)}</p>
           <p className='text-muted-foreground font-mono text-xs'>#{order.id}</p>
 
           <div className='mt-4 flex flex-wrap justify-center gap-2'>
@@ -198,25 +201,32 @@ export function QrPayment({ orderId }: QrPaymentProps) {
             <h2 className='text-center font-semibold'>{t('manualTitle')}</h2>
             <p className='text-muted-foreground mt-1 text-center text-sm text-pretty'>{t('manualBody')}</p>
 
-            <dl className='mt-4 space-y-2'>
+            {/* Hình S04: các dòng nằm trong MỘT khung, ngăn nhau bằng vạch kẻ
+                mảnh — không phải mỗi dòng một khung viền bo góc rời như trước.
+                Nút sao chép là nút vuông có viền ở mép phải. */}
+            <dl className='divide-border mt-4 divide-y overflow-hidden rounded-xl border'>
               {rows.map((row) => (
                 <div
                   key={row.label}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg border px-3 py-2.5',
-                    row.highlight && 'border-warning/50 bg-warning/10'
+                    'flex items-center gap-3 px-3 py-2.5',
+                    row.highlight && 'bg-warning/10 border-warning/40'
                   )}
                 >
                   <div className='min-w-0 flex-1'>
-                    <dt className='text-muted-foreground text-[11px]'>{row.label}</dt>
-                    <dd className={cn('truncate font-medium', row.highlight && 'text-warning-strong')}>{row.value}</dd>
+                    <dt className={cn('text-muted-foreground text-[11px]', row.highlight && 'text-warning-strong')}>
+                      {row.label}
+                    </dt>
+                    <dd className={cn('truncate font-medium', row.highlight && 'text-warning-strong font-semibold')}>
+                      {row.value}
+                    </dd>
                   </div>
                   {row.copyable ? (
                     <button
                       type='button'
                       aria-label={`${t('copy')} ${row.label}`}
                       onClick={() => copy(row.value)}
-                      className='text-muted-foreground hover:text-foreground transition-colors'
+                      className='text-muted-foreground hover:text-foreground hover:bg-muted flex size-8 shrink-0 items-center justify-center rounded-md border transition-colors'
                     >
                       <Copy className='size-4' />
                     </button>

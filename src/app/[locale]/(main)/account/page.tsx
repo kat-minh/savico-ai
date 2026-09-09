@@ -1,9 +1,9 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 
 import { FavoriteGrid } from '@/features/account'
-import { MyProjects } from '@/features/design'
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
+import { AccountProjects } from './account-projects'
 import { AccountSide } from './account-side'
 import { AccountSupervision } from './account-supervision'
 import { AccountTabs } from './account-tabs'
@@ -30,33 +30,32 @@ export default async function AccountPage({ params }: PageProps) {
 
   return (
     <ProtectedRoute>
-      {/* Cùng bề rộng với thanh công cụ và footer để mép trái thẳng hàng. */}
-      <div className='mx-auto w-full max-w-6xl px-4 py-10 lg:px-8'>
-        <header className='mb-8 space-y-2'>
-          <h1 className='text-3xl font-semibold tracking-tight'>{t('title')}</h1>
-          <p className='text-muted-foreground text-pretty'>{t('subtitle')}</p>
-        </header>
-
-        <div className='grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]'>
-          <div className='lg:sticky lg:top-24 lg:self-start'>
-            {/* Thẻ hồ sơ + thẻ "GÓI CỦA TÔI" (mục IX, Hình 17). */}
+      {/* Bề ngang lấy thẳng từ Hình S24: khung nội dung chiếm ~96% bề ngang cửa
+          sổ, cột trái 340px, khoảng cách hai cột 32px — nên mỗi thẻ dự án rộng
+          ~500px. Hẹp hơn thì dòng "Tiến độ 50% · Sớm hơn kế hoạch · bàn giao …"
+          ở khối giám sát tràn xuống hai hàng, còn `max-w-6xl` của bản đầu thì
+          tên dự án bị cắt cụt ngay từ thẻ đầu. */}
+      <div className='mx-auto w-[96%] max-w-[88rem] py-10'>
+        {/* Cột trái 340px: dòng "Tiến độ 6 giai đoạn: 50% · Giai đoạn 4/6 ·
+            Còn 16 ngày" ở thẻ giám sát cần đủ chỗ để nằm gọn một dòng. */}
+        <div className='grid gap-8 lg:grid-cols-[340px_minmax(0,1fr)]'>
+          <div className='space-y-5 lg:sticky lg:top-24 lg:self-start'>
+            {/* Cột trái ba thẻ theo Hình S24: hồ sơ → GÓI CỦA TÔI → GIÁM SÁT
+                CỦA TÔI. */}
             <AccountSide />
+            <AccountSupervision />
           </div>
 
           <div className='min-w-0'>
+            {/* Tiêu đề nằm TRONG cột chính, không có dòng mô tả — Hình S24 để
+                thẻ hồ sơ bên trái bắt đầu ngang hàng với tiêu đề. */}
+            <h1 className='mb-5 text-3xl font-semibold tracking-tight'>{t('title')}</h1>
+
             <AccountTabs
               projects={{
                 label: t('projects.title'),
                 description: t('projects.description'),
-                content: (
-                  <>
-                    {/* S24 — khối giám sát đặt TRÊN lưới dự án, và chỉ ở đây.
-                        Bản mô tả vẽ nó hai lần trên cùng một màn (cột trái và
-                        trong thẻ dự án) với gần như cùng một bộ số. */}
-                    <AccountSupervision />
-                    <MyProjects />
-                  </>
-                )
+                content: <AccountProjects />
               }}
               favorites={{
                 label: t('favorites.title'),

@@ -11,8 +11,15 @@ import type { ProjectBrief } from '../types/contractor.types'
 
 interface ProjectContextBarProps {
   brief?: ProjectBrief
-  /** Ẩn nhãn "Dự án đang tìm nhà thầu" ở những màn đã có tiêu đề riêng. */
+  /** Ẩn nhãn phía trên tên dự án ở những màn đã có tiêu đề riêng. */
   compact?: boolean
+  /** Đè nhãn mặc định — S12 gọi khối này là "Dự án đang chọn". */
+  label?: string
+  /**
+   * Khối hành động dồn về mép phải (S12: viên nhãn số lượt mời, link "Xem lời
+   * mời", nút "Đổi dự án"). Bỏ trống thì chỉ có link "Chỉnh sửa hồ sơ" như cũ.
+   */
+  aside?: React.ReactNode
 }
 
 /**
@@ -23,8 +30,9 @@ interface ProjectContextBarProps {
  * mỗi hình một kiểu). Dựng MỘT component để mọi màn trong luồng có cùng một mốc
  * neo: đang làm việc trên dự án nào, hồ sơ loại gì, sửa hồ sơ ở đâu.
  */
-export function ProjectContextBar({ brief, compact = false }: ProjectContextBarProps) {
+export function ProjectContextBar({ brief, compact = false, label, aside }: ProjectContextBarProps) {
   const t = useTranslations('contractors.common')
+  const tScale = useTranslations('contractors.scale')
 
   if (!brief) {
     return <Skeleton className='h-20 w-full rounded-2xl' />
@@ -39,7 +47,7 @@ export function ProjectContextBar({ brief, compact = false }: ProjectContextBarP
       <div className='min-w-0 flex-1'>
         {compact ? null : (
           <p className='text-muted-foreground text-[11px] font-medium tracking-wide uppercase'>
-            {t('seekingContractor')}
+            {label ?? t('seekingContractor')}
           </p>
         )}
 
@@ -52,18 +60,24 @@ export function ProjectContextBar({ brief, compact = false }: ProjectContextBarP
           ) : null}
         </div>
 
+        {/* Bản mô tả: "Nhà phố · Trệt + 1 lầu · 120 m² · P. Tân Lợi, Đắk Lắk" —
+            quy mô đứng ngay sau loại công trình. */}
         <p className='text-muted-foreground truncate text-xs'>
-          {[brief.buildingType, `${brief.landArea} m²`, shortAddress(brief)].filter(Boolean).join(' · ')}
+          {[brief.buildingType, tScale(brief.scale), `${brief.landArea} m²`, shortAddress(brief)]
+            .filter(Boolean)
+            .join(' · ')}
         </p>
       </div>
 
-      <Link
-        href={contractorBriefRoute(brief.id)}
-        className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
-      >
-        <Pencil className='size-3.5' />
-        {t('editBrief')}
-      </Link>
+      {aside ?? (
+        <Link
+          href={contractorBriefRoute(brief.id)}
+          className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
+        >
+          <Pencil className='size-3.5' />
+          {t('editBrief')}
+        </Link>
+      )}
     </section>
   )
 }

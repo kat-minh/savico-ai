@@ -55,7 +55,7 @@ function transferInfo(orderId: string, amount: number): TransferInfo {
   return {
     bankName: 'Vietcombank',
     accountNumber: '1028 6688 999',
-    accountName: 'CONG TY CO PHAN DAU TU SAVICO',
+    accountName: 'CÔNG TY CỔ PHẦN SAVICO',
     content,
     // Chuỗi QR mô phỏng: đủ thông tin để quét ra nội dung đúng khi soi bằng mắt,
     // không phải chuẩn VietQR thật.
@@ -73,7 +73,14 @@ function productSnapshot(payload: CreateOrderPayload): OrderProduct {
       kind: 'design',
       name: plan.tier,
       price: plan.price,
-      benefits: plan.features?.slice(0, 3) ?? [plan.perk]
+      // Hình S03: ba dòng quyền lợi trong thẻ đơn hàng là SỐ LƯỢT của gói
+      // (phương án · lượt chỉnh sửa · lượt tra thư viện), không phải ba tính
+      // năng đầu tiên — cắt `features` thì dòng thứ ba ra "Dự toán nội thất".
+      benefits: [
+        `${plan.designCredits} phương án thiết kế`,
+        `${plan.designCredits} lượt chỉnh sửa phương án`,
+        `${plan.libraryCredits} lượt tra cứu thư viện mẫu`
+      ]
     }
   }
 

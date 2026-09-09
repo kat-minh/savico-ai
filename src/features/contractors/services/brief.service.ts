@@ -18,6 +18,7 @@ export function emptyBrief(): Omit<ProjectBrief, 'id' | 'createdAt' | 'updatedAt
     scope: 'turnkey',
     scopeNote: '',
     documents: [],
+    coverUrl: null,
     selfCreated: true
   }
 }

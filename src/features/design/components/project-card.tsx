@@ -65,7 +65,7 @@ function MiniStepper({ project }: { project: Project }) {
   const t = useTranslations('design.projects')
 
   return (
-    <ol className='flex min-w-0 flex-1 items-start'>
+    <ol className='mt-1.5 flex min-w-0 items-start'>
       {DESIGN_STEPS.map((step, index) => {
         const state = miniStepState(step, project)
         const next = DESIGN_STEPS[index + 1]
@@ -120,45 +120,60 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
   const action = ACTION_BY_STATUS[project.status]
 
   return (
-    <article className='bg-card hover:border-primary/50 group relative flex h-full flex-col overflow-hidden rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-md'>
-      <div className='relative'>
+    // Hình S24: thẻ nằm NGANG — ảnh bìa là cột trái 36%, mọi thông tin dồn
+    // sang phải. Xếp dọc như bản trước làm mỗi thẻ cao gấp đôi mà chữ vẫn ít.
+    <article className='bg-card hover:border-primary/50 group relative flex h-full overflow-hidden rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-md'>
+      <div className='relative w-[36%] shrink-0'>
         {/* Ảnh bìa là ảnh lô đất của Bước 1; chưa có thì để khung rỗng có biểu
             tượng thay vì bỏ trống. */}
         {project.coverUrl ? (
-          <Photo className='aspect-[16/9] w-full' src={project.coverUrl} alt={project.name} sizes='420px' />
+          <Photo className='h-full min-h-32 w-full' src={project.coverUrl} alt={project.name} sizes='220px' />
         ) : (
           // Khung rỗng tô nhạt màu thương hiệu thay vì ô xám trơn: ô xám với
           // biểu tượng mờ trông như ảnh vỡ chứ không như "chưa có ảnh".
-          <div className='from-accent to-accent/40 text-primary/40 flex aspect-[16/9] w-full items-center justify-center bg-linear-to-br'>
+          <div className='from-accent to-accent/40 text-primary/40 flex h-full min-h-32 w-full items-center justify-center bg-linear-to-br'>
             <House className='size-10' strokeWidth={1.25} />
           </div>
         )}
-
-        {/* z-10 để nổi trên lớp phủ của liên kết hành động bên dưới — nếu không
-            bấm vào ⋮ sẽ mở dự án thay vì mở menu. */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            aria-label={t('menu.label')}
-            className='bg-background/90 text-muted-foreground hover:text-foreground absolute top-2.5 right-2.5 z-10 flex size-7 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors'
-          >
-            <MoreHorizontal className='size-4' />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem onSelect={() => onRename(project)}>
-              <Pencil className='size-4' />
-              {t('menu.rename')}
-            </DropdownMenuItem>
-            <DropdownMenuItem variant='destructive' onSelect={() => onDelete(project)}>
-              <Trash2 className='size-4' />
-              {t('menu.delete')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
-      <div className='flex flex-1 flex-col p-3.5'>
+      <div className='flex min-w-0 flex-1 flex-col p-4'>
         <div className='flex items-start justify-between gap-2'>
           <h3 className='min-w-0 truncate text-[15px] font-semibold'>{project.name}</h3>
+
+          {/* z-10 để nổi trên lớp phủ của liên kết hành động bên dưới — nếu
+              không bấm vào ⋮ sẽ mở dự án thay vì mở menu. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              aria-label={t('menu.label')}
+              className='text-muted-foreground hover:text-foreground relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full transition-colors'
+            >
+              <MoreHorizontal className='size-4' />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem onSelect={() => onRename(project)}>
+                <Pencil className='size-4' />
+                {t('menu.rename')}
+              </DropdownMenuItem>
+              <DropdownMenuItem variant='destructive' onSelect={() => onDelete(project)}>
+                <Trash2 className='size-4' />
+                {t('menu.delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <p className='text-muted-foreground mt-1 font-mono text-xs'>{project.id}</p>
+        <p className='text-muted-foreground text-xs'>
+          {t('createdAt', { date: formatDate(project.createdAt, locale) })}
+        </p>
+
+        {/* Nhãn đứng trên mini-stepper, đúng Hình S24 — không có nhãn thì ba
+            chấm lơ lửng, người đọc không biết đó là tiến độ của cái gì. */}
+        <p className='text-muted-foreground mt-3 text-xs'>{t('progressLabel')}</p>
+        <MiniStepper project={project} />
+
+        <div className='mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5'>
           <span
             className={cn(
               'flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium',
@@ -168,21 +183,12 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
             {t(`status.${project.status}`)}
             {project.status === 'completed' ? <Check className='size-3' strokeWidth={3} /> : null}
           </span>
-        </div>
-
-        <p className='text-muted-foreground mt-1 text-xs'>{project.id}</p>
-        <p className='text-muted-foreground text-xs'>
-          {t('updatedAt', { date: formatDate(project.updatedAt, locale) })}
-        </p>
-
-        <div className='mt-3 flex items-start justify-between gap-3'>
-          <MiniStepper project={project} />
 
           {/* `after:absolute after:inset-0` biến cả thẻ thành vùng bấm mà không
               phải lồng nút ⋮ vào trong thẻ <a>. */}
           <Link
             href={action.route(project.id)}
-            className='text-primary hover:text-primary/80 mt-0.5 inline-flex shrink-0 items-center gap-1 text-[13px] font-medium transition-colors after:absolute after:inset-0 after:content-[""]'
+            className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1 text-[13px] font-medium transition-colors after:absolute after:inset-0 after:content-[""]'
           >
             {t(`action.${action.labelKey}`)}
             <ArrowRight className='size-3.5' />

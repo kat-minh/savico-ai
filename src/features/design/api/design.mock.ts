@@ -55,6 +55,14 @@ interface MockStore {
  */
 const FREE_DESIGN_LIMIT = 3
 
+/**
+ * Tổng diện tích sàn AI "ước tính" của bản mock — một con số duy nhất cho mọi
+ * dự án. Backend thật tính từ dữ liệu Bước 1; ở đây ba chỗ phải dùng CHUNG một
+ * hằng (bảng dự toán, hồ sơ chia sẻ, dòng meta trên thẻ dự án) vì ba chỗ đó
+ * cùng in một con số ra màn hình.
+ */
+const ESTIMATED_FLOOR_AREA = 240
+
 const emptyStore = (): MockStore => ({ sequence: 0, projects: {}, inputs: {}, dossiers: {}, designsUsed: 0 })
 
 function loadStore(): MockStore {
@@ -263,7 +271,7 @@ function persistShared(store: MockStore, projectId: string): void {
     createdAt: project.createdAt,
     sections: SAMPLE_SECTIONS,
     grandTotal: grandTotal(SAMPLE_SECTIONS),
-    estimatedFloorArea: 240
+    estimatedFloorArea: ESTIMATED_FLOOR_AREA
   }
   try {
     const all = { ...readShared(), [`share-${projectId.toLowerCase()}`]: entry }
@@ -285,10 +293,17 @@ export const mockDesignApi = {
     await mockDelay(200)
     const store = loadStore()
     // Ảnh bìa lấy từ ảnh lô đất của Bước 1 — backend thật sẽ trả ảnh render.
-    return Object.values(store.projects).map((project) => ({
-      ...normalizeProject(project),
-      coverUrl: store.inputs[project.id]?.landPhotoUrl ?? null
-    }))
+    return Object.values(store.projects).map((project) => {
+      const normalized = normalizeProject(project)
+      return {
+        ...normalized,
+        coverUrl: store.inputs[project.id]?.landPhotoUrl ?? null,
+        buildingType: store.inputs[project.id]?.buildingType ?? null,
+        // Diện tích sàn là kết quả của Bước 2, nên dự án còn đứng ở Bước 1 thì
+        // chưa có — dòng meta trên thẻ tự bớt vế "… m²" thay vì in số 0.
+        floorArea: normalized.currentStep >= 2 ? ESTIMATED_FLOOR_AREA : null
+      }
+    })
   },
 
   createProject: async (payload: CreateProjectPayload): Promise<Project> => {
@@ -363,7 +378,7 @@ export const mockDesignApi = {
       sections: SAMPLE_SECTIONS,
       grandTotal: grandTotal(SAMPLE_SECTIONS),
       advisory: '',
-      estimatedFloorArea: 240,
+      estimatedFloorArea: ESTIMATED_FLOOR_AREA,
       xlsxUrl: '#'
     }
   },

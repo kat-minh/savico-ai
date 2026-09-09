@@ -147,6 +147,7 @@ function seedProject(projectId: string, projectName: string): SupervisionProject
         id: 'CR-01',
         by: 'KH',
         proposedAt: shift(-33),
+        decidedAt: shift(-32),
         status: 'applied',
         reason: 'Bổ sung ảnh cột chờ C3 sau khi tháo cốp pha để hồ sơ giai đoạn đầy đủ hơn.',
         response: 'Ảnh đúng vị trí, đồng ý bổ sung.',
@@ -428,6 +429,7 @@ export const mockSupervisionApi = {
           ? {
               ...request,
               status: approve ? 'applied' : 'rejected',
+              decidedAt: now,
               ...(approve ? { resultVersion: version } : {})
             }
           : request

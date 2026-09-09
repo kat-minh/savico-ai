@@ -77,7 +77,9 @@ export function SiteHeader({
                     : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06]'
                 )}
               >
-                {t(item.labelKey)}
+                {/* Bản mô tả S01: mục này tên "Bảng giá" với khách chưa đăng
+                    nhập, "Gói đăng ký" khi đã đăng nhập. */}
+                {t(item.labelKey === 'plans' && !authed ? 'plansGuest' : item.labelKey)}
               </Link>
             )
           })}

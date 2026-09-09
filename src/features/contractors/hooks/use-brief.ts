@@ -5,17 +5,38 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
-import { contractorBriefRoute } from '@/shared/constants/routes'
+import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { contractorsApi, type SaveBriefPayload } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
 
-/** Hồ sơ dự án đang mở (S10, S11 và header dự án ở S12–S18). */
+/**
+ * Hồ sơ dự án đang mở (S10, S11 và header dự án ở S12–S18).
+ *
+ * Ở chế độ xem thử KHÔNG gọi: `preview` không phải mã dự án thật, gọi lên là
+ * nhận 404 và màn hình đầy log lỗi trong khi đúng ra chỗ đó chỉ cần bỏ trống
+ * thẻ dự án.
+ */
 export function useBrief(projectId: string) {
   return useQuery({
     queryKey: contractorKeys.brief(projectId),
     queryFn: () => contractorsApi.getBrief(projectId),
-    enabled: Boolean(projectId)
+    enabled: Boolean(projectId) && projectId !== CONTRACTOR_PREVIEW_ID
+  })
+}
+
+/**
+ * Hồ sơ dự án của tài khoản, mới nhất trước.
+ *
+ * Landing S09 cần biết khách ĐÃ CÓ hồ sơ hay chưa: nút "Xem nhà thầu" dẫn thẳng
+ * sang S12 của hồ sơ gần nhất, còn chưa có hồ sơ nào thì phải tạo trước — S12
+ * xếp hạng theo địa chỉ và quy mô của dự án nên không có hồ sơ thì không có gì
+ * để xếp.
+ */
+export function useBriefs() {
+  return useQuery({
+    queryKey: contractorKeys.briefList(),
+    queryFn: () => contractorsApi.listBriefs()
   })
 }
 

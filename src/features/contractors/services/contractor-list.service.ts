@@ -1,5 +1,5 @@
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import type { Contractor, ContractorSort, Invitation, SearchRadiusKm } from '../types/contractor.types'
+import type { Contractor, ContractorSort, Invitation, SearchRadiusKm, ServiceRegion } from '../types/contractor.types'
 
 /**
  * Logic thuần của danh sách nhà thầu (S12) và landing (S09) — không React,
@@ -10,6 +10,11 @@ import type { Contractor, ContractorSort, Invitation, SearchRadiusKm } from '../
 export interface ContractorFilters {
   radiusKm: SearchRadiusKm
   sort: ContractorSort
+  /**
+   * Tab vùng Bắc / Trung / Nam (S12). Bỏ trống thì không lọc theo vùng — landing
+   * S09 dùng chung hàm này nhưng không có tab vùng.
+   */
+  region?: ServiceRegion
 }
 
 /**
@@ -35,7 +40,10 @@ const COMPARATORS: Record<ContractorSort, (a: Contractor, b: Contractor) => numb
 
 /** Lọc theo bán kính rồi sắp xếp theo chip đang chọn (S12). */
 export function filterContractors(contractors: readonly Contractor[], filters: ContractorFilters): Contractor[] {
-  return contractors.filter((c) => c.distanceKm <= filters.radiusKm).sort(COMPARATORS[filters.sort])
+  return contractors
+    .filter((c) => c.distanceKm <= filters.radiusKm)
+    .filter((c) => !filters.region || c.region === filters.region)
+    .sort(COMPARATORS[filters.sort])
 }
 
 /**

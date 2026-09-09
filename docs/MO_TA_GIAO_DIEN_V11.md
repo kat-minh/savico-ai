@@ -1,6 +1,9 @@
 # SAVI · Bộ giao diện chuẩn — mô tả sơ bộ cho dev (v1.1)
 
 > Nguồn: Google Docs "SAVICO_Mo ta giao dien" — `SAVI · BỘ GIAO DIỆN CHUẨN - MÔ TẢ SƠ BỘ CHO DEV`, v1.1, người lập: Lâm (PO).
+> Link: <https://docs.google.com/document/d/1xV1PlIjxm4qeXZ1g8keX0JR9A9Xy7_MXuflRB-_wSbI/mobilebasic>
+> — bản `/mobilebasic` nạp thẳng 25 ảnh demo vào DOM (`document.images`), ảnh S08 là `images[7]`;
+> CSP của Google Docs chặn POST ra `localhost` nên không lưu ảnh về repo được, phải đo tại chỗ bằng canvas.
 > Chép lại vào repo ngày 2026-09-05 để code có bản tham chiếu offline. Bản trong doc là bản gốc; khi hai bên lệch nhau thì **doc thắng**.
 >
 > v1.1 so với bản trước: thêm S18 Lời mời báo giá · "Chọn cách quản lý thi công" link tới Gói đăng ký › Gói giám sát · **bỏ thanh toán thẻ/Visa, chỉ còn QR** · bỏ phụ lục bản trước.
@@ -132,6 +135,43 @@ Nội dung cẩm nang: <https://drive.google.com/drive/u/1/folders/1MbQNZaWazh1l
 
 ---
 
+## Số đo lấy từ ảnh demo
+
+Đo trực tiếp trên pixel của ảnh trong doc (canvas + dò biên), không ước lượng bằng
+mắt. Ảnh gốc **800×533**; cột "khổ thật" quy đổi theo hệ số 1.979 (= bề ngang phần
+nội dung của bản dựng 1480px chia cho 748px đo được trên ảnh).
+
+**Hình S08** — `images[7]`, 800×533:
+
+| Chỗ | Trên ảnh (px) | Tỉ lệ | Khổ thật |
+| --- | --- | --- | --- |
+| Phần nội dung | x = 20…767 → 748 | 93.5% bề ngang trang | `w-[93.5%]` |
+| Cột trái (thẻ gói) | x = 20…209 → 190 | 25.4% phần nội dung | 376px |
+| Khe giữa hai cột | 28.5 | 3.81% | 56px |
+| Cột phải (3 thẻ) | x = 237.5…767 → 529.5 | 70.79% | 1048px |
+| Khe giữa hai thẻ | 13.25 | 2.5% cột phải | 26px |
+| Thẻ lựa chọn | 157 × 341 (thẻ 1) | cao/rộng = 2.17 | 332 × 715 |
+| Lề trong thẻ | 8 | 5.2% bề ngang thẻ | 16px (`p-4`) |
+| Khung ảnh minh hoạ | 139 × 103 (thẻ 1) | **4:3**, chiếm 30% chiều cao thẻ | 4:3, `max-h-[40%]` |
+| — thẻ 3 (4 ý thay vì 6) | 161 × 136 | 41% chiều cao thẻ | ảnh CO GIÃN theo chỗ trống |
+| Nút đáy thẻ | 139 × 25 | | 274 × 50 |
+| Vòng tròn tick | Ø 39 | 20.5% bề ngang cột trái | 77px (`size-20`) |
+| Tiêu đề "Đã kích hoạt…" | 15/dòng, 2 dòng | | `text-3xl` |
+| Thẻ gói xanh | 190 × 188 | cao/rộng = **0.99** (gần vuông) | 376 × 372 |
+| — hàng quyền lợi | bước 30 | | 59px (`py-5`) |
+| Hai nút dưới thẻ gói | cao 27 | | 53px (`h-13`) |
+
+**Ba chỗ ảnh TỰ MÂU THUẪN**, không sao chép được nguyên xi:
+
+1. Ba thẻ lựa chọn rộng **khác nhau** (157 / 172 / 178px) — bản dựng chia đều ba cột.
+2. Khung ảnh minh hoạ mỗi thẻ một chiều cao (103 / — / 136px) vì AI vẽ cho vừa chỗ
+   trống còn lại. Quy luật rút ra: **ảnh giãn để lấp chỗ trống**, danh sách ý giữ
+   nguyên chiều cao tự nhiên — nên trong code khung ảnh là phần tử `grow`, còn `<ul>`
+   thì KHÔNG `flex-1`, và nút được ghim đáy bằng `mt-auto`.
+3. Lề dưới của thẻ chỉ còn ~8px trong khi lề trên là 20px.
+
+---
+
 ## Điểm lệch — quyết định khi dựng khung
 
 Những chỗ code **cố ý khác** ảnh demo hoặc bổ sung so với phần chữ. Mỗi mục đều có lý do; nếu PO không đồng ý thì sửa ở đây trước rồi sửa code.
@@ -149,7 +189,7 @@ Những chỗ code **cố ý khác** ảnh demo hoặc bổ sung so với phần
 | 9 | S16 | Thêm chỉ báo "Nhà thầu 2/3" và gom lịch của cả lượt vào **một** mã yêu cầu | Mời 3 nhà thầu là lặp màn này 3 lần; không có chỉ báo thì người dùng mất phương hướng. |
 | 10 | S18 | Mỗi thẻ lời mời hiện thêm **lịch khảo sát đã đặt** | Sau S17 không còn chỗ nào xem lại được lịch đã hẹn. |
 | 11 | S14 | Chỉ hiện siêu dữ liệu đã xác minh + khung xem bản scan **đã che**; không cho tải hợp đồng nguyên bản | Hợp đồng có chữ ký và con dấu của hai pháp nhân, không nên nằm trên trang công khai. Cần PO/pháp lý xác nhận. |
-| 12 | S10/S11 vs S18 | Ngân sách là trường bắt buộc nhưng **không** nằm trong hồ sơ gửi nhà thầu; ghi chú ngay tại ô nhập | Hai màn nói hai điều khác nhau; chốt theo S18. **Cần PO xác nhận.** |
+| 12 | S10/S11 vs S18 | Ngân sách là trường bắt buộc nhưng **không** nằm trong hồ sơ gửi nhà thầu. Trước đây có ghi chú ngay tại ô nhập; **đã BỎ ghi chú** theo yêu cầu của khách (Hình S10 không vẽ dòng nào ở đó) | Hai màn nói hai điều khác nhau; code vẫn chốt theo S18 nhưng nay KHÔNG còn nói với người dùng. **Cần PO xác nhận ngân sách có nằm trong hồ sơ gửi nhà thầu hay không.** |
 | 13 | S19 | Bỏ dòng "xem báo giá nhà thầu" ở gói Tự quản lý và bỏ dòng "checklist theo từng giai đoạn" | Trái R2 và R9. |
 | 14 | S20–S23 | Bảng lịch trình **gấp lại được**, mặc định đóng; chọn giai đoạn thì cuộn phần chi tiết vào tầm nhìn | Vẫn nằm trên danh sách giai đoạn (R9) nhưng không đẩy vùng làm việc xuống dưới màn hình đầu. |
 | 15 | S20 modal Tải hồ sơ | Cho chọn **nhiều tệp** trước khi bấm hoàn thành giai đoạn | Một giai đoạn thi công có nhiều ảnh hiện trường. |

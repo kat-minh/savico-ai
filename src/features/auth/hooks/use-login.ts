@@ -30,6 +30,10 @@ export function useLogin(redirectTo?: string) {
     onSuccess: ({ user }) => {
       setUser(user)
       queryClient.setQueryData(authKeys.currentUser(), user)
+      // Dọn Router Cache trước khi điều hướng: mọi trang đã được prefetch trong
+      // phiên khách đều đang giữ payload dựng cho khách. (Riêng nhóm route bắt
+      // buộc đăng nhập thì không còn được prefetch nữa — xem `i18n/navigation`.)
+      router.refresh()
       // Consume the pending action BEFORE closing (close() clears it).
       const pending = consumePendingAction()
       closeAuthDialog()

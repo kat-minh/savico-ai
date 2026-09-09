@@ -33,6 +33,7 @@ import {
   BOOKINGS_SEED,
   BUILDING_TYPES_SEED,
   CONSULT_PACKAGES_SEED,
+  CONTRACTOR_INVITATIONS_SEED,
   PACKAGE_REVIEWS_SEED,
   REPORTS_SEED,
   RESCHEDULE_REQUESTS_SEED,
@@ -188,8 +189,7 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   consultPackages: CONSULT_PACKAGES_SEED,
   packageReviews: PACKAGE_REVIEWS_SEED,
   reports: REPORTS_SEED,
-  // Lời mời do khách gửi ở S16/S17 nên không có bản mẫu — bảng bắt đầu rỗng.
-  contractorInvitations: [],
+  contractorInvitations: CONTRACTOR_INVITATIONS_SEED,
   // Dự án giám sát sinh ra khi khách mua gói; bản demo dựng dữ liệu mẫu ở lần
   // mở bảng điều khiển đầu tiên, nên bảng cũng bắt đầu rỗng.
   supervisionProjects: []

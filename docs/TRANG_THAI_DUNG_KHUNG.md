@@ -26,7 +26,7 @@ Cập nhật file này mỗi khi hoàn thiện một màn hình.
 | 8 | Bước 3 — chưa render | `/design/[projectId]/dossier` | `DossierOverview` | Đủ thông tin dự án + 4 thẻ xem trước + nút disabled |
 | 9 | Bước 3 — màn chờ render | `/design/[projectId]/dossier` | `GenerationWaiting` (flow `dossier`) | Dùng lại bố cục Bước 2, panel đổi sang mẫu **nội thất 3D**, 3 thanh tiến trình kèm số n/N |
 | 10 | Bước 3 — hoàn tất | `/design/[projectId]/dossier` | `DossierReady` + `DossierShareDialog` | 4 nút đã chạy: tải PDF thật, link chia sẻ, QR, gửi email (mock) |
-| 11 | Cửa sổ cá nhân | `/account` | `features/account` + `MyProjects` (từ `features/design`) | Đủ 3 khu vực |
+| 11 | Cửa sổ cá nhân | `/account` | `features/account` + `MyProjects` (từ `features/design`) | Đủ 3 khu vực; nút "Chỉnh sửa" mở `ProfileEditDialog` (họ tên + SĐT, email chỉ đọc) — mock ghi thẳng vào bản ghi phiên `bmt.mock-user` nên F5 vẫn còn |
 | 12 | Tư vấn 1:1 — danh sách KTS | `/consult` | `features/consultation` (`ConsultantDirectory` + `ConsultantCard`) | Tìm + lọc chuyên môn, đếm KTS, lưới 3 cột; danh sách nhóm theo chuyên môn |
 | 13 | Tư vấn 1:1 — hồ sơ + chọn giờ | `/consult/[consultantId]` | `ConsultantDetail` = `ConsultantRail` + `ConsultantProfile` + `SlotPicker` | Cột trái danh sách thu gọn, hồ sơ + 4 ảnh công trình, chip 7 ngày, slot 30 phút, slot kín hiện "Kín" |
 | 13a | Modal xác nhận đặt lịch | (modal) | `BookingDialog` | Dòng tóm tắt KTS · thứ ngày · khung giờ, SĐT (i) + ghi chú, toast góc phải trên, slot vừa đặt chuyển "Kín" |
@@ -51,7 +51,7 @@ trình duyệt (`NEXT_PUBLIC_USE_MOCK_API=true`), dữ liệu nằm ở `localSt
 | S09 | Landing Tìm nhà thầu | `/contractors` | `features/contractors` (`ContractorLanding`) | Trang công khai; FAQ và khối so sánh bám R1/R2 |
 | S10 | Tự tạo hồ sơ – Bước 1 | `/contractors/[projectId]/profile` | `BriefForm` | 2 cột, chọn tỉnh/phường từ danh mục hành chính, tải tệp ≤ 10 MB |
 | S11 | Kiểm tra hồ sơ – Bước 2 | `/contractors/[projectId]/review` | `BriefReview` | Hoàn tất → mở `StartOptionsDialog` (R7) |
-| S12 | Nhà thầu được đề xuất | `/contractors/[projectId]/matches` | `ContractorMatches` + `ContractorCard` | Một hàng bộ lọc; panel so sánh sticky; đủ 3 lời mời thì khóa nút mời |
+| S12 | Nhà thầu được đề xuất | `/contractors/[projectId]/matches` | `ContractorMatches` + `ContractorCard` + `ProjectPickerDialog` | Một hàng bộ lọc; panel so sánh sticky; đủ 3 lời mời thì khóa nút mời. **Chế độ xem thử**: `projectId = preview` (xem `CONTRACTOR_PREVIEW_ID`) cho xem / lọc / so sánh mà chưa cần hồ sơ — dải nhắc vàng thay thẻ dự án, nút mời khóa, "Đổi dự án" và các nút mời mở hộp thoại "Chọn dự án để tìm nhà thầu". Bản mock nạp sẵn 4 hồ sơ mẫu (`api/briefs.seed.ts`) + lời mời tương ứng (`shared/cms/seeds/invitations.seed.ts`) để hộp thoại có đủ 4 trạng thái dòng khi demo |
 | S13 | Hồ sơ nhà thầu – Tổng quan | `/contractors/[projectId]/firm/[contractorId]` | `ContractorProfile` | 4 tab dùng chung header |
 | S14 | Hồ sơ nhà thầu – Hợp tác SAVICO | `…/firm/[contractorId]?tab=partnership` | `ContractorProfile` | Siêu dữ liệu đã xác minh; bản scan hiển thị dạng đã che (xem điểm lệch #11) |
 | S15 | So sánh hồ sơ nhà thầu | `/contractors/[projectId]/compare` | `ContractorCompare` | 8 tiêu chí, không có giá; chọn tối đa 3 để mời |
@@ -60,8 +60,13 @@ trình duyệt (`NEXT_PUBLIC_USE_MOCK_API=true`), dữ liệu nằm ở `localSt
 | S18 | Lời mời báo giá | `/contractors/[projectId]/invitations` | `InvitationTracker` | Thanh 4 nấc, khách chỉ xem (R4); có lối vào "Chọn cách quản lý thi công" (R8) |
 | S19 | Trang Gói giám sát thi công | `/plans/supervision?project=` | `features/supervision` (`SupervisionPricing`) | 3 lựa chọn, bảng so sánh, add-on, hành trình 8 bước |
 | S20–S23 | Bảng điều khiển giám sát | `/supervision/[projectId]?stage=` | `SupervisionDashboard` + `StageDetail` + `StageUploadDialog` + `ChangeRequestDialog` | MỘT trang, 4 trạng thái giai đoạn; bảng lịch trình gấp được |
-| S24 | Tài khoản — Giám sát của tôi | `/account` | `SupervisionSummary` (qua `account-supervision.tsx`) | Một khối duy nhất, đặt trên lưới dự án |
-| PL | Cẩm nang — dấu (+) | `/handbook` | `features/handbook/components/article-list.tsx` | Mở nhẹ tại chỗ, không đổi URL; "Xem chi tiết" mới mở trọn bài |
+| S24 | Tài khoản — Giám sát của tôi | `/account` | `SupervisionSummary` (cột trái) + `SupervisionProjectStrip` (đáy thẻ dự án) | Dựng lại bám Hình S24: thẻ có giám sát **chiếm 2 hàng lưới** (nửa trên và khối giám sát mỗi phần cao một hàng), khối trong thẻ có ảnh hiện trường bên phải, sợi chỉ 6 nút với đoạn dẫn vào giai đoạn đang chạy tô cam, ngày dạng `dd/MM/yyyy` |
+| PL | Cẩm nang — dấu (+) | `/handbook` | `article-list.tsx` **và** `foundation-block.tsx` | Mở nhẹ tại chỗ, không đổi URL; "Xem chi tiết" mới mở trọn bài. Phụ lục nói "mọi dòng bài ở mọi chuyên mục", nhưng dòng bài trong khối **Cẩm nang Phần thô** vẫn là `<Link>` nhảy thẳng sang trang bài — đã sửa cùng kiểu với `article-list`, và mỗi dòng thành thẻ viền riêng theo Hình PL |
+
+> **Điểm lệch #17 của bản mô tả đã hết hiệu lực.** Dòng đó viết "khối Giám sát
+> của tôi chỉ dựng MỘT lần", nhưng **Hình S24 vẽ CẢ HAI**: thẻ "GIÁM SÁT CỦA TÔI"
+> ở cột trái (số tổng quát của gói) và khối "GÓI AN TÂM · GIÁM SÁT" gắn trong thẻ
+> dự án (số của chính dự án đó, kèm ảnh hiện trường). Code hiện dựng theo ẢNH.
 
 **Hai lỗi khung app đã sửa trong đợt này** (cả hai có TRƯỚC bộ v1.1, chỉ lộ ra khi
 mở thẳng URL thay vì bấm link):

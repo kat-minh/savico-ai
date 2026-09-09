@@ -2,10 +2,10 @@
 
 import { ArrowRight, Check, House, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
+import { Fragment } from 'react'
 
 import { Link } from '@/i18n/navigation'
-import type { Locale } from '@/i18n/routing'
 import { EmptyState, Photo } from '@/shared/components/common'
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import {
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
 import { designDossierRoute, designEstimateRoute, designInputRoute } from '@/shared/constants/routes'
-import { formatDate } from '@/shared/utils'
+import { formatDayMonth } from '@/shared/utils'
 import { DESIGN_STEPS } from '../constants/design.constants'
 import { useProjects } from '../hooks/use-projects'
 import type { DesignStep, Project } from '../types/design.types'
@@ -28,6 +28,15 @@ const STEP_ROUTE: Record<DesignStep, (projectId: string) => string> = {
   3: designDossierRoute
 }
 
+interface MyProjectsProps {
+  /**
+   * Nội dung gắn vào đáy mỗi thẻ dự án — S24 dùng để cắm khối giám sát.
+   * `features/design` không được import `features/supervision`, nên khối đó do
+   * lớp app truyền vào.
+   */
+  renderSupervision?: (projectId: string) => React.ReactNode
+}
+
 /**
  * "Dự án của tôi" ở trang Tài khoản (mục IX, Hình 17).
  *
@@ -36,9 +45,9 @@ const STEP_ROUTE: Record<DesignStep, (projectId: string) => string> = {
  * Khác với lưới ở trang Thiết kế & Dự toán (mục IV.1) — chỗ đó là thẻ dọc kèm
  * bộ lọc và phân trang.
  */
-export function MyProjects() {
+export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
   const t = useTranslations('account.projects')
-  const locale = useLocale() as Locale
+  const tBuilding = useTranslations('design.input.buildingType.options')
   const { data: projects, isPending } = useProjects()
 
   const [renaming, setRenaming] = useState<Project | null>(null)
@@ -60,90 +69,163 @@ export function MyProjects() {
 
   return (
     <>
-      <ul className='grid gap-4 sm:grid-cols-2'>
+      {/* `grid-flow-row-dense`: thẻ có khối giám sát chiếm HAI hàng (xem bên
+          dưới), nên các thẻ sau phải lấp được vào ô trống của hàng thứ hai thay
+          vì nhảy hẳn xuống hàng ba. */}
+      <ul className='grid grid-flow-row-dense items-start gap-4 sm:grid-cols-2'>
         {projects.map((project) => {
           const done = project.status === 'completed'
+          // Hình S24: nửa trên của thẻ và khối giám sát mỗi phần cao đúng MỘT
+          // hàng, nên thẻ có giám sát chiếm hai hàng và cột bên cạnh xếp vừa
+          // hai thẻ thường. Không khai `row-span-2` thì thẻ ngắn bên cạnh để
+          // trống hẳn một mảng bằng cả một thẻ.
+          const supervision = renderSupervision?.(project.id)
+
           return (
-            <li key={project.id}>
-              <article className='bg-card hover:border-primary/50 group relative flex h-full gap-3 rounded-xl border p-3 transition-colors'>
-                {/* Ảnh bìa là ảnh lô đất của Bước 1; chưa có thì để khung rỗng. */}
-                {project.coverUrl ? (
-                  <Photo
-                    className='size-28 shrink-0 rounded-lg'
-                    src={project.coverUrl}
-                    alt={project.name}
-                    sizes='112px'
-                  />
-                ) : (
-                  <span className='bg-muted text-muted-foreground/40 flex size-28 shrink-0 items-center justify-center rounded-lg'>
-                    <House className='size-8' strokeWidth={1.25} />
-                  </span>
+            <li key={project.id} className={cn(supervision && 'sm:row-span-2 sm:self-stretch')}>
+              <article
+                className={cn(
+                  'bg-card hover:border-primary/50 group relative flex h-full flex-col overflow-hidden rounded-xl border transition-colors',
+                  // Thẻ chiếm hai hàng thì CHIA ĐÔI theo chiều cao: mỗi nửa cao
+                  // đúng một hàng lưới, nên đường đứt giữa hai nửa rơi vào GIỮA
+                  // khe hở của cột bên cạnh. Để hai nửa tự co theo nội dung thì
+                  // đường đứt bám mép trên khe, và thẻ dưới bên phải tụt xuống
+                  // đúng một `gap` so với khối giám sát — nhìn là thấy lệch.
+                  supervision && 'sm:grid sm:grid-rows-2'
                 )}
-
-                <div className='flex min-w-0 flex-1 flex-col gap-1'>
-                  <div className='flex items-start justify-between gap-2'>
-                    <h3 className='min-w-0 truncate text-sm font-semibold'>{project.name}</h3>
-
-                    {/* z-10 để nổi trên lớp phủ của liên kết "Mở tiếp". */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        aria-label={t('menu.label')}
-                        className='text-muted-foreground hover:text-foreground z-10 -mt-1 -mr-1 shrink-0 rounded p-1 transition-colors'
-                      >
-                        <MoreHorizontal className='size-4' />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuItem onSelect={() => setRenaming(project)}>
-                          <Pencil className='size-4' />
-                          {t('menu.rename')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem variant='destructive' onSelect={() => setDeleting(project)}>
-                          <Trash2 className='size-4' />
-                          {t('menu.delete')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <p className='text-muted-foreground text-xs'>{project.id}</p>
-                  <p className='text-muted-foreground text-xs'>
-                    {t('createdAt', { date: formatDate(project.createdAt, locale) })}
-                  </p>
-
-                  {/* Ba đoạn RỜI nhau như Hình 17, không phải một thanh liền. */}
-                  <span className='mt-1.5 flex gap-1' aria-hidden>
-                    {DESIGN_STEPS.map((step) => (
-                      <span
-                        key={step}
-                        className={cn(
-                          'h-1.5 flex-1 rounded-full',
-                          done || step <= project.currentStep ? 'bg-primary' : 'bg-muted'
-                        )}
-                      />
-                    ))}
-                  </span>
-
-                  <div className='mt-auto flex items-center justify-between gap-2 pt-2'>
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium',
-                        done ? 'bg-accent text-primary-strong' : 'border-primary/40 text-primary-strong border'
-                      )}
-                    >
-                      {done ? t('completed') : t('step', { step: project.currentStep })}
-                      {done ? <Check className='size-3' strokeWidth={3} /> : null}
+              >
+                <div className='flex gap-3 p-3'>
+                  {/* Ảnh bìa là ảnh lô đất của Bước 1; chưa có thì để khung rỗng. */}
+                  {project.coverUrl ? (
+                    <Photo
+                      className='w-[36%] shrink-0 self-stretch rounded-lg'
+                      src={project.coverUrl}
+                      alt={project.name}
+                      sizes='220px'
+                    />
+                  ) : (
+                    <span className='bg-muted text-muted-foreground/40 flex w-[36%] shrink-0 items-center justify-center self-stretch rounded-lg'>
+                      <House className='size-8' strokeWidth={1.25} />
                     </span>
+                  )}
 
-                    {/* `after:absolute after:inset-0` biến cả thẻ thành vùng bấm. */}
-                    <Link
-                      href={STEP_ROUTE[project.currentStep](project.id)}
-                      className='text-primary hover:text-primary/80 inline-flex items-center gap-1 text-xs font-medium transition-colors after:absolute after:inset-0 after:content-[""]'
-                    >
-                      {t('open')}
-                      <ArrowRight className='size-3' />
-                    </Link>
+                  <div className='flex min-w-0 flex-1 flex-col gap-1'>
+                    <div className='flex items-start justify-between gap-2'>
+                      <h3 className='min-w-0 truncate text-lg font-semibold'>{project.name}</h3>
+
+                      {/* z-10 để nổi trên lớp phủ của liên kết "Mở tiếp". */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          aria-label={t('menu.label')}
+                          className='text-muted-foreground hover:text-foreground z-10 -mt-1 -mr-1 shrink-0 rounded p-1 transition-colors'
+                        >
+                          <MoreHorizontal className='size-4' />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align='end'>
+                          <DropdownMenuItem onSelect={() => setRenaming(project)}>
+                            <Pencil className='size-4' />
+                            {t('menu.rename')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem variant='destructive' onSelect={() => setDeleting(project)}>
+                            <Trash2 className='size-4' />
+                            {t('menu.delete')}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <p className='text-muted-foreground font-mono text-sm'>{project.id}</p>
+                    {/* Hình S24: "Tạo ngày 12/06/2026 · Nhà phố · 120 m²" — một
+                        dòng, ngăn bằng dấu chấm giữa. Hai vế sau chỉ có sau khi
+                        khách qua Bước 1 và Bước 2, thiếu vế nào thì bỏ luôn cả
+                        dấu ngăn của vế đó. */}
+                    <p className='text-muted-foreground text-sm'>
+                      {[
+                        t('createdAt', { date: formatDayMonth(project.createdAt, { year: true }) }),
+                        project.buildingType ? tBuilding(project.buildingType) : null,
+                        project.floorArea ? t('floorArea', { area: project.floorArea }) : null
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+
+                    {/* Hình S24: nhãn + ba CHẤM có số và tên bước, không phải ba
+                      thanh trơn — ba thanh không nói được đang dừng ở bước nào. */}
+                    <p className='mt-3 text-sm font-medium'>{t('progressLabel')}</p>
+                    <ol className='mt-2 flex items-start'>
+                      {DESIGN_STEPS.map((step, index) => {
+                        const reached = done || step <= project.currentStep
+                        const current = !done && step === project.currentStep
+
+                        return (
+                          <Fragment key={step}>
+                            <li className='flex shrink-0 flex-col items-center gap-1'>
+                              <span
+                                className={cn(
+                                  'flex size-6 items-center justify-center rounded-full text-[11px] leading-none font-semibold',
+                                  current && 'bg-info text-primary-foreground',
+                                  !current && reached && 'bg-primary text-primary-foreground',
+                                  !reached && 'border-border text-muted-foreground border'
+                                )}
+                              >
+                                {reached && !current ? <Check className='size-3.5' strokeWidth={3.5} /> : step}
+                              </span>
+                              <span
+                                className={cn(
+                                  'text-xs leading-none whitespace-nowrap',
+                                  reached ? 'text-foreground' : 'text-muted-foreground'
+                                )}
+                              >
+                                {t('stepShort', { step })}
+                              </span>
+                            </li>
+
+                            {index < DESIGN_STEPS.length - 1 ? (
+                              <span
+                                aria-hidden
+                                className={cn(
+                                  'mt-3 h-0.5 min-w-3 flex-1 rounded-full',
+                                  done || step < project.currentStep ? 'bg-primary' : 'bg-border'
+                                )}
+                              />
+                            ) : null}
+                          </Fragment>
+                        )
+                      })}
+                    </ol>
+
+                    {/* Viên nhãn trạng thái và liên kết xếp DỌC, canh trái —
+                      Hình S24 để chúng trên hai dòng chứ không đẩy hai đầu. */}
+                    <div className='mt-3 flex flex-col items-start gap-1.5'>
+                      <span
+                        // Hình S24: "Hoàn tất" nền XANH LÁ nhạt, "Bước 2/3"
+                        // nền XANH DƯƠNG nhạt — cùng màu với chấm bước đang
+                        // làm ở sợi chỉ ngay trên nó, để hai thứ đọc ra là một.
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium',
+                          done ? 'bg-accent text-primary-strong' : 'bg-info-soft text-info border-info/25 border'
+                        )}
+                      >
+                        {done ? t('completed') : t('step', { step: project.currentStep })}
+                        {done ? <Check className='size-3' strokeWidth={3} /> : null}
+                      </span>
+
+                      {/* `after:absolute after:inset-0` biến cả thẻ thành vùng bấm. */}
+                      <Link
+                        href={STEP_ROUTE[project.currentStep](project.id)}
+                        className='text-primary hover:text-primary/80 inline-flex items-center gap-1.5 text-sm font-medium underline underline-offset-4 transition-colors after:absolute after:inset-0 after:content-[""]'
+                      >
+                        {t('open')}
+                        <ArrowRight className='size-4' />
+                      </Link>
+                    </div>
                   </div>
                 </div>
+
+                {/* Chỗ cắm cho khối giám sát (S24). `features/design` không được
+                    import `features/supervision`, nên lớp app truyền nội dung
+                    vào qua slot này. */}
+                {supervision}
               </article>
             </li>
           )

@@ -37,18 +37,20 @@ export function CheckoutSteps({ current, error = false }: CheckoutStepsProps) {
       {CHECKOUT_STEPS.map((step, index) => {
         const done = index < currentIndex
         const active = index === currentIndex
+        // Hình S08: nấc CUỐI khi đang đứng ở đó cũng hiện dấu tích (luồng đã xong),
+        // không hiện số 4.
+        const showCheck = done || (active && index === CHECKOUT_STEPS.length - 1 && !error)
         const state = error && active ? 'error' : done ? 'done' : active ? 'current' : 'pending'
 
         return (
           <li key={step} className='relative flex min-w-0 flex-1 flex-col items-center gap-2'>
-            {/* Đường nối vẽ bằng `::before` của nấc sau, kéo từ tâm nấc trước
-                sang tâm nấc này — cách duy nhất giữ đường nối luôn nằm đúng
-                giữa hai vòng tròn khi các cột co giãn theo nhau. */}
+            {/* Đường nối KHÔNG chạm vào vòng tròn: dừng cách mép mỗi vòng tròn
+                một khoảng (tâm nấc ± bán kính 1.125rem + 1rem hở). */}
             {index > 0 ? (
               <span
                 aria-hidden
                 className={cn(
-                  'absolute top-[1.125rem] -left-1/2 h-px w-full',
+                  'absolute top-[calc(1.125rem-1px)] left-[calc(-50%+2.125rem)] right-[calc(50%+2.125rem)] h-0.5 rounded-full',
                   done || active ? 'bg-primary' : 'bg-border'
                 )}
               />
@@ -63,7 +65,7 @@ export function CheckoutSteps({ current, error = false }: CheckoutStepsProps) {
                 state === 'pending' && 'bg-muted text-muted-foreground border'
               )}
             >
-              {state === 'done' ? (
+              {showCheck ? (
                 <Check className='size-4' strokeWidth={3} />
               ) : state === 'error' ? (
                 <AlertTriangle className='size-4' />

@@ -11,35 +11,35 @@ interface ContractorLogoProps {
 }
 
 /**
- * Ô logo nhà thầu. Danh bạ thật hiếm khi có đủ logo, nên khi thiếu thì dựng chữ
- * viết tắt trên nền thương hiệu thay vì để một ô trống — thẻ ở S12/S15 vẫn giữ
- * đúng nhịp bố cục.
+ * Ô logo nhà thầu.
+ *
+ * CHỖ CHỜ ASSET: chưa có logo thật thì để KHUNG NÉT ĐỨT kèm icon, giống mọi chỗ
+ * chờ asset khác trong bản dựng. Bản trước dựng chữ viết tắt trên nền thương
+ * hiệu ("AC"), trông như đã có logo nên không ai biết là còn thiếu — mà Hình
+ * S09/S12 vẽ logo thật của nhà thầu trong ô này.
  */
 export function ContractorLogo({ contractor, className }: ContractorLogoProps) {
-  const initials = contractor.name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase()
+  if (!contractor.logoUrl) {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          'bg-muted/30 text-muted-foreground/50 flex size-14 shrink-0 items-center justify-center rounded-xl border border-dashed',
+          className
+        )}
+      >
+        <Building2 className='size-[45%]' />
+      </span>
+    )
+  }
 
   return (
     <span
       aria-hidden
-      className={cn(
-        'bg-accent text-primary-strong flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border text-sm font-bold tracking-tight',
-        className
-      )}
+      className={cn('flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border', className)}
     >
-      {contractor.logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- logo đối tác là URL ngoài, không qua next/image loader
-        <img src={contractor.logoUrl} alt='' className='size-full object-contain' />
-      ) : initials ? (
-        initials
-      ) : (
-        <Building2 className='size-5' />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element -- logo đối tác là URL ngoài, không qua next/image loader */}
+      <img src={contractor.logoUrl} alt='' className='size-full object-contain' />
     </span>
   )
 }

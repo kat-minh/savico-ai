@@ -5,6 +5,7 @@ import type {
   ContractorReview,
   Invitation,
   ProjectBrief,
+  ProjectBriefSummary,
   SurveyBooking,
   SurveyRequest,
   SurveySlot
@@ -29,6 +30,11 @@ const ContractorsApi = {
   getContractor: (contractorId: string) => http.get<Contractor>(`/contractors/${contractorId}`),
 
   createBrief: () => http.post<ProjectBrief>('/project-briefs', {}),
+  /** Hồ sơ dự án của tài khoản — nút "Xem nhà thầu" (S09) cần biết đã có hồ sơ chưa. */
+  listBriefs: () => http.get<ProjectBrief[]>('/project-briefs'),
+
+  /** Hồ sơ + số lời mời đã gửi — hộp thoại "Chọn dự án để tìm nhà thầu". */
+  listBriefSummaries: () => http.get<ProjectBriefSummary[]>('/project-briefs/summaries'),
   getBrief: (projectId: string) => http.get<ProjectBrief>(`/project-briefs/${projectId}`),
   saveBrief: (projectId: string, payload: SaveBriefPayload) =>
     http.put<ProjectBrief>(`/project-briefs/${projectId}`, payload),

@@ -23,8 +23,16 @@ export type ProjectScale = 'ground' | 'ground+1' | 'ground+2' | 'ground+3'
 /** Mốc khởi công dự kiến (S10). */
 export type StartWindow = 'asap' | 'in-1-3-months' | 'in-3-6-months' | 'undecided'
 
-/** Trạng thái hồ sơ dự án trong luồng tìm nhà thầu. */
-export type BriefStatus = 'draft' | 'ready' | 'inviting'
+/**
+ * Trạng thái hồ sơ dự án trong luồng tìm nhà thầu.
+ *
+ * `draft` đã bỏ cùng nút "Lưu nháp": hồ sơ được ghi lại ngay khi bấm "Tiếp tục"
+ * và mức độ điền đủ vốn suy ra từ chính dữ liệu (`isBriefComplete`), nên một cờ
+ * riêng cho "đang nháp" không nói thêm được gì. Chỗ đó nhường cho `contracted`
+ * — thứ KHÔNG suy ra được từ dữ liệu trên web, vì khảo sát · báo giá · thương
+ * thảo · hợp đồng đều diễn ra ngoài web (R3) và chỉ đội vận hành mới biết.
+ */
+export type BriefStatus = 'ready' | 'inviting' | 'contracted'
 
 /** Chip sắp xếp danh sách nhà thầu (S12) và tab xếp hạng ở landing (S09). */
 export type ContractorSort = 'match' | 'distance' | 'rating' | 'survey'
@@ -110,10 +118,29 @@ export interface ProjectBrief {
   scope: ConstructionScope
   scopeNote: string
   documents: BriefDocument[]
+  /**
+   * Ảnh bìa hồ sơ — dòng dự án ở hộp thoại "Chọn dự án để tìm nhà thầu".
+   * Hồ sơ từ gói thiết kế lấy phối cảnh đã render; hồ sơ tự tạo lấy ảnh hiện
+   * trạng khách tải lên. Bỏ trống thì dòng hiện khung biểu tượng.
+   */
+  coverUrl?: string | null
   selfCreated: boolean
   status: BriefStatus
   createdAt: string
   updatedAt: string
+}
+
+/**
+ * Một dòng trong hộp thoại "Chọn dự án để tìm nhà thầu".
+ *
+ * Hồ sơ kèm SỐ LỜI MỜI đã gửi: hộp thoại phải nói ngay mỗi dự án đang ở đâu
+ * ("Chưa mời" / "Đã mời 2/3" / "Đã mời 3/3"), mà đếm bằng cách gọi
+ * `listInvitations` cho từng dự án thì mở hộp thoại là bắn n truy vấn.
+ */
+export interface ProjectBriefSummary {
+  brief: ProjectBrief
+  /** Số lời mời đã gửi cho dự án này — tối đa 3 (R1). */
+  invitedCount: number
 }
 
 /** Ảnh công trình trong hồ sơ năng lực (S13). */
@@ -158,6 +185,12 @@ export interface Contractor {
   reviewCount: number
   /** Số dự án tương tự dự án đang xét — cơ sở của xếp hạng "Phù hợp nhất". */
   similarProjects: number
+  /**
+   * Tổng số dự án đã hoàn thành — Hình S09 in nó ngay trên `similarProjects`
+   * trong thẻ nhà thầu ở hero ("46 dự án" / "18 dự án tương tự"). Hai con số
+   * khác nhau: một cái là bề dày, một cái là mức phù hợp với dự án đang xét.
+   */
+  completedProjects: number
   distanceKm: number
   serviceAreas: string[]
   region: ServiceRegion

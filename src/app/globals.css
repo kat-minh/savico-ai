@@ -27,11 +27,20 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.164 0.007 270.998);
 
-  /* Brand roles: xanh lá SAVICO theo bộ mockup khách duyệt (client-ai-gen).
-   * primary ~ #16A34A, nhấn đậm ~ #15803D, nền nhạt ~ #ECFDF3. -------- */
-  --primary: oklch(0.63 0.17 149);
+  /* Brand roles: xanh lá SAVICO.
+   *
+   * Đo lại bằng pixel trên Hình S09 của bản mô tả v1.1 (vùng đặc lớn nên đáng
+   * tin): nền nút "Tạo hồ sơ" và dải CTA cuối trang đều ra (0,91,48) = #005B30,
+   * tiêu đề H1 hero ra (3,60,14). Tức bảng màu của khách là XANH RÊU ĐẬM, không
+   * phải xanh lá tươi #16A34A / #15803D mà bản dựng đang dùng — đặt cạnh ảnh là
+   * thấy chênh ngay.
+   *
+   * `--primary-strong` bám đúng #005B30 (nền đặc, tiêu đề, dải CTA);
+   * `--primary` nhạt hơn một nấc cho icon và nét mảnh, vì ở cỡ 16px mà dùng
+   * thẳng #005B30 thì icon chìm vào chữ đen. -------- */
+  --primary: oklch(0.47 0.115 154);
   --primary-foreground: oklch(1 0 0);
-  --primary-strong: oklch(0.55 0.155 150);
+  --primary-strong: oklch(0.4 0.105 155);
   /* Dải gradient thương hiệu (giống bản deploy SAVICO): xanh lá đậm → xanh chanh.
    * Dùng cho nút chính, vòng icon 3 bước, nút chatbot, nút play video, chữ accent. */
   --brand-gradient-from: #006400;
@@ -64,6 +73,13 @@
   /* Chữ cảnh báo trên nền vàng nhạt (badge "Chờ duyệt", mục IV.1) — `--warning`
      quá sáng để đọc khi dùng làm màu chữ. */
   --warning-strong: oklch(0.56 0.13 66);
+  /* Thông tin trung tính — dải dẫn "Đây là so sánh hồ sơ năng lực…" ở S15. Xanh
+     nước biển chứ KHÔNG phải xanh thương hiệu: dải này chỉ giải thích, không
+     phải hành động, để màu xanh lá thì nó tranh chỗ với nút chính trên cùng
+     một màn. Số đo từ ảnh S15: icon #0653AD, nền #F0F4FB. */
+  --info: oklch(0.457 0.159 257);
+  --info-foreground: oklch(0.3 0.055 264);
+  --info-soft: oklch(0.965 0.012 253);
 
   /* Borders, inputs, focus rings --------------------------------------- */
   --border: oklch(0.912 0.012 150);
@@ -119,6 +135,9 @@
   --warning: oklch(0.812 0.141 80.97);
   --warning-foreground: oklch(0.164 0.007 270.998);
   --warning-strong: oklch(0.84 0.13 78);
+  --info: oklch(0.72 0.13 250);
+  --info-foreground: oklch(0.9 0.03 250);
+  --info-soft: oklch(0.28 0.05 255);
 
   --border: oklch(0.988 0.004 91.446 / 14%);
   --input: oklch(0.988 0.004 91.446 / 18%);
@@ -170,6 +189,9 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-strong: var(--warning-strong);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
   --color-brand-orange: var(--brand-orange);
   --color-brand-orange-foreground: var(--brand-orange-foreground);
   --color-brand-orange-soft: var(--brand-orange-soft);
@@ -454,6 +476,25 @@
    * `.brand-gradient` lên nền, nên chỉ đặt `bg-brand-orange` thì gradient xanh
    * vẫn nằm đè lên và nút vẫn ra xanh.
    */
+  /*
+   * Nút ĐẶC màu thương hiệu — dùng cho các nút lớn của Hình S01/S19.
+   *
+   * Nút mặc định của hệ thống có lớp bóng gradient (ngôn ngữ "kính" của site);
+   * riêng ba nút chọn gói và nút "Đăng ký ngay" trong bản mô tả là nền phẳng
+   * một màu, nên phải tắt lớp bóng đó tại chỗ thay vì đổi nút toàn site.
+   */
+  .brand-green-button {
+    background-image: none;
+    background-color: var(--primary-strong);
+    color: var(--primary-foreground);
+    box-shadow:
+      0 1px oklch(1 0 0 / 0.12) inset,
+      0 2px 6px color-mix(in oklch, var(--primary-strong) 30%, transparent);
+  }
+  .brand-green-button:hover {
+    background-color: color-mix(in oklch, var(--primary-strong) 92%, black);
+  }
+
   .brand-orange-button {
     background-image: none;
     background-color: var(--brand-orange);

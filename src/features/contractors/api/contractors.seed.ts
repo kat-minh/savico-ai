@@ -1,4 +1,4 @@
-import { BUILDING_IMAGE, CONSTRUCTION_IMAGE, TOPIC_IMAGE } from '@/shared/lib/imagery'
+import { BUILDING_IMAGE } from '@/shared/lib/imagery'
 import type { Contractor } from '../types/contractor.types'
 
 /**
@@ -20,6 +20,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     rating: 4.8,
     reviewCount: 126,
     similarProjects: 18,
+    completedProjects: 46,
     distanceKm: 2.3,
     serviceAreas: ['TP. Buôn Ma Thuột', 'Cư M’gar', 'Krông Pắc'],
     region: 'central',
@@ -28,11 +29,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     intro:
       'ABC Construction là đơn vị thiết kế và thi công nhà ở dân dụng với hơn 8 năm kinh nghiệm. Công ty sở hữu đội ngũ kiến trúc sư, kỹ sư và giám sát chuyên môn, đồng hành cùng khách hàng từ ý tưởng đến khi hoàn thiện công trình.',
     strengths: ['Nhà phố', 'Thi công trọn gói', 'Phần thô', 'Hoàn thiện'],
-    photos: [
-      { url: TOPIC_IMAGE.blueprint, caption: 'Văn phòng làm việc' },
-      { url: CONSTRUCTION_IMAGE.electrician, caption: 'Đội ngũ nhân sự' },
-      { url: CONSTRUCTION_IMAGE.rebar, caption: 'Công trình đang thi công' }
-    ],
+    photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2016,
     teamSize: '32',
     officeAddress: 'TP. Buôn Ma Thuột, Đắk Lắk',
@@ -41,7 +38,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
       'Giấy phép kinh doanh đã xác minh',
       'Đội ngũ kỹ sư phụ trách',
       'Bảo hiểm công trình',
-      'Cam kết bảo hành'
+      'Cam kết bảo hành 24 tháng'
     ],
     featuredProjects: [
       { id: 'p1', name: 'Nhà phố Nguyễn Văn Linh', year: 2023, imageUrl: BUILDING_IMAGE.townhouse },
@@ -64,6 +61,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     rating: 4.6,
     reviewCount: 98,
     similarProjects: 15,
+    completedProjects: 38,
     distanceKm: 4.1,
     serviceAreas: ['TP. Buôn Ma Thuột', 'Buôn Đôn'],
     region: 'central',
@@ -72,10 +70,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     intro:
       'An Gia Build tập trung vào nhà phố và biệt thự trọn gói, có xưởng nội thất riêng nên chủ động được tiến độ phần hoàn thiện.',
     strengths: ['Nhà phố', 'Biệt thự', 'Thi công trọn gói', 'Nội thất'],
-    photos: [
-      { url: TOPIC_IMAGE.blueprint, caption: 'Văn phòng làm việc' },
-      { url: CONSTRUCTION_IMAGE.rebar, caption: 'Công trình đang thi công' }
-    ],
+    photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2014,
     teamSize: '45',
     officeAddress: 'TP. Buôn Ma Thuột, Đắk Lắk',
@@ -101,6 +96,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     rating: 4.5,
     reviewCount: 76,
     similarProjects: 12,
+    completedProjects: 31,
     distanceKm: 3.7,
     serviceAreas: ['TP. Buôn Ma Thuột', 'Krông Ana'],
     region: 'central',
@@ -109,10 +105,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     intro:
       'Hưng Phát Home nhận phần thô và hoàn thiện cho nhà phố quy mô vừa, thế mạnh là kiểm soát khối lượng vật tư theo từng hạng mục.',
     strengths: ['Nhà phố', 'Phần thô', 'Hoàn thiện'],
-    photos: [
-      { url: CONSTRUCTION_IMAGE.rebar, caption: 'Công trình đang thi công' },
-      { url: CONSTRUCTION_IMAGE.electrician, caption: 'Đội ngũ nhân sự' }
-    ],
+    photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2018,
     teamSize: '24',
     officeAddress: 'TP. Buôn Ma Thuột, Đắk Lắk',
@@ -138,6 +131,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     rating: 4.4,
     reviewCount: 54,
     similarProjects: 9,
+    completedProjects: 24,
     distanceKm: 12.4,
     serviceAreas: ['Cư M’gar', 'TP. Buôn Ma Thuột'],
     region: 'central',
@@ -146,7 +140,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     intro:
       'Trường Thịnh E&C thi công biệt thự và công trình có kết cấu phức tạp, có bộ phận quản lý chất lượng độc lập với đội thi công.',
     strengths: ['Biệt thự', 'Thi công trọn gói'],
-    photos: [{ url: CONSTRUCTION_IMAGE.rebar, caption: 'Công trình đang thi công' }],
+    photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2012,
     teamSize: '60',
     officeAddress: 'Cư M’gar, Đắk Lắk',
@@ -174,6 +168,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     rating: 4.2,
     reviewCount: 41,
     similarProjects: 6,
+    completedProjects: 17,
     distanceKm: 25.8,
     serviceAreas: ['Krông Pắc', 'Ea Kar'],
     region: 'central',
@@ -182,7 +177,7 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
     intro:
       'Đại Việt Group nhận phần thô và hoàn thiện tại khu vực Krông Pắc – Ea Kar, quy mô đội nhỏ nên nhận số lượng dự án hạn chế.',
     strengths: ['Phần thô', 'Hoàn thiện'],
-    photos: [{ url: CONSTRUCTION_IMAGE.rebar, caption: 'Công trình đang thi công' }],
+    photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2019,
     teamSize: '18',
     officeAddress: 'Krông Pắc, Đắk Lắk',

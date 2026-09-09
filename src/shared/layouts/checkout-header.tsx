@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { cmsText, useCmsDocument } from '@/shared/cms'
 import { Logo } from '@/shared/components/common'
+import { Button } from '@/shared/components/ui/button'
 import { siteConfig } from '@/shared/config/site'
 import { ROUTES } from '@/shared/constants/routes'
 
@@ -29,13 +30,17 @@ export function CheckoutHeader() {
           <Logo tagline={tNav('brandTagline')} />
         </Link>
 
-        <a
-          href={`tel:${hotline.replace(/\s/g, '')}`}
-          className='text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm transition-colors'
-        >
-          <Headphones className='text-primary size-5' />
-          {t('headerSupport')}
-        </a>
+        {/* Hình S03: "Bạn cần hỗ trợ?" là CHỮ THƯỜNG (không bấm được), nút viền
+            "Liên hệ SAVI" đứng ngay sau mới là chỗ bấm gọi hotline. */}
+        <div className='flex items-center gap-3'>
+          <span className='text-muted-foreground flex items-center gap-2 text-sm'>
+            <Headphones className='text-primary size-5' />
+            {t('headerSupport')}
+          </span>
+          <Button asChild variant='outline' size='sm' className='rounded-lg'>
+            <a href={`tel:${hotline.replace(/\s/g, '')}`}>{t('headerSupportAction')}</a>
+          </Button>
+        </div>
       </div>
     </header>
   )

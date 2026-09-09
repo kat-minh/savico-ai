@@ -61,6 +61,16 @@ export interface Project {
   status: ProjectStatus
   /** Ảnh lô đất đã tải ở Bước 1, dùng làm ảnh bìa thẻ dự án. */
   coverUrl?: string | null
+  /**
+   * Loại công trình đã chọn ở Bước 1 — dòng "Tạo ngày … · Nhà phố · 120 m²"
+   * trên thẻ dự án (Hình S24). `null` khi khách chưa qua Bước 1.
+   */
+  buildingType?: BuildingType | null
+  /**
+   * Tổng diện tích sàn AI ước tính (m²), lấy từ kết quả Bước 2. `null` khi
+   * chưa chạy dự toán — thẻ khi đó chỉ in ngày tạo và loại công trình.
+   */
+  floorArea?: number | null
 }
 
 /**

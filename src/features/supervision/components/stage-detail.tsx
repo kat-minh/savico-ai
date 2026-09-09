@@ -1,28 +1,24 @@
 'use client'
 
-import { CheckCircle2, FileText, History, ImageIcon, Info, Lock, MessageSquare, Send, Upload } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { CheckCircle2, FileText, History, ImageIcon, MessageSquare, Send, Upload } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import type { Locale } from '@/i18n/routing'
 import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/utils'
-import { formatDate } from '@/shared/utils'
+import { formatDayMonth } from '@/shared/utils'
 import { useStageActions } from '../hooks/use-supervision'
-import { canUpload, daysUntil, isLocked } from '../services/supervision.service'
-import type { StageFile, SupervisionProject, SupervisionStage } from '../types/supervision.types'
+import { canUpload, daysUntil, isLocked, stageConfirmDrift, stageVersions } from '../services/supervision.service'
+import type { StageFile, SupervisionStage } from '../types/supervision.types'
 import { ChangeRequestDialog } from './change-request-dialog'
 
 interface StageDetailProps {
   projectId: string
-  project: SupervisionProject
   stage: SupervisionStage
   onUpload: () => void
 }
-
-const TIME_FORMAT = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' } as const
 
 /**
  * Chi tiết một giai đoạn — cùng một component phục vụ cả bốn trạng thái của bản
@@ -36,12 +32,14 @@ const TIME_FORMAT = { day: '2-digit', month: '2-digit', hour: '2-digit', minute:
  * Bốn màn của bản mô tả là bốn TRẠNG THÁI dữ liệu, không phải bốn bố cục — dựng
  * rời ra là cách chắc chắn để chúng trôi khỏi nhau sau vài lần sửa.
  */
-export function StageDetail({ projectId, project, stage, onUpload }: StageDetailProps) {
+/** Nhãn vai trò Giám sát trên ảnh đại diện — trùng với `role` của nhận xét. */
+const ROLE_SUPERVISOR = 'GS'
+
+export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
   const t = useTranslations('supervision.dashboard.stage')
   const tStages = useTranslations('supervision.stages')
   const tChange = useTranslations('supervision.dashboard.change')
   const tStatus = useTranslations('supervision.dashboard.status')
-  const locale = useLocale() as Locale
 
   const { comment, requestChange } = useStageActions(projectId)
   const [draft, setDraft] = useState('')
@@ -50,6 +48,8 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
   const locked = isLocked(stage)
   const pending = stage.changeRequests.find((request) => request.status === 'pending')
   const pendingForCustomer = pending?.by === 'GS' ? pending : undefined
+  /** Yêu cầu sửa đổi đã ngã ngũ — chỉ những cái này mới hiện thành bản ghi. */
+  const settledRequests = stage.changeRequests.filter((request) => request.status !== 'pending')
 
   const sendComment = () => {
     if (!draft.trim()) return
@@ -64,11 +64,24 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
     )
   }
 
+  const confirmDrift = stageConfirmDrift(stage)
+  const versions = stageVersions(stage)
+  /** Số ngày theo lịch của giai đoạn — Hình S21 in kèm khoảng ngày. */
+  const plannedDays = Math.max(
+    1,
+    Math.round((new Date(stage.plannedEnd).getTime() - new Date(stage.plannedStart).getTime()) / (24 * 60 * 60 * 1000))
+  )
+
   return (
-    <div className='bg-card space-y-6 rounded-2xl border p-5'>
+    // Không tự bọc thẻ: khung này nằm sẵn trong thẻ chung của bảng điều khiển,
+    // thêm một lớp viền nữa thành thẻ lồng thẻ.
+    <div className='space-y-6 p-5'>
       <header className='space-y-2'>
-        <p className='text-muted-foreground font-mono text-xs'>{t('heading', { index: stage.index })}</p>
-        <h2 className='text-xl font-semibold tracking-tight'>{tStages(stage.key)}</h2>
+        {/* Số thứ tự và tên giai đoạn nằm CÙNG một dòng, đúng Hình S21. */}
+        <div className='flex flex-wrap items-baseline gap-x-3 gap-y-1'>
+          <p className='text-muted-foreground font-mono text-xs'>{t('heading', { index: stage.index })}</p>
+          <h2 className='text-xl font-semibold tracking-tight'>{tStages(stage.key)}</h2>
+        </div>
 
         <div className='flex flex-wrap items-center gap-2 text-xs'>
           <span
@@ -81,9 +94,28 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
           >
             {tStatus(stage.status)}
           </span>
-          <span className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 font-medium'>
-            {stage.version}
-          </span>
+          {/* Thứ tự đúng Hình S22: trạng thái → mốc xác nhận → phiên bản →
+              yêu cầu sửa đổi → lịch kế hoạch. Mốc xác nhận cũng là VIÊN NHÃN
+              nền xanh chứ không phải chữ trần. */}
+          {confirmDrift ? (
+            <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 font-medium'>
+              {t(confirmDrift.early ? 'confirmedEarly' : 'confirmedLate', {
+                date: formatDayMonth(confirmDrift.date),
+                days: confirmDrift.days
+              })}
+            </span>
+          ) : null}
+          {/* Giai đoạn chưa bắt đầu thì chưa có tệp nào, chip phiên bản
+              không mang thông tin gì — Hình S21 thay nó bằng mốc bắt đầu. */}
+          {stage.status === 'upcoming' ? (
+            <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 font-medium'>
+              {t('startsIn', { days: Math.max(0, daysUntil(stage.plannedStart)) })}
+            </span>
+          ) : (
+            <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 font-medium'>
+              {stage.version}
+            </span>
+          )}
           {pendingForCustomer ? (
             <span className='bg-warning/20 text-warning-strong rounded-md px-2 py-0.5 font-medium'>
               {tChange('pendingBadge', { code: pendingForCustomer.id })}
@@ -91,13 +123,14 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
           ) : null}
           <span className='text-muted-foreground'>
             {t('planned', {
-              start: formatDate(stage.plannedStart, locale, { day: '2-digit', month: '2-digit' }),
-              end: formatDate(stage.plannedEnd, locale, { day: '2-digit', month: '2-digit' })
+              start: formatDayMonth(stage.plannedStart, { year: true }),
+              end: formatDayMonth(stage.plannedEnd, { year: true }),
+              days: plannedDays
             })}
           </span>
           {stage.actualStart ? (
             <span className='text-muted-foreground'>
-              {t('actualStart', { date: formatDate(stage.actualStart, locale, { day: '2-digit', month: '2-digit' }) })}
+              {t('actualStart', { date: formatDayMonth(stage.actualStart) })}
             </span>
           ) : null}
         </div>
@@ -109,7 +142,7 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
           <p className='font-medium'>{t('upcomingTitle')}</p>
           <p className='text-muted-foreground mt-1 text-sm text-pretty'>
             {t('upcomingBody', {
-              date: formatDate(stage.plannedStart, locale),
+              date: formatDayMonth(stage.plannedStart, { year: true }),
               days: Math.max(0, daysUntil(stage.plannedStart)),
               previous: stage.index - 1
             })}
@@ -122,36 +155,51 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
 
       {/* Yêu cầu sửa đổi của Giám sát đang chờ khách duyệt (S22). */}
       {pendingForCustomer ? (
-        <section className='border-warning/40 bg-warning/10 flex flex-wrap items-center gap-4 rounded-xl border p-4'>
-          <div className='min-w-0 flex-1'>
-            <p className='text-warning-strong font-medium text-pretty'>
-              {tChange('bannerTitle', { code: pendingForCustomer.id })}
-            </p>
-            <p className='text-muted-foreground mt-1 text-sm text-pretty'>
-              {tChange('bannerBody', {
-                due: pendingForCustomer.dueAt ? formatDate(pendingForCustomer.dueAt, locale) : '—',
-                version: stage.version
-              })}
-            </p>
-          </div>
-          <Button onClick={() => setChangeOpen(true)}>{tChange('review')}</Button>
+        <section className='border-brand-orange/40 bg-brand-orange-soft flex flex-wrap items-center gap-4 rounded-xl border p-4'>
+          {/* Một đoạn liền, không tách tiêu đề — đúng Hình S22. */}
+          <p className='min-w-0 flex-1 text-sm text-pretty'>
+            {tChange.rich('banner', {
+              code: pendingForCustomer.id,
+              due: pendingForCustomer.dueAt ? formatDayMonth(pendingForCustomer.dueAt, { year: true }) : '—',
+              version: stage.version,
+              b: (chunks) => <b className='font-semibold'>{chunks}</b>
+            })}
+          </p>
+          <Button
+            className='bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90 bg-none shadow-none'
+            onClick={() => setChangeOpen(true)}
+          >
+            {tChange('review')}
+          </Button>
         </section>
       ) : null}
 
-      {/* Hồ sơ đã khóa (S22, S23). */}
-      {locked && stage.inspection ? (
-        <section className='bg-accent/40 flex flex-wrap items-start gap-3 rounded-xl border p-4'>
-          <Lock className='text-primary mt-0.5 size-4 shrink-0' />
-          <p className='text-muted-foreground min-w-0 flex-1 text-sm text-pretty'>
-            {t('lockedNotice', {
-              date: formatDate(stage.inspection.confirmedAt, locale, TIME_FORMAT),
-              version: stage.version
-            })}
-          </p>
-          <Button variant='outline' size='sm' onClick={() => setChangeOpen(true)}>
+      {/* Hồ sơ đã khóa (S23). Khi đang có yêu cầu sửa đổi chờ khách duyệt thì
+          KHÔNG dựng: banner cam ngay trên đã nói đúng việc cần làm, thêm hộp này
+          là nói hai lần cùng một chuyện (Hình S22 chỉ có banner).
+
+          Nút "Yêu cầu sửa đổi" đứng RIÊNG một hàng phía trên banner, tô cam —
+          đúng Hình S23. Nhét nó vào trong banner như bản trước làm câu chữ giải
+          thích và nút hành động chen nhau trên cùng một dòng. */}
+      {locked && stage.inspection && !pendingForCustomer ? (
+        <div className='space-y-4'>
+          <Button
+            className='bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90 bg-none shadow-none'
+            onClick={() => setChangeOpen(true)}
+          >
             {t('requestChange')}
           </Button>
-        </section>
+
+          <section className='border-primary/30 bg-primary/5 rounded-xl border p-4'>
+            <p className='text-sm text-pretty'>
+              {t.rich('lockedNotice', {
+                date: formatDayMonth(stage.inspection.confirmedAt, { time: true }),
+                version: stage.version,
+                b: (chunks) => <b className='font-semibold'>{chunks}</b>
+              })}
+            </p>
+          </section>
+        </div>
       ) : null}
 
       {/* Đang thực hiện (S20): tải hồ sơ để hoàn thành giai đoạn. */}
@@ -166,7 +214,10 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
       ) : null}
 
       {/* Ảnh & tài liệu */}
-      <section>
+      {/* Giai đoạn chưa tới thì KHÔNG dựng khối tệp và khối kiểm tra: Hình S21
+          đi thẳng từ hộp "Chưa đến giai đoạn này" xuống lịch sử. Bày ra hai khối
+          rỗng chỉ làm khách tưởng mình còn việc phải làm. */}
+      <section hidden={stage.status === 'upcoming'}>
         <div className='flex flex-wrap items-center justify-between gap-2'>
           <h3 className='flex items-center gap-2 text-sm font-semibold'>
             <ImageIcon className='text-primary size-4' />
@@ -181,7 +232,7 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
         {stage.files.length === 0 ? (
           <p className='text-muted-foreground mt-3 text-sm'>{t('noFiles')}</p>
         ) : (
-          <ul className='mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+          <ul className='mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-5'>
             {stage.files.map((file) => (
               <StageFileCard key={file.id} file={file} />
             ))}
@@ -189,8 +240,10 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
         )}
       </section>
 
-      {/* Nhận xét & trao đổi */}
-      <section>
+      {/* Nhận xét & trao đổi — mục S21 của bản mô tả chỉ liệt kê tag, lịch kế
+          hoạch, khối "Chưa đến giai đoạn này" và Lịch sử, nên giai đoạn chưa
+          tới KHÔNG dựng khối này (S20/S22/S23 vẫn có). */}
+      <section hidden={stage.status === 'upcoming'}>
         <div className='flex flex-wrap items-center justify-between gap-2'>
           <h3 className='flex items-center gap-2 text-sm font-semibold'>
             <MessageSquare className='text-primary size-4' />
@@ -214,7 +267,7 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
               <div className='min-w-0 flex-1'>
                 <p className='text-muted-foreground text-xs'>
                   <span className='text-foreground font-medium'>{item.author}</span> ·{' '}
-                  {formatDate(item.at, locale, TIME_FORMAT)}
+                  {formatDayMonth(item.at, { time: true })}
                   {item.changeRequestId ? (
                     <span className='bg-warning/20 text-warning-strong ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium'>
                       {item.changeRequestId}
@@ -244,21 +297,33 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
         )}
       </section>
 
-      {/* Kết quả kiểm tra của Giám sát */}
-      <section>
+      {/* Kết quả kiểm tra của Giám sát — giai đoạn chưa tới thì chưa có gì để
+          kiểm tra, Hình S21 không vẽ khối này. */}
+      <section hidden={stage.status === 'upcoming'}>
         <h3 className='flex items-center gap-2 text-sm font-semibold'>
           <CheckCircle2 className='text-primary size-4' />
           {t('inspectionTitle')}
         </h3>
 
         {stage.inspection ? (
-          <div className='border-primary/30 bg-accent/30 mt-3 rounded-xl border p-4'>
-            <p className='text-primary-strong text-xs font-medium'>
-              {tStatus('confirmed')} · {formatDate(stage.inspection.confirmedAt, locale, TIME_FORMAT)} ·{' '}
-              {stage.inspection.engineer}
-              {stage.inspection.onSite ? ` · ${t('inspectionVisited')}` : ''}
-            </p>
-            <p className='mt-1.5 text-sm text-pretty'>{stage.inspection.note}</p>
+          <div className='border-primary/30 bg-accent/30 mt-3 flex gap-3 rounded-xl border p-4'>
+            {/* Cùng kiểu ảnh đại diện với khối "Nhận xét & trao đổi": đây cũng
+                là lời của Giám sát, để trần không có avatar thì hai khối kề nhau
+                trông như hai loại nội dung khác hẳn. */}
+            <span
+              aria-hidden
+              className='bg-warning/20 text-warning-strong flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold'
+            >
+              {ROLE_SUPERVISOR}
+            </span>
+            <div className='min-w-0 flex-1'>
+              <p className='text-primary-strong text-xs font-medium'>
+                {tStatus('confirmed')} · {formatDayMonth(stage.inspection.confirmedAt, { time: true })} ·{' '}
+                {stage.inspection.engineer}
+                {stage.inspection.onSite ? ` · ${t('inspectionVisited')}` : ''}
+              </p>
+              <p className='mt-1.5 text-sm text-pretty'>{stage.inspection.note}</p>
+            </div>
           </div>
         ) : (
           <div className='mt-3 rounded-xl border border-dashed p-4 text-center'>
@@ -281,6 +346,21 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
           <span className='text-muted-foreground text-xs'>{t('historyNote')}</span>
         </div>
 
+        {/* Bản mô tả: khối lịch sử mở đầu bằng hàng chip phiên bản "v1 · 02/08",
+            "v2 · 03/08" để thấy hồ sơ đã qua mấy lần khóa. */}
+        {versions.length > 0 ? (
+          <ul className='mt-3 flex flex-wrap items-center gap-2'>
+            {versions.map((item) => (
+              <li
+                key={item.version}
+                className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-xs font-medium'
+              >
+                {item.version} · {formatDayMonth(item.at, { time: true })}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
         <ol className='mt-3 space-y-2'>
           {[...stage.history]
             .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
@@ -293,21 +373,25 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
                     item.milestone ? 'bg-primary' : 'bg-muted-foreground/40'
                   )}
                 />
-                <span className='text-muted-foreground font-mono'>{formatDate(item.at, locale, TIME_FORMAT)}</span>
+                <span className='text-muted-foreground font-mono'>{formatDayMonth(item.at, { time: true })}</span>
                 <span className='bg-muted rounded px-1.5 py-0.5 font-medium'>{item.actor}</span>
                 <span className={cn('min-w-0 flex-1 text-pretty', item.milestone && 'font-medium')}>{item.text}</span>
               </li>
             ))}
         </ol>
 
-        {stage.changeRequests.length > 0 ? (
+        {/* Bản ghi yêu cầu sửa đổi thuộc về S23 ("Bản ghi CR-01: người đề
+            xuất, thời điểm, Đã áp dụng → v2, lý do, phản hồi"). Cái đang CHỜ
+            khách duyệt thì không dựng ở đây — S22 chỉ có banner + nút "Xem &
+            duyệt", nội dung đầy đủ nằm trong hộp thoại đó. */}
+        {settledRequests.length > 0 ? (
           <ul className='mt-4 space-y-2'>
-            {stage.changeRequests.map((request) => (
+            {settledRequests.map((request) => (
               <li key={request.id} className='rounded-xl border p-3'>
                 <p className='flex flex-wrap items-center gap-2 text-xs'>
                   <span className='font-mono font-medium'>{request.id}</span>
                   <span className='bg-muted rounded px-1.5 py-0.5'>{request.by}</span>
-                  <span className='text-muted-foreground'>{formatDate(request.proposedAt, locale, TIME_FORMAT)}</span>
+                  <span className='text-muted-foreground'>{formatDayMonth(request.proposedAt, { time: true })}</span>
                   <span
                     className={cn(
                       'rounded px-1.5 py-0.5 font-medium',
@@ -337,11 +421,6 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
         ) : null}
       </section>
 
-      <p className='text-muted-foreground flex items-start gap-2 text-xs'>
-        <Info className='mt-0.5 size-3.5 shrink-0' />
-        <span className='text-pretty'>{project.engineer}</span>
-      </p>
-
       <ChangeRequestDialog
         open={changeOpen}
         onOpenChange={setChangeOpen}
@@ -358,7 +437,6 @@ export function StageDetail({ projectId, project, stage, onUpload }: StageDetail
 /** Một ô ảnh/tài liệu trong khối "Ảnh & tài liệu". */
 function StageFileCard({ file }: { file: StageFile }) {
   const t = useTranslations('supervision.dashboard.stage')
-  const locale = useLocale() as Locale
 
   return (
     <li className='overflow-hidden rounded-xl border'>
@@ -381,7 +459,7 @@ function StageFileCard({ file }: { file: StageFile }) {
       <div className='space-y-1 p-3'>
         <p className='text-sm text-pretty'>{file.name}</p>
         <p className='text-muted-foreground text-[11px]'>
-          {formatDate(file.capturedAt ?? file.uploadedAt, locale, TIME_FORMAT)}
+          {formatDayMonth(file.capturedAt ?? file.uploadedAt, { time: true })}
         </p>
         <div className='flex flex-wrap gap-1.5'>
           {file.fromInspection ? (

@@ -5,8 +5,10 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 import type { SubscriptionPlan } from '@/shared/cms'
+import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/components/ui/dialog'
+import { cn } from '@/shared/lib/utils'
 import { formatCurrency } from '@/shared/utils'
 import { giftValueInMillions } from '../services/plan-gift.service'
 
@@ -44,58 +46,88 @@ export function PlanGiftDialog({ plan, onClose }: PlanGiftDialogProps) {
 
   return (
     <Dialog open={Boolean(gift)} onOpenChange={(open) => (open ? undefined : onClose())}>
-      <DialogContent className='max-w-lg gap-0 overflow-hidden bg-[oklch(0.985_0.012_75)] p-0'>
+      <DialogContent
+        className={cn(
+          'max-h-[92vh] gap-0 overflow-y-auto bg-[oklch(0.985_0.012_75)] p-0 sm:max-w-lg',
+          // Hình S02: nút đóng là một VÒNG TRÒN TRẮNG có bóng, không phải dấu ✕ trần.
+          '[&>[data-slot=dialog-close]]:bg-card [&>[data-slot=dialog-close]]:text-foreground [&>[data-slot=dialog-close]]:flex [&>[data-slot=dialog-close]]:size-7 [&>[data-slot=dialog-close]]:items-center [&>[data-slot=dialog-close]]:justify-center [&>[data-slot=dialog-close]]:rounded-full [&>[data-slot=dialog-close]]:opacity-100 [&>[data-slot=dialog-close]]:shadow-md'
+        )}
+      >
         {gift ? (
           <>
-            {/* Dải ruy băng cam: hai mẩu gập ở hai đầu tạo cảm giác băng vải. */}
-            <div className='relative pt-7 pb-2'>
-              <DialogTitle className='bg-brand-orange text-brand-orange-foreground mx-auto flex w-fit items-center gap-2.5 px-8 py-2.5 text-base font-bold tracking-wide uppercase'>
-                <Gift className='size-5' />
-                {t('badge')}
-              </DialogTitle>
-              <span
-                aria-hidden
-                className='bg-brand-orange/70 absolute top-7 left-6 h-11 w-8 [clip-path:polygon(0_0,100%_0,100%_100%,0_70%)]'
-              />
-              <span
-                aria-hidden
-                className='bg-brand-orange/70 absolute top-7 right-6 h-11 w-8 [clip-path:polygon(0_0,100%_0,100%_70%,0_100%)]'
-              />
-            </div>
+            {/* Hình S02 — khối đầu popup:
+                - Ảnh quà là một KHUNG VUÔNG thụt vào hai bên, bắt đầu từ giữa dải
+                  ruy-băng; nó nằm TRONG luồng nên chiếm đúng chiều cao của mình.
+                - Ruy-băng và cụm chữ (tên quà · "trị giá" · số · đơn vị) nằm ĐÈ
+                  lên khung ảnh đó.
 
-            <div className='space-y-4 px-6 pt-2 pb-6'>
-              <div className='text-center'>
-                <DialogDescription className='text-foreground text-lg font-bold text-pretty'>
-                  {gift.title}
-                </DialogDescription>
-                <p className='text-muted-foreground mt-1 text-sm'>{t('valuePrefix')}</p>
-                <p className='text-brand-orange mt-1 text-6xl leading-none font-extrabold tracking-tight tabular-nums'>
-                  {valueNumber}
-                </p>
-                {valueUnit ? (
-                  <p className='text-brand-orange mt-1 text-xl font-bold tracking-wide uppercase'>{valueUnit}</p>
-                ) : null}
+                CHỖ CHỜ ASSET: đổ ảnh vào `gift.imageUrl` là khung có ảnh ngay. */}
+            <div className='relative'>
+              <div className='mx-3 mt-[46px] aspect-[16/12] overflow-hidden rounded-lg'>
+                {gift.imageUrl ? (
+                  <Photo src={gift.imageUrl} alt='' className='size-full' sizes='576px' />
+                ) : (
+                  <div className='border-brand-orange/30 bg-brand-orange-soft/40 relative size-full rounded-lg border-2 border-dashed'>
+                    <span className='text-brand-orange/70 absolute inset-x-0 bottom-3 text-center text-[11px] font-medium'>
+                      {t('imageSlot')}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <section className='bg-brand-orange-soft flex items-start gap-3 rounded-2xl p-4'>
-                <span className='bg-brand-orange text-brand-orange-foreground flex size-11 shrink-0 items-center justify-center rounded-full'>
-                  <Gift className='size-5' />
+              <div className='absolute inset-x-0 top-0'>
+                <div className='flex justify-center pt-6 pb-1'>
+                  <span
+                    aria-hidden
+                    className='bg-brand-orange/70 h-11 w-10 [clip-path:polygon(0_0,100%_0,100%_100%,0_72%)]'
+                  />
+                  <DialogTitle className='bg-brand-orange text-brand-orange-foreground -mx-px flex items-center gap-2.5 px-8 py-2.5 text-base font-bold tracking-wide uppercase'>
+                    <Gift className='size-5' />
+                    {t('badge')}
+                  </DialogTitle>
+                  <span
+                    aria-hidden
+                    className='bg-brand-orange/70 h-11 w-10 [clip-path:polygon(0_0,100%_0,100%_72%,0_100%)]'
+                  />
+                </div>
+
+                <div className='px-6 pt-2 text-center'>
+                  <DialogDescription className='text-foreground text-base font-bold text-pretty'>
+                    {gift.title}
+                  </DialogDescription>
+                  <p className='text-muted-foreground mt-1 text-xs'>{t('valuePrefix')}</p>
+                  <p className='text-brand-orange mt-1 text-5xl leading-none font-extrabold tracking-tight tabular-nums'>
+                    {valueNumber}
+                  </p>
+                  {valueUnit ? (
+                    <p className='text-brand-orange mt-1 text-lg font-bold tracking-wide uppercase'>{valueUnit}</p>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div className='space-y-3 px-6 pt-1 pb-5'>
+              {/* Hình S02: khối này nền CAM NHẠT (không phải trắng), icon hộp quà to
+                  trong vòng tròn trắng. */}
+              <section className='bg-brand-orange-soft flex items-center gap-4 rounded-2xl p-4'>
+                <span className='bg-card text-brand-orange flex size-14 shrink-0 items-center justify-center rounded-full shadow-sm'>
+                  <Gift className='size-8' strokeWidth={2.25} />
                 </span>
                 <div className='min-w-0'>
-                  <p className='text-brand-orange text-sm font-bold'>{gift.extraTitle}</p>
-                  <p className='mt-1 text-sm text-pretty'>{gift.extraBody}</p>
+                  <p className='text-brand-orange text-base font-bold tracking-wide uppercase'>{gift.extraTitle}</p>
+                  <p className='mt-1.5 text-sm leading-relaxed text-pretty'>{gift.extraBody}</p>
                 </div>
               </section>
 
-              <Button className='h-12 w-full text-base' onClick={onClose}>
+              <Button className='brand-green-button h-12 w-full text-base' onClick={onClose}>
                 {t('understood')}
               </Button>
 
               <p className='text-muted-foreground flex items-start gap-2 text-xs'>
                 <Info className='mt-0.5 size-3.5 shrink-0' />
-                <span className='text-pretty'>
-                  {t('conditionsLabel')}: {gift.conditions}
-                </span>
+                {/* Hình S02: dòng cuối chỉ là câu điều kiện, không có nhãn
+                    "Điều kiện áp dụng:" đứng trước. */}
+                <span className='text-pretty'>{gift.conditions}</span>
               </p>
             </div>
           </>

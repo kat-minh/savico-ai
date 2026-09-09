@@ -1,6 +1,6 @@
 import type { AuthUser } from '@/shared/auth'
 import { ROLES } from '@/shared/auth'
-import { AUTH_COOKIE_NAME } from '@/shared/auth/auth.constants'
+import { AUTH_COOKIE_NAME, MOCK_SESSION_USER_KEY } from '@/shared/auth/auth.constants'
 import type { ApiError } from '@/shared/types'
 import type { LoginPayload, LoginResponse } from '../types/auth.types'
 
@@ -13,13 +13,12 @@ import type { LoginPayload, LoginResponse } from '../types/auth.types'
  * Delete this file (and the env flag) once the .NET API is wired up.
  */
 
-const MOCK_USER_KEY = 'bmt.mock-user'
-
 /** Any email + a password of 8+ chars logs in as this user. */
 const MOCK_USER: AuthUser = {
   id: 'mock-user-1',
   email: 'dev@bmt.local',
   name: 'Dev User',
+  phone: '0938 123 456',
   roles: [ROLES.CUSTOMER]
 }
 
@@ -71,25 +70,25 @@ export const mockAuthApi = {
       email: payload.email,
       roles: rolesForEmail(payload.email)
     }
-    localStorage.setItem(MOCK_USER_KEY, JSON.stringify(user))
+    localStorage.setItem(MOCK_SESSION_USER_KEY, JSON.stringify(user))
     setSessionCookie()
     return { user }
   },
 
   async logout(): Promise<void> {
     await delay(150)
-    localStorage.removeItem(MOCK_USER_KEY)
+    localStorage.removeItem(MOCK_SESSION_USER_KEY)
     clearSessionCookie()
   },
 
   async getCurrentUser(): Promise<AuthUser> {
     await delay(150)
-    const raw = typeof window !== 'undefined' ? localStorage.getItem(MOCK_USER_KEY) : null
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(MOCK_SESSION_USER_KEY) : null
     // The session is only valid if BOTH the profile and the cookie exist.
     // Once the cookie expires, drop the stale profile so the client store
     // agrees with the middleware (otherwise login ↔ dashboard redirect loop).
     if (!raw || !hasSessionCookie()) {
-      localStorage.removeItem(MOCK_USER_KEY)
+      localStorage.removeItem(MOCK_SESSION_USER_KEY)
       throw apiError('No active session (mock).', 401)
     }
     return JSON.parse(raw) as AuthUser

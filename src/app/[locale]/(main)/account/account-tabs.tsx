@@ -22,12 +22,21 @@ interface AccountTabsProps {
 export function AccountTabs({ projects, favorites }: AccountTabsProps) {
   return (
     <Tabs defaultValue='projects'>
-      <TabsList>
-        <TabsTrigger value='projects'>
+      {/* Hình S24: hai viên thuốc lớn trong một khung viền, tab đang mở TÔ
+          XANH ĐẶC chữ trắng. Kiểu mặc định của primitive là nền xám nhạt với
+          viên trắng nổi lên — nhìn không ra cái nào đang mở. */}
+      <TabsList className='bg-card h-auto gap-1 rounded-xl border p-1'>
+        <TabsTrigger
+          value='projects'
+          className='data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2 data-[state=active]:shadow-none'
+        >
           <LayoutGrid className='size-4' />
           {projects.label}
         </TabsTrigger>
-        <TabsTrigger value='favorites'>
+        <TabsTrigger
+          value='favorites'
+          className='data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg px-4 py-2 data-[state=active]:shadow-none'
+        >
           <Heart className='size-4' />
           {favorites.label}
         </TabsTrigger>

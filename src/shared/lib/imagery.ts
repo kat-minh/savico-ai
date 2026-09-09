@@ -107,6 +107,30 @@ export const STAGE_IMAGE = {
 } as const
 
 /**
+ * Ảnh hiện trường của 6 giai đoạn giám sát (R5) — dùng cho tấm ảnh bên phải
+ * khối "GÓI AN TÂM · GIÁM SÁT" ở thẻ dự án (Hình S24).
+ *
+ * Là ảnh SEED: bản mock không có URL ảnh thật (`StageFile` chỉ giữ tên tệp và
+ * dung lượng), nên tấm này minh họa giai đoạn ĐANG CHẠY. Khi backend trả ảnh
+ * khách tải lên thì lấy ảnh mới nhất của giai đoạn đó thay cho bảng này; trong
+ * lúc chờ, admin thay được từng ảnh ở màn "Hình ảnh site".
+ */
+export const SUPERVISION_IMAGE = {
+  /** Hồ sơ pháp lý — bản vẽ, giấy phép. */
+  legal: TOPIC_IMAGE.blueprint,
+  /** Móng & khởi công — hố móng, cốt thép. */
+  foundation: photo('photo-1590274853856-f22d5ee3d228'),
+  /** Phần thô, kết cấu — sàn thép chờ đổ bê tông. */
+  structure: CONSTRUCTION_IMAGE.rebar,
+  /** Hệ thống kỹ thuật & chống thấm — thợ đấu nối điện nước. */
+  mep: CONSTRUCTION_IMAGE.electrician,
+  /** Hoàn thiện — sơn bả, ốp lát. */
+  finishing: STAGE_IMAGE.finishing,
+  /** Nghiệm thu & bàn giao — công trình đã xong, sân vườn. */
+  handover: BUILDING_IMAGE.garden
+} as const
+
+/**
  * Ảnh chân dung kiến trúc sư của trang Tư vấn 1:1 (mục VIII.1, Hình 14).
  * Toàn bộ là ảnh SEED — admin tải ảnh thật của KTS lên và thay ở mục X, #5.
  */
@@ -171,6 +195,7 @@ export const SITE_IMAGE = {
   ...prefixed('topic', TOPIC_IMAGE),
   ...prefixed('construction', CONSTRUCTION_IMAGE),
   ...prefixed('stage', STAGE_IMAGE),
+  ...prefixed('supervision', SUPERVISION_IMAGE),
   ...prefixed('portrait', PORTRAIT_IMAGE),
   ...prefixed('render', RENDER_IMAGE),
   ...prefixed('map', MAP_IMAGE)
@@ -180,6 +205,7 @@ export const SITE_IMAGE = {
   Prefixed<'topic', typeof TOPIC_IMAGE> &
   Prefixed<'construction', typeof CONSTRUCTION_IMAGE> &
   Prefixed<'stage', typeof STAGE_IMAGE> &
+  Prefixed<'supervision', typeof SUPERVISION_IMAGE> &
   Prefixed<'portrait', typeof PORTRAIT_IMAGE> &
   Prefixed<'render', typeof RENDER_IMAGE> &
   Prefixed<'map', typeof MAP_IMAGE>

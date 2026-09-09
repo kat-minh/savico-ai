@@ -8,6 +8,9 @@ export const contractorKeys = {
   detail: (contractorId: string) => [...contractorKeys.all, 'detail', contractorId] as const,
 
   briefs: () => [...contractorKeys.all, 'brief'] as const,
+  /** Danh sách hồ sơ dự án của tài khoản (S09 — nút "Xem nhà thầu"). */
+  briefList: () => [...contractorKeys.briefs(), 'list'] as const,
+  briefSummaries: () => [...contractorKeys.briefs(), 'summaries'] as const,
   /** Hồ sơ dự án đang dựng / đã lưu (S10, S11). */
   brief: (projectId: string) => [...contractorKeys.briefs(), projectId] as const,
 

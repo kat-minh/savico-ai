@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { Link, usePathname } from '@/i18n/navigation'
+import { useAuth } from '@/shared/auth'
 import { Button } from '@/shared/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet'
 import { cn } from '@/shared/lib/utils'
@@ -20,6 +21,7 @@ import { SITE_NAV } from './site-nav.config'
 export function SiteNavMobile() {
   const t = useTranslations('nav')
   const pathname = usePathname()
+  const { isAuthenticated } = useAuth()
   const [open, setOpen] = useState(false)
 
   return (
@@ -49,7 +51,8 @@ export function SiteNavMobile() {
                   active ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-foreground/[0.06]'
                 )}
               >
-                {t(item.labelKey)}
+                {/* Cùng luật đổi nhãn với thanh ngang: khách thấy "Bảng giá". */}
+                {t(item.labelKey === 'plans' && !isAuthenticated ? 'plansGuest' : item.labelKey)}
               </Link>
             )
           })}

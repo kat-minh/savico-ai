@@ -84,12 +84,22 @@ function TopicIcon({ topicId }: { topicId: string }) {
  */
 export function FoundationBlock() {
   const t = useTranslations('handbook.foundation')
+  // "Mở nhanh bài viết" / "Thu gọn" / "Xem chi tiết" là chữ của HÀNH VI mở nhanh,
+  // dùng chung với khối "Tất cả bài viết" — hai khối cùng một thao tác thì phải
+  // cùng một câu, để mỗi khối một bản dịch riêng là admin sửa một chỗ hụt chỗ kia.
+  const tArticles = useTranslations('handbook.articles')
 
   const { data: stages, isPending } = useHandbookStages()
   const { data: articles } = useHandbookArticles()
 
   const [openStage, setOpenStage] = useState<HandbookStageId | null>(null)
   const [openTopic, setOpenTopic] = useState<string | null>(null)
+  /**
+   * Dòng bài đang mở nhanh; chỉ một dòng mở tại một thời điểm (PHỤ LỤC bản mô
+   * tả v1.1). Đổi chủ đề hay đổi giai đoạn thì đóng lại — dòng đang mở thuộc về
+   * danh sách cũ, giữ nguyên id thì danh sách mới hiện ra đã có sẵn một dòng bung.
+   */
+  const [openArticle, setOpenArticle] = useState<string | null>(null)
 
   const counts = useMemo(() => countArticlesByTopic(articles ?? []), [articles])
   const activeStage = stages?.find((stage) => stage.id === openStage)
@@ -99,6 +109,7 @@ export function FoundationBlock() {
   )
 
   function toggleStage(id: HandbookStageId, firstTopicId?: string) {
+    setOpenArticle(null)
     if (openStage === id) {
       setOpenStage(null)
       setOpenTopic(null)
@@ -106,6 +117,11 @@ export function FoundationBlock() {
     }
     setOpenStage(id)
     setOpenTopic(firstTopicId ?? null)
+  }
+
+  function selectTopic(topicId: string) {
+    setOpenTopic(topicId)
+    setOpenArticle(null)
   }
 
   return (
@@ -214,7 +230,7 @@ export function FoundationBlock() {
               <li key={topic.id}>
                 <button
                   type='button'
-                  onClick={() => setOpenTopic(topic.id)}
+                  onClick={() => selectTopic(topic.id)}
                   aria-pressed={topic.id === openTopic}
                   className={cn(
                     'w-full rounded-lg border p-3 text-left transition-colors',
@@ -239,26 +255,69 @@ export function FoundationBlock() {
           </ul>
 
           {topicArticles.length > 0 ? (
-            <ul className='divide-y rounded-lg border'>
-              {topicArticles.map((article) => (
-                <li key={article.id}>
-                  <Link
-                    href={handbookArticleRoute(article.slug)}
-                    className='hover:bg-muted/50 flex items-center gap-3 px-4 py-3 transition-colors'
-                  >
-                    <span className='bg-primary size-1.5 shrink-0 rounded-full' aria-hidden />
-                    <span className='min-w-0 flex-1 text-sm font-medium'>{article.title}</span>
-                    <span className='text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs'>
-                      <Clock className='size-3.5' />
-                      {t('readingTime', { minutes: article.readingMinutes })}
-                    </span>
-                    {/* Hình 10: cuối mỗi dòng là nút tròn ⊕ xanh, không phải mũi tên. */}
-                    <span className='bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full'>
-                      <Plus className='size-3.5' />
-                    </span>
-                  </Link>
-                </li>
-              ))}
+            /* Hình PL: mỗi dòng là một thẻ viền RIÊNG, cách nhau một khoảng —
+               không phải một danh sách gạch ngang chung khung. */
+            <ul className='space-y-2'>
+              {topicArticles.map((article) => {
+                const expanded = openArticle === article.id
+                return (
+                  <li key={article.id} className='overflow-hidden rounded-lg border'>
+                    {/* CẢ DÒNG là vùng bấm, không riêng dấu (+) — phụ lục ghi rõ
+                        "bấm dấu (+) hoặc bất kỳ đâu trên dòng", và trên mobile
+                        dòng bài trở thành thẻ nên chạm đâu cũng phải mở. */}
+                    <button
+                      type='button'
+                      onClick={() => setOpenArticle(expanded ? null : article.id)}
+                      aria-expanded={expanded}
+                      className='hover:bg-muted/50 flex w-full items-center gap-3 px-4 py-3 text-left transition-colors'
+                    >
+                      <span className='bg-primary size-1.5 shrink-0 rounded-full' aria-hidden />
+                      <span className='min-w-0 flex-1 text-sm font-medium'>{article.title}</span>
+                      <span className='text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs'>
+                        <Clock className='size-3.5' />
+                        {t('readingTime', { minutes: article.readingMinutes })}
+                      </span>
+                      {/* Hình 10: cuối mỗi dòng là nút tròn ⊕ xanh, không phải mũi
+                          tên. Mở ra thì XOAY 45° thành dấu ×, đúng phụ lục. */}
+                      <span
+                        aria-label={expanded ? tArticles('collapse') : tArticles('expand')}
+                        className={cn(
+                          'bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full transition-transform duration-200',
+                          expanded && 'rotate-45'
+                        )}
+                      >
+                        <Plus className='size-3.5' />
+                      </span>
+                    </button>
+
+                    {/* Mở nhẹ TẠI CHỖ (~¼ giây): không rời trang, không đổi URL.
+                        Trước đây cả dòng là một <Link> nên bấm đâu cũng nhảy
+                        thẳng sang trang bài viết — đúng lỗi phụ lục yêu cầu sửa.
+                        `grid-rows-[0fr→1fr]` cho phép chuyển động mượt mà không
+                        phải đo trước chiều cao của đoạn sapo. */}
+                    <div
+                      className={cn(
+                        'grid transition-all duration-200 ease-out',
+                        expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                      )}
+                    >
+                      <div className='overflow-hidden'>
+                        <div className='px-4 pb-3 sm:pl-9'>
+                          <p className='text-muted-foreground text-sm text-pretty'>{article.excerpt}</p>
+                          {/* Chỉ liên kết NÀY mới mở trọn bài. */}
+                          <Link
+                            href={handbookArticleRoute(article.slug)}
+                            className='text-primary hover:text-primary/80 mt-2 inline-flex items-center gap-1.5 text-sm font-medium'
+                          >
+                            {tArticles('viewDetail')}
+                            <ArrowRight className='size-4' />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           ) : (
             <p className='text-muted-foreground text-sm'>{t('topicEmpty')}</p>

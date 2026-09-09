@@ -82,3 +82,59 @@ export function handoverDrift(project: SupervisionProject): { days: number; earl
 export function stageStatusOf(stage: SupervisionStage): StageStatus {
   return stage.status
 }
+
+/**
+ * Chip nhắc lịch của một giai đoạn — dùng chung cho sợi chỉ tiến độ (S20) và
+ * cột "Nhắc lịch" của bảng lịch trình, để hai chỗ không bao giờ nói khác nhau.
+ */
+export type StageReminder =
+  | { kind: 'confirmed'; date: string }
+  | { kind: 'remaining'; days: number }
+  | { kind: 'overdue'; days: number }
+  | { kind: 'startsIn'; days: number }
+
+export function stageReminder(stage: SupervisionStage): StageReminder | undefined {
+  if (stage.status === 'confirmed') {
+    const date = stage.inspection?.confirmedAt ?? stage.actualEnd
+    return date ? { kind: 'confirmed', date } : undefined
+  }
+
+  if (stage.status === 'inProgress') {
+    const days = daysUntil(stage.plannedEnd)
+    return days >= 0 ? { kind: 'remaining', days } : { kind: 'overdue', days: Math.abs(days) }
+  }
+
+  const days = daysUntil(stage.plannedStart)
+  return days > 0 ? { kind: 'startsIn', days } : undefined
+}
+
+/**
+ * Giai đoạn được xác nhận sớm hay trễ so với HẠN KẾ HOẠCH của chính nó — chip
+ * "Xác nhận 29/08 · sớm 26 ngày" ở đầu màn giai đoạn (S22, S23).
+ */
+export function stageConfirmDrift(stage: SupervisionStage): { date: string; days: number; early: boolean } | undefined {
+  const date = stage.inspection?.confirmedAt ?? stage.actualEnd
+  if (stage.status !== 'confirmed' || !date) return undefined
+
+  const days = Math.round((new Date(stage.plannedEnd).getTime() - new Date(date).getTime()) / 86_400_000)
+  return { date, days: Math.abs(days), early: days >= 0 }
+}
+
+/**
+ * Các phiên bản hồ sơ của giai đoạn kèm mốc thời gian — hàng chip "v1 · 02/08"
+ * trong khối "Lịch sử & phiên bản".
+ *
+ * v1 sinh ra khi Giám sát xác nhận; mỗi phiên bản sau là kết quả của MỘT yêu cầu
+ * sửa đổi được duyệt, nên mốc của nó là lúc duyệt chứ không phải lúc đề xuất.
+ */
+export function stageVersions(stage: SupervisionStage): { version: string; at: string }[] {
+  const firstAt = stage.inspection?.confirmedAt ?? stage.actualEnd
+  const versions = firstAt ? [{ version: 'v1', at: firstAt }] : []
+
+  for (const request of stage.changeRequests) {
+    if (request.status !== 'applied' || !request.resultVersion) continue
+    versions.push({ version: request.resultVersion, at: request.decidedAt ?? request.proposedAt })
+  }
+
+  return versions
+}

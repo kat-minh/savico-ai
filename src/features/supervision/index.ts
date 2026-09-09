@@ -6,6 +6,7 @@
  */
 export { SupervisionDashboard } from './components/supervision-dashboard'
 export { SupervisionPricing } from './components/supervision-pricing'
+export { SupervisionProjectStrip } from './components/supervision-project-strip'
 export { SupervisionSummary } from './components/supervision-summary'
 
 export { STAGE_KEYS, STAGE_COUNT } from './constants/supervision.constants'
