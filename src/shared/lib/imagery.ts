@@ -160,6 +160,18 @@ export const RENDER_IMAGE = {
 } as const
 
 /**
+ * Thư mục chứa MỌI file ảnh khách gửi cho thư viện mẫu.
+ *
+ * Ảnh stock (Unsplash) và ảnh dựng sẵn đều nằm ngoài thư mục này, nên chỉ cần so
+ * tiền tố là biết một mẫu đang dùng file thật hay ảnh minh họa tạm — panel màn
+ * chờ dựa vào đúng dấu hiệu đó để không bốc nhầm ảnh stock.
+ */
+export const LIBRARY_PHOTO_PREFIX = '/images/library/'
+
+/** Ảnh trong thư viện file khách gửi: `'2d/2d-0001.webp'` → đường dẫn đầy đủ. */
+const libraryPhoto = (file: string) => `${LIBRARY_PHOTO_PREFIX}${file}`
+
+/**
  * Bản vẽ mặt bằng THẬT của thư viện mẫu 2D (Phần 2.1).
  *
  * File khách gửi, đã chuyển sang webp và đặt trong `/public/images/library/2d`.
@@ -169,17 +181,17 @@ export const RENDER_IMAGE = {
  */
 export const PLAN_IMAGE = {
   /** Lô 9×20m, 91m² sàn — phòng ngủ trệt, tiểu cảnh giữa nhà, chỗ đậu ô tô. */
-  garden9x20: '/images/library/2d/2d-0001.webp',
+  garden9x20: libraryPhoto('2d/2d-0001.webp'),
   /** Lô 4×9,8m, 35,2m² sàn — nhà phố hẹp, gara xe máy. */
-  townhouse4x10: '/images/library/2d/2d-0002.webp',
+  townhouse4x10: libraryPhoto('2d/2d-0002.webp'),
   /** Lô 5×10m, 25,25m² phần ở — gara ô tô trong nhà, sân thượng nhỏ. */
-  townhouse5x10: '/images/library/2d/2d-0003.webp',
+  townhouse5x10: libraryPhoto('2d/2d-0003.webp'),
   /** Lô 5×12m — gara ô tô, phòng ngủ 1 ở tầng trệt. */
-  townhouse5x12: '/images/library/2d/2d-0004.webp',
+  townhouse5x12: libraryPhoto('2d/2d-0004.webp'),
   /** Lô 6,75×10,02m — phòng ngủ chính tầng trệt, mái che xe. */
-  garden675x10: '/images/library/2d/2d-0005.webp',
+  garden675x10: libraryPhoto('2d/2d-0005.webp'),
   /** Lô 6,75×13m — gara ô tô + gara xe máy, phòng sinh hoạt chung. */
-  garden675x13: '/images/library/2d/2d-0006.webp'
+  garden675x13: libraryPhoto('2d/2d-0006.webp')
 } as const
 
 /**
@@ -192,17 +204,17 @@ export const PLAN_IMAGE = {
  */
 export const INTERIOR_RENDER = {
   /** Phòng khách căn hộ tông kem, sofa cong, đèn chùm bi. */
-  creamLiving: '/images/library/3d/3d-0001.webp',
+  creamLiving: libraryPhoto('3d/3d-0001.webp'),
   /** Phòng khách trắng ấm, sofa module, ghế Togo, ban công. */
-  softMinimal: '/images/library/3d/3d-0004.webp',
+  softMinimal: libraryPhoto('3d/3d-0004.webp'),
   /** Vách TV đá marble kết hợp lam gỗ, hắt sáng viền. */
-  stoneTvWall: '/images/library/3d/3d-0005.webp',
+  stoneTvWall: libraryPhoto('3d/3d-0005.webp'),
   /** Khách – ăn liên thông, cửa vòm nhìn ra thành phố. */
-  openDining: '/images/library/3d/3d-0007.webp',
+  openDining: libraryPhoto('3d/3d-0007.webp'),
   /** Phòng khách tông gỗ óc chó, tủ TV kịch trần, đèn cần câu. */
-  walnutLiving: '/images/library/3d/3d-0008.webp',
+  walnutLiving: libraryPhoto('3d/3d-0008.webp'),
   /** Phòng khách tối giản cạnh ban công, sofa bông kem. */
-  balconyLiving: '/images/library/3d/3d-0009.webp'
+  balconyLiving: libraryPhoto('3d/3d-0009.webp')
 } as const
 
 /**

@@ -1,3 +1,4 @@
+import { LIBRARY_PHOTO_PREFIX } from '@/shared/lib/imagery'
 import {
   PERSONALIZED_TEMPLATE_COUNT,
   RELATED_ARTICLE_COUNT,
@@ -33,10 +34,15 @@ export function matchesTags(tags: HandbookTags, filter: HandbookFilter): boolean
  * vòng nên khi kho mẫu mỏng, đúng những mẫu khớp phong cách lại bị loại hết và
  * panel hiện toàn mẫu lệch phong cách.
  *
- * Trong CÙNG một vòng, mẫu có ảnh thật (bản vẽ / phối cảnh khách gửi) được lấy
- * trước mẫu chỉ có hình dựng SVG: panel màn chờ là chỗ khách nhìn lâu nhất, một
- * bản vẽ thật thuyết phục hơn hẳn một hình minh họa. Độ khớp tag vẫn quan trọng
- * hơn — ưu tiên này chỉ sắp xếp bên trong một mức khớp, không vượt qua nó.
+ * Ảnh khách gửi đứng TRƯỚC độ khớp tag: nếu kho có đủ mẫu mang file thật (bản
+ * vẽ / phối cảnh trong `public/images/library`) thì panel chỉ chọn trong nhóm
+ * đó, tag Bước 1 chỉ còn quyết định thứ tự bên trong nhóm. Mẫu dùng ảnh stock
+ * cũng bị loại như mẫu dựng SVG — vẫn xem được ở trang Thư viện, chỉ không lọt
+ * vào panel. Panel màn chờ là chỗ khách nhìn lâu nhất
+ * nên một tấm hình dựng SVG lọt vào đây là thấy ngay. Lý do phải xếp trên tag:
+ * `buildingType` không bao giờ được nới lỏng, nên một dự án Villa (chưa mẫu nào
+ * gắn tag đó) rơi thẳng xuống nhánh bù cuối hàm và bốc ngẫu nhiên cả kho.
+ * Kho chưa đủ ảnh thật thì quay lại chọn trên toàn bộ kho như trước.
  *
  * `pick` is injected so the caller controls randomness (and tests stay
  * deterministic); it receives the eligible pool and returns the chosen slice.
@@ -47,6 +53,9 @@ export function selectPersonalizedTemplates(
   pick: (candidates: readonly HandbookTemplate[], count: number) => HandbookTemplate[] = takeRandom,
   count = PERSONALIZED_TEMPLATE_COUNT
 ): HandbookTemplate[] {
+  const withPhoto = pool.filter(hasClientPhoto)
+  const source = withPhoto.length >= count ? withPhoto : pool
+
   const chosen: HandbookTemplate[] = []
   const taken = new Set<string>()
   let active: HandbookFilter = { ...filter }
@@ -59,9 +68,9 @@ export function selectPersonalizedTemplates(
   }
 
   for (let relaxed = 0; relaxed <= TAG_RELAXATION_ORDER.length; relaxed++) {
-    const eligible = pool.filter((template) => !taken.has(template.id) && matchesTags(template.tags, active))
-    add(eligible.filter(hasRealImage))
-    if (chosen.length < count) add(eligible.filter((template) => !hasRealImage(template)))
+    const eligible = source.filter((template) => !taken.has(template.id) && matchesTags(template.tags, active))
+    add(eligible.filter(hasClientPhoto))
+    if (chosen.length < count) add(eligible.filter((template) => !hasClientPhoto(template)))
     if (chosen.length >= count) return chosen
 
     const next = TAG_RELAXATION_ORDER[relaxed]
@@ -71,13 +80,19 @@ export function selectPersonalizedTemplates(
   }
 
   // Every criterion relaxed and the pool is still short — bù nốt bằng mẫu còn lại.
-  add(pool.filter((template) => !taken.has(template.id)))
+  add(source.filter((template) => !taken.has(template.id)))
+  if (chosen.length < count) add(pool.filter((template) => !taken.has(template.id)))
   return chosen
 }
 
-/** Mẫu đã có file ảnh thật — ảnh bìa hoặc bản vẽ của tầng đầu tiên. */
-function hasRealImage(template: HandbookTemplate): boolean {
-  return Boolean(template.imageUrl ?? template.floors[0]?.imageUrl)
+/**
+ * Mẫu đang dùng ẢNH KHÁCH GỬI — ảnh bìa hoặc bản vẽ của tầng đầu tiên nằm trong
+ * thư mục file thật. Không đủ nếu chỉ kiểm tra "có imageUrl hay không": mẫu 3D
+ * nào cũng có ảnh, phần lớn là ảnh stock.
+ */
+function hasClientPhoto(template: HandbookTemplate): boolean {
+  const src = template.imageUrl ?? template.floors[0]?.imageUrl
+  return Boolean(src?.startsWith(LIBRARY_PHOTO_PREFIX))
 }
 
 /** Fisher–Yates over a copy, then take the first `count`. */
