@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import type { LucideIcon } from 'lucide-react'
 
 import type { Locale } from '@/i18n/routing'
-import { DossierCover, EstimateSheet, Photo, PlanDrawing, type CoverRow } from '@/shared/components/common'
+import { DossierCover, EstimateSheet, Photo, type CoverRow } from '@/shared/components/common'
 import { useSiteImage } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { formatDate } from '@/shared/utils'
@@ -61,12 +61,15 @@ interface PreviewBodyProps {
 /** Render the real artefact behind each preview card. */
 function PreviewBody({ part, alt, cover, grandTotal, percents }: PreviewBodyProps) {
   const exteriorImage = useSiteImage('render.villa')
+  // Bản vẽ mẫu của thư viện 2D — admin thay ở màn "Hình ảnh site". Hiện TRỌN
+  // khung vì bản vẽ là ảnh dọc: cắt theo khung 4:3 thì mất dòng ghi kích thước.
+  const planImage = useSiteImage('plan.garden675x10')
 
   switch (part) {
     case 'cover':
       return <DossierCover className='aspect-4/3 w-full' project={cover} />
     case 'floorPlan':
-      return <PlanDrawing className='aspect-4/3 w-full' />
+      return <Photo className='aspect-4/3 w-full' src={planImage} alt={alt} sizes='240px' fit='contain' />
     case 'exterior':
       return <Photo className='aspect-4/3 w-full' src={exteriorImage} alt={alt} sizes='240px' />
     case 'estimate':

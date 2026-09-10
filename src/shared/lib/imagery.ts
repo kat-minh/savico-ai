@@ -160,6 +160,52 @@ export const RENDER_IMAGE = {
 } as const
 
 /**
+ * Bản vẽ mặt bằng THẬT của thư viện mẫu 2D (Phần 2.1).
+ *
+ * File khách gửi, đã chuyển sang webp và đặt trong `/public/images/library/2d`.
+ * Mỗi tấm là mặt bằng TẦNG TRỆT của một mẫu — các tầng còn lại vẫn để
+ * `PlanDrawing` dựng SVG cho tới khi có đủ file, đúng như fallback sẵn có của
+ * `TemplateFigure`. Khóa đặt theo kích thước lô để khỏi lẫn khi thêm bản vẽ mới.
+ */
+export const PLAN_IMAGE = {
+  /** Lô 9×20m, 91m² sàn — phòng ngủ trệt, tiểu cảnh giữa nhà, chỗ đậu ô tô. */
+  garden9x20: '/images/library/2d/2d-0001.webp',
+  /** Lô 4×9,8m, 35,2m² sàn — nhà phố hẹp, gara xe máy. */
+  townhouse4x10: '/images/library/2d/2d-0002.webp',
+  /** Lô 5×10m, 25,25m² phần ở — gara ô tô trong nhà, sân thượng nhỏ. */
+  townhouse5x10: '/images/library/2d/2d-0003.webp',
+  /** Lô 5×12m — gara ô tô, phòng ngủ 1 ở tầng trệt. */
+  townhouse5x12: '/images/library/2d/2d-0004.webp',
+  /** Lô 6,75×10,02m — phòng ngủ chính tầng trệt, mái che xe. */
+  garden675x10: '/images/library/2d/2d-0005.webp',
+  /** Lô 6,75×13m — gara ô tô + gara xe máy, phòng sinh hoạt chung. */
+  garden675x13: '/images/library/2d/2d-0006.webp'
+} as const
+
+/**
+ * Ảnh phối cảnh nội thất THẬT của thư viện mẫu 3D (Phần 2.2).
+ *
+ * Sáu tấm khách gửi, đã chuyển sang webp trong `/public/images/library/3d`.
+ * Toàn bộ là phòng khách tông kem – gỗ sáng nên chỉ gắn cho mẫu HIỆN ĐẠI /
+ * TỐI GIẢN; mẫu Tân cổ điển, Indochine, mái Thái vẫn dùng ảnh stock cho tới khi
+ * có phối cảnh đúng phong cách.
+ */
+export const INTERIOR_RENDER = {
+  /** Phòng khách căn hộ tông kem, sofa cong, đèn chùm bi. */
+  creamLiving: '/images/library/3d/3d-0001.webp',
+  /** Phòng khách trắng ấm, sofa module, ghế Togo, ban công. */
+  softMinimal: '/images/library/3d/3d-0004.webp',
+  /** Vách TV đá marble kết hợp lam gỗ, hắt sáng viền. */
+  stoneTvWall: '/images/library/3d/3d-0005.webp',
+  /** Khách – ăn liên thông, cửa vòm nhìn ra thành phố. */
+  openDining: '/images/library/3d/3d-0007.webp',
+  /** Phòng khách tông gỗ óc chó, tủ TV kịch trần, đèn cần câu. */
+  walnutLiving: '/images/library/3d/3d-0008.webp',
+  /** Phòng khách tối giản cạnh ban công, sofa bông kem. */
+  balconyLiving: '/images/library/3d/3d-0009.webp'
+} as const
+
+/**
  * Ảnh nền khối hero trang chủ — đang là ẢNH TẠM (placeholder) chờ ảnh thật của
  * khách: lô đất / ngôi nhà hoàn thiện chụp ngang. Để tạm một tấm stock ở đây thì
  * khách dễ tưởng đó là ảnh chốt, nên chỗ này cố ý trung tính. Thay bằng URL ảnh
@@ -218,6 +264,8 @@ export const SITE_IMAGE = {
   ...prefixed('supervision', SUPERVISION_IMAGE),
   ...prefixed('portrait', PORTRAIT_IMAGE),
   ...prefixed('render', RENDER_IMAGE),
+  ...prefixed('plan', PLAN_IMAGE),
+  ...prefixed('interior3d', INTERIOR_RENDER),
   ...prefixed('map', MAP_IMAGE),
   ...prefixed('home', HOME_IMAGE)
 } as Prefixed<'style', typeof STYLE_IMAGE> &
@@ -229,6 +277,8 @@ export const SITE_IMAGE = {
   Prefixed<'supervision', typeof SUPERVISION_IMAGE> &
   Prefixed<'portrait', typeof PORTRAIT_IMAGE> &
   Prefixed<'render', typeof RENDER_IMAGE> &
+  Prefixed<'plan', typeof PLAN_IMAGE> &
+  Prefixed<'interior3d', typeof INTERIOR_RENDER> &
   Prefixed<'map', typeof MAP_IMAGE> &
   Prefixed<'home', typeof HOME_IMAGE>
 

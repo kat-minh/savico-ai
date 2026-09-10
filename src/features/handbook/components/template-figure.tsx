@@ -18,9 +18,14 @@ interface TemplateFigureProps {
 /**
  * Khung hình của một mẫu.
  *
- * Mẫu 3D luôn có ảnh phối cảnh thật. Mẫu 2D chưa có file bản vẽ nên dựng bằng
- * SVG (`PlanDrawing`) theo `planVariant` của tầng — cùng một component sẽ hiển
- * thị ảnh thật ngay khi admin tải bản vẽ lên, không phải sửa nơi gọi.
+ * Mẫu 3D luôn có ảnh phối cảnh thật. Mẫu 2D chỉ một phần có file bản vẽ; tầng
+ * nào chưa có thì dựng bằng SVG (`PlanDrawing`) theo `planVariant` của tầng —
+ * cùng một component hiển thị ảnh thật ngay khi admin tải bản vẽ lên, không phải
+ * sửa nơi gọi.
+ *
+ * Bản vẽ mặt bằng luôn hiện TRỌN khung (`fit='contain'`): file thật là ảnh dọc
+ * còn khung thẻ là 3:2, cắt theo kiểu `cover` thì mất cả dãy phòng lẫn dòng ghi
+ * diện tích ở chân bản vẽ.
  */
 export function TemplateFigure({
   template,
@@ -35,14 +40,16 @@ export function TemplateFigure({
   const src = floor?.imageUrl ?? (floor ? undefined : template.imageUrl) ?? target?.imageUrl
 
   if (src) {
+    const fit = template.kind === '2d' ? 'contain' : 'cover'
+
     // Ảnh phối cảnh cũng đóng dấu bản quyền như bản vẽ (Hình 8) — chỉ khác là
     // dấu nằm đè lên ảnh nên phải có bóng chữ mới đọc được trên nền sáng.
     if (!watermark) {
-      return <Photo className={className} src={src} alt={template.name} sizes={sizes} priority={priority} />
+      return <Photo className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
     }
     return (
       <div className={cn('relative', className)}>
-        <Photo className='size-full' src={src} alt={template.name} sizes={sizes} priority={priority} />
+        <Photo className='size-full' src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
         <span
           aria-hidden
           className='absolute right-3 bottom-2 text-lg font-bold tracking-widest text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]'

@@ -2,6 +2,8 @@ import {
   BUILDING_IMAGE,
   CONSTRUCTION_IMAGE,
   INTERIOR_IMAGE,
+  INTERIOR_RENDER,
+  PLAN_IMAGE,
   STAGE_IMAGE,
   STYLE_IMAGE,
   TOPIC_IMAGE
@@ -13,14 +15,18 @@ import type { HandbookArticle, HandbookFloor, HandbookStage, HandbookTemplate } 
  * tiếp trong trang quản trị. Chuyển ra `shared/cms` để cả trang Cẩm nang lẫn
  * trang quản trị cùng đọc một nguồn (xem `cms.db.ts`).
  *
- * Bản vẽ 2D chưa có file thật nên mỗi tầng chỉ khai `planVariant` — thẻ và trang
- * chi tiết dựng bản vẽ bằng SVG (`shared/components/common/plan-drawing`). Khi
- * admin tải bản vẽ lên thì điền `imageUrl` và phần còn lại không phải sửa gì.
+ * Sáu mẫu 2D đầu tiên đã có BẢN VẼ THẬT của tầng trệt (`PLAN_IMAGE`), thông số
+ * ghi đúng con số in trên bản vẽ. Các tầng trên và những mẫu còn lại vẫn chỉ khai
+ * `planVariant` — thẻ và trang chi tiết tự dựng bản vẽ bằng SVG
+ * (`shared/components/common/plan-drawing`). Có thêm file thật thì chỉ việc điền
+ * `imageUrl`, phần còn lại không phải sửa gì.
  */
 
 /** Dựng danh sách tầng của một mẫu bản vẽ 2D: trệt → các lầu → tum → mặt mái. */
-function buildPlanFloors(levels: number, attic: boolean): HandbookFloor[] {
-  const floors: HandbookFloor[] = [{ id: 'ground', label: 'Tầng trệt', planVariant: 'ground' }]
+function buildPlanFloors(levels: number, attic: boolean, groundImageUrl?: string): HandbookFloor[] {
+  const floors: HandbookFloor[] = [
+    { id: 'ground', label: 'Tầng trệt', planVariant: 'ground', ...(groundImageUrl ? { imageUrl: groundImageUrl } : {}) }
+  ]
   for (let level = 2; level <= levels; level++) {
     floors.push({ id: `floor-${level}`, label: `Tầng ${level}`, planVariant: 'upper' })
   }
@@ -37,8 +43,10 @@ interface PlanSeed {
   depth: number
   levels: number
   attic: boolean
-  /** Diện tích một sàn, m². */
-  area: number
+  /** Diện tích sàn in trên bản vẽ, m². Bỏ trống khi bản vẽ không ghi con số nào. */
+  area?: number
+  /** Bản vẽ THẬT của tầng trệt. Bỏ trống thì mọi tầng đều dựng bằng SVG. */
+  imageUrl?: string
   buildingType: 'townhouse' | 'garden' | 'apartment'
   buildingTypeLabel: string
   architectureStyle: string
@@ -49,98 +57,101 @@ interface PlanSeed {
 const PLAN_SEEDS: PlanSeed[] = [
   {
     id: '2d-01',
-    width: 5,
+    width: 9,
     depth: 20,
     levels: 2,
     attic: false,
-    area: 100,
-    buildingType: 'townhouse',
-    buildingTypeLabel: 'Nhà phố',
+    area: 91,
+    imageUrl: PLAN_IMAGE.garden9x20,
+    buildingType: 'garden',
+    buildingTypeLabel: 'Nhà vườn',
     architectureStyle: 'modern',
     interiorStyle: 'modern',
     description: [
-      'Tầng trệt bố trí phòng khách liên thông bếp + ăn, cầu thang đặt giữa nhà, WC dưới gầm thang và giếng trời phía sau lấy sáng cho bếp.',
-      'Tầng 2 gồm 2 phòng ngủ, 1 WC chung và ban công trước. Phòng ngủ chính quay ra mặt tiền nên thoáng và yên hơn.'
+      'Lô 9×20m chia dọc làm hai: nửa trái là khối nhà 91m² sàn, nửa phải dành cho lối xe, sân phơi và mảng cây — nhờ vậy phòng nào cũng có một mặt thoáng.',
+      'Tầng trệt đã có sẵn phòng ngủ 12,3m² kèm WC riêng cho người lớn tuổi; bếp – ăn 15,4m² mở ra tiểu cảnh giữa nhà, phòng khách 21,4m² quay ra mặt tiền.'
     ]
   },
   {
     id: '2d-02',
     width: 4,
-    depth: 18,
-    levels: 2,
-    attic: true,
-    area: 90,
+    depth: 9.8,
+    levels: 3,
+    attic: false,
+    area: 35.2,
+    imageUrl: PLAN_IMAGE.townhouse4x10,
     buildingType: 'townhouse',
     buildingTypeLabel: 'Nhà phố',
     architectureStyle: 'modern',
     interiorStyle: 'minimal',
     description: [
-      'Lô 4m mặt tiền nên bếp đặt dọc theo tường, bàn ăn kê sát giếng trời để không chắn lối đi. Cầu thang thẳng một vế tiết kiệm được gần 2m² so với thang chữ L.',
-      'Tum bố trí phòng thờ và sân phơi, giữ tầng 2 trọn vẹn cho 2 phòng ngủ.'
+      'Mặt bằng trệt 35,2m² cho lô 4m mặt tiền: gara xe máy ngay sau cửa, phòng khách và bàn ăn nối liền một mạch, bếp lùi sát tường sau.',
+      'Cầu thang bám tường phải, WC giấu cạnh chiếu nghỉ — cách bố trí này giữ lối đi thẳng suốt từ cửa vào tới bếp, không phải vòng qua bàn ăn.'
     ]
   },
   {
     id: '2d-03',
     width: 5,
-    depth: 16,
+    depth: 10,
     levels: 3,
     attic: false,
-    area: 80,
+    area: 25.25,
+    imageUrl: PLAN_IMAGE.townhouse5x10,
     buildingType: 'townhouse',
     buildingTypeLabel: 'Nhà phố',
     architectureStyle: 'modern',
     interiorStyle: 'modern',
     description: [
-      'Lô ngắn nên đẩy lên 3 tầng để đủ phòng. Trệt chỉ để khách và bếp, không bố trí phòng ngủ, nhờ vậy không gian sinh hoạt chung rộng rãi.',
-      'Tầng 2 và tầng 3 mỗi tầng 2 phòng ngủ, WC riêng cho phòng ngủ chính ở tầng 2.'
+      'Lô 5×10m với gara ô tô chiếm trọn nửa phải mặt tiền; phần ở chỉ 25,25m² nên khách và ăn gộp vào một phòng, bếp kê dọc tường sau.',
+      'Khoảng sân thượng nhỏ bên trái lấy sáng cho khối bếp và làm chỗ trồng cây; thang đặt cạnh WC để đường ống kỹ thuật gom về một trục.'
     ]
   },
   {
     id: '2d-04',
     width: 5,
-    depth: 18,
+    depth: 12,
     levels: 2,
     attic: false,
-    area: 90,
+    imageUrl: PLAN_IMAGE.townhouse5x12,
     buildingType: 'townhouse',
     buildingTypeLabel: 'Nhà phố',
     architectureStyle: 'modern',
-    interiorStyle: 'minimal',
+    interiorStyle: 'modern',
     description: [
-      'Mặt bằng cân đối cho lô 5×18m: khách trước, thang giữa, bếp sau, sân sau 1,5m làm chỗ giặt phơi và thông gió.',
-      'Tầng 2 chia 2 phòng ngủ bằng nhau, phù hợp gia đình hai con.'
+      'Lô 5×12m có gara ô tô nằm trong nhà: xe đỗ sát mép phải, người đi men theo mảng cây bên trái nên không phải lách qua đầu xe.',
+      'Phòng ngủ 1 đặt ngay tầng trệt cạnh phòng ăn; bếp và WC dồn về tường trái để hai tầng trên dùng chung một trục ống nước.'
     ]
   },
   {
     id: '2d-05',
-    width: 4.5,
-    depth: 20,
+    width: 6.75,
+    depth: 10.02,
     levels: 2,
     attic: false,
-    area: 90,
-    buildingType: 'townhouse',
-    buildingTypeLabel: 'Nhà phố',
-    architectureStyle: 'modern',
-    interiorStyle: 'modern',
+    imageUrl: PLAN_IMAGE.garden675x10,
+    buildingType: 'garden',
+    buildingTypeLabel: 'Nhà vườn',
+    architectureStyle: 'thai-roof',
+    interiorStyle: 'minimal',
     description: [
-      'Lô hẹp và sâu, giếng trời đặt ở 2/3 chiều sâu để tầng trệt không bị tối ở giữa nhà.',
-      'Chỗ để xe máy bố trí ngay sảnh trước, không lấn vào phòng khách.'
+      'Bản vẽ tỷ lệ 1:100 cho lô 6,75×10,02m: phòng ngủ chính và phòng vệ sinh nằm trọn bên trái, bếp – ăn bên phải, phòng khách ở giữa mở ra chỗ ngồi chờ phía trước.',
+      'Mái che xe kéo từ hông nhà ra sân nên không tốn thêm diện tích xây; cầu thang đặt cạnh phòng ăn, ăn theo trục giữa nhà.'
     ]
   },
   {
     id: '2d-06',
-    width: 5,
-    depth: 17,
+    width: 6.75,
+    depth: 13,
     levels: 2,
     attic: true,
-    area: 85,
-    buildingType: 'townhouse',
-    buildingTypeLabel: 'Nhà phố',
+    imageUrl: PLAN_IMAGE.garden675x13,
+    buildingType: 'garden',
+    buildingTypeLabel: 'Nhà vườn',
     architectureStyle: 'thai-roof',
     interiorStyle: 'modern',
     description: [
-      'Phương án có tum kết hợp mái Thái, phù hợp khu vực nắng nhiều vì lớp mái dốc giảm hấp nhiệt cho tầng dưới.',
-      'Tum làm kho và sân phơi, chừa khoảng trống cho bồn nước và thiết bị năng lượng mặt trời.'
+      'Lô 6,75×13m tách bạch hai chỗ để xe: gara ô tô phía trước, gara xe máy chạy dọc hông phải, hiên nhà nằm giữa hai lối này.',
+      'Bên trong chia hai lớp — phòng khách chính trước, phòng sinh hoạt chung sau; phòng ngủ khách và kho đặt bên trái, bếp cùng khu vực ăn quay ra mảng cây phía sau.'
     ]
   },
   {
@@ -312,15 +323,16 @@ const TEMPLATES_2D: HandbookTemplate[] = PLAN_SEEDS.map((seed) => {
     id: seed.id,
     name: `${seed.buildingTypeLabel} ${size} – ${floorLabel}`,
     kind: '2d',
+    imageUrl: seed.imageUrl,
     styleLabel: seed.buildingTypeLabel,
     specs: {
       buildingTypeLabel: seed.buildingTypeLabel,
       floorLabel,
       lotSize: `${formatMeters(seed.width)} × ${formatMeters(seed.depth)} m`,
-      floorArea: `${seed.area} m²`
+      floorArea: seed.area === undefined ? undefined : `${formatMeters(seed.area)} m²`
     },
     description: seed.description,
-    floors: buildPlanFloors(seed.levels, seed.attic),
+    floors: buildPlanFloors(seed.levels, seed.attic, seed.imageUrl),
     tags: {
       buildingType: seed.buildingType,
       floorCount: floorCountTag(seed.levels),
@@ -361,7 +373,7 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
   {
     id: '3d-01',
     name: 'Nhà phố Hiện đại 5×20m – gỗ sáng',
-    imageUrl: INTERIOR_IMAGE.modern,
+    imageUrl: INTERIOR_RENDER.stoneTvWall,
     styleLabel: 'Hiện đại',
     interiorStyle: 'modern',
     buildingType: 'townhouse',
@@ -371,19 +383,18 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
     hasAttic: false,
     architectureStyle: 'modern',
     gallery: [
-      { label: 'Tầng trệt', imageUrl: INTERIOR_IMAGE.modern },
-      { label: 'Tầng 2', imageUrl: TOPIC_IMAGE.warmLiving },
-      { label: 'Bếp', imageUrl: TOPIC_IMAGE.kitchen }
+      { label: 'Phòng khách', imageUrl: INTERIOR_RENDER.stoneTvWall },
+      { label: 'Góc sofa', imageUrl: INTERIOR_RENDER.walnutLiving }
     ],
     description: [
-      'Gỗ sồi sáng kết hợp tường trắng và sàn bê tông mài, tổng thể nhẹ và dễ phối với đồ rời.',
-      'Ánh sáng gián tiếp giấu trong hộp trần giúp phòng khách sáng đều mà không chói khi xem TV buổi tối.'
+      'Vách TV ốp đá vân mây kết hợp lam gỗ sáng chạy suốt chiều ngang phòng khách; đèn hắt giấu sau lam làm mảng đá nổi khối mà không chói khi xem TV buổi tối.',
+      'Tủ kính khung nhôm đen bên phải vừa để trưng bày vừa ngăn nhẹ với hành lang — phòng khách gọn lại mà không phải xây thêm vách.'
     ]
   },
   {
     id: '3d-02',
     name: 'Nhà phố Tối giản 4×18m – trắng ấm',
-    imageUrl: INTERIOR_IMAGE.minimal,
+    imageUrl: INTERIOR_RENDER.balconyLiving,
     styleLabel: 'Tối giản',
     interiorStyle: 'minimal',
     buildingType: 'townhouse',
@@ -393,18 +404,18 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
     hasAttic: true,
     architectureStyle: 'modern',
     gallery: [
-      { label: 'Tầng trệt', imageUrl: INTERIOR_IMAGE.minimal },
-      { label: 'Tầng 2', imageUrl: TOPIC_IMAGE.livingRoom }
+      { label: 'Phòng khách', imageUrl: INTERIOR_RENDER.balconyLiving },
+      { label: 'Góc ban công', imageUrl: INTERIOR_RENDER.softMinimal }
     ],
     description: [
-      'Bảng màu chỉ ba tông: trắng ấm, gỗ nhạt và xám nhạt. Ít chi tiết nên nhà nhỏ vẫn thấy rộng.',
-      'Toàn bộ đồ lưu trữ giấu sau cánh phẳng không tay nắm, giữ mặt tường liền mạch.'
+      'Bảng màu chỉ ba tông: trắng ấm, kem và xám nhạt. Ít chi tiết nên nhà mặt tiền 4m vẫn thấy rộng.',
+      'Sofa bông lùi khỏi cửa ban công để lối ra vào thông suốt; đèn trụ và bức tranh khổ đứng là hai điểm nhấn duy nhất trên mảng tường trơn.'
     ]
   },
   {
     id: '3d-03',
     name: 'Nhà phố Hiện đại 5×16m – giếng trời',
-    imageUrl: TOPIC_IMAGE.livingRoom,
+    imageUrl: INTERIOR_RENDER.walnutLiving,
     styleLabel: 'Hiện đại',
     interiorStyle: 'modern',
     buildingType: 'townhouse',
@@ -414,20 +425,18 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
     hasAttic: false,
     architectureStyle: 'modern',
     gallery: [
-      { label: 'Tầng trệt', imageUrl: TOPIC_IMAGE.livingRoom },
-      { label: 'Tầng 2', imageUrl: INTERIOR_IMAGE.modern },
-      { label: 'Tầng 3', imageUrl: TOPIC_IMAGE.warmLiving },
-      { label: 'Bếp', imageUrl: TOPIC_IMAGE.kitchen }
+      { label: 'Phòng khách', imageUrl: INTERIOR_RENDER.walnutLiving },
+      { label: 'Vách TV', imageUrl: INTERIOR_RENDER.stoneTvWall }
     ],
     description: [
-      'Giếng trời giữa nhà là điểm tựa của cả phương án: cây xanh, thang và ánh sáng tự nhiên gom về một trục.',
-      'Vật liệu chính là gỗ công nghiệp phủ melamine vân gỗ, chi phí vừa phải mà bề mặt bền với khí hậu ẩm.'
+      'Tủ TV kịch trần tông gỗ óc chó chạy hết mảng tường, xen kệ mở có đèn hắt để khối tối không bị nặng.',
+      'Đèn cần câu vươn qua bàn trà thay cho đèn thả trần — nhà có giếng trời nên trần bị chia ô, treo đèn giữa phòng sẽ vướng.'
     ]
   },
   {
     id: '3d-04',
     name: 'Nhà phố Hiện đại 5×18m – không gian mở',
-    imageUrl: TOPIC_IMAGE.warmLiving,
+    imageUrl: INTERIOR_RENDER.openDining,
     styleLabel: 'Hiện đại',
     interiorStyle: 'modern',
     buildingType: 'townhouse',
@@ -437,12 +446,12 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
     hasAttic: false,
     architectureStyle: 'modern',
     gallery: [
-      { label: 'Tầng trệt', imageUrl: TOPIC_IMAGE.warmLiving },
-      { label: 'Tầng 2', imageUrl: INTERIOR_IMAGE.minimal }
+      { label: 'Khách – ăn liên thông', imageUrl: INTERIOR_RENDER.openDining },
+      { label: 'Phòng khách', imageUrl: INTERIOR_RENDER.creamLiving }
     ],
     description: [
-      'Bỏ hết vách ngăn giữa khách – ăn – bếp, chỉ phân vùng bằng thảm và trần hạ.',
-      'Tông ấm từ gỗ và vải bố, điểm xanh của cây để không gian mở không bị trống trải.'
+      'Bỏ hết vách ngăn giữa khách – ăn – bếp, chỉ phân vùng bằng thảm và mảng trần hạ.',
+      'Cửa vòm ra ban công làm mềm dãy đường thẳng của khối tủ bếp; bàn ăn đặt ngay lối chuyển giữa hai khu nên không chắn đường đi.'
     ]
   },
   {
@@ -490,7 +499,7 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
   {
     id: '3d-07',
     name: 'Căn hộ Tối giản 68m² – 2 phòng ngủ',
-    imageUrl: BUILDING_IMAGE.apartment,
+    imageUrl: INTERIOR_RENDER.softMinimal,
     styleLabel: 'Tối giản',
     interiorStyle: 'minimal',
     buildingType: 'apartment',
@@ -500,18 +509,18 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
     hasAttic: false,
     architectureStyle: 'modern',
     gallery: [
-      { label: 'Phòng khách', imageUrl: BUILDING_IMAGE.apartment },
-      { label: 'Bếp', imageUrl: TOPIC_IMAGE.kitchen }
+      { label: 'Phòng khách', imageUrl: INTERIOR_RENDER.softMinimal },
+      { label: 'Góc ban công', imageUrl: INTERIOR_RENDER.balconyLiving }
     ],
     description: [
       'Căn hộ 68m² được nới cảm giác rộng bằng cách bỏ vách ngăn bếp và dùng tủ âm tường kịch trần.',
-      'Đồ nội thất chọn loại chân cao để sàn nhìn liên tục, căn hộ nhỏ đỡ bí.'
+      'Sofa module và ghế bệt thay cho bộ bàn ghế truyền thống: chân thấp, khối mềm, dễ đổi cách kê khi nhà có khách.'
     ]
   },
   {
     id: '3d-08',
     name: 'Căn hộ Hiện đại 82m² – tông ấm',
-    imageUrl: TOPIC_IMAGE.gallery,
+    imageUrl: INTERIOR_RENDER.creamLiving,
     styleLabel: 'Hiện đại',
     interiorStyle: 'modern',
     buildingType: 'apartment',
@@ -521,12 +530,12 @@ const INTERIOR_SEEDS: InteriorSeed[] = [
     hasAttic: false,
     architectureStyle: 'modern',
     gallery: [
-      { label: 'Phòng khách', imageUrl: TOPIC_IMAGE.gallery },
-      { label: 'Phòng ngủ', imageUrl: TOPIC_IMAGE.warmLiving }
+      { label: 'Phòng khách', imageUrl: INTERIOR_RENDER.creamLiving },
+      { label: 'Khu bàn ăn', imageUrl: INTERIOR_RENDER.openDining }
     ],
     description: [
-      'Tường tranh và kệ mở làm điểm nhìn cho phòng khách vốn ít ánh sáng tự nhiên.',
-      'Đèn rọi ray cho phép đổi hướng chiếu khi thay tranh, không phải đục trần lại.'
+      'Tông kem phủ toàn bộ tường và rèm, điểm nâu trầm ở kệ TV để phòng khách nhiều ánh sáng không bị phẳng.',
+      'Đèn chùm bi và đèn cây đứng chia hai lớp sáng — sinh hoạt chung dùng đèn chùm, đọc sách bật riêng đèn cây.'
     ]
   },
   {

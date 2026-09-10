@@ -33,6 +33,11 @@ export function matchesTags(tags: HandbookTags, filter: HandbookFilter): boolean
  * vòng nên khi kho mẫu mỏng, đúng những mẫu khớp phong cách lại bị loại hết và
  * panel hiện toàn mẫu lệch phong cách.
  *
+ * Trong CÙNG một vòng, mẫu có ảnh thật (bản vẽ / phối cảnh khách gửi) được lấy
+ * trước mẫu chỉ có hình dựng SVG: panel màn chờ là chỗ khách nhìn lâu nhất, một
+ * bản vẽ thật thuyết phục hơn hẳn một hình minh họa. Độ khớp tag vẫn quan trọng
+ * hơn — ưu tiên này chỉ sắp xếp bên trong một mức khớp, không vượt qua nó.
+ *
  * `pick` is injected so the caller controls randomness (and tests stay
  * deterministic); it receives the eligible pool and returns the chosen slice.
  */
@@ -54,7 +59,9 @@ export function selectPersonalizedTemplates(
   }
 
   for (let relaxed = 0; relaxed <= TAG_RELAXATION_ORDER.length; relaxed++) {
-    add(pool.filter((template) => !taken.has(template.id) && matchesTags(template.tags, active)))
+    const eligible = pool.filter((template) => !taken.has(template.id) && matchesTags(template.tags, active))
+    add(eligible.filter(hasRealImage))
+    if (chosen.length < count) add(eligible.filter((template) => !hasRealImage(template)))
     if (chosen.length >= count) return chosen
 
     const next = TAG_RELAXATION_ORDER[relaxed]
@@ -66,6 +73,11 @@ export function selectPersonalizedTemplates(
   // Every criterion relaxed and the pool is still short — bù nốt bằng mẫu còn lại.
   add(pool.filter((template) => !taken.has(template.id)))
   return chosen
+}
+
+/** Mẫu đã có file ảnh thật — ảnh bìa hoặc bản vẽ của tầng đầu tiên. */
+function hasRealImage(template: HandbookTemplate): boolean {
+  return Boolean(template.imageUrl ?? template.floors[0]?.imageUrl)
 }
 
 /** Fisher–Yates over a copy, then take the first `count`. */

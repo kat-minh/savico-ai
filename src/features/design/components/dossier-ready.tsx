@@ -63,6 +63,8 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
   const t = useTranslations('design.dossier')
   // Ảnh phối cảnh mẫu — admin thay ở màn "Hình ảnh site".
   const exteriorImage = useSiteImage('render.villa')
+  // Bản vẽ mặt bằng mẫu, cùng nguồn với thẻ xem trước ở màn chưa render.
+  const planImage = useSiteImage('plan.garden675x10')
   const locale = useLocale() as Locale
   const { contact } = siteConfig
   const [shareMode, setShareMode] = useState<ShareMode>(null)
@@ -85,7 +87,7 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
       case 'exterior':
         return <Photo className='size-full' src={exteriorImage} alt={t(`files.${key}`)} sizes='140px' />
       case 'architecture':
-        return <PlanDrawing className='size-full' />
+        return <Photo className='size-full' src={planImage} alt={t(`files.${key}`)} sizes='140px' fit='contain' />
       case 'structure':
         // Chưa có bản vẽ kết cấu riêng nên tạm dùng lại nét vẽ kỹ thuật — đúng
         // thể loại hơn là mượn trang bìa. Backend sẽ trả thumbnail thật.
