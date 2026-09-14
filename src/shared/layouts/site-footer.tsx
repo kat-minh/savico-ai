@@ -1,8 +1,9 @@
 'use client'
 
 import { Facebook, Youtube } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import type { ReactNode } from 'react'
+import { type CSSProperties, type ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { cmsText, useCmsDocument } from '@/shared/cms'
@@ -15,10 +16,25 @@ import { FOOTER_ABOUT_LINKS, FOOTER_PRODUCT_LINKS, FOOTER_SUPPORT_LINKS, type Fo
  * Mot muc trong cot link. `href: null` = trang chua dung: hien mo, khong bam
  * duoc thay vi tro toi route chet (xem `site-footer.config.ts`).
  */
-function FooterNavLink({ link, label, pendingLabel }: { link: FooterLink; label: string; pendingLabel: string }) {
+function FooterNavLink({
+  link,
+  label,
+  pendingLabel,
+  index
+}: {
+  link: FooterLink
+  label: string
+  pendingLabel: string
+  index: number
+}) {
   if (!link.href) {
     return (
-      <li>
+      <motion.li
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.42, delay: 0.18 + index * 0.07 }}
+      >
         <span
           aria-disabled='true'
           title={pendingLabel}
@@ -26,19 +42,24 @@ function FooterNavLink({ link, label, pendingLabel }: { link: FooterLink; label:
         >
           {label}
         </span>
-      </li>
+      </motion.li>
     )
   }
 
   return (
-    <li>
+    <motion.li
+      initial={{ opacity: 0, y: 6 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.44, delay: 0.18 + index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+    >
       <Link
         href={link.href}
-        className='text-footer-foreground/75 hover:text-footer-foreground text-sm transition-colors'
+        className='footer-animated-link text-footer-foreground/75 hover:text-footer-foreground relative inline-block text-sm transition-colors'
       >
         {label}
       </Link>
-    </li>
+    </motion.li>
   )
 }
 
@@ -62,12 +83,13 @@ function LinkColumn({
     <nav aria-label={title}>
       <ColumnTitle>{title}</ColumnTitle>
       <ul className='space-y-2.5'>
-        {links.map((link) => (
+        {links.map((link, index) => (
           <FooterNavLink
             key={link.labelKey}
             link={link}
             label={t(`links.${link.labelKey}`)}
             pendingLabel={pendingLabel}
+            index={index}
           />
         ))}
       </ul>
@@ -119,7 +141,12 @@ export function SiteFooter() {
     <footer className='bg-footer text-footer-foreground mt-auto'>
       <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8'>
         {/* Cot 1 - Thuong hieu */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+        >
           <Logo onDark tagline={t('brandTagline')} />
           <p className='text-footer-foreground/70 mt-4 max-w-xs text-sm leading-relaxed'>
             {cmsText(settings.tagline, t('tagline'))}
@@ -134,6 +161,7 @@ export function SiteFooter() {
                   rel='noreferrer'
                   aria-label={item.label}
                   className={cn(
+                    'footer-social-link',
                     'bg-footer-foreground/10 text-primary flex size-9 items-center justify-center rounded-full',
                     'hover:bg-footer-foreground/20 transition-colors'
                   )}
@@ -143,33 +171,72 @@ export function SiteFooter() {
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
 
-        <LinkColumn title={t('productTitle')} links={FOOTER_PRODUCT_LINKS} pendingLabel={pendingLabel} />
-        <LinkColumn title={t('supportTitle')} links={FOOTER_SUPPORT_LINKS} pendingLabel={pendingLabel} />
-        <LinkColumn title={t('aboutTitle')} links={FOOTER_ABOUT_LINKS} pendingLabel={pendingLabel} />
+        {[
+          { title: t('productTitle'), links: FOOTER_PRODUCT_LINKS },
+          { title: t('supportTitle'), links: FOOTER_SUPPORT_LINKS },
+          { title: t('aboutTitle'), links: FOOTER_ABOUT_LINKS }
+        ].map((column, index) => (
+          <motion.div
+            key={column.title}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.58, delay: (index + 1) * 0.14, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <LinkColumn title={column.title} links={column.links} pendingLabel={pendingLabel} />
+          </motion.div>
+        ))}
 
         {/* Cot 5 - Lien he */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.58, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
+          style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
+        >
           <ColumnTitle>{t('contactTitle')}</ColumnTitle>
           <ul className='text-footer-foreground/75 space-y-2.5 text-sm'>
-            <li>
+            <motion.li
+              initial={{ opacity: 0, y: 5 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.42, delay: 0.74, ease: [0.22, 1, 0.36, 1] }}
+            >
               {t('hotline')}:{' '}
-              <a href={`tel:${hotline.replace(/\s/g, '')}`} className='hover:text-footer-foreground transition-colors'>
+              <a
+                href={`tel:${hotline.replace(/\s/g, '')}`}
+                className='footer-animated-link hover:text-footer-foreground relative inline-block transition-colors'
+              >
                 {hotline}
               </a>
-            </li>
-            <li>
+            </motion.li>
+            <motion.li
+              initial={{ opacity: 0, y: 5 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.42, delay: 0.81, ease: [0.22, 1, 0.36, 1] }}
+            >
               {t('emailLabel')}:{' '}
-              <a href={`mailto:${email}`} className='hover:text-footer-foreground transition-colors'>
+              <a
+                href={`mailto:${email}`}
+                className='footer-animated-link hover:text-footer-foreground relative inline-block transition-colors'
+              >
                 {email}
               </a>
-            </li>
-            <li>
+            </motion.li>
+            <motion.li
+              initial={{ opacity: 0, y: 5 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.42, delay: 0.88, ease: [0.22, 1, 0.36, 1] }}
+            >
               {t('addressLabel')}: {cmsText(settings.address, t('address'))}
-            </li>
+            </motion.li>
           </ul>
-        </div>
+        </motion.div>
       </div>
 
       {/* Hang day - chi con dong ban quyen (anh mockup). */}
