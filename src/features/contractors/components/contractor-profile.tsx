@@ -5,13 +5,18 @@ import {
   Briefcase,
   CalendarCheck,
   CalendarDays,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CircleCheck,
   Clock,
   Download,
+  Eye,
   FileCheck2,
   FileText,
   Handshake,
   ImageIcon,
+  Loader2,
   Lock,
   Map as MapIcon,
   MapPin,
@@ -21,23 +26,36 @@ import {
   Search,
   Send,
   ShieldCheck,
-  Users
+  Users,
+  X
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { Photo } from '@/shared/components/common'
+import { Photo, revealContainerVariants, revealEase, revealItemVariants, RevealPhoto } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import {
   CONTRACTOR_PREVIEW_ID,
   contractorFirmRoute,
+  contractorInvitationsRoute,
   contractorInviteRoute,
   contractorMatchesRoute
 } from '@/shared/constants/routes'
+import { usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatNumber } from '@/shared/utils'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
@@ -47,6 +65,7 @@ import { useInvitations } from '../hooks/use-invitations'
 import { isInvited, remainingInvites } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import type { Contractor, ContractorPhoto } from '../types/contractor.types'
+import { MATCHES_LAST_VIEWED_KEY } from './contractor-matches'
 import { ContractorLogo } from './contractor-logo'
 import { useProjectPickerStore } from '../store/project-picker.store'
 import { ProjectContextBar } from './project-context-bar'
@@ -61,6 +80,106 @@ interface ContractorProfileProps {
 
 /** Bề ngang trang, đo từ ảnh S13: khối nội dung chiếm 90% bề ngang màn. */
 const PAGE_CONTAINER = 'mx-auto w-[90%] max-w-[80rem]'
+
+/**
+ * Nội dung tab trượt vào theo hướng tab vừa chọn (mục 4) — Radix dựng lại mỗi
+ * `TabsContent` khi nó vừa active nên `initial`/`animate` chạy đúng một lần
+ * mỗi lần đổi tab, không cần `AnimatePresence`.
+ */
+function TabPanel({ direction, children }: { direction: number; children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: direction * 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, ease: revealEase }}
+      className='space-y-5'
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/** Neo cho `usePastElement` — cuộn qua khối nhận diện thì dải tóm tắt dính dưới thanh điều hướng (mục 3). */
+const HEADER_ANCHOR_ID = 'firm-header-anchor'
+
+/**
+ * Nút "Mời báo giá" — MỘT nơi quyết định trạng thái, dùng lại cho cột phải,
+ * dải tóm tắt dính khi cuộn và thanh dưới cùng trên mobile (mục 3/11), để ba
+ * chỗ không bao giờ lệch nhau.
+ */
+function InviteButton({
+  projectId,
+  contractorId,
+  contractor,
+  preview,
+  invited,
+  inviteLocked,
+  navigating,
+  onNavigate,
+  onOpenPicker,
+  size
+}: {
+  projectId: string
+  contractorId: string
+  contractor: Contractor
+  preview: boolean
+  invited: boolean
+  inviteLocked: boolean
+  navigating: boolean
+  onNavigate: () => void
+  onOpenPicker: () => void
+  size?: 'sm'
+}) {
+  const t = useTranslations('contractors.firm')
+  const tCommon = useTranslations('contractors.common')
+
+  if (!contractor.acceptingProjects) {
+    return (
+      <Button size={size} className='w-full opacity-50' disabled>
+        <Send className='size-4' />
+        {tCommon('invite')}
+      </Button>
+    )
+  }
+
+  if (preview) {
+    return (
+      <Button size={size} className='w-full' onClick={onOpenPicker}>
+        <Send className='size-4' />
+        {tCommon('invite')}
+      </Button>
+    )
+  }
+
+  if (invited) {
+    return (
+      <Button asChild size={size} variant='outline' className='border-primary text-primary-strong w-full'>
+        <Link href={contractorInvitationsRoute(projectId)}>
+          <Send className='size-4' />
+          {tCommon('invited')} · {t('viewInvites')}
+        </Link>
+      </Button>
+    )
+  }
+
+  if (inviteLocked) {
+    return (
+      <Button size={size} className='w-full' disabled title={tCommon('inviteFull', { max: MAX_INVITATIONS })}>
+        <Send className='size-4' />
+        {tCommon('inviteFull', { max: MAX_INVITATIONS })}
+      </Button>
+    )
+  }
+
+  return (
+    <Button asChild size={size} className='w-full' onClick={onNavigate}>
+      <Link href={contractorInviteRoute(projectId, contractorId)}>
+        {navigating ? <Loader2 className='size-4 animate-spin' /> : <Send className='size-4' />}
+        {tCommon('invite')}
+      </Link>
+    </Button>
+  )
+}
 
 /**
  * Hồ sơ một nhà thầu — S13 (tab Tổng quan) và S14 (tab Hợp tác SAVICO) là HAI
@@ -79,12 +198,16 @@ const PAGE_CONTAINER = 'mx-auto w-[90%] max-w-[80rem]'
 export function ContractorProfile({ projectId, contractorId, tab }: ContractorProfileProps) {
   const t = useTranslations('contractors.firm')
   const tCommon = useTranslations('contractors.common')
+  const tGlobal = useTranslations('common')
   const locale = useLocale() as Locale
   const router = useRouter()
 
   const openPicker = useProjectPickerStore((s) => s.openPicker)
   /** Xem thử — chưa gắn hồ sơ dự án nào (xem `CONTRACTOR_PREVIEW_ID`). */
   const preview = projectId === CONTRACTOR_PREVIEW_ID
+
+  /** Bấm một thẻ "thế mạnh" ở khối giới thiệu → tab "Dự án đã thực hiện" (mục 5). */
+  const goToProjectsTab = () => router.replace(contractorFirmRoute(projectId, contractorId, 'projects'))
 
   const { data: brief } = useBrief(projectId)
   const { data: contractor, isPending } = useContractor(contractorId)
@@ -97,6 +220,35 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   const invited = isInvited(sent, contractorId)
   const inviteLocked = remainingInvites(sent) === 0
   const inCompare = compareIds.includes(contractorId)
+
+  // Cuộn qua khối nhận diện → dải tóm tắt dính dưới thanh điều hướng (mục 3).
+  const barCollapsed = usePastElement(HEADER_ANCHOR_ID)
+
+  /** Đang xem ảnh nào trong hộp phóng — `null` là đang đóng (mục 6). */
+  const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null)
+  const [reportOpen, setReportOpen] = useState(false)
+
+  /** Nút "Mời báo giá" thở một nhịp sau khi hiện (mục 11). */
+  const [inviteBreathe, setInviteBreathe] = useState(false)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setInviteBreathe(true), 500)
+    return () => window.clearTimeout(timer)
+  }, [])
+  /** Bấm "Mời báo giá" → vòng xoay trong lúc trang M08 tải (mục 11). */
+  const [navigatingInvite, setNavigatingInvite] = useState(false)
+
+  /**
+   * Nội dung trượt vào theo HƯỚNG của tab vừa chọn so với tab trước đó (mục
+   * 4) — dương là sang phải (tab đứng sau), âm là sang trái. Mẫu "điều chỉnh
+   * state khi prop đổi" chính thức của React: so với tab đã thấy lần render
+   * trước, đặt lại ngay trong thân hàm thay vì trong `useEffect`.
+   */
+  const [renderedTab, setRenderedTab] = useState(tab)
+  const [tabDirection, setTabDirection] = useState(1)
+  if (tab !== renderedTab) {
+    setTabDirection(CONTRACTOR_TABS.indexOf(tab) - CONTRACTOR_TABS.indexOf(renderedTab) || 1)
+    setRenderedTab(tab)
+  }
 
   if (isPending || !contractor) {
     return (
@@ -157,12 +309,15 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
           chờ xám đứng mãi ở đầu trang. */}
       {preview ? null : <ProjectContextBar brief={brief} compact />}
 
-      <Link
-        href={contractorMatchesRoute(projectId)}
-        className='text-primary-strong inline-flex items-center gap-2 text-sm font-medium'
-      >
-        ← {tCommon('backToList')}
-      </Link>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+        <Link
+          href={contractorMatchesRoute(projectId)}
+          onClick={() => window.sessionStorage.setItem(MATCHES_LAST_VIEWED_KEY, contractorId)}
+          className='text-primary-strong inline-flex items-center gap-2 text-sm font-medium'
+        >
+          ← {tCommon('backToList')}
+        </Link>
+      </motion.div>
 
       <div className='grid gap-x-[1.4%] gap-y-5 lg:grid-cols-[79%_minmax(0,1fr)]'>
         <div className='min-w-0'>
@@ -172,113 +327,187 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
             className='gap-5'
           >
             {/* Nhận diện + chỉ số + tab: một thẻ duy nhất, đúng ảnh S13. */}
-            <div className='bg-card rounded-2xl border'>
+            <motion.div
+              id={HEADER_ANCHOR_ID}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: revealEase }}
+              className='bg-card rounded-2xl border'
+            >
               <div className='flex flex-wrap items-center gap-y-4 px-5 py-4'>
                 <ContractorLogo contractor={contractor} className='size-24 shrink-0 rounded-xl' />
 
                 <div className='min-w-0 grow basis-52 px-4 lg:grow-0 lg:basis-[25%]'>
-                  <div className='flex items-center gap-2'>
+                  <div className='flex flex-wrap items-center gap-2'>
                     <h1 className='min-w-0 text-xl font-semibold tracking-tight text-balance'>{contractor.name}</h1>
-                    {contractor.verified ? <BadgeCheck className='text-primary size-5 shrink-0' /> : null}
+                    {contractor.verified ? (
+                      <motion.span
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.3 }}
+                      >
+                        <BadgeCheck className='text-primary size-5 shrink-0' />
+                      </motion.span>
+                    ) : null}
+                    {invited ? (
+                      <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
+                        {tCommon('invited')}
+                      </span>
+                    ) : null}
                   </div>
                   <p className='text-muted-foreground mt-1 text-sm'>{contractor.kind}</p>
                 </div>
 
-                <div className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'>
+                <motion.div
+                  variants={revealContainerVariants}
+                  initial='hidden'
+                  animate='show'
+                  transition={{ delayChildren: 0.4 }}
+                  className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'
+                >
                   {headerFacts.map((fact) => (
-                    <div key={fact.key} className='min-w-0 flex-1 px-2.5'>
+                    <motion.div variants={revealItemVariants} key={fact.key} className='min-w-0 flex-1 px-2.5'>
                       <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
                         <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
                         <span className='truncate'>{fact.value}</span>
                       </p>
                       <p className='text-muted-foreground mt-1 truncate pl-5.5 text-xs'>{fact.hint}</p>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </div>
 
-              {/* Tab gạch chân, không phải viên thuốc nền xám của primitive. */}
+              {/* Tab gạch chân, không phải viên thuốc nền xám của primitive.
+                  Gạch chân trượt giữa các tab + vẽ từ trái khi vào trang (mục 4). */}
               <TabsList className='h-auto w-full justify-start gap-8 overflow-x-auto rounded-none border-t bg-transparent px-5 py-0'>
                 {CONTRACTOR_TABS.map((key) => (
                   <TabsTrigger
                     key={key}
                     value={key}
-                    className='data-[state=active]:border-primary data-[state=active]:text-primary-strong text-muted-foreground h-auto flex-none rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none'
+                    className='data-[state=active]:text-primary-strong text-muted-foreground relative h-auto flex-none rounded-none border-x-0 border-t-0 border-b-2 border-transparent px-0 py-3 data-[state=active]:bg-transparent data-[state=active]:shadow-none'
                   >
                     {t(`tabs.${key}`)}
+                    {tab === key ? (
+                      <motion.span
+                        layoutId='firm-tab-underline'
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        style={{ transformOrigin: 'left' }}
+                        transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                        className='border-primary pointer-events-none absolute inset-x-0 bottom-0 border-b-2'
+                      />
+                    ) : null}
                   </TabsTrigger>
                 ))}
               </TabsList>
-            </div>
+            </motion.div>
 
-            <TabsContent value='overview' className='space-y-5'>
-              <IntroCard contractor={contractor} />
-              <PartnershipSummary contractor={contractor} />
-              <FeaturedProjects contractor={contractor} projectId={projectId} />
-              <LegalChecks contractor={contractor} />
+            <TabsContent value='overview'>
+              <TabPanel direction={tabDirection}>
+                <IntroCard contractor={contractor} onTagClick={goToProjectsTab} onOpenPhoto={setActivePhotoIndex} />
+                <PartnershipSummary contractor={contractor} />
+                <FeaturedProjects contractor={contractor} projectId={projectId} />
+                <LegalChecks contractor={contractor} />
+              </TabPanel>
             </TabsContent>
 
             <TabsContent value='projects'>
-              <FeaturedProjects contractor={contractor} projectId={projectId} />
+              <TabPanel direction={tabDirection}>
+                <FeaturedProjects contractor={contractor} projectId={projectId} />
+              </TabPanel>
             </TabsContent>
 
             <TabsContent value='legal'>
-              <LegalChecks contractor={contractor} />
+              <TabPanel direction={tabDirection}>
+                <LegalChecks contractor={contractor} />
+              </TabPanel>
             </TabsContent>
 
             <TabsContent value='partnership'>
-              <PartnershipTab contractor={contractor} />
+              <TabPanel direction={tabDirection}>
+                <PartnershipTab contractor={contractor} />
+              </TabPanel>
             </TabsContent>
           </Tabs>
         </div>
 
         {/* Cột phải dính theo cuộn: nút "Mời báo giá" là hành động chính của màn,
             hồ sơ lại dài — để nó trôi mất là bắt người dùng cuộn ngược lên. */}
-        <aside className='space-y-4 lg:sticky lg:top-24 lg:self-start'>
-          <section className='bg-card rounded-2xl border p-4'>
+        <motion.aside
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className='space-y-4 lg:sticky lg:top-24 lg:self-start'
+        >
+          <motion.section
+            variants={revealContainerVariants}
+            initial='hidden'
+            animate='show'
+            className='bg-card rounded-2xl border p-4'
+          >
             <h2 className='text-base font-semibold'>{t('activity')}</h2>
             <ul className='mt-3 space-y-2'>
               {activityRows.map((row) => (
-                <li key={row.key} className='flex items-center gap-3 rounded-xl border px-3 py-2.5'>
+                <motion.li
+                  variants={revealItemVariants}
+                  key={row.key}
+                  className='flex items-center gap-3 rounded-xl border px-3 py-2.5'
+                >
                   <row.icon aria-hidden className='text-primary size-4 shrink-0' />
                   <div className='min-w-0'>
                     <p className='text-muted-foreground text-[11px] leading-tight'>{row.label}</p>
                     <p className='mt-0.5 truncate text-sm font-semibold'>{row.value}</p>
                   </div>
-                </li>
+                </motion.li>
               ))}
             </ul>
-          </section>
+          </motion.section>
 
           <div className='space-y-2.5'>
-            {preview ? (
-              // Mời phải gắn vào một dự án (R1 đếm lời mời theo dự án), nên ở
-              // chế độ xem thử nút này mở hộp thoại chọn dự án thay vì khóa
-              // cứng — khách vẫn đi tiếp được, chỉ là qua một bước.
-              <Button className='h-11 w-full' onClick={openPicker}>
-                <Send className='size-4' />
-                {tCommon('invite')}
-              </Button>
-            ) : invited || inviteLocked ? (
-              <Button className='h-11 w-full' disabled>
-                <Send className='size-4' />
-                {invited ? tCommon('invited') : tCommon('inviteFull', { max: MAX_INVITATIONS })}
-              </Button>
-            ) : (
-              <Button asChild className='h-11 w-full'>
-                <Link href={contractorInviteRoute(projectId, contractorId)}>
-                  <Send className='size-4' />
-                  {tCommon('invite')}
-                </Link>
-              </Button>
-            )}
+            {/* Hiện sau cùng + một nhịp thở (mục 11); tạm ngưng nhận dự án →
+                nút mờ + dẫn hướng sang nhà thầu khác (mục 10). */}
+            <motion.div
+              className='h-11 [&>*]:h-11'
+              animate={{ scale: inviteBreathe && contractor.acceptingProjects ? [1, 1.02, 1] : 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <InviteButton
+                projectId={projectId}
+                contractorId={contractorId}
+                contractor={contractor}
+                preview={preview}
+                invited={invited}
+                inviteLocked={inviteLocked}
+                navigating={navigatingInvite}
+                onNavigate={() => setNavigatingInvite(true)}
+                onOpenPicker={openPicker}
+              />
+            </motion.div>
+            {!contractor.acceptingProjects ? (
+              <>
+                <p className='text-muted-foreground text-xs text-pretty'>{t('notAcceptingNotice')}</p>
+                <Button asChild variant='outline' className='h-11 w-full'>
+                  <Link href={contractorMatchesRoute(projectId)}>{t('viewSimilar')}</Link>
+                </Button>
+              </>
+            ) : null}
 
             <Button
               variant='outline'
               className={cn('border-primary/50 text-primary-strong h-11 w-full', inCompare && 'border-primary')}
               onClick={() => toggleCompare(contractorId)}
             >
-              <Plus className='size-4' />
+              {inCompare ? (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                >
+                  <CheckCircle2 className='size-4' />
+                </motion.span>
+              ) : (
+                <Plus className='size-4' />
+              )}
               {inCompare ? t('inCompare') : t('addToCompare')}
             </Button>
           </div>
@@ -290,14 +519,94 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
 
           <button
             type='button'
-            onClick={() => toast.success(t('reportSent'))}
+            onClick={() => setReportOpen(true)}
             className='text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-xs'
           >
             <FileText className='size-3.5' />
             {t('report')}
           </button>
-        </aside>
+        </motion.aside>
       </div>
+
+      {/* Cuộn qua khối nhận diện → dải tóm tắt dính dưới thanh điều hướng
+          (mục 3); mobile: nút "Mời báo giá" dính đáy màn. */}
+      <AnimatePresence>
+        {barCollapsed ? (
+          <motion.div
+            initial={{ y: -48, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -48, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className='bg-card/95 fixed inset-x-0 top-16 z-30 hidden border-b py-2 backdrop-blur-sm sm:block'
+          >
+            <div className={cn(PAGE_CONTAINER, 'flex items-center gap-3')}>
+              <ContractorLogo contractor={contractor} className='size-8 shrink-0 rounded-md text-xs' />
+              <span className='truncate text-sm font-medium'>{contractor.name}</span>
+              <div className='ml-auto h-9 w-40 shrink-0 [&>*]:h-9'>
+                <InviteButton
+                  projectId={projectId}
+                  contractorId={contractorId}
+                  contractor={contractor}
+                  preview={preview}
+                  invited={invited}
+                  inviteLocked={inviteLocked}
+                  navigating={navigatingInvite}
+                  onNavigate={() => setNavigatingInvite(true)}
+                  onOpenPicker={openPicker}
+                  size='sm'
+                />
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <div className='h-16 sm:hidden' aria-hidden />
+      <div className='bg-card fixed inset-x-0 bottom-0 z-30 border-t p-3 sm:hidden'>
+        <div className='h-11 [&>*]:h-11'>
+          <InviteButton
+            projectId={projectId}
+            contractorId={contractorId}
+            contractor={contractor}
+            preview={preview}
+            invited={invited}
+            inviteLocked={inviteLocked}
+            navigating={navigatingInvite}
+            onNavigate={() => setNavigatingInvite(true)}
+            onOpenPicker={openPicker}
+          />
+        </div>
+      </div>
+
+      <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>{t('reportConfirmTitle')}</DialogTitle>
+            <DialogDescription>{t('reportConfirmBody')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setReportOpen(false)}>
+              {tGlobal('cancel')}
+            </Button>
+            <Button
+              onClick={() => {
+                setReportOpen(false)
+                toast.success(t('reportSent'))
+              }}
+            >
+              {t('reportConfirmAction')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <PhotoLightbox
+        photos={contractor.photos}
+        index={activePhotoIndex}
+        onClose={() => setActivePhotoIndex(null)}
+        onNavigate={setActivePhotoIndex}
+      />
+
       <ProjectPickerDialog />
     </div>
   )
@@ -309,7 +618,16 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
  * Ảnh ghép là 1 ảnh lớn + 2 ảnh xếp chồng, mỗi ảnh có chú thích đè lên đáy —
  * đúng ảnh S13. Tỉ lệ 58,6% / 41,4% cũng đo từ ảnh đó.
  */
-function IntroCard({ contractor }: { contractor: Contractor }) {
+function IntroCard({
+  contractor,
+  onTagClick,
+  onOpenPhoto
+}: {
+  contractor: Contractor
+  /** Bấm một thẻ "thế mạnh" → chuyển sang tab "Dự án đã thực hiện" (mục 5). */
+  onTagClick: () => void
+  onOpenPhoto: (index: number) => void
+}) {
   const t = useTranslations('contractors.firm')
 
   const facts = [
@@ -335,10 +653,21 @@ function IntroCard({ contractor }: { contractor: Contractor }) {
           ))}
         </ul>
 
+        {/* Rê → nền xanh nhạt; bấm → chuyển sang tab "Dự án đã thực hiện"
+            (mục 5). Không có dữ liệu nào gắn thế mạnh với TỪNG dự án trong
+            `ContractorProject`, nên dừng ở việc mở đúng tab — chưa lọc thật
+            theo tag, tránh vẽ ra một bộ lọc trông như hoạt động mà không có
+            gì đứng sau nó. */}
         <ul className='mt-4 flex flex-wrap gap-2'>
           {contractor.strengths.map((strength) => (
-            <li key={strength} className='border-primary/40 text-primary-strong rounded-md border px-2.5 py-1 text-xs'>
-              {strength}
+            <li key={strength}>
+              <button
+                type='button'
+                onClick={onTagClick}
+                className='border-primary/40 text-primary-strong hover:bg-accent rounded-md border px-2.5 py-1 text-xs transition-colors'
+              >
+                {strength}
+              </button>
             </li>
           ))}
         </ul>
@@ -348,14 +677,24 @@ function IntroCard({ contractor }: { contractor: Contractor }) {
           trái, hai đáy thẳng hàng. Đặt `aspect-*` cho ô lớn thì nó dừng sớm hơn
           cột ảnh nhỏ bên cạnh, bộ ghép thành hình răng cưa. */}
       {lead ? (
-        <div className='grid min-h-52 min-w-0 gap-[1.8%] sm:grid-cols-[58.6%_minmax(0,1fr)]'>
-          <CollagePhoto photo={lead} />
+        <motion.div
+          variants={revealContainerVariants}
+          initial='hidden'
+          animate='show'
+          className='grid min-h-52 min-w-0 gap-[1.8%] sm:grid-cols-[58.6%_minmax(0,1fr)]'
+        >
+          <CollagePhoto photo={lead} onOpen={() => onOpenPhoto(0)} />
           <div className='flex flex-col gap-2'>
-            {rest.slice(0, 2).map((photo) => (
-              <CollagePhoto key={photo.caption} photo={photo} className='min-h-24 flex-1' />
+            {rest.slice(0, 2).map((photo, index) => (
+              <CollagePhoto
+                key={photo.caption}
+                photo={photo}
+                className='min-h-24 flex-1'
+                onOpen={() => onOpenPhoto(index + 1)}
+              />
             ))}
           </div>
-        </div>
+        </motion.div>
       ) : null}
     </section>
   )
@@ -369,10 +708,19 @@ function IntroCard({ contractor }: { contractor: Contractor }) {
  * biệt thự có hồ bơi, "Đội ngũ nhân sự" hóa ra một người thợ điện — trông như
  * đã có ảnh nên không ai biết là còn thiếu.
  */
-function CollagePhoto({ photo, className }: { photo: ContractorPhoto; className?: string }) {
+function CollagePhoto({
+  photo,
+  className,
+  onOpen
+}: {
+  photo: ContractorPhoto
+  className?: string
+  onOpen?: () => void
+}) {
   if (!photo.url) {
     return (
-      <div
+      <motion.div
+        variants={revealItemVariants}
         className={cn(
           'bg-muted/30 text-muted-foreground/70 flex min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed p-2 text-center',
           className
@@ -380,19 +728,130 @@ function CollagePhoto({ photo, className }: { photo: ContractorPhoto; className?
       >
         <ImageIcon aria-hidden className='size-5 shrink-0' />
         <p className='text-xs'>{photo.caption}</p>
-      </div>
+      </motion.div>
     )
   }
 
   return (
-    <div className={cn('relative min-w-0 overflow-hidden rounded-xl border', className)}>
+    <motion.button
+      type='button'
+      variants={revealItemVariants}
+      onClick={onOpen}
+      className={cn('group relative min-w-0 overflow-hidden rounded-xl border text-left', className)}
+    >
       {/* `alt` để trống: chú thích ngay bên dưới đã mô tả ảnh, đặt cả hai thì
-          trình đọc màn hình đọc trùng hai lần. */}
-      <Photo src={photo.url} alt='' className='size-full' sizes='(max-width: 768px) 100vw, 360px' />
-      <p className='absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent px-3 pt-6 pb-2 text-xs font-medium text-white'>
+          trình đọc màn hình đọc trùng hai lần. `RevealPhoto` đã tự lo hiện
+          mờ→nét lúc tải và phóng nhẹ khi rê (mục 6). */}
+      <RevealPhoto src={photo.url} alt='' className='size-full' sizes='(max-width: 768px) 100vw, 360px' />
+      {/* Lớp tối + biểu tượng xem khi rê (mục 6). */}
+      <span className='absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-[background-color,opacity] duration-200 group-hover:bg-black/30 group-hover:opacity-100'>
+        <Eye className='size-6 text-white' />
+      </span>
+      <p className='pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent px-3 pt-6 pb-2 text-xs font-medium text-white'>
         {photo.caption}
       </p>
-    </div>
+    </motion.button>
+  )
+}
+
+/**
+ * Hộp phóng ảnh doanh nghiệp (mục 6) — phóng ra từ đúng ảnh vừa bấm, mũi tên
+ * chuyển ảnh, Esc/bấm nền để đóng.
+ *
+ * Đơn giản hoá so với mô tả: bỏ vuốt để chuyển ảnh trên di động và bỏ hiệu
+ * ứng "phóng từ đúng vị trí ảnh" (origin) — bộ ảnh chỉ 1–3 tấm và không có
+ * layout cố định giữa các khổ màn để tính toạ độ nguồn đáng tin cậy; hộp vẫn
+ * phóng to/thu nhỏ từ giữa màn, chỉ là không bắt đầu đúng tại vị trí ảnh.
+ */
+function PhotoLightbox({
+  photos,
+  index,
+  onClose,
+  onNavigate
+}: {
+  photos: ContractorPhoto[]
+  index: number | null
+  onClose: () => void
+  onNavigate: (nextIndex: number) => void
+}) {
+  useEffect(() => {
+    if (index === null) return
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+      if (event.key === 'ArrowLeft') onNavigate((index - 1 + photos.length) % photos.length)
+      if (event.key === 'ArrowRight') onNavigate((index + 1) % photos.length)
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [index, photos.length, onClose, onNavigate])
+
+  const photo = index !== null ? photos[index] : undefined
+
+  return (
+    <AnimatePresence>
+      {photo?.url ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) onClose()
+          }}
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6'
+        >
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94 }}
+            transition={{ duration: 0.25 }}
+            className='relative aspect-video w-full max-w-3xl overflow-hidden rounded-2xl'
+          >
+            <Photo src={photo.url} alt='' className='size-full' sizes='90vw' />
+            <p className='absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent px-4 pt-8 pb-3 text-sm font-medium text-white'>
+              {photo.caption}
+            </p>
+          </motion.div>
+
+          <button
+            type='button'
+            onClick={onClose}
+            aria-label='Close'
+            className='absolute top-4 right-4 flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20'
+          >
+            <X className='size-4' />
+          </button>
+
+          {photos.length > 1 ? (
+            <>
+              <button
+                type='button'
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onNavigate(((index ?? 0) - 1 + photos.length) % photos.length)
+                }}
+                aria-label='Previous photo'
+                className='absolute left-4 flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20'
+              >
+                <ChevronLeft className='size-5' />
+              </button>
+              <button
+                type='button'
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onNavigate(((index ?? 0) + 1) % photos.length)
+                }}
+                aria-label='Next photo'
+                className='absolute right-4 flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20'
+              >
+                <ChevronRight className='size-5' />
+              </button>
+            </>
+          ) : null}
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   )
 }
 
@@ -405,7 +864,13 @@ function PartnershipSummary({ contractor }: { contractor: Contractor }) {
   const { partnership } = contractor
 
   return (
-    <section className='bg-card flex flex-wrap items-center gap-4 rounded-2xl border p-4'>
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.4, ease: revealEase }}
+      className='bg-card flex flex-wrap items-center gap-4 rounded-2xl border p-4'
+    >
       <span className='bg-primary/10 text-primary flex size-14 shrink-0 items-center justify-center rounded-full'>
         <Handshake className='size-6' />
       </span>
@@ -423,7 +888,7 @@ function PartnershipSummary({ contractor }: { contractor: Contractor }) {
           </span>
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }
 
@@ -432,18 +897,26 @@ function FeaturedProjects({ contractor, projectId }: { contractor: Contractor; p
   const t = useTranslations('contractors.firm')
 
   return (
-    <section className='bg-card rounded-2xl border p-4'>
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.4, ease: revealEase }}
+      className='bg-card rounded-2xl border p-4'
+    >
       <h2 className='text-base font-semibold'>{t('featured')}</h2>
       <ul className='mt-3 grid gap-x-[3%] gap-y-4 sm:grid-cols-3'>
         {contractor.featuredProjects.map((project) => (
-          <li key={project.id} className='flex min-w-0 gap-3'>
+          <li key={project.id} className='group flex min-w-0 gap-3'>
             {project.imageUrl ? (
-              <Photo
-                src={project.imageUrl}
-                alt={project.name}
-                className='aspect-video w-1/2 shrink-0 rounded-lg'
-                sizes='(max-width: 768px) 40vw, 160px'
-              />
+              <div className='w-1/2 shrink-0 overflow-hidden rounded-lg'>
+                <RevealPhoto
+                  src={project.imageUrl}
+                  alt={project.name}
+                  className='aspect-video size-full'
+                  sizes='(max-width: 768px) 40vw, 160px'
+                />
+              </div>
             ) : (
               <div className='bg-muted/30 flex aspect-video w-1/2 shrink-0 items-center justify-center rounded-lg border border-dashed'>
                 <ImageIcon className='text-muted-foreground/50 size-5' />
@@ -456,13 +929,14 @@ function FeaturedProjects({ contractor, projectId }: { contractor: Contractor; p
                 href={contractorFirmRoute(projectId, contractor.id, 'projects')}
                 className='text-primary-strong mt-2 inline-flex items-center gap-1.5 text-xs font-medium'
               >
-                {t('viewProject')} →
+                {t('viewProject')}
+                <span className='inline-block transition-transform group-hover:translate-x-1'>→</span>
               </Link>
             </div>
           </li>
         ))}
       </ul>
-    </section>
+    </motion.section>
   )
 }
 
@@ -473,14 +947,25 @@ function LegalChecks({ contractor }: { contractor: Contractor }) {
   return (
     <section className='bg-card rounded-2xl border p-4'>
       <h2 className='text-base font-semibold'>{t('legalTitle')}</h2>
-      <ul className='mt-3 grid gap-x-[3%] gap-y-3 sm:grid-cols-2 lg:grid-cols-4'>
+      <motion.ul
+        variants={revealContainerVariants}
+        initial='hidden'
+        whileInView='show'
+        viewport={{ once: true, amount: 0.4 }}
+        className='mt-3 grid gap-x-[3%] gap-y-3 sm:grid-cols-2 lg:grid-cols-4'
+      >
         {contractor.legalChecks.map((check) => (
-          <li key={check} className='flex items-start gap-2.5 text-sm'>
+          <motion.li
+            variants={revealItemVariants}
+            key={check}
+            transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
+            className='flex items-start gap-2.5 text-sm'
+          >
             <CircleCheck className='text-primary mt-0.5 size-4 shrink-0' />
             <span className='text-muted-foreground text-pretty'>{check}</span>
-          </li>
+          </motion.li>
         ))}
-      </ul>
+      </motion.ul>
     </section>
   )
 }

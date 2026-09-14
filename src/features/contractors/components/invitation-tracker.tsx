@@ -1,16 +1,38 @@
 'use client'
 
-import { BadgeCheck, Check, ChevronLeft, FileText, Headset, Info, Lock, Star, UsersRound } from 'lucide-react'
+import {
+  BadgeCheck,
+  Check,
+  ChevronLeft,
+  FileText,
+  Headset,
+  Info,
+  Lock,
+  Mail,
+  Pencil,
+  Phone,
+  Star,
+  UsersRound
+} from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { EmptyState } from '@/shared/components/common'
+import { EmptyState, revealContainerVariants, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { contractorFirmRoute, contractorMatchesRoute, contractorReviewRoute } from '@/shared/constants/routes'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
+import {
+  contractorBriefRoute,
+  contractorFirmRoute,
+  contractorMatchesRoute,
+  contractorReviewRoute,
+  supervisionPlansRoute
+} from '@/shared/constants/routes'
+import { siteConfig } from '@/shared/config'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
 import { INVITATION_STEPS, MAX_INVITATIONS } from '../constants/contractors.constants'
@@ -40,41 +62,85 @@ interface InvitationTrackerProps {
  */
 export function InvitationTracker({ projectId }: InvitationTrackerProps) {
   const t = useTranslations('contractors.invitations')
+  const tCommon = useTranslations('contractors.common')
   const { data: brief } = useBrief(projectId)
   const { data: contractors } = useContractors(projectId)
   const { data: invitations, isPending } = useInvitations(projectId)
   const { data: reviews } = useContractorReviews(projectId)
 
+  const [contactDialogOpen, setContactDialogOpen] = useState(false)
+
   const sent = invitations ?? []
 
   return (
     <div className='mx-auto w-[91%] max-w-[84rem] space-y-5 py-8'>
-      <ProjectContextBar brief={brief} />
+      <ProjectContextBar
+        brief={brief}
+        aside={
+          brief ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={contractorBriefRoute(brief.id)}
+                  className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
+                >
+                  <Pencil className='size-3.5' />
+                  {tCommon('editBrief')}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>{t('editBriefWarning')}</TooltipContent>
+            </Tooltip>
+          ) : undefined
+        }
+      />
 
-      <Link
-        href={contractorMatchesRoute(projectId)}
-        className='text-primary-strong inline-flex items-center gap-1.5 text-sm font-medium'
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+        <Link
+          href={contractorMatchesRoute(projectId)}
+          className='text-primary-strong inline-flex items-center gap-1.5 text-sm font-medium'
+        >
+          {/* Bản mô tả S18 gọi đúng tên liên kết này là "Quay lại danh sách nhà
+              thầu" — khác với nhãn của trạng thái rỗng ở dưới. */}
+          <ChevronLeft className='size-4' />
+          {t('back')}
+        </Link>
+      </motion.div>
+
+      <motion.header
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.05 }}
+        className='flex flex-wrap items-center justify-between gap-3'
       >
-        {/* Bản mô tả S18 gọi đúng tên liên kết này là "Quay lại danh sách nhà
-            thầu" — khác với nhãn của trạng thái rỗng ở dưới. */}
-        <ChevronLeft className='size-4' />
-        {t('back')}
-      </Link>
-
-      <header className='flex flex-wrap items-center justify-between gap-3'>
         <div className='min-w-0'>
           <h1 className='text-2xl font-semibold tracking-tight'>{t('title')}</h1>
           <p className='text-muted-foreground mt-1 text-sm text-pretty'>{t('subtitle', { count: sent.length })}</p>
         </div>
-        <span className='bg-card inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm'>
+        <motion.span
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
+          className='bg-card inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm'
+        >
           <UsersRound className='text-primary size-4' />
-          {t.rich('counter', {
-            used: sent.length,
-            max: MAX_INVITATIONS,
-            b: (chunks) => <b className='font-semibold'>{chunks}</b>
-          })}
-        </span>
-      </header>
+          <AnimatePresence mode='popLayout' initial={false}>
+            <motion.span
+              key={sent.length}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.25 }}
+              className='inline-block'
+            >
+              {t.rich('counter', {
+                used: sent.length,
+                max: MAX_INVITATIONS,
+                b: (chunks) => <b className='font-semibold'>{chunks}</b>
+              })}
+            </motion.span>
+          </AnimatePresence>
+        </motion.span>
+      </motion.header>
 
       {isPending ? (
         <Skeleton className='h-72 rounded-2xl' />
@@ -89,25 +155,26 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
         />
       ) : (
         <div className='grid gap-x-[1.6%] gap-y-5 lg:grid-cols-[70.5%_minmax(0,1fr)]'>
-          <div className='min-w-0 space-y-4'>
+          <motion.div variants={revealContainerVariants} initial='hidden' animate='show' className='min-w-0 space-y-4'>
             {sent.map((invitation) => (
-              <InvitationCard
-                key={invitation.id}
-                invitation={invitation}
-                contractor={contractors?.find((c) => c.id === invitation.contractorId)}
-                projectId={projectId}
-                review={reviews?.find((item) => item.invitationId === invitation.id)}
-              />
+              <motion.div variants={revealItemVariants} key={invitation.id}>
+                <InvitationCard
+                  invitation={invitation}
+                  contractor={contractors?.find((c) => c.id === invitation.contractorId)}
+                  projectId={projectId}
+                  review={reviews?.find((item) => item.invitationId === invitation.id)}
+                />
+              </motion.div>
             ))}
 
             <p className='text-muted-foreground bg-muted/50 flex items-start gap-2.5 rounded-xl p-4 text-sm'>
               <Info className='mt-0.5 size-4 shrink-0' />
               <span className='text-pretty'>{t('footerNote')}</span>
             </p>
-          </div>
+          </motion.div>
 
           <aside className='space-y-4 lg:sticky lg:top-24 lg:self-start'>
-            <StatusLegend />
+            <StatusLegend statuses={sent.map((invitation) => invitation.status)} />
             <SentDossier projectId={projectId} version={sent[0]?.dossierVersion ?? 'v1'} />
 
             <section className='bg-accent/40 flex gap-3 rounded-2xl p-4'>
@@ -117,7 +184,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
                 <p className='text-muted-foreground mt-1 text-sm text-pretty'>{t('supportBody')}</p>
                 <button
                   type='button'
-                  onClick={() => toast.info(t('supportToast'))}
+                  onClick={() => setContactDialogOpen(true)}
                   className='text-primary-strong mt-2 text-sm font-medium underline underline-offset-4'
                 >
                   {t('supportAction')}
@@ -127,6 +194,35 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
           </aside>
         </div>
       )}
+
+      <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>{t('contactDialogTitle')}</DialogTitle>
+          </DialogHeader>
+          <div className='space-y-2.5 text-sm'>
+            <a
+              href={`tel:${siteConfig.contact.hotline.replace(/\s/g, '')}`}
+              className='hover:bg-accent flex items-center gap-2.5 rounded-lg border px-3 py-2.5 transition-colors'
+            >
+              <Phone className='text-primary size-4 shrink-0' />
+              {siteConfig.contact.hotline}
+            </a>
+            <a
+              href={`mailto:${siteConfig.contact.email}`}
+              className='hover:bg-accent flex items-center gap-2.5 rounded-lg border px-3 py-2.5 transition-colors'
+            >
+              <Mail className='text-primary size-4 shrink-0' />
+              {siteConfig.contact.email}
+            </a>
+          </div>
+          <DialogFooter>
+            <Button asChild className='w-full'>
+              <a href={`tel:${siteConfig.contact.hotline.replace(/\s/g, '')}`}>{t('contactDialogCall')}</a>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -157,6 +253,7 @@ function InvitationCard({
 
   const currentIndex = INVITATION_STEPS.indexOf(invitation.status)
   const stampOf = (status: string) => invitation.steps.find((step) => step.status === status)?.at
+  const isDone = invitation.status === 'done'
 
   /**
    * Ảnh S18 ghi mốc thời gian dạng "10:42 · 26/08/2026" và "26/08 · 10:42" —
@@ -176,7 +273,12 @@ function InvitationCard({
   }
 
   return (
-    <article className='bg-card space-y-4 rounded-2xl border p-4 sm:p-5'>
+    <article
+      className={cn('bg-card relative space-y-4 overflow-hidden rounded-2xl border p-4 sm:p-5', isDone && 'pt-5')}
+    >
+      {/* "Hoàn tất" → dải trên xanh (mục 6). */}
+      {isDone ? <span aria-hidden className='bg-primary absolute inset-x-0 top-0 h-1' /> : null}
+
       <div className='flex flex-wrap items-start gap-4'>
         {contractor ? <ContractorLogo contractor={contractor} className='size-14 rounded-lg' /> : null}
 
@@ -197,7 +299,8 @@ function InvitationCard({
 
         <div className='flex shrink-0 flex-wrap items-center gap-2'>
           {/* Nấc chờ nhà thầu tô CAM chứ không xanh: đây là nấc duy nhất bóng
-              đang ở phía nhà thầu, khách nhìn màu là biết chưa xong. */}
+              đang ở phía nhà thầu, khách nhìn màu là biết chưa xong. Chấm nhấp
+              chậm khi còn đang chờ, đứng yên khi đã hoàn tất (mục 5). */}
           <span
             className={cn(
               'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium',
@@ -210,7 +313,8 @@ function InvitationCard({
               aria-hidden
               className={cn(
                 'size-1.5 rounded-full',
-                invitation.status === 'received' ? 'bg-warning-strong' : 'bg-primary'
+                invitation.status === 'received' ? 'bg-warning-strong' : 'bg-primary',
+                !isDone && 'animate-pulse'
               )}
             />
             {invitation.status === 'received' ? tStatus('receivedWaiting') : tStatus(invitation.status)}
@@ -260,7 +364,11 @@ function InvitationCard({
           const at = stampOf(status)
 
           return (
-            <li key={status} className='relative flex min-w-0 flex-1 flex-col gap-2'>
+            <motion.li
+              key={status}
+              whileHover={{ scale: 1.06 }}
+              className='relative flex min-w-0 flex-1 flex-col gap-2'
+            >
               {/* Đường nối do nấc SAU vẽ, kéo từ tâm nấc trước sang tâm nấc này.
                   Để nó là phần tử anh em `flex-1` như trước thì nấc cuối — nấc
                   duy nhất không có đường nối — rộng hơn hẳn ba nấc kia. */}
@@ -285,7 +393,25 @@ function InvitationCard({
                   !done && !active && 'border-border bg-card'
                 )}
               >
-                {done ? <Check className='size-3.5' strokeWidth={3} /> : null}
+                {/* Quầng "thở" hai nhịp rồi đứng yên ở nấc hiện tại (mục 6). */}
+                {active ? (
+                  <motion.span
+                    aria-hidden
+                    initial={{ opacity: 0.6, scale: 1 }}
+                    animate={{ opacity: 0, scale: 1.8 }}
+                    transition={{ duration: 0.9, repeat: 1, repeatType: 'loop' }}
+                    className='border-primary absolute inset-0 -z-10 rounded-full border-2'
+                  />
+                ) : null}
+                {done ? (
+                  <motion.span
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', bounce: 0.6, duration: 0.35, delay: index * 0.1 }}
+                  >
+                    <Check className='size-3.5' strokeWidth={3} />
+                  </motion.span>
+                ) : null}
                 {active ? <span aria-hidden className='bg-primary size-2 rounded-full' /> : null}
               </span>
 
@@ -304,10 +430,27 @@ function InvitationCard({
                     trống, vẽ "—" chỉ làm cột thời gian trông như bị lỗi. */}
                 {at ? <p className='text-muted-foreground mt-0.5 text-sm'>{stepStamp(at)}</p> : null}
               </div>
-            </li>
+            </motion.li>
           )
         })}
       </ol>
+
+      {/* Hoàn tất → gợi ý "Chọn cách quản lý thi công", trượt lên + một nhịp
+          thở rồi im (mục 6). */}
+      {isDone ? (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0, scale: [1, 1.015, 1] }}
+          transition={{ opacity: { duration: 0.4 }, y: { duration: 0.4 }, scale: { duration: 0.5, delay: 0.4 } }}
+          className='bg-accent/40 flex flex-wrap items-center justify-between gap-3 rounded-xl p-3.5 text-sm'
+        >
+          <span className='text-primary-strong font-medium'>{t('supervisionSuggestion')}</span>
+          <Button asChild size='sm' variant='outline'>
+            <Link href={supervisionPlansRoute(projectId)}>{t('supervisionAction')}</Link>
+          </Button>
+        </motion.div>
+      ) : null}
+
       {contractor ? (
         <ContractorReviewDialog
           open={reviewOpen}
@@ -321,18 +464,32 @@ function InvitationCard({
   )
 }
 
-/** Cột phải: giải thích 4 trạng thái (S18). */
-function StatusLegend() {
+/**
+ * Cột phải: giải thích 4 trạng thái (S18).
+ *
+ * Dòng ứng với trạng thái hiện tại nền xanh nhạt (mục 8) — chỉ khi TẤT CẢ lời
+ * mời đang ở cùng một trạng thái; nhiều lời mời ở nhiều trạng thái khác nhau
+ * thì không tô dòng nào để khỏi ngầm chỉ sai một trạng thái.
+ */
+function StatusLegend({ statuses }: { statuses: Invitation['status'][] }) {
   const t = useTranslations('contractors.invitations')
   const tStatus = useTranslations('contractors.status')
   const tMeaning = useTranslations('contractors.statusMeaning')
+
+  const uniqueStatuses = new Set(statuses)
+  const currentStatus = uniqueStatuses.size === 1 ? [...uniqueStatuses][0] : null
 
   return (
     <section className='bg-card rounded-2xl border p-4'>
       <h2 className='font-semibold'>{t('meaningTitle')}</h2>
       <dl className='mt-3 space-y-2.5 text-sm'>
         {INVITATION_STEPS.map((status, index) => (
-          <div key={status} className='flex gap-2.5'>
+          <div key={status} className='relative isolate flex gap-2.5'>
+            {/* Nền xanh nhạt của dòng hiện tại — overlay riêng, không đổi đệm
+                hay lề của hàng ở trạng thái nghỉ (mục 8). */}
+            {status === currentStatus ? (
+              <span aria-hidden className='bg-accent/60 absolute -inset-x-1.5 -inset-y-0.5 -z-10 rounded-lg' />
+            ) : null}
             <span
               aria-hidden
               className={cn(
@@ -378,9 +535,14 @@ function SentDossier({ projectId, version }: { projectId: string; version: strin
     <section className='bg-card rounded-2xl border p-4'>
       <div className='flex items-center justify-between gap-2'>
         <h2 className='font-semibold'>{t('dossierTitle')}</h2>
-        <span className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 text-[10px] font-medium'>
+        <motion.span
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+          className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 text-[10px] font-medium'
+        >
           {version}
-        </span>
+        </motion.span>
       </div>
 
       <dl className='mt-3 space-y-2.5 text-sm'>

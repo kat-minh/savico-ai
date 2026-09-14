@@ -13,11 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
-import { designDossierRoute, designEstimateRoute, designInputRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
 import { DESIGN_STEPS } from '../constants/design.constants'
-import { miniStepState } from '../services/project-list.service'
+import { miniStepState, RESUME_ROUTE_BY_STATUS } from '../services/project-list.service'
 import type { Project, ProjectStatus } from '../types/design.types'
 
 interface ProjectCardProps {
@@ -31,14 +30,11 @@ interface ProjectCardProps {
  * "Tiếp tục nhập", đang thiết kế → "Mở tiếp", chờ duyệt → "Xem dự toán",
  * hoàn tất → "Xem hồ sơ".
  */
-const ACTION_BY_STATUS: Record<
-  ProjectStatus,
-  { route: (projectId: string) => string; labelKey: 'continueInput' | 'open' | 'viewEstimate' | 'viewDossier' }
-> = {
-  input: { route: designInputRoute, labelKey: 'continueInput' },
-  designing: { route: designEstimateRoute, labelKey: 'open' },
-  review: { route: designEstimateRoute, labelKey: 'viewEstimate' },
-  completed: { route: designDossierRoute, labelKey: 'viewDossier' }
+const ACTION_LABEL_BY_STATUS: Record<ProjectStatus, 'continueInput' | 'open' | 'viewEstimate' | 'viewDossier'> = {
+  input: 'continueInput',
+  designing: 'open',
+  review: 'viewEstimate',
+  completed: 'viewDossier'
 }
 
 /**
@@ -117,7 +113,8 @@ function MiniStepper({ project }: { project: Project }) {
 export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
   const t = useTranslations('design.projects')
   const locale = useLocale() as Locale
-  const action = ACTION_BY_STATUS[project.status]
+  const actionLabelKey = ACTION_LABEL_BY_STATUS[project.status]
+  const actionHref = RESUME_ROUTE_BY_STATUS[project.status](project.id)
 
   return (
     // Hình S24: thẻ nằm NGANG — ảnh bìa là cột trái 36%, mọi thông tin dồn
@@ -187,10 +184,10 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
           {/* `after:absolute after:inset-0` biến cả thẻ thành vùng bấm mà không
               phải lồng nút ⋮ vào trong thẻ <a>. */}
           <Link
-            href={action.route(project.id)}
+            href={actionHref}
             className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1 text-[13px] font-medium transition-colors after:absolute after:inset-0 after:content-[""]'
           >
-            {t(`action.${action.labelKey}`)}
+            {t(`action.${actionLabelKey}`)}
             <ArrowRight className='size-3.5' />
           </Link>
         </div>

@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
-import { ErrorState } from '@/shared/components/common'
+import { ErrorState, revealEase } from '@/shared/components/common'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { useAvailability, useConsultant, useConsultants } from '../hooks/use-consultation'
 import { ConsultantProfile } from './consultant-profile'
 import { ConsultantRail } from './consultant-rail'
+import { useConsultTransitionState } from './consult-transition-state'
 
 interface ConsultantDetailProps {
   consultantId: string
@@ -17,14 +20,24 @@ interface ConsultantDetailProps {
  *
  * Giữ nguyên tiêu đề của trang danh sách ở trên đầu như trong ảnh — khách vẫn
  * đang ở luồng "chọn kiến trúc sư", chỉ là đã mở một người ra xem.
+ *
+ * ★ CC-03 (đổi KTS trong màn này): khung thẻ bên phải (`bg-card` + viền) ĐỨNG
+ * YÊN — không remount — chỉ nội dung BÊN TRONG mờ và trượt lên từ dưới khi đổi
+ * người. Thanh chọn bên trái giữ nguyên state tìm kiếm và vị trí cuộn.
  */
 export function ConsultantDetail({ consultantId }: ConsultantDetailProps) {
   const t = useTranslations('consult.directory')
   const tProfile = useTranslations('consult.profile')
+  const reduceMotion = useReducedMotion()
+  const { selectedDate, setSelectedDate, profileDirection } = useConsultTransitionState()
+  const [timeChoice, setTimeChoice] = useState({ consultantId, time: '' })
+  const selectedTime = timeChoice.consultantId === consultantId ? timeChoice.time : ''
+  const setSelectedTime = (time: string) => setTimeChoice({ consultantId, time })
 
   const { data: consultants, isPending: listPending } = useConsultants()
   const { data: consultant, isPending, isError } = useConsultant(consultantId)
   const { data: days, isPending: daysPending } = useAvailability(consultantId)
+  const visibleConsultant = consultant ?? consultants?.find((item) => item.id === consultantId)
 
   return (
     <div className='mx-auto w-full max-w-[80rem] space-y-6 px-4 py-10 lg:px-8'>
@@ -36,16 +49,45 @@ export function ConsultantDetail({ consultantId }: ConsultantDetailProps) {
       <div className='grid gap-5 lg:grid-cols-[20rem_1fr]'>
         <ConsultantRail consultants={consultants ?? []} activeId={consultantId} isPending={listPending} />
 
-        {isPending ? (
-          <Skeleton className='h-[32rem] w-full rounded-xl' />
-        ) : isError || !consultant ? (
-          <ErrorState title={tProfile('notFound')} />
-        ) : (
-          /* `key`: đổi sang KTS khác ở cột trái phải dựng lại hồ sơ từ đầu, nếu
-             không ngày/giờ đã chọn của người trước còn dính lại. */
-          <ConsultantProfile key={consultant.id} consultant={consultant} days={days ?? []} isPending={daysPending} />
-        )}
+        <div className='bg-card relative overflow-hidden rounded-xl border p-4 sm:p-6'>
+          <AnimatePresence mode='wait' initial={false} custom={profileDirection}>
+            <motion.div
+              key={consultantId}
+              custom={profileDirection}
+              variants={profileVariants}
+              initial={reduceMotion ? { opacity: 0 } : 'enter'}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : 'exit'}
+              transition={{ duration: reduceMotion ? 0.01 : 0.3, ease: revealEase }}
+            >
+              {isPending && !visibleConsultant ? (
+                <Skeleton className='h-[32rem] w-full rounded-xl' />
+              ) : (isError && !visibleConsultant) || !visibleConsultant ? (
+                <ErrorState title={tProfile('notFound')} />
+              ) : (
+                <ConsultantProfile
+                  consultant={visibleConsultant}
+                  days={days ?? []}
+                  isPending={daysPending}
+                  dateChoice={selectedDate}
+                  onDateChoiceChange={setSelectedDate}
+                  timeChoice={selectedTime}
+                  onTimeChoiceChange={setSelectedTime}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   )
+}
+
+const profileVariants: Variants = {
+  enter: (direction: 1 | -1) => ({ opacity: 0, y: direction * 24 }),
+  exit: (direction: 1 | -1) => ({
+    opacity: 0,
+    y: direction * -14,
+    transition: { duration: 0.16, ease: revealEase }
+  })
 }

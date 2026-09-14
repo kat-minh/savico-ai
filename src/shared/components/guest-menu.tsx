@@ -15,6 +15,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
+import { cn } from '@/shared/lib/utils'
+
+/** Mỗi mục trong dropdown hiện LẦN LƯỢT khi mở (mục II.1), khớp `AccountMenu`. */
+const ITEM_STAGGER = [
+  'delay-0',
+  'delay-[110ms]',
+  'delay-[220ms]',
+  'delay-[330ms]',
+  'delay-[440ms]',
+  'delay-[550ms]',
+  'delay-[660ms]'
+] as const
+
+function staggerClass(index: number): string {
+  return cn(
+    'animate-in fade-in-0 slide-in-from-top-1 fill-mode-both duration-350 motion-reduce:animate-none',
+    ITEM_STAGGER[index] ?? ITEM_STAGGER.at(-1)
+  )
+}
 
 /**
  * Đối trọng của {@link AccountMenu} cho khách chưa đăng nhập (mục II.1).
@@ -25,7 +44,7 @@ import {
  * Ngôn ngữ + giao diện nằm chung một chỗ ở cả hai menu nên không còn nút bánh
  * răng lẻ loi chỉ hiện với khách.
  */
-export function GuestMenu() {
+export function GuestMenu({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const t = useTranslations('nav')
   const tLogin = useTranslations('auth.login')
   const tRegister = useTranslations('auth.register')
@@ -45,9 +64,14 @@ export function GuestMenu() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' size='icon' className='rounded-full' aria-label={t('guest')}>
+        <Button
+          variant='ghost'
+          size='icon'
+          className='ring-primary/0 hover:ring-primary/70 rounded-full ring-2 transition-[box-shadow] duration-300'
+          aria-label={t('guest')}
+        >
           <Avatar className='size-8'>
             <AvatarFallback>
               <UserRound className='size-4' />
@@ -57,20 +81,22 @@ export function GuestMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-64'>
         <DropdownMenuLabel className='flex flex-col'>
-          <span className='truncate text-sm font-medium'>{t('guest')}</span>
-          <span className='text-muted-foreground text-xs font-normal text-pretty'>{t('guestHint')}</span>
+          <span className={cn('truncate text-sm font-medium', staggerClass(0))}>{t('guest')}</span>
+          <span className={cn('text-muted-foreground text-xs font-normal text-pretty', staggerClass(1))}>
+            {t('guestHint')}
+          </span>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => openAfterMenuCloses('login')}>
+        <DropdownMenuSeparator className={staggerClass(2)} />
+        <DropdownMenuItem onClick={() => openAfterMenuCloses('login')} className={staggerClass(3)}>
           <LogIn />
           {tLogin('submit')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => openAfterMenuCloses('register')}>
+        <DropdownMenuItem onClick={() => openAfterMenuCloses('register')} className={staggerClass(4)}>
           <UserPlus />
           {tRegister('submit')}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <PreferenceSwitches />
+        <DropdownMenuSeparator className={staggerClass(5)} />
+        <PreferenceSwitches className={staggerClass(6)} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

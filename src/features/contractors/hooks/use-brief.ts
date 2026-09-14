@@ -33,10 +33,11 @@ export function useBrief(projectId: string) {
  * xếp hạng theo địa chỉ và quy mô của dự án nên không có hồ sơ thì không có gì
  * để xếp.
  */
-export function useBriefs() {
+export function useBriefs(enabled = true) {
   return useQuery({
     queryKey: contractorKeys.briefList(),
-    queryFn: () => contractorsApi.listBriefs()
+    queryFn: () => contractorsApi.listBriefs(),
+    enabled
   })
 }
 

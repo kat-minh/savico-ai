@@ -1,7 +1,9 @@
 'use client'
 
-import { CalendarCheck, CircleCheck, Clock, FileText, MapPin, Map as MapIcon, Send, Star } from 'lucide-react'
+import { CalendarCheck, CircleCheck, Clock, FileText, Loader2, MapPin, Map as MapIcon, Send, Star } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -11,7 +13,7 @@ import { contractorFirmRoute, contractorInviteRoute } from '@/shared/constants/r
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import type { Contractor } from '../types/contractor.types'
+import type { Contractor, ContractorSort } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
 
 interface ContractorCardProps {
@@ -24,6 +26,10 @@ interface ContractorCardProps {
   invited: boolean
   /** Dự án đã đủ 3 lời mời — R1. */
   inviteLocked: boolean
+  /** Vừa đổi chip sắp xếp theo tiêu chí này — ô tương ứng nổi lên 1 giây (mục 4). */
+  highlightField?: ContractorSort | null
+  /** Vừa tạo hồ sơ từ M04, đây là thẻ đầu danh sách → viền loé một lần (mục 6). */
+  ringFlash?: boolean
 }
 
 /**
@@ -46,13 +52,17 @@ export function ContractorCard({
   compared,
   onToggleCompare,
   invited,
-  inviteLocked
+  inviteLocked,
+  highlightField,
+  ringFlash = false
 }: ContractorCardProps) {
   const t = useTranslations('contractors.common')
   const tMatches = useTranslations('contractors.matches')
   const locale = useLocale() as Locale
 
   const disabled = invited || inviteLocked
+  const [navigatingProfile, setNavigatingProfile] = useState(false)
+  const [navigatingInvite, setNavigatingInvite] = useState(false)
 
   /** Bốn ô hàng trên: đánh giá · số dự án · khoảng cách · phạm vi phục vụ. */
   const facts = [
@@ -84,12 +94,35 @@ export function ContractorCard({
   ]
 
   return (
-    <article
+    <motion.article
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
       className={cn(
-        'bg-card flex flex-col gap-4 rounded-2xl border p-4 transition-colors sm:flex-row sm:items-start sm:p-5',
+        'bg-card relative flex flex-col gap-4 rounded-2xl border p-4 transition-colors sm:flex-row sm:items-start sm:p-5',
         compared ? 'border-primary/60' : 'hover:border-primary/40'
       )}
     >
+      {/* Viền loé một lần khi đây là thẻ đầu vừa từ M04 sang (mục 6) — overlay
+          riêng, không đụng viền gốc của thẻ. */}
+      {ringFlash ? (
+        <motion.span
+          aria-hidden
+          initial={{ opacity: 0.8 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 1.1 }}
+          className='border-primary pointer-events-none absolute -inset-1 rounded-2xl border-2'
+        />
+      ) : null}
+
+      {/* Dải trái khi đang được tick so sánh (mục 7). */}
+      <span
+        aria-hidden
+        className={cn(
+          'bg-primary absolute inset-y-0 left-0 w-1 rounded-l-2xl opacity-0 transition-opacity',
+          compared && 'opacity-100'
+        )}
+      />
+
       <div className='flex items-center gap-4 sm:items-start'>
         <label className='text-muted-foreground flex cursor-pointer flex-col items-center gap-1.5 text-[11px]'>
           <Checkbox
@@ -108,11 +141,19 @@ export function ContractorCard({
       <div className='min-w-0 flex-1'>
         <div className='flex flex-wrap items-center gap-2'>
           <h3 className='text-primary-strong text-lg font-bold'>{contractor.name}</h3>
-          {invited ? (
-            <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
-              {t('invited')}
-            </span>
-          ) : null}
+          <AnimatePresence>
+            {invited ? (
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: 'spring', bounce: 0.5, duration: 0.35 }}
+                className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'
+              >
+                {t('invited')}
+              </motion.span>
+            ) : null}
+          </AnimatePresence>
         </div>
 
         {/* Vạch ngăn dọc giữa các ô, vạch ngang giữa hai hàng — `divide-*` lo cả
@@ -120,7 +161,14 @@ export function ContractorCard({
         <div className='divide-border mt-3 grid divide-y sm:grid-cols-2 lg:grid-cols-4'>
           <div className='divide-border grid divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4 lg:grid-cols-4'>
             {facts.map((fact) => (
-              <Fact key={fact.key} icon={fact.icon} iconClass={fact.iconClass} value={fact.value} hint={fact.hint} />
+              <Fact
+                key={fact.key}
+                icon={fact.icon}
+                iconClass={fact.iconClass}
+                value={fact.value}
+                hint={fact.hint}
+                highlighted={highlightField === fact.key}
+              />
             ))}
           </div>
 
@@ -129,6 +177,7 @@ export function ContractorCard({
               icon={Clock}
               value={t('surveyWithin', { hours: contractor.surveyWithinHours })}
               hint={t('surveyEarly')}
+              highlighted={highlightField === 'survey'}
             />
             <Fact
               icon={CircleCheck}
@@ -142,9 +191,9 @@ export function ContractorCard({
       {/* Hai nút canh GIỮA theo chiều cao thẻ: khối chỉ số bên trái cao hai
           hàng nên để `items-start` thì cặp nút trôi hẳn lên đỉnh, nhìn lệch. */}
       <div className='flex shrink-0 flex-col gap-2.5 sm:w-44 sm:self-center'>
-        <Button asChild variant='outline' className='justify-center'>
+        <Button asChild variant='outline' className='justify-center' onClick={() => setNavigatingProfile(true)}>
           <Link href={contractorFirmRoute(projectId, contractor.id)}>
-            <FileText className='size-4' />
+            {navigatingProfile ? <Loader2 className='size-4 animate-spin' /> : <FileText className='size-4' />}
             {t('viewProfile')}
           </Link>
         </Button>
@@ -155,15 +204,15 @@ export function ContractorCard({
             {invited ? t('invited') : t('invite')}
           </Button>
         ) : (
-          <Button asChild>
+          <Button asChild onClick={() => setNavigatingInvite(true)}>
             <Link href={contractorInviteRoute(projectId, contractor.id)}>
-              <Send className='size-4' />
+              {navigatingInvite ? <Loader2 className='size-4 animate-spin' /> : <Send className='size-4' />}
               {t('invite')}
             </Link>
           </Button>
         )}
       </div>
-    </article>
+    </motion.article>
   )
 }
 
@@ -172,18 +221,21 @@ function Fact({
   icon: Icon,
   iconClass,
   value,
-  hint
+  hint,
+  highlighted = false
 }: {
   icon: typeof Star
   iconClass?: string
   value: string
   hint: string
+  /** Tiêu chí đang được xếp theo — nổi trong thẻ một giây (mục 4). */
+  highlighted?: boolean
 }) {
   return (
     // Cột chỉ số hẹp (4 ô trên một hàng) nên chữ phải nhỏ lại, và dòng nhãn
     // được XUỐNG DÒNG tối đa 2 dòng thay vì `truncate` — "TP. Buôn Ma Thuột,
     // Cư M'gar" mà cắt cụt thì mất luôn thông tin phục vụ ở đâu.
-    <div className='min-w-0 px-2.5 py-2 first:pl-0'>
+    <div className={cn('min-w-0 rounded-lg px-2.5 py-2 transition-colors first:pl-0', highlighted && 'bg-accent')}>
       <p className='flex items-center gap-1.5 text-[13px] leading-snug font-semibold'>
         <Icon aria-hidden className={cn('size-3.5 shrink-0', iconClass ?? 'text-primary')} />
         <span className='truncate'>{value}</span>

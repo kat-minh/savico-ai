@@ -530,6 +530,31 @@
     color: transparent;
   }
 
+  /* Ảnh hero "phóng rất chậm liên tục" (mục II.2, vùng 02) — zoom ambient, độc
+     lập với chuỗi mở màn; chạy suốt vòng đời trang chứ không chỉ 1,5s đầu. */
+  .hero-photo-drift {
+    animation: hero-photo-drift 26s var(--ease-out-soft) infinite alternate;
+  }
+
+  /* Dải logo đối tác chạy ngang (mục II.2, vùng 11) — `.paused` (tw-animate-css)
+     dừng lại khi chạm/rê, không cần state React can thiệp vào animation. */
+  .animate-marquee {
+    animation: marquee-x 22s linear infinite;
+  }
+
+  /* Bảng lọc chuyên môn — trang Tư vấn 1:1, mục 2. Gắn trực tiếp vào
+     `data-state` mà Radix Select tự đặt lên `Content`, nên không cần React
+     biết panel đang mở hay đóng để chọn animation. */
+  .specialty-panel {
+    transform-origin: top;
+  }
+  .specialty-panel[data-state='open'] {
+    animation: specialty-panel-open 180ms var(--ease-out-soft);
+  }
+  .specialty-panel[data-state='closed'] {
+    animation: specialty-panel-close 120ms ease-in;
+  }
+
   /* --- Thanh công cụ (mục II.1) -------------------------------------------
    * ★ Yêu cầu mới: header phải nổi bật hơn nền trang. Ba lớp:
    *   1. mặt kính đặc hơn `--background` + bóng đổ nhẹ → tách khỏi nền;
@@ -966,8 +991,58 @@
   }
 }
 
+/* Zoom rất chậm, không lặp giật — hero trang chủ (mục II.2, vùng 02). */
+@keyframes hero-photo-drift {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.09);
+  }
+}
+
+/* Dải chạy ngang chậm — logo đối tác trên mobile / khi nhiều hơn 7 logo (mục
+   II.2, vùng 11). Nội dung nhân đôi rồi trượt đúng nửa bề ngang nên vòng lặp
+   liền mạch, không giật ở điểm nối. */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Bảng lọc chuyên môn — trang Tư vấn 1:1, mục 2: nở từ mép trên ngay dưới
+   nút, đóng lại nhanh hơn mở. `@radix-ui/react-select` ở bản đang dùng không
+   có `forceMount` để giao hẳn việc mount/unmount cho Motion, nên hoạt ảnh
+   đóng/mở nằm ở CSS thuần — `Presence` của Radix tự đợi `animationend` rồi
+   mới gỡ khỏi DOM, không cần can thiệp gì thêm. */
+@keyframes specialty-panel-open {
+  from {
+    opacity: 0;
+    transform: scaleY(0.65);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+@keyframes specialty-panel-close {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0.7);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .site-header-shell::before,
+  .hero-photo-drift,
+  .animate-marquee,
   .ambient-orb,
   .ambient-grid,
   .ambient-grid::after,

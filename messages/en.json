@@ -46,7 +46,11 @@
     "title": "AI Assistant",
     "subtitle": "Ask anything about your project",
     "close": "Close",
-    "fab": "SAVICO AI Assistant"
+    "fab": "SAVICO AI Assistant",
+    "nudge": {
+      "painPoints": "Not sure which one fits? Ask me 👋",
+      "services": "Not sure which plan to pick? I can help!"
+    }
   },
   "auth": {
     "login": {
@@ -239,7 +243,8 @@
     "plansGuest": "Pricing",
     "consult": "1:1 consulting",
     "admin": "Admin area",
-    "contractors": "Find a contractor"
+    "contractors": "Find a contractor",
+    "resumeProject": "Resume project"
   },
   "footer": {
     "tagline": "An AI design & estimate platform that connects verified contractors and supervises the build.",
@@ -287,6 +292,7 @@
       "titleAccent": "design & estimate in minutes",
       "subtitle": "AI turns a photo of your lot into floor plans, 3D renders and a quantity-based estimate.\nInvite verified contractors and supervise the build on the same platform.",
       "primaryCta": "Start a project",
+      "resumeCta": "Resume your project →",
       "secondaryCta": "Watch the 1-minute tour",
       "card": {
         "title": "Project dossier",
@@ -340,6 +346,7 @@
       "title": "The hard part is keeping it all under control",
       "subtitle": "From budget and design to picking a contractor and supervising the build — SAVICO puts you in control at every step.",
       "note": "Sound familiar?",
+      "solveHint": "See how SAVICO solves this",
       "items": {
         "budget": {
           "title": "No idea what it will actually cost?",
@@ -369,26 +376,48 @@
       "note": "You always know where you are\nand what each step is doing.",
       "cta": "Start a project",
       "ctaHint": "One photo of your lot is all it takes",
+      "resumeCta": "Resume project {id}",
+      "currentStepBadge": "You're on this step",
+      "detailLabels": {
+        "youDo": "What you do",
+        "savicoDoes": "What SAVICO does",
+        "youGet": "What you get"
+      },
       "items": {
         "project": {
           "title": "Create a project",
-          "description": "Photograph the lot, tell us your needs and style."
+          "description": "Photograph the lot, tell us your needs and style.",
+          "youDo": "Photograph the lot and pick a building type and style.",
+          "savicoDoes": "Generates a project code and opens Step 1 for you right away.",
+          "youGet": "A project you can pick back up any time."
         },
         "design": {
           "title": "Design & estimate",
-          "description": "AI produces floor plans, 3D renders and a quantity estimate."
+          "description": "AI produces floor plans, 3D renders and a quantity estimate.",
+          "youDo": "Preview the design options and pick the one you like best.",
+          "savicoDoes": "AI reads the photo and produces floor plans, 3D renders and a quantity estimate.",
+          "youGet": "A line-item cost breakdown, transparent from the start."
         },
         "dossier": {
           "title": "Construction dossier",
-          "description": "Render and receive the full design and estimate package."
+          "description": "Render and receive the full design and estimate package.",
+          "youDo": "Review and download the dossier once you're happy with the estimate.",
+          "savicoDoes": "Renders the floor plans, exterior view and estimate into a complete dossier.",
+          "youGet": "A dossier ready to hand to any contractor for construction."
         },
         "contractor": {
           "title": "Invite contractors",
-          "description": "Invite up to three verified contractors and track each invitation."
+          "description": "Invite up to three verified contractors and track each invitation.",
+          "youDo": "Pick up to 3 matching contractors from the suggested list.",
+          "savicoDoes": "Suggests verified contractors, sends the dossier and tracks replies.",
+          "youGet": "Several options to compare without hunting for them yourself."
         },
         "build": {
           "title": "Build & supervise",
-          "description": "SAVICO engineers inspect at each milestone, keeping design and schedule on track."
+          "description": "SAVICO engineers inspect at each milestone, keeping design and schedule on track.",
+          "youDo": "Track progress and review inspection results at each milestone.",
+          "savicoDoes": "SAVICO engineers visit the site to inspect at each scheduled milestone.",
+          "youGet": "Peace of mind that the build matches the design and schedule."
         }
       }
     },
@@ -398,26 +427,32 @@
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
       "viewAll": "See all packages",
       "note": "Right package,\nright stage!",
+      "ownedLabel": "Your package - {count} uses left",
+      "openPackage": "Open package",
       "items": {
         "design": {
           "title": "Design package",
           "description": "Basic · Detailed · Optimised — 2/5/8 design options, 2/4/6 revisions.",
-          "action": "See packages"
+          "action": "See packages",
+          "usedAtStep": "Used in steps 02–03"
         },
         "contractors": {
           "title": "Find a contractor",
           "description": "SAVICO suggests verified contractors; invite up to three.",
-          "action": "Find contractors"
+          "action": "Find contractors",
+          "usedAtStep": "Used in step 04"
         },
         "supervision": {
           "title": "Site supervision",
           "description": "SVC CHECK (6 visits) · SVC CONTROL (12 visits) by our engineers.",
-          "action": "See supervision plans"
+          "action": "See supervision plans",
+          "usedAtStep": "Used in step 05"
         },
         "turnkey": {
           "title": "Turnkey construction",
           "description": "SAVICO surveys, signs the contract and builds through to handover.",
-          "action": "Request a call"
+          "action": "Request a call",
+          "usedAtStep": "Used in steps 04–05"
         }
       }
     },
@@ -521,7 +556,14 @@
     "cta": {
       "title": "Ready to start your project?",
       "subtitle": "One photo of your lot — get the design and estimate today.",
-      "action": "Start a project"
+      "action": "Start a project",
+      "resumeTitle": "Continue your project {name}?",
+      "resumeAction": "Resume project →",
+      "byStatus": {
+        "input": "You're on the Input step — it only takes about 2 minutes to finish.",
+        "designing": "Your design & estimate is being generated — check the progress now.",
+        "review": "Your estimate is ready — see the details and next step."
+      }
     }
   },
   "handbook": {
@@ -536,7 +578,9 @@
     "home": {
       "eyebrow": "HOME-BUILDING HANDBOOK",
       "title": "Practical knowledge for your build",
-      "viewAll": "See all articles"
+      "viewAll": "See all articles",
+      "newBadge": "New",
+      "readTime": "~{minutes} min read →"
     },
     "card": {
       "imageCount": "{count} 3D images"
@@ -724,7 +768,45 @@
     "carouselLabel": "Guide videos",
     "prev": "Previous page",
     "next": "Next page",
-    "goToPage": "Page {page}"
+    "goToPage": "Page {page}",
+    "card": {
+      "comingSoon": "Coming soon",
+      "editingHint": "This video is being produced",
+      "continueFrom": "Continue from {time}",
+      "completed": "Watched"
+    },
+    "search": {
+      "clear": "Clear search",
+      "tryTopic": "Or try a topic:"
+    },
+    "lightbox": {
+      "upNext": "Up next",
+      "createProject": "Start a project now",
+      "close": "Close",
+      "dragHandle": "Drag down to close",
+      "prevVideo": "Previous video",
+      "nextVideo": "Next video",
+      "play": "Play",
+      "pause": "Pause",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit fullscreen",
+      "continueFrom": "Continue from {time}",
+      "watchFromStart": "Watch from the start",
+      "loadingSlow": "Loading video…",
+      "connectionSlow": "Slow connection",
+      "retry": "Retry",
+      "offline": "You're offline — the video will resume once you're back online",
+      "autoAdvanceIn": "Playing next in {seconds}s",
+      "replay": "Watch again",
+      "watchNow": "Watch now",
+      "completedAllTitle": "You've watched the whole guide!",
+      "watchAgain": "Watch from the start",
+      "notifyMe": "Notify me when it's ready",
+      "notifyMeConfirmed": "You'll be notified",
+      "readArticleInstead": "Read the article instead"
+    }
   },
   "design": {
     "steps": {
@@ -1386,6 +1468,8 @@
       "specialty": "Expertise",
       "allSpecialties": "All expertise",
       "count": "{count} architects",
+      "countLabel": "architects",
+      "clearSearch": "Clear search",
       "lead": "Pick the architect you want to talk to",
       "empty": {
         "title": "No matching architect",
@@ -1414,6 +1498,7 @@
         "afternoon": "Afternoon"
       },
       "full": "Full",
+      "fullHint": "This slot is already full",
       "weekday": {
         "mon": "Mon",
         "tue": "Tue",
@@ -1441,7 +1526,9 @@
       "subtitle": "An architect suggests the solution that fits your needs.",
       "eyebrow": "1:1 CONSULTATION",
       "viewAll": "See all experts",
-      "book": "Book"
+      "book": "Book",
+      "booking": "Booking…",
+      "booked": "Booked"
     }
   },
   "admin": {
@@ -2592,7 +2679,8 @@
           "distanceValue": "{km} km",
           "completedValue": "{count} projects",
           "similarValue": "{count} similar projects",
-          "surveyValue": "within {hours}h"
+          "surveyValue": "within {hours}h",
+          "locked": "Create a project brief for SAVICO to match contractors"
         }
       },
       "promises": {
@@ -2609,12 +2697,24 @@
         "scale": "Project scale",
         "experience": "Experience on similar projects",
         "rating": "Rating & completed projects",
-        "schedule": "Availability & survey lead time"
+        "schedule": "Availability & survey lead time",
+        "experienceOptions": {
+          "any": "No requirement",
+          "junior": "Under 5 similar projects",
+          "mid": "5–15 similar projects",
+          "senior": "Over 15 similar projects"
+        },
+        "ratingOptions": {
+          "any": "Any rating",
+          "good": "4.0 stars and up",
+          "great": "4.5 stars and up"
+        }
       },
       "ranking": {
         "note": "Ranking = project fit + distance + experience + rating + availability + survey readiness",
         "detail": "View details",
         "choose": "Select & send brief",
+        "stickyNudge": "Create a project brief - free",
         "tabs": {
           "match": "Best match",
           "distance": "Nearest",
@@ -2708,8 +2808,10 @@
     "brief": {
       "badge": "Free · No package required",
       "back": "Back to options",
+      "leaveConfirm": "Leaving will discard what you're entering. Continue?",
       "title": "Create your project brief",
       "subtitle": "Complete the build details and what you need done, and SAVICO will suggest matching contractors.",
+      "draftSaved": "Draft saved - {time}",
       "steps": {
         "one": "Details & needs",
         "two": "Review brief"
@@ -2722,6 +2824,7 @@
         "buildingType": "Building type",
         "buildingTypePlaceholder": "Select a building type",
         "landArea": "Land area (m²)",
+        "areaSuffix": "m²",
         "condition": "Site condition",
         "scale": "Scale",
         "address": "Site address",
@@ -2732,7 +2835,9 @@
         "startWindow": "Expected start",
         "street": "Street address",
         "streetPlaceholder": "e.g. 12 Nguyen Tat Thanh",
-        "addressHint": "Pick the province first; the ward list filters to it."
+        "addressHint": "Pick the province first; the ward list filters to it.",
+        "landAreaConfirm": "Are you sure the area is {value} m²?",
+        "budgetApprox": "≈ {value}"
       },
       "needs": {
         "title": "What you need built",
@@ -2740,6 +2845,12 @@
         "scope": "Scope of work",
         "note": "Describe your needs",
         "notePlaceholder": "e.g. Need a turnkey contractor for a two-storey townhouse, experienced, able to survey the site at the weekend.",
+        "notePlaceholderByScope": {
+          "turnkey": "e.g. Need a turnkey contractor for a two-storey townhouse, experienced, able to survey at the weekend.",
+          "shell": "e.g. Need a contractor for the shell — foundation, frame, walls, roof — of a two-storey townhouse.",
+          "finishing": "e.g. Need a contractor for finishing — plastering, tiling, painting, fixtures — on a shell already built.",
+          "interior": "e.g. Need a contractor for interior fit-out — furniture, loose items, decor — in a modern style."
+        },
         "noteHint": "The clearer your description, the better SAVICO can match contractors.",
         "counter": "{current} / {max}"
       },
@@ -2774,6 +2885,8 @@
       "needsTitle": "What you need built",
       "documentsTitle": "Attached documents",
       "noDocuments": "No documents attached yet.",
+      "documentsThinHint": "Add drawings, site photos, or a cost estimate for a fuller brief.",
+      "pleaseConfirm": "Please confirm the information",
       "edit": "Edit",
       "addFile": "Add file",
       "scopeLabel": "Scope",
@@ -2817,6 +2930,7 @@
     "start": {
       "title": "How would you like to start?",
       "subtitle": "Pick what suits you right now — your package credits stay untouched until you use them.",
+      "idleSubtitle": "You can change your choice later - your package credits stay untouched.",
       "option": "Option {index}",
       "popular": "Most popular option",
       "find": {
@@ -2873,12 +2987,14 @@
       "subtitle": "Pick a contractor to view their record, compare, or invite them to quote.",
       "radius": "Search radius",
       "radiusOption": "{km} km",
+      "resultsInRadius": "{count} contractors within {km} km",
       "empty": "No contractors within {km} km. Try widening the search radius.",
       "compareTitle": "Selected for comparison",
       "compareCount": "({selected}/{max})",
       "compareHint": "Pick {min} to {max} contractors",
       "compareAction": "Compare {count} contractors",
       "compareCheckbox": "Compare",
+      "maxCompare": "Up to {max} contractors",
       "whyTitle": "Why SAVICO suggests these",
       "why1": "Matches your building type",
       "why2": "{count} completed projects",
@@ -2918,8 +3034,14 @@
       "contactLocked": "Contact details unlock once a survey appointment is confirmed.",
       "report": "Report this record",
       "reportSent": "Report noted. The SAVICO support team will review this record.",
+      "reportConfirmTitle": "Report this record?",
+      "reportConfirmBody": "SAVICO will review this contractor's information and activity.",
+      "reportConfirmAction": "Send report",
       "addToCompare": "Add to comparison",
       "inCompare": "Added to comparison",
+      "viewInvites": "View invitations",
+      "notAcceptingNotice": "This contractor is temporarily not accepting new projects.",
+      "viewSimilar": "View similar contractors",
       "partnership": {
         "title": "SAVICO partner",
         "body": "{name} has signed a partnership agreement and had its company records verified by SAVICO.",
@@ -2969,11 +3091,27 @@
       "back": "Back to list",
       "invite": "Invite selected contractors to quote",
       "tooFew": "Select at least {min} contractors to compare.",
+      "tooFewInline": "Add at least {count} more contractor to compare.",
       "surveyValue": "Within {hours}h",
-      "warrantyValue": "{months} months"
+      "warrantyValue": "{months} months",
+      "betterBadge": "Better",
+      "highlightToggle": "Highlight the better value",
+      "removeColumn": "Remove from comparison",
+      "exceedRoom": "You only have {count} invitation left",
+      "criteriaHint": {
+        "rating": "Average rating from customers who worked with this contractor through SAVICO.",
+        "similarProjects": "Number of projects of this type the contractor has completed.",
+        "distance": "Distance from the contractor to your site.",
+        "surveyTime": "How soon the contractor can survey the site after accepting the invitation.",
+        "serviceAreas": "Areas the contractor takes on projects in.",
+        "legal": "Legal records SAVICO has verified.",
+        "warranty": "Warranty period after handover.",
+        "accepting": "Whether the contractor is currently taking on new projects."
+      }
     },
     "survey": {
       "title": "Choose a survey time",
+      "titleQueue": "Choose a survey time ({current}/{total})",
       "subtitle": "Pick a time that works for {name} to survey the site.",
       "queue": "Contractor {current} of {total}",
       "dateTitle": "Choose a date",
@@ -2997,21 +3135,24 @@
       "privacy": "Your details stay private and are only shared with the contractor after confirmation.",
       "limitReached": "This project already has {max} invitations — no more contractors can be invited.",
       "invalid": "Some required details are missing — check the date, time slot and contact details.",
-      "weekdays": [
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
-        "Sun"
-      ],
+      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "editContact": "Edit",
       "contactMissing": "Not set",
       "saveContact": "Save",
-      "cancelEdit": "Discard changes"
+      "cancelEdit": "Discard changes",
+      "contactUpdated": "Contact details updated",
+      "earliestSlot": "Earliest",
+      "dayFull": "This day is full - the next open day is {date}",
+      "slotBusyClick": "The contractor is busy at this time",
+      "noMonthAvailable": "No available days this month.",
+      "backToAvailableMonth": "Go to an available month",
+      "sending": "Sending…",
+      "cancelConfirmTitle": "Cancel this survey booking?",
+      "cancelConfirmBody": "The date and time you just picked will not be saved.",
+      "cancelConfirmAction": "Cancel booking",
+      "keepEditing": "Keep choosing"
     },
     "sent": {
       "title": "Invitation sent & survey booked",
@@ -3027,7 +3168,12 @@
       "supportTime": "Expected: during the next working hours.",
       "track": "Track this request",
       "privacy": "Your contact details stay private until the survey appointment is confirmed.",
-      "statusSent": "Sent"
+      "statusSent": "Sent",
+      "titleMultiple": "{count} invitations sent & surveys booked",
+      "copyCode": "Copy code",
+      "copied": "Copied",
+      "remainingInvites": "You have {count} invitations left - invite more contractors for more options",
+      "inviteMore": "Invite more contractors"
     },
     "invitations": {
       "title": "Invitations to quote",
@@ -3054,7 +3200,13 @@
       "supportBody": "They update each invitation status and help when you want to stop an invitation or switch contractor.",
       "supportAction": "Contact the support team",
       "footerNote": "Once a contractor accepts, the two of you deal directly on the survey, the quote and the contract. SAVICO stores no quotes or amounts. To stop an invitation or change contractor, contact the support team.",
-      "supportToast": "The SAVICO support team will contact you on your registered phone number."
+      "supportToast": "The SAVICO support team will contact you on your registered phone number.",
+      "newUpdateBadge": "New",
+      "editBriefWarning": "Editing the brief creates a v2 - invitations already sent still use v1",
+      "contactDialogTitle": "Contact the SAVICO support team",
+      "contactDialogCall": "Call now",
+      "supervisionSuggestion": "Contractor confirmed — decide how to manage construction?",
+      "supervisionAction": "See supervision plans"
     },
     "picker": {
       "title": "Pick a project to find contractors",

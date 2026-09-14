@@ -1,42 +1,66 @@
 'use client'
 
 import { Facebook, Youtube } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
-import { Link } from '@/i18n/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 import { cmsText, useCmsDocument } from '@/shared/cms'
-import { TikTokIcon, Logo, ZaloIcon } from '@/shared/components/common'
+import { revealEase, TikTokIcon, Logo, ZaloIcon } from '@/shared/components/common'
 import { siteConfig } from '@/shared/config/site'
+import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { FOOTER_ABOUT_LINKS, FOOTER_PRODUCT_LINKS, FOOTER_SUPPORT_LINKS, type FooterLink } from './site-footer.config'
 
 /**
- * Mot muc trong cot link. `href: null` = trang chua dung: hien mo, khong bam
- * duoc thay vi tro toi route chet (xem `site-footer.config.ts`).
+ * Mot muc trong cot link. `href: null` = trang chua dung: hien mo kem viên
+ * nhãn "Sắp ra mắt" LUÔN THẤY, không bấm được — thay vì chỉ báo qua `title`
+ * (chỉ hiện khi rê chuột, điện thoại không rê được nên không bao giờ thấy).
  */
 function FooterNavLink({ link, label, pendingLabel }: { link: FooterLink; label: string; pendingLabel: string }) {
+  const pathname = usePathname()
+
   if (!link.href) {
     return (
-      <li>
-        <span
-          aria-disabled='true'
-          title={pendingLabel}
-          className='text-footer-foreground/35 cursor-default text-sm select-none'
-        >
+      <li className='flex items-center gap-2'>
+        <span aria-disabled='true' className='text-footer-foreground/35 cursor-default text-sm select-none'>
           {label}
         </span>
+        <span className='bg-footer-foreground/10 text-footer-foreground/40 rounded px-1.5 py-0.5 text-[10px] font-medium'>
+          {pendingLabel}
+        </span>
+      </li>
+    )
+  }
+
+  const linkClassName =
+    'group text-footer-foreground/75 hover:text-primary relative inline-block text-sm transition-colors'
+  const underline = (
+    <span
+      aria-hidden
+      className='bg-primary absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100'
+    />
+  )
+
+  // "Hướng dẫn sử dụng" mà bấm ngay TRÊN trang Hướng dẫn thì cuộn mượt lên đầu
+  // trang thay vì điều hướng lại chính trang đang đứng (trang Hướng dẫn, mục 6).
+  if (link.href === ROUTES.GUIDE && pathname === ROUTES.GUIDE) {
+    return (
+      <li>
+        <button type='button' onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className={linkClassName}>
+          {label}
+          {underline}
+        </button>
       </li>
     )
   }
 
   return (
     <li>
-      <Link
-        href={link.href}
-        className='text-footer-foreground/75 hover:text-footer-foreground text-sm transition-colors'
-      >
+      <Link href={link.href} className={linkClassName}>
         {label}
+        {underline}
       </Link>
     </li>
   )
@@ -75,16 +99,33 @@ function LinkColumn({
   )
 }
 
+/** Hiện dần từ trái sang phải — dùng cho từng cột (mục II.2, vùng 14). */
+function FooterColumn({ index, children }: { index: number; children: ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.4, delay: index * 0.1, ease: revealEase }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 /**
  * Footer dung chung cho moi trang (quy uoc xuyen suot, muc I).
  *
- * Dung theo anh mockup khach gui: nen toi, nam cot - thuong hieu (logo, mo ta,
+ * Dung theo anh mockup khach gui: nam cot - thuong hieu (logo, mo ta,
  * mang xa hoi), San pham, Ho tro, Ve SAVICO, Lien he - va mot hang day chi con
  * dong ban quyen.
  *
  * Cot lien he la chu thuan chu khong phai danh sach icon: trong anh no la ba
  * dong "Hotline / Email / Dia chi" xep nhu mot cot chu, cung nhip voi ba cot
  * lien ket ben canh.
+ *
+ * ★ 4 cột hiện dần trái→phải; rê link đổi xanh + gạch chân trượt; icon mạng xã
+ * hội đổi nền xanh + nhấc nhẹ khi rê.
  */
 export function SiteFooter() {
   const t = useTranslations('footer')
@@ -119,7 +160,7 @@ export function SiteFooter() {
     <footer className='bg-footer text-footer-foreground mt-auto'>
       <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8'>
         {/* Cot 1 - Thuong hieu */}
-        <div>
+        <FooterColumn index={0}>
           <Logo onDark tagline={t('brandTagline')} />
           <p className='text-footer-foreground/70 mt-4 max-w-xs text-sm leading-relaxed'>
             {cmsText(settings.tagline, t('tagline'))}
@@ -135,7 +176,8 @@ export function SiteFooter() {
                   aria-label={item.label}
                   className={cn(
                     'bg-footer-foreground/10 text-primary flex size-9 items-center justify-center rounded-full',
-                    'hover:bg-footer-foreground/20 transition-colors'
+                    'hover:bg-primary hover:text-primary-foreground transition-[background-color,color,transform] hover:-translate-y-0.5',
+                    'active:translate-y-0 active:scale-90'
                   )}
                 >
                   {item.icon}
@@ -143,14 +185,20 @@ export function SiteFooter() {
               </li>
             ))}
           </ul>
-        </div>
+        </FooterColumn>
 
-        <LinkColumn title={t('productTitle')} links={FOOTER_PRODUCT_LINKS} pendingLabel={pendingLabel} />
-        <LinkColumn title={t('supportTitle')} links={FOOTER_SUPPORT_LINKS} pendingLabel={pendingLabel} />
-        <LinkColumn title={t('aboutTitle')} links={FOOTER_ABOUT_LINKS} pendingLabel={pendingLabel} />
+        <FooterColumn index={1}>
+          <LinkColumn title={t('productTitle')} links={FOOTER_PRODUCT_LINKS} pendingLabel={pendingLabel} />
+        </FooterColumn>
+        <FooterColumn index={2}>
+          <LinkColumn title={t('supportTitle')} links={FOOTER_SUPPORT_LINKS} pendingLabel={pendingLabel} />
+        </FooterColumn>
+        <FooterColumn index={3}>
+          <LinkColumn title={t('aboutTitle')} links={FOOTER_ABOUT_LINKS} pendingLabel={pendingLabel} />
+        </FooterColumn>
 
         {/* Cot 5 - Lien he */}
-        <div>
+        <FooterColumn index={4}>
           <ColumnTitle>{t('contactTitle')}</ColumnTitle>
           <ul className='text-footer-foreground/75 space-y-2.5 text-sm'>
             <li>
@@ -169,7 +217,7 @@ export function SiteFooter() {
               {t('addressLabel')}: {cmsText(settings.address, t('address'))}
             </li>
           </ul>
-        </div>
+        </FooterColumn>
       </div>
 
       {/* Hang day - chi con dong ban quyen (anh mockup). */}

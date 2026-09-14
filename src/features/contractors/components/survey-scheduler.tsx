@@ -4,11 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   BadgeCheck,
   CalendarCheck,
+  Check,
   ChevronLeft,
   ChevronRight,
   CircleCheck,
   Clock,
   Info,
+  Loader2,
   Lock,
   Mail,
   MapPin,
@@ -17,18 +19,29 @@ import {
   Star,
   X
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth } from '@/shared/auth'
+import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { contractorInviteRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatNumber } from '@/shared/utils'
@@ -112,12 +125,23 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const selectable = useMemo(() => new Set(days.map(toDateKey)), [days])
 
   const firstDay = days[0]
-  const [date, setDate] = useState(() => (firstDay ? toDateKey(firstDay) : ''))
+  /**
+   * Mời nhiều nhà thầu: ngày vừa chọn cho nhà thầu TRƯỚC được giữ làm gợi ý
+   * cho nhà thầu này (mục 3 của M07, mục 3 của M08) — đọc từ hàng đợi chung
+   * chứ không phải state riêng, nên vẫn đúng dù trang này có dựng lại hay không
+   * khi chuyển sang nhà thầu kế tiếp.
+   */
+  const preferredDate = pendingBookings[pendingBookings.length - 1]?.date
+  const initialDay = preferredDate ? new Date(`${preferredDate}T00:00:00`) : firstDay
+  const [date, setDate] = useState(() => preferredDate ?? (firstDay ? toDateKey(firstDay) : ''))
   /** Tháng đang hiển thị trên lịch — tách khỏi ngày đã chọn để lật tháng xem được. */
   const [month, setMonth] = useState(() =>
-    firstDay ? new Date(firstDay.getFullYear(), firstDay.getMonth(), 1) : new Date()
+    initialDay ? new Date(initialDay.getFullYear(), initialDay.getMonth(), 1) : new Date()
   )
   const { data: slots, isPending: slotsPending } = useSurveySlots(contractorId, date)
+
+  /** Nhà thầu kế tiếp trong hàng đợi trượt vào từ phải; lần đầu thì trượt lên (mục 3). */
+  const isQueueAdvance = queueIndex > 0
 
   const schema = useMemo(
     () =>
@@ -161,14 +185,14 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
    */
   const [contactSnapshot, setContactSnapshot] = useState<Pick<SurveyFormValues, 'phone' | 'email'> | null>(null)
 
+  /** Viền loé xanh một lần khi vào chế độ nhập (mục 8). */
+  const [contactFlash, setContactFlash] = useState(false)
+
   const openContactEditor = () => {
     setContactSnapshot({ phone: form.getValues('phone'), email: form.getValues('email') })
     setEditingContact(true)
-  }
-
-  /** Chỉ đóng lại khi hai ô hợp lệ — đóng khi đang sai là giấu lỗi đi. */
-  const saveContact = async () => {
-    if (await form.trigger(['phone', 'email'])) setEditingContact(false)
+    setContactFlash(true)
+    window.setTimeout(() => setContactFlash(false), 700)
   }
 
   const { phone: phoneError, email: emailError } = form.formState.errors
@@ -182,6 +206,47 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
     form.clearErrors(['phone', 'email'])
     setEditingContact(false)
   }
+
+  /** Lưu liên hệ xong → tick xanh + thông báo một lần (mục 8). */
+  const [contactJustSaved, setContactJustSaved] = useState(false)
+  const saveContactWithFeedback = async () => {
+    const valid = await form.trigger(['phone', 'email'])
+    if (!valid) return
+    setEditingContact(false)
+    setContactJustSaved(true)
+    toast.success(t('contactUpdated'))
+    window.setTimeout(() => setContactJustSaved(false), 2000)
+  }
+
+  /** Huỷ khi đã chọn ngày/giờ → hỏi xác nhận nhỏ (mục 9). */
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false)
+  const slotIdValue = useWatch({ control: form.control, name: 'slotId' })
+  const requestCancel = () => {
+    if (date && slotIdValue) {
+      setCancelConfirmOpen(true)
+      return
+    }
+    router.push(contractorMatchesRoute(projectId))
+  }
+
+  /** Bấm khung giờ đã bận → rung + thông báo (mục 5). */
+  const [busySlotShake, setBusySlotShake] = useState<string | null>(null)
+  /** Hộp "Khung giờ làm việc…" trượt xuống một lần sau khi chọn giờ (mục 5). */
+  const [slotChosenOnce, setSlotChosenOnce] = useState(false)
+
+  /** Nút "Xác nhận" thở một nhịp ngay khi vừa đủ ngày + giờ (mục 9). */
+  const wasReadyRef = useRef(false)
+  const [submitBreathe, setSubmitBreathe] = useState(false)
+  const isReadyToSubmit = Boolean(date && slotIdValue)
+  useEffect(() => {
+    if (isReadyToSubmit && !wasReadyRef.current) {
+      setSubmitBreathe(true)
+      const timer = window.setTimeout(() => setSubmitBreathe(false), 500)
+      wasReadyRef.current = true
+      return () => window.clearTimeout(timer)
+    }
+    wasReadyRef.current = isReadyToSubmit
+  }, [isReadyToSubmit])
 
   const room = remainingInvites(invitations ?? []) - pendingBookings.length
   const inQueue = inviteQueue.length > 1
@@ -260,22 +325,31 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
 
       {/* Liên kết quay lại sát mép trái, tiêu đề canh giữa TRANG. */}
       <div className='relative space-y-3 lg:space-y-0'>
-        <Link
-          href={contractorMatchesRoute(projectId)}
-          className='text-primary-strong inline-flex items-center gap-2 text-sm font-medium lg:absolute lg:top-1 lg:left-0'
-        >
-          ← {tCommon('backToList')}
-        </Link>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          <Link
+            href={contractorMatchesRoute(projectId)}
+            className='text-primary-strong inline-flex items-center gap-2 text-sm font-medium lg:absolute lg:top-1 lg:left-0'
+          >
+            ← {tCommon('backToList')}
+          </Link>
+        </motion.div>
 
-        <header className='space-y-1 text-center'>
+        <motion.header
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
+          className='space-y-1 text-center'
+        >
           {inQueue ? (
             <p className='text-primary-strong bg-accent mx-auto w-fit rounded-full px-3 py-1 text-xs font-medium'>
               {t('queue', { current: queueIndex + 1, total: inviteQueue.length })}
             </p>
           ) : null}
-          <h1 className='text-2xl font-semibold tracking-tight sm:text-3xl'>{t('title')}</h1>
+          <h1 className='text-2xl font-semibold tracking-tight sm:text-3xl'>
+            {inQueue ? t('titleQueue', { current: queueIndex + 1, total: inviteQueue.length }) : t('title')}
+          </h1>
           <p className='text-muted-foreground text-pretty'>{t('subtitle', { name: contractor.name })}</p>
-        </header>
+        </motion.header>
       </div>
 
       {room <= 0 ? (
@@ -286,7 +360,13 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className='space-y-5'>
-          <div className='bg-card rounded-2xl border'>
+          <motion.div
+            key={contractorId}
+            initial={isQueueAdvance ? { opacity: 0, x: 32 } : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 0.4, ease: revealEase }}
+            className='bg-card rounded-2xl border'
+          >
             {/* Dải nhận diện nhà thầu. */}
             <div className='flex flex-wrap items-center gap-y-4 border-b px-5 py-4'>
               <ContractorLogo contractor={contractor} className='size-16 shrink-0 rounded-xl' />
@@ -342,6 +422,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                         }}
                         prevLabel={t('prevMonth')}
                         nextLabel={t('nextMonth')}
+                        firstAvailableDate={firstDay}
                       />
                       <FormMessage />
                     </FormItem>
@@ -367,72 +448,148 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                     {t('slotTitle')} <span className='font-normal'>({t('slotOffice')})</span>
                   </h2>
                   {selectedDate ? (
-                    <p className='text-muted-foreground mt-1 text-sm capitalize'>
-                      {formatDate(selectedDate, locale, {
-                        weekday: 'long',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      })}
-                    </p>
+                    <AnimatePresence mode='wait'>
+                      <motion.p
+                        key={date}
+                        initial={{ opacity: 0, x: 8, y: -4 }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className='text-muted-foreground mt-1 text-sm capitalize'
+                      >
+                        {formatDate(selectedDate, locale, {
+                          weekday: 'long',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </motion.p>
+                    </AnimatePresence>
                   ) : null}
                 </div>
 
                 <FormField
                   control={form.control}
                   name='slotId'
-                  render={({ field }) => (
-                    <FormItem>
-                      {slotsPending ? (
-                        <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
-                          {[0, 1, 2, 3].map((i) => (
-                            <Skeleton key={i} className='h-12 rounded-lg' />
-                          ))}
-                        </div>
-                      ) : (
-                        <ul className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
-                          {slots?.map((slot) => {
-                            const active = field.value === slot.id
-                            return (
-                              <li key={slot.id}>
-                                <button
-                                  type='button'
-                                  disabled={!slot.available}
-                                  title={slot.available ? undefined : t('slotTaken')}
-                                  onClick={() => field.onChange(slot.id)}
-                                  className={cn(
-                                    'flex h-12 w-full items-center justify-center gap-2 rounded-lg border px-3 text-sm transition-colors',
-                                    active && 'border-primary bg-accent/60 text-primary-strong font-medium',
-                                    !active && slot.available && 'hover:border-primary/40',
-                                    !slot.available &&
-                                      'text-muted-foreground cursor-not-allowed line-through opacity-60'
-                                  )}
-                                >
-                                  {slot.label}
-                                  {/* Vòng tròn xanh đặc, dấu tick trắng — `fill` ăn
-                                      vào vòng tròn, nét tick giữ màu chữ. */}
-                                  {active ? (
-                                    <CircleCheck className='fill-primary text-primary-foreground size-5 shrink-0' />
-                                  ) : null}
-                                </button>
-                              </li>
-                            )
-                          })}
-                        </ul>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const earliestId = slots?.find((slot) => slot.available)?.id
+                    return (
+                      <FormItem>
+                        {slotsPending ? (
+                          <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
+                            {[0, 1, 2, 3].map((i) => (
+                              <Skeleton key={i} className='h-12 rounded-lg' />
+                            ))}
+                          </div>
+                        ) : (
+                          <AnimatePresence mode='wait'>
+                            <motion.ul
+                              key={date}
+                              initial='hidden'
+                              animate='show'
+                              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
+                              className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'
+                            >
+                              {slots?.map((slot) => {
+                                const active = field.value === slot.id
+                                const isEarliest = slot.id === earliestId
+                                const isBusyShake = busySlotShake === slot.id
+                                return (
+                                  <motion.li
+                                    key={slot.id}
+                                    variants={{ hidden: { opacity: 0, y: -6 }, show: { opacity: 1, y: 0 } }}
+                                    className='relative'
+                                  >
+                                    <motion.button
+                                      type='button'
+                                      onClick={() => {
+                                        if (!slot.available) {
+                                          setBusySlotShake(slot.id)
+                                          window.setTimeout(() => setBusySlotShake(null), 400)
+                                          return
+                                        }
+                                        field.onChange(slot.id)
+                                        if (!slotChosenOnce) setSlotChosenOnce(true)
+                                      }}
+                                      animate={isBusyShake ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+                                      transition={{ duration: 0.35 }}
+                                      className={cn(
+                                        'flex h-12 w-full items-center justify-center gap-2 rounded-lg border px-3 text-sm transition-colors',
+                                        active && 'border-primary bg-accent/60 text-primary-strong font-medium',
+                                        !active && slot.available && 'hover:border-primary/40',
+                                        !slot.available &&
+                                          'text-muted-foreground cursor-not-allowed line-through opacity-60'
+                                      )}
+                                    >
+                                      {slot.label}
+                                      {/* Vòng tròn xanh đặc, dấu tick trắng — `fill` ăn
+                                          vào vòng tròn, nét tick giữ màu chữ. */}
+                                      <AnimatePresence>
+                                        {active ? (
+                                          <motion.span
+                                            key='tick'
+                                            initial={{ scale: 0, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            exit={{ scale: 0, opacity: 0 }}
+                                            transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                                          >
+                                            <CircleCheck className='fill-primary text-primary-foreground size-5 shrink-0' />
+                                          </motion.span>
+                                        ) : null}
+                                      </AnimatePresence>
+                                    </motion.button>
+                                    {isEarliest && !active ? (
+                                      <>
+                                        <span className='bg-primary text-primary-foreground pointer-events-none absolute -top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'>
+                                          {t('earliestSlot')}
+                                        </span>
+                                        <motion.span
+                                          aria-hidden
+                                          initial={{ opacity: 0.6, scale: 1 }}
+                                          animate={{ opacity: 0, scale: 1.08 }}
+                                          transition={{ duration: 1, delay: 0.4 }}
+                                          className='border-primary pointer-events-none absolute inset-0 rounded-lg border-2'
+                                        />
+                                      </>
+                                    ) : null}
+                                  </motion.li>
+                                )
+                              })}
+                            </motion.ul>
+                          </AnimatePresence>
+                        )}
+                        <FormMessage />
+                        <AnimatePresence>
+                          {busySlotShake ? (
+                            <motion.p
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className='text-destructive mt-1.5 overflow-hidden text-xs'
+                            >
+                              {t('slotBusyClick')}
+                            </motion.p>
+                          ) : null}
+                        </AnimatePresence>
+                      </FormItem>
+                    )
+                  }}
                 />
 
-                <p className='text-info-foreground bg-info-soft flex items-start gap-2.5 rounded-xl p-3 text-sm'>
+                {/* Trượt xuống lần đầu sau khi chọn giờ, rồi đứng yên (mục 5) —
+                    `y` chỉ nhận dãy keyframe đúng lần đổi từ chưa chọn sang đã
+                    chọn, các lần re-render sau target vẫn là 0 nên không lặp lại. */}
+                <motion.p
+                  animate={{ opacity: 1, y: slotChosenOnce ? [-10, 0] : 0 }}
+                  transition={{ duration: 0.35, ease: revealEase }}
+                  className='text-info-foreground bg-info-soft flex items-start gap-2.5 rounded-xl p-3 text-sm'
+                >
                   <Info className='text-info mt-0.5 size-4 shrink-0' />
                   <span>
                     {t('workingHours')}
                     <br />
                     {t('callAhead')}
                   </span>
-                </p>
+                </motion.p>
 
                 <FormField
                   control={form.control}
@@ -453,11 +610,17 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
             {/* Địa điểm khảo sát + liên hệ nhận xác nhận. */}
             {/* Hàng cuối KHÔNG có vạch dọc: ảnh S16 chỉ kẻ vạch ngăn ở khối
                 lịch/khung giờ phía trên, tới hàng này thì hai cột chạy liền. */}
-            <div className='grid border-t lg:grid-cols-[39%_minmax(0,1fr)]'>
-              <section className='border-b p-5 lg:border-b-0'>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.35, ease: revealEase }}
+              className='grid border-t lg:grid-cols-[39%_minmax(0,1fr)]'
+            >
+              <section className='group border-b p-5 lg:border-b-0'>
                 <h2 className='font-semibold'>{t('locationTitle')}</h2>
                 <p className='bg-muted/40 text-muted-foreground mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm'>
-                  <MapPin className='text-primary size-4 shrink-0' />
+                  <MapPin className='text-primary size-4 shrink-0 transition-transform group-hover:-translate-y-0.5' />
                   <span className='truncate'>{brief ? fullAddress(brief) : ''}</span>
                 </p>
               </section>
@@ -470,7 +633,15 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                     bên trái dù đang xem hay đang sửa. Đổi sang cặp input có nhãn
                     riêng thì cả hàng tụt xuống và lệch hẳn so với ảnh S16. */}
                 <div className='mt-3 flex flex-wrap items-center gap-3'>
-                  <div className='bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-1 rounded-lg border px-3 py-2.5 text-sm'>
+                  {/* Viền loé xanh một lần khi vào chế độ nhập (mục 8) — công tắc
+                      ring qua CSS thay vì nội suy `box-shadow` bằng JS, vì màu
+                      lấy từ biến CSS (`--color-ring`) không nội suy được. */}
+                  <div
+                    className={cn(
+                      'bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-1 rounded-lg border px-3 py-2.5 text-sm ring-0 ring-ring transition-shadow duration-700',
+                      contactFlash && 'ring-2'
+                    )}
+                  >
                     <span className='flex min-w-0 flex-1 items-center gap-2'>
                       <Phone aria-hidden className='text-primary size-4 shrink-0' />
                       {editingContact ? (
@@ -492,7 +663,21 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                           )}
                         />
                       ) : (
-                        <span className='truncate'>{contactPhone || t('contactMissing')}</span>
+                        <span className='flex min-w-0 items-center gap-1.5 truncate'>
+                          {contactPhone || t('contactMissing')}
+                          <AnimatePresence>
+                            {contactJustSaved ? (
+                              <motion.span
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                              >
+                                <Check className='text-primary size-3.5 shrink-0' />
+                              </motion.span>
+                            ) : null}
+                          </AnimatePresence>
+                        </span>
                       )}
                     </span>
 
@@ -523,8 +708,13 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                   </div>
 
                   {editingContact ? (
-                    <div className='flex items-center gap-2'>
-                      <Button type='button' onClick={saveContact}>
+                    <motion.div
+                      initial={{ opacity: 0, x: 8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className='flex items-center gap-2'
+                    >
+                      <Button type='button' onClick={saveContactWithFeedback}>
                         {t('saveContact')}
                       </Button>
                       <Button
@@ -536,7 +726,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                       >
                         <X className='size-4' />
                       </Button>
-                    </div>
+                    </motion.div>
                   ) : (
                     <Button
                       type='button'
@@ -554,8 +744,8 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                     khung cao lên và hàng lại lệch. */}
                 {contactError ? <p className='text-destructive mt-2 text-sm'>{contactError}</p> : null}
               </section>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Hai nút nằm NGOÀI thẻ. Bản mô tả S16 còn nút "Đề xuất ghi chú" nhưng
               khách đã bỏ: nó chỉ chép nguyên placeholder vào ô ghi chú, tức là
@@ -567,13 +757,25 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                   type='button'
                   variant='outline'
                   className='border-primary/50 text-primary-strong min-w-32'
-                  onClick={() => router.push(contractorMatchesRoute(projectId))}
+                  onClick={requestCancel}
                 >
                   {t('cancel')}
                 </Button>
-                <Button type='submit' disabled={room <= 0 || send.isPending}>
-                  {isLastOfQueue ? t('submit') : t('submitNext')}
-                </Button>
+                {/* Mờ tới khi đủ ngày + giờ; đủ → màu đầy đủ + một nhịp thở (mục 9). */}
+                <motion.span
+                  animate={{ scale: submitBreathe ? [1, 1.03, 1] : 1 }}
+                  transition={{ duration: 0.5 }}
+                  className='inline-block'
+                >
+                  <Button
+                    type='submit'
+                    disabled={room <= 0 || send.isPending}
+                    className={cn(!(date && slotIdValue) && 'opacity-60')}
+                  >
+                    {send.isPending ? <Loader2 className='size-4 animate-spin' /> : null}
+                    {send.isPending ? t('sending') : isLastOfQueue ? t('submit') : t('submitNext')}
+                  </Button>
+                </motion.span>
               </div>
               <p className='text-muted-foreground flex items-center gap-2 text-xs'>
                 <Lock className='size-3.5' />
@@ -583,6 +785,23 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
           </div>
         </form>
       </Form>
+
+      <Dialog open={cancelConfirmOpen} onOpenChange={setCancelConfirmOpen}>
+        <DialogContent className='sm:max-w-sm'>
+          <DialogHeader>
+            <DialogTitle>{t('cancelConfirmTitle')}</DialogTitle>
+            <DialogDescription>{t('cancelConfirmBody')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setCancelConfirmOpen(false)}>
+              {t('keepEditing')}
+            </Button>
+            <Button variant='destructive' onClick={() => router.push(contractorMatchesRoute(projectId))}>
+              {t('cancelConfirmAction')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -605,7 +824,8 @@ function MonthCalendar({
   selectable,
   onSelect,
   prevLabel,
-  nextLabel
+  nextLabel,
+  firstAvailableDate
 }: {
   locale: Locale
   month: Date
@@ -615,6 +835,8 @@ function MonthCalendar({
   onSelect: (key: string) => void
   prevLabel: string
   nextLabel: string
+  /** Nhảy về đây khi tháng đang xem không có ngày khả dụng nào (mục 4). */
+  firstAvailableDate?: Date
 }) {
   const t = useTranslations('contractors.survey')
   const weekdays = t.raw('weekdays') as string[]
@@ -630,6 +852,31 @@ function MonthCalendar({
       return day
     })
   }, [month])
+
+  const hasAvailableInMonth = cells.some((day) => day.getMonth() === month.getMonth() && selectable.has(toDateKey(day)))
+
+  /** Hướng trượt khi đổi tháng — mẫu "điều chỉnh state khi prop đổi" của React. */
+  const [renderedMonthKey, setRenderedMonthKey] = useState(`${month.getFullYear()}-${month.getMonth()}`)
+  const [monthDirection, setMonthDirection] = useState(1)
+  const monthKey = `${month.getFullYear()}-${month.getMonth()}`
+  if (monthKey !== renderedMonthKey) {
+    setMonthDirection(monthKey > renderedMonthKey ? 1 : -1)
+    setRenderedMonthKey(monthKey)
+  }
+
+  /** 7 ngày khả dụng "sáng lên" thêm một nhịp sau khi lưới hiện xong (mục 4). */
+  const [pulseOnce, setPulseOnce] = useState(false)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPulseOnce(true), 350)
+    return () => window.clearTimeout(timer)
+  }, [monthKey])
+
+  /** Bấm ngày không khả dụng → rung nhẹ + chú giải (mục 4). */
+  const [shakeKey, setShakeKey] = useState<string | null>(null)
+  const shakeUnavailable = (key: string) => {
+    setShakeKey(key)
+    window.setTimeout(() => setShakeKey(null), 400)
+  }
 
   const shift = (delta: number) => onMonthChange(new Date(month.getFullYear(), month.getMonth() + delta, 1))
 
@@ -647,9 +894,18 @@ function MonthCalendar({
         {/* Ảnh S16 ghi "Tháng 8, 2026" — Intl vi cho ra "tháng 9 năm 2026" nên
             tháng và năm được ghép tay. `capitalize` của Tailwind viết hoa MỌI
             từ ("Tháng 9 Năm 2026"), phải dùng `first-letter:uppercase`. */}
-        <p className='text-sm font-semibold first-letter:uppercase'>
-          {formatDate(month, locale, { month: 'long' })}, {month.getFullYear()}
-        </p>
+        <AnimatePresence mode='wait'>
+          <motion.p
+            key={monthKey}
+            initial={{ opacity: 0, x: monthDirection * 10, y: -4 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className='text-sm font-semibold first-letter:uppercase'
+          >
+            {formatDate(month, locale, { month: 'long' })}, {month.getFullYear()}
+          </motion.p>
+        </AnimatePresence>
         <button
           type='button'
           aria-label={nextLabel}
@@ -668,33 +924,87 @@ function MonthCalendar({
         ))}
       </div>
 
-      <div className='grid grid-cols-7 gap-y-1 text-center text-sm'>
-        {cells.map((day) => {
-          const key = toDateKey(day)
-          const inMonth = day.getMonth() === month.getMonth()
-          const canPick = selectable.has(key)
-          const active = value === key
+      <AnimatePresence mode='wait' initial={false}>
+        <motion.div
+          key={monthKey}
+          initial={{ opacity: 0, x: monthDirection * 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -monthDirection * 16 }}
+          transition={{ duration: 0.25 }}
+          className='grid grid-cols-7 gap-y-1 text-center text-sm'
+        >
+          {cells.map((day, index) => {
+            const key = toDateKey(day)
+            const inMonth = day.getMonth() === month.getMonth()
+            const canPick = selectable.has(key)
+            const active = value === key
+            const isShaking = shakeKey === key
 
-          return (
-            <div key={key} className='flex justify-center py-0.5'>
-              <button
-                type='button'
-                disabled={!canPick}
-                onClick={() => onSelect(key)}
-                className={cn(
-                  'flex size-9 items-center justify-center rounded-full transition-colors',
-                  active && 'bg-primary text-primary-foreground font-semibold',
-                  !active && canPick && 'bg-accent text-primary-strong hover:bg-accent/70 font-medium',
-                  !canPick && (inMonth ? 'text-muted-foreground' : 'text-muted-foreground/45'),
-                  !canPick && 'cursor-default'
-                )}
-              >
-                {day.getDate()}
-              </button>
-            </div>
-          )
-        })}
-      </div>
+            return (
+              <div key={key} className='flex justify-center py-0.5'>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      type='button'
+                      onClick={() => (canPick ? onSelect(key) : shakeUnavailable(key))}
+                      animate={isShaking ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+                      transition={{ duration: 0.35 }}
+                      className={cn(
+                        'relative isolate flex size-9 items-center justify-center rounded-full transition-colors hover:scale-105',
+                        active && 'font-semibold',
+                        !active && canPick && 'bg-accent text-primary-strong hover:bg-accent/70 font-medium',
+                        !canPick && (inMonth ? 'text-muted-foreground' : 'text-muted-foreground/45'),
+                        !canPick && 'cursor-default'
+                      )}
+                    >
+                      {/* Vòng tròn tô đặc của ngày đang chọn — overlay riêng để
+                          trượt + nảy giữa các ô bằng `layoutId` (mục 4). */}
+                      {active ? (
+                        <motion.span
+                          layoutId='calendar-active-day'
+                          transition={{ type: 'spring', bounce: 0.45, duration: 0.4 }}
+                          className='bg-primary absolute inset-0 -z-10 rounded-full'
+                        />
+                      ) : null}
+                      {/* Sáng lên thêm một nhịp sau khi lưới vừa hiện (mục 4). */}
+                      {canPick && !active && pulseOnce ? (
+                        <motion.span
+                          aria-hidden
+                          initial={{ opacity: 0.5, scale: 1 }}
+                          animate={{ opacity: 0, scale: 1.6 }}
+                          transition={{ duration: 0.6, delay: index * 0.03 }}
+                          className='bg-accent absolute inset-0 -z-10 rounded-full'
+                        />
+                      ) : null}
+                      <span className={cn('relative z-10', active && 'text-primary-foreground')}>{day.getDate()}</span>
+                    </motion.button>
+                  </TooltipTrigger>
+                  {!canPick ? <TooltipContent>{t('dateHint', { days: SURVEY_WINDOW_DAYS })}</TooltipContent> : null}
+                </Tooltip>
+              </div>
+            )
+          })}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Tháng không có ngày khả dụng → thông báo + lối về tháng có lịch (mục 4). */}
+      {!hasAvailableInMonth && firstAvailableDate ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25 }}
+          className='mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed p-3 text-sm'
+        >
+          <span className='text-muted-foreground'>{t('noMonthAvailable')}</span>
+          <button
+            type='button'
+            onClick={() => onMonthChange(new Date(firstAvailableDate.getFullYear(), firstAvailableDate.getMonth(), 1))}
+            className='text-primary-strong font-medium underline underline-offset-4'
+          >
+            {t('backToAvailableMonth')}
+          </button>
+        </motion.div>
+      ) : null}
     </div>
   )
 }

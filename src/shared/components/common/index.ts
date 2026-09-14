@@ -16,6 +16,7 @@ export { PasswordInput } from './password-input'
 export { PreferenceSwitches } from './preference-switches'
 export { Photo } from './photo'
 export { PlanDrawing, type PlanVariant } from './plan-drawing'
+export { RevealPhoto } from './reveal-photo'
 export {
   Reveal,
   RevealStagger,

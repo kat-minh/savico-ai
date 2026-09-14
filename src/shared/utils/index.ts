@@ -7,5 +7,5 @@ export {
   formatNumber,
   formatPriceTag
 } from './formatters'
-export { isValidPhone, normalizePhone } from './phone'
+export { formatPhoneDisplay, isValidPhone, normalizePhone } from './phone'
 export { getInitials, truncate } from './string'

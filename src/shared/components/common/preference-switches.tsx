@@ -29,7 +29,7 @@ const isThemeMode = (value: string | undefined): value is ThemeMode =>
  * Nhúng vào dropdown tài khoản trên thanh công cụ: đây là tuỳ chọn cá nhân,
  * không phải mục điều hướng.
  */
-export function PreferenceSwitches() {
+export function PreferenceSwitches({ className }: { className?: string }) {
   const tTheme = useTranslations('theme')
   const tLanguage = useTranslations('language')
 
@@ -48,7 +48,7 @@ export function PreferenceSwitches() {
   const currentTheme: ThemeMode = mounted && isThemeMode(theme) ? theme : 'system'
 
   return (
-    <div className='space-y-3 px-2 py-2'>
+    <div className={cn('space-y-3 px-2 py-2', className)}>
       <Field icon={<Languages className='size-3.5' />} label={tLanguage('label')}>
         <ToggleGroup
           type='single'
