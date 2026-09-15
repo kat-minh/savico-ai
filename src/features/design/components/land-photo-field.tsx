@@ -32,7 +32,6 @@ export function LandPhotoField({ value, onChange, buildingType, invalid }: LandP
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploadPercent, setUploadPercent] = useState(0)
-  const [removing, setRemoving] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [errorPulse, setErrorPulse] = useState(false)
   const dragDepthRef = useRef(0)
@@ -88,6 +87,20 @@ export function LandPhotoField({ value, onChange, buildingType, invalid }: LandP
     reader.readAsDataURL(file)
   }
 
+  function remove() {
+    // Xóa giá trị form và preview trong cùng một nhịp. Trì hoãn `onChange`
+    // khiến ảnh cũ còn là nguồn dữ liệu hợp lệ trong lúc animation chạy và có
+    // thể bị một render khác ghi trở lại. Reset input để người dùng cũng có thể
+    // chọn lại đúng file vừa xóa (trình duyệt không phát `change` nếu value cũ
+    // vẫn còn và người dùng chọn cùng một file).
+    onChange(null)
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setPreviewUrl(null)
+    setUploadPercent(0)
+    setError(null)
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
   return (
     <div className='relative space-y-2'>
       <FieldLabel htmlFor='land-photo' hint={hint} required>
@@ -95,11 +108,7 @@ export function LandPhotoField({ value, onChange, buildingType, invalid }: LandP
       </FieldLabel>
 
       {value || previewUrl ? (
-        <div
-          data-photo-preview
-          data-removing={removing}
-          className='group relative h-56 overflow-hidden rounded-xl border'
-        >
+        <div data-photo-preview className='group relative h-56 overflow-hidden rounded-xl border'>
           <Image
             src={previewUrl ?? value ?? ''}
             alt={label}
@@ -127,14 +136,7 @@ export function LandPhotoField({ value, onChange, buildingType, invalid }: LandP
               variant='secondary'
               size='icon'
               aria-label={t('remove')}
-              onClick={() => {
-                setRemoving(true)
-                window.setTimeout(() => {
-                  onChange(null)
-                  setRemoving(false)
-                  setUploadPercent(0)
-                }, 260)
-              }}
+              onClick={remove}
               className='absolute top-2 right-2 rounded-full opacity-60 transition-opacity group-hover:opacity-100'
             >
               <X className='size-4' />

@@ -2441,10 +2441,6 @@ body main {
 [data-photo-preview] img[data-upload-complete='true'] {
   animation: design-image-resolve 620ms ease-out both;
 }
-[data-photo-preview][data-removing='true'] img {
-  opacity: 0;
-  transform: scale(0.82);
-}
 [data-upload-error] {
   animation: design-error-in 300ms var(--ease-out-soft) both;
 }

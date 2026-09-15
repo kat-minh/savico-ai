@@ -53,6 +53,13 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
   const [renaming, setRenaming] = useState<Project | null>(null)
   const [deleting, setDeleting] = useState<Project | null>(null)
 
+  // Đợi Dropdown trả lại pointer-events cho body trước khi mở Dialog. Mở hai
+  // modal layer Radix trong cùng một tick sẽ khiến Dialog lưu nhầm giá trị
+  // `none` và phục hồi nó khi đóng, làm toàn bộ trang không thể bấm chuột.
+  const openDialogAfterMenuCloses = (setter: (project: Project) => void, project: Project) => {
+    window.setTimeout(() => setter(project), 0)
+  }
+
   if (isPending) {
     return (
       <div className='grid gap-4 sm:grid-cols-2'>
@@ -122,11 +129,14 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
                           <MoreHorizontal className='size-4' />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
-                          <DropdownMenuItem onSelect={() => setRenaming(project)}>
+                          <DropdownMenuItem onSelect={() => openDialogAfterMenuCloses(setRenaming, project)}>
                             <Pencil className='size-4' />
                             {t('menu.rename')}
                           </DropdownMenuItem>
-                          <DropdownMenuItem variant='destructive' onSelect={() => setDeleting(project)}>
+                          <DropdownMenuItem
+                            variant='destructive'
+                            onSelect={() => openDialogAfterMenuCloses(setDeleting, project)}
+                          >
                             <Trash2 className='size-4' />
                             {t('menu.delete')}
                           </DropdownMenuItem>

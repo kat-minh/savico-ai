@@ -157,6 +157,14 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
   const action = ACTION_BY_STATUS[project.status]
   const [justCompleted, setJustCompleted] = useState(false)
 
+  // Dropdown và Dialog đều là modal layer của Radix. Nếu mở Dialog ngay trong
+  // `onSelect`, Dialog sẽ ghi nhận `pointer-events: none` mà Dropdown đang đặt
+  // trên body; khi Dialog đóng nó phục hồi chính giá trị đó và khóa cả trang.
+  // Chờ sang tick kế tiếp để Dropdown cleanup xong rồi mới mount Dialog.
+  const openDialogAfterMenuCloses = (action: (project: Project) => void) => {
+    window.setTimeout(() => action(project), 0)
+  }
+
   useEffect(() => {
     if (sessionStorage.getItem('savico.just-completed-project') !== project.id) return
     sessionStorage.removeItem('savico.just-completed-project')
@@ -209,11 +217,11 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
               <MoreHorizontal className='size-4' />
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
-              <DropdownMenuItem onSelect={() => onRename(project)}>
+              <DropdownMenuItem onSelect={() => openDialogAfterMenuCloses(onRename)}>
                 <Pencil className='size-4' />
                 {t('menu.rename')}
               </DropdownMenuItem>
-              <DropdownMenuItem variant='destructive' onSelect={() => onDelete(project)}>
+              <DropdownMenuItem variant='destructive' onSelect={() => openDialogAfterMenuCloses(onDelete)}>
                 <Trash2 className='size-4' />
                 {t('menu.delete')}
               </DropdownMenuItem>
