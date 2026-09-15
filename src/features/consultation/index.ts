@@ -7,9 +7,11 @@ export { ConsultantDirectory } from './components/consultant-directory'
 export { ConsultantDetail } from './components/consultant-detail'
 export { ConsultantCard } from './components/consultant-card'
 export { ConsultantHighlights } from './components/consultant-highlights'
+export { ConsultTransitionStateProvider } from './components/consult-transition-state'
 export { useConsultants, useConsultant, useAvailability, useBookConsultation } from './hooks/use-consultation'
 export {
   filterConsultants,
+  findMatchRange,
   sortConsultants,
   specialtyOptions,
   sessionSlots,

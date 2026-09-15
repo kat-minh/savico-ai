@@ -29,6 +29,21 @@ export function specialtyOptions(consultants: readonly Consultant[]): Consultant
   return [...seen.values()]
 }
 
+/**
+ * Vị trí đoạn khớp `query` trong `text` (chữ khớp tô nền xanh nhạt — trang Tư
+ * vấn 1:1, mục 5). So khớp trên bản đã CHUẨN HOÁ (bỏ dấu, hạ chữ thường) nhưng
+ * trả vị trí để cắt trên bản GỐC có dấu — mọi phép biến đổi trong `normalize`
+ * (bỏ dấu, đổi đ→d) giữ nguyên số ký tự nên vị trí tìm được áp thẳng lên chuỗi
+ * gốc mà không lệch.
+ */
+export function findMatchRange(text: string, query: string): { start: number; end: number } | null {
+  const q = normalize(query.trim())
+  if (!q) return null
+  const index = normalize(text).indexOf(q)
+  if (index === -1) return null
+  return { start: index, end: index + q.length }
+}
+
 /** Tìm theo tên hoặc chuyên môn + lọc theo chuyên môn (mục VIII.1). */
 export function filterConsultants(consultants: readonly Consultant[], filter: ConsultantFilter = {}): Consultant[] {
   const query = filter.query ? normalize(filter.query.trim()) : ''

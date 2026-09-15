@@ -155,6 +155,8 @@ export interface ContractorProject {
   name: string
   year: number
   imageUrl?: string
+  /** Thế mạnh liên quan, dùng để lọc dự án khi bấm tag ở M06. */
+  tags?: string[]
 }
 
 /**

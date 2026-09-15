@@ -1,3 +1,4 @@
+import { designDossierRoute, designEstimateRoute, designInputRoute } from '@/shared/constants/routes'
 import { PROJECTS_PAGE_SIZE } from '../constants/design.constants'
 import type { DesignStep, Project, ProjectSort, ProjectStatus } from '../types/design.types'
 
@@ -80,6 +81,37 @@ export function countProjects(projects: readonly Project[]): ProjectCounts {
     review: projects.filter((p) => p.status === 'review').length,
     completed: projects.filter((p) => p.status === 'completed').length
   }
+}
+
+/**
+ * Route to pick up a project where it was left off, by status (Hình 02:
+ * "Tiếp tục nhập" / "Mở tiếp" / "Xem dự toán" / "Xem hồ sơ"). Exported so the
+ * homepage's "Mở tiếp dự án" affordances (navbar avatar, hero, dải 5 bước,
+ * CTA cuối trang — mục II.2) send people to the exact same place as the
+ * project card does.
+ */
+export const RESUME_ROUTE_BY_STATUS: Record<ProjectStatus, (projectId: string) => string> = {
+  input: designInputRoute,
+  designing: designEstimateRoute,
+  review: designEstimateRoute,
+  completed: designDossierRoute
+}
+
+export function resumeProjectRoute(project: Pick<Project, 'id' | 'status'>): string {
+  return RESUME_ROUTE_BY_STATUS[project.status](project.id)
+}
+
+/**
+ * Most recently touched project that isn't finished yet — "dự án dở" the
+ * homepage personalizes around (mục II.2: chấm xanh trên avatar, nút "Mở
+ * tiếp dự án" ở hero/CTA cuối, bước hiện tại tự sáng ở dải 5 bước, KTS đúng
+ * loại nhà lên đầu ở khối Tư vấn 1:1).
+ */
+export function mostRecentActiveProject(projects: readonly Project[]): Project | undefined {
+  return sortProjects(
+    projects.filter((project) => project.status !== 'completed'),
+    'recent'
+  )[0]
 }
 
 export function pageCount(itemCount: number, pageSize = PROJECTS_PAGE_SIZE): number {

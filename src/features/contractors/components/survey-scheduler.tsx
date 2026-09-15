@@ -4,32 +4,46 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   BadgeCheck,
   CalendarCheck,
+  Check,
   ChevronLeft,
   ChevronRight,
   CircleCheck,
   Clock,
   Info,
+  Loader2,
   Lock,
   Mail,
   MapPin,
   Pencil,
   Phone,
+  Send,
   Star,
   X
 } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { Link, useRouter } from '@/i18n/navigation'
+import { useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth } from '@/shared/auth'
+import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { contractorInviteRoute, contractorMatchesRoute } from '@/shared/constants/routes'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
+import { contractorCompareRoute, contractorInviteRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatNumber } from '@/shared/utils'
 import { MAX_INVITATIONS, SURVEY_WINDOW_DAYS } from '../constants/contractors.constants'
@@ -48,6 +62,8 @@ interface SurveySchedulerProps {
   projectId: string
   contractorId: string
 }
+
+type SendPhase = 'idle' | 'flying' | 'success' | 'returning'
 
 /** `YYYY-MM-DD` theo giờ địa phương — `toISOString()` sẽ lệch ngày ở múi giờ VN. */
 function toDateKey(date: Date): string {
@@ -78,11 +94,21 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const locale = useLocale() as Locale
   const router = useRouter()
   const { user } = useAuth()
+  const reduceMotion = useReducedMotion()
+  const [sendPhase, setSendPhase] = useState<SendPhase>('idle')
+  const [advancingQueue, setAdvancingQueue] = useState(false)
+  const [leavingBack, setLeavingBack] = useState(false)
+  const [flightOrigin, setFlightOrigin] = useState({ x: 0, y: 0 })
 
   const { data: brief } = useBrief(projectId)
   const { data: contractor } = useContractor(contractorId)
   const { data: invitations } = useInvitations(projectId)
-  const send = useSendInvitations(projectId)
+  const send = useSendInvitations(projectId, {
+    navigateDelayMs: reduceMotion ? 0 : 1200,
+    errorMessage: t('sendFailed'),
+    onSuccess: () => window.setTimeout(() => setSendPhase('success'), reduceMotion ? 0 : 300),
+    onError: () => setSendPhase('returning')
+  })
 
   const inviteQueue = useContractorsStore((s) => s.inviteQueue)
   const queueIndex = useContractorsStore((s) => s.queueIndex)
@@ -112,12 +138,24 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const selectable = useMemo(() => new Set(days.map(toDateKey)), [days])
 
   const firstDay = days[0]
-  const [date, setDate] = useState(() => (firstDay ? toDateKey(firstDay) : ''))
+  /**
+   * Mời nhiều nhà thầu: ngày vừa chọn cho nhà thầu TRƯỚC được giữ làm gợi ý
+   * cho nhà thầu này (mục 3 của M07, mục 3 của M08) — đọc từ hàng đợi chung
+   * chứ không phải state riêng, nên vẫn đúng dù trang này có dựng lại hay không
+   * khi chuyển sang nhà thầu kế tiếp.
+   */
+  const preferredDate = pendingBookings[pendingBookings.length - 1]?.date
+  const initialDay = preferredDate ? new Date(`${preferredDate}T00:00:00`) : firstDay
+  /* Lần mời đầu không tự chọn ngày. Chỉ hàng đợi nhiều nhà thầu mới kế thừa ngày vừa chọn. */
+  const [date, setDate] = useState(() => preferredDate ?? '')
   /** Tháng đang hiển thị trên lịch — tách khỏi ngày đã chọn để lật tháng xem được. */
   const [month, setMonth] = useState(() =>
-    firstDay ? new Date(firstDay.getFullYear(), firstDay.getMonth(), 1) : new Date()
+    initialDay ? new Date(initialDay.getFullYear(), initialDay.getMonth(), 1) : new Date()
   )
   const { data: slots, isPending: slotsPending } = useSurveySlots(contractorId, date)
+
+  /** Nhà thầu kế tiếp trong hàng đợi trượt vào từ phải; lần đầu thì trượt lên (mục 3). */
+  const isQueueAdvance = queueIndex > 0
 
   const schema = useMemo(
     () =>
@@ -161,14 +199,14 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
    */
   const [contactSnapshot, setContactSnapshot] = useState<Pick<SurveyFormValues, 'phone' | 'email'> | null>(null)
 
+  /** Viền loé xanh một lần khi vào chế độ nhập (mục 8). */
+  const [contactFlash, setContactFlash] = useState(false)
+
   const openContactEditor = () => {
     setContactSnapshot({ phone: form.getValues('phone'), email: form.getValues('email') })
     setEditingContact(true)
-  }
-
-  /** Chỉ đóng lại khi hai ô hợp lệ — đóng khi đang sai là giấu lỗi đi. */
-  const saveContact = async () => {
-    if (await form.trigger(['phone', 'email'])) setEditingContact(false)
+    setContactFlash(true)
+    window.setTimeout(() => setContactFlash(false), 700)
   }
 
   const { phone: phoneError, email: emailError } = form.formState.errors
@@ -183,9 +221,65 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
     setEditingContact(false)
   }
 
+  /** Lưu liên hệ xong → tick xanh + thông báo một lần (mục 8). */
+  const [contactJustSaved, setContactJustSaved] = useState(false)
+  const saveContactWithFeedback = async () => {
+    const valid = await form.trigger(['phone', 'email'])
+    if (!valid) return
+    setEditingContact(false)
+    setContactJustSaved(true)
+    toast.success(t('contactUpdated'))
+    window.setTimeout(() => setContactJustSaved(false), 2000)
+  }
+
+  /** Huỷ khi đã chọn ngày/giờ → hỏi xác nhận nhỏ (mục 9). */
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false)
+  const slotIdValue = useWatch({ control: form.control, name: 'slotId' })
+  const requestCancel = () => {
+    if (date || slotIdValue) {
+      setCancelConfirmOpen(true)
+      return
+    }
+    leaveScheduler()
+  }
+
+  /** Bấm khung giờ đã bận → rung + thông báo (mục 5). */
+  const [busySlotShake, setBusySlotShake] = useState<string | null>(null)
+  /** Hộp "Khung giờ làm việc…" trượt xuống một lần sau khi chọn giờ (mục 5). */
+  const [slotChosenOnce, setSlotChosenOnce] = useState(false)
+
+  /** Nút "Xác nhận" thở một nhịp ngay khi vừa đủ ngày + giờ (mục 9). */
+  const wasReadyRef = useRef(false)
+  const [submitBreathe, setSubmitBreathe] = useState(false)
+  const isReadyToSubmit = Boolean(date && slotIdValue)
+  useEffect(() => {
+    if (isReadyToSubmit && !wasReadyRef.current) {
+      setSubmitBreathe(true)
+      const timer = window.setTimeout(() => setSubmitBreathe(false), 500)
+      wasReadyRef.current = true
+      return () => window.clearTimeout(timer)
+    }
+    wasReadyRef.current = isReadyToSubmit
+  }, [isReadyToSubmit])
+
   const room = remainingInvites(invitations ?? []) - pendingBookings.length
   const inQueue = inviteQueue.length > 1
+  const cameFromCompare = inviteQueue.length > 0
   const isLastOfQueue = !inQueue || queueIndex >= inviteQueue.length - 1
+
+  const backRoute = cameFromCompare ? contractorCompareRoute(projectId) : contractorMatchesRoute(projectId)
+  const goBack = () => {
+    if (reduceMotion) {
+      router.push(backRoute)
+      return
+    }
+    setLeavingBack(true)
+    window.setTimeout(() => router.push(backRoute), 180)
+  }
+  const leaveScheduler = () => {
+    clearQueue()
+    goBack()
+  }
 
   /**
    * Bấm "Xác nhận" mà form còn thiếu trường thì RHF chặn im lặng — mà hai ô bắt
@@ -206,17 +300,33 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
     const bookings = [...pendingBookings.filter((item) => item.contractorId !== contractorId), booking]
 
     if (isLastOfQueue) {
-      clearCompare()
-      clearQueue()
-      send.mutate(bookings)
+      if (flightOrigin.x === 0) setFlightOrigin({ x: window.innerWidth / 2, y: window.innerHeight - 40 })
+      setSendPhase(reduceMotion ? 'idle' : 'flying')
+      send.mutate(bookings, {
+        onSuccess: () => {
+          window.setTimeout(
+            () => {
+              clearCompare()
+              clearQueue()
+            },
+            reduceMotion ? 0 : 1050
+          )
+        }
+      })
       return
     }
 
     // Còn nhà thầu trong hàng đợi: giữ lịch vừa chọn lại và mở nhà thầu kế tiếp.
+    setAdvancingQueue(true)
     addBooking(booking)
-    advanceQueue()
     const next = inviteQueue[queueIndex + 1]
-    if (next) router.push(contractorInviteRoute(projectId, next))
+    window.setTimeout(
+      () => {
+        advanceQueue()
+        if (next) router.push(contractorInviteRoute(projectId, next))
+      },
+      reduceMotion ? 0 : 360
+    )
   }
 
   if (!contractor) {
@@ -253,336 +363,656 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   ]
 
   const selectedDate = date ? new Date(`${date}T00:00:00`) : null
+  const dayIsFull = Boolean(date && slots?.length && slots.every((slot) => !slot.available))
+  const nearestAvailableDay = dayIsFull
+    ? (days.find((day) => toDateKey(day) > date) ?? days.find((day) => toDateKey(day) !== date))
+    : undefined
+
+  const jumpToAvailableDay = () => {
+    if (!nearestAvailableDay) return
+    const key = toDateKey(nearestAvailableDay)
+    setMonth(new Date(nearestAvailableDay.getFullYear(), nearestAvailableDay.getMonth(), 1))
+    setDate(key)
+    form.setValue('date', key)
+    form.setValue('slotId', '')
+  }
 
   return (
-    <div className='mx-auto w-[94%] max-w-[80rem] space-y-5 py-8'>
-      <ProjectContextBar brief={brief} compact />
+    <>
+      <motion.div
+        animate={{
+          opacity: leavingBack || sendPhase === 'flying' || sendPhase === 'success' ? 0.28 : 1,
+          x: leavingBack ? 20 : 0
+        }}
+        transition={{ duration: leavingBack ? 0.18 : 0.45, ease: revealEase }}
+        className='mx-auto w-[94%] max-w-[80rem] space-y-5 py-8'
+      >
+        <ProjectContextBar brief={brief} compact />
 
-      {/* Liên kết quay lại sát mép trái, tiêu đề canh giữa TRANG. */}
-      <div className='relative space-y-3 lg:space-y-0'>
-        <Link
-          href={contractorMatchesRoute(projectId)}
-          className='text-primary-strong inline-flex items-center gap-2 text-sm font-medium lg:absolute lg:top-1 lg:left-0'
-        >
-          ← {tCommon('backToList')}
-        </Link>
+        {/* Liên kết quay lại sát mép trái, tiêu đề canh giữa TRANG. */}
+        <div className='relative space-y-3 lg:space-y-0'>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <button
+              type='button'
+              onClick={leaveScheduler}
+              className='text-primary-strong inline-flex items-center gap-2 text-sm font-medium lg:absolute lg:top-1 lg:left-0'
+            >
+              ← {tCommon('backToList')}
+            </button>
+          </motion.div>
 
-        <header className='space-y-1 text-center'>
-          {inQueue ? (
-            <p className='text-primary-strong bg-accent mx-auto w-fit rounded-full px-3 py-1 text-xs font-medium'>
-              {t('queue', { current: queueIndex + 1, total: inviteQueue.length })}
-            </p>
-          ) : null}
-          <h1 className='text-2xl font-semibold tracking-tight sm:text-3xl'>{t('title')}</h1>
-          <p className='text-muted-foreground text-pretty'>{t('subtitle', { name: contractor.name })}</p>
-        </header>
-      </div>
+          <motion.header initial='hidden' animate='show' className='space-y-1 text-center'>
+            {inQueue ? (
+              <motion.p
+                variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
+                transition={{ duration: 0.3, delay: 0.06 }}
+                className='text-primary-strong bg-accent mx-auto w-fit rounded-full px-3 py-1 text-xs font-medium'
+              >
+                {t('queue', { current: queueIndex + 1, total: inviteQueue.length })}
+              </motion.p>
+            ) : null}
+            <motion.h1
+              variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.35, delay: 0.12, ease: revealEase }}
+              className='text-2xl font-semibold tracking-tight sm:text-3xl'
+            >
+              {inQueue ? t('titleQueue', { current: queueIndex + 1, total: inviteQueue.length }) : t('title')}
+            </motion.h1>
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.35, delay: 0.2, ease: revealEase }}
+              className='text-muted-foreground text-pretty'
+            >
+              {t('subtitle', { name: contractor.name })}
+            </motion.p>
+          </motion.header>
+        </div>
 
-      {room <= 0 ? (
-        <p className='border-destructive/40 text-destructive rounded-xl border px-4 py-3 text-sm'>
-          {t('limitReached', { max: MAX_INVITATIONS })}
-        </p>
-      ) : null}
+        {room <= 0 ? (
+          <p className='border-destructive/40 text-destructive rounded-xl border px-4 py-3 text-sm'>
+            {t('limitReached', { max: MAX_INVITATIONS })}
+          </p>
+        ) : null}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className='space-y-5'>
-          <div className='bg-card rounded-2xl border'>
-            {/* Dải nhận diện nhà thầu. */}
-            <div className='flex flex-wrap items-center gap-y-4 border-b px-5 py-4'>
-              <ContractorLogo contractor={contractor} className='size-16 shrink-0 rounded-xl' />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className='space-y-5'>
+            <motion.div
+              key={contractorId}
+              initial={isQueueAdvance ? { opacity: 0, x: 32 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ duration: 0.4, ease: revealEase }}
+              className='bg-card rounded-2xl border'
+            >
+              {/* Dải nhận diện nhà thầu. */}
+              <div className='flex flex-wrap items-center gap-y-4 border-b px-5 py-4'>
+                <ContractorLogo contractor={contractor} className='size-16 shrink-0 rounded-xl' />
 
-              <div className='min-w-0 grow basis-52 px-4 lg:grow-0 lg:basis-[28%]'>
-                <p className='flex items-center gap-1.5 font-semibold'>
-                  <span className='truncate'>{contractor.name}</span>
-                  {contractor.verified ? <BadgeCheck className='text-primary size-4 shrink-0' /> : null}
-                </p>
-                <p className='mt-1 flex items-center gap-1.5 text-sm'>
-                  <Star className='text-warning size-4 shrink-0 fill-current' />
-                  {formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}/5
-                  <span className='text-muted-foreground'>
-                    {tCommon('reviewCount', { count: contractor.reviewCount })}
-                  </span>
-                </p>
-              </div>
-
-              <div className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'>
-                {facts.map((fact) => (
-                  <div key={fact.key} className='min-w-0 flex-1 px-3'>
-                    <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
-                      <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
-                      <span className='truncate'>{fact.value}</span>
-                    </p>
-                    <p className='text-muted-foreground mt-1 truncate pl-5.5 text-xs'>{fact.hint}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className='grid lg:grid-cols-[39%_minmax(0,1fr)]'>
-              {/* Cột trái: lịch tháng. */}
-              <section className='border-b p-5 lg:border-r lg:border-b-0'>
-                <h2 className='font-semibold'>{t('dateTitle')}</h2>
-                <p className='text-muted-foreground mt-1 text-sm'>{t('dateHint', { days: SURVEY_WINDOW_DAYS })}</p>
-
-                <FormField
-                  control={form.control}
-                  name='date'
-                  render={({ field }) => (
-                    <FormItem className='mt-4'>
-                      <MonthCalendar
-                        locale={locale}
-                        month={month}
-                        onMonthChange={setMonth}
-                        value={field.value}
-                        selectable={selectable}
-                        onSelect={(key) => {
-                          field.onChange(key)
-                          setDate(key)
-                          form.setValue('slotId', '')
-                        }}
-                        prevLabel={t('prevMonth')}
-                        nextLabel={t('nextMonth')}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <ul className='text-muted-foreground mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs'>
-                  <li className='flex items-center gap-2'>
-                    <span aria-hidden className='bg-accent size-3 rounded-full' />
-                    {t('available')}
-                  </li>
-                  <li className='flex items-center gap-2'>
-                    <span aria-hidden className='bg-muted size-3 rounded-full' />
-                    {t('unavailable')}
-                  </li>
-                </ul>
-              </section>
-
-              {/* Cột phải: khung giờ, dòng lưu ý, ghi chú. */}
-              <div className='min-w-0 space-y-4 p-5'>
-                <div>
-                  <h2 className='font-semibold'>
-                    {t('slotTitle')} <span className='font-normal'>({t('slotOffice')})</span>
-                  </h2>
-                  {selectedDate ? (
-                    <p className='text-muted-foreground mt-1 text-sm capitalize'>
-                      {formatDate(selectedDate, locale, {
-                        weekday: 'long',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  ) : null}
+                <div className='min-w-0 grow basis-52 px-4 lg:grow-0 lg:basis-[28%]'>
+                  <p className='flex items-center gap-1.5 font-semibold'>
+                    <span className='truncate'>{contractor.name}</span>
+                    {contractor.verified ? <BadgeCheck className='text-primary size-4 shrink-0' /> : null}
+                  </p>
+                  <p className='mt-1 flex items-center gap-1.5 text-sm'>
+                    <Star className='text-warning size-4 shrink-0 fill-current' />
+                    {formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}/5
+                    <span className='text-muted-foreground'>
+                      {tCommon('reviewCount', { count: contractor.reviewCount })}
+                    </span>
+                  </p>
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name='slotId'
-                  render={({ field }) => (
-                    <FormItem>
-                      {slotsPending ? (
-                        <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
-                          {[0, 1, 2, 3].map((i) => (
-                            <Skeleton key={i} className='h-12 rounded-lg' />
-                          ))}
-                        </div>
-                      ) : (
-                        <ul className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
-                          {slots?.map((slot) => {
-                            const active = field.value === slot.id
-                            return (
-                              <li key={slot.id}>
-                                <button
-                                  type='button'
-                                  disabled={!slot.available}
-                                  title={slot.available ? undefined : t('slotTaken')}
-                                  onClick={() => field.onChange(slot.id)}
-                                  className={cn(
-                                    'flex h-12 w-full items-center justify-center gap-2 rounded-lg border px-3 text-sm transition-colors',
-                                    active && 'border-primary bg-accent/60 text-primary-strong font-medium',
-                                    !active && slot.available && 'hover:border-primary/40',
-                                    !slot.available &&
-                                      'text-muted-foreground cursor-not-allowed line-through opacity-60'
-                                  )}
-                                >
-                                  {slot.label}
-                                  {/* Vòng tròn xanh đặc, dấu tick trắng — `fill` ăn
-                                      vào vòng tròn, nét tick giữ màu chữ. */}
-                                  {active ? (
-                                    <CircleCheck className='fill-primary text-primary-foreground size-5 shrink-0' />
-                                  ) : null}
-                                </button>
-                              </li>
-                            )
-                          })}
-                        </ul>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <p className='text-info-foreground bg-info-soft flex items-start gap-2.5 rounded-xl p-3 text-sm'>
-                  <Info className='text-info mt-0.5 size-4 shrink-0' />
-                  <span>
-                    {t('workingHours')}
-                    <br />
-                    {t('callAhead')}
-                  </span>
-                </p>
-
-                <FormField
-                  control={form.control}
-                  name='note'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('noteTitle')}</FormLabel>
-                      <FormControl>
-                        <Textarea rows={2} placeholder={t('notePlaceholder')} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'>
+                  {facts.map((fact) => (
+                    <div key={fact.key} className='min-w-0 flex-1 px-3'>
+                      <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
+                        <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
+                        <span className='truncate'>{fact.value}</span>
+                      </p>
+                      <p className='text-muted-foreground mt-1 truncate pl-5.5 text-xs'>{fact.hint}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Địa điểm khảo sát + liên hệ nhận xác nhận. */}
-            {/* Hàng cuối KHÔNG có vạch dọc: ảnh S16 chỉ kẻ vạch ngăn ở khối
+              <div className='grid lg:grid-cols-[39%_minmax(0,1fr)]'>
+                {/* Cột trái: lịch tháng. */}
+                <section className='border-b p-5 lg:border-r lg:border-b-0'>
+                  <h2 className='font-semibold'>{t('dateTitle')}</h2>
+                  <p className='text-muted-foreground mt-1 text-sm'>{t('dateHint', { days: SURVEY_WINDOW_DAYS })}</p>
+
+                  <FormField
+                    control={form.control}
+                    name='date'
+                    render={({ field }) => (
+                      <FormItem className='mt-4'>
+                        <MonthCalendar
+                          locale={locale}
+                          month={month}
+                          onMonthChange={setMonth}
+                          value={field.value}
+                          selectable={selectable}
+                          onSelect={(key) => {
+                            field.onChange(key)
+                            setDate(key)
+                            form.setValue('slotId', '')
+                          }}
+                          prevLabel={t('prevMonth')}
+                          nextLabel={t('nextMonth')}
+                          firstAvailableDate={firstDay}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <ul className='text-muted-foreground mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs'>
+                    <li className='flex items-center gap-2'>
+                      <span aria-hidden className='bg-accent size-3 rounded-full' />
+                      {t('available')}
+                    </li>
+                    <li className='flex items-center gap-2'>
+                      <span aria-hidden className='bg-muted size-3 rounded-full' />
+                      {t('unavailable')}
+                    </li>
+                  </ul>
+                </section>
+
+                {/* Cột phải: khung giờ, dòng lưu ý, ghi chú. */}
+                <div className='min-w-0 space-y-4 p-5'>
+                  <div>
+                    <h2 className='font-semibold'>
+                      {t('slotTitle')} <span className='font-normal'>({t('slotOffice')})</span>
+                    </h2>
+                    {selectedDate ? (
+                      <AnimatePresence mode='wait'>
+                        <motion.p
+                          key={date}
+                          initial={{ opacity: 0, x: 8, y: -4 }}
+                          animate={{ opacity: 1, x: 0, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className='text-muted-foreground mt-1 text-sm capitalize'
+                        >
+                          {formatDate(selectedDate, locale, {
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                        </motion.p>
+                      </AnimatePresence>
+                    ) : null}
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name='slotId'
+                    render={({ field }) => {
+                      const earliestId = slots?.find((slot) => slot.available)?.id
+                      return (
+                        <FormItem>
+                          {!date ? (
+                            <div>
+                              <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
+                                {Array.from({ length: 8 }, (_, index) => (
+                                  <div
+                                    key={index}
+                                    aria-hidden
+                                    className='bg-muted/45 h-12 rounded-lg border opacity-55'
+                                  />
+                                ))}
+                              </div>
+                              <p className='text-muted-foreground mt-2 text-xs'>{t('chooseDateForSlots')}</p>
+                            </div>
+                          ) : slotsPending ? (
+                            <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
+                              {Array.from({ length: 8 }, (_, i) => (
+                                <Skeleton key={i} className='h-12 rounded-lg' />
+                              ))}
+                            </div>
+                          ) : (
+                            <AnimatePresence mode='wait'>
+                              <motion.ul
+                                key={date}
+                                initial='hidden'
+                                animate='show'
+                                exit={{ opacity: 0, y: 6 }}
+                                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
+                                className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'
+                              >
+                                {slots?.map((slot) => {
+                                  const active = field.value === slot.id
+                                  const isEarliest = slot.id === earliestId
+                                  const isBusyShake = busySlotShake === slot.id
+                                  return (
+                                    <motion.li
+                                      key={slot.id}
+                                      variants={{ hidden: { opacity: 0, y: -6 }, show: { opacity: 1, y: 0 } }}
+                                      className='relative'
+                                    >
+                                      <motion.button
+                                        type='button'
+                                        onClick={() => {
+                                          if (!slot.available) {
+                                            setBusySlotShake(slot.id)
+                                            window.setTimeout(() => setBusySlotShake(null), 400)
+                                            return
+                                          }
+                                          field.onChange(slot.id)
+                                          if (!slotChosenOnce) setSlotChosenOnce(true)
+                                        }}
+                                        animate={isBusyShake ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+                                        transition={{ duration: 0.35 }}
+                                        className={cn(
+                                          'relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-lg border px-3 text-sm transition-colors',
+                                          active && 'border-primary bg-accent/60 text-primary-strong font-medium',
+                                          !active && slot.available && 'hover:border-primary/40',
+                                          !slot.available && 'text-muted-foreground cursor-not-allowed opacity-60'
+                                        )}
+                                      >
+                                        <span className='relative'>
+                                          {slot.label}
+                                          {!slot.available ? (
+                                            <motion.span
+                                              aria-hidden
+                                              initial={{ scaleX: 0 }}
+                                              animate={{ scaleX: 1 }}
+                                              transition={{ duration: 0.35, delay: 0.12 }}
+                                              className='bg-current absolute inset-x-0 top-1/2 h-px origin-left'
+                                            />
+                                          ) : null}
+                                        </span>
+                                        {/* Vòng tròn xanh đặc, dấu tick trắng — `fill` ăn
+                                          vào vòng tròn, nét tick giữ màu chữ. */}
+                                        <AnimatePresence>
+                                          {active ? (
+                                            <motion.span
+                                              key='tick'
+                                              initial={{ scale: 0, opacity: 0 }}
+                                              animate={{ scale: 1, opacity: 1 }}
+                                              exit={{ scale: 0, opacity: 0 }}
+                                              transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                                            >
+                                              <CircleCheck className='fill-primary text-primary-foreground absolute top-1 right-1 size-4 shrink-0' />
+                                            </motion.span>
+                                          ) : null}
+                                        </AnimatePresence>
+                                      </motion.button>
+                                      {isEarliest && !active ? (
+                                        <>
+                                          <span className='bg-primary text-primary-foreground pointer-events-none absolute -top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'>
+                                            {t('earliestSlot')}
+                                          </span>
+                                          <motion.span
+                                            aria-hidden
+                                            initial={{ opacity: 0.6, scale: 1 }}
+                                            animate={{ opacity: 0, scale: 1.08 }}
+                                            transition={{ duration: 1, delay: 0.4 }}
+                                            className='border-primary pointer-events-none absolute inset-0 rounded-lg border-2'
+                                          />
+                                        </>
+                                      ) : null}
+                                    </motion.li>
+                                  )
+                                })}
+                              </motion.ul>
+                            </AnimatePresence>
+                          )}
+                          <FormMessage />
+                          <AnimatePresence>
+                            {busySlotShake ? (
+                              <motion.p
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className='text-destructive mt-1.5 overflow-hidden text-xs'
+                              >
+                                {t('slotBusyClick')}
+                              </motion.p>
+                            ) : null}
+                          </AnimatePresence>
+                        </FormItem>
+                      )
+                    }}
+                  />
+
+                  <AnimatePresence>
+                    {dayIsFull && nearestAvailableDay ? (
+                      <motion.button
+                        type='button'
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.3, ease: revealEase }}
+                        onClick={jumpToAvailableDay}
+                        className='border-primary/30 bg-accent/40 text-primary-strong w-full rounded-xl border p-3 text-left text-sm'
+                      >
+                        {t('dayFull', {
+                          date: formatDate(nearestAvailableDay, locale, {
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: '2-digit'
+                          })
+                        })}
+                      </motion.button>
+                    ) : null}
+                  </AnimatePresence>
+
+                  {/* Trượt xuống lần đầu sau khi chọn giờ, rồi đứng yên (mục 5) —
+                    `y` chỉ nhận dãy keyframe đúng lần đổi từ chưa chọn sang đã
+                    chọn, các lần re-render sau target vẫn là 0 nên không lặp lại. */}
+                  <AnimatePresence>
+                    {slotChosenOnce ? (
+                      <motion.p
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.35, ease: revealEase }}
+                        className='text-info-foreground bg-info-soft flex items-start gap-2.5 rounded-xl p-3 text-sm'
+                      >
+                        <Info className='text-info mt-0.5 size-4 shrink-0' />
+                        <span>
+                          {t('workingHours')}
+                          <br />
+                          {t('callAhead')}
+                        </span>
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
+
+                  <FormField
+                    control={form.control}
+                    name='note'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('noteTitle')}</FormLabel>
+                        <FormControl>
+                          <Textarea rows={2} placeholder={t('notePlaceholder')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Địa điểm khảo sát + liên hệ nhận xác nhận. */}
+              {/* Hàng cuối KHÔNG có vạch dọc: ảnh S16 chỉ kẻ vạch ngăn ở khối
                 lịch/khung giờ phía trên, tới hàng này thì hai cột chạy liền. */}
-            <div className='grid border-t lg:grid-cols-[39%_minmax(0,1fr)]'>
-              <section className='border-b p-5 lg:border-b-0'>
-                <h2 className='font-semibold'>{t('locationTitle')}</h2>
-                <p className='bg-muted/40 text-muted-foreground mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm'>
-                  <MapPin className='text-primary size-4 shrink-0' />
-                  <span className='truncate'>{brief ? fullAddress(brief) : ''}</span>
-                </p>
-              </section>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.35, ease: revealEase }}
+                className='grid border-t lg:grid-cols-[39%_minmax(0,1fr)]'
+              >
+                <section className='group border-b p-5 lg:border-b-0'>
+                  <h2 className='font-semibold'>{t('locationTitle')}</h2>
+                  <p className='bg-muted/40 text-muted-foreground mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm'>
+                    <MapPin className='text-primary size-4 shrink-0 transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-110' />
+                    <span className='truncate'>{brief ? fullAddress(brief) : ''}</span>
+                  </p>
+                </section>
 
-              <section className='min-w-0 p-5'>
-                <h2 className='font-semibold'>{t('contactTitle')}</h2>
+                <section className='min-w-0 p-5'>
+                  <h2 className='font-semibold'>{t('contactTitle')}</h2>
 
-                {/* Ô chỉ đọc và ô nhập DÙNG CHUNG một khung: cùng chiều cao, cùng
+                  {/* Ô chỉ đọc và ô nhập DÙNG CHUNG một khung: cùng chiều cao, cùng
                     icon, nên hàng này luôn thẳng hàng với "Địa điểm khảo sát"
                     bên trái dù đang xem hay đang sửa. Đổi sang cặp input có nhãn
                     riêng thì cả hàng tụt xuống và lệch hẳn so với ảnh S16. */}
-                <div className='mt-3 flex flex-wrap items-center gap-3'>
-                  <div className='bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-1 rounded-lg border px-3 py-2.5 text-sm'>
-                    <span className='flex min-w-0 flex-1 items-center gap-2'>
-                      <Phone aria-hidden className='text-primary size-4 shrink-0' />
-                      {editingContact ? (
-                        <FormField
-                          control={form.control}
-                          name='phone'
-                          render={({ field }) => (
-                            <FormItem className='min-w-0 flex-1'>
-                              <FormControl>
-                                <input
-                                  inputMode='tel'
-                                  aria-label={t('phone')}
-                                  placeholder={t('phone')}
-                                  className='text-foreground w-full bg-transparent outline-hidden'
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      ) : (
-                        <span className='truncate'>{contactPhone || t('contactMissing')}</span>
+                  <div className='mt-3 flex flex-wrap items-center gap-3'>
+                    {/* Viền loé xanh một lần khi vào chế độ nhập (mục 8) — công tắc
+                      ring qua CSS thay vì nội suy `box-shadow` bằng JS, vì màu
+                      lấy từ biến CSS (`--color-ring`) không nội suy được. */}
+                    <motion.div
+                      animate={contactError && editingContact ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+                      transition={{ duration: 0.35 }}
+                      className={cn(
+                        'bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-1 rounded-lg border px-3 py-2.5 text-sm ring-0 ring-ring transition-shadow duration-700',
+                        contactFlash && 'ring-2'
                       )}
-                    </span>
+                    >
+                      <span className='flex min-w-0 flex-1 items-center gap-2'>
+                        <Phone aria-hidden className='text-primary size-4 shrink-0' />
+                        {editingContact ? (
+                          <FormField
+                            control={form.control}
+                            name='phone'
+                            render={({ field }) => (
+                              <FormItem className='min-w-0 flex-1'>
+                                <FormControl>
+                                  <input
+                                    inputMode='tel'
+                                    aria-label={t('phone')}
+                                    placeholder={t('phone')}
+                                    className='text-foreground w-full bg-transparent outline-hidden'
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        ) : (
+                          <span className='flex min-w-0 items-center gap-1.5 truncate'>
+                            {contactPhone || t('contactMissing')}
+                            <AnimatePresence>
+                              {contactJustSaved ? (
+                                <motion.span
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  exit={{ scale: 0, opacity: 0 }}
+                                  transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                                >
+                                  <Check className='text-primary size-3.5 shrink-0' />
+                                </motion.span>
+                              ) : null}
+                            </AnimatePresence>
+                          </span>
+                        )}
+                      </span>
 
-                    <span className='flex min-w-0 flex-1 items-center gap-2'>
-                      <Mail aria-hidden className='text-primary size-4 shrink-0' />
-                      {editingContact ? (
-                        <FormField
-                          control={form.control}
-                          name='email'
-                          render={({ field }) => (
-                            <FormItem className='min-w-0 flex-1'>
-                              <FormControl>
-                                <input
-                                  inputMode='email'
-                                  aria-label={t('email')}
-                                  placeholder={t('email')}
-                                  className='text-foreground w-full bg-transparent outline-hidden'
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      ) : (
-                        <span className='truncate'>{contactEmail || t('contactMissing')}</span>
-                      )}
-                    </span>
-                  </div>
+                      <span className='flex min-w-0 flex-1 items-center gap-2'>
+                        <Mail aria-hidden className='text-primary size-4 shrink-0' />
+                        {editingContact ? (
+                          <FormField
+                            control={form.control}
+                            name='email'
+                            render={({ field }) => (
+                              <FormItem className='min-w-0 flex-1'>
+                                <FormControl>
+                                  <input
+                                    inputMode='email'
+                                    aria-label={t('email')}
+                                    placeholder={t('email')}
+                                    className='text-foreground w-full bg-transparent outline-hidden'
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        ) : (
+                          <span className='truncate'>{contactEmail || t('contactMissing')}</span>
+                        )}
+                      </span>
+                    </motion.div>
 
-                  {editingContact ? (
-                    <div className='flex items-center gap-2'>
-                      <Button type='button' onClick={saveContact}>
-                        {t('saveContact')}
-                      </Button>
+                    {editingContact ? (
+                      <motion.div
+                        initial={{ opacity: 0, x: 8, y: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className='flex items-center gap-2'
+                      >
+                        <Button type='button' onClick={saveContactWithFeedback}>
+                          {t('saveContact')}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          aria-label={t('cancelEdit')}
+                          title={t('cancelEdit')}
+                          onClick={cancelContactEdit}
+                        >
+                          <X className='size-4' />
+                        </Button>
+                      </motion.div>
+                    ) : (
                       <Button
                         type='button'
-                        variant='ghost'
-                        aria-label={t('cancelEdit')}
-                        title={t('cancelEdit')}
-                        onClick={cancelContactEdit}
+                        variant='outline'
+                        className='border-primary/50 text-primary-strong'
+                        onClick={openContactEditor}
                       >
-                        <X className='size-4' />
+                        <Pencil className='size-4' />
+                        {t('editContact')}
                       </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      type='button'
-                      variant='outline'
-                      className='border-primary/50 text-primary-strong'
-                      onClick={openContactEditor}
-                    >
-                      <Pencil className='size-4' />
-                      {t('editContact')}
-                    </Button>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* Lỗi để DƯỚI hàng, không nhét vào trong khung — nhét vào là
+                  {/* Lỗi để DƯỚI hàng, không nhét vào trong khung — nhét vào là
                     khung cao lên và hàng lại lệch. */}
-                {contactError ? <p className='text-destructive mt-2 text-sm'>{contactError}</p> : null}
-              </section>
-            </div>
-          </div>
+                  {contactError ? <p className='text-destructive mt-2 text-sm'>{contactError}</p> : null}
+                  <AnimatePresence>
+                    {contactJustSaved ? (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className='text-primary-strong mt-2 flex items-center gap-1.5 text-xs font-medium'
+                      >
+                        <CircleCheck className='size-3.5' />
+                        {t('contactUpdated')}
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
+                </section>
+              </motion.div>
+            </motion.div>
 
-          {/* Hai nút nằm NGOÀI thẻ. Bản mô tả S16 còn nút "Đề xuất ghi chú" nhưng
+            {/* Hai nút nằm NGOÀI thẻ. Bản mô tả S16 còn nút "Đề xuất ghi chú" nhưng
               khách đã bỏ: nó chỉ chép nguyên placeholder vào ô ghi chú, tức là
               gửi cho nhà thầu đúng cái câu mẫu khách chưa đọc. */}
-          <div className='flex flex-wrap items-start justify-end gap-3'>
-            <div className='flex flex-col items-end gap-2'>
-              <div className='flex flex-wrap gap-3'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  className='border-primary/50 text-primary-strong min-w-32'
-                  onClick={() => router.push(contractorMatchesRoute(projectId))}
-                >
-                  {t('cancel')}
-                </Button>
-                <Button type='submit' disabled={room <= 0 || send.isPending}>
-                  {isLastOfQueue ? t('submit') : t('submitNext')}
-                </Button>
+            <div className='flex flex-wrap items-start justify-end gap-3'>
+              <div className='flex flex-col items-end gap-2'>
+                <div className='flex flex-wrap gap-3'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    className='border-primary/50 text-primary-strong min-w-32'
+                    onClick={requestCancel}
+                  >
+                    {t('cancel')}
+                  </Button>
+                  {/* Mờ tới khi đủ ngày + giờ; đủ → màu đầy đủ + một nhịp thở (mục 9). */}
+                  <motion.span
+                    animate={{ scale: submitBreathe ? [1, 1.03, 1] : 1 }}
+                    transition={{ duration: 0.5 }}
+                    className='inline-block'
+                  >
+                    <Button
+                      type='submit'
+                      onPointerDown={(event) => {
+                        const rect = event.currentTarget.getBoundingClientRect()
+                        setFlightOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+                      }}
+                      disabled={
+                        room <= 0 || send.isPending || advancingQueue || sendPhase !== 'idle' || !date || !slotIdValue
+                      }
+                      className={cn(!(date && slotIdValue) && 'opacity-60')}
+                    >
+                      {send.isPending || advancingQueue ? <Loader2 className='size-4 animate-spin' /> : null}
+                      {send.isPending || advancingQueue ? t('sending') : isLastOfQueue ? t('submit') : t('submitNext')}
+                    </Button>
+                  </motion.span>
+                </div>
+                <p className='text-muted-foreground flex items-center gap-2 text-xs'>
+                  <Lock className='size-3.5' />
+                  {t('privacy')}
+                </p>
               </div>
-              <p className='text-muted-foreground flex items-center gap-2 text-xs'>
-                <Lock className='size-3.5' />
-                {t('privacy')}
-              </p>
             </div>
-          </div>
-        </form>
-      </Form>
+          </form>
+        </Form>
+
+        <Dialog open={cancelConfirmOpen} onOpenChange={setCancelConfirmOpen}>
+          <DialogContent className='sm:max-w-sm'>
+            <DialogHeader>
+              <DialogTitle>{t('cancelConfirmTitle')}</DialogTitle>
+              <DialogDescription>{t('cancelConfirmBody')}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant='outline' onClick={() => setCancelConfirmOpen(false)}>
+                {t('keepEditing')}
+              </Button>
+              <Button variant='destructive' onClick={leaveScheduler}>
+                {t('cancelConfirmAction')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </motion.div>
+      <SendFlight
+        phase={sendPhase}
+        origin={flightOrigin}
+        onReturned={() => setSendPhase('idle')}
+        reduceMotion={Boolean(reduceMotion)}
+      />
+    </>
+  )
+}
+
+function SendFlight({
+  phase,
+  origin,
+  onReturned,
+  reduceMotion
+}: {
+  phase: SendPhase
+  origin: { x: number; y: number }
+  onReturned: () => void
+  reduceMotion: boolean
+}) {
+  if (phase === 'idle' || reduceMotion || typeof window === 'undefined') return null
+
+  const center = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+  const returning = phase === 'returning'
+
+  return (
+    <div className='pointer-events-none fixed inset-0 z-60'>
+      <motion.span
+        initial={{ x: origin.x - 18, y: origin.y - 18, opacity: 0, scale: 0.7, rotate: -18 }}
+        animate={
+          returning
+            ? { x: origin.x - 18, y: origin.y - 18, opacity: [1, 1, 0], scale: [1, 0.9, 0.65], rotate: -28 }
+            : phase === 'success'
+              ? { x: center.x - 18, y: center.y - 18, opacity: 0, scale: 0.7, rotate: 24 }
+              : {
+                  x: center.x - 18,
+                  y: [origin.y - 18, Math.min(origin.y, center.y) - 110, center.y - 18],
+                  opacity: [0, 1, 1],
+                  scale: [0.7, 1, 1],
+                  rotate: [-18, 8, 22]
+                }
+        }
+        transition={{ duration: returning ? 0.45 : 0.7, ease: revealEase }}
+        onAnimationComplete={() => returning && onReturned()}
+        className='bg-primary text-primary-foreground fixed top-0 left-0 flex size-9 items-center justify-center rounded-full shadow-lg'
+      >
+        <Send className='size-4' />
+      </motion.span>
+
+      <AnimatePresence>
+        {phase === 'success' ? (
+          <motion.span
+            initial={{ opacity: 0.55, scale: 0.25 }}
+            animate={{ opacity: 0, scale: 4.5 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.75, ease: revealEase }}
+            className='bg-primary/15 fixed top-1/2 left-1/2 size-20 -translate-x-1/2 -translate-y-1/2 rounded-full'
+          />
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }
@@ -605,7 +1035,8 @@ function MonthCalendar({
   selectable,
   onSelect,
   prevLabel,
-  nextLabel
+  nextLabel,
+  firstAvailableDate
 }: {
   locale: Locale
   month: Date
@@ -615,8 +1046,11 @@ function MonthCalendar({
   onSelect: (key: string) => void
   prevLabel: string
   nextLabel: string
+  /** Nhảy về đây khi tháng đang xem không có ngày khả dụng nào (mục 4). */
+  firstAvailableDate?: Date
 }) {
   const t = useTranslations('contractors.survey')
+  const reduceMotion = useReducedMotion()
   const weekdays = t.raw('weekdays') as string[]
 
   const cells = useMemo(() => {
@@ -630,6 +1064,38 @@ function MonthCalendar({
       return day
     })
   }, [month])
+
+  const availableOrder = useMemo(
+    () => new Map(cells.filter((day) => selectable.has(toDateKey(day))).map((day, index) => [toDateKey(day), index])),
+    [cells, selectable]
+  )
+
+  const hasAvailableInMonth = cells.some((day) => day.getMonth() === month.getMonth() && selectable.has(toDateKey(day)))
+
+  /** Hướng trượt khi đổi tháng — mẫu "điều chỉnh state khi prop đổi" của React. */
+  const [renderedMonthKey, setRenderedMonthKey] = useState(`${month.getFullYear()}-${month.getMonth()}`)
+  const [monthDirection, setMonthDirection] = useState(1)
+  const [pulseOnce, setPulseOnce] = useState(false)
+  const monthKey = `${month.getFullYear()}-${month.getMonth()}`
+  if (monthKey !== renderedMonthKey) {
+    setMonthDirection(monthKey > renderedMonthKey ? 1 : -1)
+    setRenderedMonthKey(monthKey)
+    setPulseOnce(false)
+  }
+
+  /** 7 ngày khả dụng "sáng lên" thêm một nhịp sau khi lưới hiện xong (mục 4). */
+  useEffect(() => {
+    if (reduceMotion) return
+    const timer = window.setTimeout(() => setPulseOnce(true), 720)
+    return () => window.clearTimeout(timer)
+  }, [monthKey, reduceMotion])
+
+  /** Bấm ngày không khả dụng → rung nhẹ + chú giải (mục 4). */
+  const [shakeKey, setShakeKey] = useState<string | null>(null)
+  const shakeUnavailable = (key: string) => {
+    setShakeKey(key)
+    window.setTimeout(() => setShakeKey(null), 400)
+  }
 
   const shift = (delta: number) => onMonthChange(new Date(month.getFullYear(), month.getMonth() + delta, 1))
 
@@ -647,9 +1113,18 @@ function MonthCalendar({
         {/* Ảnh S16 ghi "Tháng 8, 2026" — Intl vi cho ra "tháng 9 năm 2026" nên
             tháng và năm được ghép tay. `capitalize` của Tailwind viết hoa MỌI
             từ ("Tháng 9 Năm 2026"), phải dùng `first-letter:uppercase`. */}
-        <p className='text-sm font-semibold first-letter:uppercase'>
-          {formatDate(month, locale, { month: 'long' })}, {month.getFullYear()}
-        </p>
+        <AnimatePresence mode='wait'>
+          <motion.p
+            key={monthKey}
+            initial={{ opacity: 0, x: monthDirection * 10, y: -4 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className='text-sm font-semibold first-letter:uppercase'
+          >
+            {formatDate(month, locale, { month: 'long' })}, {month.getFullYear()}
+          </motion.p>
+        </AnimatePresence>
         <button
           type='button'
           aria-label={nextLabel}
@@ -668,33 +1143,133 @@ function MonthCalendar({
         ))}
       </div>
 
-      <div className='grid grid-cols-7 gap-y-1 text-center text-sm'>
-        {cells.map((day) => {
-          const key = toDateKey(day)
-          const inMonth = day.getMonth() === month.getMonth()
-          const canPick = selectable.has(key)
-          const active = value === key
+      <AnimatePresence mode='wait'>
+        <motion.div
+          key={monthKey}
+          initial={{ opacity: 0, x: monthDirection * 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -monthDirection * 16 }}
+          transition={{ duration: 0.25 }}
+          className='grid grid-cols-7 gap-y-1 text-center text-sm'
+        >
+          {cells.map((day, index) => {
+            const key = toDateKey(day)
+            const inMonth = day.getMonth() === month.getMonth()
+            const canPick = selectable.has(key)
+            const active = value === key
+            const isShaking = shakeKey === key
 
-          return (
-            <div key={key} className='flex justify-center py-0.5'>
-              <button
-                type='button'
-                disabled={!canPick}
-                onClick={() => onSelect(key)}
-                className={cn(
-                  'flex size-9 items-center justify-center rounded-full transition-colors',
-                  active && 'bg-primary text-primary-foreground font-semibold',
-                  !active && canPick && 'bg-accent text-primary-strong hover:bg-accent/70 font-medium',
-                  !canPick && (inMonth ? 'text-muted-foreground' : 'text-muted-foreground/45'),
-                  !canPick && 'cursor-default'
-                )}
+            return (
+              <motion.div
+                key={key}
+                initial={reduceMotion ? false : { opacity: 0, y: -7 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.26, delay: Math.floor(index / 7) * 0.075, ease: revealEase }}
+                className='flex justify-center py-0.5'
               >
-                {day.getDate()}
-              </button>
-            </div>
-          )
-        })}
-      </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      type='button'
+                      aria-pressed={active}
+                      aria-disabled={!canPick}
+                      onClick={() => (canPick ? onSelect(key) : shakeUnavailable(key))}
+                      whileHover={canPick && !reduceMotion ? { scale: 1.08 } : undefined}
+                      whileTap={canPick && !reduceMotion ? { scale: 0.92 } : undefined}
+                      animate={
+                        isShaking && !reduceMotion
+                          ? { x: [0, -4, 4, -3, 3, 0], scale: 1 }
+                          : active && !reduceMotion
+                            ? { x: 0, scale: [0.86, 1.14, 1] }
+                            : { x: 0, scale: 1 }
+                      }
+                      // Spring của motion chỉ nhận HAI keyframe: đưa `[0.86, 1.14, 1]` vào spring
+                      // là motion ném lỗi ngay trong vòng lặp khung hình, và vòng lặp đó chết cho
+                      // cả phiên — M09 (màn kế tiếp) đứng yên ở trạng thái ẩn. Độ nảy đã nằm sẵn
+                      // trong ba keyframe nên `scale` chạy tween; các giá trị khác giữ spring.
+                      transition={
+                        active
+                          ? { type: 'spring', stiffness: 420, damping: 22, scale: { duration: 0.4, ease: 'easeOut' } }
+                          : { duration: reduceMotion ? 0 : 0.35 }
+                      }
+                      className={cn(
+                        'relative isolate flex size-9 items-center justify-center rounded-full transition-colors',
+                        active && 'font-semibold',
+                        !active && canPick && 'bg-accent text-primary-strong hover:bg-primary/15 font-medium',
+                        !canPick && (inMonth ? 'text-muted-foreground' : 'text-muted-foreground/45'),
+                        !canPick && 'cursor-default'
+                      )}
+                    >
+                      {/* Vòng tròn tô đặc của ngày đang chọn — overlay riêng để
+                          trượt + nảy giữa các ô bằng `layoutId` (mục 4). */}
+                      <AnimatePresence initial={false}>
+                        {active ? (
+                          <motion.span
+                            layoutId='calendar-active-day'
+                            initial={reduceMotion ? false : { scale: 0.72, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={reduceMotion ? undefined : { scale: 0.72, opacity: 0 }}
+                            transition={{ type: 'spring', bounce: 0.45, duration: 0.42 }}
+                            className='bg-primary absolute inset-0 z-0 rounded-full'
+                          />
+                        ) : null}
+                      </AnimatePresence>
+                      {/* Sáng lên thêm một nhịp sau khi lưới vừa hiện (mục 4). */}
+                      {canPick && !active && pulseOnce && !reduceMotion ? (
+                        <motion.span
+                          aria-hidden
+                          initial={{ opacity: 0.65, scale: 0.7 }}
+                          animate={{ opacity: 0, scale: 1.75 }}
+                          transition={{
+                            duration: 0.7,
+                            delay: (availableOrder.get(key) ?? 0) * 0.09,
+                            ease: revealEase
+                          }}
+                          className='border-primary/35 absolute inset-0 z-0 rounded-full border-2'
+                        />
+                      ) : null}
+                      <span className={cn('relative z-10', active && 'text-primary-foreground')}>{day.getDate()}</span>
+                    </motion.button>
+                  </TooltipTrigger>
+                  {!canPick ? <TooltipContent>{t('dateHint', { days: SURVEY_WINDOW_DAYS })}</TooltipContent> : null}
+                </Tooltip>
+              </motion.div>
+            )
+          })}
+        </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {shakeKey ? (
+          <motion.p
+            initial={{ opacity: 0, height: 0, y: -4 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0 }}
+            className='text-brand-orange mt-2 overflow-hidden text-xs'
+          >
+            {t('dateHint', { days: SURVEY_WINDOW_DAYS })}
+          </motion.p>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Tháng không có ngày khả dụng → thông báo + lối về tháng có lịch (mục 4). */}
+      {!hasAvailableInMonth && firstAvailableDate ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25 }}
+          className='mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed p-3 text-sm'
+        >
+          <span className='text-muted-foreground'>{t('noMonthAvailable')}</span>
+          <button
+            type='button'
+            onClick={() => onMonthChange(new Date(firstAvailableDate.getFullYear(), firstAvailableDate.getMonth(), 1))}
+            className='text-primary-strong font-medium underline underline-offset-4'
+          >
+            {t('backToAvailableMonth')}
+          </button>
+        </motion.div>
+      ) : null}
     </div>
   )
 }

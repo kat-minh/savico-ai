@@ -28,6 +28,7 @@ export {
   usePricingMotion
 } from './pricing-motion'
 export { PlanDrawing, type PlanVariant } from './plan-drawing'
+export { RevealPhoto } from './reveal-photo'
 export {
   Reveal,
   RevealStagger,

@@ -15,7 +15,7 @@ export default async function ContractorInvitePage({ params }: PageProps) {
 
   return (
     <ProtectedRoute>
-      <SurveyScheduler projectId={projectId} contractorId={contractorId} />
+      <SurveyScheduler key={contractorId} projectId={projectId} contractorId={contractorId} />
     </ProtectedRoute>
   )
 }

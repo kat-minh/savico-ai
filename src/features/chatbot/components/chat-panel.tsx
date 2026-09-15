@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
+import { AnimatePresence, motion } from 'motion/react'
 import { Bot, SendHorizonal, User } from 'lucide-react'
 
 import { cn } from '@/shared/lib/utils'
@@ -10,11 +11,13 @@ import { Input } from '@/shared/components/ui/input'
 import { Card } from '@/shared/components/ui/card'
 import { useChat } from '../hooks/use-chat'
 import { SUGGESTIONS } from '../api/chatbot.mock'
+import { useChatbotStore } from '../store/chatbot.store'
 
 export function ChatPanel() {
   const t = useTranslations('chatbot')
   const { messages, send, isReplying, remaining, dailyLimit, limitReached } = useChat()
-  const [input, setInput] = useState('')
+  const input = useChatbotStore((state) => state.draft)
+  const setInput = useChatbotStore((state) => state.setDraft)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -38,26 +41,34 @@ export function ChatPanel() {
     <Card className='flex h-full min-h-0 flex-col overflow-hidden p-0'>
       {/* Messages */}
       <div ref={scrollRef} className='flex-1 space-y-4 overflow-y-auto p-4'>
-        {messages.map((m) => (
-          <div key={m.id} className={cn('flex items-start gap-3', m.role === 'user' && 'flex-row-reverse')}>
-            <div
-              className={cn(
-                'flex size-8 shrink-0 items-center justify-center rounded-full',
-                m.role === 'assistant' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-              )}
+        <AnimatePresence initial={false}>
+          {messages.map((m) => (
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 12, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className={cn('flex items-start gap-3', m.role === 'user' && 'flex-row-reverse')}
             >
-              {m.role === 'assistant' ? <Bot className='size-4' /> : <User className='size-4' />}
-            </div>
-            <div
-              className={cn(
-                'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap',
-                m.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'
-              )}
-            >
-              {m.content}
-            </div>
-          </div>
-        ))}
+              <div
+                className={cn(
+                  'flex size-8 shrink-0 items-center justify-center rounded-full',
+                  m.role === 'assistant' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+                )}
+              >
+                {m.role === 'assistant' ? <Bot className='size-4' /> : <User className='size-4' />}
+              </div>
+              <div
+                className={cn(
+                  'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap',
+                  m.role === 'assistant' ? 'bg-muted' : 'bg-primary text-primary-foreground'
+                )}
+              >
+                {m.content}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {isReplying ? (
           <div className='flex items-start gap-3'>

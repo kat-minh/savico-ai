@@ -171,7 +171,10 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
             <p className='text-muted-foreground mx-auto mt-1 max-w-2xl text-center text-sm text-pretty'>
               {tStart('subtitle')}
             </p>
-            <StartOptions findHref={order.projectId ? contractorMatchesRoute(order.projectId) : ROUTES.CONTRACTORS} />
+            <StartOptions
+              findHref={order.projectId ? contractorMatchesRoute(order.projectId) : ROUTES.CONTRACTORS}
+              hasPlan
+            />
           </div>
         )}
       </div>

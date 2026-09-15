@@ -47,7 +47,14 @@
     "subtitle": "Hỏi bất cứ điều gì về dự án của bạn",
     "close": "Đóng",
     "fab": "SAVICO AI Assistant",
-    "topicSuggestion": "Hỏi AI về {topic}"
+    "topicSuggestion": "Hỏi AI về {topic}",
+    "nudge": {
+      "painPoints": "Đang phân vân chỗ nào? Hỏi tôi thử xem 👋",
+      "services": "Chưa biết chọn gói nào? Tôi gợi ý cho bạn nhé!",
+      "guideNext": "Cần mình hướng dẫn bước tiếp theo?",
+      "guidePrompt": "Hướng dẫn tôi bước tiếp theo sau video {title}",
+      "guidePromptGeneral": "Hướng dẫn tôi nên bắt đầu từ video nào"
+    }
   },
   "auth": {
     "login": {
@@ -246,7 +253,8 @@
     "plansGuest": "Bảng giá",
     "consult": "Tư vấn 1:1",
     "admin": "Khu quản trị",
-    "contractors": "Tìm nhà thầu"
+    "contractors": "Tìm nhà thầu",
+    "resumeProject": "Mở tiếp dự án"
   },
   "footer": {
     "tagline": "Nền tảng thiết kế & dự toán AI, kết nối nhà thầu đã xác minh và giám sát thi công.",
@@ -299,6 +307,7 @@
       "titleAccent": "thiết kế & dự toán",
       "subtitle": "AI tạo mặt bằng, phối cảnh 3D và dự toán khối lượng từ ảnh lô đất.\nMời nhà thầu đã xác minh và giám sát thi công trên cùng một nền tảng.",
       "primaryCta": "Tạo dự án ngay",
+      "resumeCta": "Mở tiếp dự án →",
       "secondaryCta": "Xem hướng dẫn 1 phút",
       "card": {
         "title": "Hồ sơ dự án",
@@ -352,6 +361,7 @@
       "title": "Khó là kiểm soát mọi thứ cùng lúc",
       "subtitle": "Từ ngân sách, thiết kế đến chọn nhà thầu và giám sát thi công — SAVICO giúp bạn chủ động và dễ dàng hơn ở từng bước.",
       "note": "Bạn cũng đang\ngặp những vấn đề này?",
+      "solveHint": "Xem cách SAVICO giải quyết",
       "items": {
         "budget": {
           "title": "Không biết chi phí thực tế sẽ bao nhiêu?",
@@ -381,26 +391,48 @@
       "note": "Bạn luôn biết mình đang ở đâu,\nvà trạng thái từng bước.",
       "cta": "Tạo dự án mới",
       "ctaHint": "Chỉ cần 1 tấm ảnh lô đất",
+      "resumeCta": "Mở tiếp dự án {id}",
+      "currentStepBadge": "Bạn đang ở bước này",
+      "detailLabels": {
+        "youDo": "Bạn làm gì",
+        "savicoDoes": "SAVICO làm gì",
+        "youGet": "Bạn nhận được gì"
+      },
       "items": {
         "project": {
           "title": "Tạo dự án",
-          "description": "Chụp ảnh lô đất, nhập nhu cầu và phong cách."
+          "description": "Chụp ảnh lô đất, nhập nhu cầu và phong cách.",
+          "youDo": "Chụp ảnh lô đất, chọn loại công trình và phong cách mong muốn.",
+          "savicoDoes": "Tạo mã dự án và mở ngay Bước 1 để bạn nhập thông tin.",
+          "youGet": "Một dự án sẵn sàng, quay lại tiếp tục bất cứ lúc nào."
         },
         "design": {
           "title": "Thiết kế & Dự toán",
-          "description": "AI tạo mặt bằng, phối cảnh 3D và dự toán khối lượng."
+          "description": "AI tạo mặt bằng, phối cảnh 3D và dự toán khối lượng.",
+          "youDo": "Xem trước các phương án và chọn phương án ưng ý nhất.",
+          "savicoDoes": "AI phân tích ảnh, dựng mặt bằng, phối cảnh 3D và bóc khối lượng.",
+          "youGet": "Bảng dự toán chi tiết theo từng hạng mục, minh bạch từ đầu."
         },
         "dossier": {
           "title": "Hồ sơ thi công",
-          "description": "Render và nhận đầy đủ hồ sơ thiết kế, dự toán."
+          "description": "Render và nhận đầy đủ hồ sơ thiết kế, dự toán.",
+          "youDo": "Xem lại và tải về bộ hồ sơ khi đã hài lòng với dự toán.",
+          "savicoDoes": "Render đầy đủ bản vẽ mặt bằng, phối cảnh và dự toán thành hồ sơ hoàn chỉnh.",
+          "youGet": "Bộ hồ sơ đủ để đưa cho bất kỳ nhà thầu nào thi công."
         },
         "contractor": {
           "title": "Mời nhà thầu",
-          "description": "Mời tối đa 3 nhà thầu đã xác minh, theo dõi trạng thái lời mời."
+          "description": "Mời tối đa 3 nhà thầu đã xác minh, theo dõi trạng thái lời mời.",
+          "youDo": "Chọn tối đa 3 nhà thầu phù hợp từ danh sách đề xuất.",
+          "savicoDoes": "Đề xuất nhà thầu đã xác minh, gửi hồ sơ và theo dõi phản hồi.",
+          "youGet": "Nhiều lựa chọn để so sánh mà không mất công tự tìm kiếm."
         },
         "build": {
           "title": "Thi công & Giám sát",
-          "description": "Kỹ sư SAVICO kiểm tra theo mốc, đảm bảo đúng thiết kế và tiến độ."
+          "description": "Kỹ sư SAVICO kiểm tra theo mốc, đảm bảo đúng thiết kế và tiến độ.",
+          "youDo": "Theo dõi tiến độ và duyệt kết quả kiểm tra tại mỗi mốc.",
+          "savicoDoes": "Kỹ sư SAVICO đến tận công trình kiểm tra theo mốc đã hẹn.",
+          "youGet": "Yên tâm công trình đúng thiết kế, đúng tiến độ."
         }
       }
     },
@@ -410,26 +442,32 @@
       "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
       "viewAll": "Xem tất cả gói",
       "note": "Đúng gói,\nđúng giai đoạn!",
+      "ownedLabel": "Gói của bạn - còn {count} lượt",
+      "openPackage": "Mở gói",
       "items": {
         "design": {
           "title": "Gói thiết kế",
           "description": "Cơ bản · Chi tiết · Tối ưu — 2/5/8 phương án, 2/4/6 lượt chỉnh sửa.",
-          "action": "Xem các gói"
+          "action": "Xem các gói",
+          "usedAtStep": "Dùng ở bước 02–03"
         },
         "contractors": {
           "title": "Tìm nhà thầu",
           "description": "SAVICO đề xuất nhà thầu đã xác minh, mời tối đa 3 nhà thầu.",
-          "action": "Tìm nhà thầu"
+          "action": "Tìm nhà thầu",
+          "usedAtStep": "Dùng ở bước 04"
         },
         "supervision": {
           "title": "Giám sát thi công",
           "description": "An Tâm (6 lượt) · Toàn Diện (12 lượt) kỹ sư kiểm tra thực tế.",
-          "action": "Xem gói giám sát"
+          "action": "Xem gói giám sát",
+          "usedAtStep": "Dùng ở bước 05"
         },
         "turnkey": {
           "title": "Thi công trọn gói",
           "description": "SAVICO khảo sát, ký hợp đồng và thi công đến bàn giao.",
-          "action": "Đăng ký triển khai"
+          "action": "Đăng ký triển khai",
+          "usedAtStep": "Dùng ở bước 04–05"
         }
       }
     },
@@ -533,7 +571,14 @@
     "cta": {
       "title": "Sẵn sàng bắt đầu dự án của bạn?",
       "subtitle": "Chụp 1 tấm ảnh lô đất — nhận thiết kế & dự toán ngay hôm nay.",
-      "action": "Tạo dự án mới"
+      "action": "Tạo dự án mới",
+      "resumeTitle": "Tiếp tục dự án {name} của bạn?",
+      "resumeAction": "Mở tiếp dự án →",
+      "byStatus": {
+        "input": "Bạn đang ở bước Nhập liệu — chỉ mất khoảng 2 phút để hoàn tất.",
+        "designing": "Thiết kế & dự toán của bạn đang được xử lý — xem tiến độ ngay.",
+        "review": "Bản dự toán đã sẵn sàng — xem chi tiết và bước tiếp theo."
+      }
     }
   },
   "handbook": {
@@ -548,7 +593,9 @@
     "home": {
       "eyebrow": "CẨM NANG XÂY NHÀ",
       "title": "Kiến thức thực tế cho hành trình xây nhà",
-      "viewAll": "Xem tất cả bài viết"
+      "viewAll": "Xem tất cả bài viết",
+      "newBadge": "Mới",
+      "readTime": "Đọc ~{minutes} phút →"
     },
     "card": {
       "imageCount": "{count} ảnh 3D"
@@ -737,7 +784,7 @@
     "searchPlaceholder": "Tìm video hoặc bài hướng dẫn...",
     "articlesTitle": "Bài hướng dẫn",
     "empty": {
-      "title": "Không tìm thấy hướng dẫn",
+      "title": "Không tìm thấy hướng dẫn cho \"{keyword}\"",
       "description": "Thử từ khóa khác."
     },
     "topics": {
@@ -756,7 +803,50 @@
     "carouselLabel": "Video hướng dẫn",
     "prev": "Trang trước",
     "next": "Trang sau",
-    "goToPage": "Trang {page}"
+    "goToPage": "Trang {page}",
+    "pageOf": "Trang {page}/{total}",
+    "card": {
+      "comingSoon": "Sắp có",
+      "editingHint": "Video đang được biên tập",
+      "continueFrom": "Xem tiếp từ {time}",
+      "completed": "Đã xem xong"
+    },
+    "search": {
+      "clear": "Xoá tìm kiếm",
+      "tryTopic": "Hoặc thử chủ đề:",
+      "suggestions": "Đề xuất tìm kiếm",
+      "article": "Bài viết",
+      "style": "Chọn phong cách"
+    },
+    "lightbox": {
+      "upNext": "Xem tiếp",
+      "createProject": "Tạo dự án ngay",
+      "close": "Đóng",
+      "dragHandle": "Kéo xuống để đóng",
+      "prevVideo": "Video trước",
+      "nextVideo": "Video sau",
+      "play": "Phát",
+      "pause": "Tạm dừng",
+      "mute": "Tắt tiếng",
+      "unmute": "Bật tiếng",
+      "fullscreen": "Toàn màn hình",
+      "exitFullscreen": "Thoát toàn màn hình",
+      "continueFrom": "Tiếp tục từ {time}",
+      "watchFromStart": "Xem từ đầu",
+      "loadingSlow": "Đang tải video…",
+      "connectionSlow": "Kết nối chậm",
+      "retry": "Thử lại",
+      "offline": "Mất kết nối mạng. Video sẽ tự phát tiếp khi có mạng trở lại",
+      "autoAdvanceIn": "Xem tiếp sau {seconds}s",
+      "replay": "Xem lại",
+      "watchNow": "Xem tiếp ngay",
+      "completedAllTitle": "Bạn đã xem hết hướng dẫn",
+      "watchAgain": "Xem lại từ đầu",
+      "notifyMe": "Nhận thông báo khi có video",
+      "notifyMeConfirmed": "Đã đăng ký nhận thông báo",
+      "editingMessage": "Video đang được biên tập",
+      "readArticleInstead": "Đọc bài hướng dẫn thay thế"
+    }
   },
   "design": {
     "steps": {
@@ -1427,6 +1517,8 @@
       "specialty": "Chuyên môn",
       "allSpecialties": "Tất cả chuyên môn",
       "count": "{count} kiến trúc sư",
+      "countLabel": "kiến trúc sư",
+      "clearSearch": "Xoá tìm kiếm",
       "lead": "Chọn kiến trúc sư bạn muốn trao đổi",
       "empty": {
         "title": "Không tìm thấy kiến trúc sư phù hợp",
@@ -1455,6 +1547,7 @@
         "afternoon": "Chiều"
       },
       "full": "Kín",
+      "fullHint": "Khung giờ này đã kín",
       "weekday": {
         "mon": "T2",
         "tue": "T3",
@@ -1482,7 +1575,9 @@
       "subtitle": "Kiến trúc sư gợi ý giải pháp phù hợp với nhu cầu của bạn.",
       "eyebrow": "TƯ VẤN 1:1",
       "viewAll": "Xem tất cả chuyên gia",
-      "book": "Đặt lịch"
+      "book": "Đặt lịch",
+      "booking": "Đang đặt lịch…",
+      "booked": "Đã đặt lịch"
     }
   },
   "admin": {
@@ -2619,6 +2714,8 @@
     "landing": {
       "hero": {
         "title": "Tìm đúng nhà thầu cho công trình của bạn",
+        "titleLine1": "Tìm đúng nhà thầu",
+        "titleLine2": "cho công trình của bạn",
         "subtitle": "Kết nối với mạng lưới nhà thầu uy tín trên SAVICO, giúp bạn dễ dàng tìm kiếm, so sánh năng lực và lựa chọn đối tác phù hợp, minh bạch và đáng tin cậy.",
         "createBrief": "Tạo hồ sơ",
         "bestMatch": "Phù hợp nhất với dự án của bạn",
@@ -2633,7 +2730,8 @@
           "distanceValue": "{km} km",
           "completedValue": "{count} dự án",
           "similarValue": "{count} dự án tương tự",
-          "surveyValue": "trong {hours}h"
+          "surveyValue": "trong {hours}h",
+          "locked": "Tạo hồ sơ để SAVICO ghép nhà thầu phù hợp"
         }
       },
       "promises": {
@@ -2650,12 +2748,24 @@
         "scale": "Quy mô công trình",
         "experience": "Kinh nghiệm dự án tương tự",
         "rating": "Đánh giá & số dự án hoàn thành",
-        "schedule": "Lịch nhận việc & thời gian khảo sát"
+        "schedule": "Lịch nhận việc & thời gian khảo sát",
+        "experienceOptions": {
+          "any": "Không yêu cầu",
+          "junior": "Dưới 5 dự án tương tự",
+          "mid": "5–15 dự án tương tự",
+          "senior": "Trên 15 dự án tương tự"
+        },
+        "ratingOptions": {
+          "any": "Mọi mức đánh giá",
+          "good": "Từ 4,0 sao",
+          "great": "Từ 4,5 sao"
+        }
       },
       "ranking": {
         "note": "Xếp hạng = mức độ phù hợp dự án + khoảng cách + kinh nghiệm + đánh giá + lịch nhận việc + mức độ khảo sát",
         "detail": "Xem chi tiết",
         "choose": "Chọn & gửi hồ sơ",
+        "stickyNudge": "Tạo hồ sơ dự án - miễn phí",
         "tabs": {
           "match": "Phù hợp nhất",
           "distance": "Gần nhất",
@@ -2749,8 +2859,16 @@
     "brief": {
       "badge": "Miễn phí · Không cần đăng ký gói",
       "back": "Quay lại lựa chọn",
+      "leaveConfirm": "Rời trang sẽ bỏ dở phần đang nhập. Tiếp tục?",
+      "close": "Đóng và quay lại lựa chọn",
+      "leaveTitle": "Lưu hồ sơ nháp trước khi rời đi?",
+      "leaveDescription": "Bạn đã nhập một số thông tin. SAVICO có thể lưu lại để bạn tiếp tục sau.",
+      "saveDraftAndLeave": "Lưu nháp và quay lại",
+      "leaveWithoutSaving": "Không lưu",
+      "keepEditing": "Tiếp tục nhập",
       "title": "Tự tạo hồ sơ dự án",
       "subtitle": "Hoàn tất thông tin công trình và nhu cầu thi công, SAVICO đề xuất nhà thầu phù hợp.",
+      "draftSaved": "Đã lưu nháp - {time}",
       "steps": {
         "one": "Thông tin & nhu cầu",
         "two": "Kiểm tra hồ sơ"
@@ -2763,6 +2881,7 @@
         "buildingType": "Loại công trình",
         "buildingTypePlaceholder": "Chọn loại công trình",
         "landArea": "Diện tích đất (m²)",
+        "areaSuffix": "m²",
         "condition": "Hiện trạng",
         "scale": "Quy mô",
         "address": "Địa chỉ công trình",
@@ -2773,7 +2892,9 @@
         "startWindow": "Dự kiến khởi công",
         "street": "Số nhà, đường",
         "streetPlaceholder": "VD: 12 Nguyễn Tất Thành",
-        "addressHint": "Chọn tỉnh/thành trước, danh sách phường/xã sẽ lọc theo."
+        "addressHint": "Chọn tỉnh/thành trước, danh sách phường/xã sẽ lọc theo.",
+        "landAreaConfirm": "Bạn chắc chắn diện tích {value} m²?",
+        "budgetApprox": "≈ {value}"
       },
       "needs": {
         "title": "Nhu cầu thi công",
@@ -2781,6 +2902,12 @@
         "scope": "Phạm vi thi công",
         "note": "Mô tả nhu cầu",
         "notePlaceholder": "VD: Cần nhà thầu thi công trọn gói nhà phố 2 tầng, có kinh nghiệm và có thể khảo sát hiện trạng vào cuối tuần.",
+        "notePlaceholderByScope": {
+          "turnkey": "VD: Cần nhà thầu thi công trọn gói nhà phố 2 tầng, có kinh nghiệm và có thể khảo sát cuối tuần.",
+          "shell": "VD: Cần nhà thầu thi công phần thô — móng, khung, tường bao, mái — cho nhà phố 2 tầng.",
+          "finishing": "VD: Cần nhà thầu hoàn thiện — trát, ốp lát, sơn, lắp thiết bị — cho nhà đã có phần thô.",
+          "interior": "VD: Cần nhà thầu thi công nội thất — đồ gỗ, đồ rời, trang trí — theo phong cách hiện đại."
+        },
         "noteHint": "Mô tả càng rõ, SAVICO càng dễ đề xuất đúng nhà thầu.",
         "counter": "{current} / {max}"
       },
@@ -2815,6 +2942,8 @@
       "needsTitle": "Nhu cầu thi công",
       "documentsTitle": "Tài liệu đính kèm",
       "noDocuments": "Chưa có tài liệu nào.",
+      "documentsThinHint": "Thêm bản vẽ, ảnh hiện trạng hoặc dự toán để hồ sơ đầy đủ hơn.",
+      "pleaseConfirm": "Vui lòng xác nhận thông tin",
       "edit": "Chỉnh sửa",
       "addFile": "Thêm tệp",
       "scopeLabel": "Phạm vi",
@@ -2858,6 +2987,7 @@
     "start": {
       "title": "Bạn muốn bắt đầu như thế nào?",
       "subtitle": "Chọn cách phù hợp với bạn lúc này — lượt trong gói vẫn còn nguyên cho tới khi bạn dùng.",
+      "idleSubtitle": "Bạn có thể đổi lựa chọn sau - lượt trong gói vẫn còn.",
       "option": "Lựa chọn {index}",
       "popular": "Lựa chọn phổ biến nhất",
       "find": {
@@ -2888,7 +3018,9 @@
         "p2": "Gợi ý hướng thiết kế phù hợp ngân sách",
         "p3": "Giải đáp quy trình và cách dùng nền tảng",
         "action": "Đặt lịch tư vấn",
-        "p4": "Đã bao gồm trong gói của bạn"
+        "included": "Đã bao gồm trong gói của bạn",
+        "priceFrom": "Từ {price}",
+        "viewPricing": "Xem các gói tư vấn"
       },
       "turnkeyForm": {
         "title": "Đăng ký triển khai trọn gói",
@@ -2914,18 +3046,21 @@
       "subtitle": "Chọn nhà thầu để xem hồ sơ, so sánh hoặc mời báo giá.",
       "radius": "Bán kính tìm kiếm",
       "radiusOption": "{km} km",
+      "resultsInRadius": "{count} nhà thầu trong {km} km",
       "empty": "Chưa có nhà thầu nào trong bán kính {km} km. Thử mở rộng bán kính tìm kiếm.",
       "compareTitle": "Đã chọn so sánh",
       "compareCount": "({selected}/{max})",
       "compareHint": "Chọn từ {min} đến {max} nhà thầu",
       "compareAction": "So sánh {count} nhà thầu",
       "compareCheckbox": "So sánh",
+      "maxCompare": "Tối đa {max} nhà thầu",
+      "inviteLimitReached": "Đã dùng hết {max} lượt mời",
       "whyTitle": "Vì sao SAVICO đề xuất?",
       "why1": "Phù hợp loại công trình",
       "why2": "{count} dự án đã thực hiện",
       "why3": "Có thể khảo sát trong {hours}h",
       "projectLabel": "Dự án đang chọn",
-      "invitedPill": "Đã mời {used}/{max} · còn {left} lượt",
+      "invitedPill": "Đã mời <n>{used}</n>/{max} · còn <n>{left}</n> lượt",
       "viewInvites": "Xem lời mời",
       "switchProject": "Đổi dự án",
       "regionLabel": "Khu vực",
@@ -2950,6 +3085,7 @@
       "founded": "Thành lập năm {year}",
       "team": "{count} kiến trúc sư & kỹ sư",
       "office": "Văn phòng tại {address}",
+      "serviceAreaCount": "{count} khu vực",
       "strengths": "Thế mạnh",
       "featured": "Dự án tiêu biểu",
       "viewProject": "Xem dự án",
@@ -2959,8 +3095,17 @@
       "contactLocked": "Thông tin liên hệ được mở sau khi lịch khảo sát được xác nhận.",
       "report": "Báo cáo hồ sơ",
       "reportSent": "Đã ghi nhận báo cáo. Đội hỗ trợ SAVICO sẽ kiểm tra hồ sơ này.",
+      "reportConfirmTitle": "Báo cáo hồ sơ này?",
+      "reportConfirmBody": "SAVICO sẽ kiểm tra lại thông tin và hoạt động của nhà thầu này.",
+      "reportConfirmAction": "Gửi báo cáo",
       "addToCompare": "Thêm vào so sánh",
       "inCompare": "Đã thêm vào so sánh",
+      "compareChip": "So sánh {count}/{max}",
+      "compareFull": "Đã chọn đủ {max} nhà thầu để so sánh",
+      "clearProjectFilter": "Bỏ bộ lọc dự án",
+      "viewInvites": "Xem lời mời",
+      "notAcceptingNotice": "Nhà thầu đang tạm ngưng nhận dự án mới.",
+      "viewSimilar": "Xem nhà thầu tương tự",
       "partnership": {
         "title": "Đối tác hợp tác cùng SAVICO",
         "body": "{name} đã ký thỏa thuận hợp tác và được SAVICO xác minh hồ sơ doanh nghiệp.",
@@ -3005,16 +3150,32 @@
       "select": "Chọn nhà thầu",
       "selected": "Đã chọn nhà thầu",
       "footerHint": "Chọn tối đa {max} trong {total} nhà thầu để mời báo giá",
-      "footerSelected": "Đã chọn: {names}",
+      "footerSelected": "Đã chọn {count}: {names}",
       "footerEmpty": "Chưa chọn nhà thầu nào",
       "back": "Quay lại danh sách",
       "invite": "Mời nhà thầu đã chọn báo giá",
       "tooFew": "Chọn ít nhất {min} nhà thầu để so sánh.",
+      "tooFewInline": "Thêm ít nhất {count} nhà thầu nữa để so sánh.",
       "surveyValue": "Trong {hours}h",
-      "warrantyValue": "{months} tháng"
+      "warrantyValue": "{months} tháng",
+      "betterBadge": "Tốt hơn",
+      "highlightToggle": "Làm nổi điểm tốt hơn",
+      "removeColumn": "Bỏ so sánh",
+      "exceedRoom": "Bạn chỉ còn {count} lượt mời",
+      "criteriaHint": {
+        "rating": "Điểm đánh giá trung bình từ khách hàng đã làm việc qua SAVICO.",
+        "similarProjects": "Số dự án cùng loại hình nhà thầu đã thực hiện.",
+        "distance": "Khoảng cách từ nhà thầu tới công trình của bạn.",
+        "surveyTime": "Thời gian nhà thầu có thể tới khảo sát sau khi nhận lời mời.",
+        "serviceAreas": "Các khu vực nhà thầu nhận thi công.",
+        "legal": "Hồ sơ pháp lý đã được SAVICO đối chiếu.",
+        "warranty": "Thời gian bảo hành sau khi bàn giao công trình.",
+        "accepting": "Nhà thầu có đang nhận dự án mới hay không."
+      }
     },
     "survey": {
       "title": "Chọn thời gian khảo sát",
+      "titleQueue": "Chọn thời gian khảo sát ({current}/{total})",
       "subtitle": "Chọn thời gian phù hợp để {name} đến khảo sát công trình.",
       "queue": "Nhà thầu {current}/{total}",
       "dateTitle": "Chọn ngày khảo sát",
@@ -3023,6 +3184,7 @@
       "unavailable": "Không khả dụng",
       "slotTitle": "Chọn khung giờ",
       "slotOffice": "Giờ hành chính",
+      "chooseDateForSlots": "Chọn ngày ở lịch để xem khung giờ",
       "slotTaken": "Khung giờ này đã có lịch",
       "workingHours": "Khung giờ làm việc: 08:00 – 17:00 (Thứ 2 – Thứ 7)",
       "callAhead": "Nhà thầu sẽ liên hệ trước 30 phút để xác nhận.",
@@ -3044,12 +3206,24 @@
       "editContact": "Chỉnh sửa",
       "contactMissing": "Chưa có",
       "saveContact": "Lưu",
-      "cancelEdit": "Bỏ thay đổi"
+      "cancelEdit": "Bỏ thay đổi",
+      "contactUpdated": "Đã cập nhật liên hệ",
+      "earliestSlot": "Sớm nhất",
+      "dayFull": "Ngày này đã kín - gần nhất còn trống: {date}",
+      "slotBusyClick": "Khung giờ này nhà thầu đã bận",
+      "noMonthAvailable": "Tháng này chưa có ngày khả dụng.",
+      "backToAvailableMonth": "Về tháng có lịch",
+      "sending": "Đang gửi…",
+      "sendFailed": "Chưa gửi được, vui lòng thử lại",
+      "cancelConfirmTitle": "Huỷ đặt lịch khảo sát?",
+      "cancelConfirmBody": "Ngày và khung giờ bạn vừa chọn sẽ không được lưu.",
+      "cancelConfirmAction": "Huỷ đặt lịch",
+      "keepEditing": "Tiếp tục chọn"
     },
     "sent": {
       "title": "Đã gửi lời mời & đăng ký khảo sát",
       "subtitle": "Yêu cầu khảo sát của bạn đã được gửi đến {names}.",
-      "requestCode": "Mã yêu cầu: {code}",
+      "requestCode": "Mã yêu cầu: <accent>{code}</accent>",
       "sentAt": "Gửi lúc {time}",
       "detailTitle": "Chi tiết yêu cầu",
       "location": "Địa điểm khảo sát",
@@ -3060,7 +3234,12 @@
       "supportTime": "Thời gian dự kiến: Trong giờ làm việc gần nhất.",
       "track": "Theo dõi yêu cầu",
       "privacy": "Thông tin liên hệ được bảo mật cho đến khi lịch khảo sát được xác nhận.",
-      "statusSent": "Đã gửi"
+      "statusSent": "Đã gửi",
+      "titleMultiple": "Đã gửi {count} lời mời & đăng ký khảo sát",
+      "copyCode": "Sao chép mã",
+      "copied": "Đã sao chép",
+      "remainingInvites": "Bạn còn {count} lượt mời - mời thêm nhà thầu để có nhiều lựa chọn",
+      "inviteMore": "Mời thêm nhà thầu"
     },
     "invitations": {
       "title": "Lời mời báo giá",
@@ -3087,7 +3266,20 @@
       "supportBody": "Cập nhật trạng thái từng lời mời và hỗ trợ khi bạn muốn ngưng lời mời hoặc đổi nhà thầu.",
       "supportAction": "Liên hệ đội hỗ trợ",
       "footerNote": "Sau khi nhà thầu nhận lời mời, hai bên trao đổi trực tiếp về khảo sát, báo giá và hợp đồng. SAVICO không lưu báo giá hay số tiền. Muốn ngưng một lời mời hoặc đổi nhà thầu, hãy liên hệ đội hỗ trợ.",
-      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn qua số điện thoại đã đăng ký."
+      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
+      "newUpdateBadge": "Mới",
+      "editBriefWarning": "Sửa hồ sơ sẽ tạo phiên bản v2 - lời mời đã gửi vẫn dùng v1",
+      "contactDialogTitle": "Liên hệ đội hỗ trợ SAVICO",
+      "contactDialogCall": "Gọi ngay",
+      "supervisionSuggestion": "Đã có nhà thầu — chọn cách quản lý thi công?",
+      "supervisionAction": "Xem gói giám sát",
+      "statusPending": "Chưa có cập nhật thời gian",
+      "updateToast": "Lời mời tới {name} đã chuyển sang trạng thái {status}",
+      "profilePanelDescription": "Hồ sơ năng lực nhà thầu · Chế độ xem nhanh",
+      "profileRating": "Đánh giá",
+      "profileSimilar": "Dự án tương tự",
+      "dossierPanelDescription": "Phiên bản hồ sơ đã gửi · Chỉ đọc",
+      "noPriceBadge": "Không chứa giá"
     },
     "picker": {
       "title": "Chọn dự án để tìm nhà thầu",
