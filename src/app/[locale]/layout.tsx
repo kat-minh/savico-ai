@@ -11,6 +11,60 @@ import { notFound } from 'next/navigation'
 
 import '../globals.css'
 
+const PRICING_SCROLL_RESTORE_SCRIPT = `
+(() => {
+  const path = location.pathname.endsWith('/') ? location.pathname.slice(0, -1) : location.pathname;
+  if (!path.endsWith('/plans')) return;
+
+  const key = 'pricing-scroll:' + location.pathname + location.search;
+  const navigation = performance.getEntriesByType('navigation')[0];
+  const isReload = navigation && navigation.type === 'reload';
+  const saved = Number(sessionStorage.getItem(key));
+  let restoring = isReload && Number.isFinite(saved) && saved > 0;
+  let frame = 0;
+  const startedAt = performance.now();
+  const root = document.documentElement;
+  const previousMinHeight = root.style.minHeight;
+
+  history.scrollRestoration = 'manual';
+
+  if (restoring) {
+    root.style.minHeight = Math.ceil(saved + window.innerHeight) + 'px';
+    void root.offsetHeight;
+    window.scrollTo(0, saved);
+  }
+
+  const save = () => {
+    if (!restoring) sessionStorage.setItem(key, String(window.scrollY));
+  };
+
+  const restore = () => {
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    window.scrollTo(0, Math.min(saved, maxScroll));
+
+    const pageIsTallEnough = maxScroll >= saved - 2;
+    const positionIsRestored = Math.abs(window.scrollY - saved) <= 2;
+    if ((pageIsTallEnough && positionIsRestored) || performance.now() - startedAt > 5000) {
+      restoring = false;
+      root.style.minHeight = previousMinHeight;
+      sessionStorage.setItem(key, String(window.scrollY));
+      return;
+    }
+
+    frame = requestAnimationFrame(restore);
+  };
+
+  if (restoring) frame = requestAnimationFrame(restore);
+
+  window.addEventListener('scroll', save, { passive: true });
+  window.addEventListener('pagehide', () => {
+    cancelAnimationFrame(frame);
+    root.style.minHeight = previousMinHeight;
+    sessionStorage.setItem(key, String(window.scrollY));
+  }, { once: true });
+})();
+`
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   // 'latin-ext' covers Vietnamese diacritics; Geist has no 'vietnamese' subset.
@@ -78,6 +132,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: PRICING_SCROLL_RESTORE_SCRIPT }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${beVietnamPro.variable} ${handwriting.variable} font-sans antialiased`}
       >

@@ -111,7 +111,7 @@ function PlanPricingContent() {
         onViewportEnter={(entry) => {
           if (entry) (entry.target as HTMLElement).dataset.seen = 'true'
         }}
-        className='plan-cta-band group relative bg-accent/40 hover:bg-accent/55 -mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5 transition-colors'
+        className='plan-cta-band relative bg-accent/40 -mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5'
         initial={reduceMotion ? false : { opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
@@ -127,10 +127,10 @@ function PlanPricingContent() {
             <p className='text-muted-foreground text-sm text-pretty'>{t('ctaBand.subtitle')}</p>
           </div>
         </div>
-        <Button asChild size='lg' className='brand-green-button'>
-          <Link className='after:absolute after:inset-0 after:rounded-2xl' href={checkoutConfirmRoute('advanced')}>
+        <Button asChild size='lg' className='brand-green-button plan-cta-action'>
+          <Link href={checkoutConfirmRoute('advanced')}>
             {t('ctaBand.action')}
-            <ArrowRight className='size-4 transition-transform group-hover:translate-x-1' />
+            <ArrowRight className='plan-cta-arrow size-4' />
           </Link>
         </Button>
       </motion.section>

@@ -234,7 +234,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
             transition={{ duration: 0.48, delay: index * 0.14, ease: pricingEase }}
           >
             <span className='supervision-note-icon border-primary/40 text-primary flex size-8 shrink-0 items-center justify-center rounded-full border'>
-              <note.icon aria-hidden className='size-4' />
+              <note.icon aria-hidden className='supervision-note-glyph size-4' />
             </span>
             <span className='text-pretty'>{note.text}</span>
           </motion.li>

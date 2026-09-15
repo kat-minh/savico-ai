@@ -54,17 +54,49 @@ export function PricingMotionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let stopTimer: ReturnType<typeof setTimeout> | undefined
+    let restoreFrame = 0
+    let restoring = false
     const scrollKey = `pricing-scroll:${location.pathname}${location.search}`
     const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+    const previousScrollRestoration = history.scrollRestoration
+
+    history.scrollRestoration = 'manual'
+
+    const saveScrollPosition = () => {
+      if (restoring) return
+      sessionStorage.setItem(scrollKey, String(window.scrollY))
+    }
 
     if (navigation?.type === 'reload') {
       const saved = Number(sessionStorage.getItem(scrollKey))
-      if (Number.isFinite(saved) && saved > 0)
-        requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: 'instant' })))
+      if (Number.isFinite(saved) && saved > 0) {
+        restoring = true
+        const startedAt = performance.now()
+
+        const restore = () => {
+          const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+          const target = Math.min(saved, maxScroll)
+          window.scrollTo({ top: target, behavior: 'instant' })
+
+          const pageIsTallEnough = maxScroll >= saved - 2
+          const positionIsRestored = Math.abs(window.scrollY - saved) <= 2
+          const timedOut = performance.now() - startedAt > 4000
+
+          if ((pageIsTallEnough && positionIsRestored) || timedOut) {
+            restoring = false
+            sessionStorage.setItem(scrollKey, String(window.scrollY))
+            return
+          }
+
+          restoreFrame = requestAnimationFrame(restore)
+        }
+
+        restoreFrame = requestAnimationFrame(restore)
+      }
     }
 
     const onScroll = () => {
-      sessionStorage.setItem(scrollKey, String(window.scrollY))
+      saveScrollPosition()
       setIsScrolling(true)
       document.documentElement.dataset.pricingScrolling = 'true'
       if (stopTimer) clearTimeout(stopTimer)
@@ -75,9 +107,14 @@ export function PricingMotionProvider({ children }: { children: ReactNode }) {
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('pagehide', saveScrollPosition)
     return () => {
       delete document.documentElement.dataset.pricingScrolling
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('pagehide', saveScrollPosition)
+      cancelAnimationFrame(restoreFrame)
+      saveScrollPosition()
+      history.scrollRestoration = previousScrollRestoration
       if (stopTimer) clearTimeout(stopTimer)
     }
   }, [])
