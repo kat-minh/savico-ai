@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 
 interface DesignStepLayoutProps {
@@ -23,27 +24,36 @@ interface DesignStepLayoutProps {
    * dung chính rộng bên trái.
    */
   waiting?: boolean
+  /** Page/state-specific key so waiting -> result can run its own local opening. */
+  entranceKey?: string
 }
 
 /**
  * Bố cục chung của Bước 2 và Bước 3 (mục III.3a, III.4b).
  *
- * Panel cẩm nang là thành phần cố định của cả hai bước, KHÔNG biến mất khi AI
- * sinh xong: theo spec người dùng chủ động thu nhỏ nó để đọc dự toán. Vì vậy
- * màn chờ và màn kết quả dùng chung một khung, chỉ đổi nội dung cột trái.
+ * Panel cẩm nang là slot tùy chọn do lớp app quyết định theo từng trạng thái.
+ * Các màn đang render có thể truyền panel vào; màn kết quả có thể bỏ panel để
+ * nội dung chính tự trải hết bề rộng mà không cần thêm một layout riêng.
  */
 export function DesignStepLayout({
   children,
   sidePanel,
   sidePanelCollapsed = false,
-  waiting = false
+  waiting = false,
+  entranceKey
 }: DesignStepLayoutProps) {
   const twoColumn = Boolean(sidePanel) && !sidePanelCollapsed
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance(
+    entranceKey ?? `design.step-layout.${waiting ? 'waiting' : 'content'}`,
+    { offsetMs: 220 }
+  )
 
   // Cột ngắn hơn là cột dính: màn chờ thì cột tiến độ dính để luôn thấy % khi
   // cuộn danh sách cẩm nang; màn kết quả thì ngược lại.
   const main = (
     <div
+      data-entrance-step={waiting ? '1' : undefined}
+      data-entrance-from={waiting ? 'right' : undefined}
       className={cn(
         'min-w-0',
         waiting && twoColumn && 'lg:sticky lg:top-40 lg:self-start',
@@ -58,13 +68,22 @@ export function DesignStepLayout({
   )
   // Khi thu nhỏ, panel tự render thành nút nổi nên vẫn phải được mount.
   const aside = twoColumn ? (
-    <div className={cn(!waiting && 'lg:sticky lg:top-40 lg:self-start')}>{sidePanel}</div>
+    <div
+      data-entrance-step={waiting ? '0' : undefined}
+      data-entrance-from={waiting ? 'left' : undefined}
+      className={cn(!waiting && 'lg:sticky lg:top-40 lg:self-start')}
+    >
+      {sidePanel}
+    </div>
   ) : (
     sidePanel
   )
 
   return (
     <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      style={entranceStyle}
       className={cn(
         'mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 lg:px-8',
         twoColumn && (waiting ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'lg:grid-cols-[minmax(0,1fr)_360px]')

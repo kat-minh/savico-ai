@@ -18,6 +18,7 @@ import {
 } from '@/shared/components/ui/breadcrumb'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { useHandbookArticle, useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, selectRelatedArticles } from '../services/handbook.service'
@@ -38,9 +39,13 @@ interface ArticleDetailProps {
 export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   const t = useTranslations('handbook.article')
 
-  const { data: article, isPending, isError } = useHandbookArticle(slug)
+  const { data: article, isPending, isError, refetch } = useHandbookArticle(slug)
   const { data: articles } = useHandbookArticles()
   const { data: stages } = useHandbookStages()
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance(`handbook.article.${slug}`, {
+    enabled: !isPending && Boolean(article),
+    offsetMs: 120
+  })
 
   const stage = stages?.find((item) => item.id === article?.stage)
   const topic = stage?.topics.find((item) => item.id === article?.topicId)
@@ -52,11 +57,28 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   const related = useMemo(() => (article ? selectRelatedArticles(articles ?? [], article) : []), [articles, article])
 
   if (isPending) return <ArticleDetailSkeleton />
-  if (isError || !article) return <ErrorState title={t('notFound')} description={t('notFoundHint')} />
+  if (isError) {
+    return (
+      <div className='mx-auto w-full max-w-[88rem] px-4 py-10 lg:px-8'>
+        <ErrorState
+          title={t('loadError')}
+          description={t('loadErrorHint')}
+          retryLabel={t('retry')}
+          onRetry={() => void refetch()}
+        />
+      </div>
+    )
+  }
+  if (!article) return <ErrorState title={t('notFound')} description={t('notFoundHint')} />
 
   return (
-    <div className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'>
-      <Breadcrumb>
+    <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      style={entranceStyle}
+      className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'
+    >
+      <Breadcrumb data-entrance-step='0'>
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
@@ -91,7 +113,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
       </Breadcrumb>
 
       <div className='grid gap-6 lg:grid-cols-[1.7fr_1fr]'>
-        <article className='bg-card space-y-5 rounded-2xl border p-6'>
+        <article data-entrance-step='1' data-entrance-from='left' className='bg-card space-y-5 rounded-2xl border p-6'>
           {stage || topic ? (
             <Badge variant='secondary'>{[stage?.title, topic?.title].filter(Boolean).join(' · ')}</Badge>
           ) : (
@@ -154,7 +176,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
           </div>
         </article>
 
-        <aside className='space-y-4'>
+        <aside data-entrance-step='2' data-entrance-from='right' className='space-y-4'>
           {siblings.length > 0 && topic ? (
             <section className='bg-card rounded-2xl border p-5'>
               <h2 className='text-base font-semibold'>{t('inTopic', { topic: topic.title })}</h2>
@@ -237,13 +259,46 @@ function formatMonthYear(iso: string): string {
 
 function ArticleDetailSkeleton() {
   return (
-    <div className='grid gap-6 lg:grid-cols-[1.7fr_1fr]'>
-      <div className='space-y-4'>
-        <Skeleton className='h-10 w-3/4' />
-        <Skeleton className='aspect-16/9 w-full rounded-xl' />
-        <Skeleton className='h-40 w-full' />
+    <div
+      data-handbook-loading='true'
+      className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'
+      aria-hidden='true'
+    >
+      <Skeleton className='handbook-skeleton animate-none h-4 w-72 max-w-[78%]' />
+      <div className='grid gap-6 lg:grid-cols-[1.7fr_1fr]'>
+        <article className='bg-card space-y-5 rounded-2xl border p-6'>
+          <Skeleton className='handbook-skeleton animate-none h-6 w-28 rounded-full' />
+          <Skeleton className='handbook-skeleton animate-none h-9 w-4/5' />
+          <Skeleton className='handbook-skeleton animate-none h-4 w-44' />
+          <Skeleton className='handbook-skeleton animate-none aspect-16/9 w-full rounded-xl' />
+          <div className='space-y-5 pt-1'>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className='space-y-2.5'>
+                <Skeleton className='handbook-skeleton animate-none h-5 w-52 max-w-[65%]' />
+                <Skeleton className='handbook-skeleton animate-none h-3 w-full' />
+                <Skeleton className='handbook-skeleton animate-none h-3 w-[94%]' />
+                <Skeleton className='handbook-skeleton animate-none h-3 w-[82%]' />
+              </div>
+            ))}
+          </div>
+        </article>
+        <aside className='space-y-4'>
+          <div className='bg-card space-y-3 rounded-2xl border p-5'>
+            <Skeleton className='handbook-skeleton animate-none h-5 w-32' />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className='handbook-skeleton animate-none h-4 w-full' />
+            ))}
+          </div>
+          <div className='bg-primary/5 border-primary/30 space-y-3 rounded-2xl border p-5'>
+            <Skeleton className='handbook-skeleton animate-none size-8 rounded-lg' />
+            <Skeleton className='handbook-skeleton animate-none h-4 w-5/6' />
+            <Skeleton className='handbook-skeleton animate-none h-10 w-full rounded-lg' />
+          </div>
+          <div className='bg-card rounded-2xl border p-5'>
+            <Skeleton className='handbook-skeleton animate-none h-5 w-40' />
+          </div>
+        </aside>
       </div>
-      <Skeleton className='h-72 rounded-2xl' />
     </div>
   )
 }

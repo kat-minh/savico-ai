@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import { ROUTES } from '@/shared/constants/routes'
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 
 interface PlanTabsProps {
@@ -23,6 +24,7 @@ interface PlanTabsProps {
  */
 export function PlanTabs({ active }: PlanTabsProps) {
   const t = useTranslations('plans.tabs')
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.tabs')
 
   const tabs = [
     { key: 'design' as const, href: ROUTES.PLANS, icon: PencilRuler, label: t('design') },
@@ -30,8 +32,17 @@ export function PlanTabs({ active }: PlanTabsProps) {
   ]
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] px-4 pt-8 lg:px-8'>
-      <nav className='bg-muted/60 mx-auto flex w-fit gap-1 rounded-xl p-1'>
+    <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      style={entranceStyle}
+      className='mx-auto w-full max-w-[90rem] px-4 pt-8 lg:px-8'
+    >
+      <nav
+        data-entrance-step='0'
+        data-entrance-from='soft-scale'
+        className='bg-muted/60 mx-auto flex w-fit gap-1 rounded-xl p-1'
+      >
         {tabs.map((tab) => {
           const isActive = tab.key === active
           return (

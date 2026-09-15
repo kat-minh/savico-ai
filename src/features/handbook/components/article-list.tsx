@@ -1,242 +1,713 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { ArrowRight, ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { ArrowRight, LoaderCircle, RotateCcw, Search } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import { EmptyState, Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
+import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
 import { useDebouncedValue } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { ARTICLE_PAGE_SIZE, HANDBOOK_CATEGORIES } from '../constants/handbook.constants'
+import {
+  ARTICLE_PAGE_SIZE,
+  HANDBOOK_ARTICLE_LIST_HISTORY_KEY,
+  HANDBOOK_CATEGORIES,
+  HANDBOOK_CATEGORY_SELECT_EVENT
+} from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
-import { pageCount, pageSlice, sortByNewest } from '../services/handbook.service'
-import type { HandbookCategory } from '../types/handbook.types'
+import { sortByNewest } from '../services/handbook.service'
+import type { HandbookArticle, HandbookCategory } from '../types/handbook.types'
 
 const ALL = 'all'
+type ArticleFilter = HandbookCategory | typeof ALL
+
+interface CategorySelectDetail {
+  category: HandbookCategory
+}
+
+interface ArticleListRestoreState {
+  category: ArticleFilter
+  term: string
+  visibleCount: number
+  openId: string | null
+  scrollY: number
+}
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function normalizeSearchPhrase(value: string): string {
+  return value
+    .normalize('NFC')
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+}
+
+function matchesSearchPhrase(value: string, query: string): boolean {
+  const normalizedQuery = normalizeSearchPhrase(query)
+  if (!normalizedQuery) return true
+
+  const normalizedValue = normalizeSearchPhrase(value)
+  return ` ${normalizedValue} `.includes(` ${normalizedQuery} `)
+}
+
+function filterArticles(
+  articles: readonly HandbookArticle[],
+  category: ArticleFilter,
+  query: string
+): HandbookArticle[] {
+  const seenIds = new Set<string>()
+  return sortByNewest(articles).filter((article) => {
+    if (seenIds.has(article.id)) return false
+    seenIds.add(article.id)
+    if (category !== ALL && article.category !== category) return false
+    return matchesSearchPhrase(article.title, query)
+  })
+}
+
+function readArticleListRestoreState(): ArticleListRestoreState | null {
+  if (typeof window === 'undefined') return null
+  const state = window.history.state as Record<string, unknown> | null
+  const value = state?.[HANDBOOK_ARTICLE_LIST_HISTORY_KEY]
+  if (!value || typeof value !== 'object') return null
+
+  const candidate = value as Partial<ArticleListRestoreState>
+  const category = candidate.category
+  const categoryValid = category === ALL || (category !== undefined && HANDBOOK_CATEGORIES.includes(category))
+  if (!categoryValid || typeof candidate.term !== 'string') return null
+
+  return {
+    category,
+    term: candidate.term,
+    visibleCount:
+      typeof candidate.visibleCount === 'number' && candidate.visibleCount >= ARTICLE_PAGE_SIZE
+        ? candidate.visibleCount
+        : ARTICLE_PAGE_SIZE,
+    openId: typeof candidate.openId === 'string' ? candidate.openId : null,
+    scrollY: typeof candidate.scrollY === 'number' && candidate.scrollY >= 0 ? candidate.scrollY : 0
+  }
+}
 
 /**
- * Khối "Tất cả bài viết" (Phần 3.2, nửa dưới Hình 11): danh sách đầy đủ, lọc
- * theo chuyên mục, kèm ô tìm kiếm và phân trang.
+ * Khá»‘i "Táº¥t cáº£ bÃ i viáº¿t" (Pháº§n 3.2, ná»­a dÆ°á»›i HÃ¬nh 11): danh sÃ¡ch Ä‘áº§y Ä‘á»§, lá»c
+ * theo chuyÃªn má»¥c, tÃ¬m kiáº¿m debounce vÃ  má»Ÿ nhanh tá»«ng dÃ²ng.
  *
- * PHỤ LỤC bản mô tả v1.1 — dấu (+) trên dòng bài: bấm dấu (+) hoặc bất kỳ đâu
- * trên dòng thì dòng MỞ NHẸ TẠI CHỖ, hiện sapo 1–2 câu kèm liên kết "Xem chi
- * tiết"; dấu + xoay thành ×, bấm lại để đóng. Không rời trang, không đổi URL —
- * chỉ khi bấm "Xem chi tiết" mới mở trọn bài. Trước đây dấu (+) nhảy thẳng sang
- * trang bài viết, đó chính là lỗi phụ lục yêu cầu sửa.
+ * Filter/search dÃ¹ng WAAPI + FLIP native: dÃ²ng bá»‹ loáº¡i má»/co trÆ°á»›c, dÃ²ng cÃ²n láº¡i
+ * trÆ°á»£t tá»›i vá»‹ trÃ­ má»›i, dÃ²ng má»›i vÃ o tá»« dÆ°á»›i. KhÃ´ng cáº§n thÃªm animation library vÃ
+ * má»i animation Ä‘á»u Ä‘Æ°á»£c há»§y sáº¡ch khi filter bá»‹ Ä‘á»•i liÃªn tá»¥c.
  */
 export function ArticleList() {
   const t = useTranslations('handbook.articles')
   const format = useFormatter()
+  const [restoreState] = useState(readArticleListRestoreState)
+  const initialCategory = restoreState?.category ?? ALL
+  const initialTerm = restoreState?.term ?? ''
+  const sectionRef = useRef<HTMLElement>(null)
+  const toolbarRef = useRef<HTMLDivElement>(null)
+  const chipRowRef = useRef<HTMLDivElement>(null)
+  const filterPillRef = useRef<HTMLSpanElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const rowsRef = useRef<HTMLUListElement>(null)
+  const resultCountRef = useRef<HTMLSpanElement>(null)
+  const filterAnimationsRef = useRef<Animation[]>([])
+  const previousRectsRef = useRef(new Map<string, DOMRect>())
+  const previousContentHeightRef = useRef<number | null>(null)
+  const loadMoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [category, setCategory] = useState<HandbookCategory | typeof ALL>(ALL)
-  const [term, setTerm] = useState('')
-  const [page, setPage] = useState(1)
-  /** Dòng bài đang mở nhanh; chỉ một dòng mở tại một thời điểm (phụ lục Cẩm nang). */
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [visualCategory, setVisualCategory] = useState<ArticleFilter>(initialCategory)
+  const [appliedCategory, setAppliedCategory] = useState<ArticleFilter>(initialCategory)
+  const [term, setTerm] = useState(initialTerm)
+  const [appliedQuery, setAppliedQuery] = useState(initialTerm.trim())
+  const [visibleCount, setVisibleCount] = useState(restoreState?.visibleCount ?? ARTICLE_PAGE_SIZE)
+  const [openId, setOpenId] = useState<string | null>(restoreState?.openId ?? null)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isToolbarStuck, setIsToolbarStuck] = useState(false)
 
-  const query = useDebouncedValue(term, 250).trim().toLowerCase()
+  const appliedCategoryRef = useRef<ArticleFilter>(initialCategory)
+  const appliedQueryRef = useRef(initialTerm.trim())
+  const visualCategoryRef = useRef<ArticleFilter>(initialCategory)
+
+  const debouncedTerm = useDebouncedValue(term, 250).trim()
   const { data: articles, isPending } = useHandbookArticles()
+  const pool = useMemo(() => articles ?? [], [articles])
+  const results = useMemo(
+    () => filterArticles(pool, appliedCategory, appliedQuery),
+    [pool, appliedCategory, appliedQuery]
+  )
+  const visible = results.slice(0, visibleCount)
+  const hasMore = visible.length < results.length
 
-  const results = useMemo(() => {
-    const pool = sortByNewest(articles ?? [])
-    return pool.filter((article) => {
-      if (category !== ALL && article.category !== category) return false
-      if (!query) return true
-      return `${article.title} ${article.excerpt}`.toLowerCase().includes(query)
+  useEffect(() => {
+    appliedCategoryRef.current = appliedCategory
+  }, [appliedCategory])
+
+  useEffect(() => {
+    appliedQueryRef.current = appliedQuery
+  }, [appliedQuery])
+
+  useEffect(() => {
+    visualCategoryRef.current = visualCategory
+  }, [visualCategory])
+
+  const cancelLoadMore = useCallback(() => {
+    if (loadMoreTimerRef.current) {
+      clearTimeout(loadMoreTimerRef.current)
+      loadMoreTimerRef.current = null
+    }
+    setIsLoadingMore(false)
+  }, [])
+
+  const cancelFilterAnimations = useCallback(() => {
+    filterAnimationsRef.current.forEach((animation) => animation.cancel())
+    filterAnimationsRef.current = []
+  }, [])
+
+  const captureRowRects = useCallback(() => {
+    const map = new Map<string, DOMRect>()
+    previousContentHeightRef.current = contentRef.current?.getBoundingClientRect().height ?? null
+    rowsRef.current?.querySelectorAll<HTMLElement>('[data-article-row-item]').forEach((row) => {
+      const id = row.dataset.articleRowItem
+      if (id) map.set(id, row.getBoundingClientRect())
     })
-  }, [articles, category, query])
+    previousRectsRef.current = map
+  }, [])
 
-  const totalPages = pageCount(results.length, ARTICLE_PAGE_SIZE)
-  const safePage = Math.min(page, totalPages)
-  const visible = pageSlice(results, safePage, ARTICLE_PAGE_SIZE)
+  const commitFilter = useCallback(
+    (nextCategory: ArticleFilter, nextQuery: string) => {
+      captureRowRects()
+      appliedCategoryRef.current = nextCategory
+      appliedQueryRef.current = nextQuery
+      setAppliedCategory(nextCategory)
+      setAppliedQuery(nextQuery)
+      setVisibleCount(ARTICLE_PAGE_SIZE)
+      setOpenId(null)
+    },
+    [captureRowRects]
+  )
+
+  const runFilterTransition = useCallback(
+    (nextCategory: ArticleFilter, nextQuery: string) => {
+      const normalizedQuery = nextQuery.trim()
+      if (
+        nextCategory === appliedCategoryRef.current &&
+        normalizedQuery.toLocaleLowerCase() === appliedQueryRef.current.toLocaleLowerCase()
+      ) {
+        return
+      }
+
+      // Keep filtering to a single layout transition. The previous implementation
+      // collapsed every leaving row to height:0 and then started FLIP/enter motion,
+      // which produced a visible two-step "snap" in the list height.
+      cancelLoadMore()
+      cancelFilterAnimations()
+      setOpenId(null)
+      commitFilter(nextCategory, normalizedQuery)
+    },
+    [cancelFilterAnimations, cancelLoadMore, commitFilter]
+  )
+
+  useEffect(() => {
+    void runFilterTransition(visualCategoryRef.current, debouncedTerm)
+  }, [debouncedTerm, runFilterTransition])
+
+  useEffect(() => {
+    const handleCategorySelect = (event: Event) => {
+      const detail = (event as CustomEvent<CategorySelectDetail>).detail
+      if (!detail || !HANDBOOK_CATEGORIES.includes(detail.category)) return
+
+      setVisualCategory(detail.category)
+      visualCategoryRef.current = detail.category
+      setTerm('')
+      void runFilterTransition(detail.category, '')
+    }
+
+    window.addEventListener(HANDBOOK_CATEGORY_SELECT_EVENT, handleCategorySelect)
+    return () => window.removeEventListener(HANDBOOK_CATEGORY_SELECT_EVENT, handleCategorySelect)
+  }, [runFilterTransition])
+
+  useLayoutEffect(() => {
+    const previous = previousRectsRef.current
+    const previousContentHeight = previousContentHeightRef.current
+    if (prefersReducedMotion() || (previous.size === 0 && previousContentHeight === null)) {
+      previousRectsRef.current = new Map()
+      previousContentHeightRef.current = null
+      return
+    }
+
+    const animations: Animation[] = []
+    const content = contentRef.current
+    if (content && previousContentHeight !== null) {
+      const currentContentHeight = content.getBoundingClientRect().height
+      if (Math.abs(previousContentHeight - currentContentHeight) > 0.5) {
+        content.style.overflow = 'hidden'
+        const contentHeightAnimation = content.animate(
+          [{ height: `${previousContentHeight}px` }, { height: `${currentContentHeight}px` }],
+          {
+            duration: 240,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            fill: 'both'
+          }
+        )
+        animations.push(contentHeightAnimation)
+        void contentHeightAnimation.finished
+          .then(() => {
+            contentHeightAnimation.cancel()
+            content.style.removeProperty('overflow')
+          })
+          .catch(() => undefined)
+      }
+    }
+
+    let enteringIndex = 0
+    rowsRef.current?.querySelectorAll<HTMLElement>('[data-article-row-item]').forEach((row) => {
+      const id = row.dataset.articleRowItem
+      if (!id) return
+      const current = row.getBoundingClientRect()
+      const before = previous.get(id)
+
+      if (before) {
+        const dx = before.left - current.left
+        const dy = before.top - current.top
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          animations.push(
+            row.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }], {
+              duration: 240,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            })
+          )
+        }
+      } else {
+        const delay = Math.min(enteringIndex * 18, 72)
+        enteringIndex += 1
+        animations.push(
+          row.animate(
+            [
+              { opacity: 0, transform: 'translateY(8px)' },
+              { opacity: 1, transform: 'translateY(0)' }
+            ],
+            {
+              duration: 220,
+              delay,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+            }
+          )
+        )
+      }
+    })
+
+    previousRectsRef.current = new Map()
+    previousContentHeightRef.current = null
+    filterAnimationsRef.current = animations
+    void Promise.allSettled(animations.map((animation) => animation.finished)).then(() => {
+      if (filterAnimationsRef.current === animations) filterAnimationsRef.current = []
+    })
+
+    return () => {
+      animations.forEach((animation) => animation.cancel())
+      content?.style.removeProperty('overflow')
+      if (filterAnimationsRef.current === animations) filterAnimationsRef.current = []
+    }
+  }, [appliedCategory, appliedQuery, visibleCount])
+
+  useEffect(() => {
+    if (!resultCountRef.current || prefersReducedMotion()) return
+    const animation = resultCountRef.current.animate(
+      [
+        { opacity: 0, transform: 'translateY(5px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ],
+      { duration: 190, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+    )
+    return () => animation.cancel()
+  }, [results.length])
+
+  useLayoutEffect(() => {
+    const row = chipRowRef.current
+    const pill = filterPillRef.current
+    if (!row || !pill) return
+
+    let frame = 0
+    const update = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const active = row.querySelector<HTMLElement>(`[data-filter-chip='${visualCategoryRef.current}']`)
+        if (!active) return
+        pill.style.width = `${active.offsetWidth}px`
+        pill.style.height = `${active.offsetHeight}px`
+        pill.style.transform = `translate(${active.offsetLeft}px, ${active.offsetTop}px)`
+        pill.dataset.ready = 'true'
+      })
+    }
+
+    update()
+    window.addEventListener('resize', update)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', update)
+    }
+  }, [visualCategory])
+
+  useEffect(() => {
+    let frame = 0
+    let last = false
+
+    const updateStickyState = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const section = sectionRef.current
+        const toolbar = toolbarRef.current
+        if (!section || !toolbar) return
+
+        const rootStyle = getComputedStyle(document.documentElement)
+        const headerOffset = Number.parseFloat(rootStyle.getPropertyValue('--public-header-offset')) || 64
+        const sectionRect = section.getBoundingClientRect()
+        const toolbarRect = toolbar.getBoundingClientRect()
+        const releaseBoundary = Math.max(headerOffset + toolbar.offsetHeight + 8, window.innerHeight * 0.72)
+        const next =
+          sectionRect.top < headerOffset && sectionRect.bottom > releaseBoundary && toolbarRect.top <= headerOffset + 1
+
+        if (next !== last) {
+          last = next
+          setIsToolbarStuck(next)
+        }
+      })
+    }
+
+    updateStickyState()
+    window.addEventListener('scroll', updateStickyState, { passive: true })
+    window.addEventListener('resize', updateStickyState)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', updateStickyState)
+      window.removeEventListener('resize', updateStickyState)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      cancelLoadMore()
+      cancelFilterAnimations()
+    }
+  }, [cancelFilterAnimations, cancelLoadMore])
+
+  useEffect(() => {
+    if (!restoreState || isPending) return
+    let secondFrame = 0
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        window.scrollTo({ top: restoreState.scrollY, behavior: 'auto' })
+
+        const current = (window.history.state ?? {}) as Record<string, unknown>
+        const { [HANDBOOK_ARTICLE_LIST_HISTORY_KEY]: _restored, ...nextState } = current
+        window.history.replaceState(nextState, '')
+      })
+    })
+
+    return () => {
+      cancelAnimationFrame(firstFrame)
+      cancelAnimationFrame(secondFrame)
+    }
+  }, [isPending, restoreState])
+
+  const saveReturnState = () => {
+    const current = (window.history.state ?? {}) as Record<string, unknown>
+    const value: ArticleListRestoreState = {
+      category: visualCategoryRef.current,
+      term,
+      visibleCount,
+      openId,
+      scrollY: window.scrollY
+    }
+    window.history.replaceState({ ...current, [HANDBOOK_ARTICLE_LIST_HISTORY_KEY]: value }, '')
+  }
+
+  const selectCategory = (next: ArticleFilter) => {
+    if (next === visualCategoryRef.current) return
+    setVisualCategory(next)
+    visualCategoryRef.current = next
+    void runFilterTransition(next, debouncedTerm)
+  }
+
+  const clearFilters = () => {
+    setVisualCategory(ALL)
+    visualCategoryRef.current = ALL
+    setTerm('')
+    void runFilterTransition(ALL, '')
+  }
+
+  const handleLoadMore = () => {
+    if (isLoadingMore || !hasMore) return
+    setIsLoadingMore(true)
+    loadMoreTimerRef.current = setTimeout(
+      () => {
+        captureRowRects()
+        setVisibleCount((count) => count + ARTICLE_PAGE_SIZE)
+        setIsLoadingMore(false)
+        loadMoreTimerRef.current = null
+      },
+      prefersReducedMotion() ? 0 : 420
+    )
+  }
 
   return (
-    <section id='all-articles' className='bg-card space-y-5 rounded-2xl border p-5'>
-      <div className='flex flex-wrap items-center gap-3'>
-        <h2 className='text-xl font-semibold tracking-tight'>{t('title')}</h2>
-
-        <div className='flex flex-wrap gap-2'>
-          {([ALL, ...HANDBOOK_CATEGORIES] as (HandbookCategory | typeof ALL)[]).map((option) => (
-            <button
-              key={option}
-              type='button'
-              onClick={() => {
-                setCategory(option)
-                setPage(1)
-              }}
-              aria-pressed={category === option}
-              className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                category === option
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'text-muted-foreground hover:border-primary/40'
-              )}
-            >
-              {option === ALL ? t('all') : t(`categories.${option}`)}
-            </button>
-          ))}
+    <section
+      ref={sectionRef}
+      id='all-articles'
+      data-article-list
+      className='bg-card scroll-mt-[calc(var(--public-header-offset,64px)+0.75rem)] space-y-5 rounded-2xl border p-5'
+    >
+      <div
+        ref={toolbarRef}
+        data-article-toolbar
+        data-stuck={isToolbarStuck ? 'true' : 'false'}
+        className={cn(
+          'z-30 -mx-5 flex flex-wrap items-center gap-3 border-y border-transparent px-5 py-3 transition-[top,background-color,border-color,box-shadow] motion-reduce:transition-none',
+          isToolbarStuck ? 'sticky border-border/70 bg-card/90 shadow-md backdrop-blur-xl' : 'relative'
+        )}
+        style={{
+          top: isToolbarStuck ? 'var(--public-header-offset, 64px)' : 'auto',
+          transitionDuration: 'var(--public-header-duration, 180ms)'
+        }}
+      >
+        <div className='flex shrink-0 items-baseline gap-2'>
+          <h2 className='text-xl font-semibold tracking-tight'>{t('title')}</h2>
+          <span ref={resultCountRef} data-article-result-count className='text-muted-foreground text-xs tabular-nums'>
+            {t('resultCount', { count: results.length })}
+          </span>
         </div>
 
-        <div className='relative ml-auto min-w-56'>
-          <Search className='text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2' />
+        <div ref={chipRowRef} data-filter-chip-row className='relative flex flex-wrap gap-2'>
+          <span
+            ref={filterPillRef}
+            data-filter-pill
+            data-ready='false'
+            aria-hidden
+            className='pointer-events-none absolute top-0 left-0 z-0 rounded-full'
+          />
+          {([ALL, ...HANDBOOK_CATEGORIES] as ArticleFilter[]).map((option) => {
+            const active = visualCategory === option
+            return (
+              <button
+                key={option}
+                data-filter-chip={option}
+                data-active={active ? 'true' : 'false'}
+                type='button'
+                onClick={() => selectCategory(option)}
+                aria-pressed={active}
+                className={cn(
+                  'relative z-10 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-medium transition-[color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+                  active
+                    ? 'border-primary text-success-foreground'
+                    : 'text-muted-foreground hover:border-primary/50 hover:text-primary focus-visible:border-primary/50 focus-visible:text-primary'
+                )}
+              >
+                <span className='relative z-10'>{option === ALL ? t('all') : t(`categories.${option}`)}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div
+          data-article-search-shell
+          className='group/search relative ml-auto w-full transition-[width] duration-200 motion-reduce:transition-none sm:w-60 sm:focus-within:w-64'
+        >
+          <Search
+            data-article-search-icon
+            className='text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 transition-colors duration-200 group-focus-within/search:text-primary'
+          />
           <Input
+            data-article-search
             value={term}
             onChange={(event) => {
+              cancelLoadMore()
               setTerm(event.target.value)
-              setPage(1)
+              setOpenId(null)
             }}
             placeholder={t('searchPlaceholder')}
-            className='pl-9'
+            className='pl-9 transition-[border-color,box-shadow] duration-200'
           />
         </div>
       </div>
 
-      {isPending ? (
-        <div className='space-y-3'>
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className='h-20 rounded-xl' />
-          ))}
-        </div>
-      ) : visible.length === 0 ? (
-        <EmptyState title={t('empty.title')} description={t('empty.description')} />
-      ) : (
-        <ul className='divide-y'>
-          {visible.map((article) => {
-            const expanded = openId === article.id
-            return (
-              <li key={article.id}>
-                {/* Cả dòng là vùng bấm — trên mobile dòng bài trở thành thẻ nên
-                    chạm đâu cũng mở, đúng hành vi phụ lục yêu cầu. */}
-                <button
-                  type='button'
-                  onClick={() => setOpenId(expanded ? null : article.id)}
-                  aria-expanded={expanded}
-                  className='hover:bg-muted/40 flex w-full flex-wrap items-center gap-4 rounded-lg px-1 py-3 text-left transition-colors'
-                >
-                  <Photo
-                    className='size-16 shrink-0 rounded-lg'
-                    src={article.imageUrl}
-                    alt={article.title}
-                    sizes='64px'
-                  />
-                  <div className='min-w-0 flex-1 space-y-1'>
-                    <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
-                    <h3 className='text-sm font-semibold'>{article.title}</h3>
-                  </div>
-                  <p className='text-muted-foreground shrink-0 text-xs'>
-                    {format.dateTime(new Date(article.publishedAt), { dateStyle: 'short' })}
-                    <span aria-hidden> · </span>
-                    {t('readingTime', { minutes: article.readingMinutes })}
-                  </p>
-                  <span
-                    aria-label={expanded ? t('collapse') : t('expand')}
+      <div ref={contentRef} data-article-list-content className='space-y-5'>
+        {isPending ? (
+          <div className='space-y-3'>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} className='h-20 rounded-xl' />
+            ))}
+          </div>
+        ) : visible.length === 0 ? (
+          <div
+            data-article-empty
+            className='animate-in fade-in slide-in-from-bottom-2 duration-200 motion-reduce:animate-none'
+          >
+            <EmptyState
+              title={t('empty.title')}
+              description={t('empty.description')}
+              action={
+                <Button type='button' variant='outline' size='sm' onClick={clearFilters}>
+                  <RotateCcw className='size-4' />
+                  {t('clearFilters')}
+                </Button>
+              }
+            />
+          </div>
+        ) : (
+          <ul ref={rowsRef} data-article-rows className='divide-y'>
+            {visible.map((article) => {
+              const expanded = openId === article.id
+              return (
+                <li key={article.id} data-article-row-item={article.id} className='origin-top overflow-hidden'>
+                  <button
+                    data-article-row
+                    type='button'
+                    onClick={() => setOpenId(expanded ? null : article.id)}
+                    aria-expanded={expanded}
+                    className='group/row flex w-full flex-wrap items-center gap-4 rounded-lg px-1 py-3 text-left transition-colors duration-200 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
+                  >
+                    <div data-article-row-image className='shrink-0'>
+                      <Photo className='size-16 rounded-lg' src={article.imageUrl} alt={article.title} sizes='64px' />
+                    </div>
+                    <div className='min-w-0 flex-1 space-y-1'>
+                      <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
+                      <h3 data-article-row-title className='text-sm font-semibold transition-colors duration-200'>
+                        <HighlightText text={article.title} query={appliedQuery} />
+                      </h3>
+                    </div>
+                    <p className='text-muted-foreground shrink-0 text-xs'>
+                      {format.dateTime(new Date(article.publishedAt), { dateStyle: 'short' })}
+                      <span aria-hidden> · </span>
+                      {t('readingTime', { minutes: article.readingMinutes })}
+                    </p>
+                    <span
+                      data-row-plus
+                      data-open={expanded ? 'true' : 'false'}
+                      aria-label={expanded ? t('collapse') : t('expand')}
+                      className={cn(
+                        'flex size-7 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-200',
+                        expanded ? 'bg-primary text-primary-foreground' : 'bg-accent text-primary-strong'
+                      )}
+                    >
+                      <span aria-hidden className='relative block size-4'>
+                        <span
+                          data-plus-horizontal
+                          className='bg-current absolute top-1/2 left-1/2 h-0.5 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full'
+                        />
+                        <span
+                          data-plus-vertical
+                          className='bg-current absolute top-1/2 left-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full'
+                        />
+                      </span>
+                    </span>
+                  </button>
+
+                  <div
+                    data-article-detail
                     className={cn(
-                      'flex size-7 shrink-0 items-center justify-center rounded-full transition-transform duration-200',
-                      expanded ? 'bg-primary text-primary-foreground rotate-45' : 'bg-accent text-primary-strong'
+                      'grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none',
+                      expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                     )}
                   >
-                    <Plus className='size-4' />
-                  </span>
-                </button>
-
-                {/* Mở nhẹ tại chỗ (~¼ giây), không rời trang, không đổi URL. */}
-                <div
-                  className={cn(
-                    'grid transition-all duration-200 ease-out',
-                    expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                  )}
-                >
-                  <div className='overflow-hidden'>
-                    <div className='px-1 pb-3 sm:pl-20'>
-                      <p className='text-muted-foreground text-sm text-pretty'>{article.excerpt}</p>
-                      <Link
-                        href={handbookArticleRoute(article.slug)}
-                        className='text-primary hover:text-primary/80 mt-2 inline-flex items-center gap-1.5 text-sm font-medium'
-                      >
-                        {t('viewDetail')}
-                        <ArrowRight className='size-4' />
-                      </Link>
+                    <div className='overflow-hidden'>
+                      <div className='px-1 pb-3 sm:pl-20'>
+                        <p className='text-muted-foreground text-sm text-pretty'>{article.excerpt}</p>
+                        <Link
+                          data-stage-guide-link
+                          data-article-detail-link
+                          href={handbookArticleRoute(article.slug)}
+                          onClick={saveReturnState}
+                          className='text-primary mt-2 inline-flex items-center gap-1.5 text-sm font-medium'
+                        >
+                          <span className='relative grid'>
+                            <span aria-hidden className='invisible col-start-1 row-start-1 font-bold'>
+                              {t('viewDetail')}
+                            </span>
+                            <span className='col-start-1 row-start-1'>{t('viewDetail')}</span>
+                            <span
+                              data-stage-guide-underline
+                              aria-hidden
+                              className='bg-primary absolute right-0 -bottom-0.5 left-0 h-px motion-reduce:transition-none'
+                            />
+                          </span>
+                          <ArrowRight
+                            data-step-link-arrow
+                            className='size-4 transition-transform duration-200 motion-reduce:transition-none'
+                          />
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-      )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
 
-      {totalPages > 1 ? (
-        <nav className='flex items-center justify-center gap-1.5' aria-label={t('pagination')}>
-          <button
-            type='button'
-            onClick={() => setPage(Math.max(1, safePage - 1))}
-            disabled={safePage === 1}
-            aria-label={t('previousPage')}
-            className='text-muted-foreground hover:border-primary/40 flex size-8 items-center justify-center rounded-md border transition-colors disabled:opacity-40'
-          >
-            <ChevronLeft className='size-4' />
-          </button>
-
-          {pageItems(safePage, totalPages).map((item, index) =>
-            item === ELLIPSIS ? (
-              <span key={`gap-${index}`} className='text-muted-foreground px-1 text-sm'>
-                …
-              </span>
-            ) : (
-              <button
-                key={item}
-                type='button'
-                onClick={() => setPage(item)}
-                aria-current={item === safePage ? 'page' : undefined}
-                className={cn(
-                  'size-8 rounded-md border text-sm font-medium transition-colors',
-                  item === safePage
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'text-muted-foreground hover:border-primary/40'
-                )}
-              >
-                {item}
-              </button>
-            )
-          )}
-
-          <button
-            type='button'
-            onClick={() => setPage(Math.min(totalPages, safePage + 1))}
-            disabled={safePage === totalPages}
-            aria-label={t('nextPage')}
-            className='text-muted-foreground hover:border-primary/40 flex size-8 items-center justify-center rounded-md border transition-colors disabled:opacity-40'
-          >
-            <ChevronRight className='size-4' />
-          </button>
-        </nav>
-      ) : null}
+        {hasMore ? (
+          <div className='flex justify-center pt-1'>
+            <Button
+              data-article-load-more
+              type='button'
+              variant='outline'
+              disabled={isLoadingMore}
+              onClick={handleLoadMore}
+              className='min-w-32'
+            >
+              {isLoadingMore ? (
+                <>
+                  <LoaderCircle className='size-4 animate-spin motion-reduce:animate-none' />
+                  {t('loading')}
+                </>
+              ) : (
+                t('showMore')
+              )}
+            </Button>
+          </div>
+        ) : null}
+      </div>
     </section>
   )
 }
 
-/** Dấu ngắt quãng giữa các số trang. */
-const ELLIPSIS = 0
+function escapeSearchToken(token: string): string {
+  const special = '\\.^$*+?()[]{}|'
+  return [...token].map((character) => (special.includes(character) ? `\\${character}` : character)).join('')
+}
 
-/**
- * Dãy số trang rút gọn kiểu `‹ 1 2 3 … 12 ›` (Hình 11).
- *
- * Luôn giữ trang đầu, trang cuối và các trang quanh trang hiện tại; phần bị bỏ
- * thay bằng {@link ELLIPSIS}. Không rút gọn thì 12 trang trở lên sẽ tràn hàng.
- */
-function pageItems(current: number, total: number): number[] {
-  if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1)
+function HighlightText({ text, query }: { text: string; query: string }) {
+  const normalizedQuery = normalizeSearchPhrase(query)
+  if (!normalizedQuery) return text
 
-  const around = [current - 1, current, current + 1].filter((page) => page > 1 && page < total)
-  const pages = [1, ...around, total]
+  const pattern = normalizedQuery.split(' ').filter(Boolean).map(escapeSearchToken).join('[^\\p{L}\\p{N}]+')
+  const matcher = new RegExp(`(^|[^\\p{L}\\p{N}])(${pattern})(?=$|[^\\p{L}\\p{N}])`, 'giu')
+  const nodes: ReactNode[] = []
+  let cursor = 0
+  let key = 0
 
-  return pages.flatMap((page, index) => {
-    const previous = pages[index - 1]
-    return previous !== undefined && page - previous > 1 ? [ELLIPSIS, page] : [page]
-  })
+  for (const match of text.matchAll(matcher)) {
+    const prefix = match[1] ?? ''
+    const phrase = match[2] ?? ''
+    if (!phrase || match.index === undefined) continue
+
+    const start = match.index + prefix.length
+    const end = start + phrase.length
+    if (start > cursor) nodes.push(text.slice(cursor, start))
+    nodes.push(
+      <mark key={`${start}-${key++}`} data-highlight className='bg-warning/20 rounded-sm text-inherit'>
+        {text.slice(start, end)}
+      </mark>
+    )
+    cursor = end
+  }
+
+  if (cursor === 0) return text
+  if (cursor < text.length) nodes.push(text.slice(cursor))
+  return <>{nodes}</>
 }

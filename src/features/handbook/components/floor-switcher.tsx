@@ -1,5 +1,7 @@
 'use client'
 
+import { useLayoutEffect, useRef, useState } from 'react'
+
 import { cn } from '@/shared/lib/utils'
 import type { HandbookFloor, HandbookTemplate } from '../types/handbook.types'
 import { TemplateFigure } from './template-figure'
@@ -13,62 +15,125 @@ interface FloorSwitcherProps {
   className?: string
 }
 
+interface PillStyle {
+  transform: string
+  width: number
+  height: number
+  ready: boolean
+}
+
 /**
  * Nhóm nút chuyển tầng + dải ảnh xem trước.
  *
- * Dùng chung cho popup xem nhanh (Hình 2) và trang chi tiết mẫu; popup chỉ bật
- * nhóm nút, trang chi tiết bật thêm dải ảnh.
+ * Trang chi tiết dùng một pill duy nhất trượt giữa các tab thay vì đổi nền từng
+ * button. Thumbnail dùng cùng `onChange`, nên click tab / thumbnail / swipe / phím
+ * luôn đi qua một nguồn state ở component cha.
  */
 export function FloorSwitcher({ template, activeId, onChange, showThumbnails, className }: FloorSwitcherProps) {
   const { floors } = template
+  const trackRef = useRef<HTMLDivElement>(null)
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const [pillStyle, setPillStyle] = useState<PillStyle>({
+    transform: 'translate3d(0,0,0)',
+    width: 0,
+    height: 0,
+    ready: false
+  })
+
+  useLayoutEffect(() => {
+    const track = trackRef.current
+    const active = tabRefs.current[activeId]
+    if (!track || !active) return
+
+    const update = () => {
+      const trackRect = track.getBoundingClientRect()
+      const activeRect = active.getBoundingClientRect()
+      setPillStyle({
+        transform: `translate3d(${activeRect.left - trackRect.left}px, ${activeRect.top - trackRect.top}px, 0)`,
+        width: activeRect.width,
+        height: activeRect.height,
+        ready: true
+      })
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(track)
+    observer.observe(active)
+    return () => observer.disconnect()
+  }, [activeId, floors.length])
 
   return (
-    <div className={cn('space-y-3', className)}>
-      <div className='bg-muted/60 inline-flex flex-wrap gap-1 rounded-lg p-1'>
-        {floors.map((floor) => (
-          <button
-            key={floor.id}
-            type='button'
-            onClick={() => onChange(floor.id)}
-            aria-pressed={floor.id === activeId}
-            className={cn(
-              'rounded-md px-4 py-1.5 text-sm font-medium transition-colors',
-              floor.id === activeId
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {floor.label}
-          </button>
-        ))}
+    <div data-floor-switcher className={cn('space-y-3', className)}>
+      <div
+        ref={trackRef}
+        data-floor-tab-track
+        className='bg-muted/60 relative inline-flex flex-wrap gap-1 rounded-lg p-1'
+      >
+        <span
+          data-floor-tab-pill
+          data-ready={pillStyle.ready}
+          aria-hidden
+          className='bg-primary pointer-events-none absolute top-0 left-0 rounded-md shadow-sm'
+          style={{ transform: pillStyle.transform, width: pillStyle.width, height: pillStyle.height }}
+        />
+        {floors.map((floor) => {
+          const active = floor.id === activeId
+          return (
+            <button
+              key={floor.id}
+              ref={(node) => {
+                tabRefs.current[floor.id] = node
+              }}
+              type='button'
+              data-floor-tab={floor.id}
+              onClick={() => onChange(floor.id)}
+              aria-pressed={active}
+              className={cn(
+                'relative z-10 rounded-md px-4 py-1.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+                active ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {floor.label}
+            </button>
+          )
+        })}
       </div>
 
       {showThumbnails ? (
-        <ul className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
-          {floors.map((floor) => (
-            <li key={floor.id}>
-              <button
-                type='button'
-                onClick={() => onChange(floor.id)}
-                aria-pressed={floor.id === activeId}
-                className={cn(
-                  'block w-full overflow-hidden rounded-lg border-2 transition-colors',
-                  floor.id === activeId ? 'border-primary' : 'border-transparent hover:border-border'
-                )}
-              >
-                <TemplateFigure
-                  template={template}
-                  floor={floor}
-                  // Bản vẽ nhà phố nằm ngang; để 4:3 thì thumbnail cao gấp đôi
-                  // mockup và đẩy cả cột trái dài ra (Hình 7, Hình 8).
-                  className={cn('w-full', template.kind === '3d' && 'aspect-16/9')}
-                  autoHeight={template.kind === '2d'}
-                  sizes='200px'
-                />
-                <span className='block py-1.5 text-center text-xs font-medium'>{floor.label}</span>
-              </button>
-            </li>
-          ))}
+        <ul data-floor-thumbnails className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
+          {floors.map((floor) => {
+            const active = floor.id === activeId
+            return (
+              <li key={floor.id}>
+                <button
+                  type='button'
+                  data-floor-thumbnail={floor.id}
+                  onClick={() => onChange(floor.id)}
+                  aria-pressed={active}
+                  className={cn(
+                    'group/floor block w-full overflow-hidden rounded-lg border-2 transition-[border-color,transform,box-shadow] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+                    active
+                      ? 'border-primary shadow-sm'
+                      : 'border-transparent hover:border-primary/35 hover:scale-[1.018]'
+                  )}
+                >
+                  <span data-floor-thumbnail-media className='block h-24 overflow-hidden'>
+                    <TemplateFigure
+                      template={template}
+                      floor={floor}
+                      className='pointer-events-none h-full w-full transition-transform duration-300 ease-out group-hover/floor:scale-[1.018]'
+                      autoHeight={false}
+                      sizes='200px'
+                    />
+                  </span>
+                  <span className={cn('block py-1.5 text-center text-xs', active ? 'font-semibold' : 'font-medium')}>
+                    {floor.label}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
         </ul>
       ) : null}
     </div>

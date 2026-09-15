@@ -7,11 +7,18 @@ import { DESIGN_DRAFT_STORAGE_KEY } from '../constants/design.constants'
 import { applyBuildingTypeChange, emptyDesignInput } from '../services/design-input.service'
 import type { BuildingType, DesignInput } from '../types/design.types'
 
+interface DialogOrigin {
+  x: number
+  y: number
+}
+
 interface DesignStore {
   /** Bản nháp Bước 1 theo từng dự án — thoát ra vào lại vẫn còn nguyên. */
   drafts: Record<string, DesignInput>
   /** Modal Tạo dự án (mục III.1) — mở từ nút trên thanh công cụ hoặc trang chủ. */
   isCreateDialogOpen: boolean
+  /** Viewport delta from the triggering control to the modal centre (M02). */
+  createDialogOrigin: DialogOrigin
 
   getDraft: (projectId: string) => DesignInput
   patchDraft: (projectId: string, patch: Partial<DesignInput>) => void
@@ -37,6 +44,7 @@ export const useDesignStore = create<DesignStore>()(
     (set, get) => ({
       drafts: {},
       isCreateDialogOpen: false,
+      createDialogOrigin: { x: 0, y: 0 },
 
       getDraft: (projectId) => hydrateDraft(get().drafts[projectId]),
 
@@ -60,7 +68,19 @@ export const useDesignStore = create<DesignStore>()(
           return { drafts: next }
         }),
 
-      openCreateDialog: () => set({ isCreateDialogOpen: true }),
+      openCreateDialog: () => {
+        const trigger = typeof document === 'undefined' ? null : document.activeElement
+        const rect = trigger instanceof HTMLElement ? trigger.getBoundingClientRect() : null
+        set({
+          isCreateDialogOpen: true,
+          createDialogOrigin: rect
+            ? {
+                x: rect.left + rect.width / 2 - window.innerWidth / 2,
+                y: rect.top + rect.height / 2 - window.innerHeight / 2
+              }
+            : { x: 0, y: 0 }
+        })
+      },
       closeCreateDialog: () => set({ isCreateDialogOpen: false })
     }),
     {

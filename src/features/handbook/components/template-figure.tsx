@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from 'react'
+
 import { Photo, PlanDrawing } from '@/shared/components/common'
 import { cn } from '@/shared/lib/utils'
 import type { HandbookFloor, HandbookTemplate } from '../types/handbook.types'
@@ -13,6 +17,8 @@ interface TemplateFigureProps {
   watermark?: boolean
   /** Bản vẽ tự cao theo tỷ lệ lô thay vì lấp đầy khung tỷ lệ cố định. */
   autoHeight?: boolean
+  /** Blur-to-sharp reveal for large handbook media only. */
+  revealOnLoad?: boolean
 }
 
 /**
@@ -34,7 +40,8 @@ export function TemplateFigure({
   sizes,
   priority,
   watermark,
-  autoHeight
+  autoHeight,
+  revealOnLoad
 }: TemplateFigureProps) {
   const target = floor ?? template.floors[0]
   const src = floor?.imageUrl ?? (floor ? undefined : template.imageUrl) ?? target?.imageUrl
@@ -45,11 +52,26 @@ export function TemplateFigure({
     // Ảnh phối cảnh cũng đóng dấu bản quyền như bản vẽ (Hình 8) — chỉ khác là
     // dấu nằm đè lên ảnh nên phải có bóng chữ mới đọc được trên nền sáng.
     if (!watermark) {
-      return <Photo className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+      return revealOnLoad ? (
+        <RevealPhoto className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+      ) : (
+        <Photo className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+      )
     }
     return (
       <div className={cn('relative', className)}>
-        <Photo className='size-full' src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+        {revealOnLoad ? (
+          <RevealPhoto
+            className='size-full'
+            src={src}
+            alt={template.name}
+            sizes={sizes}
+            priority={priority}
+            fit={fit}
+          />
+        ) : (
+          <Photo className='size-full' src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+        )}
         <span
           aria-hidden
           className='absolute right-3 bottom-2 text-lg font-bold tracking-widest text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]'
@@ -74,6 +96,37 @@ export function TemplateFigure({
       paper={false}
       autoHeight={autoHeight}
       seed={`${template.id}-${target?.id ?? ''}`}
+    />
+  )
+}
+
+function RevealPhoto({
+  className,
+  src,
+  alt,
+  sizes,
+  priority,
+  fit
+}: {
+  className?: string
+  src: string
+  alt: string
+  sizes?: string
+  priority?: boolean
+  fit: 'cover' | 'contain'
+}) {
+  const [loaded, setLoaded] = useState(false)
+
+  return (
+    <Photo
+      className={className}
+      src={src}
+      alt={alt}
+      sizes={sizes}
+      priority={priority}
+      fit={fit}
+      imageClassName={cn('handbook-image-reveal', loaded && 'is-loaded')}
+      onLoad={() => setLoaded(true)}
     />
   )
 }

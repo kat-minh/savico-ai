@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/shared/components/ui/button'
@@ -37,6 +37,12 @@ export function AddressField({ value, onChange, invalid }: AddressFieldProps) {
   const t = useTranslations('design.input.address')
   const { provinces, isLoadingProvinces } = useGetProvinces()
   const { wards, isLoadingWards } = useGetWards(value.provinceCode ?? undefined)
+  const [wardUnlockPulse, setWardUnlockPulse] = useState(false)
+  const unlockTimerRef = useRef(0)
+
+  useEffect(() => {
+    return () => window.clearTimeout(unlockTimerRef.current)
+  }, [])
 
   return (
     <div className='space-y-2'>
@@ -54,10 +60,16 @@ export function AddressField({ value, onChange, invalid }: AddressFieldProps) {
           selected={value.provinceName}
           invalid={invalid && !value.provinceCode}
           options={provinces.map((p) => ({ code: p.code, name: p.name }))}
-          onSelect={(option) =>
+          onSelect={(option) => {
+            const wasLocked = value.provinceCode === null
             // Đổi tỉnh thì xã/phường cũ không còn hợp lệ.
             onChange({ ...value, provinceCode: option.code, provinceName: option.name, wardCode: null, wardName: '' })
-          }
+            if (!wasLocked) return
+            window.clearTimeout(unlockTimerRef.current)
+            setWardUnlockPulse(false)
+            window.requestAnimationFrame(() => setWardUnlockPulse(true))
+            unlockTimerRef.current = window.setTimeout(() => setWardUnlockPulse(false), 760)
+          }}
         />
 
         <Picker
@@ -67,6 +79,7 @@ export function AddressField({ value, onChange, invalid }: AddressFieldProps) {
           emptyText={t('noResult')}
           loading={isLoadingWards}
           disabled={!value.provinceCode}
+          justUnlocked={wardUnlockPulse}
           selected={value.wardName}
           invalid={invalid && Boolean(value.provinceCode) && !value.wardCode}
           options={wards.map((w) => ({ code: w.code, name: w.name }))}
@@ -101,7 +114,8 @@ function Picker({
   onSelect,
   loading,
   disabled,
-  invalid
+  invalid,
+  justUnlocked
 }: {
   label: string
   placeholder: string
@@ -113,6 +127,7 @@ function Picker({
   loading?: boolean
   disabled?: boolean
   invalid?: boolean
+  justUnlocked?: boolean
 }) {
   const [open, setOpen] = useState(false)
 
@@ -126,13 +141,14 @@ function Picker({
           aria-expanded={open}
           aria-label={label}
           disabled={disabled || loading}
+          data-address-unlocked={justUnlocked}
           className={cn('w-full justify-between font-normal', invalid && 'border-destructive')}
         >
           <span className={cn('truncate', !selected && 'text-muted-foreground')}>{selected || placeholder}</span>
           <ChevronsUpDown className='ml-2 size-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-(--radix-popover-trigger-width) p-0' align='start'>
+      <PopoverContent data-address-menu className='w-(--radix-popover-trigger-width) p-0' align='start'>
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>

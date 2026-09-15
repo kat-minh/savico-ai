@@ -591,6 +591,1245 @@
     z-index: 1;
   }
 
+  /* Shared page-opening choreography. Existing page elements opt in with
+   * data attributes only, so motion never changes the finished UI/layout. */
+  [data-page-entrance='play'] [data-entrance-step] {
+    animation: savico-page-entrance 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(
+      var(--page-entrance-offset, 0ms) + var(--entrance-step-delay, 0ms) + var(--entrance-order-delay, 0ms)
+    );
+    will-change: opacity, transform;
+  }
+
+  [data-entrance-step='1'] {
+    --entrance-step-delay: 130ms;
+  }
+  [data-entrance-step='2'] {
+    --entrance-step-delay: 260ms;
+  }
+  [data-entrance-step='3'] {
+    --entrance-step-delay: 390ms;
+  }
+  [data-entrance-step='4'] {
+    --entrance-step-delay: 520ms;
+  }
+  [data-entrance-step='5'] {
+    --entrance-step-delay: 650ms;
+  }
+  [data-entrance-step='6'] {
+    --entrance-step-delay: 780ms;
+  }
+  [data-entrance-step='7'] {
+    --entrance-step-delay: 910ms;
+  }
+  [data-entrance-step='8'] {
+    --entrance-step-delay: 1040ms;
+  }
+
+  [data-entrance-order='1'] {
+    --entrance-order-delay: 70ms;
+  }
+  [data-entrance-order='2'] {
+    --entrance-order-delay: 140ms;
+  }
+  [data-entrance-order='3'] {
+    --entrance-order-delay: 210ms;
+  }
+  [data-entrance-order='4'] {
+    --entrance-order-delay: 280ms;
+  }
+  [data-entrance-order='5'] {
+    --entrance-order-delay: 350ms;
+  }
+  [data-entrance-order='6'] {
+    --entrance-order-delay: 420ms;
+  }
+  [data-entrance-order='7'] {
+    --entrance-order-delay: 490ms;
+  }
+
+  /* M03 stepper: the three named stages must read as an intentional 1 → 2 → 3
+   * sequence before the two-column form begins. Keep this local so the shared
+   * entrance rhythm used by the rest of the site is unchanged. */
+  [data-design-step-progress] [data-design-step-item][data-entrance-order='1'] {
+    --entrance-order-delay: 70ms;
+  }
+  [data-design-step-progress] [data-design-step-item][data-entrance-order='2'] {
+    --entrance-order-delay: 230ms;
+  }
+  [data-design-step-progress] [data-design-step-item][data-entrance-order='3'] {
+    --entrance-order-delay: 390ms;
+  }
+
+  /* M07 — thông tin dự án đọc theo từng cặp: nhãn → giá trị → dòng kế.
+   * Hai cột dùng cùng row delay để giữ nhịp thị giác, nhưng value luôn trễ
+   * label 70ms và row tiếp theo chỉ bắt đầu sau khi value trước đã vào. */
+  [data-dossier-overview-root][data-page-entrance='play'] [data-dossier-info-label],
+  [data-dossier-overview-root][data-page-entrance='play'] [data-dossier-info-value] {
+    --entrance-y: 8px;
+    animation: savico-page-entrance 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: opacity, transform;
+  }
+  [data-dossier-overview-root][data-page-entrance='play'] [data-dossier-info-label] {
+    animation-delay: calc(var(--page-entrance-offset, 0ms) + 80ms + var(--dossier-info-row-delay, 0ms));
+  }
+  [data-dossier-overview-root][data-page-entrance='play'] [data-dossier-info-value] {
+    animation-delay: calc(var(--page-entrance-offset, 0ms) + 150ms + var(--dossier-info-row-delay, 0ms));
+  }
+
+  [data-entrance-from='left'] {
+    --entrance-x: -18px;
+    --entrance-y: 0px;
+  }
+  [data-entrance-from='right'] {
+    --entrance-x: 18px;
+    --entrance-y: 0px;
+  }
+  [data-entrance-from='soft-scale'] {
+    --entrance-y: 8px;
+    --entrance-scale: 0.985;
+  }
+
+  [data-create-project-trigger]:hover {
+    transform: translateY(-0.125rem);
+    filter: brightness(1.05);
+  }
+  [data-create-project-trigger]:hover [data-create-project-plus] {
+    transform: rotate(90deg);
+  }
+  [data-create-project-trigger]:active {
+    transform: translateY(0) scale(0.96);
+  }
+
+  [data-handbook-foundation]:hover .foundation-hero-motion,
+  [data-handbook-foundation]:focus-within .foundation-hero-motion {
+    filter: brightness(1.05);
+  }
+
+  [data-handbook-tab-indicator][data-opening='true'] {
+    animation: handbook-tab-underline-draw 360ms var(--ease-out-soft) 300ms both;
+  }
+
+  [data-foundation-cta]:hover,
+  [data-foundation-cta]:focus-visible {
+    transform: translateY(-0.125rem);
+    filter: brightness(1.05);
+  }
+  [data-foundation-cta]:active {
+    transform: translateY(0) scale(0.98);
+  }
+  [data-foundation-cta]:hover [data-foundation-cta-arrow] {
+    transform: translateX(0.25rem);
+  }
+  [data-foundation-cta-arrow][data-nudge='true'] {
+    animation: handbook-cta-arrow-nudge 620ms var(--ease-out-soft) 1;
+  }
+  [data-foundation-cta-sheen] {
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -58%;
+    width: 46%;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      var(--glass-rim-2) 24%,
+      color-mix(in oklch, var(--glass-rim) 52%, transparent) 40%,
+      var(--glass-rim) 50%,
+      color-mix(in oklch, var(--glass-rim) 52%, transparent) 60%,
+      var(--glass-rim-2) 76%,
+      transparent 100%
+    );
+    mix-blend-mode: screen;
+    filter: blur(0.6px);
+    transform: translateX(0) skewX(-18deg);
+    will-change: transform, opacity;
+  }
+  [data-foundation-cta-sheen][data-nudge='true'] {
+    animation: handbook-cta-sheen 680ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+  }
+
+  [data-foundation-step]:hover,
+  [data-foundation-step]:focus-within {
+    transform: translateY(-0.25rem);
+  }
+  [data-foundation-step]:hover .foundation-step-image-motion,
+  [data-foundation-step]:focus-within .foundation-step-image-motion {
+    transform: scale(1.035);
+  }
+  [data-foundation-step]:hover [data-step-icon],
+  [data-foundation-step]:focus-within [data-step-icon] {
+    filter: brightness(0.75);
+  }
+  [data-stage-guide-link]:hover,
+  [data-stage-guide-link]:focus-visible {
+    font-weight: 700;
+  }
+  [data-stage-guide-underline] {
+    transform: scaleX(0);
+    transform-origin: right;
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform-origin 0ms;
+  }
+  [data-stage-guide-link]:hover [data-stage-guide-underline],
+  [data-stage-guide-link]:focus-visible [data-stage-guide-underline] {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  [data-stage-guide-link]:not(:hover):not(:focus-visible) [data-stage-guide-underline] {
+    transform-origin: right;
+    transition-duration: 170ms, 0ms;
+  }
+  [data-stage-guide-link]:not(:hover):not(:focus-visible) [data-step-link-arrow] {
+    transform: translateX(0);
+  }
+  [data-stage-guide-link]:hover [data-step-link-arrow],
+  [data-stage-guide-link]:focus-visible [data-step-link-arrow] {
+    transform: translateX(0.25rem);
+  }
+
+  [data-article-search][data-flash='true'] {
+    animation: handbook-search-flash 520ms var(--ease-out-soft) both;
+  }
+
+  /* Handbook newsroom — Hình 11 / Bản tin SAVICO. Keep the lead anchored;
+     only its media and emphasis change on hover. */
+  [data-newsletter-lead-image],
+  [data-newsletter-supporting-image],
+  [data-newsletter-related-image],
+  [data-article-row-image] {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+  }
+  [data-newsletter-lead-image] img,
+  [data-newsletter-supporting-image] img,
+  [data-newsletter-related-image] img,
+  [data-article-row-image] img {
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-newsletter-lead-title],
+  [data-newsletter-lead-number],
+  [data-newsletter-supporting-number],
+  [data-newsletter-related-title] {
+    transition:
+      color 180ms ease,
+      opacity 180ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-newsletter-lead]:hover [data-newsletter-lead-image] img,
+  [data-newsletter-lead]:focus-within [data-newsletter-lead-image] img {
+    transform: scale(1.025);
+  }
+  [data-newsletter-lead]:hover [data-newsletter-lead-title],
+  [data-newsletter-lead]:focus-within [data-newsletter-lead-title] {
+    color: var(--primary);
+  }
+  [data-newsletter-lead]:hover [data-newsletter-lead-number],
+  [data-newsletter-lead]:focus-within [data-newsletter-lead-number] {
+    color: var(--primary);
+    opacity: 1;
+    transform: scale(1.055);
+  }
+  [data-newsletter-swap='true'] {
+    animation: handbook-newsletter-crossfade 230ms var(--ease-out-soft) both;
+  }
+
+  [data-newsletter-supporting]:hover,
+  [data-newsletter-supporting]:focus-visible {
+    border-color: color-mix(in oklch, var(--primary) 38%, var(--border));
+    background: color-mix(in oklch, var(--primary) 4%, transparent);
+    transform: translateY(-3px);
+  }
+  [data-newsletter-supporting]:hover [data-newsletter-supporting-image] img,
+  [data-newsletter-supporting]:focus-visible [data-newsletter-supporting-image] img {
+    transform: scale(1.045);
+  }
+  [data-newsletter-supporting]:hover [data-newsletter-supporting-number],
+  [data-newsletter-supporting]:focus-visible [data-newsletter-supporting-number] {
+    color: var(--primary);
+    opacity: 1;
+    transform: scale(1.06);
+  }
+
+  [data-newsletter-related]:hover,
+  [data-newsletter-related]:focus-visible {
+    background: color-mix(in oklch, var(--muted) 58%, transparent);
+  }
+  [data-newsletter-related]:hover [data-newsletter-related-image] img,
+  [data-newsletter-related]:focus-visible [data-newsletter-related-image] img {
+    transform: scale(1.045);
+  }
+  [data-newsletter-related]:hover [data-newsletter-related-title],
+  [data-newsletter-related]:focus-visible [data-newsletter-related-title] {
+    color: var(--primary);
+  }
+  [data-newsletter-related-arrow] {
+    opacity: 0;
+    transform: translateX(-0.25rem);
+  }
+  [data-newsletter-related]:hover [data-newsletter-related-arrow],
+  [data-newsletter-related]:focus-visible [data-newsletter-related-arrow] {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  [data-stage-guide-link]:hover [data-newsletter-see-all-arrow],
+  [data-stage-guide-link]:focus-visible [data-newsletter-see-all-arrow] {
+    transform: translateX(0.25rem);
+  }
+
+  /* Handbook template library — Hình 5/6. Keep the existing layout; motion is
+     layered on top so filters, cards and pagination never need duplicate DOM. */
+  [data-template-kind-pill] {
+    opacity: 0;
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--primary) 28%, transparent);
+  }
+  [data-template-kind-pill][data-ready='true'] {
+    opacity: 1;
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 120ms ease;
+  }
+  [data-template-secondary-label] {
+    animation: handbook-template-label-crossfade 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  [data-template-select] {
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+  [data-template-select]:hover,
+  [data-template-select][data-state='open'] {
+    border-color: color-mix(in oklch, var(--primary) 72%, var(--border));
+  }
+  [data-template-select] svg {
+    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-template-select]:hover svg {
+    transform: translateY(2px);
+  }
+  [data-template-select][data-state='open'] svg {
+    transform: rotate(180deg);
+  }
+  [data-template-select-content] [data-highlighted] {
+    background: color-mix(in oklch, var(--primary) 10%, var(--accent));
+    color: var(--foreground);
+  }
+  [data-template-search] {
+    transform-origin: right center;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-template-search]:focus-within {
+    transform: scaleX(1.012);
+  }
+  [data-template-search]:focus-within input {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 14%, transparent);
+  }
+
+  [data-template-card]:hover,
+  [data-template-card]:has([data-template-card-open]:focus-visible) {
+    border-color: color-mix(in oklch, var(--primary) 42%, var(--border));
+    box-shadow: 0 12px 28px -20px color-mix(in oklch, var(--primary) 48%, transparent);
+    transform: translateY(-3px);
+    z-index: 1;
+  }
+  [data-template-card]:hover [data-template-card-title],
+  [data-template-card]:has([data-template-card-open]:focus-visible) [data-template-card-title] {
+    color: var(--primary);
+  }
+  [data-template-card-figure] {
+    overflow: hidden;
+  }
+  [data-template-card-figure] .template-card-figure-motion {
+    transition:
+      filter 260ms ease,
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 220ms ease;
+  }
+  [data-template-gallery-frame] {
+    opacity: 0;
+    transition: opacity 460ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity;
+  }
+  [data-template-gallery-frame][data-active='true'] {
+    opacity: 1;
+  }
+  [data-template-gallery-indicators] {
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+  [data-template-gallery-indicators][data-visible='true'] {
+    opacity: 1;
+  }
+  [data-template-card]:hover [data-template-card-figure] .template-card-figure-motion,
+  [data-template-card]:has([data-template-card-open]:focus-visible)
+    [data-template-card-figure]
+    .template-card-figure-motion,
+  [data-template-card][data-template-preview='true'] [data-template-card-figure] .template-card-figure-motion {
+    filter: brightness(1.06);
+    transform: scale(1.025);
+  }
+  [data-template-card][data-template-kind='3d'] [data-template-card-figure] .template-card-figure-motion {
+    transition:
+      filter 620ms ease,
+      transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 300ms ease;
+  }
+  [data-template-card][data-template-kind='3d']:hover [data-template-card-figure] .template-card-figure-motion,
+  [data-template-card][data-template-kind='3d']:has([data-template-card-open]:focus-visible)
+    [data-template-card-figure]
+    .template-card-figure-motion,
+  [data-template-card][data-template-kind='3d'][data-template-preview='true']
+    [data-template-card-figure]
+    .template-card-figure-motion {
+    filter: brightness(1.025);
+    transform: scale(1.015);
+  }
+  [data-template-card][data-template-pressing='true'] {
+    transform: translateY(0) scale(0.985);
+  }
+  [data-template-card][data-template-blocked='true'] {
+    animation: handbook-template-blocked-shake 420ms ease-out 1;
+  }
+
+  [data-favorite-button] {
+    transition:
+      border-color 180ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 180ms ease;
+  }
+  [data-favorite-button]:hover {
+    border-color: color-mix(in oklch, var(--primary) 58%, var(--border));
+    transform: scale(1.07);
+  }
+  [data-favorite-fill] {
+    transition: clip-path 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-favorite-button][data-favorite-pulse='save'] [data-favorite-heart] {
+    animation: handbook-favorite-pop 430ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+  }
+  [data-favorite-button][data-favorite-pulse='remove'] [data-favorite-heart] {
+    animation: handbook-favorite-unpop 260ms ease-out 1;
+  }
+  [data-favorite-particle] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--primary);
+    opacity: 0;
+    pointer-events: none;
+  }
+  [data-favorite-button][data-favorite-pulse='save'] [data-favorite-particle] {
+    animation: handbook-favorite-particle 420ms ease-out 1;
+  }
+  [data-favorite-particle][data-index='0'] {
+    --particle-x: 11px;
+    --particle-y: -11px;
+  }
+  [data-favorite-particle][data-index='1'] {
+    --particle-x: -10px;
+    --particle-y: -9px;
+  }
+  [data-favorite-particle][data-index='2'] {
+    --particle-x: 12px;
+    --particle-y: 7px;
+  }
+  [data-favorite-particle][data-index='3'] {
+    --particle-x: -11px;
+    --particle-y: 8px;
+  }
+
+  [data-read-badge] {
+    animation: handbook-read-badge-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  [data-read-check] path {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: handbook-read-check-draw 340ms cubic-bezier(0.22, 1, 0.36, 1) 90ms forwards;
+  }
+
+  [data-quota-number] {
+    display: inline-block;
+    animation: handbook-quota-number-flip 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  [data-quota-badge][data-quota-flash='true'] {
+    animation: handbook-quota-flash 480ms ease-out 1;
+  }
+  [data-quota-badge][data-quota-shake='true'] {
+    animation: handbook-template-blocked-shake 420ms ease-out 1;
+  }
+  [data-template-result-count] {
+    animation: handbook-template-count-in 220ms ease-out both;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Template detail (Ảnh 7/8) — motion is transform/opacity-first so the
+   * finished layout is unchanged and scroll/sticky geometry stays stable.
+   * -------------------------------------------------------------------- */
+  [data-detail-breadcrumb-link] {
+    position: relative;
+    transition: color 180ms ease;
+  }
+  [data-detail-breadcrumb-link]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -2px;
+    left: 0;
+    height: 1px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-detail-breadcrumb-link]:hover,
+  [data-detail-breadcrumb-link]:focus-visible {
+    color: var(--primary);
+  }
+  [data-detail-breadcrumb-link]:hover::after,
+  [data-detail-breadcrumb-link]:focus-visible::after {
+    transform: scaleX(1);
+  }
+  [data-detail-back]:hover [data-detail-back-arrow],
+  [data-detail-back]:focus-visible [data-detail-back-arrow] {
+    transform: translateX(-4px);
+  }
+  [data-detail-tag] {
+    --entrance-y: -9px;
+  }
+
+  [data-favorite-button][data-favorite-variant='full'] {
+    transform: none;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+  [data-favorite-button][data-favorite-variant='full']:hover,
+  [data-favorite-button][data-favorite-variant='full']:focus-visible,
+  [data-favorite-button][data-favorite-variant='full'][data-favorite-active='true'] {
+    border-color: color-mix(in oklch, var(--primary) 48%, var(--border));
+    background: color-mix(in oklch, var(--primary) 9%, var(--background));
+    transform: none;
+  }
+  [data-favorite-label] {
+    animation: handbook-template-label-crossfade 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  [data-floor-tab-pill] {
+    opacity: 0;
+  }
+  [data-floor-tab-pill][data-ready='true'] {
+    opacity: 1;
+    transition:
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 100ms ease;
+  }
+  [data-detail-floor-track] {
+    backface-visibility: hidden;
+  }
+  [data-detail-floor-viewport][data-detail-floor-kind='3d'] [data-detail-floor-panel] > * {
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: center;
+  }
+  [data-detail-floor-viewport][data-detail-floor-kind='3d']:hover [data-detail-floor-panel][aria-hidden='false'] > * {
+    transform: scale(1.018);
+  }
+
+  /*
+   * Keep the page shell completely stable during an in-place Similar switch.
+   * Only the named data blocks below are allowed to animate. Animating the
+   * root made the entire detail page fade out/in and read visually as a reset.
+   */
+  html.handbook-detail-inplace-transition::view-transition-group(root),
+  html.handbook-detail-inplace-transition::view-transition-old(root),
+  html.handbook-detail-inplace-transition::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-old(root) {
+    opacity: 0;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(root) {
+    opacity: 1;
+  }
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-media) {
+    animation-duration: 240ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-media) {
+    animation: none;
+    opacity: 1;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-media) {
+    animation: detail-vt-media-reveal 220ms cubic-bezier(0.22, 1, 0.36, 1) 12ms both;
+  }
+  html.handbook-detail-inplace-transition::view-transition-image-pair(handbook-detail-media) {
+    overflow: clip;
+  }
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-media),
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-media) {
+    mix-blend-mode: normal;
+  }
+
+  /*
+   * Similar-card data refresh: the page/header/info shells stay still. Only the
+   * values that actually change are captured, then revealed top-to-bottom like
+   * the motion reference. This keeps geometry untouched and avoids double-fade.
+   */
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-breadcrumb-name),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-title),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-tag-building),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-tag-style),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-tag-floors),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-tag-size),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-favorite),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-info-title),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-info-row-0),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-info-row-1),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-info-row-2),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-info-row-3),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-description-title),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-description-copy),
+  html.handbook-detail-inplace-transition::view-transition-group(handbook-detail-quota) {
+    animation-duration: 520ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-breadcrumb-name),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-title),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-tag-building),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-tag-style),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-tag-floors),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-tag-size),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-favorite),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-info-title),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-info-row-0),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-info-row-1),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-info-row-2),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-info-row-3),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-description-title),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-description-copy),
+  html.handbook-detail-inplace-transition::view-transition-old(handbook-detail-quota) {
+    animation: detail-vt-data-out 64ms ease-out both;
+    mix-blend-mode: normal;
+  }
+
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-breadcrumb-name) {
+    animation: detail-vt-copy-in 150ms cubic-bezier(0.22, 1, 0.36, 1) 28ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-title) {
+    animation: detail-vt-title-in 190ms cubic-bezier(0.22, 1, 0.36, 1) 52ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-tag-building) {
+    animation: detail-vt-chip-in 170ms cubic-bezier(0.22, 1, 0.36, 1) 82ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-tag-style) {
+    animation: detail-vt-chip-in 170ms cubic-bezier(0.22, 1, 0.36, 1) 112ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-tag-floors) {
+    animation: detail-vt-chip-in 170ms cubic-bezier(0.22, 1, 0.36, 1) 142ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-tag-size) {
+    animation: detail-vt-chip-in 170ms cubic-bezier(0.22, 1, 0.36, 1) 172ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-favorite) {
+    animation: detail-vt-copy-in 160ms cubic-bezier(0.22, 1, 0.36, 1) 96ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-info-title) {
+    animation: detail-vt-copy-in 165ms cubic-bezier(0.22, 1, 0.36, 1) 104ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-info-row-0) {
+    animation: detail-vt-info-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) 136ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-info-row-1) {
+    animation: detail-vt-info-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) 184ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-info-row-2) {
+    animation: detail-vt-info-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) 232ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-info-row-3) {
+    animation: detail-vt-info-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) 280ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-description-title) {
+    animation: detail-vt-copy-in 165ms cubic-bezier(0.22, 1, 0.36, 1) 304ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-description-copy) {
+    animation: detail-vt-description-in 190ms cubic-bezier(0.22, 1, 0.36, 1) 334ms both;
+    mix-blend-mode: normal;
+  }
+  html.handbook-detail-inplace-transition::view-transition-new(handbook-detail-quota) {
+    animation: detail-vt-copy-in 160ms cubic-bezier(0.22, 1, 0.36, 1) 366ms both;
+    mix-blend-mode: normal;
+  }
+  [data-page-entrance='play'] [data-detail-watermark] {
+    animation: detail-watermark-in 340ms ease-out calc(var(--page-entrance-offset, 0ms) + 900ms) both;
+  }
+
+  [data-page-entrance='play'] [data-template-info-row] [data-template-info-label] {
+    animation: detail-info-label-in 300ms cubic-bezier(0.22, 1, 0.36, 1)
+      calc(var(--page-entrance-offset, 0ms) + 760ms + var(--info-row-delay, 0ms)) both;
+  }
+  [data-page-entrance='play'] [data-template-info-row] [data-template-info-value] {
+    animation: detail-info-value-in 300ms cubic-bezier(0.22, 1, 0.36, 1)
+      calc(var(--page-entrance-offset, 0ms) + 825ms + var(--info-row-delay, 0ms)) both;
+  }
+  [data-page-entrance='play'] [data-template-info-divider] {
+    animation: detail-info-divider-draw 360ms cubic-bezier(0.22, 1, 0.36, 1)
+      calc(var(--page-entrance-offset, 0ms) + 850ms + var(--info-row-delay, 0ms)) both;
+  }
+
+  [data-similar-card] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  [data-similar-section][data-visible='false'] [data-similar-card] {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  [data-similar-section][data-visible='true'][data-reveal-done='false'] [data-similar-card] {
+    animation: detail-similar-card-in 360ms cubic-bezier(0.22, 1, 0.36, 1) var(--similar-delay, 0ms) both;
+  }
+  [data-similar-open]:hover,
+  [data-similar-open]:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -22px color-mix(in oklch, var(--primary) 52%, transparent);
+  }
+  [data-similar-card][data-blocked='true'] [data-similar-shake-shell] {
+    animation: handbook-template-blocked-shake 420ms ease-out 1 !important;
+  }
+
+  [data-consult-glow-shell]::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.985);
+  }
+  [data-consult-glow-shell][data-consult-pulse='true']::after {
+    animation: detail-consult-pulse 1200ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+  }
+  [data-mobile-consult-shell] {
+    opacity: 0;
+    transform: translateY(calc(100% + 1.5rem));
+    transition:
+      opacity 220ms ease,
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-mobile-consult-shell][data-visible='true'] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes detail-watermark-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes detail-vt-header-out {
+    to {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes detail-vt-header-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-vt-media-reveal {
+    from {
+      clip-path: inset(0 0 0 100%);
+      transform: translateX(4px);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes detail-vt-aside-out {
+    to {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes detail-vt-aside-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-vt-data-out {
+    to {
+      opacity: 0;
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes detail-vt-copy-in {
+    from {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-vt-title-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-vt-chip-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes detail-vt-info-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-vt-description-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-info-label-in {
+    from {
+      opacity: 0;
+      transform: translateX(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes detail-info-value-in {
+    from {
+      opacity: 0;
+      transform: translateX(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes detail-info-divider-draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes detail-similar-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes detail-consult-pulse {
+    0%,
+    100% {
+      opacity: 0;
+      transform: scale(0.985);
+      border-color: transparent;
+      box-shadow: 0 0 0 0 transparent;
+    }
+    38% {
+      opacity: 0.95;
+      transform: scale(1.008);
+      border-color: color-mix(in oklch, var(--primary) 42%, transparent);
+      box-shadow:
+        0 0 0 5px color-mix(in oklch, var(--primary) 16%, transparent),
+        0 0 22px 3px color-mix(in oklch, var(--primary) 42%, transparent);
+    }
+    68% {
+      opacity: 0.42;
+      transform: scale(1.018);
+      border-color: color-mix(in oklch, var(--primary) 18%, transparent);
+      box-shadow:
+        0 0 0 8px color-mix(in oklch, var(--primary) 6%, transparent),
+        0 0 28px 5px color-mix(in oklch, var(--primary) 20%, transparent);
+    }
+  }
+
+  /* Active category is represented by one moving pill. No secondary bloom:
+     adjacent selections should read as a single, continuous slide. */
+  [data-filter-pill] {
+    opacity: 0;
+    background: var(--primary);
+    border: 1px solid color-mix(in oklch, var(--primary) 88%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent);
+  }
+  [data-filter-pill][data-ready='true'] {
+    opacity: 1;
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 120ms ease;
+  }
+  [data-article-row-image] {
+    border-radius: var(--radius-lg);
+  }
+  [data-article-row]:hover [data-article-row-image] img,
+  [data-article-row]:focus-visible [data-article-row-image] img {
+    transform: scale(1.04);
+  }
+  [data-article-row]:hover [data-article-row-title],
+  [data-article-row]:focus-visible [data-article-row-title] {
+    color: var(--primary);
+  }
+  [data-row-plus] {
+    --article-plus-rotation: 0deg;
+    transform: rotate(var(--article-plus-rotation)) scale(1);
+  }
+  [data-row-plus][data-open='true'] {
+    --article-plus-rotation: 45deg;
+  }
+  [data-article-row]:hover [data-row-plus],
+  [data-article-row]:focus-visible [data-row-plus] {
+    transform: rotate(var(--article-plus-rotation)) scale(1.08);
+  }
+  [data-plus-horizontal],
+  [data-plus-vertical] {
+    transition:
+      width 160ms ease,
+      height 160ms ease;
+  }
+  [data-article-row]:hover [data-plus-horizontal],
+  [data-article-row]:focus-visible [data-plus-horizontal] {
+    height: 3px;
+  }
+  [data-article-row]:hover [data-plus-vertical],
+  [data-article-row]:focus-visible [data-plus-vertical] {
+    width: 3px;
+  }
+
+  [data-assistant-fab][data-ready='true'] {
+    animation: assistant-fab-rise 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-assistant-fab][data-ready='true']:hover {
+    transform: scale(1.05) !important;
+  }
+  [data-assistant-idle-ring] {
+    animation: assistant-idle-ring 4.8s ease-out infinite;
+  }
+  [data-assistant-fab]:hover [data-assistant-fab-icon] {
+    animation: assistant-icon-blink 340ms ease-out 1;
+  }
+
+  @keyframes handbook-template-label-crossfade {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes handbook-template-blocked-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    22% {
+      transform: translateX(-5px);
+    }
+    44% {
+      transform: translateX(4px);
+    }
+    64% {
+      transform: translateX(-3px);
+    }
+    82% {
+      transform: translateX(2px);
+    }
+  }
+
+  @keyframes handbook-favorite-pop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    48% {
+      transform: scale(1.34);
+    }
+    72% {
+      transform: scale(0.94);
+    }
+  }
+
+  @keyframes handbook-favorite-unpop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    52% {
+      transform: scale(0.82);
+    }
+  }
+
+  @keyframes handbook-favorite-particle {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.4);
+    }
+    30% {
+      opacity: 0.82;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(-50% + var(--particle-x)), calc(-50% + var(--particle-y))) scale(1);
+    }
+  }
+
+  @keyframes handbook-read-badge-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes handbook-read-check-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes handbook-quota-number-flip {
+    0% {
+      opacity: 0.35;
+      transform: rotateX(-72deg) translateY(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: rotateX(0) translateY(0);
+    }
+  }
+
+  @keyframes handbook-quota-flash {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+    42% {
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 18%, transparent);
+    }
+  }
+
+  @keyframes handbook-template-count-in {
+    from {
+      opacity: 0.4;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes handbook-search-flash {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+    35% {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 18%, transparent);
+    }
+    65% {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 0%, transparent);
+    }
+  }
+
+  @keyframes handbook-newsletter-crossfade {
+    from {
+      opacity: 0.48;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes assistant-fab-rise {
+    0% {
+      opacity: 0;
+      transform: translateY(2.5rem) scale(0);
+    }
+    72% {
+      opacity: 1;
+      transform: translateY(-0.25rem) scale(1.025);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes assistant-idle-ring {
+    0%,
+    58%,
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+    64% {
+      opacity: 0.42;
+      transform: scale(1);
+    }
+    80% {
+      opacity: 0;
+      transform: scale(1.75);
+    }
+  }
+
+  @keyframes assistant-icon-blink {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    48% {
+      opacity: 0.35;
+      transform: scale(0.86);
+    }
+  }
+
+  @keyframes handbook-tab-underline-draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes handbook-cta-arrow-nudge {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    22% {
+      transform: translateX(0);
+    }
+    46% {
+      transform: translateX(0.375rem);
+    }
+    66% {
+      transform: translateX(0.075rem);
+    }
+    80% {
+      transform: translateX(0.125rem);
+    }
+  }
+
+  @keyframes handbook-cta-sheen {
+    0% {
+      opacity: 0;
+      transform: translateX(0) skewX(-18deg);
+    }
+    16% {
+      opacity: 0.9;
+    }
+    72% {
+      opacity: 0.72;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(520%) skewX(-18deg);
+    }
+  }
+
   /* Shared liquid-glass surface behaviour (rim + inner glow + stacking). */
   .glass-panel,
   .glass-panel-strong,
@@ -956,6 +2195,48 @@
   }
 }
 
+@keyframes savico-page-entrance {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--entrance-x, 0px), var(--entrance-y, 16px), 0) scale(var(--entrance-scale, 1));
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* M09 uses the same content choreography for every entry path. The success
+ * circle/check itself is separately gated by data-celebrating so an old dossier
+ * never redraws them on reload/open from the project list. */
+[data-dossier-ready][data-page-entrance='play'] [data-entrance-step='1'] {
+  --entrance-step-delay: 760ms;
+}
+[data-dossier-ready][data-page-entrance='play'] [data-entrance-step='2'] {
+  --entrance-step-delay: 900ms;
+}
+[data-dossier-ready][data-page-entrance='play'] [data-entrance-step='3'] {
+  --entrance-step-delay: 2150ms;
+}
+[data-dossier-ready][data-page-entrance='play'] [data-entrance-step='4'] {
+  --entrance-step-delay: 2450ms;
+}
+
+@keyframes savico-success-check {
+  0% {
+    opacity: 0;
+    transform: scale(0.58);
+  }
+  68% {
+    opacity: 1;
+    transform: scale(1.16);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Sheen sweep used by hero surfaces + the generating overlay. */
 @keyframes glass-sheen {
   0% {
@@ -966,7 +2247,1495 @@
   }
 }
 
+/* =============================================================================
+ * DESIGN FLOW MOTION — M01…M09
+ * Motion is attached to existing semantic elements and resolves to the exact
+ * existing layout. Transform/opacity own the choreography; no parallax and no
+ * animated layout coordinates are used.
+ * ========================================================================== */
+[data-page-entrance='play'] [data-stat-icon] {
+  opacity: 0;
+  transform: scale(0.82);
+  animation: design-icon-arrive 300ms var(--ease-out-soft) var(--stat-icon-delay, 1.45s) both;
+}
+[data-stat-card][data-count-settled='true'] {
+  animation: design-card-settle 520ms var(--ease-out-soft);
+}
+[data-number-old] {
+  animation: design-number-old-out 300ms var(--ease-out-soft) both;
+}
+[data-number-new='true'] {
+  animation: design-number-new-in 300ms var(--ease-out-soft) both;
+}
+[data-create-project-tile] {
+  background-image:
+    linear-gradient(90deg, var(--primary) 50%, transparent 50%),
+    linear-gradient(90deg, var(--primary) 50%, transparent 50%),
+    linear-gradient(0deg, var(--primary) 50%, transparent 50%),
+    linear-gradient(0deg, var(--primary) 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size:
+    10px 1px,
+    10px 1px,
+    1px 10px,
+    1px 10px;
+  background-position:
+    0 0,
+    0 100%,
+    0 0,
+    100% 0;
+}
+[data-create-project-tile]:hover {
+  border-color: transparent;
+  animation: design-dashed-border 2.4s linear infinite;
+  box-shadow: 0 10px 24px color-mix(in oklch, var(--primary) 10%, transparent);
+}
+[data-create-tile-plus] {
+  transition: transform 360ms var(--ease-out-soft);
+}
+[data-create-project-tile]:hover [data-create-tile-plus] {
+  transform: rotate(90deg);
+}
+[data-project-card]:hover .project-card-image {
+  transform: scale(1.035);
+}
+[data-project-card][data-just-completed='true'] {
+  animation: design-project-return 760ms var(--ease-out-soft);
+}
+[data-project-status] {
+  animation: design-chip-arrive 340ms var(--ease-out-soft) 420ms both;
+}
+[data-project-status][data-completed='true'] {
+  animation:
+    design-chip-arrive 340ms var(--ease-out-soft) 420ms both,
+    design-complete-glow 650ms var(--ease-out-soft) 760ms;
+}
+[data-stepper-phase='waiting'] [data-mini-step-link][data-reached='true'] {
+  transform: scaleX(0);
+}
+[data-stepper-phase='play'] [data-mini-step-link][data-reached='true'] {
+  animation: design-connector-draw 520ms var(--ease-out-soft) both;
+  animation-delay: var(--mini-step-delay, 0ms);
+}
+[data-stepper-phase='done'] [data-mini-step-link][data-reached='true'] {
+  transform: scaleX(1);
+}
+
+/* Main 3-step progress: the already-completed connector stays solid while only
+ * the connector entering the current step is drawn left -> right. Keeping the
+ * gray track separate prevents the whole line from flashing green immediately. */
+[data-step-connector-fill] {
+  transform: scaleX(1);
+}
+[data-step-connector-fill][data-current='true'] {
+  transform: scaleX(0);
+  animation: design-connector-draw 720ms var(--ease-out-soft) 120ms both;
+}
+[data-design-step-progress][data-animate-entrance='true'] [data-step-connector-fill][data-current='true'] {
+  animation-delay: calc(var(--page-entrance-offset, 0ms) + 420ms);
+}
+[data-stepper-phase='play'] [data-step-dot][data-active='true'],
+[data-stepper-phase='done'] [data-step-dot][data-active='true'] {
+  animation: design-step-breathe 3.6s ease-in-out infinite;
+}
+[data-design-step-progress] [data-step-dot][data-active='true'] {
+  animation: design-step-breathe 3.6s ease-in-out infinite;
+}
+[data-filter-chip][aria-pressed='true'] {
+  animation: design-chip-fill 340ms var(--ease-out-soft);
+}
+
+[data-create-dialog-content] {
+  transform: none !important;
+}
+[data-create-dialog-content][data-state='open'] {
+  transform-origin: calc(50% + var(--dialog-origin-x, 0px)) calc(50% + var(--dialog-origin-y, 0px));
+  animation: design-dialog-open 380ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+[data-create-dialog-content][data-state='closed'] {
+  animation: design-dialog-close 240ms cubic-bezier(0.4, 0, 1, 1) both !important;
+}
+[data-create-dialog-content][data-submitting='complete'] {
+  animation: design-dialog-continue 360ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+body:has([data-create-dialog-content][data-state='open']) main {
+  transform: scale(0.988);
+  filter: blur(1px);
+}
+body main {
+  transition:
+    transform 320ms var(--ease-out-soft),
+    filter 320ms ease;
+  transform-origin: center top;
+}
+[data-create-dialog-content] [data-create-project-name] {
+  transition:
+    border-color 200ms ease,
+    box-shadow 300ms ease;
+}
+[data-create-dialog-content] [data-create-project-name]::placeholder {
+  transition: opacity 320ms ease;
+}
+[data-create-dialog-content] [data-create-project-name]:focus::placeholder {
+  opacity: 0.35;
+}
+[data-create-dialog-content][data-state='open'] [data-create-project-name] {
+  animation: design-input-focus 700ms var(--ease-out-soft) 280ms both;
+}
+[data-create-dialog-content] [data-create-project-description] {
+  min-height: 5rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  transition: height 220ms var(--ease-out-soft);
+}
+[data-create-dialog-content][data-invalid-pulse='true']:has([data-create-project-name][aria-invalid='true'])
+  [data-create-project-name] {
+  animation: design-field-nudge 340ms ease-out;
+}
+[data-create-submit]:active {
+  transform: scale(0.97);
+}
+[data-submit-dots] > span {
+  animation: design-thinking-dot 900ms ease-in-out infinite;
+  animation-delay: var(--dot-delay, 0ms);
+}
+
+[data-photo-dropzone] [data-photo-icon] {
+  transition: transform 240ms var(--ease-out-soft);
+}
+[data-photo-dropzone][data-dragging='true'] {
+  border-width: 2px;
+  animation: design-dropzone-glow 900ms ease-in-out infinite alternate;
+}
+[data-photo-dropzone][data-dragging='true'] [data-photo-icon] {
+  transform: translateY(-6px);
+}
+[data-photo-dropzone][data-error-pulse='true'] {
+  animation: design-upload-error-flash 360ms ease-out;
+}
+[data-photo-preview] img[data-upload-complete='true'] {
+  animation: design-image-resolve 620ms ease-out both;
+}
+[data-photo-preview][data-removing='true'] img {
+  opacity: 0;
+  transform: scale(0.82);
+}
+[data-upload-error] {
+  animation: design-error-in 300ms var(--ease-out-soft) both;
+}
+[data-character-counter-warning='true'] [data-character-counter] {
+  color: var(--warning-strong);
+  animation: design-counter-nudge 260ms var(--ease-out-soft);
+}
+[data-address-menu][data-state='open'] {
+  animation: design-menu-drop 220ms var(--ease-out-soft) both !important;
+}
+[data-address-unlocked='true'] {
+  position: relative;
+  overflow: hidden;
+  animation: design-unlock 650ms var(--ease-out-soft);
+}
+[data-address-unlocked='true']::after {
+  content: '';
+  position: absolute;
+  inset: -55% auto -55% -28%;
+  width: 20%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, white 62%, transparent), transparent);
+  animation: design-unlock-sheen 650ms ease-out both;
+  pointer-events: none;
+}
+[data-scope-reveal] {
+  animation: design-reveal-down 360ms var(--ease-out-soft) both;
+}
+[data-extra-reveal] {
+  animation: design-reveal-down 420ms var(--ease-out-soft) 180ms both;
+}
+[data-compact-choice] {
+  background-position: center;
+  transition:
+    color 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    transform 150ms ease;
+}
+[data-compact-choice][aria-pressed='true'] {
+  animation: design-choice-fill 280ms var(--ease-out-soft);
+}
+[data-image-choice] {
+  position: relative;
+  transition:
+    transform 260ms var(--ease-out-soft),
+    color 180ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+[data-image-choice]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border: 2px solid var(--primary);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+[data-page-entrance='done'] [data-image-choice][data-style-choice-reveal='true'] {
+  animation: design-style-choice-in 360ms var(--ease-out-soft) var(--choice-reveal-delay, 0ms) both;
+}
+.choice-card-photo {
+  background-color: transparent;
+}
+[data-image-choice][data-selected='false']:hover {
+  transform: translateY(-3px);
+  color: var(--primary-strong);
+}
+[data-image-choice][data-selected='true'] .choice-card-image {
+  transform: scale(1.025);
+}
+[data-image-choice][data-selected='true'] {
+  transform: translateY(-2px);
+}
+[data-image-choice][data-selected='true']::after {
+  animation: design-selected-border 360ms var(--ease-out-soft) both;
+}
+[data-choice-check] {
+  animation: design-check-pop 360ms cubic-bezier(0.2, 1.45, 0.4, 1) both;
+}
+[data-package-slider] [data-slot='slider-range'] {
+  transition: width 100ms linear;
+}
+[data-package-slider] [data-slot='slider-thumb'] {
+  transition:
+    transform 160ms var(--ease-out-soft),
+    box-shadow 160ms ease;
+}
+[data-package-slider] [data-slot='slider-thumb']:active {
+  transform: scale(1.16);
+}
+[data-package-label][data-active='true'] {
+  transform: translateY(-1px);
+}
+[data-validation-run='true'] [data-missing='true'] {
+  animation: design-missing-field 360ms ease-out both;
+  animation-delay: var(--missing-delay, 0ms);
+}
+[data-primary-ready='true'] {
+  position: relative;
+  overflow: hidden;
+}
+[data-primary-ready='true'][data-ready-sweep='true']::after {
+  content: '';
+  position: absolute;
+  inset: -60% auto -60% -35%;
+  width: 24%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, white 60%, transparent), transparent);
+  animation: design-ready-sheen 760ms ease-out both;
+}
+[data-quota-message][data-ready-pulse='true'] {
+  animation: design-copy-pulse 560ms var(--ease-out-soft);
+}
+[data-estimate-submit][data-primary-ready='true']:active {
+  transform: scale(0.985);
+}
+[data-flow-leaving='true'] [data-estimate-submit] {
+  animation: design-submit-to-progress 460ms var(--ease-out-soft) both;
+}
+[data-flow-leaving='true'] > .grid,
+[data-flow-leaving='true'] > .grid + div > p {
+  animation: design-form-collapse 440ms var(--ease-out-soft) both;
+}
+
+[data-generation-waiting]:not([data-error='true']) [data-progress-ring][data-stalled='true'] [data-progress-arc] {
+  filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 55%, transparent));
+  animation: design-ring-alive 1.8s ease-in-out infinite;
+}
+
+/* M08 owns its timeline; these effects never advance the render state. */
+[data-m08-alive] {
+  transform-origin: 80px 80px;
+  animation: m08-ring-orbit 2.8s linear infinite;
+}
+[data-m08-waiting][data-error='true'] [data-render-check] {
+  animation-play-state: paused;
+}
+[data-m08-waiting][data-long-wait='true'] [data-render-check] {
+  animation: none;
+}
+[data-m08-waiting] [data-render-tip] {
+  animation-delay: 720ms;
+}
+[data-handbook-panel][data-long-wait='true'],
+[data-handbook-panel-fab][data-long-wait='true'] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 12%, transparent);
+  transition:
+    border-color 800ms ease,
+    box-shadow 800ms ease;
+  animation: m08-copy-in 650ms ease both;
+}
+[data-panel-selection-outline] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 520ms ease,
+    opacity 180ms ease;
+}
+[data-panel-selected='true'] [data-panel-selection-outline] {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+[data-dossier-handoff='true'][data-files-entering='false'] [data-dossier-pdf]::after {
+  content: '';
+  position: absolute;
+  inset: -70% auto -70% -35%;
+  width: 22%;
+  transform: skewX(-20deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--primary-foreground) 58%, transparent),
+    transparent
+  );
+  animation: design-action-sheen 800ms ease-out 420ms both;
+}
+@keyframes m08-ring-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes m08-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  [data-m08-alive],
+  [data-handbook-panel][data-long-wait='true'],
+  [data-handbook-panel-fab][data-long-wait='true'],
+  [data-dossier-handoff='true'] [data-dossier-pdf]::after {
+    animation: none !important;
+  }
+  [data-panel-selection-outline] {
+    transition: none;
+  }
+}
+body:has([data-generation-waiting]) [data-assistant-idle-ring] {
+  animation-play-state: paused;
+  opacity: 0;
+}
+[data-progress-row][data-state='done'] svg,
+[data-render-check] {
+  animation: design-check-pop 360ms cubic-bezier(0.2, 1.45, 0.4, 1) both;
+}
+[data-progress-row][data-state='done'] {
+  opacity: 0.68;
+}
+[data-progress-row][data-state='active'] > span:first-child,
+[data-render-row][data-state='active'] [data-progress-value] {
+  animation: design-active-dot 1.55s ease-in-out infinite;
+}
+[data-render-row][data-state='pending'] [data-render-bar] {
+  width: 0 !important;
+}
+[data-render-row] {
+  animation: design-render-row-reveal 300ms var(--ease-out-soft) both;
+}
+[data-render-tip] {
+  animation: design-tip-rise 420ms var(--ease-out-soft) 160ms both;
+}
+
+[data-estimate-chart-stage] {
+  transition: opacity 240ms ease;
+}
+[data-estimate-grand-total] {
+  transform-origin: center;
+  animation: design-estimate-focus-in 520ms var(--ease-out-soft) both;
+  transition:
+    border-color 220ms ease,
+    box-shadow 260ms ease;
+}
+[data-estimate-grand-total][data-total-settled='true'] {
+  animation: design-estimate-total-settle 520ms var(--ease-out-soft) both;
+}
+[data-estimate-table-reveal='true'] {
+  animation: design-reveal-down 360ms var(--ease-out-soft) both;
+}
+[data-estimate-table-reveal='false'] * {
+  animation-play-state: paused !important;
+}
+[data-estimate-table-body] [data-estimate-row] {
+  animation: design-table-row-in 320ms var(--ease-out-soft) both;
+  animation-delay: var(--row-delay, 0ms);
+}
+[data-estimate-row]:hover {
+  transition-duration: 0ms;
+}
+[data-estimate-detail-row] {
+  animation: design-table-row-in 280ms var(--ease-out-soft) both;
+  animation-delay: var(--detail-row-delay, 0ms);
+}
+[data-estimate-total-row] {
+  opacity: 0;
+  animation: design-total-row-appear 1ms linear var(--total-row-delay, 0ms) forwards;
+}
+[data-estimate-total-cell] {
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 0 100%;
+  animation: design-total-row-fill 420ms var(--ease-out-soft) var(--total-row-delay, 0ms) forwards;
+}
+[data-donut-slice] {
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  transition:
+    opacity 520ms ease,
+    transform 420ms var(--ease-out-soft);
+}
+[data-donut-slice][data-active='true'] {
+  transform: translate(var(--slice-x), var(--slice-y));
+  transition-duration: 220ms;
+}
+[data-donut-slice][data-muted='true'] {
+  opacity: 0.45;
+}
+[data-donut-label],
+[data-donut-legend] {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+[data-donut-label][data-visible='true'],
+[data-donut-legend][data-visible='true'] {
+  opacity: 1;
+}
+[data-donut-legend] {
+  transition:
+    opacity 520ms ease,
+    font-weight 180ms ease;
+}
+[data-donut-legend][data-active='true'] .font-medium {
+  font-weight: 600;
+}
+[data-donut-legend][data-muted='true'] {
+  opacity: 0.46;
+}
+[data-advisory-visible='false'] [data-advisory-paragraph] {
+  opacity: 0;
+}
+[data-advisory-visible='true'] [data-advisory-paragraph] {
+  animation: design-advisory-chunk 420ms var(--ease-out-soft) both;
+  animation-delay: var(--paragraph-delay, 0ms);
+}
+[data-advisory-icon] {
+  opacity: 0;
+}
+[data-advisory-card][data-advisory-visible='true'] [data-advisory-icon] {
+  animation: design-advisory-icon-in 300ms var(--ease-out-soft) both;
+}
+[data-advisory-card][data-advisory-visible='true'] [data-advisory-icon='sparkle'] {
+  animation-delay: 120ms;
+}
+
+[data-dossier-ready] li:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+[data-dossier-ready] li {
+  transition:
+    transform 240ms var(--ease-out-soft),
+    box-shadow 240ms ease;
+}
+[data-dossier-ready] li:hover img {
+  filter: saturate(1.03) contrast(1.02);
+}
+[data-dossier-preview] > :first-child {
+  transition:
+    transform 460ms var(--ease-out-soft),
+    filter 300ms ease;
+}
+[data-dossier-preview]:hover > :first-child {
+  transform: scale(1.025);
+}
+[data-preview-action-icon] {
+  transform: none;
+}
+[data-dossier-overview-left] {
+  transition:
+    opacity 260ms ease,
+    transform 340ms var(--ease-out-soft);
+}
+[data-dossier-overview-root][data-waiting-panel-visible='true'] [data-dossier-overview-left] {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-12px);
+}
+[data-dossier-waiting-panel][data-collapsed='false'] {
+  animation: design-dossier-waiting-panel-in 420ms var(--ease-out-soft) both;
+}
+[data-dossier-inline-progress] {
+  transform-origin: top center;
+  animation: design-render-progress-expand 420ms var(--ease-out-soft) both;
+}
+[data-render-dossier-button] {
+  position: relative;
+  overflow: hidden;
+}
+[data-render-dossier-button]::after {
+  content: '';
+  position: absolute;
+  inset: -70% auto -70% -35%;
+  width: 22%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, white 58%, transparent), transparent);
+  animation: design-action-sheen 800ms ease-out 1.25s both;
+}
+[data-render-dossier-button][data-launching='true'] {
+  animation: design-render-launch 320ms var(--ease-out-soft) both;
+}
+[data-locked-hint] {
+  transform: translateX(8px);
+  transition:
+    opacity 180ms ease,
+    transform 220ms var(--ease-out-soft);
+}
+[data-locked-action]:hover [data-locked-hint],
+[data-locked-action]:focus-visible [data-locked-hint] {
+  opacity: 1;
+  transform: translateX(0);
+}
+[data-locked-action]:disabled,
+[data-locked-action]:disabled:hover,
+[data-locked-action]:disabled:active {
+  transform: none !important;
+  filter: none !important;
+}
+[data-locked-action]:disabled::before,
+[data-locked-action]:disabled:hover::before {
+  opacity: 0 !important;
+  transition: none !important;
+}
+[data-render-status-chip] {
+  interpolate-size: allow-keywords;
+  width: max-content;
+}
+[data-preview-dialog] {
+  transform-origin: calc(50% + var(--dialog-origin-x, 0px)) calc(50% + var(--dialog-origin-y, 0px));
+}
+[data-preview-dialog][data-state='open'],
+[data-origin-dialog][data-state='open'] {
+  animation: design-dialog-open 360ms var(--ease-out-soft) both !important;
+}
+[data-preview-dialog][data-state='closed'] {
+  animation: design-dialog-close 220ms ease-in both !important;
+}
+[data-origin-dialog][data-state='closed'] {
+  animation: design-dialog-close 220ms ease-in both !important;
+}
+
+[data-handbook-panel] {
+  animation: design-panel-restore 380ms var(--ease-out-soft) both;
+  transform-origin: bottom right;
+}
+[data-handbook-panel-fab] {
+  animation: design-panel-minimize-fab 280ms var(--ease-out-soft) both;
+}
+[data-handbook-panel-grid] [data-panel-card] {
+  animation: design-table-row-in 360ms var(--ease-out-soft) both;
+  animation-delay: var(--panel-card-delay, 0ms);
+}
+[data-chat-thinking] > span {
+  animation: design-thinking-dot 1.2s ease-in-out infinite;
+  animation-delay: var(--dot-delay, 0ms);
+}
+[data-chat-message] {
+  animation: design-chat-chunk 420ms var(--ease-out-soft) both;
+}
+
+[data-dossier-ready][data-celebrating='true'][data-page-entrance='play'] [data-dossier-success-circle] {
+  position: relative;
+  animation: design-success-circle 520ms var(--ease-out-soft) 160ms both;
+}
+[data-dossier-success-ring] circle {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+[data-dossier-ready][data-celebrating='true'][data-page-entrance='play'] [data-dossier-success-ring] circle {
+  stroke-dashoffset: 1;
+  opacity: 1;
+  animation: design-success-ring-draw 420ms var(--ease-out-soft) 120ms forwards;
+}
+[data-dossier-ready][data-celebrating='true'][data-page-entrance='play'] [data-dossier-success-check] path {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+  animation: design-check-draw 420ms ease-out 560ms forwards;
+}
+[data-dossier-ready][data-celebrating='true'][data-page-entrance='play'] [data-dossier-success-check] {
+  animation: design-success-bounce 360ms var(--ease-out-soft) 900ms both !important;
+}
+[data-dossier-file-card]:hover [data-file-kind] {
+  font-weight: 700;
+}
+[data-dossier-pdf] {
+  position: relative;
+}
+[data-download-arrow] {
+  animation: design-download-arrow 700ms ease-in-out infinite;
+}
+[data-download-complete] {
+  animation: design-check-pop 360ms cubic-bezier(0.2, 1.45, 0.4, 1) both;
+}
+[data-share-link-expanded] {
+  position: relative;
+  animation: design-share-expand 320ms var(--ease-out-soft) both;
+}
+[data-copied-label] {
+  animation: design-copied-label 1.4s var(--ease-out-soft) both;
+}
+[data-call-now] {
+  animation: none;
+}
+[data-dossier-ready][data-page-entrance='play'] [data-contact-strip] {
+  /* Do not fade the CTA: fading a layered primary gradient through the page
+   * background makes "Gọi ngay" appear white/dark during reload. Keep the
+   * final paint from frame one and reveal it only when its slide starts. */
+  animation: design-contact-strip-in 460ms var(--ease-out-soft) both;
+  animation-delay: calc(var(--page-entrance-offset, 0ms) + var(--entrance-step-delay, 0ms));
+  will-change: transform;
+}
+[data-dossier-ready][data-page-entrance='done'] [data-call-now] {
+  animation: design-call-breathe 3.8s ease-in-out 450ms infinite;
+}
+[data-contact-strip]:hover [data-call-now] {
+  animation-play-state: paused;
+}
+[data-dossier-ready][data-m09-leaving='true'] {
+  pointer-events: none;
+  animation: design-m09-exit-right 320ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@media (max-width: 639px) {
+  [data-create-dialog-content][data-state='open'] {
+    animation: design-dialog-mobile-open 380ms var(--ease-out-soft) both !important;
+  }
+  [data-create-dialog-content][data-state='closed'] {
+    animation: design-dialog-mobile-close 240ms ease-in both !important;
+  }
+  [data-create-dialog-content][data-dragging='true'] {
+    animation: none !important;
+    translate: -50% calc(-50% + var(--dialog-drag-y, 0px)) !important;
+    transform: none !important;
+    transition: translate 160ms var(--ease-out-soft);
+  }
+}
+
+@keyframes design-icon-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes design-card-settle {
+  45% {
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 12%, transparent);
+  }
+}
+@keyframes design-number-slide {
+  from {
+    opacity: 0.45;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-number-old-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+}
+@keyframes design-number-new-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-dashed-border {
+  to {
+    background-position:
+      20px 0,
+      -20px 100%,
+      0 -20px,
+      100% 20px;
+  }
+}
+@keyframes design-chip-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes design-project-return {
+  45% {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 13%, transparent);
+  }
+}
+@keyframes design-complete-glow {
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in oklch, var(--primary) 15%, transparent);
+  }
+}
+@keyframes design-connector-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes design-step-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 18%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+@keyframes design-chip-fill {
+  from {
+    box-shadow: inset 0 0 0 1.5rem color-mix(in oklch, var(--primary) 12%, transparent);
+    transform: scaleX(0.96);
+  }
+  to {
+    box-shadow: inset 0 0 0 0 transparent;
+    transform: scaleX(1);
+  }
+}
+@keyframes design-dialog-open {
+  from {
+    opacity: 0;
+    scale: 0.9;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes design-dialog-close {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.9;
+  }
+}
+@keyframes design-dialog-continue {
+  to {
+    opacity: 0;
+    scale: 1.07;
+    filter: blur(5px);
+  }
+}
+@keyframes design-dialog-mobile-open {
+  from {
+    opacity: 0;
+    translate: -50% calc(-50% + 55vh);
+  }
+  to {
+    opacity: 1;
+    translate: -50% -50%;
+  }
+}
+@keyframes design-dialog-mobile-close {
+  from {
+    opacity: 1;
+    translate: -50% -50%;
+  }
+  to {
+    opacity: 0;
+    translate: -50% calc(-50% + 55vh);
+  }
+}
+@keyframes design-input-focus {
+  45% {
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--ring) 20%, transparent);
+    border-color: var(--ring);
+  }
+}
+@keyframes design-field-nudge {
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+@keyframes design-dropzone-glow {
+  to {
+    box-shadow:
+      inset 0 0 0 1px var(--primary),
+      0 0 0 5px color-mix(in oklch, var(--primary) 10%, transparent);
+  }
+}
+@keyframes design-upload-error-flash {
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in oklch, var(--destructive) 14%, transparent);
+  }
+}
+@keyframes design-unlock-sheen {
+  from {
+    left: -28%;
+  }
+  to {
+    left: 118%;
+  }
+}
+@keyframes design-image-resolve {
+  from {
+    opacity: 0.35;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@keyframes design-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-counter-nudge {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes design-menu-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-unlock {
+  45% {
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 13%, transparent);
+  }
+}
+@keyframes design-reveal-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-style-choice-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.985;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes design-choice-fill {
+  from {
+    background-size: 0 100%;
+    transform: scaleX(0.96);
+  }
+  to {
+    background-size: 100% 100%;
+    transform: scaleX(1);
+  }
+}
+@keyframes design-selected-border {
+  from {
+    opacity: 0;
+    clip-path: inset(48% 48% 48% 48% round 0.75rem);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 round 0.75rem);
+  }
+}
+@keyframes design-check-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.16);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes design-missing-field {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 48%, transparent);
+  }
+}
+@keyframes design-ready-sheen {
+  to {
+    left: 125%;
+  }
+}
+@keyframes design-copy-pulse {
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+    color: var(--primary-strong);
+  }
+}
+@keyframes design-submit-to-progress {
+  40% {
+    transform: scale(0.985);
+  }
+  to {
+    transform: scaleY(0.18) scaleX(1.02);
+    border-radius: 999px;
+    color: transparent;
+  }
+}
+@keyframes design-form-collapse {
+  to {
+    opacity: 0;
+    transform: translateY(-18px) scaleY(0.96);
+  }
+}
+@keyframes design-ring-alive {
+  50% {
+    filter: drop-shadow(0 0 8px color-mix(in oklch, var(--primary) 70%, transparent));
+  }
+}
+@keyframes design-active-dot {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes design-tip-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-table-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-estimate-focus-in {
+  from {
+    opacity: 0.72;
+    transform: scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes design-estimate-total-settle {
+  45% {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 15%, transparent);
+  }
+}
+@keyframes design-total-row-appear {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes design-total-row-fill {
+  to {
+    background-size: 100% 100%;
+  }
+}
+@keyframes design-advisory-chunk {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+}
+@keyframes design-advisory-icon-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes design-action-sheen {
+  from {
+    left: -35%;
+  }
+  to {
+    left: 125%;
+  }
+}
+@keyframes design-render-launch {
+  50% {
+    transform: scale(0.97);
+  }
+  to {
+    transform: scaleX(1.035);
+    filter: brightness(1.06);
+  }
+}
+@keyframes design-render-progress-expand {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+@keyframes design-render-row-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-dossier-waiting-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes design-panel-restore {
+  from {
+    opacity: 0;
+    transform: scale(0.82) translate(18px, 18px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate(0);
+  }
+}
+@keyframes design-panel-minimize-fab {
+  from {
+    opacity: 0;
+    transform: scale(0.65) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes design-thinking-dot {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  35% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+@keyframes design-chat-chunk {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes design-success-circle {
+  from {
+    opacity: 0;
+    transform: scale(0.62);
+    box-shadow: inset 0 0 0 1.75rem var(--background);
+    background-color: transparent;
+  }
+  72% {
+    background-color: transparent;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: inset 0 0 0 0 var(--background);
+    background-color: var(--primary);
+  }
+}
+@keyframes design-success-ring-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes design-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes design-success-bounce {
+  55% {
+    transform: scale(1.16);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes design-download-arrow {
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes design-share-expand {
+  from {
+    opacity: 0;
+    transform: scaleX(0.72);
+    transform-origin: left;
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+@keyframes design-copied-label {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  20%,
+  75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+@keyframes design-call-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in oklch, var(--primary) 14%, transparent);
+  }
+}
+@keyframes design-contact-strip-in {
+  0% {
+    visibility: hidden;
+    transform: translateY(18px);
+  }
+  1% {
+    visibility: visible;
+    transform: translateY(18px);
+  }
+  100% {
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+@keyframes design-m09-exit-right {
+  to {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-stat-icon],
+  [data-stat-card],
+  [data-number-changing],
+  [data-number-old],
+  [data-number-new],
+  [data-create-project-tile],
+  [data-project-status],
+  [data-mini-step-link],
+  [data-step-connector],
+  [data-step-connector-fill],
+  [data-step-dot],
+  [data-filter-chip],
+  [data-create-dialog-content],
+  [data-photo-dropzone],
+  [data-photo-preview] img,
+  [data-upload-error],
+  [data-character-counter],
+  [data-address-menu],
+  [data-address-unlocked],
+  [data-address-unlocked]::after,
+  [data-scope-reveal],
+  [data-extra-reveal],
+  [data-compact-choice],
+  [data-image-choice],
+  [data-image-choice]::after,
+  .choice-card-photo img,
+  [data-choice-check],
+  [data-missing],
+  [data-primary-ready]::after,
+  [data-quota-message],
+  [data-estimate-submit],
+  [data-progress-arc],
+  [data-progress-row],
+  [data-render-row],
+  [data-render-tip],
+  [data-dossier-inline-progress],
+  [data-dossier-waiting-panel],
+  [data-dossier-info-label],
+  [data-dossier-info-value],
+  [data-dossier-overview-left],
+  [data-estimate-details],
+  [data-estimate-chart-stage],
+  [data-estimate-row],
+  [data-estimate-total-row],
+  [data-donut-slice],
+  [data-donut-label],
+  [data-donut-legend],
+  [data-advisory-paragraph],
+  [data-render-dossier-button],
+  [data-render-dossier-button]::after,
+  [data-handbook-panel],
+  [data-handbook-panel-fab],
+  [data-panel-card],
+  [data-chat-thinking] > span,
+  [data-chat-message],
+  [data-dossier-success-circle],
+  [data-dossier-success-ring] circle,
+  [data-dossier-success-check],
+  [data-dossier-success-check] path,
+  [data-dossier-ready] li > span:first-child > *,
+  [data-dossier-pdf]::after,
+  [data-download-arrow],
+  [data-download-complete],
+  [data-share-link-expanded],
+  [data-copied-label],
+  [data-call-now],
+  [data-contact-strip] {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+  body:has([data-create-dialog-content][data-state='open']) main {
+    transform: none !important;
+    filter: none !important;
+  }
+  [data-stat-icon],
+  .choice-card-photo img,
+  [data-advisory-paragraph] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  [data-dossier-success-check] path {
+    stroke-dashoffset: 0 !important;
+  }
+  [data-template-kind-pill][data-ready='true'],
+  [data-filter-pill][data-ready='true'],
+  [data-floor-tab-pill][data-ready='true'] {
+    transition-duration: 0ms !important;
+  }
+  [data-template-secondary-label],
+  [data-template-select-content],
+  [data-template-card][data-template-blocked='true'],
+  [data-favorite-heart],
+  [data-favorite-particle],
+  [data-read-badge],
+  [data-read-check] path,
+  [data-quota-number],
+  [data-quota-badge],
+  [data-template-result-count],
+  [data-detail-watermark],
+  [data-template-info-label],
+  [data-template-info-value],
+  [data-template-info-divider],
+  [data-similar-card],
+  [data-consult-cta],
+  [data-favorite-label] {
+    animation: none !important;
+  }
+  [data-template-card],
+  [data-template-card-figure] .template-card-figure-motion,
+  [data-favorite-button],
+  [data-favorite-fill],
+  [data-template-page-dot],
+  [data-template-search],
+  [data-template-select],
+  [data-template-description-copy],
+  [data-mobile-consult-shell],
+  [data-detail-floor-viewport][data-detail-floor-kind='3d'] [data-detail-floor-panel] > * {
+    transition-duration: 0ms !important;
+  }
+  [data-detail-floor-viewport][data-detail-floor-kind='3d']:hover [data-detail-floor-panel][aria-hidden='false'] > * {
+    transform: none !important;
+  }
+  [data-similar-card] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-consult-glow-shell]::after {
+    animation: none !important;
+    opacity: 0 !important;
+    transform: none !important;
+  }
+  [data-template-search]:focus-within {
+    transform: none !important;
+  }
+  [data-template-card]:hover,
+  [data-template-card]:has([data-template-card-open]:focus-visible),
+  [data-template-card][data-template-pressing='true'],
+  [data-template-card][data-template-preview='true'] [data-template-card-figure] .template-card-figure-motion,
+  [data-favorite-button]:hover {
+    transform: none !important;
+  }
+  [data-article-search][data-flash='true'] {
+    animation: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 0.2rem color-mix(in oklch, var(--primary) 22%, transparent) !important;
+  }
+  [data-assistant-fab][data-ready='true'],
+  [data-assistant-idle-ring],
+  [data-assistant-fab]:hover [data-assistant-fab-icon] {
+    animation: none !important;
+  }
+  [data-latest-card]:hover,
+  [data-latest-card]:focus-visible,
+  [data-latest-card]:hover .latest-news-image-motion,
+  [data-latest-card]:focus-visible .latest-news-image-motion,
+  [data-stage-guide-link]:hover [data-step-link-arrow],
+  [data-stage-guide-link]:focus-visible [data-step-link-arrow],
+  [data-detail-back]:hover [data-detail-back-arrow],
+  [data-detail-back]:focus-visible [data-detail-back-arrow],
+  [data-similar-open]:hover,
+  [data-similar-open]:focus-visible {
+    transform: none !important;
+  }
+  [data-page-entrance='play'] [data-entrance-step] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-page-entrance='play'] [data-dossier-success-check] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-handbook-foundation]:hover .foundation-hero-motion,
+  [data-handbook-foundation]:focus-within .foundation-hero-motion {
+    filter: none !important;
+  }
+  [data-foundation-cta-arrow][data-nudge='true'] {
+    animation: none !important;
+  }
+  [data-foundation-cta-sheen][data-nudge='true'] {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  [data-handbook-tab-indicator][data-opening='true'] {
+    animation: none !important;
+    transform: none !important;
+  }
+  [data-foundation-cta]:hover,
+  [data-foundation-cta]:focus-visible,
+  [data-foundation-cta]:active,
+  [data-foundation-step]:hover,
+  [data-foundation-step]:focus-within {
+    transform: none !important;
+  }
+  [data-create-project-trigger],
+  [data-create-project-plus],
+  [data-site-nav-hover-line],
+  [data-handbook-tab-indicator],
+  [data-foundation-cta],
+  [data-foundation-step],
+  .foundation-hero-motion,
+  .foundation-step-image-motion,
+  [data-step-icon],
+  [data-step-plus],
+  [data-step-minus],
+  [data-step-link-arrow],
+  [data-stage-guide-underline],
+  [data-latest-card],
+  .latest-news-image-motion,
+  [data-assistant-drawer],
+  [data-assistant-fab],
+  [data-assistant-label],
+  [data-assistant-fab-icon] {
+    transition-duration: 0ms !important;
+  }
   .site-header-shell::before,
   .ambient-orb,
   .ambient-grid,
@@ -978,6 +3747,34 @@
   }
   .ambient-cells {
     display: none;
+  }
+}
+
+/* These interaction-state colors must sit outside Tailwind's cascade layers so
+   they can override the primitive `border-input` utilities without changing
+   the resting UI. */
+[data-template-select]:hover,
+[data-template-select][data-state='open'] {
+  border-color: color-mix(in oklch, var(--primary) 72%, var(--border));
+}
+
+[data-template-search]:focus-within input {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--primary) 14%, transparent);
+}
+
+/* Touch long-press preview must also live outside Tailwind's cascade layers.
+   The preview state was toggling correctly, but the utility-layer transform
+   still won on mobile, so the image never visibly brightened/zoomed. */
+[data-template-card][data-template-preview='true'] [data-template-card-figure] .template-card-figure-motion {
+  filter: brightness(1.06);
+  transform: scale(1.025);
+}
+
+@media (hover: none) {
+  [data-template-card]:not([data-template-preview='true']) [data-template-card-figure] .template-card-figure-motion {
+    filter: none;
+    transform: none;
   }
 }
 
@@ -995,4 +3792,137 @@
 }
 [data-sonner-toast] [data-button]:hover {
   opacity: 0.9 !important;
+}
+
+/* Handbook-only route loading + skeleton motion. These effects do not alter
+   the final layout: they only decorate loading/transition states. */
+[data-handbook-progress] {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+[data-handbook-progress] > span {
+  transform: scaleX(0);
+}
+
+[data-handbook-progress='running'] {
+  opacity: 1;
+}
+
+[data-handbook-progress='running'] > span {
+  animation: handbook-route-progress 1.45s cubic-bezier(0.2, 0.75, 0.25, 1) forwards;
+}
+
+[data-handbook-progress='finishing'] {
+  opacity: 1;
+}
+
+[data-handbook-progress='finishing'] > span {
+  transform: scaleX(1);
+  transition: transform 180ms ease-out;
+}
+
+.handbook-skeleton {
+  position: relative;
+  overflow: hidden;
+  animation: none !important;
+}
+
+.handbook-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-115%);
+  background: linear-gradient(
+    100deg,
+    transparent 16%,
+    color-mix(in oklch, var(--background) 72%, transparent) 46%,
+    transparent 76%
+  );
+  animation: handbook-skeleton-shimmer 1.45s ease-in-out infinite;
+}
+
+.handbook-image-reveal {
+  transition:
+    filter 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 320ms ease,
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.handbook-image-reveal:not(.is-loaded) {
+  opacity: 0.55;
+  filter: blur(10px) saturate(0.82);
+  transform: scale(1.012);
+}
+
+.handbook-image-reveal.is-loaded {
+  opacity: 1;
+  filter: blur(0) saturate(1);
+  transform: scale(1);
+}
+
+/* Sonner already pauses auto-dismiss while the toaster is hovered. The
+   handbook progress stripe mirrors that pause, while bottom-left placement
+   keeps it away from the AI FAB on the right. */
+.handbook-toast {
+  overflow: hidden;
+}
+
+.handbook-toast::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 2px !important;
+  width: auto !important;
+  background: color-mix(in oklch, var(--primary) 78%, transparent) !important;
+  transform-origin: left center;
+  animation: handbook-toast-countdown 4.2s linear forwards;
+}
+
+[data-sonner-toaster]:hover .handbook-toast::after {
+  animation-play-state: paused;
+}
+
+@keyframes handbook-route-progress {
+  0% {
+    transform: scaleX(0.06);
+  }
+  55% {
+    transform: scaleX(0.72);
+  }
+  100% {
+    transform: scaleX(0.9);
+  }
+}
+
+@keyframes handbook-skeleton-shimmer {
+  100% {
+    transform: translateX(115%);
+  }
+}
+
+@keyframes handbook-toast-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-handbook-progress] > span,
+  .handbook-skeleton::after,
+  .handbook-toast::after {
+    animation: none !important;
+  }
+
+  .handbook-image-reveal {
+    transition: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

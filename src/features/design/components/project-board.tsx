@@ -3,10 +3,12 @@
 import { ChevronLeft, ChevronRight, FolderPlus, Plus, SearchX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 
 import { EmptyState } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { DEFAULT_PROJECT_SORT } from '../constants/design.constants'
 import { useProjects } from '../hooks/use-projects'
@@ -25,11 +27,12 @@ function CreateProjectTile({ onClick }: { onClick: () => void }) {
   return (
     <button
       type='button'
+      data-create-project-tile
       onClick={onClick}
-      className='border-primary/35 hover:border-primary hover:bg-accent/30 flex h-full min-h-52 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-6 text-center transition-colors'
+      className='border-primary/35 hover:border-primary hover:bg-accent/30 flex h-full min-h-52 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-6 text-center transition-[background-color,border-color,box-shadow]'
     >
       <span className='border-primary/40 text-primary flex size-11 items-center justify-center rounded-full border'>
-        <Plus className='size-5' />
+        <Plus data-create-tile-plus className='size-5' />
       </span>
       <span className='mt-1 text-[15px] font-semibold'>{t('title')}</span>
       <span className='text-muted-foreground max-w-56 text-xs'>{t('description')}</span>
@@ -127,6 +130,9 @@ export function ProjectBoard() {
   // `useMemo` bên dưới tính lại ở mọi lần render.
   const list = useMemo(() => projects ?? [], [projects])
   const counts = useMemo(() => countProjects(list), [list])
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance('design.m01.board', {
+    enabled: !isPending && list.length > 0
+  })
   const { items, matchedCount, pageCount } = useMemo(
     () => selectProjects(list, { query, status, sort }, page),
     [list, query, status, sort, page]
@@ -163,10 +169,10 @@ export function ProjectBoard() {
   }
 
   return (
-    <div className='space-y-6'>
+    <div ref={rootRef} data-page-entrance={entranceState} style={entranceStyle} className='space-y-6'>
       <ProjectStatCards counts={counts} activeStatus={status} onSelect={resetTo(setStatus)} />
 
-      <section className='bg-card space-y-4 rounded-2xl border p-4 lg:p-5'>
+      <section data-entrance-step='3' className='bg-card space-y-4 rounded-2xl border p-4 lg:p-5'>
         <h2 className='text-muted-foreground text-xs font-semibold tracking-[0.1em] uppercase'>{t('title')}</h2>
 
         <ProjectFilters
@@ -178,30 +184,53 @@ export function ProjectBoard() {
           onSortChange={resetTo(setSort)}
         />
 
-        {matchedCount === 0 ? (
-          <EmptyState icon={SearchX} title={t('noMatch.title')} description={t('noMatch.description')} />
-        ) : (
-          <>
-            <ul className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-              {items.map((project) => (
-                <li key={project.id}>
-                  <ProjectCard project={project} onRename={setRenaming} onDelete={setDeleting} />
-                </li>
-              ))}
-              {/* Ô tạo dự án chỉ đứng cuối trang cuối, không lặp ở mọi trang. */}
-              {page === pageCount ? (
-                <li>
-                  <CreateProjectTile onClick={openCreateDialog} />
-                </li>
-              ) : null}
-            </ul>
+        <AnimatePresence mode='popLayout' initial={false}>
+          {matchedCount === 0 ? (
+            <motion.div key='empty' initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <EmptyState icon={SearchX} title={t('noMatch.title')} description={t('noMatch.description')} />
+            </motion.div>
+          ) : (
+            <motion.div key='grid' initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <>
+                <ul className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
+                  <AnimatePresence initial={false} mode='popLayout'>
+                    {items.map((project, index) => (
+                      <motion.li
+                        layout='position'
+                        key={project.id}
+                        data-entrance-step='4'
+                        data-entrance-order={index}
+                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.3, delay: index * 0.045, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        <ProjectCard project={project} onRename={setRenaming} onDelete={setDeleting} />
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
+                  {/* Ô tạo dự án chỉ đứng cuối trang cuối, không lặp ở mọi trang. */}
+                  {page === pageCount ? (
+                    <motion.li
+                      data-entrance-step='4'
+                      data-entrance-order={items.length}
+                      layout='position'
+                      initial={{ opacity: 0, scale: 0.96 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                    >
+                      <CreateProjectTile onClick={openCreateDialog} />
+                    </motion.li>
+                  ) : null}
+                </ul>
 
-            <div className='flex flex-wrap items-center justify-between gap-3 pt-1'>
-              <p className='text-muted-foreground text-[13px]'>{t('count', { count: matchedCount })}</p>
-              <ProjectPagination page={page} pageCount={pageCount} onChange={setPage} />
-            </div>
-          </>
-        )}
+                <div className='flex flex-wrap items-center justify-between gap-3 pt-1'>
+                  <p className='text-muted-foreground text-[13px]'>{t('count', { count: matchedCount })}</p>
+                  <ProjectPagination page={page} pageCount={pageCount} onChange={setPage} />
+                </div>
+              </>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       <RenameProjectDialog project={renaming} onClose={() => setRenaming(null)} />

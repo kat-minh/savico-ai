@@ -33,6 +33,7 @@ import { useCmsCollection, type SupervisionPackage, type SupervisionTier } from 
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { checkoutConfirmRoute } from '@/shared/constants/routes'
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatCurrency } from '@/shared/utils'
 import {
@@ -66,6 +67,7 @@ interface SupervisionPricingProps {
 export function SupervisionPricing({ projectId }: SupervisionPricingProps) {
   const t = useTranslations('supervision.pricing')
   const packages = useCmsCollection('supervisionPackages')
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.supervision', { offsetMs: 120 })
 
   // Chữ cuối tiêu đề tô cam (Hình S19) — tách ở khoảng trắng cuối như S01.
   const title = t('title')
@@ -74,25 +76,49 @@ export function SupervisionPricing({ projectId }: SupervisionPricingProps) {
   const titleAccent = splitAt > 0 ? title.slice(splitAt + 1) : ''
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-10 lg:px-8'>
+    <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      style={entranceStyle}
+      className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-10 lg:px-8'
+    >
       <header className='space-y-2 text-center'>
         <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>
-          <Leaf aria-hidden className='text-primary size-7 -scale-x-100 sm:size-8' />
-          <span className='text-pretty'>
+          <Leaf
+            data-entrance-step='2'
+            data-entrance-order='0'
+            data-entrance-from='right'
+            aria-hidden
+            className='text-primary size-7 -scale-x-100 sm:size-8'
+          />
+          <span data-entrance-step='0' data-entrance-from='right' className='text-pretty'>
             {titleLead}
-            {titleAccent ? <span className='text-brand-orange'> {titleAccent}</span> : null}
+            {titleAccent ? (
+              <span data-entrance-step='1' data-entrance-from='right' className='text-brand-orange'>
+                {' '}
+                {titleAccent}
+              </span>
+            ) : null}
           </span>
-          <Leaf aria-hidden className='text-primary size-7 sm:size-8' />
+          <Leaf
+            data-entrance-step='2'
+            data-entrance-order='1'
+            data-entrance-from='right'
+            aria-hidden
+            className='text-primary size-7 sm:size-8'
+          />
         </h1>
-        <p className='text-muted-foreground text-pretty'>{t('subtitle')}</p>
+        <p data-entrance-step='3' data-entrance-from='right' className='text-muted-foreground text-pretty'>
+          {t('subtitle')}
+        </p>
       </header>
 
       {/* pt đủ chỗ cho ruy-băng "Khuyến nghị" NẰM TRÊN viên nhãn nhóm gói: viên
           nhãn cưỡi lên mép trên thẻ (-mt-8) nên hai thứ này từng chồng chữ lên
           nhau ở thẻ được khuyến nghị. */}
       <ul className='grid items-stretch gap-6 pt-11 md:grid-cols-3'>
-        {packages.map((item) => (
-          <PackageCard key={item.tier} item={item} projectId={projectId} />
+        {packages.map((item, index) => (
+          <PackageCard key={item.tier} item={item} projectId={projectId} entranceOrder={index} />
         ))}
       </ul>
 
@@ -155,7 +181,15 @@ const ORANGE_BUTTON =
 const CONTROL_COLUMN = 'bg-brand-orange-soft/35'
 
 /** Một thẻ lựa chọn quản lý thi công. */
-function PackageCard({ item, projectId }: { item: SupervisionPackage; projectId?: string }) {
+function PackageCard({
+  item,
+  projectId,
+  entranceOrder
+}: {
+  item: SupervisionPackage
+  projectId?: string
+  entranceOrder: number
+}) {
   const t = useTranslations('supervision.pricing')
   const tTiers = useTranslations('supervision.tiers')
   const tTags = useTranslations('supervision.tierTags')
@@ -164,7 +198,7 @@ function PackageCard({ item, projectId }: { item: SupervisionPackage; projectId?
   const isFree = item.price === 0
 
   return (
-    <li className='relative flex'>
+    <li data-entrance-step='4' data-entrance-order={entranceOrder} data-entrance-from='right' className='relative flex'>
       {item.recommended ? (
         <span className='bg-brand-orange text-brand-orange-foreground absolute -top-10 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 rounded-full px-4 py-1 text-xs font-semibold tracking-wide uppercase whitespace-nowrap'>
           <Star className='size-3' />

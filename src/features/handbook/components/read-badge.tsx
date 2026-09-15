@@ -15,8 +15,8 @@ export function ReadBadge({ id, className }: { id: string; className?: string })
   if (!read) return null
 
   return (
-    <Badge variant='outline' className={cn('text-muted-foreground gap-1', className)}>
-      <Check className='size-3' />
+    <Badge data-read-badge variant='outline' className={cn('text-muted-foreground gap-1 overflow-hidden', className)}>
+      <Check data-read-check className='size-3' />
       {t('badge')}
     </Badge>
   )

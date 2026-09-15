@@ -22,7 +22,8 @@ export function useProactiveChat(): void {
   const markScriptPlayed = useChatbotStore((s) => s.markScriptPlayed)
 
   useEffect(() => {
-    if (!context || !waitingFlow) return
+    // M08 messages are emitted by its active render task, not this timer script.
+    if (!context || !waitingFlow || waitingFlow === 'dossier') return
 
     const key = scriptKey(context, waitingFlow)
     if (useChatbotStore.getState().playedScript === key) return

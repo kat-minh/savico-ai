@@ -3,11 +3,14 @@
 import { Eye, FileDown, FileText, Info, Link2, Mail, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { LucideIcon } from 'lucide-react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 
 import type { Locale } from '@/i18n/routing'
 import { DossierCover, EstimateSheet, Photo, type CoverRow } from '@/shared/components/common'
 import { useSiteImage } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@/shared/components/ui/dialog'
+import { usePageEntrance } from '@/shared/hooks'
 import { formatDate } from '@/shared/utils'
 import { costShares } from '../services/estimate.service'
 import type { EstimateResult } from '../types/design.types'
@@ -35,6 +38,13 @@ interface DossierOverviewProps {
   result: EstimateResult | undefined
   onRender: () => void
   isRendering: boolean
+  /** Giữ M07 mounted trong toàn bộ pha render/error/settle để panel phải morph tại chỗ. */
+  renderActive?: boolean
+  /** Nội dung tiến độ do app layer compose để không tạo import chéo feature. */
+  renderContent?: ReactNode
+  /** Cẩm nang cá nhân hoá xuất hiện sau khi ba dòng progress đã lần lượt vào. */
+  waitingPanel?: ReactNode
+  waitingPanelCollapsed?: boolean
 }
 
 /** Bốn thành phần của bộ hồ sơ ở khối "Xem trước hồ sơ" (Hình 09). */
@@ -84,9 +94,49 @@ function PreviewBody({ part, alt, cover, grandTotal, percents }: PreviewBodyProp
  * Cột phải: thẻ "Xuất hồ sơ" với nút chính "Render hồ sơ", 4 nút mờ chờ render,
  * dòng nhắc và badge trạng thái "Chưa render".
  */
-export function DossierOverview({ info, result, onRender, isRendering }: DossierOverviewProps) {
+export function DossierOverview({
+  info,
+  result,
+  onRender,
+  isRendering,
+  renderActive = isRendering,
+  renderContent,
+  waitingPanel,
+  waitingPanelCollapsed = false
+}: DossierOverviewProps) {
   const t = useTranslations('design.dossier')
+  const tProgress = useTranslations('design.progress.dossier')
   const locale = useLocale() as Locale
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance(`design.${info.projectId}.dossier-overview`, {
+    offsetMs: 220,
+    // M07 is entered from the estimate result via a client-side click. The
+    // same project can be revisited during QA, so session-level "already
+    // played" state must not swallow the forward transition. Reload and click
+    // now use the same choreography, while the StepProgress remains stable.
+    replayOnMount: true
+  })
+  const [previewing, setPreviewing] = useState<PreviewPart | null>(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewOrigin, setPreviewOrigin] = useState({ x: 0, y: 0 })
+  const [launching, setLaunching] = useState(false)
+  const [waitingPanelVisible, setWaitingPanelVisible] = useState(false)
+
+  const showRenderProgress = renderActive && Boolean(renderContent)
+  const showWaitingPanel = waitingPanelVisible && Boolean(waitingPanel) && !waitingPanelCollapsed
+
+  useEffect(() => {
+    if (!showRenderProgress) return
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const timer = window.setTimeout(() => setWaitingPanelVisible(true), 0)
+      return () => window.clearTimeout(timer)
+    }
+
+    // Row 1 → row 2 → row 3 chạy trước; cẩm nang chỉ bước vào sau cùng để
+    // chuyển trạng thái M07 → màn chờ có chủ đích, không swap toàn trang ngay.
+    const timer = window.setTimeout(() => setWaitingPanelVisible(true), 900)
+    return () => window.clearTimeout(timer)
+  }, [showRenderProgress])
 
   /** Message keys under `design.dossier.info`. */
   type InfoKey =
@@ -115,22 +165,34 @@ export function DossierOverview({ info, result, onRender, isRendering }: Dossier
   const rightRows: InfoRow[] = [
     { labelKey: 'buildingType', value: info.buildingTypeLabel },
     { labelKey: 'scale', value: info.scaleLabel },
-    // Diện tích do AI ước tính ở Bước 2; chưa có thì bỏ dòng chứ đừng in "0 m²".
+    // Diện tích do AI ước tính ở Bước 2; nếu chưa có vẫn giữ dòng để khối
+    // Thông tin dự án không thay đổi cấu trúc giữa các lần tải dữ liệu.
     { labelKey: 'floorArea', value: info.floorArea > 0 ? t('floorAreaValue', { value: info.floorArea }) : '' },
     { labelKey: 'package', value: info.packageLabel },
     { labelKey: 'style', value: info.styleLabel }
   ]
 
-  /** Trường nào chưa có dữ liệu thì bỏ hẳn dòng, đừng để nhãn treo lơ lửng. */
+  /**
+   * Hình 09 có 5 dòng cố định ở mỗi cột. Không ẩn dòng khi dữ liệu tạm thời
+   * chưa có: việc lọc `value` trước đây làm UI "Thông tin dự án" mất mục trong
+   * lúc query/store chưa hydrate xong và khiến bố cục khác với bản thiết kế.
+   */
   const renderRows = (rows: InfoRow[]) =>
-    rows
-      .filter((row) => Boolean(row.value))
-      .map((row) => (
-        <div key={row.labelKey} className='flex items-start justify-between gap-4 border-b py-2.5 text-sm'>
-          <dt className='text-muted-foreground'>{t(`info.${row.labelKey}`)}</dt>
-          <dd className='text-right font-medium'>{row.value}</dd>
-        </div>
-      ))
+    rows.map((row, index) => (
+      <div
+        key={row.labelKey}
+        data-dossier-info-row
+        style={{ '--dossier-info-row-delay': `${index * 120}ms` } as CSSProperties}
+        className='flex items-start justify-between gap-4 border-b py-2.5 text-sm'
+      >
+        <dt data-dossier-info-label className='text-muted-foreground'>
+          {t(`info.${row.labelKey}`)}
+        </dt>
+        <dd data-dossier-info-value className='text-right font-medium'>
+          {row.value.trim() || '—'}
+        </dd>
+      </div>
+    ))
 
   const shares = result ? costShares(result.sections) : null
   const cover = {
@@ -144,81 +206,193 @@ export function DossierOverview({ info, result, onRender, isRendering }: Dossier
   }
 
   return (
-    <div className='mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8'>
-      <div className='space-y-5'>
-        <section className='bg-card rounded-2xl border p-5 sm:p-6'>
-          <h2 className='text-muted-foreground mb-3 text-xs font-semibold tracking-[0.1em] uppercase'>
-            {t('infoTitle')}
-          </h2>
-          <div className='grid gap-x-10 sm:grid-cols-2'>
-            <dl>{renderRows(leftRows)}</dl>
-            <dl>{renderRows(rightRows)}</dl>
-          </div>
-        </section>
+    <div
+      ref={rootRef}
+      data-dossier-overview-root
+      data-render-active={showRenderProgress}
+      data-waiting-panel-visible={showWaitingPanel}
+      data-page-entrance={entranceState}
+      style={entranceStyle}
+      className='mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8'
+    >
+      <div className='grid min-w-0'>
+        <div data-dossier-overview-left className='col-start-1 row-start-1 space-y-5'>
+          <section className='bg-card rounded-2xl border p-5 sm:p-6'>
+            <h2 className='text-muted-foreground mb-3 text-xs font-semibold tracking-[0.1em] uppercase'>
+              {t('infoTitle')}
+            </h2>
+            <div className='grid gap-x-10 sm:grid-cols-2'>
+              <dl>{renderRows(leftRows)}</dl>
+              <dl>{renderRows(rightRows)}</dl>
+            </div>
+          </section>
 
-        <section className='bg-card rounded-2xl border p-5 sm:p-6'>
-          <h2 className='mb-4 font-semibold tracking-tight'>{t('previewTitle')}</h2>
-          <div className='grid grid-cols-2 gap-4 sm:grid-cols-4'>
-            {PREVIEW_PARTS.map((key) => (
-              <figure
-                key={key}
-                className='bg-card hover:border-primary/40 flex flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md'
-              >
-                <PreviewBody
-                  part={key}
-                  alt={t(`preview.${key}`)}
-                  cover={cover}
-                  grandTotal={result?.grandTotal}
-                  percents={
-                    shares
-                      ? [
-                          shares.find((s) => s.section === 'structure')?.percent ?? 0,
-                          shares.find((s) => s.section === 'finishing')?.percent ?? 0,
-                          shares.find((s) => s.section === 'interior')?.percent ?? 0
-                        ]
-                      : undefined
-                  }
-                />
-                <figcaption className='mt-auto space-y-1.5 border-t px-3 py-3 text-center'>
-                  <span className='block text-[13px] font-medium'>{t(`preview.${key}`)}</span>
-                  {/* Hồ sơ chưa render nên chưa có file để mở — liên kết ở đây
-                      chỉ báo thành phần nào sẽ có, kích hoạt sau khi render. */}
-                  <span className='text-muted-foreground/70 inline-flex items-center gap-1.5 text-xs'>
-                    <Eye className='size-3.5' />
-                    {t('previewAction')}
-                  </span>
-                </figcaption>
-              </figure>
-            ))}
+          <section className='bg-card rounded-2xl border p-5 sm:p-6'>
+            <h2 className='mb-4 font-semibold tracking-tight'>{t('previewTitle')}</h2>
+            <div className='grid grid-cols-2 gap-4 sm:grid-cols-4'>
+              {PREVIEW_PARTS.map((key, index) => (
+                <figure
+                  key={key}
+                  data-entrance-step='2'
+                  data-entrance-order={index}
+                  data-dossier-preview
+                  className='bg-card hover:border-primary/40 group flex flex-col overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-md'
+                >
+                  <PreviewBody
+                    part={key}
+                    alt={t(`preview.${key}`)}
+                    cover={cover}
+                    grandTotal={result?.grandTotal}
+                    percents={
+                      shares
+                        ? [
+                            shares.find((s) => s.section === 'structure')?.percent ?? 0,
+                            shares.find((s) => s.section === 'finishing')?.percent ?? 0,
+                            shares.find((s) => s.section === 'interior')?.percent ?? 0
+                          ]
+                        : undefined
+                    }
+                  />
+                  <figcaption className='mt-auto space-y-1.5 border-t px-3 py-3 text-center'>
+                    <span className='block text-[13px] font-medium'>{t(`preview.${key}`)}</span>
+                    {/* Hồ sơ chưa render nên chưa có file để mở — liên kết ở đây
+                        chỉ báo thành phần nào sẽ có, kích hoạt sau khi render. */}
+                    <button
+                      type='button'
+                      onClick={(event) => {
+                        const card = event.currentTarget.closest('figure')
+                        const rect = card?.getBoundingClientRect()
+                        if (rect) {
+                          setPreviewOrigin({
+                            x: rect.left + rect.width / 2 - window.innerWidth / 2,
+                            y: rect.top + rect.height / 2 - window.innerHeight / 2
+                          })
+                        }
+                        setPreviewing(key)
+                        setPreviewOpen(true)
+                      }}
+                      className='text-muted-foreground/70 hover:text-primary group-hover:text-primary focus-visible:text-primary relative z-10 inline-flex items-center gap-1.5 text-xs transition-colors'
+                    >
+                      <Eye data-preview-action-icon className='size-3.5' />
+                      {t('previewAction')}
+                    </button>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {waitingPanelVisible && waitingPanel ? (
+          <div
+            data-dossier-waiting-panel
+            data-collapsed={waitingPanelCollapsed}
+            className='col-start-1 row-start-1 min-w-0'
+          >
+            {waitingPanel}
           </div>
-        </section>
+        ) : null}
       </div>
 
       {/* Cột PHẢI — thẻ "Xuất hồ sơ" */}
-      <aside className='bg-card h-fit space-y-3 rounded-2xl border p-5 lg:sticky lg:top-32'>
-        <h2 className='font-semibold tracking-tight'>{t('exportTitle')}</h2>
+      <aside
+        data-entrance-step='3'
+        data-entrance-from='right'
+        data-dossier-export-panel
+        data-rendering={showRenderProgress}
+        className='bg-card h-fit rounded-2xl border p-5 lg:sticky lg:top-32'
+      >
+        {showRenderProgress ? (
+          <div data-dossier-inline-progress>{renderContent}</div>
+        ) : (
+          <div data-dossier-export-actions className='space-y-3'>
+            <h2 className='font-semibold tracking-tight'>{t('exportTitle')}</h2>
 
-        <Button size='lg' className='h-14 w-full text-base' onClick={onRender} disabled={isRendering}>
-          <FileText className='size-5' />
-          {t('render')}
-        </Button>
+            <Button
+              data-render-dossier-button
+              data-launching={launching}
+              size='lg'
+              className='h-14 w-full text-base'
+              onClick={() => {
+                if (launching || isRendering || renderActive) return
+                setLaunching(true)
+                window.setTimeout(onRender, 320)
+              }}
+              disabled={isRendering}
+            >
+              <FileText className='size-5' />
+              {t('render')}
+            </Button>
 
-        {LOCKED_ACTIONS.map(({ key, icon: Icon }) => (
-          <Button key={key} variant='outline' size='lg' className='h-12 w-full' disabled>
-            <Icon className='size-4' />
-            {t(`actions.${key}`)}
-          </Button>
-        ))}
+            {LOCKED_ACTIONS.map(({ key, icon: Icon }) => (
+              <Button
+                key={key}
+                type='button'
+                disabled
+                data-locked-action
+                variant='outline'
+                size='lg'
+                className='group relative h-12 w-full cursor-not-allowed overflow-visible disabled:pointer-events-auto disabled:opacity-50 hover:before:opacity-0 focus-visible:border-border focus-visible:ring-0'
+              >
+                <Icon className='size-4' />
+                {t(`actions.${key}`)}
+                <span
+                  data-locked-hint
+                  className='bg-foreground text-background pointer-events-none absolute right-full mr-2 max-w-48 rounded-lg px-2.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 shadow-md'
+                >
+                  {t('lockedHint')}
+                </span>
+              </Button>
+            ))}
 
-        <p className='text-muted-foreground flex items-start gap-2 pt-1 text-sm'>
-          <Info className='mt-0.5 size-4 shrink-0' />
-          {t('lockedHint')}
-        </p>
+            <p className='text-muted-foreground flex items-start gap-2 pt-1 text-sm'>
+              <Info className='mt-0.5 size-4 shrink-0' />
+              {t('lockedHint')}
+            </p>
 
-        <span className='bg-warning/15 text-warning-strong inline-flex rounded-md px-2.5 py-1 text-xs font-medium'>
-          {t('statusPending')}
-        </span>
+            <span
+              data-render-status-chip
+              className='bg-warning/15 text-warning-strong inline-flex w-fit rounded-md px-2.5 py-1 text-xs font-medium transition-[width]'
+            >
+              {launching ? tProgress('pageTitle') : t('statusPending')}
+            </span>
+          </div>
+        )}
       </aside>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent
+          data-preview-dialog
+          style={
+            {
+              '--dialog-origin-x': `${previewOrigin.x}px`,
+              '--dialog-origin-y': `${previewOrigin.y}px`
+            } as CSSProperties
+          }
+          className='sm:max-w-4xl'
+        >
+          <DialogTitle>{previewing ? t(`preview.${previewing}`) : t('previewTitle')}</DialogTitle>
+          {previewing ? (
+            <div className='overflow-hidden rounded-xl border'>
+              <PreviewBody
+                part={previewing}
+                alt={t(`preview.${previewing}`)}
+                cover={cover}
+                grandTotal={result?.grandTotal}
+                percents={
+                  shares
+                    ? [
+                        shares.find((s) => s.section === 'structure')?.percent ?? 0,
+                        shares.find((s) => s.section === 'finishing')?.percent ?? 0,
+                        shares.find((s) => s.section === 'interior')?.percent ?? 0
+                      ]
+                    : undefined
+                }
+              />
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
 
-import { Lightbulb } from 'lucide-react'
+import { Check, Lightbulb } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 import { cn } from '@/shared/lib/utils'
 
@@ -35,6 +36,18 @@ function taskPercent(percent: number, start: number, weight: number): number {
  */
 export function RenderProgressBars({ percent }: RenderProgressBarsProps) {
   const t = useTranslations('design.progress.dossier')
+  const [visibleRows, setVisibleRows] = useState(0)
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const timer = window.setTimeout(() => setVisibleRows(TASKS.length), 0)
+      return () => window.clearTimeout(timer)
+    }
+
+    const timers = [120, 330, 540].map((delay, index) => window.setTimeout(() => setVisibleRows(index + 1), delay))
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer))
+  }, [])
 
   const [drawings, renders, packaging] = TASKS
   const drawingsPercent = taskPercent(percent, 0, drawings.weight)
@@ -55,26 +68,43 @@ export function RenderProgressBars({ percent }: RenderProgressBarsProps) {
   return (
     <div className='w-full space-y-5 text-left'>
       <ul className='space-y-4'>
-        {rows.map((row) => {
+        {rows.slice(0, visibleRows).map((row, index) => {
           const pending = row.own <= 0
+          const done = row.own >= 100
           return (
-            <li key={row.key} className='space-y-2'>
+            <li
+              key={row.key}
+              data-render-row
+              data-render-row-index={index}
+              data-state={done ? 'done' : pending ? 'pending' : 'active'}
+              className='space-y-2'
+            >
               <div className='flex items-center justify-between gap-3'>
                 <span className={cn('text-sm', pending ? 'text-muted-foreground' : 'text-foreground')}>
                   {row.label}
                 </span>
 
-                {pending ? (
+                {done ? (
+                  <span
+                    data-render-check
+                    className='bg-accent text-primary-strong flex size-6 shrink-0 items-center justify-center rounded-full'
+                  >
+                    <Check className='size-3.5' strokeWidth={3} />
+                  </span>
+                ) : pending ? (
                   <span className='bg-muted text-muted-foreground shrink-0 rounded-md px-2 py-0.5 text-xs font-medium'>
                     {t('pending')}
                   </span>
                 ) : (
-                  <span className='shrink-0 text-sm font-semibold tabular-nums'>{Math.round(row.own)}%</span>
+                  <span data-progress-value className='shrink-0 text-sm font-semibold tabular-nums'>
+                    {Math.round(row.own)}%
+                  </span>
                 )}
               </div>
 
               <div className='bg-muted h-2 overflow-hidden rounded-full'>
                 <div
+                  data-render-bar
                   className='bg-primary h-full rounded-full transition-[width] duration-500 ease-out'
                   style={{ width: `${row.own}%` }}
                 />
@@ -84,12 +114,14 @@ export function RenderProgressBars({ percent }: RenderProgressBarsProps) {
         })}
       </ul>
 
-      <p className='bg-warning/12 border-warning/30 flex gap-2.5 rounded-xl border p-3.5 text-sm'>
-        <Lightbulb className='text-warning-strong mt-0.5 size-4 shrink-0' />
-        <span className='text-pretty'>
-          <span className='font-medium'>{t('tipLabel')}</span> {t('tip')}
-        </span>
-      </p>
+      {visibleRows === rows.length ? (
+        <p data-render-tip className='bg-warning/12 border-warning/30 flex gap-2.5 rounded-xl border p-3.5 text-sm'>
+          <Lightbulb className='text-warning-strong mt-0.5 size-4 shrink-0' />
+          <span className='text-pretty'>
+            <span className='font-medium'>{t('tipLabel')}</span> {t('tip')}
+          </span>
+        </p>
+      ) : null}
     </div>
   )
 }

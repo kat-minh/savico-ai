@@ -47,7 +47,13 @@ export function GuestMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' size='icon' className='rounded-full' aria-label={t('guest')}>
+        <Button
+          data-account-trigger
+          variant='ghost'
+          size='icon'
+          className='relative rounded-full after:pointer-events-none after:absolute after:inset-0.5 after:scale-75 after:rounded-full after:ring-2 after:ring-primary after:opacity-0 after:transition-[transform,opacity] after:duration-200 after:content-[""] hover:after:scale-110 hover:after:opacity-100 data-[state=open]:after:scale-110 data-[state=open]:after:opacity-100'
+          aria-label={t('guest')}
+        >
           <Avatar className='size-8'>
             <AvatarFallback>
               <UserRound className='size-4' />
@@ -55,7 +61,11 @@ export function GuestMenu() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-64'>
+      <DropdownMenuContent
+        data-account-menu
+        align='end'
+        className='w-64 data-[state=closed]:duration-100 data-[state=closed]:slide-out-to-top-1 data-[state=open]:duration-200'
+      >
         <DropdownMenuLabel className='flex flex-col'>
           <span className='truncate text-sm font-medium'>{t('guest')}</span>
           <span className='text-muted-foreground text-xs font-normal text-pretty'>{t('guestHint')}</span>

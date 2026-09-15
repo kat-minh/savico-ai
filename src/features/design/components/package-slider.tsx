@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import { Slider } from '@/shared/components/ui/slider'
 import { cn } from '@/shared/lib/utils'
@@ -21,6 +22,9 @@ interface PackageSliderProps {
 export function PackageSlider({ value, onChange }: PackageSliderProps) {
   const t = useTranslations('design.input.packageTier')
   const index = Math.max(0, PACKAGE_TIERS.indexOf(value))
+  const [dragValue, setDragValue] = useState<number | null>(null)
+  const sliderValue = dragValue ?? index
+  const activeIndex = Math.round(sliderValue)
 
   return (
     <div className='space-y-3'>
@@ -29,13 +33,19 @@ export function PackageSlider({ value, onChange }: PackageSliderProps) {
       </FieldLabel>
 
       <Slider
+        data-package-slider
         min={0}
         max={PACKAGE_TIERS.length - 1}
-        step={1}
-        value={[index]}
+        step={0.01}
+        value={[sliderValue]}
         aria-label={t('label')}
         onValueChange={([next]) => {
-          const tier = PACKAGE_TIERS[next ?? 0]
+          setDragValue(next ?? index)
+        }}
+        onValueCommit={([next]) => {
+          const snappedIndex = Math.round(next ?? index)
+          const tier = PACKAGE_TIERS[snappedIndex]
+          setDragValue(null)
           if (tier) onChange(tier)
         }}
       />
@@ -45,10 +55,17 @@ export function PackageSlider({ value, onChange }: PackageSliderProps) {
           <button
             key={tier}
             type='button'
-            onClick={() => onChange(tier)}
+            onClick={() => {
+              setDragValue(null)
+              onChange(tier)
+            }}
+            data-package-label
+            data-active={PACKAGE_TIERS[activeIndex] === tier}
             className={cn(
               'text-xs font-medium transition-colors',
-              tier === value ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              PACKAGE_TIERS[activeIndex] === tier
+                ? 'text-primary font-semibold'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {t(`options.${tier}`)}

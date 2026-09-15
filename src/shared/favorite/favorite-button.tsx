@@ -2,6 +2,8 @@
 
 import { Heart } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
@@ -25,8 +27,10 @@ export function FavoriteButton({ item, className, variant = 'icon' }: FavoriteBu
   const t = useTranslations('favorite')
   const active = useIsFavorite(item.templateId)
   const toggle = useFavoriteStore((s) => s.toggle)
+  const [pulse, setPulse] = useState<'save' | 'remove' | null>(null)
 
-  const label = active ? t('remove') : t('add')
+  const actionLabel = active ? t('remove') : t('add')
+  const visualLabel = variant === 'full' && active ? t('saved') : actionLabel
 
   return (
     <Button
@@ -34,17 +38,53 @@ export function FavoriteButton({ item, className, variant = 'icon' }: FavoriteBu
       variant={variant === 'icon' ? 'ghost' : 'outline'}
       size={variant === 'icon' ? 'icon' : 'sm'}
       aria-pressed={active}
-      aria-label={label}
-      title={label}
+      aria-label={actionLabel}
+      title={actionLabel}
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
+        const nextActive = !active
         toggle(item)
+        setPulse(nextActive ? 'save' : 'remove')
+        window.setTimeout(() => setPulse(null), 520)
+
+        if (nextActive) {
+          toast.success(t('savedToast'), { description: t('viewSaved') })
+        } else {
+          toast(t('removedToast'), {
+            action: {
+              label: t('undo'),
+              onClick: () => toggle(item)
+            }
+          })
+        }
       }}
-      className={cn(variant === 'icon' && 'rounded-full', className)}
+      data-favorite-button
+      data-favorite-variant={variant}
+      data-favorite-active={active}
+      data-favorite-pulse={pulse ?? 'idle'}
+      className={cn(variant === 'icon' && 'relative overflow-visible rounded-full', className)}
     >
-      <Heart className={cn('size-4 transition-colors', active && 'fill-primary text-primary')} />
-      {variant === 'full' ? label : null}
+      <span data-favorite-heart className='relative grid size-4 place-items-center' aria-hidden>
+        <Heart className='absolute inset-0 size-4 transition-colors' />
+        <span
+          data-favorite-fill
+          className='absolute inset-0 overflow-hidden'
+          style={{ clipPath: active ? 'inset(0 0 0 0)' : 'inset(100% 0 0 0)' }}
+        >
+          <Heart className='fill-primary text-primary size-4' />
+        </span>
+        {variant === 'icon'
+          ? Array.from({ length: 4 }).map((_, index) => (
+              <span key={index} data-favorite-particle data-index={index} aria-hidden />
+            ))
+          : null}
+      </span>
+      {variant === 'full' ? (
+        <span key={visualLabel} data-favorite-label className='inline-block'>
+          {visualLabel}
+        </span>
+      ) : null}
     </Button>
   )
 }

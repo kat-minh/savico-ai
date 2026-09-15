@@ -383,7 +383,17 @@ export const mockDesignApi = {
     }
   },
 
-  getEstimate: async (projectId: string): Promise<EstimateResult> => mockDesignApi.generateEstimate(projectId),
+  getEstimate: async (projectId: string): Promise<EstimateResult> => {
+    await mockDelay(150)
+    return {
+      projectId,
+      sections: SAMPLE_SECTIONS,
+      grandTotal: grandTotal(SAMPLE_SECTIONS),
+      advisory: '',
+      estimatedFloorArea: ESTIMATED_FLOOR_AREA,
+      xlsxUrl: '#'
+    }
+  },
 
   renderDossier: async (projectId: string): Promise<Dossier> => {
     await mockDelay(RENDER_DELAY_MS)

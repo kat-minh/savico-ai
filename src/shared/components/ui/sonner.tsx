@@ -1,6 +1,7 @@
 'use client'
 
 import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
 /**
@@ -9,6 +10,8 @@ import { Toaster as Sonner, type ToasterProps } from 'sonner'
  */
 function Toaster({ ...props }: ToasterProps) {
   const { theme = 'system' } = useTheme()
+  const pathname = usePathname()
+  const inHandbook = /\/handbook(?:\/|$)/.test(pathname)
 
   return (
     <Sonner
@@ -16,7 +19,11 @@ function Toaster({ ...props }: ToasterProps) {
       className='toaster group'
       // Góc phải TRÊN theo Hình 16 (mục VIII.3) — cũng tránh che nút chatbox nổi
       // và các nút hành động chính nằm ở đáy màn hình.
-      position='top-right'
+      position={inHandbook ? 'bottom-left' : 'top-right'}
+      duration={inHandbook ? 4200 : undefined}
+      offset={inHandbook ? { bottom: 24, left: 24 } : undefined}
+      mobileOffset={inHandbook ? { bottom: 112, left: 16, right: 16 } : undefined}
+      toastOptions={inHandbook ? { className: 'handbook-toast' } : undefined}
       richColors
       closeButton
       style={

@@ -13,7 +13,7 @@ export function StepInputView({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <StepProgress current={1} title={t('pageTitle')} />
+      <StepProgress current={1} title={t('pageTitle')} entranceKey={`design.${projectId}.step1`} />
       <StepInputForm projectId={projectId} onSubmit={() => router.push(designEstimateRoute(projectId))} />
     </>
   )

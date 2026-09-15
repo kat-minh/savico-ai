@@ -31,7 +31,7 @@ export function useProject(projectId: string) {
  * Modal Tạo dự án (mục III.1): sinh Project ID, lưu vào danh sách dự án của
  * tài khoản và mở ngay màn hình Bước 1 — Nhập liệu.
  */
-export function useCreateProject() {
+export function useCreateProject(onCreated?: (projectId: string) => void) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const closeCreateDialog = useDesignStore((s) => s.closeCreateDialog)
@@ -41,6 +41,10 @@ export function useCreateProject() {
     mutationFn: (payload: CreateProjectPayload) => designApi.createProject(payload),
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: designKeys.projects() })
+      if (onCreated) {
+        onCreated(project.id)
+        return
+      }
       closeCreateDialog()
       router.push(designInputRoute(project.id))
     },

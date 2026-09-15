@@ -46,7 +46,8 @@
     "title": "AI Assistant",
     "subtitle": "Ask anything about your project",
     "close": "Close",
-    "fab": "SAVICO AI Assistant"
+    "fab": "SAVICO AI Assistant",
+    "topicSuggestion": "Ask AI about {topic}"
   },
   "auth": {
     "login": {
@@ -203,6 +204,12 @@
     "limitReached": "You've reached today's limit of {limit} messages. Please come back tomorrow.",
     "greeting": "Hi! I'm the SAVICO AI assistant. I can walk you through the estimate, suggest ways to optimise cost and guide you step by step. What do you need?",
     "waitingHint": "The assistant is talking you through it while it works",
+    "renderStages": {
+      "drawings": "The dossier is in the drawing stage. You can browse layout ideas in the handbook while you wait.",
+      "renders": "The progress is moving to the rendering stage. Explore the colors and materials in the interior examples alongside it.",
+      "package": "The dossier is in the packaging stage. Download and sharing options will open when the dossier is ready.",
+      "error": "This render has not completed. The displayed progress is preserved; choose Try again to submit another request."
+    },
     "openPanel": "Open the chat panel",
     "proactive": {
       "estimate": {
@@ -277,7 +284,12 @@
   },
   "favorite": {
     "add": "Save template",
-    "remove": "Remove from saved"
+    "saved": "Saved",
+    "remove": "Remove from saved",
+    "savedToast": "Template saved",
+    "removedToast": "Removed from saved",
+    "viewSaved": "View saved templates",
+    "undo": "Undo"
   },
   "landing": {
     "hero": {
@@ -567,7 +579,9 @@
     "quota": {
       "lookupRemaining": "Lookups today: {remaining}/{total}",
       "detailRemaining": "You have {remaining}/{total} detail views left today",
-      "exhausted": "No lookups left today — upgrade your plan"
+      "detailSeen": "Already viewed — no credit used",
+      "exhausted": "No lookups left today — upgrade your plan",
+      "tooltip": "View {total} template details each day — resets at midnight · {hours}h remaining"
     },
     "info": {
       "planTitle": "Drawing details",
@@ -581,7 +595,9 @@
       "imageCountValue": "{count} images",
       "planDescription": "Layout description",
       "templateDescription": "Description",
-      "floorsPlan": "Floors"
+      "floorsPlan": "Floors",
+      "showMore": "Show more",
+      "showLess": "Show less"
     },
     "quickView": {
       "openFullPage": "Open full page"
@@ -591,6 +607,14 @@
       "breadcrumbRoot": "Handbook",
       "breadcrumbLibrary": "Template library",
       "similar": "Similar templates",
+      "zoom": "Enlarge drawing",
+      "viewerTitle": "Full-screen drawing viewer",
+      "previousFloor": "Previous floor",
+      "nextFloor": "Next floor",
+      "floorViewer": "Switch drawing floor",
+      "loadError": "Unable to load this template",
+      "loadErrorHint": "The connection may have been interrupted. Please try loading the content again.",
+      "retry": "Try again",
       "notFound": "Template not found",
       "notFoundHint": "It may have been removed. Go back to the library to pick another one.",
       "note": "Reference template curated by SAVICO. Actual results depend on your project details.",
@@ -628,6 +652,10 @@
       "title": "All articles",
       "all": "All",
       "searchPlaceholder": "Search articles…",
+      "resultCount": "{count} results",
+      "clearFilters": "Clear filters",
+      "showMore": "Show more",
+      "loading": "Loading",
       "readMore": "Read more",
       "readingTime": "{minutes} min read",
       "pagination": "Pagination",
@@ -657,6 +685,9 @@
       "ctaButton": "New project",
       "related": "Related articles",
       "readMore": "Read more",
+      "loadError": "Unable to load this article",
+      "loadErrorHint": "The connection may have been interrupted. Please try loading the content again.",
+      "retry": "Try again",
       "notFound": "Article not found",
       "notFoundHint": "It may have been removed. Go back to the Handbook to read something else.",
       "categories": {
@@ -690,6 +721,7 @@
     "latest": {
       "title": "Latest news",
       "seeAll": "See all",
+      "new": "New",
       "readingTime": "{minutes} min read",
       "categories": {
         "experience": "Building experience",
@@ -770,7 +802,8 @@
         "remove": "Remove photo",
         "errorType": "Only JPG, PNG or HEIC are supported.",
         "errorSize": "The image exceeds 10MB.",
-        "fallbackNote": "No photo yet? Just describe it — the AI can still work."
+        "fallbackNote": "No photo yet? Just describe it — the AI can still work.",
+        "uploadedNote": "The photo is ready for AI analysis."
       },
       "address": {
         "label": "Site address",
@@ -888,6 +921,13 @@
         "pending": "Queued",
         "tipLabel": "Tip:",
         "tip": "you can keep browsing interior templates or advice articles while the system finishes.",
+        "error": "The render could not be completed. Displayed progress is preserved; choose Try again to submit another request.",
+        "tips": {
+          "0": "Browse interior examples or advice articles while the system finishes.",
+          "1": "Tap the heart on an example you like to save it for a later discussion with your architect.",
+          "2": "When comparing interiors, consider circulation, lighting and your family's everyday needs."
+        },
+        "retry": "Try again",
         "tasks": {
           "drawings": "Processing drawings ({done}/{total})",
           "renders": "Rendering views ({done}/{total})",
@@ -1001,7 +1041,8 @@
         "link": {
           "title": "Dossier share link",
           "description": "Copy the link below so others can view the dossier without signing in.",
-          "copy": "Copy link"
+          "copy": "Copy link",
+          "copied": "Copied"
         },
         "qr": {
           "title": "Dossier QR code",
@@ -2997,15 +3038,7 @@
       "privacy": "Your details stay private and are only shared with the contractor after confirmation.",
       "limitReached": "This project already has {max} invitations — no more contractors can be invited.",
       "invalid": "Some required details are missing — check the date, time slot and contact details.",
-      "weekdays": [
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
-        "Sun"
-      ],
+      "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "editContact": "Edit",

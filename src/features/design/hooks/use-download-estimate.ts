@@ -31,16 +31,19 @@ export function useDownloadEstimate(result: EstimateResult | undefined, context:
 
     const fileName = t('xlsx.fileName', { project: context.projectName || t('xlsx.untitledProject') })
 
-    if (remoteUrl) {
-      const anchor = document.createElement('a')
-      anchor.href = remoteUrl
-      anchor.download = fileName
-      anchor.click()
-      return
-    }
-
     setPending(true)
     try {
+      if (remoteUrl) {
+        const anchor = document.createElement('a')
+        anchor.href = remoteUrl
+        anchor.download = fileName
+        anchor.click()
+        // Giữ trạng thái "đang chuẩn bị" đủ lâu để người dùng nhận biết được
+        // trước nhịp tick xác nhận hoàn tất.
+        await new Promise((resolve) => window.setTimeout(resolve, 420))
+        return
+      }
+
       const labels: EstimateXlsxLabels = {
         title: t('xlsx.title'),
         sheet: t('xlsx.sheet'),
@@ -56,7 +59,9 @@ export function useDownloadEstimate(result: EstimateResult | undefined, context:
           amount: t('xlsx.columns.amount')
         },
         sections: Object.fromEntries(COST_SECTIONS.map((s) => [s, t(`sections.${s}`)])) as Record<CostSection, string>,
-        sectionTotal: t('sectionTotal'),
+        // Lấy template thô vì key này có biến `{section}`; truyền thẳng `t()`
+        // mà thiếu biến sẽ làm next-intl ném FORMATTING_ERROR và chặn tải file.
+        sectionTotal: t.raw('sectionTotal') as string,
         grandTotal: t('grandTotal'),
         note: t('xlsx.note')
       }

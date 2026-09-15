@@ -2,7 +2,7 @@
 
 import { ArrowRight, Check, House, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState, type CSSProperties } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -61,11 +61,40 @@ function currentDotClass(status: ProjectStatus): string {
  * Mini-stepper 3 nấc nằm ngang, các chấm nối bằng đường kẻ (Hình 02):
  * Nhập liệu — Dự toán — Hồ sơ.
  */
+const playedMiniSteppers = new Set<string>()
+type MiniStepperPhase = 'waiting' | 'play' | 'done'
+
 function MiniStepper({ project }: { project: Project }) {
   const t = useTranslations('design.projects')
+  const [phase, setPhase] = useState<MiniStepperPhase>(() => (playedMiniSteppers.has(project.id) ? 'done' : 'waiting'))
+
+  useEffect(() => {
+    if (phase !== 'waiting') return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      playedMiniSteppers.add(project.id)
+      queueMicrotask(() => setPhase('done'))
+      return
+    }
+
+    // Project cards already have their own entrance choreography. Trigger the
+    // connector once, near the end of that entrance, instead of coupling it to
+    // IntersectionObserver (which could retrigger after filter/search remounts).
+    // The module-level Set keeps each project from replaying until a hard reload.
+    const timer = window.setTimeout(() => {
+      playedMiniSteppers.add(project.id)
+      setPhase('play')
+    }, 900)
+    return () => window.clearTimeout(timer)
+  }, [phase, project.id])
+
+  useEffect(() => {
+    if (phase !== 'play') return
+    const timer = window.setTimeout(() => setPhase('done'), 720)
+    return () => window.clearTimeout(timer)
+  }, [phase])
 
   return (
-    <ol className='mt-1.5 flex min-w-0 items-start'>
+    <ol data-stepper-phase={phase} className='mt-1.5 flex min-w-0 items-start'>
       {DESIGN_STEPS.map((step, index) => {
         const state = miniStepState(step, project)
         const next = DESIGN_STEPS[index + 1]
@@ -77,6 +106,8 @@ function MiniStepper({ project }: { project: Project }) {
           <Fragment key={step}>
             <li className='flex shrink-0 flex-col items-center gap-1'>
               <span
+                data-step-dot
+                data-active={state === 'current'}
                 className={cn(
                   'flex size-[18px] items-center justify-center rounded-full text-[10px] leading-none font-semibold',
                   state === 'done' && 'bg-primary text-primary-foreground',
@@ -99,7 +130,13 @@ function MiniStepper({ project }: { project: Project }) {
             {next ? (
               <span
                 aria-hidden
-                className={cn('mt-2 h-0.5 min-w-3 flex-1 rounded-full', linkReached ? 'bg-primary' : 'bg-border')}
+                data-mini-step-link
+                data-reached={linkReached}
+                style={{ '--mini-step-delay': `${index * 150}ms` } as CSSProperties}
+                className={cn(
+                  'mt-2 h-0.5 min-w-3 flex-1 origin-left rounded-full',
+                  linkReached ? 'bg-primary' : 'bg-border'
+                )}
               />
             ) : null}
           </Fragment>
@@ -118,16 +155,37 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
   const t = useTranslations('design.projects')
   const locale = useLocale() as Locale
   const action = ACTION_BY_STATUS[project.status]
+  const [justCompleted, setJustCompleted] = useState(false)
+
+  useEffect(() => {
+    if (sessionStorage.getItem('savico.just-completed-project') !== project.id) return
+    sessionStorage.removeItem('savico.just-completed-project')
+    const startTimer = window.setTimeout(() => setJustCompleted(true), 0)
+    const endTimer = window.setTimeout(() => setJustCompleted(false), 850)
+    return () => {
+      window.clearTimeout(startTimer)
+      window.clearTimeout(endTimer)
+    }
+  }, [project.id])
 
   return (
     // Hình S24: thẻ nằm NGANG — ảnh bìa là cột trái 36%, mọi thông tin dồn
     // sang phải. Xếp dọc như bản trước làm mỗi thẻ cao gấp đôi mà chữ vẫn ít.
-    <article className='bg-card hover:border-primary/50 group relative flex h-full overflow-hidden rounded-xl border transition-all hover:-translate-y-0.5 hover:shadow-md'>
+    <article
+      data-project-card
+      data-just-completed={justCompleted}
+      className='bg-card hover:border-primary/50 group relative flex h-full overflow-hidden rounded-xl border transition-[transform,border-color,box-shadow] duration-600 ease-out hover:-translate-y-px hover:shadow-md'
+    >
       <div className='relative w-[36%] shrink-0'>
         {/* Ảnh bìa là ảnh lô đất của Bước 1; chưa có thì để khung rỗng có biểu
             tượng thay vì bỏ trống. */}
         {project.coverUrl ? (
-          <Photo className='h-full min-h-32 w-full' src={project.coverUrl} alt={project.name} sizes='220px' />
+          <Photo
+            className='project-card-image h-full min-h-32 w-full transition-transform duration-500'
+            src={project.coverUrl}
+            alt={project.name}
+            sizes='220px'
+          />
         ) : (
           // Khung rỗng tô nhạt màu thương hiệu thay vì ô xám trơn: ô xám với
           // biểu tượng mờ trông như ảnh vỡ chứ không như "chưa có ảnh".
@@ -146,7 +204,7 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={t('menu.label')}
-              className='text-muted-foreground hover:text-foreground relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full transition-colors'
+              className='text-muted-foreground hover:text-foreground relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full opacity-55 transition-[color,opacity] group-hover:opacity-100'
             >
               <MoreHorizontal className='size-4' />
             </DropdownMenuTrigger>
@@ -175,6 +233,8 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
 
         <div className='mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5'>
           <span
+            data-project-status
+            data-completed={project.status === 'completed'}
             className={cn(
               'flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium',
               BADGE_CLASS[project.status]
@@ -188,10 +248,10 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
               phải lồng nút ⋮ vào trong thẻ <a>. */}
           <Link
             href={action.route(project.id)}
-            className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1 text-[13px] font-medium transition-colors after:absolute after:inset-0 after:content-[""]'
+            className='text-primary hover:text-primary-strong inline-flex shrink-0 items-center gap-1 text-[13px] font-medium transition-colors after:absolute after:inset-0 after:content-[""]'
           >
             {t(`action.${action.labelKey}`)}
-            <ArrowRight className='size-3.5' />
+            <ArrowRight className='size-3.5 transition-transform duration-200 group-hover:translate-x-1' />
           </Link>
         </div>
       </div>

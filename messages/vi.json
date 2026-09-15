@@ -46,7 +46,8 @@
     "title": "Trợ lý AI",
     "subtitle": "Hỏi bất cứ điều gì về dự án của bạn",
     "close": "Đóng",
-    "fab": "SAVICO AI Assistant"
+    "fab": "SAVICO AI Assistant",
+    "topicSuggestion": "Hỏi AI về {topic}"
   },
   "auth": {
     "login": {
@@ -203,6 +204,12 @@
     "limitReached": "Bạn đã đạt giới hạn {limit} tin nhắn hôm nay. Vui lòng quay lại vào ngày mai.",
     "greeting": "Xin chào! Tôi là trợ lý AI của SAVICO. Tôi có thể giải thích bảng dự toán, gợi ý phương án tối ưu chi phí và hướng dẫn bạn qua từng bước. Bạn cần hỗ trợ gì?",
     "waitingHint": "AI đang trao đổi với bạn trong lúc xử lý",
+    "renderStages": {
+      "drawings": "Bộ hồ sơ đang ở công đoạn xử lý bản vẽ. Bạn có thể xem các mẫu bố trí trong cẩm nang trong lúc chờ.",
+      "renders": "Tiến trình đang chuyển sang phần phối cảnh. Bạn có thể tham khảo màu sắc và vật liệu của các mẫu nội thất bên cạnh.",
+      "package": "Tiến trình đang ở công đoạn đóng gói hồ sơ. Các lựa chọn tải và chia sẻ sẽ mở khi bộ hồ sơ sẵn sàng.",
+      "error": "Lượt render chưa hoàn tất. Tiến độ hiển thị đã được giữ lại; bạn có thể bấm Thử lại để gửi lại yêu cầu."
+    },
     "openPanel": "Mở khung trò chuyện",
     "proactive": {
       "estimate": {
@@ -277,7 +284,12 @@
   },
   "favorite": {
     "add": "Lưu mẫu",
-    "remove": "Bỏ lưu mẫu"
+    "saved": "Đã lưu",
+    "remove": "Bỏ lưu mẫu",
+    "savedToast": "Đã lưu mẫu",
+    "removedToast": "Đã bỏ lưu",
+    "viewSaved": "Xem mẫu đã lưu",
+    "undo": "Hoàn tác"
   },
   "landing": {
     "hero": {
@@ -567,7 +579,9 @@
     "quota": {
       "lookupRemaining": "Lượt tra hôm nay: {remaining}/{total}",
       "detailRemaining": "Bạn còn {remaining}/{total} lượt xem chi tiết hôm nay",
-      "exhausted": "Hết lượt hôm nay — nâng cấp gói"
+      "detailSeen": "Mẫu đã xem - không trừ lượt",
+      "exhausted": "Hết lượt hôm nay — nâng cấp gói",
+      "tooltip": "Mỗi ngày xem chi tiết {total} mẫu — Làm mới lúc 0h · còn {hours} giờ"
     },
     "info": {
       "planTitle": "Thông tin bản vẽ",
@@ -581,7 +595,9 @@
       "imageCountValue": "{count} ảnh",
       "planDescription": "Mô tả bản vẽ",
       "templateDescription": "Mô tả",
-      "floorsPlan": "Số tầng"
+      "floorsPlan": "Số tầng",
+      "showMore": "Xem thêm",
+      "showLess": "Thu gọn"
     },
     "quickView": {
       "openFullPage": "Mở trang đầy đủ"
@@ -591,6 +607,14 @@
       "breadcrumbRoot": "Cẩm nang",
       "breadcrumbLibrary": "Thư viện mẫu",
       "similar": "Mẫu tương tự",
+      "zoom": "Phóng to bản vẽ",
+      "viewerTitle": "Xem bản vẽ toàn màn hình",
+      "previousFloor": "Tầng trước",
+      "nextFloor": "Tầng tiếp theo",
+      "floorViewer": "Chuyển tầng bản vẽ",
+      "loadError": "Không thể tải nội dung mẫu",
+      "loadErrorHint": "Kết nối có thể đang gián đoạn. Vui lòng thử tải lại nội dung.",
+      "retry": "Thử lại",
       "notFound": "Không tìm thấy mẫu",
       "notFoundHint": "Mẫu có thể đã bị gỡ. Quay lại thư viện để chọn mẫu khác.",
       "note": "Mẫu tham khảo do SAVICO biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn.",
@@ -628,6 +652,10 @@
       "title": "Tất cả bài viết",
       "all": "Tất cả",
       "searchPlaceholder": "Tìm kiếm bài viết…",
+      "resultCount": "{count} kết quả",
+      "clearFilters": "Xoá bộ lọc",
+      "showMore": "Xem thêm",
+      "loading": "Đang tải",
       "readMore": "Xem chi tiết",
       "readingTime": "{minutes} phút đọc",
       "pagination": "Chuyển trang",
@@ -638,7 +666,7 @@
         "legal": "Pháp lý"
       },
       "empty": {
-        "title": "Chưa có bài viết phù hợp",
+        "title": "Không tìm thấy bài phù hợp",
         "description": "Thử từ khóa khác hoặc chọn chuyên mục khác."
       },
       "previousPage": "Trang trước",
@@ -657,6 +685,9 @@
       "ctaButton": "Tạo dự án mới",
       "related": "Bài viết liên quan",
       "readMore": "Đọc thêm",
+      "loadError": "Không thể tải bài viết",
+      "loadErrorHint": "Kết nối có thể đang gián đoạn. Vui lòng thử tải lại nội dung.",
+      "retry": "Thử lại",
       "notFound": "Không tìm thấy bài viết",
       "notFoundHint": "Bài viết có thể đã bị gỡ. Quay lại Cẩm nang để đọc bài khác.",
       "categories": {
@@ -690,6 +721,7 @@
     "latest": {
       "title": "Tin tức mới nhất",
       "seeAll": "Xem tất cả",
+      "new": "Mới",
       "readingTime": "{minutes} phút đọc",
       "categories": {
         "experience": "Kinh nghiệm xây nhà",
@@ -770,7 +802,8 @@
         "remove": "Xóa ảnh",
         "errorType": "Chỉ hỗ trợ JPG, PNG hoặc HEIC.",
         "errorSize": "Ảnh vượt quá 10MB.",
-        "fallbackNote": "Chưa có ảnh? Chỉ cần mô tả, AI vẫn dựng được."
+        "fallbackNote": "Chưa có ảnh? Chỉ cần mô tả, AI vẫn dựng được.",
+        "uploadedNote": "Ảnh đã sẵn sàng để AI phân tích."
       },
       "address": {
         "label": "Địa chỉ công trình",
@@ -888,6 +921,13 @@
         "pending": "Chờ xử lý",
         "tipLabel": "Mẹo nhỏ:",
         "tip": "bạn có thể tiếp tục xem mẫu nội thất hoặc bài viết tư vấn trong lúc chờ hệ thống hoàn tất.",
+        "error": "Chưa thể hoàn tất lượt render. Tiến độ hiển thị được giữ lại; bấm Thử lại để gửi lại yêu cầu.",
+        "tips": {
+          "0": "Bạn có thể xem mẫu nội thất hoặc bài viết tư vấn trong lúc chờ hệ thống hoàn tất.",
+          "1": "Bấm trái tim trên mẫu bạn thích để lưu lại và trao đổi với kiến trúc sư sau này.",
+          "2": "Khi so sánh mẫu nội thất, hãy chú ý lối đi, ánh sáng và nhu cầu sử dụng của gia đình."
+        },
+        "retry": "Thử lại",
         "tasks": {
           "drawings": "Đang xử lý bản vẽ ({done}/{total})",
           "renders": "Đang render phối cảnh ({done}/{total})",
@@ -1001,7 +1041,8 @@
         "link": {
           "title": "Link chia sẻ hồ sơ",
           "description": "Sao chép link dưới đây để gửi cho người khác xem hồ sơ mà không cần đăng nhập.",
-          "copy": "Sao chép link"
+          "copy": "Sao chép link",
+          "copied": "Đã chép"
         },
         "qr": {
           "title": "Mã QR hồ sơ",
@@ -2997,15 +3038,7 @@
       "privacy": "Thông tin của bạn được bảo mật và chỉ chia sẻ với nhà thầu sau khi xác nhận.",
       "limitReached": "Dự án đã đủ {max} lời mời — không thể mời thêm nhà thầu.",
       "invalid": "Còn thông tin bắt buộc chưa điền — kiểm tra lại ngày, khung giờ và thông tin liên hệ.",
-      "weekdays": [
-        "T2",
-        "T3",
-        "T4",
-        "T5",
-        "T6",
-        "T7",
-        "CN"
-      ],
+      "weekdays": ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
       "prevMonth": "Tháng trước",
       "nextMonth": "Tháng sau",
       "editContact": "Chỉnh sửa",

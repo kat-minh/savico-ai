@@ -30,6 +30,7 @@ import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { checkoutConfirmRoute } from '@/shared/constants/routes'
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatPriceTag } from '@/shared/utils'
 import { PLAN_COMPARISON, PLAN_VALUE_ROWS, type PlanCell, type PlanValueKey } from '../constants/plan-comparison'
@@ -65,6 +66,7 @@ const VALUE_ROW_ICON: Record<(typeof PLAN_VALUE_ROWS)[number], LucideIcon> = {
 export function PlanPricing() {
   const t = useTranslations('plans')
   const { data: plans, isPending } = usePlans()
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.design', { offsetMs: 120 })
 
   const [giftPlan, setGiftPlan] = useState<SubscriptionPlan | null>(null)
 
@@ -79,20 +81,37 @@ export function PlanPricing() {
   // trong thẻ phải lớn theo bề rộng thẻ (tên gói ~8,3% bề rộng thẻ, giá ~10%)
   // — giữ chữ nhỏ như hệ thống mặc định là trang trông loãng, khác hẳn ảnh.
   return (
-    <div className='mx-auto w-full max-w-[80rem] space-y-8 px-4 py-10 lg:px-8'>
+    <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      style={entranceStyle}
+      className='mx-auto w-full max-w-[80rem] space-y-8 px-4 py-10 lg:px-8'
+    >
       {/* Hình S01: tiêu đề IN HOA cỡ lớn, chữ cuối (tên thương hiệu) tô cam,
           hai bên có hai chiếc lá. Tách chữ cuối ngay tại đây để admin đổi tiêu
           đề trong CMS thì phần tô màu vẫn tự bám chữ cuối. */}
       <header className='space-y-2 text-center'>
         <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>
-          <Leaf aria-hidden className='text-primary size-7 -scale-x-100 sm:size-8' />
-          <span className='text-pretty'>
+          <Leaf
+            data-entrance-step='2'
+            data-entrance-order='0'
+            aria-hidden
+            className='text-primary size-7 -scale-x-100 sm:size-8'
+          />
+          <span data-entrance-step='0' className='text-pretty'>
             {titleLead}
-            {titleAccent ? <span className='text-brand-orange'> {titleAccent}</span> : null}
+            {titleAccent ? (
+              <span data-entrance-step='1' className='text-brand-orange'>
+                {' '}
+                {titleAccent}
+              </span>
+            ) : null}
           </span>
-          <Leaf aria-hidden className='text-primary size-7 sm:size-8' />
+          <Leaf data-entrance-step='2' data-entrance-order='1' aria-hidden className='text-primary size-7 sm:size-8' />
         </h1>
-        <p className='text-muted-foreground text-pretty'>{t('subtitle')}</p>
+        <p data-entrance-step='3' className='text-muted-foreground text-pretty'>
+          {t('subtitle')}
+        </p>
       </header>
 
       {isPending ? (
@@ -106,8 +125,8 @@ export function PlanPricing() {
         // nên chỉ TỈ LỆ mới dùng lại được, không phải số đo tuyệt đối: cụm ba
         // thẻ chiếm 88% bề rộng và bề rộng thẻ gấp ~8,3 lần khe giữa hai thẻ.
         <ul className='grid items-stretch gap-6 pt-4 md:grid-cols-3'>
-          {plans?.map((plan) => (
-            <PlanCard key={plan.tier} plan={plan} onOpenGift={() => setGiftPlan(plan)} />
+          {plans?.map((plan, index) => (
+            <PlanCard key={plan.tier} plan={plan} entranceOrder={index} onOpenGift={() => setGiftPlan(plan)} />
           ))}
         </ul>
       )}
@@ -172,13 +191,26 @@ export function PlanPricing() {
 }
 
 /** Một thẻ gói (S01). Thẻ có quà tặng mở popup S02 khi bấm vào khối quà. */
-function PlanCard({ plan, onOpenGift }: { plan: SubscriptionPlan; onOpenGift: () => void }) {
+function PlanCard({
+  plan,
+  onOpenGift,
+  entranceOrder
+}: {
+  plan: SubscriptionPlan
+  onOpenGift: () => void
+  entranceOrder: number
+}) {
   const t = useTranslations('plans')
   const locale = useLocale() as Locale
   const giftMillions = plan.gift ? giftValueInMillions(plan.gift.value) : null
 
   return (
-    <li className='@container relative flex'>
+    <li
+      data-entrance-step='4'
+      data-entrance-order={entranceOrder}
+      data-entrance-from='soft-scale'
+      className='@container relative flex'
+    >
       {/* Đo trên ảnh S01: ruy-băng cao 8,1% bề rộng thẻ, nhô lên khỏi mép thẻ
           2,0% và cách chữ tên gói 4,5%. */}
       {plan.popular ? (
