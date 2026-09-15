@@ -277,7 +277,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   } | null>(null)
 
   // Cuộn qua khối nhận diện → dải tóm tắt dính dưới thanh điều hướng (mục 3).
-  const barCollapsed = usePastElement(HEADER_ANCHOR_ID)
+  const barCollapsed = usePastElement(HEADER_ANCHOR_ID, Boolean(contractor))
 
   const handleToggleCompare = () => {
     if (compareLocked) return

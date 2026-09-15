@@ -7,15 +7,21 @@ import { useEffect, useState } from 'react'
  * `id` (e.g. the hero) — `false` while it's still on screen. A route with no
  * such element reads as "already past" so callers land on their settled look
  * (opaque header, visible chat FAB…) instead of staying in the "before" state
- * forever.
+ * forever. Pass `enabled = false` while the observed element is waiting on
+ * async data so the hook stays in its initial, non-sticky state.
  */
-export function usePastElement(id: string): boolean {
+export function usePastElement(id: string, enabled = true): boolean {
   const [past, setPast] = useState(false)
 
   useEffect(() => {
+    if (!enabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- disabled observers must return to their initial, non-sticky state
+      setPast(false)
+      return
+    }
+
     const el = document.getElementById(id)
     if (!el) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- no element to observe, so there's nothing to subscribe to; the sentinel default is "past"
       setPast(true)
       return
     }
@@ -28,7 +34,7 @@ export function usePastElement(id: string): boolean {
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [id])
+  }, [enabled, id])
 
   return past
 }

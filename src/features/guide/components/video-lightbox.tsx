@@ -181,52 +181,54 @@ export function VideoLightbox({
                       </button>
                     </DialogPrimitive.Close>
 
-                    <AnimatePresence mode='sync' initial custom={direction}>
-                      <motion.div
-                        key={video.id}
-                        custom={direction}
-                        initial={{ opacity: 0, x: reduceMotion ? 0 : direction * 44 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: reduceMotion ? 0 : direction * -44 }}
-                        transition={{ duration: reduceMotion ? 0 : 0.28, ease: revealEase }}
-                        className={cn(
-                          isMobile ? 'flex h-[calc(100dvh-1rem)] flex-col overflow-y-auto p-4 pt-0' : 'relative'
-                        )}
-                      >
+                    <div className={cn('overflow-hidden', isMobile ? 'h-[calc(100dvh-1rem)]' : 'rounded-xl')}>
+                      <AnimatePresence mode='wait' initial={false} custom={direction}>
                         <motion.div
-                          initial={reduceMotion ? false : { opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: reduceMotion ? 0 : 0.18 }}
-                          className='mb-3 min-w-0 space-y-1 pr-10'
-                        >
-                          <DialogPrimitive.Title className='truncate text-lg leading-tight font-semibold'>
-                            {video.title}
-                          </DialogPrimitive.Title>
-                          <DialogPrimitive.Description className='text-muted-foreground line-clamp-2 text-sm'>
-                            {video.description}
-                          </DialogPrimitive.Description>
-                        </motion.div>
-
-                        <motion.div
-                          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: reduceMotion ? 0 : 0.24, delay: reduceMotion ? 0 : 0.14 }}
-                        >
-                          {editing ? (
-                            <EditingCover video={video} articleHref={articleHref} />
-                          ) : (
-                            <VideoPlayer
-                              key={video.id}
-                              video={video}
-                              nextVideo={nextVideo}
-                              onAdvance={(next) => goTo(next, 1)}
-                              onReplay={() => onSelect?.(video)}
-                              onCreateProject={onCreateProject ? startProject : undefined}
-                            />
+                          key={video.id}
+                          custom={direction}
+                          initial={{ opacity: 0, x: reduceMotion ? 0 : direction * 44 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: reduceMotion ? 0 : direction * -44 }}
+                          transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
+                          className={cn(
+                            isMobile ? 'flex h-[calc(100dvh-1rem)] flex-col overflow-y-auto p-4 pt-0' : 'relative'
                           )}
+                        >
+                          <motion.div
+                            initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.18 }}
+                            className='mb-3 min-w-0 space-y-1 pr-10'
+                          >
+                            <DialogPrimitive.Title className='truncate text-lg leading-tight font-semibold'>
+                              {video.title}
+                            </DialogPrimitive.Title>
+                            <DialogPrimitive.Description className='text-muted-foreground line-clamp-2 text-sm'>
+                              {video.description}
+                            </DialogPrimitive.Description>
+                          </motion.div>
+
+                          <motion.div
+                            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.24, delay: reduceMotion ? 0 : 0.14 }}
+                          >
+                            {editing ? (
+                              <EditingCover video={video} articleHref={articleHref} />
+                            ) : (
+                              <VideoPlayer
+                                key={video.id}
+                                video={video}
+                                nextVideo={nextVideo}
+                                onAdvance={(next) => goTo(next, 1)}
+                                onReplay={() => onSelect?.(video)}
+                                onCreateProject={onCreateProject ? startProject : undefined}
+                              />
+                            )}
+                          </motion.div>
                         </motion.div>
-                      </motion.div>
-                    </AnimatePresence>
+                      </AnimatePresence>
+                    </div>
 
                     {prevVideo ? (
                       <motion.button
