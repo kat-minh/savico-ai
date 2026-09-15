@@ -173,7 +173,11 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
                       rê thẻ thì nút đầy màu thay vì viền. */}
                   <div className='mt-auto pt-3'>
                     {isOwned ? (
-                      <Button asChild className='h-9 w-full rounded-lg text-xs'>
+                      <Button
+                        asChild
+                        variant={isHovered ? 'default' : 'outline'}
+                        className='h-9 w-full rounded-lg text-xs transition-colors'
+                      >
                         <Link href={ROUTES.DESIGN}>
                           {t('openPackage')}
                           <ArrowRight className='size-3.5' />
