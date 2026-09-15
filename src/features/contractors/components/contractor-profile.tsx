@@ -5,7 +5,7 @@ import {
   Briefcase,
   CalendarCheck,
   CalendarDays,
-  CheckCircle2,
+  Check,
   ChevronLeft,
   ChevronRight,
   CircleCheck,
@@ -23,15 +23,17 @@ import {
   Maximize2,
   Minus,
   Plus,
+  Scale,
   Search,
   Send,
   ShieldCheck,
   Users,
   X
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
@@ -47,15 +49,18 @@ import {
   DialogTitle
 } from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
+import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import {
   CONTRACTOR_PREVIEW_ID,
+  contractorBriefRoute,
+  contractorCompareRoute,
   contractorFirmRoute,
   contractorInvitationsRoute,
   contractorInviteRoute,
   contractorMatchesRoute
 } from '@/shared/constants/routes'
-import { usePastElement } from '@/shared/hooks'
+import { useCountUp, usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatNumber } from '@/shared/utils'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
@@ -64,7 +69,7 @@ import { useContractor } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
 import { isInvited, remainingInvites } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
-import type { Contractor, ContractorPhoto } from '../types/contractor.types'
+import type { Contractor, ContractorPhoto, ContractorProject } from '../types/contractor.types'
 import { MATCHES_LAST_VIEWED_KEY } from './contractor-matches'
 import { ContractorLogo } from './contractor-logo'
 import { useProjectPickerStore } from '../store/project-picker.store'
@@ -81,6 +86,45 @@ interface ContractorProfileProps {
 /** Bề ngang trang, đo từ ảnh S13: khối nội dung chiếm 90% bề ngang màn. */
 const PAGE_CONTAINER = 'mx-auto w-[90%] max-w-[80rem]'
 
+/** Mốc để bật thanh hồ sơ thu gọn sau khi phần nhận diện rời khỏi viewport. */
+const HEADER_ANCHOR_ID = 'firm-header-anchor'
+
+/** Vòng tròn luôn khép kín; chỉ nét tick bên trong chạy hiệu ứng vẽ. */
+function DrawnCircleCheck({
+  className,
+  delay = 0,
+  active = true
+}: {
+  className?: string
+  delay?: number
+  active?: boolean
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'border-primary text-primary flex size-4 shrink-0 items-center justify-center rounded-full border-[1.5px]',
+        className
+      )}
+    >
+      <Check
+        className={cn('size-2.5 motion-reduce:animate-none', active && 'animate-[firm-check-draw_.45s_ease-out_both]')}
+        style={{
+          animationDelay: `${delay}s`,
+          strokeDasharray: 48,
+          strokeDashoffset: active ? undefined : 48
+        }}
+        strokeWidth={3}
+      />
+    </span>
+  )
+}
+
+function CountedMetric({ value, format }: { value: number; format: (value: number) => string }) {
+  const { ref, display } = useCountUp(value, { duration: 0.8, amount: 0.3 })
+  return <span ref={ref}>{format(display)}</span>
+}
+
 /**
  * Nội dung tab trượt vào theo hướng tab vừa chọn (mục 4) — Radix dựng lại mỗi
  * `TabsContent` khi nó vừa active nên `initial`/`animate` chạy đúng một lần
@@ -91,6 +135,7 @@ function TabPanel({ direction, children }: { direction: number; children: React.
     <motion.div
       initial={{ opacity: 0, x: direction * 20 }}
       animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: direction * -12 }}
       transition={{ duration: 0.3, ease: revealEase }}
       className='space-y-5'
     >
@@ -98,9 +143,6 @@ function TabPanel({ direction, children }: { direction: number; children: React.
     </motion.div>
   )
 }
-
-/** Neo cho `usePastElement` — cuộn qua khối nhận diện thì dải tóm tắt dính dưới thanh điều hướng (mục 3). */
-const HEADER_ANCHOR_ID = 'firm-header-anchor'
 
 /**
  * Nút "Mời báo giá" — MỘT nơi quyết định trạng thái, dùng lại cho cột phải,
@@ -206,8 +248,12 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   /** Xem thử — chưa gắn hồ sơ dự án nào (xem `CONTRACTOR_PREVIEW_ID`). */
   const preview = projectId === CONTRACTOR_PREVIEW_ID
 
-  /** Bấm một thẻ "thế mạnh" ở khối giới thiệu → tab "Dự án đã thực hiện" (mục 5). */
-  const goToProjectsTab = () => router.replace(contractorFirmRoute(projectId, contractorId, 'projects'))
+  /** Bấm một thẻ "thế mạnh" ở khối giới thiệu -> tab dự án và giữ bộ lọc vừa chọn. */
+  const [projectFilter, setProjectFilter] = useState<string | null>(null)
+  const goToProjectsTab = (strength: string) => {
+    setProjectFilter(strength)
+    router.replace(contractorFirmRoute(projectId, contractorId, 'projects'))
+  }
 
   const { data: brief } = useBrief(projectId)
   const { data: contractor, isPending } = useContractor(contractorId)
@@ -220,9 +266,35 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   const invited = isInvited(sent, contractorId)
   const inviteLocked = remainingInvites(sent) === 0
   const inCompare = compareIds.includes(contractorId)
+  const compareLocked = !inCompare && compareIds.length >= MAX_INVITATIONS
+  const reduceMotion = useReducedMotion()
+  const compareButtonRef = useRef<HTMLButtonElement>(null)
+  const [compareFlight, setCompareFlight] = useState<{
+    fromX: number
+    fromY: number
+    toX: number
+    toY: number
+  } | null>(null)
 
   // Cuộn qua khối nhận diện → dải tóm tắt dính dưới thanh điều hướng (mục 3).
   const barCollapsed = usePastElement(HEADER_ANCHOR_ID)
+
+  const handleToggleCompare = () => {
+    if (compareLocked) return
+    if (!inCompare && !reduceMotion) {
+      const source = compareButtonRef.current?.getBoundingClientRect()
+      const target = document.getElementById('firm-compare-target')?.getBoundingClientRect()
+      if (source && target) {
+        setCompareFlight({
+          fromX: source.left + source.width / 2,
+          fromY: source.top + source.height / 2,
+          toX: target.left + target.width / 2,
+          toY: target.top + target.height / 2
+        })
+      }
+    }
+    toggleCompare(contractorId)
+  }
 
   /** Đang xem ảnh nào trong hộp phóng — `null` là đang đóng (mục 6). */
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null)
@@ -266,23 +338,50 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
     {
       key: 'similar',
       icon: CalendarCheck,
-      value: tCommon('similarShort', { count: contractor.similarProjects }),
+      value: (
+        <CountedMetric
+          value={contractor.similarProjects}
+          format={(value) => tCommon('similarShort', { count: value })}
+        />
+      ),
       hint: tCommon('similarSuffix')
     },
     {
       key: 'distance',
       icon: MapPin,
-      value: tCommon('distanceShort', {
-        km: formatNumber(contractor.distanceKm, locale, { minimumFractionDigits: 1 })
-      }),
+      value: (
+        <CountedMetric
+          value={Math.round(contractor.distanceKm * 10)}
+          format={(value) =>
+            tCommon('distanceShort', {
+              km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 })
+            })
+          }
+        />
+      ),
       hint: tCommon('distanceSuffix')
     },
-    { key: 'areas', icon: MapIcon, value: tCommon('serviceAreas'), hint: areas },
+    {
+      key: 'areas',
+      icon: MapIcon,
+      value: (
+        <CountedMetric
+          value={contractor.serviceAreas.length}
+          format={(value) => t('serviceAreaCount', { count: value })}
+        />
+      ),
+      hint: areas
+    },
     {
       key: 'survey',
       icon: Clock,
-      value: tCommon('surveyLabel'),
-      hint: tCommon('surveyHours', { hours: contractor.surveyWithinHours })
+      value: (
+        <CountedMetric
+          value={contractor.surveyWithinHours}
+          format={(value) => tCommon('surveyHours', { hours: value })}
+        />
+      ),
+      hint: tCommon('surveyLabel')
     }
   ]
 
@@ -307,7 +406,33 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
     <div className={cn(PAGE_CONTAINER, 'space-y-4 py-8')}>
       {/* Xem thử thì chưa có hồ sơ để hiện — để nguyên thanh này là một khung
           chờ xám đứng mãi ở đầu trang. */}
-      {preview ? null : <ProjectContextBar brief={brief} compact />}
+      {preview ? null : (
+        <ProjectContextBar
+          brief={brief}
+          compact
+          aside={
+            <div className='flex items-center gap-2'>
+              <motion.div
+                id='firm-compare-target'
+                key={compareIds.length}
+                initial={reduceMotion ? false : { scale: 0.82, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+              >
+                <Button asChild size='sm' variant='outline' className='border-primary/40 text-primary-strong'>
+                  <Link href={contractorCompareRoute(projectId)}>
+                    <Scale className='size-3.5' />
+                    {t('compareChip', { count: compareIds.length, max: MAX_INVITATIONS })}
+                  </Link>
+                </Button>
+              </motion.div>
+              <Button asChild size='sm' variant='ghost' className='hidden sm:inline-flex'>
+                <Link href={contractorBriefRoute(projectId)}>{tCommon('editBrief')}</Link>
+              </Button>
+            </div>
+          }
+        />
+      )}
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
         <Link
@@ -328,7 +453,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
           >
             {/* Nhận diện + chỉ số + tab: một thẻ duy nhất, đúng ảnh S13. */}
             <motion.div
-              id={HEADER_ANCHOR_ID}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: revealEase }}
@@ -346,7 +470,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.3 }}
                       >
-                        <BadgeCheck className='text-primary size-5 shrink-0' />
+                        <BadgeCheck className='text-primary size-5 shrink-0 animate-[firm-check-draw_.5s_ease-out_both] motion-reduce:animate-none' />
                       </motion.span>
                     ) : null}
                     {invited ? (
@@ -402,32 +526,41 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               </TabsList>
             </motion.div>
 
-            <TabsContent value='overview'>
-              <TabPanel direction={tabDirection}>
-                <IntroCard contractor={contractor} onTagClick={goToProjectsTab} onOpenPhoto={setActivePhotoIndex} />
-                <PartnershipSummary contractor={contractor} />
-                <FeaturedProjects contractor={contractor} projectId={projectId} />
-                <LegalChecks contractor={contractor} />
-              </TabPanel>
-            </TabsContent>
+            {/* Mốc mỏng cho `usePastElement` — CÙNG mẫu với bảng so sánh
+                (`TABLE_TOP_ANCHOR_ID`), không gắn `id` lên cả khối tiêu đề cao
+                bên trên. Gắn lên khối cao thì thanh dính bật ngay khi cuộn qua
+                dù tên "An Gia Build" vẫn còn hiện — khối đó cao hơn khung nhìn
+                nên `IntersectionObserver` báo "hết giao" ở nhiều mốc cuộn khác
+                nhau tùy chiều cao màn hình, không riêng lúc đã cuộn qua hẳn. */}
+            <div id={HEADER_ANCHOR_ID} className='h-px' aria-hidden />
 
-            <TabsContent value='projects'>
-              <TabPanel direction={tabDirection}>
-                <FeaturedProjects contractor={contractor} projectId={projectId} />
-              </TabPanel>
-            </TabsContent>
-
-            <TabsContent value='legal'>
-              <TabPanel direction={tabDirection}>
-                <LegalChecks contractor={contractor} />
-              </TabPanel>
-            </TabsContent>
-
-            <TabsContent value='partnership'>
-              <TabPanel direction={tabDirection}>
-                <PartnershipTab contractor={contractor} />
-              </TabPanel>
-            </TabsContent>
+            <motion.div layout className='overflow-hidden' transition={{ duration: 0.3, ease: revealEase }}>
+              <AnimatePresence mode='wait' initial={false}>
+                <TabPanel key={tab} direction={tabDirection}>
+                  {tab === 'overview' ? (
+                    <>
+                      <IntroCard
+                        contractor={contractor}
+                        onTagClick={goToProjectsTab}
+                        onOpenPhoto={setActivePhotoIndex}
+                      />
+                      <PartnershipSummary contractor={contractor} />
+                      <FeaturedProjects contractor={contractor} />
+                      <LegalChecks contractor={contractor} />
+                    </>
+                  ) : null}
+                  {tab === 'projects' ? (
+                    <FeaturedProjects
+                      contractor={contractor}
+                      filter={projectFilter}
+                      onClearFilter={() => setProjectFilter(null)}
+                    />
+                  ) : null}
+                  {tab === 'legal' ? <LegalChecks contractor={contractor} /> : null}
+                  {tab === 'partnership' ? <PartnershipTab contractor={contractor} /> : null}
+                </TabPanel>
+              </AnimatePresence>
+            </motion.div>
           </Tabs>
         </div>
 
@@ -437,7 +570,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className='space-y-4 lg:sticky lg:top-24 lg:self-start'
+          className='hidden space-y-4 lg:sticky lg:top-24 lg:block lg:self-start'
         >
           <motion.section
             variants={revealContainerVariants}
@@ -451,9 +584,18 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                 <motion.li
                   variants={revealItemVariants}
                   key={row.key}
-                  className='flex items-center gap-3 rounded-xl border px-3 py-2.5'
+                  className={cn(
+                    'flex items-center gap-3 rounded-xl border px-3 py-2.5',
+                    row.key === 'accepting' && !contractor.acceptingProjects && 'bg-muted/60 text-muted-foreground'
+                  )}
                 >
-                  <row.icon aria-hidden className='text-primary size-4 shrink-0' />
+                  <row.icon
+                    aria-hidden
+                    className={cn(
+                      'text-primary size-4 shrink-0',
+                      row.key === 'accepting' && !contractor.acceptingProjects && 'text-muted-foreground'
+                    )}
+                  />
                   <div className='min-w-0'>
                     <p className='text-muted-foreground text-[11px] leading-tight'>{row.label}</p>
                     <p className='mt-0.5 truncate text-sm font-semibold'>{row.value}</p>
@@ -493,9 +635,15 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
             ) : null}
 
             <Button
+              ref={compareButtonRef}
               variant='outline'
-              className={cn('border-primary/50 text-primary-strong h-11 w-full', inCompare && 'border-primary')}
-              onClick={() => toggleCompare(contractorId)}
+              disabled={compareLocked}
+              title={compareLocked ? t('compareFull', { max: MAX_INVITATIONS }) : undefined}
+              className={cn(
+                'border-primary/50 text-primary-strong h-11 w-full',
+                inCompare && 'border-primary bg-primary/10 hover:bg-primary/15'
+              )}
+              onClick={handleToggleCompare}
             >
               {inCompare ? (
                 <motion.span
@@ -503,7 +651,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
                 >
-                  <CheckCircle2 className='size-4' />
+                  <DrawnCircleCheck />
                 </motion.span>
               ) : (
                 <Plus className='size-4' />
@@ -528,21 +676,30 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
         </motion.aside>
       </div>
 
-      {/* Cuộn qua khối nhận diện → dải tóm tắt dính dưới thanh điều hướng
-          (mục 3); mobile: nút "Mời báo giá" dính đáy màn. */}
-      <AnimatePresence>
-        {barCollapsed ? (
-          <motion.div
-            initial={{ y: -48, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -48, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className='bg-card/95 fixed inset-x-0 top-16 z-30 hidden border-b py-2 backdrop-blur-sm sm:block'
-          >
-            <div className={cn(PAGE_CONTAINER, 'flex items-center gap-3')}>
+      <div
+        aria-hidden={!barCollapsed}
+        className={cn(
+          PAGE_CONTAINER,
+          'pointer-events-none fixed top-14 left-1/2 z-30 hidden -translate-x-1/2 md:block'
+        )}
+      >
+        <AnimatePresence>
+          {barCollapsed ? (
+            <motion.div
+              initial={reduceMotion ? false : { y: -18, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={reduceMotion ? undefined : { y: -18, opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.3, ease: revealEase }}
+              className='bg-card/95 pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-2 shadow-[0_10px_30px_-20px_rgba(24,80,42,0.5)] backdrop-blur-sm'
+            >
               <ContractorLogo contractor={contractor} className='size-8 shrink-0 rounded-md text-xs' />
-              <span className='truncate text-sm font-medium'>{contractor.name}</span>
-              <div className='ml-auto h-9 w-40 shrink-0 [&>*]:h-9'>
+              <span className='truncate text-sm font-semibold'>{contractor.name}</span>
+              {invited ? (
+                <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
+                  {tCommon('invited')}
+                </span>
+              ) : null}
+              <div className='ml-auto h-9 w-44 shrink-0 [&>*]:h-9'>
                 <InviteButton
                   projectId={projectId}
                   contractorId={contractorId}
@@ -556,27 +713,58 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                   size='sm'
                 />
               </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+
+      {barCollapsed ? <div className='h-20 lg:hidden' aria-hidden /> : null}
+      <AnimatePresence>
+        {barCollapsed ? (
+          <motion.div
+            initial={reduceMotion ? false : { y: 72, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={reduceMotion ? undefined : { y: 72, opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.3, ease: revealEase }}
+            className='bg-card/95 fixed inset-x-0 bottom-0 z-30 border-t p-3 backdrop-blur-sm lg:hidden'
+          >
+            <div className='mx-auto h-11 w-full max-w-lg [&>*]:h-11'>
+              <InviteButton
+                projectId={projectId}
+                contractorId={contractorId}
+                contractor={contractor}
+                preview={preview}
+                invited={invited}
+                inviteLocked={inviteLocked}
+                navigating={navigatingInvite}
+                onNavigate={() => setNavigatingInvite(true)}
+                onOpenPicker={openPicker}
+              />
             </div>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      <div className='h-16 sm:hidden' aria-hidden />
-      <div className='bg-card fixed inset-x-0 bottom-0 z-30 border-t p-3 sm:hidden'>
-        <div className='h-11 [&>*]:h-11'>
-          <InviteButton
-            projectId={projectId}
-            contractorId={contractorId}
-            contractor={contractor}
-            preview={preview}
-            invited={invited}
-            inviteLocked={inviteLocked}
-            navigating={navigatingInvite}
-            onNavigate={() => setNavigatingInvite(true)}
-            onOpenPicker={openPicker}
-          />
-        </div>
-      </div>
+      {compareFlight && typeof document !== 'undefined'
+        ? createPortal(
+            <motion.div
+              initial={{ x: compareFlight.fromX, y: compareFlight.fromY, opacity: 0, scale: 0.74 }}
+              animate={{
+                x: [compareFlight.fromX, compareFlight.fromX, compareFlight.toX, compareFlight.toX],
+                y: [compareFlight.fromY, compareFlight.fromY - 72, compareFlight.toY - 24, compareFlight.toY],
+                opacity: [0, 1, 1, 0],
+                scale: [0.74, 0.9, 0.7, 0.5]
+              }}
+              transition={{ duration: 0.85, ease: revealEase, times: [0, 0.16, 0.82, 1] }}
+              onAnimationComplete={() => setCompareFlight(null)}
+              className='bg-card pointer-events-none fixed top-0 left-0 z-60 flex max-w-44 items-center gap-2 rounded-xl border px-2 py-1.5 shadow-lg'
+            >
+              <ContractorLogo contractor={contractor} className='size-7 rounded-md text-[9px]' />
+              <span className='truncate text-xs font-semibold'>{contractor.name}</span>
+            </motion.div>,
+            document.body
+          )
+        : null}
 
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
         <DialogContent className='sm:max-w-sm'>
@@ -625,7 +813,7 @@ function IntroCard({
 }: {
   contractor: Contractor
   /** Bấm một thẻ "thế mạnh" → chuyển sang tab "Dự án đã thực hiện" (mục 5). */
-  onTagClick: () => void
+  onTagClick: (strength: string) => void
   onOpenPhoto: (index: number) => void
 }) {
   const t = useTranslations('contractors.firm')
@@ -640,38 +828,48 @@ function IntroCard({
 
   return (
     <section className='bg-card grid gap-x-[1.5%] gap-y-5 rounded-2xl border p-4 lg:grid-cols-[37%_minmax(0,1fr)]'>
-      <div className='min-w-0'>
-        <h2 className='text-base font-semibold'>{t('introTitle')}</h2>
-        <p className='text-muted-foreground mt-2 text-sm leading-relaxed text-pretty'>{contractor.intro}</p>
+      <motion.div
+        variants={revealContainerVariants}
+        initial='hidden'
+        whileInView='show'
+        viewport={{ once: true, amount: 0.25 }}
+        className='min-w-0'
+      >
+        <motion.h2 variants={revealItemVariants} className='text-base font-semibold'>
+          {t('introTitle')}
+        </motion.h2>
+        <motion.p
+          variants={revealItemVariants}
+          className='text-muted-foreground mt-2 text-sm leading-relaxed text-pretty'
+        >
+          {contractor.intro}
+        </motion.p>
 
-        <ul className='mt-4 space-y-2.5 text-sm'>
+        <motion.ul variants={revealContainerVariants} className='mt-4 space-y-2.5 text-sm'>
           {facts.map((fact) => (
-            <li key={fact.key} className='flex items-start gap-2.5'>
+            <motion.li variants={revealItemVariants} key={fact.key} className='flex items-start gap-2.5'>
               <fact.icon aria-hidden className='text-primary mt-0.5 size-4 shrink-0' />
               <span className='text-pretty'>{fact.text}</span>
-            </li>
+            </motion.li>
           ))}
-        </ul>
+        </motion.ul>
 
-        {/* Rê → nền xanh nhạt; bấm → chuyển sang tab "Dự án đã thực hiện"
-            (mục 5). Không có dữ liệu nào gắn thế mạnh với TỪNG dự án trong
-            `ContractorProject`, nên dừng ở việc mở đúng tab — chưa lọc thật
-            theo tag, tránh vẽ ra một bộ lọc trông như hoạt động mà không có
-            gì đứng sau nó. */}
-        <ul className='mt-4 flex flex-wrap gap-2'>
+        {/* Rê -> nền xanh nhạt; bấm -> chuyển tab dự án. Dữ liệu `tags` trên từng
+            dự án đưa các thẻ phù hợp lên đầu mà vẫn giữ nguyên toàn bộ hồ sơ. */}
+        <motion.ul variants={revealContainerVariants} className='mt-4 flex flex-wrap gap-2'>
           {contractor.strengths.map((strength) => (
-            <li key={strength}>
+            <motion.li variants={revealItemVariants} layout key={strength}>
               <button
                 type='button'
-                onClick={onTagClick}
-                className='border-primary/40 text-primary-strong hover:bg-accent rounded-md border px-2.5 py-1 text-xs transition-colors'
+                onClick={() => onTagClick(strength)}
+                className='border-primary/40 text-primary-strong hover:bg-accent rounded-md border px-2.5 py-1 text-xs transition-colors active:scale-[0.98]'
               >
                 {strength}
               </button>
-            </li>
+            </motion.li>
           ))}
-        </ul>
-      </div>
+        </motion.ul>
+      </motion.div>
 
       {/* Ô lớn KHÔNG khóa tỉ lệ: trong ảnh mẫu bộ ảnh cao đúng bằng khối chữ bên
           trái, hai đáy thẳng hàng. Đặt `aspect-*` cho ô lớn thì nó dừng sớm hơn
@@ -736,6 +934,7 @@ function CollagePhoto({
     <motion.button
       type='button'
       variants={revealItemVariants}
+      layoutId={`firm-photo-${photo.caption}`}
       onClick={onOpen}
       className={cn('group relative min-w-0 overflow-hidden rounded-xl border text-left', className)}
     >
@@ -758,10 +957,8 @@ function CollagePhoto({
  * Hộp phóng ảnh doanh nghiệp (mục 6) — phóng ra từ đúng ảnh vừa bấm, mũi tên
  * chuyển ảnh, Esc/bấm nền để đóng.
  *
- * Đơn giản hoá so với mô tả: bỏ vuốt để chuyển ảnh trên di động và bỏ hiệu
- * ứng "phóng từ đúng vị trí ảnh" (origin) — bộ ảnh chỉ 1–3 tấm và không có
- * layout cố định giữa các khổ màn để tính toạ độ nguồn đáng tin cậy; hộp vẫn
- * phóng to/thu nhỏ từ giữa màn, chỉ là không bắt đầu đúng tại vị trí ảnh.
+ * Shared layout giữ đúng điểm xuất phát của ảnh; kéo ngang, phím mũi tên và Esc
+ * cùng dùng chung một chỉ số nên không tạo ba luồng điều hướng lệch nhau.
  */
 function PhotoLightbox({
   photos,
@@ -774,6 +971,7 @@ function PhotoLightbox({
   onClose: () => void
   onNavigate: (nextIndex: number) => void
 }) {
+  const reduceMotion = useReducedMotion()
   useEffect(() => {
     if (index === null) return
     const handleKey = (event: KeyboardEvent) => {
@@ -802,10 +1000,18 @@ function PhotoLightbox({
         >
           <motion.div
             key={index}
-            initial={{ opacity: 0, scale: 0.94 }}
+            layoutId={`firm-photo-${photo.caption}`}
+            initial={reduceMotion ? false : { opacity: 0.65, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.94 }}
+            exit={reduceMotion ? undefined : { opacity: 0.65, scale: 0.98 }}
             transition={{ duration: 0.25 }}
+            drag={photos.length > 1 && !reduceMotion ? 'x' : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.22}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -60) onNavigate(((index ?? 0) + 1) % photos.length)
+              if (info.offset.x > 60) onNavigate(((index ?? 0) - 1 + photos.length) % photos.length)
+            }}
             className='relative aspect-video w-full max-w-3xl overflow-hidden rounded-2xl'
           >
             <Photo src={photo.url} alt='' className='size-full' sizes='90vw' />
@@ -893,80 +1099,176 @@ function PartnershipSummary({ contractor }: { contractor: Contractor }) {
 }
 
 /** Khối "Dự án tiêu biểu": ảnh bên trái, tên + năm + liên kết bên phải. */
-function FeaturedProjects({ contractor, projectId }: { contractor: Contractor; projectId: string }) {
+function FeaturedProjects({
+  contractor,
+  filter,
+  onClearFilter
+}: {
+  contractor: Contractor
+  filter?: string | null
+  onClearFilter?: () => void
+}) {
   const t = useTranslations('contractors.firm')
+  const [selectedProject, setSelectedProject] = useState<ContractorProject | null>(null)
+  /* Giữ nguyên toàn bộ nội dung. Khi có tag, dự án khớp được đưa lên đầu để người dùng
+     vẫn nhìn thấy hồ sơ đầy đủ và thấy rõ chuyển động sắp xếp của các thẻ. */
+  const projects = [...contractor.featuredProjects].sort((left, right) => {
+    if (!filter) return 0
+    return Number(Boolean(right.tags?.includes(filter))) - Number(Boolean(left.tags?.includes(filter)))
+  })
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.4, ease: revealEase }}
-      className='bg-card rounded-2xl border p-4'
-    >
-      <h2 className='text-base font-semibold'>{t('featured')}</h2>
-      <ul className='mt-3 grid gap-x-[3%] gap-y-4 sm:grid-cols-3'>
-        {contractor.featuredProjects.map((project) => (
-          <li key={project.id} className='group flex min-w-0 gap-3'>
-            {project.imageUrl ? (
-              <div className='w-1/2 shrink-0 overflow-hidden rounded-lg'>
-                <RevealPhoto
-                  src={project.imageUrl}
-                  alt={project.name}
-                  className='aspect-video size-full'
-                  sizes='(max-width: 768px) 40vw, 160px'
-                />
-              </div>
-            ) : (
-              <div className='bg-muted/30 flex aspect-video w-1/2 shrink-0 items-center justify-center rounded-lg border border-dashed'>
-                <ImageIcon className='text-muted-foreground/50 size-5' />
-              </div>
-            )}
-            <div className='min-w-0'>
-              <p className='text-sm leading-snug font-medium text-pretty'>{project.name}</p>
-              <p className='text-muted-foreground mt-1 text-xs'>{project.year}</p>
-              <Link
-                href={contractorFirmRoute(projectId, contractor.id, 'projects')}
-                className='text-primary-strong mt-2 inline-flex items-center gap-1.5 text-xs font-medium'
+    <>
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.4, ease: revealEase }}
+        className='bg-card rounded-2xl border p-4'
+      >
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <h2 className='text-base font-semibold'>{t('featured')}</h2>
+          <AnimatePresence>
+            {filter ? (
+              <motion.button
+                type='button'
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                onClick={onClearFilter}
+                className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'
               >
-                {t('viewProject')}
-                <span className='inline-block transition-transform group-hover:translate-x-1'>→</span>
-              </Link>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </motion.section>
+                {filter}
+                <X className='size-3' />
+                <span className='sr-only'>{t('clearProjectFilter')}</span>
+              </motion.button>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        <motion.ul layout className='mt-3 grid gap-x-[3%] gap-y-4 sm:grid-cols-3'>
+          <AnimatePresence mode='popLayout'>
+            {projects.map((project) => (
+              <motion.li
+                layout
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                key={project.id}
+              >
+                <button
+                  type='button'
+                  onClick={() => setSelectedProject(project)}
+                  className='group flex w-full min-w-0 gap-3 text-left active:scale-[0.99]'
+                >
+                  {project.imageUrl ? (
+                    <div className='w-1/2 shrink-0 overflow-hidden rounded-lg'>
+                      <RevealPhoto
+                        src={project.imageUrl}
+                        alt={project.name}
+                        className='aspect-video size-full'
+                        sizes='(max-width: 768px) 40vw, 160px'
+                      />
+                    </div>
+                  ) : (
+                    <div className='bg-muted/30 flex aspect-video w-1/2 shrink-0 items-center justify-center rounded-lg border border-dashed'>
+                      <ImageIcon className='text-muted-foreground/50 size-5' />
+                    </div>
+                  )}
+                  <div className='min-w-0'>
+                    <p className='group-hover:text-primary text-sm leading-snug font-medium text-pretty transition-colors'>
+                      {project.name}
+                    </p>
+                    <p className='text-muted-foreground mt-1 text-xs'>{project.year}</p>
+                    <span className='text-primary-strong mt-2 inline-flex items-center gap-1.5 text-xs font-medium'>
+                      {t('viewProject')}
+                      <span className='inline-block transition-transform group-hover:translate-x-1'>→</span>
+                    </span>
+                  </div>
+                </button>
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </motion.ul>
+      </motion.section>
+
+      <Sheet open={Boolean(selectedProject)} onOpenChange={(open) => !open && setSelectedProject(null)}>
+        <SheetContent className='w-[92vw] sm:max-w-md'>
+          {selectedProject ? (
+            <>
+              <SheetHeader className='pr-10'>
+                <SheetTitle>{selectedProject.name}</SheetTitle>
+                <SheetDescription>
+                  {contractor.name}, {selectedProject.year}
+                </SheetDescription>
+              </SheetHeader>
+              {selectedProject.imageUrl ? (
+                <RevealPhoto
+                  src={selectedProject.imageUrl}
+                  alt={selectedProject.name}
+                  className='mx-4 aspect-4/3 rounded-xl'
+                  sizes='(max-width: 640px) 92vw, 448px'
+                />
+              ) : null}
+              {selectedProject.tags?.length ? (
+                <div className='flex flex-wrap gap-2 px-4'>
+                  {selectedProject.tags.map((tag) => (
+                    <span key={tag} className='bg-primary/10 text-primary-strong rounded-md px-2.5 py-1 text-xs'>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </SheetContent>
+      </Sheet>
+    </>
   )
 }
 
 /** Khối "Năng lực & xác minh" — bốn mục đã được SAVICO đối chiếu. */
 function LegalChecks({ contractor }: { contractor: Contractor }) {
   const t = useTranslations('contractors.firm')
+  const [hasEnteredViewport, setHasEnteredViewport] = useState(false)
+  const checks = [...contractor.legalChecks]
+  const fallbackChecks = [
+    t('team', { count: contractor.teamSize }),
+    t('warranty', { months: contractor.warrantyMonths })
+  ]
+
+  for (const fallback of fallbackChecks) {
+    if (checks.length >= 4) break
+    if (!checks.includes(fallback)) checks.push(fallback)
+  }
 
   return (
-    <section className='bg-card rounded-2xl border p-4'>
+    <motion.section
+      variants={revealItemVariants}
+      initial='hidden'
+      whileInView='show'
+      viewport={{ once: true, amount: 0.3 }}
+      onViewportEnter={() => setHasEnteredViewport(true)}
+      className='bg-card rounded-2xl border p-4'
+    >
       <h2 className='text-base font-semibold'>{t('legalTitle')}</h2>
       <motion.ul
         variants={revealContainerVariants}
-        initial='hidden'
-        whileInView='show'
-        viewport={{ once: true, amount: 0.4 }}
         className='mt-3 grid gap-x-[3%] gap-y-3 sm:grid-cols-2 lg:grid-cols-4'
       >
-        {contractor.legalChecks.map((check) => (
+        {checks.map((check, index) => (
           <motion.li
             variants={revealItemVariants}
             key={check}
             transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
             className='flex items-start gap-2.5 text-sm'
           >
-            <CircleCheck className='text-primary mt-0.5 size-4 shrink-0' />
+            <DrawnCircleCheck className='mt-0.5' delay={index * 0.12} active={hasEnteredViewport} />
             <span className='text-muted-foreground text-pretty'>{check}</span>
           </motion.li>
         ))}
       </motion.ul>
-    </section>
+    </motion.section>
   )
 }
 

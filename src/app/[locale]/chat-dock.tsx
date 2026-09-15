@@ -5,9 +5,11 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
-import { ChatPanel, useProactiveChat } from '@/features/chatbot'
+import { ChatPanel, useChatbotStore, useProactiveChat } from '@/features/chatbot'
+import { usePathname } from '@/i18n/navigation'
 import { useChatContextStore } from '@/shared/chat-context'
 import { AssistantDrawer } from '@/shared/components/assistant-drawer'
+import { ROUTES } from '@/shared/constants/routes'
 import { useDwellNudge, useIsScrolling, useModalOpen, usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 
@@ -75,8 +77,11 @@ function useFooterInView(): boolean {
  */
 export function ChatDock() {
   const t = useTranslations('assistant')
+  const pathname = usePathname()
+  const isGuide = pathname === ROUTES.GUIDE
   const open = useChatContextStore((s) => s.panelOpen)
   const setOpen = useChatContextStore((s) => s.setPanelOpen)
+  const setDraft = useChatbotStore((s) => s.setDraft)
 
   useProactiveChat()
 
@@ -92,24 +97,87 @@ export function ChatDock() {
 
   const [labelExpanded, setLabelExpanded] = useState(true)
   const [hovered, setHovered] = useState(false)
+  const [guideReady, setGuideReady] = useState(false)
+  const [guideNudge, setGuideNudge] = useState(false)
+  const [lastGuideVideoTitle, setLastGuideVideoTitle] = useState<string | null>(null)
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const guideInteracted = useRef(false)
 
   // Nhãn tự thu gọn sau vài giây đứng yên; rê chuột vào thì bung lại ngay và
   // hẹn giờ thu gọn lại từ đầu khi rời chuột.
   useEffect(() => {
     clearTimeout(collapseTimer.current)
-    if (hovered) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- bungs the label back open in response to the hover flag flipping, not a data sync
-      setLabelExpanded(true)
+    if (hovered || !isScrolling) {
+      collapseTimer.current = setTimeout(() => setLabelExpanded(true), hovered ? 0 : 650)
+    } else {
+      collapseTimer.current = setTimeout(() => setLabelExpanded(false), 60)
+    }
+    return () => clearTimeout(collapseTimer.current)
+  }, [hovered, isScrolling])
+
+  useEffect(() => {
+    if (!isGuide) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset route-scoped UI state on navigation
+      setGuideReady(false)
+      setGuideNudge(false)
       return
     }
-    collapseTimer.current = setTimeout(() => setLabelExpanded(false), 3200)
-    return () => clearTimeout(collapseTimer.current)
-  }, [hovered])
 
-  const nudgeMessage = nudgeSectionId
-    ? t(`nudge.${NUDGE_MESSAGE_KEY[nudgeSectionId as (typeof NUDGE_SECTIONS)[number]]}`)
-    : null
+    let dwellTimer: ReturnType<typeof setTimeout> | undefined
+    let hideTimer: ReturnType<typeof setTimeout> | undefined
+    const storageKey = 'savico.guide-assistant-nudge.shown'
+
+    const showOnce = (title?: string) => {
+      if (sessionStorage.getItem(storageKey)) return
+      sessionStorage.setItem(storageKey, '1')
+      if (title) setLastGuideVideoTitle(title)
+      setLabelExpanded(true)
+      setGuideNudge(true)
+      hideTimer = setTimeout(() => setGuideNudge(false), 6500)
+    }
+
+    const onReady = () => {
+      setGuideReady(true)
+      dwellTimer = setTimeout(() => {
+        if (!guideInteracted.current) showOnce()
+      }, 8000)
+    }
+    const onOpened = () => {
+      guideInteracted.current = true
+      clearTimeout(dwellTimer)
+      setGuideNudge(false)
+    }
+    const onCompleted = (event: Event) => {
+      guideInteracted.current = true
+      clearTimeout(dwellTimer)
+      const title = (event as CustomEvent<{ title?: string }>).detail?.title
+      showOnce(title)
+    }
+
+    window.addEventListener('savico:guide-ready', onReady)
+    window.addEventListener('savico:guide-video-opened', onOpened)
+    window.addEventListener('savico:guide-video-completed', onCompleted)
+    return () => {
+      clearTimeout(dwellTimer)
+      clearTimeout(hideTimer)
+      window.removeEventListener('savico:guide-ready', onReady)
+      window.removeEventListener('savico:guide-video-opened', onOpened)
+      window.removeEventListener('savico:guide-video-completed', onCompleted)
+    }
+  }, [isGuide])
+
+  useEffect(() => {
+    if (isScrolling && guideNudge) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- scrolling dismisses this transient nudge
+      setGuideNudge(false)
+    }
+  }, [guideNudge, isScrolling])
+
+  const nudgeMessage = guideNudge
+    ? t('nudge.guideNext')
+    : nudgeSectionId
+      ? t(`nudge.${NUDGE_MESSAGE_KEY[nudgeSectionId as (typeof NUDGE_SECTIONS)[number]]}`)
+      : null
 
   // Tự tắt nhắc sau vài giây nếu không ai bấm vào.
   useEffect(() => {
@@ -119,7 +187,7 @@ export function ChatDock() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ cần chạy lại khi có nhắc mới
   }, [nudgeMessage])
 
-  const hidden = modalOpen || !pastHero
+  const hidden = modalOpen || !pastHero || (isGuide && !guideReady)
   const collapsed = ctaInView
 
   return (
@@ -127,9 +195,9 @@ export function ChatDock() {
       <AnimatePresence>
         {!hidden ? (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            initial={{ opacity: 0, y: 40, scale: 0.55 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            exit={{ opacity: 0, y: 72, scale: 0.84 }}
             transition={{ type: 'spring', bounce: 0.5, duration: 0.5 }}
             className={cn(
               'fixed right-6 z-40 flex flex-col items-end gap-2 transition-[bottom] duration-300',
@@ -142,7 +210,16 @@ export function ChatDock() {
                 <motion.button
                   type='button'
                   onClick={() => {
-                    dismiss()
+                    if (guideNudge) {
+                      setDraft(
+                        lastGuideVideoTitle
+                          ? t('nudge.guidePrompt', { title: lastGuideVideoTitle })
+                          : t('nudge.guidePromptGeneral')
+                      )
+                      setGuideNudge(false)
+                    } else {
+                      dismiss()
+                    }
                     setOpen(true)
                   }}
                   initial={{ opacity: 0, y: 8, scale: 0.9 }}
@@ -168,10 +245,11 @@ export function ChatDock() {
               onMouseLeave={() => setHovered(false)}
               whileHover={{ scale: 1.08, y: -3 }}
               whileTap={{ scale: 0.92 }}
+              animate={open ? { opacity: 0, y: 72, scale: 0.84 } : { opacity: 1, y: 0, scale: 1 }}
               transition={{ type: 'spring', stiffness: 420, damping: 16 }}
               className={cn(
                 'group flex cursor-pointer flex-col items-center drop-shadow-lg',
-                open && 'pointer-events-none scale-90 opacity-0'
+                open && 'pointer-events-none'
               )}
             >
               {/* Một khối liền: tròn robot phía trên, nhãn cùng màu dính bên dưới

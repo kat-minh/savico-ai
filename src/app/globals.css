@@ -991,6 +991,18 @@
   }
 }
 
+/* M06: nét tick xác minh/so sánh được vẽ sau khi phần tử xuất hiện. */
+@keyframes firm-check-draw {
+  from {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Zoom rất chậm, không lặp giật — hero trang chủ (mục II.2, vùng 02). */
 @keyframes hero-photo-drift {
   0% {

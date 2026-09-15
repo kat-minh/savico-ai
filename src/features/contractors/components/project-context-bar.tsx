@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorBriefRoute } from '@/shared/constants/routes'
+import { cn } from '@/shared/lib/utils'
 import { shortAddress } from '../services/brief.service'
 import type { ProjectBrief } from '../types/contractor.types'
 
@@ -13,6 +14,8 @@ interface ProjectContextBarProps {
   brief?: ProjectBrief
   /** Ẩn nhãn phía trên tên dự án ở những màn đã có tiêu đề riêng. */
   compact?: boolean
+  /** Thu thanh về một hàng khi M05 dính dưới navigation trong lúc cuộn. */
+  condensed?: boolean
   /** Đè nhãn mặc định — S12 gọi khối này là "Dự án đang chọn". */
   label?: string
   /**
@@ -30,7 +33,7 @@ interface ProjectContextBarProps {
  * mỗi hình một kiểu). Dựng MỘT component để mọi màn trong luồng có cùng một mốc
  * neo: đang làm việc trên dự án nào, hồ sơ loại gì, sửa hồ sơ ở đâu.
  */
-export function ProjectContextBar({ brief, compact = false, label, aside }: ProjectContextBarProps) {
+export function ProjectContextBar({ brief, compact = false, condensed = false, label, aside }: ProjectContextBarProps) {
   const t = useTranslations('contractors.common')
   const tScale = useTranslations('contractors.scale')
 
@@ -39,20 +42,43 @@ export function ProjectContextBar({ brief, compact = false, label, aside }: Proj
   }
 
   return (
-    <section className='bg-card flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border px-4 py-3.5 sm:px-5'>
-      <span className='bg-accent text-primary-strong flex size-11 shrink-0 items-center justify-center rounded-xl'>
+    <section
+      className={cn(
+        'bg-card flex flex-wrap items-center rounded-2xl border transition-[padding,gap,border-radius] duration-300 ease-out motion-reduce:transition-none',
+        condensed ? 'gap-x-3 gap-y-2 px-3 py-2 sm:px-4' : 'gap-x-4 gap-y-3 px-4 py-3.5 sm:px-5'
+      )}
+    >
+      <span
+        className={cn(
+          'bg-accent text-primary-strong flex shrink-0 items-center justify-center transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none',
+          condensed ? 'size-8 rounded-lg' : 'size-11 rounded-xl'
+        )}
+      >
         <House className='size-5' />
       </span>
 
       <div className='min-w-0 flex-1'>
-        {compact ? null : (
-          <p className='text-muted-foreground text-[11px] font-medium tracking-wide uppercase'>
+        {!compact ? (
+          <p
+            aria-hidden={condensed}
+            className={cn(
+              'text-muted-foreground overflow-hidden text-[11px] font-medium tracking-wide uppercase transition-[max-height,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+              condensed ? 'max-h-0 -translate-y-1 opacity-0' : 'max-h-5 translate-y-0 opacity-100'
+            )}
+          >
             {label ?? t('seekingContractor')}
           </p>
-        )}
+        ) : null}
 
         <div className='flex flex-wrap items-center gap-2'>
-          <h2 className='truncate text-lg font-semibold'>{brief.name}</h2>
+          <h2
+            className={cn(
+              'truncate font-semibold transition-[font-size] duration-300 ease-out motion-reduce:transition-none',
+              condensed ? 'text-sm' : 'text-lg'
+            )}
+          >
+            {brief.name}
+          </h2>
           {brief.selfCreated ? (
             <span className='border-primary/40 text-primary-strong rounded-md border px-2 py-0.5 text-[11px] font-medium'>
               {t('selfCreated')}
@@ -62,7 +88,13 @@ export function ProjectContextBar({ brief, compact = false, label, aside }: Proj
 
         {/* Bản mô tả: "Nhà phố · Trệt + 1 lầu · 120 m² · P. Tân Lợi, Đắk Lắk" —
             quy mô đứng ngay sau loại công trình. */}
-        <p className='text-muted-foreground truncate text-xs'>
+        <p
+          aria-hidden={condensed}
+          className={cn(
+            'text-muted-foreground truncate overflow-hidden text-xs transition-[max-height,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+            condensed ? 'max-h-0 -translate-y-1 opacity-0' : 'max-h-5 translate-y-0 opacity-100'
+          )}
+        >
           {[brief.buildingType, tScale(brief.scale), `${brief.landArea} m²`, shortAddress(brief)]
             .filter(Boolean)
             .join(' · ')}

@@ -12,10 +12,11 @@ import {
   Gift,
   House,
   Info,
+  LoaderCircle,
   PaintRoller,
-  Trash2
+  X
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -25,8 +26,16 @@ import { toast } from 'sonner'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useCmsCollection } from '@/shared/cms'
-import { revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
+import { revealContainerVariants, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
@@ -60,6 +69,20 @@ const SCOPE_ICONS = {
   finishing: PaintRoller,
   interior: Armchair
 } as const
+
+const formColumnVariants = {
+  hidden: { opacity: 0, y: 16 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.38, ease: revealEase, staggerChildren: 0.055, delayChildren: 0.04 }
+  }
+}
+
+const formGroupVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: revealEase } }
+}
 
 /**
  * Dấu sao của trường bắt buộc — Hình S10 vẽ nó màu ĐỎ, tách hẳn khỏi màu nhãn.
@@ -174,6 +197,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
   const locale = useLocale() as Locale
   const router = useRouter()
   const searchParams = useSearchParams()
+  const reduceMotion = useReducedMotion()
 
   const { data: brief, isPending } = useBrief(projectId)
   const save = useSaveBrief(projectId)
@@ -181,6 +205,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
 
   const [documents, setDocuments] = useState<BriefDocument[]>([])
   const fileInput = useRef<HTMLInputElement>(null)
+  const documentChooseButton = useRef<HTMLButtonElement>(null)
 
   const schema = useMemo(
     () =>
@@ -233,6 +258,12 @@ export function BriefForm({ projectId }: BriefFormProps) {
   const loadedRef = useRef<string | null>(null)
   useEffect(() => {
     if (!brief || loadedRef.current === brief.updatedAt) return
+    // Autosave cập nhật cache ngay khi người dùng vừa rời ô. Không reset lại
+    // toàn form trong lúc họ đang nhập ô kế tiếp vì có thể làm mất ký tự mới.
+    if (loadedRef.current && form.formState.isDirty) {
+      loadedRef.current = brief.updatedAt
+      return
+    }
     loadedRef.current = brief.updatedAt
     setDocuments(brief.documents)
     form.reset({
@@ -252,9 +283,11 @@ export function BriefForm({ projectId }: BriefFormProps) {
   }, [brief, form, locale])
 
   // Con trỏ tự vào "Tên dự án" khi mở một hồ sơ TRẮNG (mục 4) — hồ sơ đã có
-  // sẵn tên thì để yên, không cướp tiêu điểm của khách đang đọc lại.
+  // sẵn tên thì để yên, không cướp tiêu điểm của khách đang đọc lại. Chỉ làm
+  // trên máy tính để không tự bật bàn phím ảo ngay khi mở trang trên mobile.
   useEffect(() => {
-    if (!isPending && !brief?.name) {
+    const desktop = window.matchMedia('(min-width: 768px) and (pointer: fine)').matches
+    if (desktop && !isPending && !brief?.name) {
       form.setFocus('name')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ chạy một lần khi hồ sơ vừa tải xong, không phải mỗi lần `brief`/`form` đổi tham chiếu
@@ -275,17 +308,30 @@ export function BriefForm({ projectId }: BriefFormProps) {
     window.setTimeout(() => setFlashGroup(null), 900)
     if (focus === 'site') form.setFocus('name')
     else if (focus === 'needs') form.setFocus('scopeNote')
+    else if (focus === 'documents') documentChooseButton.current?.focus()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ chạy một lần khi trang vừa tải xong với ?focus=…, không phải mỗi lần `form`/`searchParams` đổi tham chiếu
   }, [isPending])
 
   /** "Đã lưu nháp - 12:01" hiện cạnh tiêu đề rồi mờ đi (mục 2). */
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null)
-  const handleFormBlur = () => {
+  const lastSavedPayload = useRef<string | null>(null)
+  const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
+    const nextTarget = event.relatedTarget
+    if (nextTarget instanceof HTMLElement && nextTarget.closest('[data-brief-navigation], [data-brief-submit]')) {
+      return
+    }
     if (!form.formState.isDirty) return
-    save.mutate(toPayload(form.getValues()), {
+    const payload = toPayload(form.getValues())
+    const signature = JSON.stringify(payload)
+    if (signature === lastSavedPayload.current) return
+    lastSavedPayload.current = signature
+    save.mutate(payload, {
       onSuccess: () => {
         setDraftSavedAt(new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date()))
         window.setTimeout(() => setDraftSavedAt(null), 2500)
+      },
+      onError: () => {
+        lastSavedPayload.current = null
       }
     })
   }
@@ -297,7 +343,9 @@ export function BriefForm({ projectId }: BriefFormProps) {
   const [dragActive, setDragActive] = useState(false)
   const [dropError, setDropError] = useState<string | null>(null)
   const [dropShake, setDropShake] = useState(false)
+  const [dropAcceptedPulse, setDropAcceptedPulse] = useState(false)
   const [pendingUploads, setPendingUploads] = useState<{ id: string; name: string }[]>([])
+  const dropAcceptedTimer = useRef<number | null>(null)
 
   useEffect(() => {
     if (!dropError) return
@@ -305,13 +353,24 @@ export function BriefForm({ projectId }: BriefFormProps) {
     return () => window.clearTimeout(timer)
   }, [dropError])
 
+  useEffect(
+    () => () => {
+      if (dropAcceptedTimer.current) window.clearTimeout(dropAcceptedTimer.current)
+    },
+    []
+  )
+
   /** Rung ô thiếu đầu tiên + nút khi bấm "Tiếp tục" lúc còn thiếu (mục 7). */
   const [shakeField, setShakeField] = useState<string | null>(null)
   const [buttonEffect, setButtonEffect] = useState<'shake' | 'breathe' | null>(null)
+  const [leavePromptOpen, setLeavePromptOpen] = useState(false)
+  const [pageTransition, setPageTransition] = useState<'back' | 'forward' | null>(null)
 
   const [nameVal, buildingTypeVal, landAreaVal, provinceVal, wardVal, streetVal, budgetVal, scopeNoteVal] =
     form.watch(REQUIRED_FIELD_ORDER)
   const scope = form.watch('scope')
+  const siteCondition = form.watch('siteCondition')
+  const scale = form.watch('scale')
   const filledRequiredCount = [
     nameVal,
     buildingTypeVal,
@@ -323,6 +382,15 @@ export function BriefForm({ projectId }: BriefFormProps) {
     scopeNoteVal
   ].filter(Boolean).length
   const requiredFilled = filledRequiredCount === REQUIRED_FIELD_ORDER.length
+  const progressFilledCount =
+    filledRequiredCount + Number(Boolean(siteCondition)) + Number(Boolean(scale)) + Number(Boolean(scope))
+  const requiredProgress = progressFilledCount / (REQUIRED_FIELD_ORDER.length + 3)
+  const hasUserData =
+    Boolean(
+      nameVal || buildingTypeVal || landAreaVal || provinceVal || wardVal || streetVal || budgetVal || scopeNoteVal
+    ) ||
+    documents.length > 0 ||
+    form.formState.isDirty
 
   /** Nút "Tiếp tục" thở một nhịp ngay khi VỪA đủ trường bắt buộc (mục 7). */
   const wasRequiredFilledRef = useRef(false)
@@ -362,9 +430,28 @@ export function BriefForm({ projectId }: BriefFormProps) {
     save.mutate(toPayload(values), {
       onSuccess: () => {
         window.sessionStorage.setItem(BRIEF_STEP_TRANSITION_KEY, projectId)
-        router.push(contractorReviewRoute(projectId))
+        setPageTransition('forward')
+        window.setTimeout(() => router.push(contractorReviewRoute(projectId)), reduceMotion ? 0 : 240)
       }
     })
+  }
+
+  const navigateBack = () => {
+    setLeavePromptOpen(false)
+    setPageTransition('back')
+    window.setTimeout(() => router.push(ROUTES.CONTRACTORS), reduceMotion ? 0 : 220)
+  }
+
+  const requestBack = () => {
+    if (hasUserData) {
+      setLeavePromptOpen(true)
+      return
+    }
+    navigateBack()
+  }
+
+  const saveDraftAndLeave = () => {
+    save.mutate(toPayload(form.getValues()), { onSuccess: navigateBack })
   }
 
   /** Bấm "Tiếp tục" khi còn thiếu trường bắt buộc (mục 7). */
@@ -413,8 +500,16 @@ export function BriefForm({ projectId }: BriefFormProps) {
       window.setTimeout(() => setDropShake(false), 450)
     }
 
-    const fresh = next.filter((doc) => !documents.some((item) => item.id === doc.id))
+    const fresh = next.filter(
+      (doc) => !documents.some((item) => item.id === doc.id) && !pendingUploads.some((item) => item.id === doc.id)
+    )
     if (fresh.length === 0) return
+
+    // Giữ viền xanh ngay sau khi nhận tệp, đồng thời cho vùng thả thở và icon
+    // nhích lên sau một nhịp để xác nhận thao tác trước khi thanh tiến trình chạy.
+    setDropAcceptedPulse(true)
+    if (dropAcceptedTimer.current) window.clearTimeout(dropAcceptedTimer.current)
+    dropAcceptedTimer.current = window.setTimeout(() => setDropAcceptedPulse(false), 560)
 
     // Thanh tiến trình xanh trước khi dòng tệp thật xuất hiện (mục 6) — không
     // có upload thật để theo dõi (lưu cục bộ), nên đây là một nhịp cố định đủ
@@ -434,29 +529,32 @@ export function BriefForm({ projectId }: BriefFormProps) {
     )
   }
 
+  const returningToGroup = Boolean(searchParams.get('focus'))
+  const hasFilesInDropzone = documents.length > 0 || pendingUploads.length > 0
+
   return (
-    <div className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'>
+    <motion.div
+      initial={reduceMotion ? false : returningToGroup ? { opacity: 0, x: -32 } : { opacity: 0, y: 22 }}
+      animate={pageTransition === 'back' ? { opacity: 0, x: reduceMotion ? 0 : 36 } : { opacity: 1, x: 0, y: 0 }}
+      transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
+      className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'
+    >
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
         className='flex flex-wrap items-center gap-3'
       >
-        <Link
-          href={ROUTES.CONTRACTORS}
-          onClick={(event) => {
-            if (!form.formState.isDirty) return
-            event.preventDefault()
-            if (window.confirm(t('leaveConfirm'))) {
-              router.push(ROUTES.CONTRACTORS)
-            }
-          }}
+        <button
+          type='button'
+          data-brief-navigation
+          onClick={requestBack}
           // Hình S10: link "Quay lại lựa chọn" màu XANH thương hiệu, không phải chữ mờ.
           className='text-primary-strong hover:text-primary inline-flex items-center gap-1.5 text-sm font-medium'
         >
           <ArrowLeft className='size-4' />
           {t('back')}
-        </Link>
+        </button>
         <motion.span
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -466,10 +564,42 @@ export function BriefForm({ projectId }: BriefFormProps) {
           <Gift className='size-3.5' />
           {t('badge')}
         </motion.span>
+        <motion.button
+          type='button'
+          data-brief-navigation
+          onClick={requestBack}
+          whileHover={reduceMotion ? undefined : { rotate: 90, scale: 1.04 }}
+          whileTap={{ scale: 0.94 }}
+          aria-label={t('close')}
+          className='bg-foreground text-background ml-auto flex size-9 items-center justify-center rounded-full shadow-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none'
+        >
+          <X className='size-4' />
+        </motion.button>
       </motion.div>
 
+      <Dialog open={leavePromptOpen} onOpenChange={setLeavePromptOpen}>
+        <DialogContent showCloseButton={false} className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle>{t('leaveTitle')}</DialogTitle>
+            <DialogDescription>{t('leaveDescription')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className='sm:flex-wrap'>
+            <Button type='button' variant='ghost' onClick={() => setLeavePromptOpen(false)}>
+              {t('keepEditing')}
+            </Button>
+            <Button type='button' variant='outline' onClick={navigateBack}>
+              {t('leaveWithoutSaving')}
+            </Button>
+            <Button type='button' onClick={saveDraftAndLeave} disabled={save.isPending}>
+              {save.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
+              {t('saveDraftAndLeave')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <motion.header
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.05, ease: revealEase }}
         className='space-y-1'
@@ -494,13 +624,19 @@ export function BriefForm({ projectId }: BriefFormProps) {
         <p className='text-muted-foreground text-pretty'>{t('subtitle')}</p>
       </motion.header>
 
-      <BriefSteps current={1} progress={filledRequiredCount / REQUIRED_FIELD_ORDER.length} />
+      <BriefSteps current={1} progress={requiredProgress} />
 
       <Form {...form}>
         {/* Hình S10: TOÀN BỘ form nằm trong MỘT khung bo góc — hai cột, khối tài
             liệu và cả hàng nút "Lưu nháp / Tiếp tục" đều ở trong đó. Bản trước
             tách thành ba thẻ rời rồi để hàng nút trôi bên ngoài. */}
-        <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} onBlur={handleFormBlur} className='space-y-4'>
+        <motion.form
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+          onBlur={handleFormBlur}
+          animate={pageTransition === 'forward' ? { opacity: 0, x: reduceMotion ? 0 : -40 } : { opacity: 1, x: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
+          className='space-y-4'
+        >
           <section className='bg-card rounded-2xl border p-6'>
             {/* Hình S10: giữa hai cột có ĐƯỜNG KẺ DỌC. Dựng bằng `border-l`
                 trên cột phải + lề hai bên, thay vì `gap-x` trơn. */}
@@ -514,17 +650,17 @@ export function BriefForm({ projectId }: BriefFormProps) {
                   cột phải nhận thêm `delayChildren` riêng bên dưới. */}
               <motion.div
                 id='brief-group-site'
-                variants={revealItemVariants}
+                variants={formColumnVariants}
                 className='relative isolate space-y-4 lg:pr-10'
               >
                 <FlashOverlay active={flashGroup === 'site'} />
-                <div>
+                <motion.div variants={formGroupVariants}>
                   {/* Hình S10: tiêu đề hai cột đều IN HOA. */}
                   <h2 className='text-sm font-semibold tracking-wide uppercase'>{t('site.title')}</h2>
                   <p className='text-muted-foreground mt-0.5 text-xs'>{t('site.requiredHint')}</p>
-                </div>
+                </motion.div>
 
-                <div className='grid gap-4 sm:grid-cols-2'>
+                <motion.div variants={formGroupVariants} className='grid gap-4 sm:grid-cols-2'>
                   <ShakeField id='brief-field-name' active={shakeField === 'name'}>
                     <FormField
                       control={form.control}
@@ -600,102 +736,108 @@ export function BriefForm({ projectId }: BriefFormProps) {
                       )}
                     />
                   </ShakeField>
-                </div>
+                </motion.div>
 
-                <ShakeField id='brief-field-landArea' active={shakeField === 'landArea'}>
+                <motion.div variants={formGroupVariants}>
+                  <ShakeField id='brief-field-landArea' active={shakeField === 'landArea'}>
+                    <FormField
+                      control={form.control}
+                      name='landArea'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t('site.landArea')}
+                            <Req />
+                          </FormLabel>
+                          <FormControl>
+                            <div className='relative'>
+                              <Input
+                                inputMode='numeric'
+                                placeholder='120'
+                                name={field.name}
+                                ref={field.ref}
+                                value={field.value}
+                                onChange={(event) => {
+                                  field.onChange(event)
+                                  setAreaOverHint(false)
+                                }}
+                                onBlur={(event) => {
+                                  field.onBlur()
+                                  setAreaOverHint(event.target.value.replace(/\D/g, '').length >= 4)
+                                }}
+                                className='pr-10'
+                              />
+                              {/* "m²" mờ cuối ô (mục 4). */}
+                              <span
+                                aria-hidden
+                                className='text-muted-foreground pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm'
+                              >
+                                {t('site.areaSuffix')}
+                              </span>
+                            </div>
+                          </FormControl>
+                          <AnimatePresence>
+                            {areaOverHint ? (
+                              <motion.p
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className='text-warning-strong overflow-hidden text-xs'
+                              >
+                                {t('site.landAreaConfirm', { value: field.value })}
+                              </motion.p>
+                            ) : null}
+                          </AnimatePresence>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </ShakeField>
+                </motion.div>
+
+                <motion.div variants={formGroupVariants}>
                   <FormField
                     control={form.control}
-                    name='landArea'
+                    name='siteCondition'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          {t('site.landArea')}
+                          {t('site.condition')}
                           <Req />
                         </FormLabel>
-                        <FormControl>
-                          <div className='relative'>
-                            <Input
-                              inputMode='numeric'
-                              placeholder='120'
-                              name={field.name}
-                              ref={field.ref}
-                              value={field.value}
-                              onChange={(event) => {
-                                field.onChange(event)
-                                setAreaOverHint(false)
-                              }}
-                              onBlur={(event) => {
-                                field.onBlur()
-                                setAreaOverHint(event.target.value.replace(/\D/g, '').length > 4)
-                              }}
-                              className='pr-10'
-                            />
-                            {/* "m²" mờ cuối ô (mục 4). */}
-                            <span
-                              aria-hidden
-                              className='text-muted-foreground pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm'
-                            >
-                              {t('site.areaSuffix')}
-                            </span>
-                          </div>
-                        </FormControl>
-                        <AnimatePresence>
-                          {areaOverHint ? (
-                            <motion.p
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className='text-warning-strong overflow-hidden text-xs'
-                            >
-                              {t('site.landAreaConfirm', { value: field.value })}
-                            </motion.p>
-                          ) : null}
-                        </AnimatePresence>
+                        <ChoiceRow
+                          options={SITE_CONDITIONS.map((value) => ({ value, label: tCondition(value) }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </ShakeField>
+                </motion.div>
 
-                <FormField
-                  control={form.control}
-                  name='siteCondition'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('site.condition')}
-                        <Req />
-                      </FormLabel>
-                      <ChoiceRow
-                        options={SITE_CONDITIONS.map((value) => ({ value, label: tCondition(value) }))}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <motion.div variants={formGroupVariants}>
+                  <FormField
+                    control={form.control}
+                    name='scale'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('site.scale')}
+                          <Req />
+                        </FormLabel>
+                        <ChoiceRow
+                          options={PROJECT_SCALES.map((value) => ({ value, label: tScale(value) }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </motion.div>
 
-                <FormField
-                  control={form.control}
-                  name='scale'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('site.scale')}
-                        <Req />
-                      </FormLabel>
-                      <ChoiceRow
-                        options={PROJECT_SCALES.map((value) => ({ value, label: tScale(value) }))}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <fieldset className='space-y-3'>
+                <motion.fieldset variants={formGroupVariants} className='space-y-3'>
                   <legend className='text-sm font-medium'>
                     {t('site.address')}
                     <Req />
@@ -805,9 +947,9 @@ export function BriefForm({ projectId }: BriefFormProps) {
                   </ShakeField>
 
                   <p className='text-muted-foreground text-xs'>{t('site.addressHint')}</p>
-                </fieldset>
+                </motion.fieldset>
 
-                <div className='grid gap-4 sm:grid-cols-2'>
+                <motion.div variants={formGroupVariants} className='grid gap-4 sm:grid-cols-2'>
                   <ShakeField id='brief-field-budget' active={shakeField === 'budget'}>
                     <FormField
                       control={form.control}
@@ -842,7 +984,9 @@ export function BriefForm({ projectId }: BriefFormProps) {
                                 exit={{ opacity: 0 }}
                                 className='text-muted-foreground text-xs'
                               >
-                                {t('site.budgetApprox', { value: formatBudgetShort(parseAmount(field.value), locale) })}
+                                {t('site.budgetApprox', {
+                                  value: formatBudgetShort(parseAmount(field.value), locale)
+                                })}
                               </motion.p>
                             ) : null}
                           </AnimatePresence>
@@ -876,9 +1020,13 @@ export function BriefForm({ projectId }: BriefFormProps) {
                       </FormItem>
                     )}
                   />
-                </div>
+                </motion.div>
 
-                <div id='brief-group-documents' className='relative isolate space-y-3 pt-2'>
+                <motion.div
+                  id='brief-group-documents'
+                  variants={formGroupVariants}
+                  className='relative isolate space-y-3 pt-2'
+                >
                   <FlashOverlay active={flashGroup === 'documents'} />
                   {/* Hình S10: khối này ở ĐÁY CỘT TRÁI, ngay dưới "Ngân sách dự
                     kiến" — không phải một thẻ riêng ở cột phải. */}
@@ -891,18 +1039,24 @@ export function BriefForm({ projectId }: BriefFormProps) {
 
                   <motion.div
                     animate={
-                      dropShake
-                        ? { x: [0, -6, 6, -4, 4, 0], scale: 1 }
-                        : dragActive
-                          ? { scale: [1, 1.015, 1], x: 0 }
-                          : { scale: 1, x: 0 }
+                      reduceMotion
+                        ? { scale: 1, x: 0 }
+                        : dropShake
+                          ? { x: [0, -6, 6, -4, 4, 0], scale: 1 }
+                          : dragActive
+                            ? { scale: [1, 1.015, 1], x: 0 }
+                            : dropAcceptedPulse
+                              ? { scale: [1, 1.012, 1], x: 0 }
+                              : { scale: 1, x: 0 }
                     }
                     transition={
                       dropShake
                         ? { duration: 0.4 }
                         : dragActive
-                          ? { duration: 1.2, repeat: Infinity }
-                          : { duration: 0.2 }
+                          ? { duration: 0.7, ease: revealEase }
+                          : dropAcceptedPulse
+                            ? { duration: reduceMotion ? 0 : 0.46, ease: revealEase }
+                            : { duration: 0.2 }
                     }
                     onDragOver={(event) => {
                       event.preventDefault()
@@ -916,17 +1070,23 @@ export function BriefForm({ projectId }: BriefFormProps) {
                     }}
                     className={cn(
                       'flex flex-wrap items-center gap-3 rounded-xl border border-dashed p-4 transition-colors',
-                      dragActive && 'border-primary bg-accent/40'
+                      (dragActive || hasFilesInDropzone) && 'border-primary',
+                      dragActive && 'bg-accent/40'
                     )}
                   >
-                    <span
-                      className={cn(
-                        'bg-accent text-primary flex size-10 shrink-0 items-center justify-center rounded-lg transition-transform duration-200',
-                        dragActive && '-translate-y-1'
-                      )}
+                    <motion.span
+                      animate={
+                        reduceMotion ? { y: 0 } : dropAcceptedPulse ? { y: [0, -5, 0] } : { y: dragActive ? -4 : 0 }
+                      }
+                      transition={
+                        dropAcceptedPulse
+                          ? { duration: 0.4, delay: 0.1, ease: revealEase }
+                          : { duration: 0.2, ease: revealEase }
+                      }
+                      className='bg-accent text-primary flex size-10 shrink-0 items-center justify-center rounded-lg'
                     >
                       <FileUp className='size-5' />
-                    </span>
+                    </motion.span>
                     <div className='min-w-0 flex-1'>
                       <p className='text-sm font-medium'>{t('documents.dropzone')}</p>
                       <p className='text-muted-foreground text-xs'>{t('documents.formats')}</p>
@@ -942,7 +1102,13 @@ export function BriefForm({ projectId }: BriefFormProps) {
                         event.target.value = ''
                       }}
                     />
-                    <Button type='button' variant='outline' size='sm' onClick={() => fileInput.current?.click()}>
+                    <Button
+                      ref={documentChooseButton}
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={() => fileInput.current?.click()}
+                    >
                       {t('documents.choose')}
                     </Button>
                   </motion.div>
@@ -966,36 +1132,37 @@ export function BriefForm({ projectId }: BriefFormProps) {
                       <AnimatePresence initial={false}>
                         {pendingUploads.map((upload) => (
                           <motion.li
-                            key={upload.id}
-                            initial={{ opacity: 0, y: -8 }}
+                            key={`pending-${upload.id}`}
+                            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
+                            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
                             className='overflow-hidden rounded-lg border px-3 py-2'
                           >
                             <span className='block truncate text-sm'>{upload.name}</span>
                             <span className='bg-muted mt-1.5 block h-1 overflow-hidden rounded-full'>
                               <motion.span
-                                initial={{ width: '0%' }}
-                                animate={{ width: '100%' }}
-                                transition={{ duration: 0.6, ease: 'easeOut' }}
-                                className='bg-primary block h-full rounded-full'
+                                initial={reduceMotion ? false : { scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
+                                transition={{ duration: reduceMotion ? 0 : 0.6, ease: 'easeOut' }}
+                                className='bg-primary block h-full origin-left rounded-full'
                               />
                             </span>
                           </motion.li>
                         ))}
                         {documents.map((document) => (
                           <motion.li
-                            key={document.id}
+                            key={`document-${document.id}`}
                             layout
-                            initial={{ opacity: 0, y: -8 }}
+                            initial={reduceMotion ? false : { opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className='flex items-center gap-3 rounded-lg border px-3 py-2'
+                            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0, scale: 0.98 }}
+                            className='flex origin-top items-center gap-3 overflow-hidden rounded-lg border px-3 py-2'
                           >
                             <motion.span
-                              initial={{ scale: 0, opacity: 0 }}
+                              initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
                               animate={{ scale: 1, opacity: 1 }}
-                              transition={{ type: 'spring', bounce: 0.6, delay: 0.1 }}
+                              transition={reduceMotion ? { duration: 0 } : { type: 'spring', bounce: 0.6, delay: 0.1 }}
                               className='text-primary shrink-0'
                             >
                               <CheckCircle2 className='size-4' />
@@ -1010,21 +1177,24 @@ export function BriefForm({ projectId }: BriefFormProps) {
                               }
                               className='text-muted-foreground hover:text-destructive transition-colors'
                             >
-                              <Trash2 className='size-4' />
+                              <X className='size-3.5' />
                             </button>
                           </motion.li>
                         ))}
                       </AnimatePresence>
                     </ul>
                   ) : null}
-                </div>
+                </motion.div>
               </motion.div>
 
               {/* Cột phải — Nhu cầu thi công. Hiện SAU cột trái (mục 4) nhờ
                   `staggerChildren` của container cha. */}
               <motion.div
                 id='brief-group-needs'
-                variants={revealItemVariants}
+                variants={{
+                  hidden: { opacity: 0, y: 18 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.42, ease: revealEase } }
+                }}
                 className='relative isolate flex flex-col space-y-4 lg:border-l lg:pl-10'
               >
                 <FlashOverlay active={flashGroup === 'needs'} />
@@ -1132,7 +1302,16 @@ export function BriefForm({ projectId }: BriefFormProps) {
                         </FormLabel>
                         <FormControl>
                           <div className='relative flex-1'>
-                            <Textarea className='min-h-40 size-full' placeholder='' {...field} />
+                            <Textarea
+                              placeholder=''
+                              {...field}
+                              onInput={(event) => {
+                                const textarea = event.currentTarget
+                                textarea.style.height = 'auto'
+                                textarea.style.height = `${textarea.scrollHeight}px`
+                              }}
+                              className='min-h-40 max-h-[32rem] w-full resize-none overflow-y-auto'
+                            />
                             {/* Chữ gợi ý đổi theo phạm vi vừa chọn, hiện chéo,
                                 chỉ khi ô còn trống (mục 5). */}
                             {field.value.length === 0 ? (
@@ -1143,9 +1322,9 @@ export function BriefForm({ projectId }: BriefFormProps) {
                                 <AnimatePresence mode='sync'>
                                   <motion.span
                                     key={scope}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
+                                    initial={{ opacity: 0, x: 8, y: -4 }}
+                                    animate={{ opacity: 1, x: 0, y: 0 }}
+                                    exit={{ opacity: 0, x: -8, y: 4 }}
                                     transition={{ duration: 0.25 }}
                                     className='text-muted-foreground absolute inset-0 px-3 py-2 text-base text-pretty md:text-sm'
                                   >
@@ -1183,7 +1362,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
                 yêu cầu: hồ sơ vốn được ghi lại ngay khi bấm "Tiếp tục" và vẫn
                 nằm ở trạng thái nháp cho tới khi xác nhận ở Bước 2, nên nút đó
                 chỉ là một đường ra thứ hai làm loãng thao tác chính. */}
-            <div className='mt-8 flex flex-wrap items-center justify-end gap-3 border-t pt-6'>
+            <div className='bg-card/95 sticky bottom-2 z-20 mt-8 flex flex-wrap items-center justify-end gap-3 border-t pt-4 pb-2 backdrop-blur-sm sm:static sm:bg-transparent sm:pt-6 sm:pb-0 sm:backdrop-blur-none'>
               <motion.span
                 animate={
                   buttonEffect === 'shake'
@@ -1195,9 +1374,15 @@ export function BriefForm({ projectId }: BriefFormProps) {
                 transition={{ duration: buttonEffect === 'breathe' ? 0.5 : 0.4 }}
                 className='inline-block'
               >
-                <Button type='submit' disabled={save.isPending} className={cn(!requiredFilled && 'opacity-60')}>
+                <Button
+                  type='submit'
+                  data-brief-submit
+                  disabled={save.isPending || pageTransition === 'forward'}
+                  className={cn('max-sm:w-full', !requiredFilled && 'opacity-60')}
+                >
+                  {save.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
                   {t('continue')}
-                  <ArrowRight className='size-4' />
+                  {!save.isPending ? <ArrowRight className='size-4' /> : null}
                 </Button>
               </motion.span>
             </div>
@@ -1212,9 +1397,9 @@ export function BriefForm({ projectId }: BriefFormProps) {
               {t('noticeAction')}
             </Link>
           </p>
-        </form>
+        </motion.form>
       </Form>
-    </div>
+    </motion.div>
   )
 }
 

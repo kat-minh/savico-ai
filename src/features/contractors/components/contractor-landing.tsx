@@ -26,9 +26,9 @@ import {
   Users,
   X
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -43,6 +43,7 @@ import { formatNumber } from '@/shared/utils'
 import {
   CONSTRUCTION_SCOPES,
   CONTRACTOR_SORTS,
+  MATCHES_PINNED_CONTRACTOR_KEY,
   PROJECT_SCALES,
   SEARCH_RADII,
   START_WINDOWS
@@ -135,6 +136,24 @@ const COMPARE_ROWS = ['duration', 'scope', 'material', 'warranty', 'remark'] as 
  * chip của {@link ContractorStats} dùng ở S12/S13, nên dựng riêng thay vì nhồi
  * thêm một biến thể `variant` vào component kia.
  */
+function AnimatedFactValue({ value, format }: { value: number; format: (value: number) => string }) {
+  const reduceMotion = useReducedMotion()
+  const progress = useMotionValue(reduceMotion ? value : 0)
+  const text = useTransform(progress, format)
+
+  useEffect(() => {
+    if (reduceMotion) {
+      progress.set(value)
+      return
+    }
+    progress.set(0)
+    const controls = animate(progress, value, { duration: 0.72, ease: 'easeOut' })
+    return () => controls.stop()
+  }, [progress, reduceMotion, value])
+
+  return <motion.span>{text}</motion.span>
+}
+
 function HeroContractorFacts({ contractor }: { contractor: Contractor }) {
   const t = useTranslations('contractors.landing.hero.card')
   const tCommon = useTranslations('contractors.common')
@@ -145,31 +164,38 @@ function HeroContractorFacts({ contractor }: { contractor: Contractor }) {
       key: 'distance',
       icon: MapPin,
       label: t('distance'),
-      value: t('distanceValue', { km: formatNumber(contractor.distanceKm, locale, { minimumFractionDigits: 1 }) })
+      numericValue: contractor.distanceKm,
+      format: (value: number) =>
+        t('distanceValue', { km: formatNumber(value, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })
     },
     {
       key: 'rating',
       icon: Star,
       label: t('rating'),
-      value: `${formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}/5`
+      numericValue: contractor.rating,
+      format: (value: number) =>
+        `${formatNumber(value, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}/5`
     },
     {
       key: 'completed',
       icon: Building2,
       label: t('completed'),
-      value: t('completedValue', { count: contractor.completedProjects })
+      numericValue: contractor.completedProjects,
+      format: (value: number) => t('completedValue', { count: Math.round(value) })
     },
     {
       key: 'similar',
       icon: CheckCircle2,
       label: t('similar'),
-      value: t('similarValue', { count: contractor.similarProjects })
+      numericValue: contractor.similarProjects,
+      format: (value: number) => t('similarValue', { count: Math.round(value) })
     },
     {
       key: 'survey',
       icon: Clock,
       label: t('survey'),
-      value: t('surveyValue', { hours: contractor.surveyWithinHours })
+      numericValue: contractor.surveyWithinHours,
+      format: (value: number) => t('surveyValue', { hours: Math.round(value) })
     },
     {
       key: 'status',
@@ -215,7 +241,7 @@ function HeroContractorFacts({ contractor }: { contractor: Contractor }) {
               )}
             >
               {row.key === 'rating' ? <Star className='text-warning size-[4cqi] shrink-0 fill-current' /> : null}
-              {row.value}
+              {'numericValue' in row ? <AnimatedFactValue value={row.numericValue} format={row.format} /> : row.value}
             </span>
           </span>
         </motion.li>
@@ -270,6 +296,7 @@ export function ContractorLanding() {
   const tGlobal = useTranslations('common')
 
   const locale = useLocale() as Locale
+  const reduceMotion = useReducedMotion()
 
   const { isAuthenticated } = useAuth()
   const openAuthDialog = useAuthDialogStore((s) => s.open)
@@ -285,7 +312,22 @@ export function ContractorLanding() {
    * site"; chưa thay thì để khung nét đứt như mọi chỗ chờ asset khác.
    */
   const mapImage = useCmsDocument('uiAssets')['map.contractors']?.trim()
-  const featured = CONTRACTORS_SEED[0]
+  const [featuredContractorId, setFeaturedContractorId] = useState(CONTRACTORS_SEED[0]?.id ?? '')
+  const featured = useMemo(
+    () => CONTRACTORS_SEED.find((contractor) => contractor.id === featuredContractorId) ?? CONTRACTORS_SEED[0],
+    [featuredContractorId]
+  )
+  const featuredHoverTimer = useRef<number | null>(null)
+  const rankingSectionRef = useRef<HTMLElement>(null)
+  const [rankingPulse, setRankingPulse] = useState(0)
+  const [leavingForBrief, setLeavingForBrief] = useState(false)
+
+  useEffect(
+    () => () => {
+      if (featuredHoverTimer.current) window.clearTimeout(featuredHoverTimer.current)
+    },
+    []
+  )
 
   // Thẻ "phù hợp nhất" ở hero chỉ MỞ KHOÁ số liệu khi tài khoản đã có ít nhất
   // một hồ sơ dự án — chưa có thì SAVICO không có gì để ghép, số liệu thật sẽ
@@ -312,8 +354,6 @@ export function ContractorLanding() {
     schedule: START_WINDOWS.map((key) => tStartWindow(key))
   }
 
-  const activeCriteriaCount = Object.values(criterionSelections).filter(Boolean).length
-
   const ranked = filterContractors(CONTRACTORS_SEED, { radiusKm, sort }).slice(0, 3)
 
   /**
@@ -327,39 +367,54 @@ export function ContractorLanding() {
   const showStickyNudge = nudgeSectionId === 'contractor-ranked-list'
 
   /** "Tạo hồ sơ" cần tài khoản: chưa đăng nhập thì mở popup đăng nhập trước. */
+  const createAndOpenBrief = () => {
+    setLeavingForBrief(true)
+    window.setTimeout(() => {
+      createBrief.mutate(undefined, { onError: () => setLeavingForBrief(false) })
+    }, 160)
+  }
+
   const startBrief = () => {
     if (!isAuthenticated) {
       // Đăng nhập xong thì chạy tiếp đúng việc người dùng đang định làm, không
       // bắt họ bấm lại "Tạo hồ sơ" lần nữa.
-      openAuthDialog('login', () => createBrief.mutate())
+      openAuthDialog('login', createAndOpenBrief)
       return
     }
-    createBrief.mutate()
+    createAndOpenBrief()
   }
 
-  /**
-   * "Xem nhà thầu" — bản mô tả S09: đi tới S12, và S12 CẦN CÓ HỒ SƠ DỰ ÁN.
-   *
-   * Có hồ sơ rồi thì mở thẳng danh sách đề xuất của hồ sơ gần nhất; chưa có thì
-   * phải dựng hồ sơ trước (không có địa chỉ và quy mô thì không xếp hạng được
-   * nhà thầu). Trước đây nút này gọi thẳng `startBrief`, nên mỗi lần bấm lại đẻ
-   * thêm một dự án rỗng và luôn rơi vào Bước 1 — không phải màn khách muốn xem.
-   */
-  const openContractorList = (contractorId?: string) => {
-    if (!isAuthenticated) {
-      openAuthDialog('login', () => openContractorList(contractorId))
+  /** "Xem nhà thầu" ở M01 chỉ cuộn tới danh sách công khai và loé đầu khối một lần. */
+  const scrollToContractors = () => {
+    dismissNudge()
+    rankingSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.setTimeout(() => setRankingPulse((value) => value + 1), 420)
+  }
+
+  const openContractorDetail = (contractorId: string) => {
+    dismissNudge()
+    router.push(contractorFirmRoute(CONTRACTOR_PREVIEW_ID, contractorId))
+  }
+
+  const chooseContractor = (contractorId: string) => {
+    dismissNudge()
+    const brief = briefs?.[0]
+    if (!hasBrief || !brief) {
+      startBrief()
       return
     }
-    // LUÔN mở ở chế độ xem thử, kể cả khi tài khoản đã có hồ sơ: "Xem nhà thầu"
-    // là xem hàng, không phải mở một dự án cụ thể. Tự nhảy vào hồ sơ gần nhất
-    // thì khách đang định xem lại thấy màn của một dự án mình không nhắc tới,
-    // kèm số lời mời đã dùng của dự án đó. Muốn gắn dự án thì bấm "Tạo hồ sơ dự
-    // án" ở dải nhắc, hộp thoại chọn dự án sẽ mở ra ngay tại đó.
-    router.push(
-      contractorId
-        ? contractorFirmRoute(CONTRACTOR_PREVIEW_ID, contractorId)
-        : contractorMatchesRoute(CONTRACTOR_PREVIEW_ID)
-    )
+    window.sessionStorage.setItem(MATCHES_PINNED_CONTRACTOR_KEY, contractorId)
+    router.push(contractorMatchesRoute(brief.id))
+  }
+
+  const previewFeaturedContractor = (contractorId: string) => {
+    if (featuredHoverTimer.current) window.clearTimeout(featuredHoverTimer.current)
+    featuredHoverTimer.current = window.setTimeout(() => setFeaturedContractorId(contractorId), 560)
+  }
+
+  const restoreBestContractor = () => {
+    if (featuredHoverTimer.current) window.clearTimeout(featuredHoverTimer.current)
+    featuredHoverTimer.current = window.setTimeout(() => setFeaturedContractorId(CONTRACTORS_SEED[0]?.id ?? ''), 120)
   }
 
   // Nhịp dọc đo trên Hình S09: các khoảng hở giữa hai khối liền nhau chỉ 12–14px
@@ -389,12 +444,22 @@ export function ContractorLanding() {
               - nút cao 56px, rộng tối thiểu 200px, cách nhau 32px.
               Bản đầu tiên (`text-[2.75rem]`/`text-lg`/`h-14`) thì ngược lại —
               khối chữ chỉ cao 16% bề ngang nội dung trong khi ảnh là 30%. */}
-          <motion.div variants={revealContainerVariants} initial='hidden' animate='show'>
+          <motion.div
+            variants={revealContainerVariants}
+            initial='hidden'
+            animate={leavingForBrief ? { opacity: 0, y: -24 } : 'show'}
+            transition={{ duration: 0.28, ease: revealEase }}
+          >
             <motion.h1
-              variants={revealItemVariants}
               className='text-primary-strong text-4xl leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
+              aria-label={t('hero.title')}
             >
-              {t('hero.title')}
+              <motion.span variants={revealItemVariants} className='block'>
+                {t('hero.titleLine1')}
+              </motion.span>
+              <motion.span variants={revealItemVariants} className='block'>
+                {t('hero.titleLine2')}
+              </motion.span>
             </motion.h1>
             {/* Hình S09: câu dẫn ngắt đúng BA dòng và rộng bằng ~88% cột chữ, hẹp
                 hơn tiêu đề một chút. Cỡ chữ ở đây đã hạ theo yêu cầu nên phải
@@ -420,7 +485,7 @@ export function ContractorLanding() {
                 size='lg'
                 variant='outline'
                 className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
-                onClick={() => openContractorList()}
+                onClick={scrollToContractors}
                 disabled={createBrief.isPending}
               >
                 {t('hero.viewContractors')}
@@ -471,52 +536,61 @@ export function ContractorLanding() {
                   className='border-primary/40 pointer-events-none absolute -inset-2 rounded-[1.25rem] border-2 border-dashed'
                 />
 
-                <div className='bg-card relative rounded-2xl border p-[5.9%] shadow-lg'>
-                  {/* Hình S09: khối đầu thẻ cao 27/135 = 20% bề ngang thẻ, do ô
+                <AnimatePresence mode='wait' initial={false}>
+                  <motion.div
+                    key={featured.id}
+                    initial={{ opacity: 0, x: 14, y: -10 }}
+                    animate={{ opacity: 1, x: 0, y: 0 }}
+                    exit={{ opacity: 0, x: -14, y: 10 }}
+                    transition={{ duration: 0.24, ease: revealEase }}
+                    className='bg-card relative rounded-2xl border p-[5.9%] shadow-lg'
+                  >
+                    {/* Hình S09: khối đầu thẻ cao 27/135 = 20% bề ngang thẻ, do ô
                       logo quyết định — nên ô logo đo theo % chứ không phải
                       `size-14` cố định, để thẻ giữ đúng tỉ lệ cao/rộng 0.93 ở
                       mọi khổ màn. */}
-                  <div className='flex items-center gap-[3.5%]'>
-                    <div className='aspect-square w-[22.8%] shrink-0'>
-                      <ContractorLogo contractor={featured} className='size-full rounded-2xl text-base' />
-                    </div>
-                    <div className='min-w-0 flex-1'>
-                      {/* Hình S09: sau tên nhà thầu KHÔNG có icon xác minh nào —
+                    <div className='flex items-center gap-[3.5%]'>
+                      <div className='aspect-square w-[22.8%] shrink-0'>
+                        <ContractorLogo contractor={featured} className='size-full rounded-2xl text-base' />
+                      </div>
+                      <div className='min-w-0 flex-1'>
+                        {/* Hình S09: sau tên nhà thầu KHÔNG có icon xác minh nào —
                           dấu tick chỉ xuất hiện ở thẻ danh sách S12 và header hồ
                           sơ S13. */}
-                      <p className='truncate text-[4.6cqi] font-semibold'>{featured.name}</p>
-                      {hasBrief ? (
-                        <motion.span
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ type: 'spring', bounce: 0.55, duration: 0.5, delay: 0.3 }}
-                          className='bg-brand-orange text-brand-orange-foreground relative mt-[2cqi] inline-flex items-center gap-[1.5cqi] rounded-full px-[3cqi] py-[1.2cqi] text-[3.1cqi] font-semibold'
-                        >
+                        <p className='truncate text-[4.6cqi] font-semibold'>{featured.name}</p>
+                        {hasBrief ? (
                           <motion.span
-                            aria-hidden
-                            initial={{ opacity: 0.8, scale: 1 }}
-                            animate={{ opacity: 0, scale: 1.6 }}
-                            transition={{ duration: 0.6, delay: 0.7, ease: revealEase }}
-                            className='bg-brand-orange absolute inset-0 -z-10 rounded-full'
-                          />
-                          <Star className='size-[3.4cqi] fill-current' />
-                          {t('hero.bestMatch')}
-                        </motion.span>
-                      ) : (
-                        <span className='text-muted-foreground mt-[2cqi] block text-[3.4cqi] text-pretty'>
-                          {t('hero.card.locked')}
-                        </span>
-                      )}
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ type: 'spring', bounce: 0.55, duration: 0.5, delay: 0.3 }}
+                            className='bg-brand-orange text-brand-orange-foreground relative mt-[2cqi] inline-flex items-center gap-[1.5cqi] rounded-full px-[3cqi] py-[1.2cqi] text-[3.1cqi] font-semibold'
+                          >
+                            <motion.span
+                              aria-hidden
+                              initial={{ opacity: 0.8, scale: 1 }}
+                              animate={{ opacity: 0, scale: 1.6 }}
+                              transition={{ duration: 0.6, delay: 0.7, ease: revealEase }}
+                              className='bg-brand-orange absolute inset-0 -z-10 rounded-full'
+                            />
+                            <Star className='size-[3.4cqi] fill-current' />
+                            {t('hero.bestMatch')}
+                          </motion.span>
+                        ) : (
+                          <span className='text-muted-foreground mt-[2cqi] block text-[3.4cqi] text-pretty'>
+                            {t('hero.card.locked')}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {hasBrief ? (
-                    <HeroContractorFacts contractor={featured} />
-                  ) : (
-                    <div className='pointer-events-none mt-[9.1%] opacity-40 select-none'>
-                      <HeroContractorFacts contractor={featured} />
-                    </div>
-                  )}
-                </div>
+                    {hasBrief ? (
+                      <HeroContractorFacts key={featured.id} contractor={featured} />
+                    ) : (
+                      <div className='pointer-events-none mt-[9.1%] opacity-40 select-none'>
+                        <HeroContractorFacts contractor={featured} />
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
             ) : null}
           </div>
@@ -536,10 +610,16 @@ export function ContractorLanding() {
           - Mỗi mục CANH GIỮA ô của nó: đo bốn cụm chữ ở x=27…103, 133…210,
             241…308, 331…428 — chia 424px thành 4 cột đều 106px thì cả bốn cụm
             đều nằm giữa cột của mình, không phải canh trái. */}
-      <section className={PAGE_CONTAINER}>
+      <motion.section
+        className={PAGE_CONTAINER}
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.5, ease: revealEase }}
+      >
         <motion.ul
           variants={revealContainerVariants}
-          initial='hidden'
+          initial={reduceMotion ? false : 'hidden'}
           whileInView='show'
           viewport={{ once: true, amount: 0.4 }}
           className='bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2 lg:grid-cols-4'
@@ -557,15 +637,22 @@ export function ContractorLanding() {
               variants={revealItemVariants}
               className='group flex items-center justify-center gap-3'
             >
-              <item.icon
-                className='text-primary size-7 shrink-0 transition-[transform,color] duration-200 group-hover:-translate-y-0.5 group-hover:text-primary-strong'
-                strokeWidth={1.5}
-              />
+              <motion.span
+                aria-hidden
+                initial={reduceMotion ? false : { strokeDashoffset: 64 }}
+                whileInView={{ strokeDashoffset: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.75, delay: 0.12, ease: revealEase }}
+                style={{ strokeDasharray: 64 }}
+                className='text-primary shrink-0 transition-[transform,color] duration-200 group-hover:-translate-y-0.5 group-hover:text-primary-strong'
+              >
+                <item.icon className='size-7' strokeWidth={1.5} />
+              </motion.span>
               <span className='text-sm font-medium text-pretty'>{t(`promises.${item.key}`)}</span>
             </motion.li>
           ))}
         </motion.ul>
-      </section>
+      </motion.section>
 
       {/* Tiêu chí + danh sách xếp hạng.
 
@@ -573,27 +660,17 @@ export function ContractorLanding() {
           khe 12px (2.8%), khung danh sách 160…436 (65.3%). Bản trước để cột
           trái 300px cứng (20% trên khổ 1480) nên tiêu đề khối bị gãy hai dòng
           còn khung phải thì rộng quá. */}
-      <section className={PAGE_CONTAINER}>
+      <motion.section
+        ref={rankingSectionRef}
+        className={cn(PAGE_CONTAINER, 'scroll-mt-24')}
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.12 }}
+        transition={{ duration: 0.45, ease: revealEase }}
+      >
         <div className='grid gap-6 lg:grid-cols-[31.8%_minmax(0,1fr)] lg:gap-x-[2.8%]'>
           <div>
-            <h2 className='text-primary-strong flex items-center gap-2 text-lg font-bold tracking-wide uppercase'>
-              {t('criteria.title')}
-              {/* Chấm xanh đếm số tiêu chí đã chọn — phóng vào khi từ 0 lên 1 (mục 5). */}
-              <AnimatePresence>
-                {activeCriteriaCount > 0 ? (
-                  <motion.span
-                    key='count'
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ type: 'spring', bounce: 0.6, duration: 0.4 }}
-                    className='bg-primary text-primary-foreground flex size-5 items-center justify-center rounded-full text-xs font-bold normal-case'
-                  >
-                    {activeCriteriaCount}
-                  </motion.span>
-                ) : null}
-              </AnimatePresence>
-            </h2>
+            <h2 className='text-primary-strong text-lg font-bold tracking-wide uppercase'>{t('criteria.title')}</h2>
             <ul className='mt-4 space-y-2'>
               {CRITERIA_ITEMS.map((item) => {
                 const open = openCriterion === item.key
@@ -613,7 +690,26 @@ export function ContractorLanding() {
                       {/* Hình S09: nhãn tiêu chí màu XANH thương hiệu, chỉ dòng
                           gợi ý bên dưới mới là chữ mờ. */}
                       <span className='text-primary-strong min-w-0 flex-1 text-sm font-medium'>
-                        {t(`criteria.${item.key}`)}
+                        <span className='flex items-center gap-2'>
+                          {t(`criteria.${item.key}`)}
+                          {/* Mỗi bộ lọc có bộ đếm riêng. Key không phụ thuộc option để đổi
+                              lựa chọn trong cùng bộ lọc không phát lại hiệu ứng phóng. */}
+                          <AnimatePresence initial={false}>
+                            {selected ? (
+                              <motion.span
+                                key={`criterion-count-${item.key}`}
+                                aria-hidden
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: 'spring', bounce: 0.6, duration: 0.4 }}
+                                className='bg-primary text-primary-foreground flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold'
+                              >
+                                1
+                              </motion.span>
+                            ) : null}
+                          </AnimatePresence>
+                        </span>
                         {item.key === 'type' ? (
                           <span className='text-muted-foreground block text-xs'>{t('criteria.typeHint')}</span>
                         ) : null}
@@ -657,11 +753,23 @@ export function ContractorLanding() {
                               <button
                                 key={option}
                                 type='button'
+                                aria-pressed={option === selected}
                                 onClick={() => {
-                                  setCriterionSelections((current) => ({ ...current, [item.key]: option }))
+                                  const shouldDeselect = option === selected
+                                  setCriterionSelections((current) => {
+                                    if (!shouldDeselect) return { ...current, [item.key]: option }
+
+                                    const next = { ...current }
+                                    delete next[item.key]
+                                    return next
+                                  })
                                   if (item.key === 'area') {
-                                    const km = SEARCH_RADII.find((value) => `${value} km` === option)
-                                    if (km) setRadiusKm(km)
+                                    if (shouldDeselect) {
+                                      setRadiusKm(50)
+                                    } else {
+                                      const km = SEARCH_RADII.find((value) => `${value} km` === option)
+                                      if (km) setRadiusKm(km)
+                                    }
                                   }
                                   setOpenCriterion(null)
                                 }}
@@ -685,7 +793,20 @@ export function ContractorLanding() {
             </ul>
           </div>
 
-          <div className='bg-card min-w-0 rounded-2xl border p-5'>
+          <div className='bg-card relative min-w-0 overflow-hidden rounded-2xl border p-5'>
+            <AnimatePresence>
+              {rankingPulse > 0 ? (
+                <motion.span
+                  key={rankingPulse}
+                  aria-hidden
+                  initial={{ opacity: 0, scaleX: 0.35 }}
+                  animate={{ opacity: [0, 0.8, 0], scaleX: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.75, ease: revealEase }}
+                  className='bg-accent pointer-events-none absolute inset-x-0 top-0 h-14 origin-center'
+                />
+              ) : null}
+            </AnimatePresence>
             {/* Hình S09: KHÔNG có tiêu đề "Nhà thầu tiêu biểu" — hàng tab nằm
                 ngay mép trên khung. Và bốn tab TRẢI ĐỀU hết bề ngang khung
                 (đo: bốn cụm chữ ở 175…212, 238…262, 287…333, 359…409 — khoảng
@@ -735,6 +856,10 @@ export function ContractorLanding() {
                   whileInView='show'
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ layout: { duration: 0.35, ease: revealEase } }}
+                  onMouseEnter={() => previewFeaturedContractor(contractor.id)}
+                  onMouseLeave={restoreBestContractor}
+                  onFocus={() => previewFeaturedContractor(contractor.id)}
+                  onBlur={restoreBestContractor}
                   className='group grid grid-cols-[10.1%_32.5%_13.7%_18.8%] items-center justify-between gap-x-4 gap-y-3 rounded-lg py-4 transition-colors max-sm:grid-cols-1 hover:bg-accent/30'
                 >
                   <ContractorLogo contractor={contractor} className='size-full aspect-square' />
@@ -786,12 +911,12 @@ export function ContractorLanding() {
                   <div className='flex flex-col gap-2'>
                     <Button
                       size='sm'
-                      onClick={() => openContractorList(contractor.id)}
+                      onClick={() => openContractorDetail(contractor.id)}
                       className='group-hover:brightness-110'
                     >
                       {t('ranking.detail')}
                     </Button>
-                    <Button size='sm' variant='outline' onClick={startBrief}>
+                    <Button size='sm' variant='outline' onClick={() => chooseContractor(contractor.id)}>
                       {t('ranking.choose')}
                     </Button>
                   </div>
@@ -812,7 +937,7 @@ export function ContractorLanding() {
             </p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Dừng lại đủ lâu ở danh sách xếp hạng mà chưa bấm gì → thanh nhắc
           trượt lên dính đáy màn (mục 7). Dùng `useDwellNudge` sẵn có (đang

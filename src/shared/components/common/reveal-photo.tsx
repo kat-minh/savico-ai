@@ -53,7 +53,8 @@ export function RevealPhoto({
         onLoad={() => setLoaded(true)}
         onError={onError}
         className={cn(
-          'object-cover transition-[opacity,filter,transform] duration-500 ease-out group-hover:scale-105',
+          'object-cover transition-[opacity,filter,transform] duration-500 ease-out',
+          !imageClassName && 'group-hover:scale-105',
           loaded ? 'opacity-100 blur-none' : 'opacity-0 blur-md',
           imageClassName
         )}

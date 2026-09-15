@@ -22,7 +22,7 @@ import {
   ROUTES
 } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { MAX_INVITATIONS } from '../constants/contractors.constants'
+import { MATCHES_PROJECT_CHANGED_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBriefSummaries } from '../hooks/use-brief-summaries'
 import { useCreateBrief } from '../hooks/use-brief'
 import { shortAddress } from '../services/brief.service'
@@ -62,6 +62,7 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
   const createBrief = useCreateBrief()
 
   function choose(projectId: string) {
+    window.sessionStorage.setItem(MATCHES_PROJECT_CHANGED_KEY, projectId)
     close()
     router.push(contractorMatchesRoute(projectId))
   }

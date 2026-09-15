@@ -1,7 +1,7 @@
 'use client'
 
 import { Facebook, Youtube } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
@@ -11,6 +11,7 @@ import { revealEase, TikTokIcon, Logo, ZaloIcon } from '@/shared/components/comm
 import { siteConfig } from '@/shared/config/site'
 import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { FOOTER_ABOUT_LINKS, FOOTER_PRODUCT_LINKS, FOOTER_SUPPORT_LINKS, type FooterLink } from './site-footer.config'
 
 /**
@@ -23,19 +24,23 @@ function FooterNavLink({ link, label, pendingLabel }: { link: FooterLink; label:
 
   if (!link.href) {
     return (
-      <li className='flex items-center gap-2'>
-        <span aria-disabled='true' className='text-footer-foreground/35 cursor-default text-sm select-none'>
-          {label}
-        </span>
-        <span className='bg-footer-foreground/10 text-footer-foreground/40 rounded px-1.5 py-0.5 text-[10px] font-medium'>
-          {pendingLabel}
-        </span>
+      <li>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span aria-disabled='true' className='text-footer-foreground/50 cursor-default text-sm select-none'>
+              {label}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side='top' sideOffset={8}>
+            {pendingLabel}
+          </TooltipContent>
+        </Tooltip>
       </li>
     )
   }
 
   const linkClassName =
-    'group text-footer-foreground/75 hover:text-primary relative inline-block text-sm transition-colors'
+    'group text-footer-foreground/75 hover:text-footer-foreground relative inline-block text-sm transition-colors'
   const underline = (
     <span
       aria-hidden
@@ -101,12 +106,13 @@ function LinkColumn({
 
 /** Hiện dần từ trái sang phải — dùng cho từng cột (mục II.2, vùng 14). */
 function FooterColumn({ index, children }: { index: number; children: ReactNode }) {
+  const reduceMotion = useReducedMotion()
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.4, delay: index * 0.1, ease: revealEase }}
+      transition={{ duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : index * 0.1, ease: revealEase }}
     >
       {children}
     </motion.div>
@@ -116,9 +122,8 @@ function FooterColumn({ index, children }: { index: number; children: ReactNode 
 /**
  * Footer dung chung cho moi trang (quy uoc xuyen suot, muc I).
  *
- * Dung theo anh mockup khach gui: nam cot - thuong hieu (logo, mo ta,
- * mang xa hoi), San pham, Ho tro, Ve SAVICO, Lien he - va mot hang day chi con
- * dong ban quyen.
+ * Dùng theo mockup: bốn cột, trong đó thông tin liên hệ nằm cùng cột Về SAVICO,
+ * và một hàng đáy chỉ còn dòng bản quyền.
  *
  * Cot lien he la chu thuan chu khong phai danh sach icon: trong anh no la ba
  * dong "Hotline / Email / Dia chi" xep nhu mot cot chu, cung nhip voi ba cot
@@ -158,7 +163,7 @@ export function SiteFooter() {
   return (
     // Nen toi o ca light lan dark (quy uoc xuyen suot, muc I).
     <footer className='bg-footer text-footer-foreground mt-auto'>
-      <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8'>
+      <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.25fr] lg:gap-10 lg:px-8'>
         {/* Cot 1 - Thuong hieu */}
         <FooterColumn index={0}>
           <Logo onDark tagline={t('brandTagline')} />
@@ -195,28 +200,29 @@ export function SiteFooter() {
         </FooterColumn>
         <FooterColumn index={3}>
           <LinkColumn title={t('aboutTitle')} links={FOOTER_ABOUT_LINKS} pendingLabel={pendingLabel} />
-        </FooterColumn>
-
-        {/* Cot 5 - Lien he */}
-        <FooterColumn index={4}>
-          <ColumnTitle>{t('contactTitle')}</ColumnTitle>
-          <ul className='text-footer-foreground/75 space-y-2.5 text-sm'>
-            <li>
-              {t('hotline')}:{' '}
-              <a href={`tel:${hotline.replace(/\s/g, '')}`} className='hover:text-footer-foreground transition-colors'>
-                {hotline}
-              </a>
-            </li>
-            <li>
-              {t('emailLabel')}:{' '}
-              <a href={`mailto:${email}`} className='hover:text-footer-foreground transition-colors'>
-                {email}
-              </a>
-            </li>
-            <li>
-              {t('addressLabel')}: {cmsText(settings.address, t('address'))}
-            </li>
-          </ul>
+          <div className='mt-8'>
+            <ColumnTitle>{t('contactTitle')}</ColumnTitle>
+            <ul className='text-footer-foreground/75 space-y-2.5 text-sm'>
+              <li>
+                {t('hotline')}:{' '}
+                <a
+                  href={`tel:${hotline.replace(/\s/g, '')}`}
+                  className='hover:text-footer-foreground transition-colors'
+                >
+                  {hotline}
+                </a>
+              </li>
+              <li>
+                {t('emailLabel')}:{' '}
+                <a href={`mailto:${email}`} className='hover:text-footer-foreground transition-colors'>
+                  {email}
+                </a>
+              </li>
+              <li>
+                {t('addressLabel')}: {cmsText(settings.address, t('address'))}
+              </li>
+            </ul>
+          </div>
         </FooterColumn>
       </div>
 

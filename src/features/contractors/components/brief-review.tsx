@@ -13,7 +13,7 @@ import {
   MapPin,
   Receipt
 } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
@@ -52,6 +52,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
   const tStart = useTranslations('contractors.startWindow')
   const tCommon = useTranslations('contractors.common')
   const locale = useLocale() as Locale
+  const reduceMotion = useReducedMotion()
 
   const { data: brief, isPending } = useBrief(projectId)
   const complete = useCompleteBrief(projectId)
@@ -153,7 +154,12 @@ export function BriefReview({ projectId }: BriefReviewProps) {
   ]
 
   return (
-    <div className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'>
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, x: 32 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
+      className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'
+    >
       {/* Hình S11: link quay lại màu XANH, và ngay cạnh nó là viên nhãn
           "HỒ SƠ TỰ TẠO" — bản trước không có viên nhãn này. */}
       <motion.div
@@ -348,7 +354,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
             animate={confirmShake ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
             transition={{ duration: 0.4 }}
             className={cn(
-              'flex cursor-pointer items-start gap-2.5 rounded-lg text-sm ring-2 ring-transparent transition-colors',
+              'flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm ring-2 ring-transparent transition-colors',
               confirmShake && 'ring-brand-orange'
             )}
           >
@@ -428,7 +434,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
         // sao đề xuất" chạy chậm hơn (mục 6/10 của M05).
         onFindNavigate={() => window.sessionStorage.setItem(MATCHES_JUST_ARRIVED_KEY, projectId)}
       />
-    </div>
+    </motion.div>
   )
 }
 
@@ -458,7 +464,7 @@ function SummaryCard({
         <h2 className='text-sm font-semibold tracking-wide uppercase'>{title}</h2>
         <Link
           href={editHref}
-          className='text-primary-strong hover:text-primary text-sm font-medium underline underline-offset-4 transition-colors'
+          className='text-primary-strong hover:text-primary after:bg-primary-strong focus-visible:after:bg-primary relative text-sm font-medium transition-colors after:absolute after:right-0 after:-bottom-0.5 after:left-0 after:h-px after:origin-left after:scale-x-0 after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 focus-visible:after:scale-x-100 motion-reduce:after:transition-none'
         >
           {editLabel}
         </Link>

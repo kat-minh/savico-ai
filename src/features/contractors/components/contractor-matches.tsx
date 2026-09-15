@@ -1,20 +1,22 @@
 'use client'
 
 import { ArrowLeftRight, CircleCheck, Clock, Info, MapPin, Scale, Sparkles, Star, X } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { EmptyState, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { CONTRACTOR_PREVIEW_ID, contractorCompareRoute, contractorInvitationsRoute } from '@/shared/constants/routes'
-import { usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import {
   CONTRACTOR_SORTS,
   DEFAULT_RADIUS,
+  MATCHES_INVITE_RETURN_KEY,
+  MATCHES_PINNED_CONTRACTOR_KEY,
+  MATCHES_PROJECT_CHANGED_KEY,
   MAX_INVITATIONS,
   MIN_COMPARE,
   SEARCH_RADII,
@@ -38,6 +40,32 @@ interface ContractorMatchesProps {
 
 const SORT_ICON = { match: Sparkles, distance: MapPin, rating: Scale, survey: Clock } as const
 
+/** Suy vùng từ tỉnh trong hồ sơ thay vì đoán theo cụm nhà thầu hiện có. */
+function serviceRegionFromProvince(provinceCode?: number | null, provinceName = ''): ServiceRegion {
+  const centralCodes = new Set([38, 40, 42, 44, 45, 46, 48, 49, 51, 52, 54, 56, 58, 60, 62, 64, 66, 67, 68])
+  const southCodes = new Set([70, 72, 74, 75, 77, 79, 80, 82, 83, 84, 86, 87, 89, 91, 92, 93, 94, 95, 96])
+  if (provinceCode && centralCodes.has(provinceCode)) return 'central'
+  if (provinceCode && southCodes.has(provinceCode)) return 'south'
+
+  const normalized = provinceName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+  if (
+    /da nang|hue|quang|nghe an|ha tinh|thanh hoa|binh dinh|phu yen|khanh hoa|ninh thuan|binh thuan|dak|gia lai|kon tum|lam dong/.test(
+      normalized
+    )
+  )
+    return 'central'
+  if (
+    /ho chi minh|dong nai|binh duong|tay ninh|ba ria|vung tau|long an|tien giang|ben tre|tra vinh|vinh long|dong thap|an giang|kien giang|can tho|hau giang|soc trang|bac lieu|ca mau/.test(
+      normalized
+    )
+  )
+    return 'south'
+  return 'north'
+}
+
 /**
  * Cờ một-lần: vừa từ M04 ("Tìm nhà thầu") sang trang này — thẻ đầu viền loé
  * một lần, tick "Vì sao SAVICO đề xuất?" chạy chậm hơn để đọc kịp (mục 6/10).
@@ -51,24 +79,50 @@ export const MATCHES_JUST_ARRIVED_KEY = 'savico.matches-just-arrived'
  */
 export const MATCHES_LAST_VIEWED_KEY = 'savico.matches-last-viewed'
 
-/** Neo cho `usePastElement` — cuộn qua thanh dự án thì thu thành dải mảnh dính dưới thanh điều hướng (mục 2). */
-const PROJECT_BAR_ANCHOR_ID = 'matches-project-bar-anchor'
-
 /** Đổi giá trị số/chữ bằng cách lật (mờ+trượt dọc) thay vì đổi tức thì — gần đúng "lật số". */
 function FlipValue({ value }: { value: string }) {
+  const reduceMotion = useReducedMotion()
+
   return (
-    <AnimatePresence mode='popLayout' initial={false}>
-      <motion.span
-        key={value}
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 6 }}
-        transition={{ duration: 0.25 }}
-        className='inline-block'
-      >
-        {value}
-      </motion.span>
-    </AnimatePresence>
+    <span className='inline-grid overflow-hidden align-bottom leading-[inherit]'>
+      <AnimatePresence mode='wait' initial={false}>
+        <motion.span
+          key={value}
+          initial={reduceMotion ? false : { opacity: 0, y: '-55%' }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: '55%' }}
+          transition={{ duration: reduceMotion ? 0 : 0.22, ease: revealEase }}
+          className='col-start-1 row-start-1 inline-block whitespace-nowrap leading-[inherit]'
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  )
+}
+
+/** Nội dung thẻ rich của next-intl (`<n>1</n>`) → chuỗi, làm khoá lật cho `FlipValue`. */
+function chunksText(chunks: ReactNode): string {
+  return Array.isArray(chunks) ? chunks.join('') : String(chunks)
+}
+
+/** Vẽ thật stroke của icon thay vì phóng hoặc mở mặt nạ cả biểu tượng. */
+function DrawnCheck({ delay, duration }: { delay: number; duration: number }) {
+  const iconRef = useRef<SVGSVGElement>(null)
+  const inView = useInView(iconRef, { once: true, amount: 0.6 })
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <CircleCheck
+      ref={iconRef}
+      aria-hidden
+      className='text-primary mt-0.5 size-4 shrink-0'
+      style={{
+        strokeDasharray: '100 100',
+        strokeDashoffset: reduceMotion || inView ? 0 : 100,
+        transition: reduceMotion ? 'none' : `stroke-dashoffset ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`
+      }}
+    />
   )
 }
 
@@ -89,7 +143,7 @@ function FlipValue({ value }: { value: string }) {
 export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const t = useTranslations('contractors.matches')
   const tSort = useTranslations('contractors.sort')
-  const tCommon = useTranslations('contractors.common')
+  const reduceMotion = useReducedMotion()
 
   const { data: brief } = useBrief(projectId)
   const { data: contractors, isPending } = useContractors(projectId)
@@ -117,19 +171,16 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [region, setRegion] = useState<ServiceRegion | null>(null)
 
   const defaultRegion = useMemo<ServiceRegion>(() => {
+    if (brief?.address.provinceCode || brief?.address.provinceName) {
+      return serviceRegionFromProvince(brief.address.provinceCode, brief.address.provinceName)
+    }
+
     const tally = new Map<ServiceRegion, number>()
     for (const contractor of contractors ?? []) tally.set(contractor.region, (tally.get(contractor.region) ?? 0) + 1)
-    let best: ServiceRegion = 'central'
-    let bestCount = -1
-    for (const candidate of SERVICE_REGIONS) {
-      const count = tally.get(candidate) ?? 0
-      if (count > bestCount) {
-        best = candidate
-        bestCount = count
-      }
-    }
-    return best
-  }, [contractors])
+    return SERVICE_REGIONS.reduce((best, candidate) =>
+      (tally.get(candidate) ?? 0) > (tally.get(best) ?? 0) ? candidate : best
+    )
+  }, [brief, contractors])
 
   const activeRegion = region ?? defaultRegion
 
@@ -147,11 +198,97 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [justArrived, setJustArrived] = useState(false)
   /** Vừa "← Quay lại danh sách" từ M06 — thẻ đó loé viền một lần (mục 2 của M06). */
   const [lastViewedId, setLastViewedId] = useState<string | null>(null)
+  const [pinnedContractorId, setPinnedContractorId] = useState<string | null>(null)
+  const [inviteReturned, setInviteReturned] = useState(false)
+  /**
+   * Vừa quay lại từ M09 — nhãn "Đã mời" đi hai nhịp: 'old' đứng ở số CŨ rồi lật sang số
+   * mới; 'lock' giữ màu cũ thêm đúng quãng số cũ lật ra (0.22s của `FlipValue`), để màu
+   * cam hết lượt đổi cùng lúc số mới lật vào chứ không đổi trước.
+   */
+  const [inviteFlipStage, setInviteFlipStage] = useState<'old' | 'lock' | null>(null)
+  const [newlyInvitedIds, setNewlyInvitedIds] = useState<Set<string>>(() => new Set())
+  const [projectChangeRevision, setProjectChangeRevision] = useState(0)
+  const projectBarRef = useRef<HTMLDivElement>(null)
+  const projectBarTriggerRef = useRef<number | null>(null)
+  const [projectBarStuck, setProjectBarStuck] = useState(false)
+
   useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const trigger = projectBarTriggerRef.current
+      if (trigger === null) return
+      setProjectBarStuck((current) => {
+        // So sánh với một mốc scroll tuyệt đối, không đo lại chính thanh sticky
+        // đang co giãn. Khoảng trễ 12px chỉ áp dụng khi cuộn ngược để mỗi chiều
+        // đi qua vùng chuyển tiếp đúng một lần.
+        const next = current ? window.scrollY >= trigger - 12 : window.scrollY >= trigger
+        return current === next ? current : next
+      })
+    }
+    const measure = () => {
+      let node: HTMLElement | null = projectBarRef.current
+      if (!node) return
+      let naturalTop = 0
+      while (node) {
+        naturalTop += node.offsetTop
+        node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null
+      }
+      // Khi bắt đầu cuộn, site header thu từ 64px xuống 48px. Trừ trước
+      // phần chênh 16px để mốc này trùng lúc thanh chạm `top-14`.
+      projectBarTriggerRef.current = Math.max(8, naturalTop - 72)
+      update()
+    }
+    const schedule = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(update)
+    }
+    const scheduleMeasure = () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(measure)
+    }
+    measure()
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', scheduleMeasure)
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', scheduleMeasure)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem(MATCHES_PROJECT_CHANGED_KEY) === projectId) {
+      window.sessionStorage.removeItem(MATCHES_PROJECT_CHANGED_KEY)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- cờ chuyển route dùng đúng một lần
+      setProjectChangeRevision((revision) => revision + 1)
+    }
+    const inviteReturn = window.sessionStorage.getItem(MATCHES_INVITE_RETURN_KEY)
+    let inviteReturnProject: string | undefined
+    let inviteReturnContractors: string[] = []
+    if (inviteReturn) {
+      try {
+        const parsed = JSON.parse(inviteReturn) as { projectId?: string; contractorIds?: string[] }
+        inviteReturnProject = parsed.projectId
+        inviteReturnContractors = parsed.contractorIds ?? []
+      } catch {
+        inviteReturnProject = inviteReturn
+      }
+    }
+    if (inviteReturnProject === projectId) {
+      window.sessionStorage.removeItem(MATCHES_INVITE_RETURN_KEY)
+      setInviteReturned(true)
+      setInviteFlipStage('old')
+      setNewlyInvitedIds(new Set(inviteReturnContractors))
+    }
+    const pinned = window.sessionStorage.getItem(MATCHES_PINNED_CONTRACTOR_KEY)
+    if (pinned) {
+      window.sessionStorage.removeItem(MATCHES_PINNED_CONTRACTOR_KEY)
+      setPinnedContractorId(pinned)
+    }
     const viewed = window.sessionStorage.getItem(MATCHES_LAST_VIEWED_KEY)
     if (viewed) {
       window.sessionStorage.removeItem(MATCHES_LAST_VIEWED_KEY)
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- cờ một lần đọc từ sessionStorage khi vừa mount, không phải đồng bộ dữ liệu
       setLastViewedId(viewed)
     }
     if (window.sessionStorage.getItem(MATCHES_JUST_ARRIVED_KEY) === projectId) {
@@ -160,22 +297,34 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
     }
   }, [projectId])
 
-  /** Đổi dự án xong → nội dung thanh hiện chéo (mục 2). */
-  const [briefJustChanged, setBriefJustChanged] = useState(false)
+  useEffect(() => {
+    if (!inviteFlipStage) return
+    const timer = window.setTimeout(
+      () => setInviteFlipStage(inviteFlipStage === 'old' ? 'lock' : null),
+      inviteFlipStage === 'old' ? 550 : 220
+    )
+    return () => window.clearTimeout(timer)
+  }, [inviteFlipStage])
+
+  /** Số đang hiện trên nhãn "Đã mời x/3" — lúc chờ lật thì chưa tính các lời mời vừa gửi. */
+  const usedBeforeReturn = Math.max(0, used - (reduceMotion ? 0 : newlyInvitedIds.size))
+  const shownUsed = inviteFlipStage === 'old' ? usedBeforeReturn : used
+  const pillLocked = (inviteFlipStage ? usedBeforeReturn : used) >= MAX_INVITATIONS
+
+  const orderedVisible = useMemo(() => {
+    if (!pinnedContractorId) return visible
+    return [...visible].sort((a, b) => Number(b.id === pinnedContractorId) - Number(a.id === pinnedContractorId))
+  }, [pinnedContractorId, visible])
+
+  /** Đổi dự án ngay trong cùng cây component vẫn tăng revision để thanh chạy lại đúng một lần. */
   const knownBriefId = useRef<string | null>(null)
   useEffect(() => {
     if (!brief) return
     if (knownBriefId.current && knownBriefId.current !== brief.id) {
-      setBriefJustChanged(true)
-      const timer = window.setTimeout(() => setBriefJustChanged(false), 900)
-      knownBriefId.current = brief.id
-      return () => window.clearTimeout(timer)
+      setProjectChangeRevision((revision) => revision + 1)
     }
     knownBriefId.current = brief.id
   }, [brief])
-
-  // Cuộn qua thanh dự án → thu thành dải mảnh dính dưới thanh điều hướng (mục 2).
-  const barCollapsed = usePastElement(PROJECT_BAR_ANCHOR_ID)
 
   /** Đổi chip sắp xếp → tiêu chí đang xếp nổi trong thẻ một giây (mục 4). */
   const [justSorted, setJustSorted] = useState<ContractorSort | null>(null)
@@ -185,42 +334,64 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
     window.setTimeout(() => setJustSorted(null), 1000)
   }
 
-  /** Vừa hết lượt mời → mọi nút mờ đồng loạt + nhãn cam rung một lần (mục 8). */
-  const wasLockedRef = useRef(false)
+  /**
+   * Vừa hết lượt mời → mọi nút mờ đồng loạt + nhãn cam rung một lần (mục 8). Rung khi
+   * nhãn CHUYỂN sang hết lượt lúc đang xem — điển hình là quay lại từ M09 sau lời mời
+   * thứ 3, rung đúng lúc số lật tới 3/3. Lần gắn đầu không rung: khi đó chưa kịp đọc cờ
+   * quay lại, nhãn còn phải lật từ số cũ. Ref `null` = chưa ghi nhận lần nào, nên lần
+   * chạy effect thứ hai của StrictMode cũng không rung nhầm.
+   */
+  const wasLockedRef = useRef<boolean | null>(null)
   const [lockShake, setLockShake] = useState(false)
   useEffect(() => {
-    if (inviteLocked && !wasLockedRef.current) {
-      setLockShake(true)
-      const timer = window.setTimeout(() => setLockShake(false), 450)
-      wasLockedRef.current = true
-      return () => window.clearTimeout(timer)
-    }
-    wasLockedRef.current = inviteLocked
-  }, [inviteLocked])
+    const was = wasLockedRef.current
+    wasLockedRef.current = pillLocked
+    if (pillLocked && was === false) setLockShake(true)
+  }, [pillLocked])
+  useEffect(() => {
+    if (!lockShake) return
+    const timer = window.setTimeout(() => setLockShake(false), 450)
+    return () => window.clearTimeout(timer)
+  }, [lockShake])
 
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='mx-auto w-[94%] max-w-[88rem] space-y-6 py-8'>
+    <div className='mx-auto flex w-[94%] max-w-[88rem] flex-col gap-6 py-8'>
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className='space-y-1 text-center'
+        initial='hidden'
+        animate='show'
+        variants={{
+          hidden: {},
+          show: { transition: { staggerChildren: reduceMotion ? 0 : 0.08 } }
+        }}
+        className='order-2 space-y-1 text-center'
       >
-        <h1 className='text-3xl font-bold tracking-tight sm:text-4xl'>{t('title')}</h1>
-        <p className='text-muted-foreground text-pretty'>{t('subtitle')}</p>
+        <motion.h1
+          variants={{
+            hidden: reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 },
+            show: { opacity: 1, y: 0, transition: { duration: reduceMotion ? 0 : 0.35 } }
+          }}
+          className='text-3xl font-bold tracking-tight sm:text-4xl'
+        >
+          {t('title')}
+        </motion.h1>
+        <motion.p
+          variants={{
+            hidden: reduceMotion ? { opacity: 1 } : { opacity: 0, y: 6 },
+            show: { opacity: 1, y: 0, transition: { duration: reduceMotion ? 0 : 0.35 } }
+          }}
+          className='text-muted-foreground text-pretty'
+        >
+          {t('subtitle')}
+        </motion.p>
       </motion.header>
-
-      {/* Neo cho `usePastElement`: cuộn qua khối này → dải mảnh dính dưới
-          thanh điều hướng hiện ra (mục 2). */}
-      <div id={PROJECT_BAR_ANCHOR_ID} />
 
       {preview ? (
         // Dải nhắc thay cho thẻ dự án: chưa có hồ sơ thì không có gì để hiện ở
         // đó, mà bỏ trống thì khách không hiểu vì sao nút mời lại mờ.
-        <section className='border-warning/40 bg-warning/10 flex flex-wrap items-center gap-4 rounded-2xl border px-4 py-3.5 sm:px-5'>
+        <section className='border-warning/40 bg-warning/10 order-1 flex flex-wrap items-center gap-4 rounded-2xl border px-4 py-3.5 sm:px-5'>
           <span className='text-warning-strong flex size-11 shrink-0 items-center justify-center'>
             <Info className='size-6' />
           </span>
@@ -235,47 +406,66 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
       ) : (
         <>
           <motion.div
-            initial={{ opacity: 0, y: -16 }}
+            ref={projectBarRef}
+            initial={reduceMotion ? false : { opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: revealEase }}
+            transition={{ duration: reduceMotion ? 0 : 0.4, ease: revealEase }}
+            className={cn(
+              'sticky top-14 z-30 order-1 transition-shadow duration-300',
+              projectBarStuck && 'shadow-[0_10px_30px_-20px_rgba(24,80,42,0.5)]'
+            )}
           >
             <AnimatePresence mode='wait'>
               <motion.div
-                key={briefJustChanged ? 'changed' : 'default'}
-                initial={briefJustChanged ? { opacity: 0, x: 10, y: -6 } : false}
+                key={`${projectId}-${projectChangeRevision}`}
+                initial={projectChangeRevision > 0 && !reduceMotion ? { opacity: 0, x: 14, y: -8, skewX: -2 } : false}
                 animate={{ opacity: 1, x: 0, y: 0 }}
-                transition={{ duration: 0.35 }}
+                transition={{ duration: reduceMotion ? 0 : 0.35, ease: revealEase }}
               >
                 <ProjectContextBar
                   brief={brief}
+                  condensed={projectBarStuck}
                   label={t('projectLabel')}
                   aside={
                     <div className='flex flex-wrap items-center gap-3'>
                       <motion.span
-                        title={inviteLocked ? tCommon('inviteFull', { max: MAX_INVITATIONS }) : undefined}
-                        initial={{ scale: 0.85, opacity: 0 }}
+                        title={pillLocked ? t('inviteLimitReached', { max: MAX_INVITATIONS }) : undefined}
+                        initial={reduceMotion ? false : { scale: 0.85, opacity: 0 }}
                         animate={{
-                          scale: lockShake ? [1, 1.06, 1] : 1,
+                          scale: reduceMotion ? 1 : lockShake ? [1, 1.06, 1] : 1,
                           opacity: 1,
-                          x: lockShake ? [0, -6, 6, -4, 4, 0] : 0
+                          x: reduceMotion ? 0 : lockShake ? [0, -6, 6, -4, 4, 0] : 0
                         }}
                         transition={{
-                          scale: { type: 'spring', bounce: 0.5, duration: lockShake ? 0.45 : 0.4 },
-                          opacity: { duration: 0.4 },
-                          x: { duration: 0.45 }
+                          // Rung dùng ba keyframe — spring chỉ nhận hai, đưa vào là motion ném
+                          // lỗi và vòng lặp khung hình chết cho cả trang (quay lại sau lời mời thứ 3).
+                          scale:
+                            lockShake && !reduceMotion
+                              ? { duration: 0.45 }
+                              : { type: 'spring', bounce: reduceMotion ? 0 : 0.5, duration: reduceMotion ? 0 : 0.4 },
+                          opacity: { duration: reduceMotion ? 0 : 0.4 },
+                          x: { duration: reduceMotion ? 0 : 0.45 }
                         }}
                         className={cn(
                           'overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                          inviteLocked ? 'bg-brand-orange-soft text-brand-orange' : 'bg-accent text-primary-strong'
+                          pillLocked ? 'bg-brand-orange-soft text-brand-orange' : 'bg-accent text-primary-strong'
                         )}
                       >
-                        {/* Vừa mời xong quay lại → lật số (mục 2) — lật cả cụm
-                            chữ vì con số nằm giữa câu, không tách riêng được
-                            mà không phá cấu trúc bản dịch. Hết lượt 3/3 → đổi
-                            cam + rung một lần (mục 8). */}
-                        <FlipValue
-                          value={t('invitedPill', { used, max: MAX_INVITATIONS, left: MAX_INVITATIONS - used })}
-                        />
+                        {/* Vừa mời xong quay lại → chỉ CON SỐ lật, từ số cũ sang số
+                            mới (mục 2; mục 5 của M09) — bản dịch bọc số trong thẻ
+                            <n>. Đổi key khi vừa quay lại để nhãn gắn lại ngay ở số
+                            cũ, không lật ngược 1→0 trước. Hết lượt 3/3 → đổi cam +
+                            rung một lần (mục 8). */}
+                        <span className='whitespace-nowrap'>
+                          <Fragment key={inviteReturned ? 'invite-return' : 'steady'}>
+                            {t.rich('invitedPill', {
+                              used: shownUsed,
+                              max: MAX_INVITATIONS,
+                              left: MAX_INVITATIONS - shownUsed,
+                              n: (chunks) => <FlipValue value={chunksText(chunks)} />
+                            })}
+                          </Fragment>
+                        </span>
                       </motion.span>
                       <Link
                         href={contractorInvitationsRoute(projectId)}
@@ -295,34 +485,11 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
               </motion.div>
             </AnimatePresence>
           </motion.div>
-
-          {/* Cuộn qua khối trên → dải mảnh dính dưới thanh điều hướng, cuộn
-              lên → nở lại (mục 2). Header trang (mục 1) đã đứng cố định nên
-              tự viết một dải gọn thay vì tái dùng `ProjectContextBar` ở cỡ
-              đầy đủ. */}
-          <AnimatePresence>
-            {barCollapsed && brief ? (
-              <motion.div
-                initial={{ y: -48, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -48, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className='bg-card/95 fixed inset-x-0 top-16 z-30 border-b py-2 backdrop-blur-sm'
-              >
-                <div className='mx-auto flex w-[94%] max-w-[88rem] items-center gap-3'>
-                  <span className='truncate text-sm font-medium'>{brief.name}</span>
-                  <span className='bg-accent text-primary-strong ml-auto shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium'>
-                    {t('invitedPill', { used, max: MAX_INVITATIONS, left: MAX_INVITATIONS - used })}
-                  </span>
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
         </>
       )}
 
       {/* Hàng tab vùng: nhãn bên trái, ba tab chia đều phần còn lại. */}
-      <section className='flex flex-wrap items-center gap-3'>
+      <section className='order-3 flex flex-wrap items-center gap-3'>
         <span className='text-muted-foreground text-sm font-medium'>{t('regionLabel')}</span>
         <div className='grid min-w-0 flex-1 grid-cols-3 overflow-hidden rounded-xl border'>
           {SERVICE_REGIONS.map((value) => (
@@ -359,7 +526,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         variants={revealContainerVariants}
         initial='hidden'
         animate='show'
-        className='flex flex-wrap items-center gap-x-4 gap-y-3'
+        className='order-4 flex flex-wrap items-center gap-x-4 gap-y-3'
       >
         <div className='flex flex-wrap items-center gap-2'>
           {CONTRACTOR_SORTS.map((key) => {
@@ -385,7 +552,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
           })}
         </div>
 
-        <div className='ml-auto flex flex-wrap items-center gap-3'>
+        <div className='ml-auto flex w-full flex-col items-start gap-1.5 sm:items-end lg:w-auto'>
           <div className='flex flex-wrap items-center gap-2'>
             <span className='text-muted-foreground text-sm font-medium'>{t('radiusShort')}</span>
             {SEARCH_RADII.map((km) => (
@@ -413,25 +580,27 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         </div>
       </motion.section>
 
-      <div className='grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'>
+      <div className='order-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'>
         <div className='min-w-0 space-y-3'>
           {isPending ? (
             [0, 1, 2].map((i) => <Skeleton key={i} className='h-40 rounded-2xl' />)
           ) : visible.length === 0 ? (
             <EmptyState title={t('empty', { km: radiusKm })} />
           ) : (
-            <AnimatePresence initial={false}>
-              {visible.map((contractor, index) => (
+            <AnimatePresence mode='popLayout'>
+              {orderedVisible.map((contractor, index) => (
                 <motion.div
-                  key={contractor.id}
+                  key={`${projectId}-${projectChangeRevision}-${contractor.id}`}
                   layout
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, height: 0 }}
+                  initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scaleY: 0.82, scaleX: 0.985 }}
+                  style={{ transformOrigin: 'top center' }}
                   transition={{
-                    layout: { duration: 0.35, ease: revealEase },
-                    opacity: { duration: 0.4, delay: index * 0.06 },
-                    y: { duration: 0.4, delay: index * 0.06 }
+                    layout: { duration: reduceMotion ? 0 : 0.35, ease: revealEase },
+                    opacity: { duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : index * 0.06 },
+                    y: { duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : index * 0.06 },
+                    scale: { duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : index * 0.06 }
                   }}
                 >
                   <ContractorCard
@@ -440,9 +609,15 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                     compared={compareIds.includes(contractor.id)}
                     onToggleCompare={toggleCompare}
                     invited={isInvited(sent, contractor.id)}
+                    invitedJustNow={newlyInvitedIds.has(contractor.id)}
                     inviteLocked={inviteLocked || preview}
+                    compareLocked={!compareIds.includes(contractor.id) && compareIds.length >= MAX_INVITATIONS}
                     highlightField={justSorted}
-                    ringFlash={(justArrived && index === 0) || lastViewedId === contractor.id}
+                    ringFlash={
+                      (justArrived && index === 0) ||
+                      lastViewedId === contractor.id ||
+                      pinnedContractorId === contractor.id
+                    }
                   />
                 </motion.div>
               ))}
@@ -457,7 +632,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
           transition={{ duration: 0.4, delay: 0.3 }}
           className='space-y-4 lg:sticky lg:top-24 lg:self-start'
         >
-          <section className='bg-card rounded-2xl border p-4'>
+          <section id='matches-compare-panel-target' className='bg-card rounded-2xl border p-4'>
             <h2 className='flex items-baseline gap-2 text-sm font-semibold'>
               {t('compareTitle')}
               <span className='text-muted-foreground overflow-hidden text-xs font-normal'>
@@ -465,7 +640,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
               </span>
             </h2>
 
-            <ul className='mt-3 space-y-2'>
+            <ul id='matches-compare-list-target' className='mt-3 min-h-1 space-y-2'>
               <AnimatePresence initial={false}>
                 {selected.map((contractor) => (
                   // Thiết kế S12: mỗi nhà thầu đã chọn là một hàng CÓ VIỀN, kèm
@@ -477,6 +652,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                     initial={{ opacity: 0, x: 16 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.24, delay: reduceMotion ? 0 : 0.68 }}
                     className='flex items-center gap-2.5 rounded-xl border p-2.5'
                   >
                     <ContractorLogo contractor={contractor} className='size-10 rounded-lg text-[11px]' />
@@ -543,18 +719,20 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                 // kịp (mục 10).
                 <motion.li
                   key={reason}
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  initial={reduceMotion ? false : { opacity: 0.28, y: 4 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{
-                    type: 'spring',
-                    bounce: 0.5,
-                    duration: 0.4,
-                    delay: index * (justArrived ? 0.5 : 0.15)
+                    duration: reduceMotion ? 0 : justArrived ? 0.72 : 0.38,
+                    delay: reduceMotion ? 0 : index * (justArrived ? 0.58 : 0.22),
+                    ease: revealEase
                   }}
                   className='flex items-start gap-2'
                 >
-                  <CircleCheck className='text-primary mt-0.5 size-4 shrink-0' />
+                  <DrawnCheck
+                    delay={reduceMotion ? 0 : index * (justArrived ? 0.58 : 0.22)}
+                    duration={reduceMotion ? 0 : justArrived ? 0.72 : 0.38}
+                  />
                   <span className='text-pretty'>{reason}</span>
                 </motion.li>
               ))}

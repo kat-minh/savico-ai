@@ -49,7 +49,10 @@
     "fab": "SAVICO AI Assistant",
     "nudge": {
       "painPoints": "Not sure which one fits? Ask me 👋",
-      "services": "Not sure which plan to pick? I can help!"
+      "services": "Not sure which plan to pick? I can help!",
+      "guideNext": "Need help with the next step?",
+      "guidePrompt": "Guide me through the next step after {title}",
+      "guidePromptGeneral": "Help me choose which guide video to start with"
     }
   },
   "auth": {
@@ -749,7 +752,7 @@
     "searchPlaceholder": "Search videos or guides…",
     "articlesTitle": "Written guides",
     "empty": {
-      "title": "No guide found",
+      "title": "No guide found for \"{keyword}\"",
       "description": "Try a different keyword."
     },
     "topics": {
@@ -769,6 +772,7 @@
     "prev": "Previous page",
     "next": "Next page",
     "goToPage": "Page {page}",
+    "pageOf": "Page {page}/{total}",
     "card": {
       "comingSoon": "Coming soon",
       "editingHint": "This video is being produced",
@@ -777,7 +781,10 @@
     },
     "search": {
       "clear": "Clear search",
-      "tryTopic": "Or try a topic:"
+      "tryTopic": "Or try a topic:",
+      "suggestions": "Search suggestions",
+      "article": "Article",
+      "style": "Choosing a style"
     },
     "lightbox": {
       "upNext": "Up next",
@@ -797,7 +804,7 @@
       "loadingSlow": "Loading video…",
       "connectionSlow": "Slow connection",
       "retry": "Retry",
-      "offline": "You're offline — the video will resume once you're back online",
+      "offline": "You're offline. The video will resume once you're back online",
       "autoAdvanceIn": "Playing next in {seconds}s",
       "replay": "Watch again",
       "watchNow": "Watch now",
@@ -805,6 +812,7 @@
       "watchAgain": "Watch from the start",
       "notifyMe": "Notify me when it's ready",
       "notifyMeConfirmed": "You'll be notified",
+      "editingMessage": "This video is being edited",
       "readArticleInstead": "Read the article instead"
     }
   },
@@ -2665,6 +2673,8 @@
     "landing": {
       "hero": {
         "title": "Find the right contractor for your build",
+        "titleLine1": "Find the right contractor",
+        "titleLine2": "for your build",
         "subtitle": "Connect with SAVICO's network of trusted contractors — search, compare capability and pick the right partner, transparently and with confidence.",
         "createBrief": "Create a brief",
         "bestMatch": "Best match for your project",
@@ -2809,6 +2819,12 @@
       "badge": "Free · No package required",
       "back": "Back to options",
       "leaveConfirm": "Leaving will discard what you're entering. Continue?",
+      "close": "Close and return to options",
+      "leaveTitle": "Save this draft before leaving?",
+      "leaveDescription": "You've entered some information. SAVICO can save it so you can continue later.",
+      "saveDraftAndLeave": "Save draft and return",
+      "leaveWithoutSaving": "Don't save",
+      "keepEditing": "Keep editing",
       "title": "Create your project brief",
       "subtitle": "Complete the build details and what you need done, and SAVICO will suggest matching contractors.",
       "draftSaved": "Draft saved - {time}",
@@ -2961,7 +2977,9 @@
         "p2": "Design direction that fits your budget",
         "p3": "Answers on the process and the platform",
         "action": "Book a consultation",
-        "p4": "Already included in your plan"
+        "included": "Already included in your plan",
+        "priceFrom": "From {price}",
+        "viewPricing": "View consultation plans"
       },
       "turnkeyForm": {
         "title": "Register for turnkey delivery",
@@ -2995,12 +3013,13 @@
       "compareAction": "Compare {count} contractors",
       "compareCheckbox": "Compare",
       "maxCompare": "Up to {max} contractors",
+      "inviteLimitReached": "All {max} invitation slots have been used",
       "whyTitle": "Why SAVICO suggests these",
       "why1": "Matches your building type",
       "why2": "{count} completed projects",
       "why3": "Can survey within {hours}h",
       "projectLabel": "Selected project",
-      "invitedPill": "Invited {used}/{max} · {left} left",
+      "invitedPill": "Invited <n>{used}</n>/{max} · <n>{left}</n> left",
       "viewInvites": "View invitations",
       "switchProject": "Switch project",
       "regionLabel": "Region",
@@ -3025,6 +3044,7 @@
       "founded": "Founded in {year}",
       "team": "{count} architects & engineers",
       "office": "Office in {address}",
+      "serviceAreaCount": "{count} areas",
       "strengths": "Strengths",
       "featured": "Featured projects",
       "viewProject": "View project",
@@ -3039,6 +3059,9 @@
       "reportConfirmAction": "Send report",
       "addToCompare": "Add to comparison",
       "inCompare": "Added to comparison",
+      "compareChip": "Compare {count}/{max}",
+      "compareFull": "You have selected the maximum of {max} contractors",
+      "clearProjectFilter": "Clear project filter",
       "viewInvites": "View invitations",
       "notAcceptingNotice": "This contractor is temporarily not accepting new projects.",
       "viewSimilar": "View similar contractors",
@@ -3086,7 +3109,7 @@
       "select": "Select contractor",
       "selected": "Contractor selected",
       "footerHint": "Pick up to {max} of {total} contractors to invite",
-      "footerSelected": "Selected: {names}",
+      "footerSelected": "Selected {count}: {names}",
       "footerEmpty": "No contractor selected yet",
       "back": "Back to list",
       "invite": "Invite selected contractors to quote",
@@ -3120,6 +3143,7 @@
       "unavailable": "Unavailable",
       "slotTitle": "Choose a time slot",
       "slotOffice": "Office hours",
+      "chooseDateForSlots": "Choose a date on the calendar to view time slots",
       "slotTaken": "This slot is already taken",
       "workingHours": "Working hours: 08:00 – 17:00 (Mon – Sat)",
       "callAhead": "The contractor will call 30 minutes ahead to confirm.",
@@ -3149,6 +3173,7 @@
       "noMonthAvailable": "No available days this month.",
       "backToAvailableMonth": "Go to an available month",
       "sending": "Sending…",
+      "sendFailed": "Could not send. Please try again",
       "cancelConfirmTitle": "Cancel this survey booking?",
       "cancelConfirmBody": "The date and time you just picked will not be saved.",
       "cancelConfirmAction": "Cancel booking",
@@ -3157,7 +3182,7 @@
     "sent": {
       "title": "Invitation sent & survey booked",
       "subtitle": "Your survey request has been sent to {names}.",
-      "requestCode": "Request code: {code}",
+      "requestCode": "Request code: <accent>{code}</accent>",
       "sentAt": "Sent at {time}",
       "detailTitle": "Request details",
       "location": "Survey location",
@@ -3206,7 +3231,14 @@
       "contactDialogTitle": "Contact the SAVICO support team",
       "contactDialogCall": "Call now",
       "supervisionSuggestion": "Contractor confirmed — decide how to manage construction?",
-      "supervisionAction": "See supervision plans"
+      "supervisionAction": "See supervision plans",
+      "statusPending": "No timestamp available yet",
+      "updateToast": "The invitation to {name} is now {status}",
+      "profilePanelDescription": "Contractor profile · Quick view",
+      "profileRating": "Rating",
+      "profileSimilar": "Similar projects",
+      "dossierPanelDescription": "Sent dossier version · Read only",
+      "noPriceBadge": "No pricing included"
     },
     "picker": {
       "title": "Pick a project to find contractors",

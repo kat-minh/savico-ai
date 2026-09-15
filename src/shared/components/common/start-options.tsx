@@ -1,18 +1,20 @@
 'use client'
 
 import { ArrowRight, CalendarClock, CircleCheck, Gift, HardHat, Loader2, Search, Star } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import type { Locale } from '@/i18n/routing'
 import { useCmsCollection, type PlanGift } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { ROUTES } from '@/shared/constants/routes'
+import { cn } from '@/shared/lib/utils'
+import { formatCurrency } from '@/shared/utils'
 import { revealEase } from './reveal'
 import { TurnkeyRequestDialog } from './turnkey-request-dialog'
-import { cn } from '@/shared/lib/utils'
 
 interface StartOptionsProps {
   /** Đích của lựa chọn 1 — trang nhà thầu đề xuất của dự án vừa tạo (S12). */
@@ -23,6 +25,14 @@ interface StartOptionsProps {
    * xuất" chạy chậm hơn). `checkout` (S08) không truyền prop này.
    */
   onFindNavigate?: () => void
+  /** Gói thiết kế đang hoạt động đã bao gồm quyền tư vấn 1:1. */
+  hasPlan?: boolean
+  /** Báo cho lớp bọc biết một liên kết sắp điều hướng để đóng hộp chọn và giữ progress ở ngoài. */
+  onNavigateStart?: () => void
+  /** Lớp bọc hộp thoại tự quản lý luồng mở form trọn gói để hộp chọn đóng trước. */
+  onTurnkeySelect?: () => void
+  /** Hộp thoại render progress ở lớp ngoài vì nội dung sẽ unmount ngay khi đóng. */
+  showRouteProgress?: boolean
 }
 
 /**
@@ -37,12 +47,31 @@ interface StartOptionsProps {
  * và {@link StartOptionsDialog} bọc chúng trong hộp thoại (dùng ở S11). Cùng một
  * nội dung, hai bối cảnh, không phải hai bản dựng.
  */
-export function StartOptions({ findHref, onFindNavigate }: StartOptionsProps) {
+export function StartOptions({
+  findHref,
+  onFindNavigate,
+  hasPlan = false,
+  onNavigateStart,
+  onTurnkeySelect,
+  showRouteProgress = true
+}: StartOptionsProps) {
   // Quà tặng lấy từ kho nội dung (gói nào có quà thì dùng gói đó) — admin sửa
   // một chỗ là cả S01, S02 lẫn thẻ này đổi theo.
   const gift = useCmsCollection('plans').find((plan) => plan.gift)?.gift
+  const consultPackages = useCmsCollection('consultPackages')
   const t = useTranslations('contractors.start')
+  const locale = useLocale() as Locale
   const [turnkeyOpen, setTurnkeyOpen] = useState(false)
+  const [routeLoading, setRouteLoading] = useState(false)
+
+  const consultationPrice = consultPackages
+    .filter((item) => item.enabled && item.price > 0)
+    .sort((a, b) => a.price - b.price)[0]?.price
+
+  const startNavigation = () => {
+    setRouteLoading(true)
+    onNavigateStart?.()
+  }
 
   /**
    * Rê một thẻ → hai thẻ còn lại mờ đi và lùi nhẹ (mục 3/4 của M04) — trạng
@@ -52,78 +81,94 @@ export function StartOptions({ findHref, onFindNavigate }: StartOptionsProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   return (
+    <>
+      {showRouteProgress ? <RouteProgress active={routeLoading} /> : null}
+      {/*
     // Hình S08 đo theo pixel: khe giữa hai thẻ là 13.25px trên 529.5px bề ngang
     // cụm ba thẻ = 2.5%. Để phần trăm để tỉ lệ giữ nguyên ở mọi khổ màn.
-    <ul className='grid items-stretch gap-x-[2.5%] gap-y-6 pt-4 md:grid-cols-3'>
-      <OptionCard
-        index={1}
-        icon={Search}
-        title={t('find.title')}
-        subtitle={t('find.subtitle')}
-        points={[t('find.p1'), t('find.p2'), t('find.p3'), t('find.p4'), t('find.p5'), t('find.p6')]}
-        action={
-          <OptionButton
-            className='brand-green-button'
-            href={findHref}
-            label={t('find.action')}
-            onClick={onFindNavigate}
-          />
-        }
-        revealDelay={0.15}
-        hovered={hoveredIndex === 1}
-        dimmed={hoveredIndex !== null && hoveredIndex !== 1}
-        onHoverChange={(active) => setHoveredIndex(active ? 1 : null)}
-      />
-
-      <OptionCard
-        index={2}
-        icon={HardHat}
-        highlighted
-        title={t('turnkey.title')}
-        subtitle={t('turnkey.subtitle')}
-        points={[t('turnkey.p1'), t('turnkey.p2'), t('turnkey.p3'), t('turnkey.p4'), t('turnkey.p5')]}
-        gift={gift}
-        action={
-          <>
-            {/* S08: "Đăng ký triển khai → form đăng ký, Ops liên hệ" — nút mở
-                form thật, không còn chỉ bắn toast. */}
+      */}
+      <ul className='grid items-stretch gap-x-[2.5%] gap-y-6 pt-4 md:grid-cols-3'>
+        <OptionCard
+          index={1}
+          icon={Search}
+          title={t('find.title')}
+          subtitle={t('find.subtitle')}
+          points={[t('find.p1'), t('find.p2'), t('find.p3'), t('find.p4'), t('find.p5'), t('find.p6')]}
+          action={
             <OptionButton
-              className='brand-orange-button'
-              label={t('turnkey.action')}
-              onClick={() => setTurnkeyOpen(true)}
+              className='brand-green-button'
+              href={findHref}
+              label={t('find.action')}
+              onClick={onFindNavigate}
+              onNavigateStart={startNavigation}
             />
-            <TurnkeyRequestDialog open={turnkeyOpen} onOpenChange={setTurnkeyOpen} />
-          </>
-        }
-        // Hiện TRƯỚC hai thẻ kia (mục 3): không delay.
-        revealDelay={0}
-        hovered={hoveredIndex === 2}
-        dimmed={hoveredIndex !== null && hoveredIndex !== 2}
-        onHoverChange={(active) => setHoveredIndex(active ? 2 : null)}
-      />
+          }
+          revealDelay={0.15}
+          hovered={hoveredIndex === 1}
+          dimmed={hoveredIndex !== null && hoveredIndex !== 1}
+          onHoverChange={(active) => setHoveredIndex(active ? 1 : null)}
+        />
 
-      <OptionCard
-        index={3}
-        icon={CalendarClock}
-        title={t('expert.title')}
-        subtitle={t('expert.subtitle')}
-        points={[t('expert.p1'), t('expert.p2'), t('expert.p3'), t('expert.p4')]}
-        revealDelay={0.3}
-        hovered={hoveredIndex === 3}
-        dimmed={hoveredIndex !== null && hoveredIndex !== 3}
-        onHoverChange={(active) => setHoveredIndex(active ? 3 : null)}
-        action={
-          // Hình S08: nút của Lựa chọn 3 là nút VIỀN XANH, chữ xanh (không phải
-          // viền xám mặc định).
-          <OptionButton
-            variant='outline'
-            className='border-primary text-primary-strong hover:bg-accent border-[1.5px]'
-            href={ROUTES.CONSULT}
-            label={t('expert.action')}
-          />
-        }
-      />
-    </ul>
+        <OptionCard
+          index={2}
+          icon={HardHat}
+          highlighted
+          title={t('turnkey.title')}
+          subtitle={t('turnkey.subtitle')}
+          points={[t('turnkey.p1'), t('turnkey.p2'), t('turnkey.p3'), t('turnkey.p4'), t('turnkey.p5')]}
+          gift={gift}
+          action={
+            <>
+              {/* S08: "Đăng ký triển khai → form đăng ký, Ops liên hệ" — nút mở
+                form thật, không còn chỉ bắn toast. */}
+              <OptionButton
+                className='brand-orange-button'
+                label={t('turnkey.action')}
+                onClick={() => (onTurnkeySelect ? onTurnkeySelect() : setTurnkeyOpen(true))}
+                deferAction
+              />
+              <TurnkeyRequestDialog open={turnkeyOpen} onOpenChange={setTurnkeyOpen} />
+            </>
+          }
+          // Hiện TRƯỚC hai thẻ kia (mục 3): không delay.
+          revealDelay={0}
+          hovered={hoveredIndex === 2}
+          dimmed={hoveredIndex !== null && hoveredIndex !== 2}
+          onHoverChange={(active) => setHoveredIndex(active ? 2 : null)}
+        />
+
+        <OptionCard
+          index={3}
+          icon={CalendarClock}
+          title={t('expert.title')}
+          subtitle={t('expert.subtitle')}
+          points={[t('expert.p1'), t('expert.p2'), t('expert.p3')]}
+          included={hasPlan}
+          value={
+            hasPlan
+              ? t('expert.included')
+              : consultationPrice
+                ? t('expert.priceFrom', { price: formatCurrency(consultationPrice, locale) })
+                : t('expert.viewPricing')
+          }
+          revealDelay={0.15}
+          hovered={hoveredIndex === 3}
+          dimmed={hoveredIndex !== null && hoveredIndex !== 3}
+          onHoverChange={(active) => setHoveredIndex(active ? 3 : null)}
+          action={
+            // Hình S08: nút của Lựa chọn 3 là nút VIỀN XANH, chữ xanh (không phải
+            // viền xám mặc định).
+            <OptionButton
+              variant='outline'
+              className='border-primary text-primary-strong hover:bg-accent border-[1.5px]'
+              href={ROUTES.CONSULT}
+              label={t('expert.action')}
+              onNavigateStart={startNavigation}
+            />
+          }
+        />
+      </ul>
+    </>
   )
 }
 
@@ -135,12 +180,16 @@ function OptionButton({
   label,
   href,
   onClick,
+  onNavigateStart,
+  deferAction = false,
   className,
   variant
 }: {
   label: string
   href?: string
   onClick?: () => void
+  onNavigateStart?: () => void
+  deferAction?: boolean
   className?: string
   variant?: 'outline'
 }) {
@@ -148,6 +197,14 @@ function OptionButton({
   // (có `href`) mới cần: nút mở hộp thoại tại chỗ (Đăng ký triển khai) không
   // có độ trễ điều hướng nào để che.
   const [navigating, setNavigating] = useState(false)
+  const actionTimerRef = useRef<number | null>(null)
+
+  useEffect(
+    () => () => {
+      if (actionTimerRef.current !== null) window.clearTimeout(actionTimerRef.current)
+    },
+    []
+  )
 
   const content = (
     <>
@@ -155,7 +212,7 @@ function OptionButton({
       {navigating ? (
         <Loader2 className='absolute right-4 size-4 animate-spin' />
       ) : (
-        <ArrowRight className='absolute right-4 size-4 transition-transform group-hover:translate-x-1' />
+        <ArrowRight className='absolute right-4 size-4 transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none' />
       )}
     </>
   )
@@ -172,9 +229,11 @@ function OptionButton({
         asChild
         variant={variant}
         className={classes}
+        aria-busy={navigating}
         onClick={() => {
           setNavigating(true)
           onClick?.()
+          onNavigateStart?.()
         }}
       >
         <Link href={href}>{content}</Link>
@@ -183,9 +242,52 @@ function OptionButton({
   }
 
   return (
-    <Button variant={variant} className={classes} onClick={onClick}>
+    <Button
+      variant={variant}
+      className={classes}
+      disabled={navigating}
+      aria-busy={navigating}
+      onClick={() => {
+        setNavigating(true)
+        if (!deferAction) {
+          onClick?.()
+          setNavigating(false)
+          return
+        }
+        actionTimerRef.current = window.setTimeout(() => {
+          onClick?.()
+          setNavigating(false)
+        }, 180)
+      }}
+    >
       {content}
     </Button>
+  )
+}
+
+/** Vạch phản hồi tức thì trong khoảng chờ router thay màn hình. */
+function RouteProgress({ active }: { active: boolean }) {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <AnimatePresence>
+      {active ? (
+        <motion.div
+          aria-hidden
+          className='bg-primary/15 pointer-events-none fixed inset-x-0 top-0 z-[60] h-1 overflow-hidden'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.span
+            className='bg-primary block h-full origin-left'
+            initial={{ scaleX: reduceMotion ? 0.75 : 0.08 }}
+            animate={{ scaleX: reduceMotion ? 0.75 : 0.82 }}
+            transition={{ duration: reduceMotion ? 0 : 1.8, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   )
 }
 
@@ -195,8 +297,10 @@ interface StartOptionsDialogProps extends StartOptionsProps {
 }
 
 /** Bản hộp thoại — dùng sau khi khách chốt hồ sơ ở Bước 2 (S11, R7). */
-export function StartOptionsDialog({ open, onOpenChange, findHref, onFindNavigate }: StartOptionsDialogProps) {
+export function StartOptionsDialog({ open, onOpenChange, findHref, onFindNavigate, hasPlan }: StartOptionsDialogProps) {
   const t = useTranslations('contractors.start')
+  const [routeLoading, setRouteLoading] = useState(false)
+  const [turnkeyOpen, setTurnkeyOpen] = useState(false)
 
   // Không thao tác một lúc → dòng phụ đổi sang nhắc "vẫn đổi được sau" (mục 2).
   const [idle, setIdle] = useState(false)
@@ -210,43 +314,67 @@ export function StartOptionsDialog({ open, onOpenChange, findHref, onFindNavigat
     return () => window.clearTimeout(timer)
   }, [open])
 
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mỗi lần mở là một lượt điều hướng mới
+      setRouteLoading(false)
+    }
+  }, [open])
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* `sm:` là bắt buộc: DialogContent của shadcn đã có `sm:max-w-lg`, một
+    <>
+      <RouteProgress active={routeLoading} />
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {/* `sm:` là bắt buộc: DialogContent của shadcn đã có `sm:max-w-lg`, một
           class `max-w-4xl` trần sẽ thua nó từ breakpoint sm trở lên và hộp thoại
           bị bóp lại thành ba cột hẹp.
 
           `max-h-[92dvh]` + bản gọn của {@link StartOptions}: cốt để hộp thoại
           nằm trọn trong màn hình, không đẻ ra thanh cuộn. `dvh` chứ không `vh`
           vì trên di động thanh địa chỉ thu vào/nhả ra làm `vh` sai. */}
-      <DialogContent className='max-h-[92dvh] sm:max-w-4xl'>
-        <DialogHeader>
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-            <DialogTitle>{t('title')}</DialogTitle>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.05 }}
-          >
-            <AnimatePresence mode='wait'>
-              <motion.div
-                key={idle ? 'idle' : 'default'}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <DialogDescription>{idle ? t('idleSubtitle') : t('subtitle')}</DialogDescription>
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        </DialogHeader>
-        <ScaleToFit>
-          <StartOptions findHref={findHref} onFindNavigate={onFindNavigate} />
-        </ScaleToFit>
-      </DialogContent>
-    </Dialog>
+        <DialogContent className='max-h-[92dvh] sm:max-w-4xl'>
+          <DialogHeader>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+              <DialogTitle>{t('title')}</DialogTitle>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.05 }}
+            >
+              <AnimatePresence mode='wait'>
+                <motion.div
+                  key={idle ? 'idle' : 'default'}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <DialogDescription>{idle ? t('idleSubtitle') : t('subtitle')}</DialogDescription>
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </DialogHeader>
+          <ScaleToFit>
+            <StartOptions
+              findHref={findHref}
+              onFindNavigate={onFindNavigate}
+              hasPlan={hasPlan}
+              onNavigateStart={() => {
+                setRouteLoading(true)
+                onOpenChange(false)
+              }}
+              onTurnkeySelect={() => {
+                onOpenChange(false)
+                setTurnkeyOpen(true)
+              }}
+              showRouteProgress={false}
+            />
+          </ScaleToFit>
+        </DialogContent>
+      </Dialog>
+      <TurnkeyRequestDialog open={turnkeyOpen} onOpenChange={setTurnkeyOpen} />
+    </>
   )
 }
 
@@ -275,6 +403,12 @@ function ScaleToFit({ children }: { children: React.ReactNode }) {
 
       const natural = node.offsetHeight
       if (!natural) return
+
+      // Mobile giữ kích thước đọc được và dùng cuộn dọc của DialogContent.
+      if (window.innerWidth < 768) {
+        setBox({ scale: 1, height: natural })
+        return
+      }
 
       // Chỗ còn lại = trần chiều cao hộp thoại − phần đã dùng phía trên khối này
       // − lề dưới của hộp thoại.
@@ -310,6 +444,8 @@ function OptionCard({
   points,
   action,
   gift,
+  included = false,
+  value,
   highlighted = false,
   revealDelay = 0,
   hovered = false,
@@ -324,6 +460,8 @@ function OptionCard({
   action: React.ReactNode
   /** Quà tặng in trong thẻ "Triển khai trọn gói" (Hình S08). */
   gift?: PlanGift
+  included?: boolean
+  value?: string
   highlighted?: boolean
   /** Thứ tự hiện: thẻ giữa trước, rồi trái, rồi phải (mục 3/4). */
   revealDelay?: number
@@ -335,21 +473,26 @@ function OptionCard({
 }) {
   const t = useTranslations('contractors.start')
   const tGift = useTranslations('plans.gift')
+  const reduceMotion = useReducedMotion()
 
   return (
     // Thẻ hiện lần lượt lúc mở (mục 3/4) — CHỈ MỘT LẦN lúc mount, tách khỏi
     // hiệu ứng rê bên dưới để không bị chồng thời lượng lên nhau.
     <motion.li
-      initial={{ opacity: 0, y: 24 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: revealDelay, ease: revealEase }}
+      transition={{ duration: reduceMotion ? 0 : 0.5, delay: reduceMotion ? 0 : revealDelay, ease: revealEase }}
       // Mobile: thẻ phổ biến nhất lên đầu (mục 4); máy tính giữ đúng thứ tự cột.
       className={cn('relative flex', highlighted && 'order-first md:order-none')}
     >
       {/* Nâng nhẹ khi rê tới, mờ + lùi khi MỘT thẻ khác đang được rê (mục 3/4). */}
       <motion.div
-        animate={{ y: hovered ? -6 : 0, scale: dimmed ? 0.97 : 1, opacity: dimmed ? 0.6 : 1 }}
-        transition={{ duration: 0.25 }}
+        animate={{
+          y: reduceMotion ? 0 : hovered ? -6 : 0,
+          scale: reduceMotion ? 1 : dimmed ? 0.97 : 1,
+          opacity: dimmed ? 0.6 : 1
+        }}
+        transition={{ duration: reduceMotion ? 0 : 0.25 }}
         onMouseEnter={() => onHoverChange?.(true)}
         onMouseLeave={() => onHoverChange?.(false)}
         className='relative flex w-full'
@@ -362,9 +505,13 @@ function OptionCard({
           nhô lên khỏi mép thẻ 4px = 8px. */}
         {highlighted ? (
           <motion.span
-            initial={{ opacity: 0, y: -14 }}
+            initial={reduceMotion ? false : { opacity: 0, y: -14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', bounce: 0.55, duration: 0.5, delay: revealDelay + 0.35 }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { type: 'spring', bounce: 0.55, duration: 0.5, delay: revealDelay + 0.35 }
+            }
             className='bg-brand-orange text-brand-orange-foreground absolute -top-2 left-1/2 z-10 inline-flex -translate-x-1/2 items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-wide whitespace-nowrap uppercase'
           >
             <Star className='size-3 fill-current' />
@@ -423,7 +570,12 @@ function OptionCard({
             - nhưng chỉ giãn tới 30–41% chiều cao thẻ (103/341 và 136/333), nên
               chặn `max-h-[40%]` — bỏ chặn thì thẻ 3 phình thành khung dọc. */}
           <div className='bg-muted/30 mt-3 flex aspect-[4/3] max-h-[40%] w-full grow items-center justify-center rounded-xl border border-dashed'>
-            <Icon className='text-muted-foreground/50 size-8' />
+            <motion.span
+              animate={reduceMotion ? undefined : { y: [0, -3, 0] }}
+              transition={{ duration: 4.8, delay: index * 0.25, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <Icon className='text-muted-foreground/50 size-8' />
+            </motion.span>
           </div>
 
           {/* Hình S08: các ý cách nhau ~17px trên thẻ rộng 157px = ~37px ở khổ
@@ -433,9 +585,12 @@ function OptionCard({
             {points.map((point, pointIndex) => (
               <motion.li
                 key={point}
-                initial={{ opacity: 0, x: -8 }}
+                initial={reduceMotion ? false : { opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.35, delay: revealDelay + 0.4 + pointIndex * 0.08 }}
+                transition={{
+                  duration: reduceMotion ? 0 : 0.35,
+                  delay: reduceMotion ? 0 : revealDelay + 0.4 + pointIndex * 0.08
+                }}
                 className='flex items-start gap-2.5 text-sm'
               >
                 {/* Hình S08: dấu tick nằm TRONG VÒNG TRÒN — thẻ thường là vòng
@@ -450,6 +605,36 @@ function OptionCard({
               </motion.li>
             ))}
           </ul>
+
+          {value ? (
+            <motion.p
+              initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.35,
+                delay: reduceMotion ? 0 : revealDelay + 0.45 + points.length * 0.08
+              }}
+              className={cn(
+                'mt-4 flex min-h-9 items-center justify-center gap-2 rounded-lg px-3 py-2 text-center text-xs font-semibold',
+                included ? 'bg-accent text-primary-strong' : 'bg-muted/45 text-foreground'
+              )}
+            >
+              {included ? (
+                <motion.span
+                  initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 420, damping: 18, delay: revealDelay + 0.55 }
+                  }
+                >
+                  <CircleCheck className='text-primary size-4' />
+                </motion.span>
+              ) : null}
+              <span>{value}</span>
+            </motion.p>
+          ) : null}
 
           {/* Hình S08: thẻ "Triển khai trọn gói" có khối ĐẶC QUYỀN DÀNH RIÊNG —
             hộp quà bên TRÁI, chữ canh trái bên phải, rồi dòng điều kiện in

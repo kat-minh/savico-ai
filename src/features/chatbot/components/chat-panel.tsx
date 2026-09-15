@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion } from 'motion/react'
 import { Bot, SendHorizonal, User } from 'lucide-react'
@@ -11,11 +11,13 @@ import { Input } from '@/shared/components/ui/input'
 import { Card } from '@/shared/components/ui/card'
 import { useChat } from '../hooks/use-chat'
 import { SUGGESTIONS } from '../api/chatbot.mock'
+import { useChatbotStore } from '../store/chatbot.store'
 
 export function ChatPanel() {
   const t = useTranslations('chatbot')
   const { messages, send, isReplying, remaining, dailyLimit, limitReached } = useChat()
-  const [input, setInput] = useState('')
+  const input = useChatbotStore((state) => state.draft)
+  const setInput = useChatbotStore((state) => state.setDraft)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

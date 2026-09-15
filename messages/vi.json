@@ -49,7 +49,10 @@
     "fab": "SAVICO AI Assistant",
     "nudge": {
       "painPoints": "Đang phân vân chỗ nào? Hỏi tôi thử xem 👋",
-      "services": "Chưa biết chọn gói nào? Tôi gợi ý cho bạn nhé!"
+      "services": "Chưa biết chọn gói nào? Tôi gợi ý cho bạn nhé!",
+      "guideNext": "Cần mình hướng dẫn bước tiếp theo?",
+      "guidePrompt": "Hướng dẫn tôi bước tiếp theo sau video {title}",
+      "guidePromptGeneral": "Hướng dẫn tôi nên bắt đầu từ video nào"
     }
   },
   "auth": {
@@ -749,7 +752,7 @@
     "searchPlaceholder": "Tìm video hoặc bài hướng dẫn...",
     "articlesTitle": "Bài hướng dẫn",
     "empty": {
-      "title": "Không tìm thấy hướng dẫn",
+      "title": "Không tìm thấy hướng dẫn cho \"{keyword}\"",
       "description": "Thử từ khóa khác."
     },
     "topics": {
@@ -769,6 +772,7 @@
     "prev": "Trang trước",
     "next": "Trang sau",
     "goToPage": "Trang {page}",
+    "pageOf": "Trang {page}/{total}",
     "card": {
       "comingSoon": "Sắp có",
       "editingHint": "Video đang được biên tập",
@@ -777,10 +781,13 @@
     },
     "search": {
       "clear": "Xoá tìm kiếm",
-      "tryTopic": "Hoặc thử chủ đề:"
+      "tryTopic": "Hoặc thử chủ đề:",
+      "suggestions": "Đề xuất tìm kiếm",
+      "article": "Bài viết",
+      "style": "Chọn phong cách"
     },
     "lightbox": {
-      "upNext": "Video tiếp theo",
+      "upNext": "Xem tiếp",
       "createProject": "Tạo dự án ngay",
       "close": "Đóng",
       "dragHandle": "Kéo xuống để đóng",
@@ -797,14 +804,15 @@
       "loadingSlow": "Đang tải video…",
       "connectionSlow": "Kết nối chậm",
       "retry": "Thử lại",
-      "offline": "Mất kết nối mạng — video tự phát tiếp khi có mạng trở lại",
+      "offline": "Mất kết nối mạng. Video sẽ tự phát tiếp khi có mạng trở lại",
       "autoAdvanceIn": "Xem tiếp sau {seconds}s",
       "replay": "Xem lại",
       "watchNow": "Xem tiếp ngay",
-      "completedAllTitle": "Bạn đã xem hết hướng dẫn!",
+      "completedAllTitle": "Bạn đã xem hết hướng dẫn",
       "watchAgain": "Xem lại từ đầu",
       "notifyMe": "Nhận thông báo khi có video",
       "notifyMeConfirmed": "Đã đăng ký nhận thông báo",
+      "editingMessage": "Video đang được biên tập",
       "readArticleInstead": "Đọc bài hướng dẫn thay thế"
     }
   },
@@ -2665,6 +2673,8 @@
     "landing": {
       "hero": {
         "title": "Tìm đúng nhà thầu cho công trình của bạn",
+        "titleLine1": "Tìm đúng nhà thầu",
+        "titleLine2": "cho công trình của bạn",
         "subtitle": "Kết nối với mạng lưới nhà thầu uy tín trên SAVICO, giúp bạn dễ dàng tìm kiếm, so sánh năng lực và lựa chọn đối tác phù hợp, minh bạch và đáng tin cậy.",
         "createBrief": "Tạo hồ sơ",
         "bestMatch": "Phù hợp nhất với dự án của bạn",
@@ -2809,6 +2819,12 @@
       "badge": "Miễn phí · Không cần đăng ký gói",
       "back": "Quay lại lựa chọn",
       "leaveConfirm": "Rời trang sẽ bỏ dở phần đang nhập. Tiếp tục?",
+      "close": "Đóng và quay lại lựa chọn",
+      "leaveTitle": "Lưu hồ sơ nháp trước khi rời đi?",
+      "leaveDescription": "Bạn đã nhập một số thông tin. SAVICO có thể lưu lại để bạn tiếp tục sau.",
+      "saveDraftAndLeave": "Lưu nháp và quay lại",
+      "leaveWithoutSaving": "Không lưu",
+      "keepEditing": "Tiếp tục nhập",
       "title": "Tự tạo hồ sơ dự án",
       "subtitle": "Hoàn tất thông tin công trình và nhu cầu thi công, SAVICO đề xuất nhà thầu phù hợp.",
       "draftSaved": "Đã lưu nháp - {time}",
@@ -2961,7 +2977,9 @@
         "p2": "Gợi ý hướng thiết kế phù hợp ngân sách",
         "p3": "Giải đáp quy trình và cách dùng nền tảng",
         "action": "Đặt lịch tư vấn",
-        "p4": "Đã bao gồm trong gói của bạn"
+        "included": "Đã bao gồm trong gói của bạn",
+        "priceFrom": "Từ {price}",
+        "viewPricing": "Xem các gói tư vấn"
       },
       "turnkeyForm": {
         "title": "Đăng ký triển khai trọn gói",
@@ -2995,12 +3013,13 @@
       "compareAction": "So sánh {count} nhà thầu",
       "compareCheckbox": "So sánh",
       "maxCompare": "Tối đa {max} nhà thầu",
+      "inviteLimitReached": "Đã dùng hết {max} lượt mời",
       "whyTitle": "Vì sao SAVICO đề xuất?",
       "why1": "Phù hợp loại công trình",
       "why2": "{count} dự án đã thực hiện",
       "why3": "Có thể khảo sát trong {hours}h",
       "projectLabel": "Dự án đang chọn",
-      "invitedPill": "Đã mời {used}/{max} · còn {left} lượt",
+      "invitedPill": "Đã mời <n>{used}</n>/{max} · còn <n>{left}</n> lượt",
       "viewInvites": "Xem lời mời",
       "switchProject": "Đổi dự án",
       "regionLabel": "Khu vực",
@@ -3025,6 +3044,7 @@
       "founded": "Thành lập năm {year}",
       "team": "{count} kiến trúc sư & kỹ sư",
       "office": "Văn phòng tại {address}",
+      "serviceAreaCount": "{count} khu vực",
       "strengths": "Thế mạnh",
       "featured": "Dự án tiêu biểu",
       "viewProject": "Xem dự án",
@@ -3039,6 +3059,9 @@
       "reportConfirmAction": "Gửi báo cáo",
       "addToCompare": "Thêm vào so sánh",
       "inCompare": "Đã thêm vào so sánh",
+      "compareChip": "So sánh {count}/{max}",
+      "compareFull": "Đã chọn đủ {max} nhà thầu để so sánh",
+      "clearProjectFilter": "Bỏ bộ lọc dự án",
       "viewInvites": "Xem lời mời",
       "notAcceptingNotice": "Nhà thầu đang tạm ngưng nhận dự án mới.",
       "viewSimilar": "Xem nhà thầu tương tự",
@@ -3086,7 +3109,7 @@
       "select": "Chọn nhà thầu",
       "selected": "Đã chọn nhà thầu",
       "footerHint": "Chọn tối đa {max} trong {total} nhà thầu để mời báo giá",
-      "footerSelected": "Đã chọn: {names}",
+      "footerSelected": "Đã chọn {count}: {names}",
       "footerEmpty": "Chưa chọn nhà thầu nào",
       "back": "Quay lại danh sách",
       "invite": "Mời nhà thầu đã chọn báo giá",
@@ -3120,6 +3143,7 @@
       "unavailable": "Không khả dụng",
       "slotTitle": "Chọn khung giờ",
       "slotOffice": "Giờ hành chính",
+      "chooseDateForSlots": "Chọn ngày ở lịch để xem khung giờ",
       "slotTaken": "Khung giờ này đã có lịch",
       "workingHours": "Khung giờ làm việc: 08:00 – 17:00 (Thứ 2 – Thứ 7)",
       "callAhead": "Nhà thầu sẽ liên hệ trước 30 phút để xác nhận.",
@@ -3149,6 +3173,7 @@
       "noMonthAvailable": "Tháng này chưa có ngày khả dụng.",
       "backToAvailableMonth": "Về tháng có lịch",
       "sending": "Đang gửi…",
+      "sendFailed": "Chưa gửi được, vui lòng thử lại",
       "cancelConfirmTitle": "Huỷ đặt lịch khảo sát?",
       "cancelConfirmBody": "Ngày và khung giờ bạn vừa chọn sẽ không được lưu.",
       "cancelConfirmAction": "Huỷ đặt lịch",
@@ -3157,7 +3182,7 @@
     "sent": {
       "title": "Đã gửi lời mời & đăng ký khảo sát",
       "subtitle": "Yêu cầu khảo sát của bạn đã được gửi đến {names}.",
-      "requestCode": "Mã yêu cầu: {code}",
+      "requestCode": "Mã yêu cầu: <accent>{code}</accent>",
       "sentAt": "Gửi lúc {time}",
       "detailTitle": "Chi tiết yêu cầu",
       "location": "Địa điểm khảo sát",
@@ -3206,7 +3231,14 @@
       "contactDialogTitle": "Liên hệ đội hỗ trợ SAVICO",
       "contactDialogCall": "Gọi ngay",
       "supervisionSuggestion": "Đã có nhà thầu — chọn cách quản lý thi công?",
-      "supervisionAction": "Xem gói giám sát"
+      "supervisionAction": "Xem gói giám sát",
+      "statusPending": "Chưa có cập nhật thời gian",
+      "updateToast": "Lời mời tới {name} đã chuyển sang trạng thái {status}",
+      "profilePanelDescription": "Hồ sơ năng lực nhà thầu · Chế độ xem nhanh",
+      "profileRating": "Đánh giá",
+      "profileSimilar": "Dự án tương tự",
+      "dossierPanelDescription": "Phiên bản hồ sơ đã gửi · Chỉ đọc",
+      "noPriceBadge": "Không chứa giá"
     },
     "picker": {
       "title": "Chọn dự án để tìm nhà thầu",
