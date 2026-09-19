@@ -46,7 +46,7 @@ export default async function AccountPage({ params }: PageProps) {
             <AccountSupervision />
           </div>
 
-          <div className='min-w-0'>
+          <div id='my-projects' className='min-w-0 scroll-mt-24'>
             {/* Tiêu đề nằm TRONG cột chính, không có dòng mô tả — Hình S24 để
                 thẻ hồ sơ bên trái bắt đầu ngang hàng với tiêu đề. */}
             <h1 className='mb-5 text-3xl font-semibold tracking-tight'>{t('title')}</h1>
