@@ -1470,10 +1470,15 @@
       "content": "Site content",
       "catalog": "Configuration",
       "ops": "Operations",
-      "config": "System configuration"
+      "config": "Configuration",
+      "payments": "Payments",
+      "contractorFlow": "Find a contractor",
+      "supervision": "Construction supervision",
+      "consult": "1:1 consultation",
+      "people": "Customers"
     },
     "nav": {
-      "dashboard": "Overview",
+      "dashboard": "To-do",
       "homeContent": "Home page",
       "staticPages": "Static pages",
       "settings": "Site settings",
@@ -1481,22 +1486,28 @@
       "articles": "Articles",
       "guide": "Guide",
       "consultants": "Architects",
-      "bookings": "Bookings",
-      "projects": "Customer projects",
-      "invitations": "Quote invitations",
-      "inspections": "Construction supervision",
-      "customers": "Users",
+      "bookings": "Consultations",
+      "projects": "Design projects",
+      "invitations": "Invitations & surveys",
+      "inspections": "Supervised projects",
+      "customers": "Customer accounts",
       "catalog": "Step 1 catalogue",
-      "pricing": "Unit prices",
+      "pricing": "Estimate unit prices",
       "uiStrings": "Interface strings",
-      "planTable": "Plan pricing",
-      "quotas": "Quotas & AI credits",
+      "planTable": "Design plans",
+      "quotas": "Limits & AI credits",
       "reschedule": "Reschedule requests",
-      "subscriptions": "Subscriptions",
-      "transactions": "Transactions",
-      "reviews": "Package reviews",
+      "subscriptions": "Plan subscriptions",
+      "transactions": "Transaction ledger",
+      "reviews": "Review moderation",
       "reports": "Abuse reports",
-      "consultPackages": "Consultation packages"
+      "consultPackages": "Consultation packages",
+      "orders": "Orders & reconciliation",
+      "discounts": "Discount codes",
+      "surveys": "Site surveys",
+      "contractors": "Contractors",
+      "changeRequests": "Change requests",
+      "supervisionPackages": "Supervision plans"
     },
     "actions": {
       "create": "Add new",
@@ -1537,7 +1548,8 @@
       "noImage": "No image",
       "requiredMessage": "This field is required.",
       "emailMessage": "Invalid email address.",
-      "sectionIndex": "Section {index}"
+      "sectionIndex": "Section {index}",
+      "name": "Full name"
     },
     "dashboard": {
       "description": "Every number is counted straight from the content store, so it always matches the tables below. Click a tile to jump to its screen.",
@@ -1743,7 +1755,7 @@
       "workLabel": "Caption"
     },
     "bookings": {
-      "description": "Slots booked on the consulting page. This is operational data, so it has no per-language version. A new booking stays Pending until someone calls back — the spec promises 24 working hours.",
+      "description": "Bookings from the 1:1 consultation page. Call the customer back within 24 working hours, agree it with the architect, then press Confirm; after the session press Held.",
       "code": "Booking id",
       "customer": "Customer",
       "phone": "Phone",
@@ -1755,7 +1767,24 @@
       "time": "Time",
       "createdAt": "Booked on",
       "allConsultants": "All architects",
-      "moreOnDay": "+{count} more"
+      "moreOnDay": "+{count} more",
+      "views": {
+        "pending": "To confirm",
+        "upcoming": "Upcoming",
+        "closed": "Done / cancelled",
+        "all": "All"
+      },
+      "decide": "Action",
+      "confirm": "Confirm",
+      "markDone": "Held",
+      "cancel": "Cancel",
+      "cancelConfirmTitle": "Cancel this consultation?",
+      "cancelConfirmBody": "Only cancel after telling the customer. Record why in the internal note (pencil icon).",
+      "statusToast": "Booking {code}: {status}.",
+      "bookedAgo": "Booked {time}",
+      "statusHint": "Use this to fix a mis-click in the table.",
+      "opsNote": "Internal note",
+      "opsNoteHint": "Customers never see this note."
     },
     "plans": {
       "description": "Prices and allowances for the three plans. Saving here updates the public pricing page immediately.",
@@ -2335,19 +2364,29 @@
       "rejectedToast": "Reschedule request rejected."
     },
     "invitations": {
-      "description": "Quote invitations customers sent to contractors. Customers only watch the status bar — the SAVICO support team moves it one step at a time, and steps never go back.",
+      "description": "Each row is one contractor the customer invited, with the survey time they picked. Call the contractor to pass on the invitation and lock the time, then call the customer. The Survey block is internal; the Progress bar is what the customer sees — hover a step to read it.",
       "code": "Invitation code",
       "project": "Project",
       "contractor": "Contractor",
-      "survey": "Survey slot",
-      "status": "Status",
+      "survey": "Survey (internal)",
+      "status": "Progress (customer sees)",
       "dossier": "Dossier {version} · {count} files",
-      "updatedAt": "Updated at {time}",
-      "advance": "Move on",
+      "advance": "Next step",
       "advanceConfirmTitle": "Move to \"{status}\"?",
-      "advanceConfirmBody": "The customer sees the new step on their invitation card right away. This cannot be undone.",
+      "advanceConfirmBody": "The customer will immediately see: \"{meaning}\"",
       "advancedToast": "Invitation {code} moved to \"{status}\".",
-      "finished": "Final step"
+      "finished": "Final step",
+      "views": {
+        "action": "Needs action",
+        "open": "In progress",
+        "done": "Completed",
+        "all": "All"
+      },
+      "revert": "Undo",
+      "revertConfirmTitle": "Go back to \"{status}\"?",
+      "revertConfirmBody": "Use this after a mistake. The current step is removed from the timeline the customer sees.",
+      "revertedToast": "Invitation {code} moved back to \"{status}\".",
+      "updatedAgo": "Updated {time}"
     },
     "invitationStatus": {
       "sent": "Sent",
@@ -2356,14 +2395,14 @@
       "done": "Completed"
     },
     "inspections": {
-      "description": "Site engineers record the inspection result for each stage. Confirming locks the stage dossier and opens the next stage — after that, only a change request can alter it.",
+      "description": "Projects whose customers bought a supervision plan, with the owner to call when needed. Once the engineer has inspected, press \"Confirm stage\": the stage file locks and the next stage opens. After that it can only change through a change request.",
       "project": "Project",
       "package": "Package",
       "engineer": "Assigned engineer",
       "currentStage": "Stage awaiting confirmation",
       "stageOf": "Stage {index}/{total}",
       "visits": "Site visits",
-      "confirm": "Confirm inspection",
+      "confirm": "Confirm stage",
       "confirmTitle": "Confirm stage \"{stage}\"",
       "readyToConfirm": "Customer uploaded the completion dossier",
       "pendingUpload": "Customer has not uploaded the completion dossier",
@@ -2377,7 +2416,9 @@
       "noteRequired": "Enter the inspection result — the customer reads this exact line.",
       "notePlaceholder": "E.g. Rebar and formwork match the drawings, ready for the concrete pour.",
       "lockNote": "Once confirmed the stage dossier is locked; any later change must go through a change request (R5).",
-      "confirmedToast": "Stage \"{stage}\" confirmed and the next stage opened."
+      "confirmedToast": "Stage \"{stage}\" confirmed and the next stage opened.",
+      "customer": "Customer",
+      "noCustomer": "No customer info"
     },
     "rescheduleStatus": {
       "pending": "Pending",
@@ -2489,6 +2530,259 @@
       "home_brands": "“Trusted by” strip",
       "home_testimonials": "“What customers say” strip",
       "home_cta": "Final CTA band"
+    },
+    "inbox": {
+      "description": "Everything someone is waiting on, in priority order. Click a row to open that screen already filtered to the work.",
+      "queuesTitle": "Queues",
+      "openTotal": "{count} open items",
+      "oldest": "Oldest: {time}",
+      "allClear": "Nothing is waiting.",
+      "kpi": {
+        "revenue": "Revenue this month",
+        "paidOrders": "Paid orders this month",
+        "openInvitations": "Open quote invitations",
+        "activeSupervision": "Projects under supervision"
+      },
+      "queues": {
+        "invitations": {
+          "title": "Invitations & surveys to handle",
+          "hint": "Invitations nobody has picked up yet, or survey times not yet agreed with contractor and customer."
+        },
+        "inspections": {
+          "title": "Stages awaiting supervisor sign-off",
+          "hint": "Customer uploaded stage files — engineer checks, then locks the stage."
+        },
+        "changeRequests": {
+          "title": "Change requests to review",
+          "hint": "Customer asks to amend a locked stage."
+        },
+        "bookings": {
+          "title": "Consultations to confirm",
+          "hint": "1:1 bookings — confirm with the architect."
+        },
+        "contractors": {
+          "title": "Unverified contractors",
+          "hint": "Check licences and the partnership contract, then mark verified."
+        },
+        "reviews": {
+          "title": "Reviews to moderate",
+          "hint": "Consultation reviews only go public once approved."
+        },
+        "reports": {
+          "title": "Open abuse reports",
+          "hint": "Users flagged false or offensive content."
+        }
+      }
+    },
+    "orderStatus": {
+      "awaiting": "Awaiting payment",
+      "verifying": "Awaiting bank confirmation",
+      "failed": "No payment received",
+      "paid": "Paid"
+    },
+    "orders": {
+      "description": "Look orders up when a customer calls. Payment status is updated automatically when the bank reports the transfer — nothing to confirm by hand. Search by order code, transfer note, name, phone or email.",
+      "views": {
+        "all": "All",
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Not paid"
+      },
+      "code": "Order",
+      "transferContent": "Transfer note",
+      "buyer": "Buyer",
+      "product": "Plan",
+      "amount": "Amount",
+      "status": "Status",
+      "phone": "Phone",
+      "invoiceRequested": "Invoice requested",
+      "paidAgo": "Confirmed {time}",
+      "createdAgo": "Created {time}",
+      "transferBlock": "Bank transfer",
+      "bankAccount": "Receiving account",
+      "invoiceBlock": "Invoice",
+      "company": "Company",
+      "taxCode": "Tax code",
+      "address": "Address",
+      "timeline": "Timeline",
+      "createdAt": "Order created",
+      "transferredAt": "Customer reported transfer",
+      "paidAt": "Payment confirmed",
+      "opsNote": "Internal note",
+      "opsNoteHint": "Customers never see this note."
+    },
+    "surveyStatus": {
+      "requested": "To confirm",
+      "rescheduled": "Time changed",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled"
+    },
+    "surveys": {
+      "description": "Customers pick a survey time when inviting a contractor; the survey itself happens off the website. Call the contractor to lock the time, call the customer to confirm, then update the status here.",
+      "views": {
+        "action": "To call",
+        "confirmed": "Confirmed",
+        "all": "All"
+      },
+      "when": "Date & time",
+      "project": "Project",
+      "customer": "Customer",
+      "contractor": "Contractor",
+      "status": "Status",
+      "noContact": "No contractor contact yet",
+      "handledAgo": "Updated {time}",
+      "requestedAgo": "Booked {time}",
+      "confirm": "Confirm",
+      "reschedule": "Change time",
+      "cancel": "Cancel",
+      "modalTitle": {
+        "confirm": "Confirm site survey {code}",
+        "reschedule": "Change survey time {code}",
+        "cancel": "Cancel site survey {code}"
+      },
+      "modalHint": {
+        "confirm": "You called {contractor} and the customer ({phone}); both agreed on this time.",
+        "reschedule": "Pick the new time both sides agreed on by phone. The survey needs confirming again afterwards.",
+        "cancel": "Cancel the survey with {contractor}. Record why, for when the customer calls."
+      },
+      "newDate": "New date",
+      "newSlot": "Time slot",
+      "opsNote": "Internal note",
+      "opsNotePlaceholder": "Who you called, when, what was agreed…",
+      "noteRequired": "Record a reason.",
+      "toast": {
+        "confirm": "Site survey {code} confirmed.",
+        "reschedule": "Site survey {code} time changed.",
+        "cancel": "Site survey {code} cancelled."
+      }
+    },
+    "changeRequests": {
+      "description": "Customers asking to amend a locked stage. Approve and the stage moves to a new version; reject and the locked version stays. The customer's dashboard updates immediately.",
+      "empty": "No change requests are waiting.",
+      "code": "Code",
+      "project": "Project",
+      "engineer": "Engineer: {name}",
+      "stage": "Stage",
+      "version": "{from} → {to}",
+      "reason": "Customer's reason",
+      "due": "Reply by",
+      "approve": "Approve",
+      "reject": "Reject",
+      "modalTitle": "Change request {code}",
+      "approveHint": "Approve: the stage moves to {version} and the customer can add files.",
+      "rejectHint": "Reject: the stage stays at {version}.",
+      "response": "Reply to the customer",
+      "responseRequired": "Explain to the customer why it was rejected.",
+      "approvedToast": "{code} approved — {project}.",
+      "rejectedToast": "{code} rejected — {project}.",
+      "stageLabel": "{index}/6 · {name}"
+    },
+    "contractors": {
+      "description": "The contractor directory used by the Find a contractor flow. Edits here change contractor cards, the comparison table and public profiles. Contact persons are visible to operations only.",
+      "views": {
+        "all": "All",
+        "unverified": "Unverified",
+        "hidden": "Hidden"
+      },
+      "unnamed": "(unnamed)",
+      "name": "Contractor name",
+      "kind": "Type",
+      "logo": "Logo",
+      "region": "Region",
+      "regions": {
+        "north": "North",
+        "central": "Central",
+        "south": "South"
+      },
+      "contact": "Contact",
+      "noContact": "No contact yet",
+      "state": "State",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "hidden": "Hide from suggestions",
+      "hiddenTag": "Hidden",
+      "hiddenHint": "Removes the contractor from every suggestion list without deleting the profile — past invitations still point to it.",
+      "openInvitations": "{count} open invitations",
+      "accepting": "Accepting projects",
+      "sections": {
+        "status": "Status",
+        "profile": "Profile",
+        "coverage": "Service area",
+        "stats": "Displayed figures",
+        "legal": "Legal & SAVICO partnership",
+        "contact": "Contact person (internal)"
+      },
+      "intro": "Introduction",
+      "strengths": "Strengths",
+      "foundedYear": "Founded",
+      "teamSize": "Team size",
+      "warranty": "Warranty",
+      "months": "months",
+      "surveyWithin": "Surveys within",
+      "office": "Office",
+      "serviceAreas": "Areas served",
+      "distance": "Displayed distance",
+      "distanceHint": "The mock uses a fixed number; the real system computes it from the site's coordinates.",
+      "rating": "Rating",
+      "reviewCount": "Reviews",
+      "completedProjects": "Completed projects",
+      "similarProjects": "Similar projects",
+      "legalChecks": "Legal checks passed",
+      "partnerVerified": "Contract cross-checked",
+      "contractCode": "Partnership contract code",
+      "partnerSince": "Partner since (MM/YYYY)",
+      "signedAt": "Signed on",
+      "pageCount": "Scan page count",
+      "scanUrl": "Scan link (PDF)",
+      "person": "Contact person",
+      "phone": "Phone",
+      "opsNote": "Internal note",
+      "ratingLine": "{kind} · ★ {rating} ({count} reviews)"
+    },
+    "discountValidity": {
+      "active": "Running",
+      "disabled": "Off",
+      "scheduled": "Not started",
+      "expired": "Expired",
+      "exhausted": "Used up"
+    },
+    "discounts": {
+      "description": "Codes customers enter on the order confirmation screen. The rules are shared with checkout, so what you set here is exactly what customers get. \"Used\" counts paid orders.",
+      "code": "Code",
+      "codeRule": "3–20 characters: uppercase letters, digits, dash or underscore.",
+      "enabled": "Enabled",
+      "type": "Discount type",
+      "typePercent": "Percentage",
+      "typeAmount": "Fixed amount",
+      "value": "Discount",
+      "maxDiscount": "Maximum discount",
+      "capped": "Up to {amount}",
+      "minOrder": "Minimum order",
+      "minOrderShort": "Orders from {amount}",
+      "products": "Applies to plans",
+      "productsHint": "Leave empty for every plan.",
+      "allProducts": "Every plan",
+      "period": "Valid period",
+      "periodHint": "Start and end days are included. Leave one side empty for no limit.",
+      "usageLimit": "Total uses",
+      "perAccountLimit": "Uses per email",
+      "emptyUnlimited": "Leave empty for no limit.",
+      "used": "Used",
+      "usedUnlimited": "{count} uses",
+      "state": "Validity",
+      "note": "Internal note"
+    },
+    "supervisionPackages": {
+      "description": "The three construction-management options on the Supervision plans page. Edit only — the plan picker and the dashboard refer to exactly these three. New prices apply to new orders only.",
+      "tier": "Plan",
+      "recommended": "Recommended",
+      "price": "Price / project",
+      "duration": "Duration",
+      "durationValue": "{months} months",
+      "months": "months",
+      "inspections": "On-site inspections",
+      "fitLine": "\"A good fit if…\" line",
+      "benefits": "Benefits on the card"
     }
   },
   "contractors": {
@@ -3122,7 +3416,7 @@
       "discountLabel": "Discount code",
       "discountPlaceholder": "Enter code",
       "apply": "Apply",
-      "discountApplied": "Code {code} applied — {percent}% off",
+      "discountApplied": "Code {code} applied — {amount} off",
       "discountInvalid": "That discount code is invalid or has expired.",
       "subtotal": "Subtotal",
       "discount": "Discount",

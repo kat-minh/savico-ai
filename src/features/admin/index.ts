@@ -6,6 +6,8 @@
  * đổi theo.
  */
 export { AdminShell } from './components/layout/admin-shell'
+export { AdminInbox } from './components/dashboard/admin-inbox'
+/** Trang số liệu cũ — tạm không gắn route nào, trang Tổng quan giờ là hàng đợi việc. */
 export { AdminOverview } from './components/dashboard/admin-overview'
 
 /**
@@ -27,6 +29,14 @@ export { QuotaEditor } from './components/business/quota-editor'
 export { ConsultPackageManager } from './components/consult/package-manager'
 
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
+export { OrderManager } from './components/ops/order-manager'
+export { DiscountManager } from './components/ops/discount-manager'
+export { SurveyManager } from './components/ops/survey-manager'
+export { ContractorManager } from './components/ops/contractor-manager'
+export { ChangeRequestManager } from './components/ops/change-request-manager'
+export { SupervisionPackageManager } from './components/ops/supervision-package-manager'
+export { BookingManager } from './components/consult/booking-manager'
+/** Bản lịch tháng cũ — tạm không gắn route, lịch tư vấn giờ là bảng như các hàng đợi khác. */
 export { BookingCalendar } from './components/consult/booking-calendar'
 export { RescheduleManager } from './components/consult/reschedule-manager'
 export { SubscriptionManager } from './components/business/subscription-manager'

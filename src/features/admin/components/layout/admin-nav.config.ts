@@ -2,10 +2,12 @@
 
 import {
   AppstoreOutlined,
+  AuditOutlined,
   BookOutlined,
+  CalculatorOutlined,
   CalendarOutlined,
-  CreditCardOutlined,
   DashboardOutlined,
+  DiffOutlined,
   DollarOutlined,
   FileTextOutlined,
   FlagOutlined,
@@ -16,9 +18,10 @@ import {
   PlayCircleOutlined,
   ProjectOutlined,
   SafetyCertificateOutlined,
+  ScheduleOutlined,
   SendOutlined,
   StarOutlined,
-  SwapOutlined,
+  TagOutlined,
   TeamOutlined,
   ThunderboltOutlined,
   ToolOutlined,
@@ -30,18 +33,25 @@ import type { ComponentType } from 'react'
 import { ADMIN_ROUTES, ROUTES, type AdminRoute, type AppRoute } from '@/shared/constants'
 
 /**
- * Menu trái, chia theo BẢN CHẤT của việc chứ không theo module.
+ * Menu trái — dựng quanh VIỆC VẬN HÀNH HẰNG NGÀY, theo thứ tự ưu tiên.
  *
- *   · Nội dung site — chữ, ảnh, bài viết: thứ khách ĐỌC.
- *   · Cấu hình hệ thống — giá gói, hạn mức, danh mục, đơn giá: con số điều khiển
- *     cách hệ thống CHẠY.
- *   · Vận hành — lịch hẹn, dự án, người dùng: dữ liệu phát sinh hằng ngày.
+ *   · Tổng quan         — hàng đợi việc hôm nay.
+ *   · Thanh toán        — tra cứu đơn, mã giảm giá, sổ giao dịch (trạng thái do BE cập nhật).
+ *   · Tìm nhà thầu      — lời mời & lịch khảo sát (một màn), danh bạ nhà thầu.
+ *   · Giám sát thi công — xác nhận giai đoạn, yêu cầu sửa đổi.
+ *   · Tư vấn 1:1        — lịch hẹn.
+ *   · Khách hàng        — tài khoản, dự án thiết kế, kiểm duyệt review / báo cáo.
+ *   · Cấu hình          — CON SỐ điều khiển hệ thống: giá gói, hạn mức, danh mục, đơn giá.
  *
- * Trộn ba thứ này vào nhau — bảng giá gói từng nằm chung trang với chữ của trang
- * Gói đăng ký — là nguồn gốc của câu "không biết mình đang sửa cái gì".
+ * Nhóm theo LUỒNG của khách chứ không theo kiểu dữ liệu: nhận cuộc gọi "tôi mời
+ * nhà thầu rồi mà chưa ai gọi lại" thì mọi thứ của luồng đó nằm cạnh nhau.
  *
- * Nhóm "Nội dung site" KHÔNG khai ở đây: nó dựng từ `admin-pages.config` để chỉ
- * có một nguồn sự thật (xem `admin-menu.tsx`).
+ * Nhóm "Nội dung site" (CMS theo trang) tạm GỠ khỏi menu — nội dung trang công
+ * khai đang sửa thẳng ở FE. Route `/admin/content/[page]` và `admin-pages.config`
+ * vẫn còn nguyên để bật lại khi làm CMS.
+ *
+ * "Kỳ đăng ký gói" (gia hạn / hủy tay) cũng gỡ khỏi menu: kích hoạt và hết hạn gói do
+ * backend xử lý; gói hiện tại của khách xem ở "Tài khoản khách".
  *
  * `key` là hậu tố khóa dịch dưới namespace `admin.nav`.
  */
@@ -51,28 +61,49 @@ export const ADMIN_NAV = [
     items: [{ key: 'dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: DashboardOutlined }]
   },
   {
-    key: 'config',
+    key: 'payments',
     items: [
-      { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: DollarOutlined },
-      { key: 'quotas', href: ADMIN_ROUTES.QUOTAS, icon: ThunderboltOutlined },
-      { key: 'consultPackages', href: ADMIN_ROUTES.CONSULT_PACKAGES, icon: GiftOutlined },
-      { key: 'catalog', href: ADMIN_ROUTES.CATALOG, icon: AppstoreOutlined },
-      { key: 'pricing', href: ADMIN_ROUTES.PRICING, icon: FileTextOutlined }
+      { key: 'orders', href: ADMIN_ROUTES.ORDERS, icon: DollarOutlined },
+      { key: 'discounts', href: ADMIN_ROUTES.DISCOUNTS, icon: TagOutlined },
+      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: FileTextOutlined }
     ]
   },
   {
-    key: 'ops',
+    key: 'contractorFlow',
     items: [
-      { key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined },
-      { key: 'reschedule', href: ADMIN_ROUTES.RESCHEDULE, icon: SwapOutlined },
-      { key: 'subscriptions', href: ADMIN_ROUTES.SUBSCRIPTIONS, icon: CreditCardOutlined },
-      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: DollarOutlined },
-      { key: 'reviews', href: ADMIN_ROUTES.REVIEWS, icon: StarOutlined },
-      { key: 'reports', href: ADMIN_ROUTES.REPORTS, icon: FlagOutlined },
-      { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
       { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined },
+      { key: 'contractors', href: ADMIN_ROUTES.CONTRACTORS, icon: TeamOutlined }
+    ]
+  },
+  {
+    key: 'supervision',
+    items: [
       { key: 'inspections', href: ADMIN_ROUTES.INSPECTIONS, icon: SafetyCertificateOutlined },
-      { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined }
+      { key: 'changeRequests', href: ADMIN_ROUTES.CHANGE_REQUESTS, icon: DiffOutlined }
+    ]
+  },
+  {
+    key: 'consult',
+    items: [{ key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined }]
+  },
+  {
+    key: 'people',
+    items: [
+      { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined },
+      { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
+      { key: 'reviews', href: ADMIN_ROUTES.REVIEWS, icon: StarOutlined },
+      { key: 'reports', href: ADMIN_ROUTES.REPORTS, icon: FlagOutlined }
+    ]
+  },
+  {
+    key: 'config',
+    items: [
+      { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: GiftOutlined },
+      { key: 'supervisionPackages', href: ADMIN_ROUTES.SUPERVISION_PACKAGES, icon: AuditOutlined },
+      { key: 'consultPackages', href: ADMIN_ROUTES.CONSULT_PACKAGES, icon: ScheduleOutlined },
+      { key: 'quotas', href: ADMIN_ROUTES.QUOTAS, icon: ThunderboltOutlined },
+      { key: 'catalog', href: ADMIN_ROUTES.CATALOG, icon: AppstoreOutlined },
+      { key: 'pricing', href: ADMIN_ROUTES.PRICING, icon: CalculatorOutlined }
     ]
   }
 ] as const satisfies readonly {

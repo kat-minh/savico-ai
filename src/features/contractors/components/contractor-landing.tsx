@@ -31,14 +31,13 @@ import { useState } from 'react'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth, useAuthDialogStore } from '@/shared/auth'
-import { useCmsDocument } from '@/shared/cms'
+import { useCmsCollection, useCmsDocument } from '@/shared/cms'
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { CONTRACTOR_PREVIEW_ID, contractorFirmRoute, contractorMatchesRoute, ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
 import { CONTRACTOR_SORTS } from '../constants/contractors.constants'
-import { CONTRACTORS_SEED } from '../api/contractors.seed'
 import { useCreateBrief } from '../hooks/use-brief'
 import { filterContractors } from '../services/contractor-list.service'
 import type { Contractor, ContractorSort } from '../types/contractor.types'
@@ -248,8 +247,10 @@ export function ContractorLanding() {
    * site"; chưa thay thì để khung nét đứt như mọi chỗ chờ asset khác.
    */
   const mapImage = useCmsDocument('uiAssets')['map.contractors']?.trim()
-  const featured = CONTRACTORS_SEED[0]
-  const ranked = filterContractors(CONTRACTORS_SEED, { radiusKm: 50, sort }).slice(0, 3)
+  // Danh bạ do vận hành quản lý ở /admin/contractors; nhà thầu bị ẩn không lên landing.
+  const directory = useCmsCollection('contractors').filter((contractor) => !contractor.hidden)
+  const featured = directory[0]
+  const ranked = filterContractors(directory, { radiusKm: 50, sort }).slice(0, 3)
 
   /** "Tạo hồ sơ" cần tài khoản: chưa đăng nhập thì mở popup đăng nhập trước. */
   const startBrief = () => {

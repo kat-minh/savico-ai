@@ -1470,10 +1470,15 @@
       "content": "Nội dung site",
       "catalog": "Danh mục cấu hình",
       "ops": "Vận hành",
-      "config": "Cấu hình hệ thống"
+      "config": "Cấu hình",
+      "payments": "Thanh toán",
+      "contractorFlow": "Tìm nhà thầu",
+      "supervision": "Giám sát thi công",
+      "consult": "Tư vấn 1:1",
+      "people": "Khách hàng"
     },
     "nav": {
-      "dashboard": "Tổng quan",
+      "dashboard": "Việc cần xử lý",
       "homeContent": "Trang chủ",
       "staticPages": "Trang tĩnh",
       "settings": "Cài đặt site",
@@ -1481,22 +1486,28 @@
       "articles": "Bài viết",
       "guide": "Hướng dẫn",
       "consultants": "Kiến trúc sư",
-      "bookings": "Lịch hẹn",
-      "projects": "Dự án khách hàng",
-      "invitations": "Lời mời báo giá",
-      "inspections": "Giám sát thi công",
-      "customers": "Người dùng",
+      "bookings": "Lịch tư vấn",
+      "projects": "Dự án thiết kế",
+      "invitations": "Lời mời & khảo sát",
+      "inspections": "Dự án giám sát",
+      "customers": "Tài khoản khách",
       "catalog": "Danh mục Bước 1",
       "pricing": "Đơn giá dự toán",
       "uiStrings": "Chuỗi giao diện",
-      "planTable": "Bảng giá gói",
+      "planTable": "Gói thiết kế",
       "quotas": "Hạn mức & lượt AI",
       "reschedule": "Yêu cầu đổi lịch",
-      "subscriptions": "Subscription",
-      "transactions": "Giao dịch",
-      "reviews": "Review gói tư vấn",
+      "subscriptions": "Kỳ đăng ký gói",
+      "transactions": "Sổ giao dịch",
+      "reviews": "Duyệt review",
       "reports": "Báo cáo vi phạm",
-      "consultPackages": "Gói tư vấn"
+      "consultPackages": "Gói tư vấn",
+      "orders": "Đơn hàng & đối soát",
+      "discounts": "Mã giảm giá",
+      "surveys": "Lịch khảo sát",
+      "contractors": "Nhà thầu",
+      "changeRequests": "Yêu cầu sửa đổi",
+      "supervisionPackages": "Gói giám sát"
     },
     "actions": {
       "create": "Thêm mới",
@@ -1537,7 +1548,8 @@
       "noImage": "Chưa có ảnh",
       "requiredMessage": "Trường này bắt buộc.",
       "emailMessage": "Email không hợp lệ.",
-      "sectionIndex": "Mục {index}"
+      "sectionIndex": "Mục {index}",
+      "name": "Họ tên"
     },
     "dashboard": {
       "description": "Số liệu đếm trực tiếp từ kho nội dung nên luôn khớp với các bảng bên dưới. Bấm vào một ô để sang màn quản lý tương ứng.",
@@ -1743,7 +1755,7 @@
       "workLabel": "Chú thích ảnh"
     },
     "bookings": {
-      "description": "Lịch khách đặt trên trang Tư vấn 1:1. Đây là dữ liệu vận hành nên không có bản dịch riêng. Khách đặt xong ở trạng thái Chờ xác nhận cho tới khi gọi lại — spec cam kết trong 24h làm việc.",
+      "description": "Lịch khách đặt ở trang Tư vấn 1:1. Gọi lại khách trong 24h làm việc, chốt với kiến trúc sư rồi bấm Xác nhận; xong buổi thì bấm Đã tư vấn.",
       "code": "Mã lịch",
       "customer": "Khách hàng",
       "phone": "Số điện thoại",
@@ -1755,7 +1767,24 @@
       "time": "Giờ",
       "createdAt": "Ngày đặt",
       "allConsultants": "Tất cả kiến trúc sư",
-      "moreOnDay": "+{count} lịch nữa"
+      "moreOnDay": "+{count} lịch nữa",
+      "views": {
+        "pending": "Chờ xác nhận",
+        "upcoming": "Sắp tới",
+        "closed": "Đã xong / hủy",
+        "all": "Tất cả"
+      },
+      "decide": "Xử lý",
+      "confirm": "Xác nhận",
+      "markDone": "Đã tư vấn",
+      "cancel": "Hủy lịch",
+      "cancelConfirmTitle": "Hủy lịch tư vấn này?",
+      "cancelConfirmBody": "Chỉ hủy sau khi đã báo cho khách. Ghi lý do ở ô ghi chú nội bộ (cây bút).",
+      "statusToast": "Lịch {code}: {status}.",
+      "bookedAgo": "Đặt {time}",
+      "statusHint": "Dùng khi bấm nhầm ở bảng.",
+      "opsNote": "Ghi chú nội bộ",
+      "opsNoteHint": "Khách không thấy ghi chú này."
     },
     "plans": {
       "description": "Giá và hạn mức của ba gói. Lưu xong là bảng giá trên trang Gói đăng ký đổi theo ngay.",
@@ -2335,19 +2364,29 @@
       "rejectedToast": "Đã từ chối yêu cầu đổi lịch."
     },
     "invitations": {
-      "description": "Lời mời báo giá khách gửi cho nhà thầu. Khách chỉ xem thanh trạng thái — đội hỗ trợ SAVICO là bên đẩy từng nấc, mỗi lần một nấc và không lùi lại.",
+      "description": "Mỗi dòng là một nhà thầu khách đã mời, kèm giờ khảo sát khách chọn. Gọi nhà thầu để chuyển lời mời và chốt giờ, gọi khách xác nhận. Khối Khảo sát là việc nội bộ; thanh Tiến trình thì khách thấy — rê chuột lên tên nấc để xem khách đọc câu gì.",
       "code": "Mã lời mời",
       "project": "Dự án",
       "contractor": "Nhà thầu",
-      "survey": "Lịch khảo sát",
-      "status": "Trạng thái",
+      "survey": "Khảo sát (nội bộ)",
+      "status": "Tiến trình (khách thấy)",
       "dossier": "Hồ sơ {version} · {count} tệp",
-      "updatedAt": "Cập nhật lúc {time}",
       "advance": "Chuyển nấc",
       "advanceConfirmTitle": "Chuyển sang \"{status}\"?",
-      "advanceConfirmBody": "Khách sẽ thấy nấc mới ngay trên thẻ lời mời. Đã chuyển thì không lùi lại được.",
+      "advanceConfirmBody": "Khách sẽ thấy ngay: \"{meaning}\"",
       "advancedToast": "Lời mời {code} đã chuyển sang \"{status}\".",
-      "finished": "Đã ở nấc cuối"
+      "finished": "Đã ở nấc cuối",
+      "views": {
+        "action": "Cần xử lý",
+        "open": "Đang xử lý",
+        "done": "Hoàn tất",
+        "all": "Tất cả"
+      },
+      "revert": "Hoàn tác",
+      "revertConfirmTitle": "Lùi về \"{status}\"?",
+      "revertConfirmBody": "Dùng khi chuyển nhầm. Nấc hiện tại bị gỡ khỏi dòng thời gian khách xem.",
+      "revertedToast": "Lời mời {code} đã lùi về \"{status}\".",
+      "updatedAgo": "Cập nhật {time}"
     },
     "invitationStatus": {
       "sent": "Đã gửi",
@@ -2356,14 +2395,14 @@
       "done": "Hoàn tất"
     },
     "inspections": {
-      "description": "Kỹ sư Giám sát ghi kết quả kiểm tra từng giai đoạn. Xác nhận là hồ sơ giai đoạn khóa lại và giai đoạn kế tiếp mở ra — sau đó chỉ đổi được qua Yêu cầu sửa đổi.",
+      "description": "Các dự án khách đã mua gói giám sát, kèm chủ dự án để gọi khi cần. Kỹ sư kiểm tra xong thì bấm \"Xác nhận giai đoạn\": hồ sơ giai đoạn khóa lại và giai đoạn kế tiếp mở ra. Sau đó chỉ đổi được qua Yêu cầu sửa đổi.",
       "project": "Dự án",
       "package": "Gói",
       "engineer": "Kỹ sư phụ trách",
       "currentStage": "Giai đoạn đang chờ",
       "stageOf": "Giai đoạn {index}/{total}",
       "visits": "Lượt kiểm tra",
-      "confirm": "Xác nhận kiểm tra",
+      "confirm": "Xác nhận giai đoạn",
       "confirmTitle": "Xác nhận giai đoạn \"{stage}\"",
       "readyToConfirm": "Khách đã tải hồ sơ hoàn thành",
       "pendingUpload": "Khách chưa tải hồ sơ hoàn thành",
@@ -2377,7 +2416,9 @@
       "noteRequired": "Nhập kết quả kiểm tra — khách sẽ đọc đúng dòng này.",
       "notePlaceholder": "Ví dụ: Cốt thép và cốp pha đúng bản vẽ, đủ điều kiện đổ bê tông.",
       "lockNote": "Xác nhận xong hồ sơ giai đoạn sẽ khóa; mọi thay đổi sau đó phải đi qua Yêu cầu sửa đổi (R5).",
-      "confirmedToast": "Đã xác nhận giai đoạn \"{stage}\" và mở giai đoạn kế tiếp."
+      "confirmedToast": "Đã xác nhận giai đoạn \"{stage}\" và mở giai đoạn kế tiếp.",
+      "customer": "Khách hàng",
+      "noCustomer": "Chưa có thông tin khách"
     },
     "rescheduleStatus": {
       "pending": "Chờ duyệt",
@@ -2489,6 +2530,259 @@
       "home_brands": "Dải “SAVICO được tin tưởng bởi”",
       "home_testimonials": "Dải “Khách hàng nói về SAVICO”",
       "home_cta": "Dải CTA cuối trang “Sẵn sàng bắt đầu dự án?”"
+    },
+    "inbox": {
+      "description": "Mọi việc đang có người chờ, xếp theo mức ưu tiên. Bấm vào một dòng để tới đúng màn đã lọc sẵn việc cần làm.",
+      "queuesTitle": "Hàng đợi",
+      "openTotal": "{count} việc đang mở",
+      "oldest": "Việc cũ nhất: {time}",
+      "allClear": "Không còn việc nào đang chờ.",
+      "kpi": {
+        "revenue": "Doanh thu tháng này",
+        "paidOrders": "Đơn đã thanh toán tháng này",
+        "openInvitations": "Lời mời báo giá đang mở",
+        "activeSupervision": "Dự án đang giám sát"
+      },
+      "queues": {
+        "invitations": {
+          "title": "Lời mời & khảo sát cần xử lý",
+          "hint": "Lời mời chưa ai tiếp nhận, hoặc giờ khảo sát chưa chốt với nhà thầu và khách."
+        },
+        "inspections": {
+          "title": "Giai đoạn chờ giám sát xác nhận",
+          "hint": "Khách đã tải hồ sơ giai đoạn — kỹ sư kiểm tra rồi khóa giai đoạn."
+        },
+        "changeRequests": {
+          "title": "Yêu cầu sửa đổi chờ duyệt",
+          "hint": "Khách xin sửa hồ sơ giai đoạn đã khóa."
+        },
+        "bookings": {
+          "title": "Lịch tư vấn chờ xác nhận",
+          "hint": "Khách đặt lịch tư vấn 1:1 — xác nhận với kiến trúc sư."
+        },
+        "contractors": {
+          "title": "Nhà thầu chưa xác minh",
+          "hint": "Kiểm tra giấy phép, hợp đồng hợp tác rồi bật xác minh."
+        },
+        "reviews": {
+          "title": "Review chờ duyệt",
+          "hint": "Review gói tư vấn chỉ hiện công khai sau khi duyệt."
+        },
+        "reports": {
+          "title": "Báo cáo vi phạm chưa xử lý",
+          "hint": "Người dùng báo nội dung sai / xấu."
+        }
+      }
+    },
+    "orderStatus": {
+      "awaiting": "Chờ thanh toán",
+      "verifying": "Chờ ngân hàng báo về",
+      "failed": "Chưa nhận được tiền",
+      "paid": "Đã thanh toán"
+    },
+    "orders": {
+      "description": "Tra cứu đơn khi khách gọi hỏi. Trạng thái thanh toán do hệ thống tự cập nhật khi ngân hàng báo tiền về — không cần xác nhận tay. Tìm theo mã đơn, nội dung chuyển khoản, tên, SĐT hoặc email.",
+      "views": {
+        "all": "Tất cả",
+        "paid": "Đã thanh toán",
+        "pending": "Đang chờ",
+        "failed": "Chưa thanh toán"
+      },
+      "code": "Mã đơn",
+      "transferContent": "Nội dung CK",
+      "buyer": "Người mua",
+      "product": "Gói",
+      "amount": "Số tiền",
+      "status": "Trạng thái",
+      "phone": "Điện thoại",
+      "invoiceRequested": "Cần xuất hóa đơn",
+      "paidAgo": "Xác nhận {time}",
+      "createdAgo": "Tạo {time}",
+      "transferBlock": "Chuyển khoản",
+      "bankAccount": "Tài khoản nhận",
+      "invoiceBlock": "Xuất hóa đơn",
+      "company": "Công ty",
+      "taxCode": "Mã số thuế",
+      "address": "Địa chỉ",
+      "timeline": "Mốc thời gian",
+      "createdAt": "Tạo đơn",
+      "transferredAt": "Khách báo đã chuyển",
+      "paidAt": "Xác nhận tiền",
+      "opsNote": "Ghi chú nội bộ",
+      "opsNoteHint": "Khách không thấy ghi chú này."
+    },
+    "surveyStatus": {
+      "requested": "Chờ gọi xác nhận",
+      "rescheduled": "Đã đổi giờ",
+      "confirmed": "Đã chốt lịch",
+      "cancelled": "Đã hủy"
+    },
+    "surveys": {
+      "description": "Khách chọn giờ khảo sát khi mời nhà thầu; buổi khảo sát diễn ra ngoài web. Gọi nhà thầu chốt giờ, gọi khách xác nhận, rồi cập nhật trạng thái ở đây.",
+      "views": {
+        "action": "Cần gọi",
+        "confirmed": "Đã chốt",
+        "all": "Tất cả"
+      },
+      "when": "Ngày giờ",
+      "project": "Dự án",
+      "customer": "Khách",
+      "contractor": "Nhà thầu",
+      "status": "Trạng thái",
+      "noContact": "Chưa có số liên hệ nhà thầu",
+      "handledAgo": "Cập nhật {time}",
+      "requestedAgo": "Đặt {time}",
+      "confirm": "Chốt lịch",
+      "reschedule": "Đổi giờ",
+      "cancel": "Hủy lịch",
+      "modalTitle": {
+        "confirm": "Chốt lịch khảo sát {code}",
+        "reschedule": "Đổi giờ khảo sát {code}",
+        "cancel": "Hủy lịch khảo sát {code}"
+      },
+      "modalHint": {
+        "confirm": "Đã gọi {contractor} và khách ({phone}), hai bên cùng đồng ý giờ này.",
+        "reschedule": "Chọn giờ mới hai bên đã thống nhất qua điện thoại. Lịch cần được chốt lại sau khi đổi.",
+        "cancel": "Hủy lịch khảo sát với {contractor}. Ghi lý do để còn tra lại khi khách gọi."
+      },
+      "newDate": "Ngày mới",
+      "newSlot": "Khung giờ",
+      "opsNote": "Ghi chú nội bộ",
+      "opsNotePlaceholder": "Đã gọi ai, lúc nào, thống nhất điều gì…",
+      "noteRequired": "Ghi lại lý do.",
+      "toast": {
+        "confirm": "Đã chốt lịch khảo sát {code}.",
+        "reschedule": "Đã đổi giờ khảo sát {code}.",
+        "cancel": "Đã hủy lịch khảo sát {code}."
+      }
+    },
+    "changeRequests": {
+      "description": "Khách xin sửa hồ sơ của giai đoạn đã khóa. Duyệt thì hồ sơ lên phiên bản mới; từ chối thì giữ nguyên phiên bản đang khóa. Bảng điều khiển của khách cập nhật ngay.",
+      "empty": "Không có yêu cầu sửa đổi nào đang chờ.",
+      "code": "Mã",
+      "project": "Dự án",
+      "engineer": "Kỹ sư: {name}",
+      "stage": "Giai đoạn",
+      "version": "{from} → {to}",
+      "reason": "Lý do khách đưa ra",
+      "due": "Hạn trả lời",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "modalTitle": "Yêu cầu sửa đổi {code}",
+      "approveHint": "Duyệt: hồ sơ giai đoạn lên {version}, khách bổ sung được tệp.",
+      "rejectHint": "Từ chối: hồ sơ giữ nguyên {version}.",
+      "response": "Phản hồi cho khách",
+      "responseRequired": "Từ chối thì cần giải thích cho khách.",
+      "approvedToast": "Đã duyệt {code} — {project}.",
+      "rejectedToast": "Đã từ chối {code} — {project}.",
+      "stageLabel": "{index}/6 · {name}"
+    },
+    "contractors": {
+      "description": "Danh bạ nhà thầu mà luồng Tìm nhà thầu đang dùng. Sửa ở đây là thẻ nhà thầu, bảng so sánh và hồ sơ công khai đổi theo. Đầu mối liên hệ chỉ vận hành thấy.",
+      "views": {
+        "all": "Tất cả",
+        "unverified": "Chưa xác minh",
+        "hidden": "Đang ẩn"
+      },
+      "unnamed": "(chưa đặt tên)",
+      "name": "Tên nhà thầu",
+      "kind": "Loại hình",
+      "logo": "Logo",
+      "region": "Vùng",
+      "regions": {
+        "north": "Miền Bắc",
+        "central": "Miền Trung",
+        "south": "Miền Nam"
+      },
+      "contact": "Đầu mối",
+      "noContact": "Chưa có đầu mối",
+      "state": "Tình trạng",
+      "verified": "Đã xác minh",
+      "unverified": "Chưa xác minh",
+      "hidden": "Ẩn khỏi đề xuất",
+      "hiddenTag": "Đang ẩn",
+      "hiddenHint": "Gỡ khỏi mọi danh sách đề xuất mà không xóa hồ sơ — lời mời cũ vẫn trỏ tới nhà thầu này.",
+      "openInvitations": "{count} lời mời đang mở",
+      "accepting": "Đang nhận dự án",
+      "sections": {
+        "status": "Trạng thái",
+        "profile": "Hồ sơ",
+        "coverage": "Khu vực phục vụ",
+        "stats": "Số liệu hiển thị",
+        "legal": "Pháp lý & hợp tác SAVICO",
+        "contact": "Đầu mối liên hệ (nội bộ)"
+      },
+      "intro": "Giới thiệu",
+      "strengths": "Thế mạnh",
+      "foundedYear": "Năm thành lập",
+      "teamSize": "Quy mô nhân sự",
+      "warranty": "Bảo hành",
+      "months": "tháng",
+      "surveyWithin": "Khảo sát trong",
+      "office": "Văn phòng",
+      "serviceAreas": "Địa bàn phục vụ",
+      "distance": "Khoảng cách hiển thị",
+      "distanceHint": "Bản mock dùng một số cố định; bản thật tính từ tọa độ công trình.",
+      "rating": "Điểm đánh giá",
+      "reviewCount": "Số đánh giá",
+      "completedProjects": "Dự án đã làm",
+      "similarProjects": "Dự án tương tự",
+      "legalChecks": "Hạng mục pháp lý đã kiểm tra",
+      "partnerVerified": "Đã đối chiếu hợp đồng",
+      "contractCode": "Mã hợp đồng hợp tác",
+      "partnerSince": "Hợp tác từ (MM/YYYY)",
+      "signedAt": "Ngày ký",
+      "pageCount": "Số trang bản scan",
+      "scanUrl": "Link bản scan (PDF)",
+      "person": "Người liên hệ",
+      "phone": "Điện thoại",
+      "opsNote": "Ghi chú nội bộ",
+      "ratingLine": "{kind} · ★ {rating} ({count} đánh giá)"
+    },
+    "discountValidity": {
+      "active": "Đang chạy",
+      "disabled": "Đã tắt",
+      "scheduled": "Chưa tới ngày",
+      "expired": "Hết hạn",
+      "exhausted": "Hết lượt"
+    },
+    "discounts": {
+      "description": "Mã khách nhập ở màn xác nhận đơn. Luật áp mã dùng chung với trang thanh toán, nên cấu hình ở đây là khách gặp đúng như vậy. \"Đã dùng\" đếm từ đơn đã thanh toán.",
+      "code": "Mã",
+      "codeRule": "3–20 ký tự: chữ in hoa, số, gạch ngang hoặc gạch dưới.",
+      "enabled": "Đang bật",
+      "type": "Kiểu giảm",
+      "typePercent": "Theo %",
+      "typeAmount": "Số tiền cố định",
+      "value": "Mức giảm",
+      "maxDiscount": "Giảm tối đa",
+      "capped": "Tối đa {amount}",
+      "minOrder": "Đơn tối thiểu",
+      "minOrderShort": "Đơn từ {amount}",
+      "products": "Áp dụng cho gói",
+      "productsHint": "Để trống = mọi gói.",
+      "allProducts": "Mọi gói",
+      "period": "Thời gian áp dụng",
+      "periodHint": "Tính cả ngày bắt đầu và ngày kết thúc. Để trống một đầu = không giới hạn.",
+      "usageLimit": "Tổng lượt dùng",
+      "perAccountLimit": "Lượt mỗi email",
+      "emptyUnlimited": "Để trống = không giới hạn.",
+      "used": "Đã dùng",
+      "usedUnlimited": "{count} lượt",
+      "state": "Hiệu lực",
+      "note": "Ghi chú nội bộ"
+    },
+    "supervisionPackages": {
+      "description": "Ba lựa chọn quản lý thi công trên trang Gói giám sát. Chỉ sửa, không thêm/xóa — luồng chọn gói và bảng điều khiển gọi đúng ba gói này. Giá mới chỉ áp cho đơn mới.",
+      "tier": "Gói",
+      "recommended": "Khuyến nghị",
+      "price": "Giá / dự án",
+      "duration": "Thời hạn",
+      "durationValue": "{months} tháng",
+      "months": "tháng",
+      "inspections": "Lượt kiểm tra hiện trường",
+      "fitLine": "Câu \"Phù hợp khi…\"",
+      "benefits": "Quyền lợi in trên thẻ"
     }
   },
   "contractors": {
@@ -3122,7 +3416,7 @@
       "discountLabel": "Mã giảm giá",
       "discountPlaceholder": "Nhập mã",
       "apply": "Áp dụng",
-      "discountApplied": "Đã áp dụng mã {code} — giảm {percent}%",
+      "discountApplied": "Đã áp dụng mã {code} — giảm {amount}",
       "discountInvalid": "Mã giảm giá không hợp lệ hoặc đã hết hạn.",
       "subtotal": "Tạm tính",
       "discount": "Giảm giá",

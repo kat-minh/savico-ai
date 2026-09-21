@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/shared/auth'
 import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import type {
@@ -333,11 +334,28 @@ function seedProject(projectId: string, projectName: string): SupervisionProject
   }
 }
 
+/**
+ * Chủ dự án của bản mock = tài khoản đang mở bảng điều khiển. Backend thật trả
+ * sẵn chủ dự án; ở đây phải lấy từ phiên đăng nhập để màn quản trị biết dự án
+ * giám sát này là của ai.
+ */
+function currentOwner(): SupervisionProject['customer'] {
+  const user = useAuthStore.getState().user
+  return user ? { name: user.name, phone: user.phone ?? '', email: user.email } : undefined
+}
+
 /** Lấy dự án trong kho, dựng dữ liệu mẫu ở lần mở đầu tiên. */
 function ensureProject(projectId: string): SupervisionProject {
+  const owner = currentOwner()
   const existing = cmsDb.find('supervisionProjects', projectId)
-  if (existing) return existing
-  return cmsDb.upsert('supervisionProjects', seedProject(projectId, 'Nhà phố Tân Lợi 2 tầng'))
+  if (existing) {
+    // Bản ghi dựng trước khi có trường chủ dự án — bổ sung ở lần mở kế tiếp.
+    return existing.customer || !owner
+      ? existing
+      : cmsDb.upsert('supervisionProjects', { ...existing, customer: owner })
+  }
+  const project = seedProject(projectId, 'Nhà phố Tân Lợi 2 tầng')
+  return cmsDb.upsert('supervisionProjects', owner ? { ...project, customer: owner } : project)
 }
 
 function replaceStage(

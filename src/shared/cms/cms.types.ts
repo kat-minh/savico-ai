@@ -335,9 +335,12 @@ export interface CmsBooking {
   date: string
   /** Giờ bắt đầu 24h, ví dụ "09:00". */
   time: string
+  /** Ghi chú khách để lại khi đặt. */
   note?: string
   status: CmsBookingStatus
   createdAt: string
+  /** Ghi chú nội bộ của vận hành — đã gọi ai, lý do hủy… Khách không thấy. */
+  opsNote?: string
 }
 
 export type CmsCustomerStatus = 'active' | 'suspended'
@@ -556,11 +559,13 @@ export interface CmsTransaction {
   id: string
   customerName: string
   customerEmail: string
-  /** Gói được mua / gia hạn. */
-  tier: PlanTier
+  /** Gói được mua / gia hạn — gói thiết kế hoặc gói giám sát. */
+  tier: PlanTier | SupervisionTier
   /** Số tiền, VND. */
   amount: number
   method: CmsTransactionMethod
+  /** Đơn hàng sinh ra giao dịch này (`SVC-YYNNN`), nếu có. */
+  orderId?: string
   status: CmsTransactionStatus
   /** ISO datetime. */
   createdAt: string
@@ -626,6 +631,15 @@ export interface CmsInvitationStep {
   at: string
 }
 
+/**
+ * Trạng thái xử lý một lịch khảo sát — vận hành cập nhật sau khi đã gọi cho CẢ
+ * khách lẫn nhà thầu (R3: buổi khảo sát diễn ra ngoài web).
+ *
+ * Bản ghi cũ không có trường này được coi là `requested`: khách vừa chọn giờ ở
+ * S16, chưa ai gọi xác nhận.
+ */
+export type CmsSurveyStatus = 'requested' | 'confirmed' | 'rescheduled' | 'cancelled'
+
 /** Lịch khảo sát khách chọn khi gửi lời mời (S16). */
 export interface CmsSurveyBooking {
   contractorId: string
@@ -635,6 +649,12 @@ export interface CmsSurveyBooking {
   note: string
   phone: string
   email: string
+  /** Thiếu = `requested`. */
+  status?: CmsSurveyStatus
+  /** Lần vận hành đổi trạng thái gần nhất (ISO). */
+  handledAt?: string
+  /** Ghi chú nội bộ — lý do đổi lịch / hủy, đã gọi ai lúc nào. Khách không thấy. */
+  opsNote?: string
 }
 
 /**
@@ -783,11 +803,23 @@ export interface CmsSupervisionStage {
   prepHint?: string
 }
 
+/** Chủ dự án — người vận hành gọi khi cần hẹn kỹ sư hay nhắc tải hồ sơ. */
+export interface CmsProjectOwner {
+  name: string
+  phone: string
+  email: string
+}
+
 /** Toàn bộ dữ liệu một dự án đang được giám sát. */
 export interface CmsSupervisionProject {
   /** Mã dự án `SVC-YYYY-NNNN` — cũng là khóa của bản ghi trong kho. */
   id: string
   projectName: string
+  /**
+   * Chủ dự án. Backend trả kèm theo dự án; bản ghi cũ trong kho mock có thể
+   * thiếu — màn quản trị khi đó tra người mua trong đơn gói giám sát.
+   */
+  customer?: CmsProjectOwner
   /** Gói đang dùng: `check` hoặc `control`. */
   packageTier: 'check' | 'control'
   /** Mã gói hiển thị trên thẻ dự án, ví dụ `SVG-2026-0001-AT`. */
@@ -817,4 +849,223 @@ export interface CmsReport {
   reason: string
   status: CmsReportStatus
   createdAt: string
+}
+
+/* ===========================================================================
+ * NHÀ THẦU (S12–S15).
+ *
+ * Danh bạ nằm ở `shared/cms` vì vận hành là bên nhập và xác minh nhà thầu:
+ * màn quản trị ghi, luồng Tìm nhà thầu đọc — mà `features/admin` không được
+ * import `features/contractors`. Không trường nào liên quan tới giá (R2).
+ * ======================================================================== */
+
+/** Vùng phục vụ — tab Bắc / Trung / Nam (S12). */
+export type CmsServiceRegion = 'north' | 'central' | 'south'
+
+/** Ảnh công trình trong hồ sơ năng lực (S13). */
+export interface CmsContractorPhoto {
+  url?: string
+  caption: string
+}
+
+/** Dự án tiêu biểu của nhà thầu (S13). */
+export interface CmsContractorProject {
+  id: string
+  name: string
+  year: number
+  imageUrl?: string
+}
+
+/**
+ * Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14).
+ *
+ * `pageCount` để dựng dải thumbnail bên trái viewer; bản scan thật do đội vận
+ * hành tải lên, ở mock chỉ có siêu dữ liệu.
+ */
+export interface CmsContractorPartnership {
+  verified: boolean
+  /** Hợp tác từ tháng/năm — hiển thị "08/2026". */
+  since: string
+  contractCode: string
+  signedAt: string
+  pageCount: number
+  scanUrl?: string
+}
+
+/**
+ * Thông tin liên hệ THẬT của nhà thầu — chỉ vận hành thấy.
+ *
+ * S13: "Thông tin liên hệ được mở sau khi lịch khảo sát được xác nhận". Vận hành
+ * là bên gọi nhà thầu để chốt lịch, nên số này nằm ở hồ sơ quản trị chứ không
+ * nằm trên trang công khai.
+ */
+export interface CmsContractorContact {
+  person: string
+  phone: string
+  email: string
+}
+
+/** Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. */
+export interface CmsContractor {
+  id: string
+  name: string
+  logoUrl?: string
+  /** Dòng phụ dưới tên: "Nhà thầu xây dựng". */
+  kind: string
+  verified: boolean
+  rating: number
+  reviewCount: number
+  /** Số dự án tương tự dự án đang xét — cơ sở của xếp hạng "Phù hợp nhất". */
+  similarProjects: number
+  /**
+   * Tổng số dự án đã hoàn thành — Hình S09 in nó ngay trên `similarProjects`
+   * trong thẻ nhà thầu ở hero ("46 dự án" / "18 dự án tương tự"). Hai con số
+   * khác nhau: một cái là bề dày, một cái là mức phù hợp với dự án đang xét.
+   */
+  completedProjects: number
+  distanceKm: number
+  serviceAreas: string[]
+  region: CmsServiceRegion
+  /** Có thể khảo sát trong bao nhiêu giờ — 24 hoặc 48 (S12, S15). */
+  surveyWithinHours: number
+  acceptingProjects: boolean
+  intro: string
+  strengths: string[]
+  photos: CmsContractorPhoto[]
+  foundedYear: number
+  teamSize: string
+  officeAddress: string
+  warrantyMonths: number
+  legalChecks: string[]
+  featuredProjects: CmsContractorProject[]
+  partnership: CmsContractorPartnership
+  /** Chỉ vận hành thấy — xem `CmsContractorContact`. */
+  contact?: CmsContractorContact
+  /**
+   * Ẩn khỏi mọi danh sách đề xuất (S09, S12) mà KHÔNG xóa hồ sơ: lời mời cũ vẫn
+   * trỏ tới nhà thầu này, xóa đi thì thẻ lời mời của khách mất tên.
+   */
+  hidden?: boolean
+  /** Ghi chú nội bộ của vận hành. */
+  opsNote?: string
+}
+
+/* ===========================================================================
+ * ĐƠN HÀNG — mua gói thiết kế (S01) và gói giám sát (S19), S03–S08.
+ *
+ * Nằm ở `shared/cms` vì R10 chỉ cho QR chuyển khoản: tới khi có đối soát tự
+ * động với ngân hàng, NGƯỜI là bên xác nhận tiền đã về. Trang khách (S06) phải
+ * đọc đúng bản ghi mà màn quản trị vừa đổi trạng thái — `features/admin` không
+ * được import `features/checkout`, nên kiểu phải ở tầng dùng chung.
+ * ======================================================================== */
+
+/** Thứ được bán: gói thiết kế (S01) hoặc gói giám sát thi công (S19). */
+export type CmsOrderKind = 'design' | 'supervision'
+
+/**
+ * Trạng thái đơn — cũng là thứ quyết định màn nào của khách được mở:
+ * `awaiting` → S04 (QR), `verifying` → S06, `failed` → S07, `paid` → S08.
+ */
+export type CmsOrderStatus = 'awaiting' | 'verifying' | 'failed' | 'paid'
+
+/** Thông tin người mua, sửa được ngay trên màn xác nhận đơn (S03). */
+export interface CmsOrderBuyer {
+  name: string
+  phone: string
+  email: string
+}
+
+/** Khối "Xuất hóa đơn" (S03) — tắt mặc định, bật thì cần đủ thông tin công ty. */
+export interface CmsOrderInvoice {
+  enabled: boolean
+  company: string
+  taxCode: string
+  address: string
+  email: string
+}
+
+/** Bản chụp sản phẩm tại thời điểm đặt — giá đổi sau đó không làm đơn cũ đổi theo. */
+export interface CmsOrderProduct {
+  id: string
+  kind: CmsOrderKind
+  /** Nhãn hiển thị, ví dụ "PLUS" hoặc "Gói An Tâm". */
+  name: string
+  price: number
+  /** Vài dòng quyền lợi in trong khối "Đơn hàng của bạn". */
+  benefits: string[]
+}
+
+/** Thông tin chuyển khoản hiện ở S04 và nhắc lại ở S06. */
+export interface CmsTransferInfo {
+  bankName: string
+  accountNumber: string
+  accountName: string
+  /** Nội dung chuyển khoản — sai nội dung là đơn phải xác nhận thủ công. */
+  content: string
+  /** Chuỗi mã QR (bản mock dựng từ chính thông tin trên). */
+  qrPayload: string
+}
+
+/** Một đơn mua gói. */
+export interface CmsOrder {
+  /** Mã đơn hàng `SVC-YYNNN`, hiện ở S04, S06, S07. */
+  id: string
+  product: CmsOrderProduct
+  /** Dự án gắn với đơn — chỉ có với gói giám sát (R8). */
+  projectId?: string
+  buyer: CmsOrderBuyer
+  invoice: CmsOrderInvoice
+  /** Mã giảm giá đã áp dụng, rỗng nếu chưa áp. */
+  discountCode: string
+  subtotal: number
+  discountAmount: number
+  total: number
+  status: CmsOrderStatus
+  createdAt: string
+  /** Hạn của mã QR hiện tại (ISO) — hết hạn thì tạo lại mã (S04). */
+  expiresAt: string
+  transfer: CmsTransferInfo
+  /** Lúc khách bấm "Tôi đã chuyển khoản" (S04 → S06). */
+  transferredAt?: string
+  /** Lúc vận hành xác nhận tiền đã về. */
+  paidAt?: string
+  /** Ghi chú nội bộ — số tham chiếu sao kê, lý do báo chưa nhận… Khách không thấy. */
+  opsNote?: string
+}
+
+/* ===========================================================================
+ * MÃ GIẢM GIÁ (S03).
+ * ======================================================================== */
+
+export type CmsDiscountType = 'percent' | 'amount'
+
+/**
+ * Một mã giảm giá.
+ *
+ * Số lượt đã dùng KHÔNG lưu ở đây mà đếm từ đơn đã thanh toán: một con số lưu
+ * riêng sẽ lệch ngay lần đầu có đơn bị xác nhận lại hay báo chưa nhận tiền.
+ */
+export interface CmsDiscountCode {
+  id: string
+  /** Mã khách gõ — luôn lưu chữ in hoa. */
+  code: string
+  type: CmsDiscountType
+  /** Phần trăm (1–100) hoặc số tiền VND, tùy `type`. */
+  value: number
+  /** Trần số tiền giảm cho mã phần trăm, VND. Trống = không giới hạn. */
+  maxDiscount?: number | null
+  /** Đơn tối thiểu để dùng mã, VND. Trống = không yêu cầu. */
+  minOrder?: number | null
+  /** ISO date `YYYY-MM-DD`, tính cả ngày đó. Trống = không giới hạn. */
+  startsAt?: string | null
+  endsAt?: string | null
+  /** Tổng số lượt dùng tối đa. Trống = không giới hạn. */
+  usageLimit?: number | null
+  /** Số lần một email được dùng. Trống = không giới hạn. */
+  perAccountLimit?: number | null
+  /** Mã sản phẩm (gói) áp dụng. Rỗng = mọi gói. */
+  productIds: string[]
+  enabled: boolean
+  /** Ghi chú nội bộ — chương trình nào, ai tạo. */
+  note?: string
 }

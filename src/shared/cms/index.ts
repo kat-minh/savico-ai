@@ -10,6 +10,17 @@ export type { CmsCollection, CmsCollectionMap, CmsDocument, CmsDocumentMap } fro
 export { cmsText, useCmsCollection, useCmsDocument } from './use-cms'
 export { CmsMessagesProvider, applyStringOverrides, isOverridableMessageKey } from './cms-messages'
 export { siteImage, useSiteImage } from './use-site-image'
+export {
+  RECEIVING_ACCOUNT,
+  discountAmountOf,
+  discountUsage,
+  evaluateDiscount,
+  normalizeDiscountCode,
+  transferContentOf,
+  transferInfoFor
+} from './commerce'
+export type { DiscountContext, DiscountRejection, DiscountResult } from './commerce'
+export { SURVEY_SLOTS, surveySlotId, surveySlotLabel } from './survey'
 export type {
   CmsBooking,
   CmsBookingStatus,
@@ -19,12 +30,29 @@ export type {
   CmsCustomerStatus,
   CmsDesignProject,
   CmsPackageReview,
+  CmsProjectOwner,
   CmsProjectStatus,
   CmsQuotas,
   CmsActor,
   CmsChangeRequest,
   CmsChangeRequestStatus,
+  CmsContractor,
+  CmsContractorContact,
   CmsContractorInvitation,
+  CmsContractorPartnership,
+  CmsContractorPhoto,
+  CmsContractorProject,
+  CmsDiscountCode,
+  CmsDiscountType,
+  CmsOrder,
+  CmsOrderBuyer,
+  CmsOrderInvoice,
+  CmsOrderKind,
+  CmsOrderProduct,
+  CmsOrderStatus,
+  CmsServiceRegion,
+  CmsSurveyStatus,
+  CmsTransferInfo,
   CmsInvitationStatus,
   CmsInvitationStep,
   CmsSurveyBooking,

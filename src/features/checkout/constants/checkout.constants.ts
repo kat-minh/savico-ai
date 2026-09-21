@@ -9,14 +9,6 @@ export type CheckoutStep = (typeof CHECKOUT_STEPS)[number]
 /** Mã QR sống 15 phút; hết hạn thì tạo lại (S04). */
 export const QR_TTL_MINUTES = 15
 
-/**
- * Mã giảm giá đang chạy. Bản thật lấy từ backend; đây là bảng mock để ô "Mã
- * giảm giá" ở S03 có thứ để kiểm tra.
- */
-export const DISCOUNT_CODES: Record<string, number> = {
-  KHAITRUONG: 15
-}
-
 /** Cam kết hoàn tiền in dưới nút thanh toán (S03). */
 export const REFUND_WINDOW_HOURS = 24
 

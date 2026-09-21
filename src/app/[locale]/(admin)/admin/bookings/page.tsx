@@ -1,6 +1,6 @@
 import { setRequestLocale } from 'next-intl/server'
 
-import { BookingCalendar } from '@/features/admin'
+import { BookingManager } from '@/features/admin'
 import type { Locale } from '@/i18n/routing'
 
 interface PageProps {
@@ -12,5 +12,5 @@ export default async function AdminBookingsPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <BookingCalendar />
+  return <BookingManager />
 }

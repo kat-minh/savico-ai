@@ -2,7 +2,10 @@ import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/routing'
 import type {
   CmsBooking,
   CmsBuildingTypeOption,
+  CmsContractor,
   CmsContractorInvitation,
+  CmsDiscountCode,
+  CmsOrder,
   CmsCustomer,
   CmsDesignProject,
   CmsConsultPackage,
@@ -33,6 +36,9 @@ import {
   BUILDING_TYPES_SEED,
   CONSULT_PACKAGES_SEED,
   CONTRACTOR_INVITATIONS_SEED,
+  CONTRACTORS_SEED,
+  DISCOUNT_CODES_SEED,
+  ORDERS_SEED,
   PACKAGE_REVIEWS_SEED,
   REPORTS_SEED,
   RESCHEDULE_REQUESTS_SEED,
@@ -103,6 +109,12 @@ export interface CmsCollectionMap {
   contractorInvitations: CmsContractorInvitation
   /** Dự án đang được giám sát — Giám sát xác nhận từng giai đoạn (S20, R5). */
   supervisionProjects: CmsSupervisionProject
+  /** Danh bạ nhà thầu — vận hành nhập và xác minh, luồng Tìm nhà thầu đọc (S12–S15). */
+  contractors: CmsContractor
+  /** Đơn mua gói — vận hành xác nhận tiền đã về, trang khách đọc trạng thái (S04–S08, R10). */
+  orders: CmsOrder
+  /** Mã giảm giá — ô nhập mã ở S03 đọc bảng này. */
+  discountCodes: CmsDiscountCode
 }
 
 export type CmsCollection = keyof CmsCollectionMap
@@ -136,7 +148,10 @@ const SHARED_COLLECTIONS: readonly CmsCollection[] = [
   'packageReviews',
   'reports',
   'contractorInvitations',
-  'supervisionProjects'
+  'supervisionProjects',
+  'contractors',
+  'orders',
+  'discountCodes'
 ]
 
 /** Ngăn lưu: một ngăn cho mỗi ngôn ngữ, cộng ngăn `shared` cho dữ liệu vận hành. */
@@ -189,7 +204,10 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   contractorInvitations: CONTRACTOR_INVITATIONS_SEED,
   // Dự án giám sát sinh ra khi khách mua gói; bản demo dựng dữ liệu mẫu ở lần
   // mở bảng điều khiển đầu tiên, nên bảng cũng bắt đầu rỗng.
-  supervisionProjects: []
+  supervisionProjects: [],
+  contractors: CONTRACTORS_SEED,
+  orders: ORDERS_SEED,
+  discountCodes: DISCOUNT_CODES_SEED
 }
 
 /** Không có gì bị ghi đè — dùng chung một tham chiếu cho cả hai tài liệu. */

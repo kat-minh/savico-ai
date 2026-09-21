@@ -5,14 +5,19 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
-import type { CmsTransactionMethod, CmsTransactionStatus, PlanTier } from '@/shared/cms'
+import type { CmsTransaction, CmsTransactionMethod, CmsTransactionStatus } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
 import { ResourceManager } from '../common/resource-manager'
+import { useProductLabel } from '../ops/use-product-label'
 
 const { Text } = Typography
 
 const STATUSES: CmsTransactionStatus[] = ['paid', 'pending', 'failed', 'refunded']
 const METHODS: CmsTransactionMethod[] = ['bank-qr', 'card', 'manual']
+
+/** Mã gói thuộc gói giám sát (S19) hay gói thiết kế (S01). */
+const SUPERVISION_TIERS: readonly string[] = ['self', 'check', 'control']
+const TIERS: CmsTransaction['tier'][] = ['basic', 'advanced', 'pro', 'check', 'control']
 
 const STATUS_TAG: Record<CmsTransactionStatus, string> = {
   paid: 'green',
@@ -33,6 +38,9 @@ export function TransactionManager() {
   const t = useTranslations('admin')
   const locale = useLocale() as Locale
   const [status, setStatus] = useState<CmsTransactionStatus | 'all'>('all')
+  const productLabel = useProductLabel()
+  const tierLabel = (tier: CmsTransaction['tier']) =>
+    productLabel(SUPERVISION_TIERS.includes(tier) ? 'supervision' : 'design', tier)
 
   return (
     <ResourceManager
@@ -88,12 +96,9 @@ export function TransactionManager() {
           title: t('customers.plan'),
           dataIndex: 'tier',
           width: 120,
-          filters: (['basic', 'advanced', 'pro'] as const).map((tier) => ({
-            text: t(`planTier.${tier}`),
-            value: tier
-          })),
+          filters: TIERS.map((tier) => ({ text: tierLabel(tier), value: tier })),
           onFilter: (value, record) => record.tier === value,
-          render: (tier: PlanTier) => <Tag>{t(`planTier.${tier}`)}</Tag>
+          render: (tier: CmsTransaction['tier']) => <Tag>{tierLabel(tier)}</Tag>
         },
         {
           title: t('transactions.amount'),

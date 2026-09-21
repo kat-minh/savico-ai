@@ -1,66 +1,45 @@
-import { cmsDb } from '@/shared/cms'
+import { cmsDb, evaluateDiscount, transferInfoFor, type CmsTransaction } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
-import { DISCOUNT_CODES, QR_TTL_MINUTES } from '../constants/checkout.constants'
-import type { CreateOrderPayload, Order, OrderProduct, TransferInfo } from '../types/checkout.types'
+import { QR_TTL_MINUTES } from '../constants/checkout.constants'
+import type { CreateOrderPayload, Order, OrderProduct } from '../types/checkout.types'
 
 /**
  * Mock trong trình duyệt của luồng mua gói (S03–S08), bật bằng
  * `NEXT_PUBLIC_USE_MOCK_API=true`.
  *
- * Đơn nằm ở `localStorage` vì luồng đi qua nhiều lần tải trang (QR → đang xác
- * nhận → hoàn tất) và người dùng hoàn toàn có thể F5 giữa chừng — mà đúng lúc
- * đó thì mất đơn là mất cả tiền đã chuyển.
+ * Đơn nằm ở bảng `orders` của `shared/cms` (localStorage): luồng đi qua nhiều
+ * lần tải trang và người dùng hoàn toàn có thể F5 giữa chừng, và màn tra cứu
+ * `/admin/orders` đọc cùng bảng đó.
  *
- * Tài khoản nhận là số MINH HỌA. Backend thật trả về tài khoản định danh theo
- * từng đơn để đối soát tự động.
+ * Bản thật: ngân hàng / cổng QR bắn WEBHOOK về backend khi tiền về, backend đổi
+ * đơn sang `paid` — không ai xác nhận bằng tay. Mock giả lập đúng việc đó: đơn
+ * đã báo chuyển khoản đủ `WEBHOOK_DELAY_MS` thì tự sang `paid` và ghi một dòng
+ * vào sổ giao dịch, như backend sẽ làm khi nhận webhook.
  */
-const STORE_KEY = 'savico.mock-checkout'
 
-/** Sau khi khách bấm "Tôi đã chuyển khoản", mock coi như ngân hàng báo có sau ngần này. */
-const CONFIRM_DELAY_MS = 8_000
+/** Sau khi khách bấm "Tôi đã chuyển khoản", mock coi như webhook báo có sau ngần này. */
+const WEBHOOK_DELAY_MS = 8_000
 
-interface MockStore {
-  sequence: number
-  orders: Record<string, Order>
-  /** Thời điểm bấm "Tôi đã chuyển khoản" của từng đơn, để mô phỏng đối soát. */
-  transferredAt: Record<string, number>
+type TransactionTier = CmsTransaction['tier']
+
+function findOrder(orderId: string): Order {
+  const order = cmsDb.find('orders', orderId)
+  if (!order) throw new Error(`Mock: không tìm thấy đơn hàng ${orderId}`)
+  return order
 }
 
-const emptyStore = (): MockStore => ({ sequence: 0, orders: {}, transferredAt: {} })
-
-function loadStore(): MockStore {
-  if (typeof window === 'undefined') return emptyStore()
-  try {
-    const raw = window.localStorage.getItem(STORE_KEY)
-    return raw ? { ...emptyStore(), ...(JSON.parse(raw) as MockStore) } : emptyStore()
-  } catch {
-    return emptyStore()
-  }
-}
-
-function saveStore(store: MockStore): void {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(STORE_KEY, JSON.stringify(store))
-}
-
-/** Mã đơn `SVC-YYNNN` như trên bản mô tả (#SVC-24001). */
-function nextOrderId(store: MockStore): string {
-  store.sequence += 1
+/**
+ * Mã đơn `SVC-YYNNN` như trên bản mô tả (#SVC-24001) — số kế tiếp sau mã lớn
+ * nhất của năm nay, để đơn mới không đè lên đơn mẫu.
+ */
+function nextOrderId(): string {
   const year = String(new Date().getFullYear()).slice(-2)
-  return `SVC-${year}${String(store.sequence).padStart(3, '0')}`
-}
-
-function transferInfo(orderId: string, amount: number): TransferInfo {
-  const content = orderId.replace(/-/g, '')
-  return {
-    bankName: 'Vietcombank',
-    accountNumber: '1028 6688 999',
-    accountName: 'CÔNG TY CỔ PHẦN SAVICO',
-    content,
-    // Chuỗi QR mô phỏng: đủ thông tin để quét ra nội dung đúng khi soi bằng mắt,
-    // không phải chuẩn VietQR thật.
-    qrPayload: `SAVICO|VCB|10286688999|${amount}|${content}`
-  }
+  const prefix = `SVC-${year}`
+  const highest = cmsDb
+    .list('orders')
+    .map((order) => (order.id.startsWith(prefix) ? Number(order.id.slice(prefix.length)) : 0))
+    .reduce((max, value) => (Number.isFinite(value) && value > max ? value : max), 0)
+  return `${prefix}${String(highest + 1).padStart(3, '0')}`
 }
 
 /** Bản chụp sản phẩm từ kho nội dung — giá đổi sau đó không làm đơn cũ đổi theo. */
@@ -95,13 +74,6 @@ function productSnapshot(payload: CreateOrderPayload): OrderProduct {
   }
 }
 
-/** Tính lại tiền sau khi áp mã giảm giá. */
-function priceOf(price: number, code: string) {
-  const percent = DISCOUNT_CODES[code.trim().toUpperCase()] ?? 0
-  const discountAmount = Math.round((price * percent) / 100)
-  return { discountPercent: percent, discountAmount, total: price - discountAmount }
-}
-
 function expiryFromNow(): string {
   return new Date(Date.now() + QR_TTL_MINUTES * 60_000).toISOString()
 }
@@ -109,10 +81,20 @@ function expiryFromNow(): string {
 export const mockCheckoutApi = {
   createOrder: async (payload: CreateOrderPayload): Promise<Order> => {
     await mockDelay(350)
-    const store = loadStore()
     const product = productSnapshot(payload)
-    const { discountPercent, discountAmount, total } = priceOf(product.price, payload.discountCode)
-    const id = nextOrderId(store)
+    // Kiểm lại mã ở "máy chủ": ô nhập mã ở S03 đã báo hợp lệ không có nghĩa là
+    // tới lúc bấm thanh toán mã vẫn còn lượt.
+    const discount = payload.discountCode
+      ? evaluateDiscount(
+          payload.discountCode,
+          { productId: product.id, subtotal: product.price, email: payload.buyer.email },
+          cmsDb.list('discountCodes'),
+          cmsDb.list('orders')
+        )
+      : null
+    const discountAmount = discount?.ok ? discount.amount : 0
+    const total = product.price - discountAmount
+    const id = nextOrderId()
 
     const order: Order = {
       id,
@@ -120,43 +102,44 @@ export const mockCheckoutApi = {
       ...(payload.projectId ? { projectId: payload.projectId } : {}),
       buyer: payload.buyer,
       invoice: payload.invoice,
-      discountCode: discountPercent > 0 ? payload.discountCode.trim().toUpperCase() : '',
-      discountPercent,
+      discountCode: discount?.ok ? discount.code : '',
       subtotal: product.price,
       discountAmount,
       total,
       status: 'awaiting',
       createdAt: new Date().toISOString(),
       expiresAt: expiryFromNow(),
-      transfer: transferInfo(id, total)
+      transfer: transferInfoFor(id, total)
     }
 
-    store.orders[id] = order
-    saveStore(store)
-    return order
+    return cmsDb.upsert('orders', order)
   },
 
   getOrder: async (orderId: string): Promise<Order> => {
     await mockDelay(150)
-    const store = loadStore()
-    const order = store.orders[orderId]
-    if (!order) throw new Error(`Mock: không tìm thấy đơn hàng ${orderId}`)
+    const order = findOrder(orderId)
 
-    // Mô phỏng đối soát ngân hàng: đơn đang chờ xác nhận đủ lâu thì báo có.
-    const startedAt = store.transferredAt[orderId]
-    if (order.status === 'verifying' && startedAt && Date.now() - startedAt >= CONFIRM_DELAY_MS) {
-      const paid: Order = { ...order, status: 'paid' }
-      store.orders[orderId] = paid
-      saveStore(store)
-      return paid
+    // Giả lập webhook tiền về.
+    const transferredAt = order.transferredAt ? new Date(order.transferredAt).getTime() : null
+    if (order.status === 'verifying' && transferredAt && Date.now() - transferredAt >= WEBHOOK_DELAY_MS) {
+      const paidAt = new Date().toISOString()
+      cmsDb.upsert('transactions', {
+        id: `TXN-${order.id}`,
+        orderId: order.id,
+        customerName: order.buyer.name,
+        customerEmail: order.buyer.email,
+        tier: order.product.id as TransactionTier,
+        amount: order.total,
+        method: 'bank-qr',
+        status: 'paid',
+        createdAt: paidAt
+      })
+      return cmsDb.upsert('orders', { ...order, status: 'paid', paidAt })
     }
 
-    // Hết hạn mã QR mà chưa chuyển khoản → màn "Chưa nhận được thanh toán" (S07).
+    // Hết hạn mã QR mà chưa báo chuyển khoản → màn "Chưa nhận được thanh toán" (S07).
     if (order.status === 'awaiting' && new Date(order.expiresAt).getTime() < Date.now()) {
-      const failed: Order = { ...order, status: 'failed' }
-      store.orders[orderId] = failed
-      saveStore(store)
-      return failed
+      return cmsDb.upsert('orders', { ...order, status: 'failed' })
     }
 
     return order
@@ -164,32 +147,18 @@ export const mockCheckoutApi = {
 
   markTransferred: async (orderId: string): Promise<Order> => {
     await mockDelay(250)
-    const store = loadStore()
-    const order = store.orders[orderId]
-    if (!order) throw new Error(`Mock: không tìm thấy đơn hàng ${orderId}`)
-
-    const updated: Order = { ...order, status: 'verifying' }
-    store.orders[orderId] = updated
-    store.transferredAt[orderId] = Date.now()
-    saveStore(store)
-    return updated
+    const order = findOrder(orderId)
+    return cmsDb.upsert('orders', { ...order, status: 'verifying', transferredAt: new Date().toISOString() })
   },
 
   regenerateQr: async (orderId: string): Promise<Order> => {
     await mockDelay(250)
-    const store = loadStore()
-    const order = store.orders[orderId]
-    if (!order) throw new Error(`Mock: không tìm thấy đơn hàng ${orderId}`)
-
-    const updated: Order = {
+    const { transferredAt: _dropped, ...order } = findOrder(orderId)
+    return cmsDb.upsert('orders', {
       ...order,
       status: 'awaiting',
       expiresAt: expiryFromNow(),
-      transfer: transferInfo(order.id, order.total)
-    }
-    store.orders[orderId] = updated
-    delete store.transferredAt[orderId]
-    saveStore(store)
-    return updated
+      transfer: transferInfoFor(order.id, order.total)
+    })
   }
 }

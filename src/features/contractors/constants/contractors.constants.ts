@@ -52,17 +52,8 @@ export const START_WINDOWS: readonly StartWindow[] = ['asap', 'in-1-3-months', '
 /** Thanh 4 nấc trạng thái lời mời (S18) — thứ tự cũng là thứ tự thời gian. */
 export const INVITATION_STEPS: readonly InvitationStatus[] = ['sent', 'received', 'accepted', 'done'] as const
 
-/** Giờ hành chính T2–T7, mỗi khung 1 tiếng, nghỉ trưa 12:00–13:00 (S16). */
-export const SURVEY_SLOTS: readonly string[] = [
-  '08:00 – 09:00',
-  '09:00 – 10:00',
-  '10:00 – 11:00',
-  '11:00 – 12:00',
-  '13:00 – 14:00',
-  '14:00 – 15:00',
-  '15:00 – 16:00',
-  '16:00 – 17:00'
-] as const
+/** Giờ hành chính T2–T7 (S16). Nằm ở `shared/cms` vì hàng đợi lịch khảo sát của vận hành cũng đọc. */
+export { SURVEY_SLOTS } from '@/shared/cms'
 
 /** Nhà thầu chỉ nhận lịch khảo sát trong 7 ngày tới (S16). */
 export const SURVEY_WINDOW_DAYS = 7

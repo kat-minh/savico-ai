@@ -1,4 +1,14 @@
-import type { CmsContractorInvitation, CmsInvitationStatus, CmsInvitationStep, CmsSurveyBooking } from '@/shared/cms'
+import type {
+  CmsContractor,
+  CmsContractorInvitation,
+  CmsContractorPartnership,
+  CmsContractorPhoto,
+  CmsContractorProject,
+  CmsInvitationStatus,
+  CmsInvitationStep,
+  CmsServiceRegion,
+  CmsSurveyBooking
+} from '@/shared/cms'
 
 /**
  * Kiểu dữ liệu của luồng TÌM NHÀ THẦU (S09–S18).
@@ -41,7 +51,7 @@ export type ContractorSort = 'match' | 'distance' | 'rating' | 'survey'
 export type SearchRadiusKm = 5 | 10 | 20 | 50
 
 /** Vùng phục vụ — tab Bắc / Trung / Nam (S12). */
-export type ServiceRegion = 'north' | 'central' | 'south'
+export type ServiceRegion = CmsServiceRegion
 
 /**
  * Thanh 4 nấc trên mỗi thẻ lời mời (S18). Trạng thái do đội hỗ trợ SAVICO cập
@@ -143,71 +153,25 @@ export interface ProjectBriefSummary {
   invitedCount: number
 }
 
+/*
+ * Danh bạ nhà thầu sống ở `shared/cms`: đội vận hành nhập và xác minh nhà thầu
+ * ở /admin/contractors, luồng này chỉ đọc. Tên cũ giữ nguyên cho mọi nơi gọi.
+ */
+
 /** Ảnh công trình trong hồ sơ năng lực (S13). */
-export interface ContractorPhoto {
-  url?: string
-  caption: string
-}
+export type ContractorPhoto = CmsContractorPhoto
 
 /** Dự án tiêu biểu của nhà thầu (S13). */
-export interface ContractorProject {
-  id: string
-  name: string
-  year: number
-  imageUrl?: string
-}
+export type ContractorProject = CmsContractorProject
+
+/** Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14). */
+export type ContractorPartnership = CmsContractorPartnership
 
 /**
- * Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14).
- *
- * `pageCount` để dựng dải thumbnail bên trái viewer; bản scan thật do đội vận
- * hành tải lên, ở mock chỉ có siêu dữ liệu.
+ * Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. Trường
+ * `contact` / `opsNote` chỉ dành cho vận hành, trang công khai không in ra.
  */
-export interface ContractorPartnership {
-  verified: boolean
-  /** Hợp tác từ tháng/năm — hiển thị "08/2026". */
-  since: string
-  contractCode: string
-  signedAt: string
-  pageCount: number
-  scanUrl?: string
-}
-
-/** Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. */
-export interface Contractor {
-  id: string
-  name: string
-  logoUrl?: string
-  /** Dòng phụ dưới tên: "Nhà thầu xây dựng". */
-  kind: string
-  verified: boolean
-  rating: number
-  reviewCount: number
-  /** Số dự án tương tự dự án đang xét — cơ sở của xếp hạng "Phù hợp nhất". */
-  similarProjects: number
-  /**
-   * Tổng số dự án đã hoàn thành — Hình S09 in nó ngay trên `similarProjects`
-   * trong thẻ nhà thầu ở hero ("46 dự án" / "18 dự án tương tự"). Hai con số
-   * khác nhau: một cái là bề dày, một cái là mức phù hợp với dự án đang xét.
-   */
-  completedProjects: number
-  distanceKm: number
-  serviceAreas: string[]
-  region: ServiceRegion
-  /** Có thể khảo sát trong bao nhiêu giờ — 24 hoặc 48 (S12, S15). */
-  surveyWithinHours: number
-  acceptingProjects: boolean
-  intro: string
-  strengths: string[]
-  photos: ContractorPhoto[]
-  foundedYear: number
-  teamSize: string
-  officeAddress: string
-  warrantyMonths: number
-  legalChecks: string[]
-  featuredProjects: ContractorProject[]
-  partnership: ContractorPartnership
-}
+export type Contractor = CmsContractor
 
 /** Một khung giờ khảo sát (S16). */
 export interface SurveySlot {

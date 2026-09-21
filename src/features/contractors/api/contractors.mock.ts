@@ -15,7 +15,6 @@ import type {
 } from '../types/contractor.types'
 import type { SaveBriefPayload, SurveyRequestDetail } from './contractors.api'
 import { BRIEFS_SEED } from './briefs.seed'
-import { CONTRACTORS_SEED } from './contractors.seed'
 
 /**
  * Mock trong trình duyệt của luồng Tìm nhà thầu (S09–S18), bật bằng
@@ -140,15 +139,33 @@ function withDerivedStatus(brief: ProjectBrief): ProjectBrief {
   return settled ? { ...brief, status: 'contracted' } : brief
 }
 
+/**
+ * Bản công khai của một nhà thầu. Đầu mối liên hệ và ghi chú nội bộ là dữ liệu
+ * của vận hành — backend thật không trả chúng ra trang công khai, mock cũng vậy.
+ */
+function publicProfile({ contact: _contact, opsNote: _opsNote, ...contractor }: Contractor): Contractor {
+  return contractor
+}
+
+function contractorName(contractorId: string): string {
+  return cmsDb.find('contractors', contractorId)?.name ?? contractorId
+}
+
 export const mockContractorsApi = {
+  /** Nhà thầu vận hành đã ẩn (`hidden`) không vào danh sách đề xuất (S09, S12). */
   listContractors: async (_projectId: string): Promise<Contractor[]> => {
     await mockDelay(250)
-    return [...CONTRACTORS_SEED]
+    return cmsDb
+      .list('contractors')
+      .filter((contractor) => !contractor.hidden)
+      .map(publicProfile)
   },
 
+  /** Vẫn mở được hồ sơ nhà thầu đã ẩn — lời mời cũ của khách trỏ tới đây. */
   getContractor: async (contractorId: string): Promise<Contractor> => {
     await mockDelay(200)
-    return CONTRACTORS_SEED.find((c) => c.id === contractorId) ?? notFound(`nhà thầu ${contractorId}`)
+    const contractor = cmsDb.find('contractors', contractorId)
+    return contractor ? publicProfile(contractor) : notFound(`nhà thầu ${contractorId}`)
   },
 
   createBrief: async (): Promise<ProjectBrief> => {
@@ -247,7 +264,7 @@ export const mockContractorsApi = {
       // và tìm kiếm, mà danh bạ nhà thầu thì nằm trong feature này.
       projectName: brief?.name ?? projectId,
       contractorId: booking.contractorId,
-      contractorName: CONTRACTORS_SEED.find((c) => c.id === booking.contractorId)?.name ?? booking.contractorId,
+      contractorName: contractorName(booking.contractorId),
       sentAt,
       status: 'sent',
       updatedAt: sentAt,

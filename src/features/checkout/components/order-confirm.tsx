@@ -15,9 +15,9 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Switch } from '@/shared/components/ui/switch'
 import { ROUTES } from '@/shared/constants/routes'
-import { useCmsCollection } from '@/shared/cms'
+import { evaluateDiscount, useCmsCollection } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
-import { DISCOUNT_CODES, REFUND_WINDOW_HOURS } from '../constants/checkout.constants'
+import { REFUND_WINDOW_HOURS } from '../constants/checkout.constants'
 import { useCreateOrder } from '../hooks/use-checkout'
 import type { OrderKind } from '../types/checkout.types'
 import { CheckoutSteps } from './checkout-steps'
@@ -52,6 +52,8 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
 
   const plans = useCmsCollection('plans')
   const supervisionPackages = useCmsCollection('supervisionPackages')
+  const discountCodes = useCmsCollection('discountCodes')
+  const orders = useCmsCollection('orders')
   const createOrder = useCreateOrder()
 
   const product = useMemo(() => {
@@ -93,7 +95,7 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
   const [invoiceOn, setInvoiceOn] = useState(false)
   const [invoice, setInvoice] = useState({ company: '', taxCode: '', address: '', email: '' })
   const [codeInput, setCodeInput] = useState('')
-  const [applied, setApplied] = useState<{ code: string; percent: number } | null>(null)
+  const [applied, setApplied] = useState<{ code: string; amount: number } | null>(null)
   const [codeError, setCodeError] = useState(false)
   const [agreed, setAgreed] = useState(false)
 
@@ -112,17 +114,23 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
     )
   }
 
-  const discountAmount = applied ? Math.round((product.price * applied.percent) / 100) : 0
+  const discountAmount = applied?.amount ?? 0
   const total = product.price - discountAmount
 
   const applyCode = () => {
-    const percent = DISCOUNT_CODES[codeInput.trim().toUpperCase()]
-    if (!percent) {
+    // Mã do vận hành quản lý ở /admin/discounts — cùng một luật với lúc tạo đơn.
+    const result = evaluateDiscount(
+      codeInput,
+      { productId, subtotal: product.price, email: buyer.email },
+      discountCodes,
+      orders
+    )
+    if (!result.ok) {
       setApplied(null)
       setCodeError(true)
       return
     }
-    setApplied({ code: codeInput.trim().toUpperCase(), percent })
+    setApplied({ code: result.code, amount: result.amount })
     setCodeError(false)
   }
 
@@ -348,7 +356,7 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
               {applied ? (
                 <p className='text-primary flex items-center gap-1.5 text-xs'>
                   <CheckCircle2 className='size-3.5' />
-                  {t('discountApplied', { code: applied.code, percent: applied.percent })}
+                  {t('discountApplied', { code: applied.code, amount: formatCurrency(applied.amount, locale) })}
                 </p>
               ) : null}
               {codeError ? <p className='text-destructive text-xs'>{t('discountInvalid')}</p> : null}

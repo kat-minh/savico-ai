@@ -1,12 +1,12 @@
 'use client'
 
-import { SafetyCertificateOutlined } from '@ant-design/icons'
+import { PhoneOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
 import { App, Alert, Button, Form, Input, Modal, Switch, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import type { CmsStageEvent, CmsSupervisionProject, CmsSupervisionStage } from '@/shared/cms'
-import { useSaveAdminItem } from '../../hooks/use-admin-data'
+import type { CmsProjectOwner, CmsStageEvent, CmsSupervisionProject, CmsSupervisionStage } from '@/shared/cms'
+import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
 import { ResourceManager } from '../common/resource-manager'
 
 const { Text } = Typography
@@ -51,6 +51,22 @@ export function InspectionManager() {
   const save = useSaveAdminItem('supervisionProjects')
 
   const [form] = Form.useForm<InspectionFormValues>()
+
+  /**
+   * Dự án này của ai. Backend trả sẵn `customer`; bản ghi cũ thiếu thì tra người
+   * mua trong đơn gói giám sát gắn với đúng dự án (R8: đơn giám sát luôn có
+   * `projectId`).
+   */
+  const { data: orders = [] } = useAdminCollection('orders')
+  const ownerOf = useMemo(() => {
+    const buyers = new Map<string, CmsProjectOwner>()
+    for (const order of orders) {
+      if (order.product.kind === 'supervision' && order.projectId && !buyers.has(order.projectId)) {
+        buyers.set(order.projectId, order.buyer)
+      }
+    }
+    return (project: CmsSupervisionProject) => project.customer ?? buyers.get(project.id)
+  }, [orders])
   const [target, setTarget] = useState<CmsSupervisionProject | null>(null)
 
   const stage = target ? activeStage(target) : null
@@ -118,7 +134,10 @@ export function InspectionManager() {
         description={t('inspections.description')}
         allowDelete={false}
         allowEdit={false}
-        searchText={(item) => `${item.id} ${item.projectName} ${item.engineer} ${item.packageCode}`}
+        searchText={(item) => {
+          const owner = ownerOf(item)
+          return `${item.id} ${item.projectName} ${item.engineer} ${item.packageCode} ${owner?.name ?? ''} ${owner?.phone ?? ''} ${owner?.email ?? ''}`
+        }}
         columns={[
           {
             title: t('inspections.project'),
@@ -133,6 +152,30 @@ export function InspectionManager() {
                 </Text>
               </div>
             )
+          },
+          {
+            title: t('inspections.customer'),
+            key: 'customer',
+            width: 220,
+            render: (_, record) => {
+              const owner = ownerOf(record)
+              if (!owner) return <Text type='warning'>{t('inspections.noCustomer')}</Text>
+              return (
+                <div style={{ minWidth: 0 }}>
+                  <Text strong style={{ display: 'block' }}>
+                    {owner.name}
+                  </Text>
+                  {owner.phone ? (
+                    <Text copyable type='secondary' style={{ display: 'block', fontSize: 12 }}>
+                      <PhoneOutlined /> {owner.phone}
+                    </Text>
+                  ) : null}
+                  <Text type='secondary' style={{ fontSize: 12 }}>
+                    {owner.email}
+                  </Text>
+                </div>
+              )
+            }
           },
           {
             title: t('inspections.package'),
@@ -177,14 +220,20 @@ export function InspectionManager() {
             title: t('table.actions'),
             key: 'confirm',
             width: 200,
-            render: (_, record) =>
-              activeStage(record) ? (
-                <Button size='small' type='primary' icon={<SafetyCertificateOutlined />} onClick={() => open(record)}>
-                  {t('inspections.confirm')}
-                </Button>
-              ) : (
-                <Text type='secondary'>—</Text>
-              )
+            // Nút luôn có mặt, cùng bề ngang — dự án đã xong 6 giai đoạn thì mờ đi
+            // chứ không biến thành một dấu gạch làm cột nhảy.
+            render: (_, record) => (
+              <Button
+                size='small'
+                type='primary'
+                icon={<SafetyCertificateOutlined />}
+                disabled={!activeStage(record)}
+                style={{ width: 168 }}
+                onClick={() => open(record)}
+              >
+                {t('inspections.confirm')}
+              </Button>
+            )
           }
         ]}
         renderForm={() => null}

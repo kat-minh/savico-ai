@@ -1,17 +1,17 @@
 import { BUILDING_IMAGE } from '@/shared/lib/imagery'
-import type { Contractor } from '../types/contractor.types'
+import type { CmsContractor, CmsContractorContact } from '../cms.types'
 
 /**
  * Danh bạ nhà thầu mẫu cho bản mock (S12–S15).
  *
- * Số liệu là dữ liệu minh họa — khi có backend, danh bạ này do đội vận hành
- * quản lý trong khu quản trị. Cố ý KHÔNG có trường nào liên quan tới giá: web
+ * Số liệu là dữ liệu minh họa. Danh bạ do đội vận hành
+ * quản lý ở /admin/contractors. Cố ý KHÔNG có trường nào liên quan tới giá: web
  * không hiển thị báo giá của nhà thầu (R2).
  *
  * Khoảng cách trải từ 2 tới 26 km để bộ lọc bán kính ở S12 (5/10/20/50 km)
  * thật sự lọc ra kết quả khác nhau chứ không phải nút bấm cho có.
  */
-export const CONTRACTORS_SEED: readonly Contractor[] = [
+const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-abc',
     name: 'ABC Construction',
@@ -192,4 +192,21 @@ export const CONTRACTORS_SEED: readonly Contractor[] = [
       pageCount: 3
     }
   }
-] as const
+]
+
+/**
+ * Đầu mối liên hệ của từng nhà thầu — chỉ vận hành thấy (S13: liên hệ chỉ mở
+ * sau khi lịch khảo sát được xác nhận, và người mở là đội hỗ trợ SAVICO).
+ */
+const CONTACTS: Record<string, CmsContractorContact> = {
+  'ctr-abc': { person: 'Nguyễn Văn An', phone: '0905 123 456', email: 'lienhe@abc-construction.vn' },
+  'ctr-angia': { person: 'Trần Thị Gia', phone: '0912 345 678', email: 'hotro@angiabuild.vn' },
+  'ctr-hungphat': { person: 'Lê Hưng', phone: '0935 222 111', email: 'kinhdoanh@hungphathome.vn' },
+  'ctr-truongthinh': { person: 'Phạm Trường', phone: '0978 456 789', email: 'contact@truongthinh-ec.vn' },
+  'ctr-daiviet': { person: 'Võ Đại', phone: '0903 987 654', email: 'info@daivietgroup.vn' }
+}
+
+export const CONTRACTORS_SEED: CmsContractor[] = DIRECTORY.map((contractor) => {
+  const contact = CONTACTS[contractor.id]
+  return contact ? { ...contractor, contact } : { ...contractor }
+})

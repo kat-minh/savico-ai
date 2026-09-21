@@ -74,6 +74,18 @@ export const ADMIN_ROUTES = {
   CONSULT_PACKAGES: '/admin/consult-packages',
 
   // Vận hành — dữ liệu backend sinh ra, không phải nội dung biên tập
+  /** Đơn hàng & đối soát chuyển khoản QR (R10). */
+  ORDERS: '/admin/orders',
+  /** Lịch khảo sát — vận hành gọi xác nhận với khách và nhà thầu (S16, R3). */
+  SURVEYS: '/admin/surveys',
+  /** Yêu cầu sửa đổi hồ sơ giai đoạn đã khóa do khách gửi (S23, R5). */
+  CHANGE_REQUESTS: '/admin/change-requests',
+  /** Danh bạ nhà thầu + xác minh (S12–S15). */
+  CONTRACTORS: '/admin/contractors',
+  /** Mã giảm giá của ô nhập mã ở S03. */
+  DISCOUNTS: '/admin/discounts',
+  /** Giá, thời hạn, lượt kiểm tra của ba gói giám sát (S19). */
+  SUPERVISION_PACKAGES: '/admin/supervision-packages',
   BOOKINGS: '/admin/bookings',
   RESCHEDULE: '/admin/bookings/reschedule',
   SUBSCRIPTIONS: '/admin/subscriptions',
