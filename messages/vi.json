@@ -1303,6 +1303,7 @@
   },
   "account": {
     "title": "Tài khoản của tôi",
+    "new": "mới",
     "info": {
       "title": "Thông tin tài khoản",
       "name": "Họ và tên",
@@ -1354,6 +1355,201 @@
       "savedAt": "Lưu ngày {date}",
       "description": "Các mẫu bạn đã lưu.",
       "count": "{count} mẫu"
+    },
+    "dossiers": {
+      "title": "Hồ sơ dự án",
+      "description": "Các hồ sơ bạn đã gửi tới nhà thầu và trạng thái từng lời mời báo giá.",
+      "create": "Tạo hồ sơ dự án mới · miễn phí",
+      "source": {
+        "selfCreated": "Hồ sơ tự tạo",
+        "design": "Từ gói thiết kế"
+      },
+      "invited": "Đã mời {count}/3",
+      "completed": "Hoàn tất",
+      "notInvited": "Chưa gửi nhà thầu",
+      "ready": "Hồ sơ đã sẵn sàng, chưa gửi tới nhà thầu nào",
+      "viewDetail": "Xem chi tiết",
+      "findContractor": "Tìm nhà thầu",
+      "area": "{area} m²",
+      "scale": {
+        "ground": "Trệt",
+        "ground+1": "Trệt + 1 lầu",
+        "ground+2": "Trệt + 2 lầu",
+        "ground+3": "Trệt + 3 lầu"
+      },
+      "status": {
+        "sent": "Đã gửi",
+        "received": "Đã tiếp nhận",
+        "accepted": "Nhà thầu đã nhận",
+        "done": "Hoàn tất"
+      },
+      "empty": {
+        "title": "Chưa có hồ sơ dự án",
+        "description": "Tạo hồ sơ miễn phí để gửi thông tin công trình và bắt đầu tìm nhà thầu phù hợp.",
+        "create": "Tạo hồ sơ dự án — miễn phí",
+        "viewDesignPlans": "Xem gói thiết kế"
+      },
+      "note": "Trạng thái do đội hỗ trợ SAVICO cập nhật. Bấm “Xem chi tiết” để mở trang theo dõi lời mời, lịch khảo sát và tiến độ xử lý."
+    },
+    "purchaseHistory": {
+      "title": "Lịch sử mua gói",
+      "description": "Gói đang dùng, lượt còn lại và toàn bộ đơn hàng đã thanh toán.",
+      "viewPlans": "Xem các gói",
+      "designPlan": "Gói thiết kế",
+      "designPlanMeta": "Gói thiết kế · kích hoạt",
+      "supervisionPlan": "Gói giám sát",
+      "supervisionPlanMeta": "Gói giám sát · {project}",
+      "activatedAt": "Kích hoạt {date}",
+      "active": "Đang dùng",
+      "pendingPayment": "Đang chờ thanh toán",
+      "designCredits": "Lượt thiết kế - dự toán",
+      "libraryCredits": "Lượt tra thư viện mẫu",
+      "consultationCredits": "Tư vấn 1:1 trong gói",
+      "inspectionCredits": "Lượt kiểm tra kỹ sư",
+      "supervisionStage": "Giai đoạn giám sát",
+      "expiresAt": "Hạn dùng {date}",
+      "designOrderMeta": "Hạn dùng {date} · đơn #{order}",
+      "supervisionOrderMeta": "Hạn gói {date} · đơn #{order} · đơn nâng cấp #{pendingOrder} đang chờ thanh toán",
+      "upgrade": "Nâng cấp gói",
+      "openSupervision": "Mở giám sát",
+      "viewReceipt": "Xem biên nhận",
+      "continuePayment": "Tiếp tục thanh toán",
+      "filterLabel": "Trạng thái",
+      "filter": {
+        "all": "Tất cả",
+        "paid": "Đã thanh toán",
+        "pending": "Đang xác nhận",
+        "refunded": "Đã hoàn tiền"
+      },
+      "table": {
+        "code": "Mã đơn",
+        "date": "Ngày",
+        "plan": "Gói",
+        "amount": "Số tiền",
+        "status": "Trạng thái",
+        "receipt": "Biên nhận"
+      },
+      "tier": {
+        "basic": "Gói Cơ bản",
+        "advanced": "Gói Nâng cao",
+        "pro": "Gói Chuyên nghiệp"
+      },
+      "status": {
+        "paid": "Đã thanh toán",
+        "pending": "Đang xác nhận",
+        "failed": "Thất bại",
+        "refunded": "Đã hoàn tiền"
+      },
+      "receipt": "Biên nhận",
+      "method": "Hình thức",
+      "methodValue": {
+        "bank-qr": "QR chuyển khoản",
+        "card": "Thẻ",
+        "manual": "Ghi nhận thủ công"
+      },
+      "paymentNote": "Thanh toán trực tuyến hiện được SAVICO xác nhận qua QR chuyển khoản. Biên nhận hiển thị theo dữ liệu giao dịch đã ghi nhận trong hệ thống.",
+      "receiptDialog": {
+        "title": "Biên nhận thanh toán",
+        "titleWithCode": "Biên nhận #{code}",
+        "description": "Thông tin giao dịch đã được SAVICO ghi nhận.",
+        "receiptHeading": "Biên nhận thanh toán · #{code}",
+        "time": "Thời gian",
+        "buyer": "Người mua",
+        "subtotal": "Tạm tính",
+        "discount": "Giảm giá",
+        "noDiscount": "—",
+        "total": "Tổng thanh toán",
+        "transferContent": "Nội dung CK",
+        "vatInvoice": "Hóa đơn VAT",
+        "vatIssued": "Đã xuất · gửi email",
+        "vatNotRequested": "Chưa yêu cầu",
+        "planDetail": {
+          "basic": "Gói thiết kế · 3 lượt thiết kế - dự toán · 20 lượt tra thư viện",
+          "advanced": "Gói thiết kế · 7 lượt thiết kế - dự toán · 100 lượt tra thư viện",
+          "pro": "Gói thiết kế cao cấp · đầy đủ quyền lợi tư vấn 1:1"
+        },
+        "note": "Cần đổi thông tin hóa đơn hoặc hoàn tiền? Liên hệ đội hỗ trợ SAVICO và kèm mã đơn #{code}.",
+        "resendEmail": "Gửi lại email",
+        "sendingEmail": "Đang gửi...",
+        "downloadPdf": "Tải PDF",
+        "generatingPdf": "Đang tạo PDF...",
+        "downloadSuccess": "Đã tải biên nhận PDF",
+        "downloadError": "Không thể tạo PDF. Vui lòng thử lại.",
+        "emailQueued": "Đã gửi yêu cầu gửi lại biên nhận tới {email}"
+      },
+      "empty": {
+        "title": "Chưa có lịch sử mua gói",
+        "description": "Các gói đã mua sẽ xuất hiện tại đây."
+      }
+    },
+    "consultationHistory": {
+      "title": "Lịch sử tư vấn 1:1",
+      "description": "Buổi sắp tới, ghi chú của kiến trúc sư và các buổi đã qua.",
+      "quota": "Lượt tư vấn 1:1: {count} lượt còn lại trong {plan} · buổi đầu tiên luôn miễn phí · đổi hoặc hủy lịch trước 24 giờ để được hoàn lượt.",
+      "planTier": {
+        "basic": "gói Cơ bản",
+        "advanced": "gói Nâng cao",
+        "pro": "gói Chuyên nghiệp"
+      },
+      "bookNew": "Đặt lịch mới",
+      "yearsExperience": "{count} năm kinh nghiệm",
+      "yourNote": "Ghi chú của bạn cho KTS",
+      "upcomingLabel": "Sắp tới",
+      "hoursLeft": "Còn {count} giờ",
+      "ongoing": "Đang diễn ra",
+      "reschedule": "Đổi lịch",
+      "cancel": {
+        "action": "Hủy lịch",
+        "title": "Hủy lịch tư vấn?",
+        "description": "Nếu hủy đủ sớm theo chính sách, lượt tư vấn sẽ được hoàn lại vào gói của bạn.",
+        "keep": "Giữ lịch",
+        "confirm": "Hủy lịch",
+        "processing": "Đang hủy...",
+        "success": "Đã hủy lịch tư vấn"
+      },
+      "filterLabel": "Hiển thị",
+      "filter": {
+        "all": "Tất cả",
+        "upcoming": "Sắp tới",
+        "done": "Đã hoàn thành",
+        "closed": "Đã hủy / không tham gia"
+      },
+      "status": {
+        "pending": "Đang chờ xác nhận",
+        "confirmed": "Đã xác nhận",
+        "done": "Đã hoàn thành",
+        "cancelled": "Đã hủy",
+        "missed": "Không tham gia"
+      },
+      "meta": {
+        "withinPlan": "Trong gói Nâng cao",
+        "cancelled": "Bạn hủy ngày {date} · đủ điều kiện hoàn lượt",
+        "missed": "KTS đã gọi {count} lần, không liên lạc được"
+      },
+      "sessionNote": "Ghi chú buổi tư vấn",
+      "hideSessionNote": "Ẩn ghi chú",
+      "bookAgain": "Đặt lại",
+      "support": "Hỗ trợ",
+      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn trong thời gian sớm nhất.",
+      "supportDialog": {
+        "title": "Hỗ trợ buổi tư vấn",
+        "description": "SAVICO đã ghi nhận yêu cầu hỗ trợ cho {consultant} · {code}. Đội hỗ trợ sẽ liên hệ với bạn trong thời gian sớm nhất.",
+        "close": "Đã hiểu"
+      },
+      "rating": {
+        "action": "Đánh giá",
+        "prompt": "Chọn số sao cho buổi tư vấn",
+        "starLabel": "{count} sao",
+        "success": "Đã ghi nhận đánh giá {count} sao"
+      },
+      "noteInline": {
+        "title": "Ghi chú sau buổi tư vấn · {consultant}",
+        "createProject": "Tạo dự án từ gợi ý này"
+      },
+      "empty": {
+        "title": "Chưa có lịch tư vấn",
+        "description": "Các buổi tư vấn bạn đặt sẽ xuất hiện tại đây."
+      }
     },
     "subtitle": "Thông tin tài khoản, các dự án đang làm và mẫu bạn đã lưu.",
     "plan": {

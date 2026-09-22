@@ -308,7 +308,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
                 variant='outline'
                 className='h-13 flex-1 transition-[background-color,transform] hover:bg-muted active:scale-[0.98] motion-reduce:transform-none'
               >
-                <Link href={`${ROUTES.ACCOUNT}#my-projects`}>
+                <Link href={ROUTES.ACCOUNT_PROJECTS}>
                   <FolderOpen className='size-4' />
                   {t('myProjects')}
                 </Link>
