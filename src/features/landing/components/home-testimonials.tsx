@@ -9,7 +9,7 @@ import { revealEase } from '@/shared/components/common'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
 import { useScrollSnapIndex } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { HOME_TESTIMONIALS, type HomeTestimonial } from '../constants/landing.constants'
+import { HOME_TESTIMONIALS, type HomeTestimonial } from '../constants/landing.constants' ////cmt
 
 /** Năm sao vàng đặc trên đầu mỗi thẻ đánh giá. */
 const STARS = [0, 1, 2, 3, 4]
