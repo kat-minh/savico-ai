@@ -1375,7 +1375,8 @@
         "ground": "Trệt",
         "ground+1": "Trệt + 1 lầu",
         "ground+2": "Trệt + 2 lầu",
-        "ground+3": "Trệt + 3 lầu"
+        "ground+3": "Trệt + 3 lầu",
+        "ground+4": "Trệt + 4 lầu"
       },
       "status": {
         "sent": "Đã gửi",
