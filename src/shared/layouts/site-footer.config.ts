@@ -25,7 +25,7 @@ export type FooterLinkKey =
   | 'terms'
 
 export interface FooterLink {
-  labelKey: FooterLinkKey
+  labelKey: FooterLinkKeygit
   href: string | null
 }
 
