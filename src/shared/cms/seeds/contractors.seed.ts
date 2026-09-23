@@ -41,9 +41,27 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       'Cam kết bảo hành 24 tháng'
     ],
     featuredProjects: [
-      { id: 'p1', name: 'Nhà phố Nguyễn Văn Linh', year: 2023, imageUrl: BUILDING_IMAGE.townhouse },
-      { id: 'p2', name: 'Nhà phố Tân Quy', year: 2024, imageUrl: BUILDING_IMAGE.roofed },
-      { id: 'p3', name: 'Cải tạo nhà Hòa Bình', year: 2023, imageUrl: BUILDING_IMAGE.apartment }
+      {
+        id: 'p1',
+        name: 'Nhà phố Nguyễn Văn Linh',
+        year: 2023,
+        imageUrl: BUILDING_IMAGE.townhouse,
+        tags: ['Nhà phố', 'Thi công trọn gói', 'Hoàn thiện']
+      },
+      {
+        id: 'p2',
+        name: 'Nhà phố Tân Quy',
+        year: 2024,
+        imageUrl: BUILDING_IMAGE.roofed,
+        tags: ['Nhà phố', 'Phần thô', 'Hoàn thiện']
+      },
+      {
+        id: 'p3',
+        name: 'Cải tạo nhà Hòa Bình',
+        year: 2023,
+        imageUrl: BUILDING_IMAGE.apartment,
+        tags: ['Thi công trọn gói', 'Hoàn thiện']
+      }
     ],
     partnership: {
       verified: true,
@@ -77,8 +95,20 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     warrantyMonths: 18,
     legalChecks: ['Giấy phép kinh doanh đã xác minh', 'Đội ngũ kỹ sư phụ trách', 'Cam kết bảo hành'],
     featuredProjects: [
-      { id: 'p1', name: 'Biệt thự Tân An', year: 2025, imageUrl: BUILDING_IMAGE.villa },
-      { id: 'p2', name: 'Nhà phố Lê Duẩn', year: 2024, imageUrl: BUILDING_IMAGE.townhouse }
+      {
+        id: 'p1',
+        name: 'Biệt thự Tân An',
+        year: 2025,
+        imageUrl: BUILDING_IMAGE.villa,
+        tags: ['Biệt thự', 'Thi công trọn gói', 'Nội thất']
+      },
+      {
+        id: 'p2',
+        name: 'Nhà phố Lê Duẩn',
+        year: 2024,
+        imageUrl: BUILDING_IMAGE.townhouse,
+        tags: ['Nhà phố', 'Thi công trọn gói']
+      }
     ],
     partnership: {
       verified: true,
@@ -112,8 +142,20 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     warrantyMonths: 24,
     legalChecks: ['Giấy phép kinh doanh đã xác minh', 'Đội ngũ kỹ sư phụ trách', 'Bảo hiểm công trình'],
     featuredProjects: [
-      { id: 'p1', name: 'Nhà phố Y Jút', year: 2024, imageUrl: BUILDING_IMAGE.townhouse },
-      { id: 'p2', name: 'Nhà phố Phan Chu Trinh', year: 2023, imageUrl: BUILDING_IMAGE.roofed }
+      {
+        id: 'p1',
+        name: 'Nhà phố Y Jút',
+        year: 2024,
+        imageUrl: BUILDING_IMAGE.townhouse,
+        tags: ['Nhà phố', 'Phần thô']
+      },
+      {
+        id: 'p2',
+        name: 'Nhà phố Phan Chu Trinh',
+        year: 2023,
+        imageUrl: BUILDING_IMAGE.roofed,
+        tags: ['Nhà phố', 'Hoàn thiện']
+      }
     ],
     partnership: {
       verified: true,
@@ -151,7 +193,15 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       'Bảo hiểm công trình',
       'Cam kết bảo hành'
     ],
-    featuredProjects: [{ id: 'p1', name: 'Biệt thự vườn Ea Kao', year: 2025, imageUrl: BUILDING_IMAGE.garden }],
+    featuredProjects: [
+      {
+        id: 'p1',
+        name: 'Biệt thự vườn Ea Kao',
+        year: 2025,
+        imageUrl: BUILDING_IMAGE.garden,
+        tags: ['Biệt thự', 'Thi công trọn gói']
+      }
+    ],
     partnership: {
       verified: true,
       since: '03/2026',
@@ -183,7 +233,15 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     officeAddress: 'Krông Pắc, Đắk Lắk',
     warrantyMonths: 12,
     legalChecks: ['Giấy phép kinh doanh đã xác minh', 'Cam kết bảo hành'],
-    featuredProjects: [{ id: 'p1', name: 'Nhà phố Phước An', year: 2024, imageUrl: BUILDING_IMAGE.townhouse }],
+    featuredProjects: [
+      {
+        id: 'p1',
+        name: 'Nhà phố Phước An',
+        year: 2024,
+        imageUrl: BUILDING_IMAGE.townhouse,
+        tags: ['Phần thô', 'Hoàn thiện']
+      }
+    ],
     partnership: {
       verified: true,
       since: '09/2026',

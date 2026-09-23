@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/utils'
  * Vẽ nét mảnh bằng SVG `currentColor` thay vì ảnh chân dung: đây là hình minh
  * họa vai trò, không phải một KTS cụ thể — hồ sơ KTS thật thuộc mục VIII.
  */
-export function ArchitectAvatar({ className }: { className?: string }) {
+export function ArchitectAvatar({ className, ...props }: { className?: string } & React.ComponentProps<'svg'>) {
   return (
     <svg
       viewBox='0 0 96 104'
@@ -18,6 +18,7 @@ export function ArchitectAvatar({ className }: { className?: string }) {
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
+      {...props}
     >
       {/* Bong bóng thoại */}
       <path d='M60 8h28a6 6 0 0 1 6 6v14a6 6 0 0 1-6 6H74l-8 8v-8h-6a6 6 0 0 1-6-6V14a6 6 0 0 1 6-6Z' />

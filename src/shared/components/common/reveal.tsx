@@ -7,7 +7,7 @@ import { motion, type Transition, type Variants } from 'motion/react'
 export const revealEase = [0.16, 1, 0.3, 1] as const
 
 /** Springy transition for interactive hover/tap. */
-export const revealSpring: Transition = { type: 'spring', stiffness: 300, damping: 24, mass: 0.6 }
+export const revealSpring: Transition = { type: 'spring', stiffness: 170, damping: 25, mass: 0.8 }
 
 /** Stagger-item variants — children of <RevealStagger> use these. */
 export const revealItemVariants: Variants = {
@@ -119,7 +119,7 @@ export function RevealItem({
     <motion.div
       className={className}
       variants={revealItemVariants}
-      whileHover={lift ? { y: -6 } : undefined}
+      whileHover={lift ? { y: -3 } : undefined}
       transition={lift ? revealSpring : undefined}
     >
       {children}

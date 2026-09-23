@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 
@@ -24,8 +24,8 @@ import { useProjectChatContext } from '../use-project-chat-context'
  * Bước 2 (mục IV.4 + IV.5).
  *
  * Màn chờ theo Hình 07: cẩm nang cá nhân hóa chiếm cột trái rộng, cột tiến độ
- * AI hẹp bên phải. Màn kết quả theo Hình 08: nội dung dự toán chiếm cột chính,
- * cẩm nang lùi sang bên — người dùng tự thu nhỏ nó chứ nó không tự biến mất.
+ * AI hẹp bên phải. Khi render xong, màn kết quả chỉ còn nội dung dự toán; cẩm
+ * nang không còn thuộc trạng thái này và được unmount hoàn toàn.
  * Lớp app dựng `HandbookFilter` từ draft vì hai feature không import lẫn nhau.
  */
 export function StepEstimateView({ projectId }: { projectId: string }) {
@@ -37,9 +37,14 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
   const { data: project } = useProject(projectId)
-  const { data: result, isSuccess } = useEstimate(projectId)
+  const { data: result, isSuccess } = useEstimate(projectId, {
+    readOnly: Boolean(project && project.currentStep >= 2),
+    enabled: Boolean(project)
+  })
+  const [resultVisible, setResultVisible] = useState(() => Boolean(result))
   const panelMinimized = useHandbookPanelStore((s) => s.minimized)
   const setPanelMinimized = useHandbookPanelStore((s) => s.setMinimized)
+  const openedPanelForRenderRef = useRef(false)
 
   const filter = useMemo<HandbookFilter>(
     () => ({
@@ -65,38 +70,59 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   // Chatbox AI nói theo dữ liệu thật của dự án; tự trò chuyện trong lúc chờ.
   useProjectChatContext(project?.name ?? '', draft, result ? null : 'estimate')
 
+  // Màn render có vòng phần trăm luôn bắt đầu với Cẩm nang đang mở. Chỉ ép mở
+  // đúng một lần cho phiên render này; nếu người dùng tự thu nhỏ sau đó thì tôn
+  // trọng lựa chọn của họ, không bật lại ở mỗi render.
+  useEffect(() => {
+    if (resultVisible || openedPanelForRenderRef.current) return
+    openedPanelForRenderRef.current = true
+    setPanelMinimized(false)
+  }, [resultVisible, setPanelMinimized])
+
   // Khi AI sinh xong: toast "Dự toán đã sẵn sàng" (mục IV.4).
   useEffect(() => {
-    if (isSuccess) toast.success(t('readyToast'))
-  }, [isSuccess, t])
+    if (!result || resultVisible) return
+    const timer = window.setTimeout(() => setResultVisible(true), 720)
+    return () => window.clearTimeout(timer)
+  }, [result, resultVisible])
 
-  // Sang màn kết quả thì bảng dự toán là thứ cần đọc, nên panel cẩm nang lùi về
-  // nút nổi đúng như Hình 08. Chỉ thu MỘT lần khi kết quả vừa có — người dùng
-  // mở lại thì tôn trọng lựa chọn đó.
   useEffect(() => {
-    if (isSuccess) setPanelMinimized(true)
-  }, [isSuccess, setPanelMinimized])
+    if (isSuccess && resultVisible) toast.success(t('readyToast'))
+  }, [isSuccess, resultVisible, t])
 
   return (
     <>
-      <StepProgress current={2} currentDone={Boolean(result)} title={result ? t('pageTitle') : tWaiting('pageTitle')} />
+      <StepProgress
+        current={2}
+        currentDone={Boolean(result) && resultVisible}
+        title={result && resultVisible ? t('pageTitle') : tWaiting('pageTitle')}
+        entranceKey={`design.${projectId}.step2`}
+      />
       <DesignStepLayout
-        sidePanel={<PersonalizedPanel filter={filter} kind='2d' topic='architecture' filterLabel={filterLabel} />}
-        sidePanelCollapsed={panelMinimized}
-        waiting={!result}
+        sidePanel={
+          resultVisible ? undefined : (
+            <PersonalizedPanel filter={filter} kind='2d' topic='architecture' filterLabel={filterLabel} />
+          )
+        }
+        sidePanelCollapsed={!resultVisible && panelMinimized}
+        waiting={!resultVisible}
+        entranceKey={`design.${projectId}.${result && resultVisible ? 'estimate-result' : 'estimate-waiting'}`}
       >
-        {result ? (
+        {result && resultVisible ? (
           <EstimateResultView
             result={result}
             customerName={user?.name ?? ''}
             projectName={project?.name ?? ''}
             input={draft}
-            onContinue={() => router.push(designDossierRoute(projectId))}
+            // Đánh dấu đúng ý định điều hướng: từ màn kết quả dự toán phải bắt
+            // đầu lại ở M07, kể cả project từng có dossier `ready` từ lần render
+            // trước. Mở trực tiếp dossier từ danh sách dự án vẫn vào M09.
+            onContinue={() => router.push(`${designDossierRoute(projectId)}?entry=estimate`)}
           />
         ) : (
           <GenerationWaiting
             flow='estimate'
-            complete={isSuccess}
+            complete={Boolean(result)}
             expectedMs={9_000}
             province={draft?.addressDetail.provinceName}
             chatStream={<ProactiveChatStream />}

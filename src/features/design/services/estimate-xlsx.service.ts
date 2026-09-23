@@ -65,6 +65,10 @@ function money(value: number, extra: Partial<Exclude<Cell, null | undefined>> = 
   return { value, type: Number, format: MONEY_FORMAT, align: 'right', ...extra }
 }
 
+function sectionTotalLabel(template: string, section: string) {
+  return template.replace('{section}', section).trim()
+}
+
 export function buildEstimateSheet(
   result: EstimateResult,
   context: EstimateXlsxContext,
@@ -145,7 +149,11 @@ export function buildEstimateSheet(
 
     rows.push([
       null,
-      { value: `${labels.sectionTotal} — ${labels.sections[section.section]}`, fontWeight: 'bold', align: 'right' },
+      {
+        value: sectionTotalLabel(labels.sectionTotal, labels.sections[section.section]),
+        fontWeight: 'bold',
+        align: 'right'
+      },
       null,
       null,
       null,

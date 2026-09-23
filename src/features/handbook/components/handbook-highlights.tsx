@@ -1,16 +1,20 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowRight, CalendarDays, Tag } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
-import { Photo } from '@/shared/components/common'
+import { revealEase, RevealPhoto } from '@/shared/components/common'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
 import { HOME_HANDBOOK_COUNT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
 import { sortByNewest } from '../services/handbook.service'
+
+/** Bài đăng trong 14 ngày gần nhất được gắn nhãn "Mới" (mục II.2, vùng 08). */
+const NEW_BADGE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000
 
 /**
  * Khối "Cẩm nang xây nhà" trên TRANG CHỦ — ba bài mới nhất.
@@ -18,6 +22,9 @@ import { sortByNewest } from '../services/handbook.service'
  * Khác `LatestNews` (nằm trong trang Cẩm nang, thẻ nằm ngang, đo bằng thời gian
  * đọc): ở trang chủ thẻ là ảnh trên – chữ dưới và ghi chuyên mục + ngày đăng,
  * đúng như ảnh mockup khách gửi.
+ *
+ * ★ Thẻ hiện lần lượt, ảnh hiện dần; rê thẻ: ảnh phóng nhẹ + phủ xanh mờ, tiêu
+ * đề đổi xanh, lộ dòng "Đọc ~x phút →" trong khoảng đã chừa sẵn.
  */
 export function HandbookHighlights() {
   const t = useTranslations('handbook.home')
@@ -26,6 +33,10 @@ export function HandbookHighlights() {
 
   const { data: articles, isPending } = useHandbookArticles()
   const latest = useMemo(() => sortByNewest(articles ?? []).slice(0, HOME_HANDBOOK_COUNT), [articles])
+  // Chốt mốc "bây giờ" một lần khi mount thay vì gọi `Date.now()` ngay trong
+  // JSX của mỗi lần render — nhãn "Mới" không cần cập nhật tức thời tới từng
+  // mili-giây trong lúc khách đang xem trang.
+  const [now] = useState(() => Date.now())
 
   return (
     <section className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
@@ -51,38 +62,65 @@ export function HandbookHighlights() {
                 <Skeleton className='h-64 w-full rounded-2xl' />
               </li>
             ))
-          : latest.map((article) => (
-              <li key={article.id}>
-                <Link
-                  href={handbookArticleRoute(article.slug)}
-                  className='bg-card hover:border-primary/50 flex h-full flex-col overflow-hidden rounded-2xl border transition-colors'
+          : latest.map((article, index) => {
+              const isNew = now - new Date(article.publishedAt).getTime() < NEW_BADGE_WINDOW_MS
+
+              return (
+                <motion.li
+                  key={article.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: revealEase }}
                 >
-                  <Photo
-                    className='aspect-[16/9] w-full'
-                    src={article.imageUrl}
-                    alt={article.title}
-                    sizes='(max-width: 1024px) 50vw, 420px'
-                  />
-                  <span className='flex flex-1 flex-col gap-2 p-4'>
-                    <span className='line-clamp-2 font-bold'>{article.title}</span>
-                    <span className='text-muted-foreground mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
-                      <span className='flex items-center gap-1.5'>
-                        <Tag className='text-primary/70 size-3.5' />
-                        {tCategory(article.category)}
+                  <Link
+                    href={handbookArticleRoute(article.slug)}
+                    className='bg-card group hover:border-primary/50 flex h-full flex-col overflow-hidden rounded-2xl border transition-colors'
+                  >
+                    <div className='relative'>
+                      <RevealPhoto
+                        className='aspect-[16/9] w-full'
+                        src={article.imageUrl}
+                        alt={article.title}
+                        sizes='(max-width: 1024px) 50vw, 420px'
+                      />
+                      {/* Phủ xanh mờ khi rê — nằm ĐÈ LÊN ảnh, không thay ảnh. */}
+                      <div className='bg-primary/0 group-hover:bg-primary/20 pointer-events-none absolute inset-0 transition-colors duration-300' />
+                      {isNew ? (
+                        <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+                          {t('newBadge')}
+                        </span>
+                      ) : null}
+                    </div>
+                    <span className='flex flex-1 flex-col gap-2 p-4'>
+                      <span className='group-hover:text-primary-strong line-clamp-2 font-bold transition-colors'>
+                        {article.title}
                       </span>
-                      <span className='flex items-center gap-1.5 border-l pl-4'>
-                        <CalendarDays className='text-primary/70 size-3.5' />
-                        {format.dateTime(new Date(article.publishedAt), {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })}
+                      <span className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
+                        <span className='flex items-center gap-1.5'>
+                          <Tag className='text-primary/70 size-3.5' />
+                          {tCategory(article.category)}
+                        </span>
+                        <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <CalendarDays className='text-primary/70 size-3.5' />
+                          {format.dateTime(new Date(article.publishedAt), {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </span>
+                      {/* Khoảng này LUÔN chiếm chỗ sẵn (chiều cao cố định
+                          theo dòng chữ) — rê chuột chỉ đổi opacity, không
+                          đổi chiều cao, nên thẻ không bao giờ bị giãn ra. */}
+                      <span className='text-primary mt-auto pt-1 text-xs font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+                        {t('readTime', { minutes: article.readingMinutes })}
                       </span>
                     </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
+                  </Link>
+                </motion.li>
+              )
+            })}
       </ul>
     </section>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 
@@ -11,6 +11,7 @@ import { ROUTES } from '@/shared/constants/routes'
 import { Button } from '@/shared/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { FLOOR_COUNTS, WISHES_MAX_LENGTH } from '../constants/design.constants'
 import {
@@ -67,16 +68,32 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
   const catalog = useDesignCatalog(draft.buildingType)
   const { data: quota } = useDesignQuota()
   const phone = useAuthStore((s) => s.user?.phone)
+  // M03 opening choreography is intentionally staged rather than overlapped:
+  // stepper finishes first, then the left column, then the right column.
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance(`design.${projectId}.input-form`, { offsetMs: 880 })
 
   // Chỉ hiện viền đỏ sau lần bấm nút đầu tiên, không nhắc lỗi khi đang gõ.
   const [showErrors, setShowErrors] = useState(false)
+  const [validationRun, setValidationRun] = useState(false)
+  const [readySweep, setReadySweep] = useState(false)
+  const [leaving, setLeaving] = useState(false)
   const [phoneOpen, setPhoneOpen] = useState(false)
+  const wasReadyRef = useRef(false)
   const missing = useMemo(() => missingRequiredFields(draft), [draft])
   const fields = visibleFields(draft.buildingType)
   const canSubmit = missing.length === 0
   const invalid = (field: RequiredInputField) => showErrors && missing.includes(field)
 
   const outOfQuota = quota ? quota.remaining <= 0 : false
+
+  useEffect(() => {
+    if (canSubmit && !wasReadyRef.current) {
+      wasReadyRef.current = true
+      setReadySweep(true)
+      const timer = window.setTimeout(() => setReadySweep(false), 900)
+      return () => window.clearTimeout(timer)
+    }
+  }, [canSubmit])
 
   const floorOptions: ChoiceOption[] = FLOOR_COUNTS.map((value) => ({
     value,
@@ -91,12 +108,20 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
 
   /** Ghi Bước 1 lên server rồi mới sang màn chờ Bước 2. */
   function save() {
-    saveInput.mutate(draft, { onSuccess: () => onSubmit() })
+    saveInput.mutate(draft, {
+      onSuccess: () => {
+        setLeaving(true)
+        window.setTimeout(onSubmit, 460)
+      }
+    })
   }
 
   function handleSubmit() {
     if (!canSubmit) {
       setShowErrors(true)
+      setValidationRun(false)
+      window.requestAnimationFrame(() => setValidationRun(true))
+      window.setTimeout(() => setValidationRun(false), 1_050)
       // Bấm khi thiếu → cuộn tới trường còn thiếu đầu tiên kèm viền đỏ nhắc.
       const first = missing[0]
       if (first) document.getElementById(`field-${first}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -110,25 +135,50 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
     save()
   }
 
+  function chooseBuildingType(buildingType: BuildingType) {
+    setBuildingType(projectId, buildingType)
+    window.setTimeout(() => {
+      const target = document.getElementById('scope-options') ?? document.getElementById('field-style')
+      target?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 180)
+  }
+
   return (
-    <div className='mx-auto w-full max-w-6xl px-4 py-6 lg:px-8'>
+    <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      data-validation-run={validationRun}
+      data-flow-leaving={leaving}
+      style={entranceStyle}
+      className='mx-auto w-full max-w-6xl px-4 py-6 lg:px-8'
+    >
       <div className='grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]'>
         {/* ── Cột TRÁI — 3 nhóm đánh số ─────────────────────────────── */}
-        <div className='bg-card space-y-7 rounded-2xl border p-5'>
+        <div data-entrance-step='0' data-entrance-from='left' className='bg-card space-y-7 rounded-2xl border p-5'>
           <section>
             <GroupHeading index={1}>{t('groups.media')}</GroupHeading>
             <div className='grid gap-5 md:grid-cols-2'>
-              <div id='field-landPhotoUrl' className='space-y-1.5'>
+              <div
+                id='field-landPhotoUrl'
+                data-missing={missing.includes('landPhotoUrl')}
+                style={{ '--missing-delay': '0ms' } as React.CSSProperties}
+                className='space-y-1.5'
+              >
                 <LandPhotoField
                   value={draft.landPhotoUrl}
                   onChange={(landPhotoUrl) => patchDraft(projectId, { landPhotoUrl })}
                   buildingType={draft.buildingType}
                   invalid={invalid('landPhotoUrl')}
                 />
-                <p className='text-muted-foreground text-xs'>{t('landPhoto.fallbackNote')}</p>
+                <p className='text-muted-foreground text-xs'>
+                  {draft.landPhotoUrl ? t('landPhoto.uploadedNote') : t('landPhoto.fallbackNote')}
+                </p>
               </div>
 
-              <div className='space-y-2'>
+              <div
+                data-character-counter-warning={draft.wishes.length >= WISHES_MAX_LENGTH * 0.88}
+                className='space-y-2'
+              >
                 <FieldLabel htmlFor='wishes' hint={t('wishes.hint')}>
                   {t('wishes.label')}
                 </FieldLabel>
@@ -140,14 +190,18 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                   placeholder={t('wishes.placeholder')}
                   onChange={(e) => patchDraft(projectId, { wishes: e.target.value })}
                 />
-                <p className='text-muted-foreground text-right text-xs'>
+                <p data-character-counter className='text-muted-foreground text-right text-xs transition-colors'>
                   {draft.wishes.length}/{WISHES_MAX_LENGTH}
                 </p>
               </div>
             </div>
           </section>
 
-          <section id='field-address'>
+          <section
+            id='field-address'
+            data-missing={missing.includes('address')}
+            style={{ '--missing-delay': '95ms' } as React.CSSProperties}
+          >
             <GroupHeading index={2}>{t('groups.location')}</GroupHeading>
             <AddressField
               value={draft.addressDetail}
@@ -163,7 +217,12 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
           <section className='space-y-5'>
             <GroupHeading index={3}>{t('groups.scope')}</GroupHeading>
 
-            <div id='field-buildingType' className='space-y-2'>
+            <div
+              id='field-buildingType'
+              data-missing={missing.includes('buildingType')}
+              style={{ '--missing-delay': '190ms' } as React.CSSProperties}
+              className='space-y-2'
+            >
               <FieldLabel htmlFor='building-type' hint={t('buildingType.hint')} required>
                 {t('buildingType.label')}
               </FieldLabel>
@@ -171,7 +230,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                   đây là select không kiểm soát rồi cảnh báo khi có giá trị. */}
               <Select
                 value={draft.buildingType ?? ''}
-                onValueChange={(value) => setBuildingType(projectId, value as BuildingType)}
+                onValueChange={(value) => chooseBuildingType(value as BuildingType)}
               >
                 <SelectTrigger
                   id='building-type'
@@ -191,9 +250,14 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
 
             {/* Số tầng và Tum đứng chung một hàng như Hình 04. */}
             {fields.floorCount || fields.attic ? (
-              <div className='flex flex-wrap items-start gap-x-6 gap-y-4'>
+              <div id='scope-options' data-scope-reveal className='flex flex-wrap items-start gap-x-6 gap-y-4'>
                 {fields.floorCount ? (
-                  <div id='field-floorCount' className='space-y-2'>
+                  <div
+                    id='field-floorCount'
+                    data-missing={missing.includes('floorCount')}
+                    style={{ '--missing-delay': '285ms' } as React.CSSProperties}
+                    className='space-y-2'
+                  >
                     <FieldLabel hint={t('floorCount.hint')} required>
                       {t('floorCount.label')}
                     </FieldLabel>
@@ -208,7 +272,12 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                 ) : null}
 
                 {fields.attic ? (
-                  <div id='field-hasAttic' className='space-y-2'>
+                  <div
+                    id='field-hasAttic'
+                    data-missing={missing.includes('hasAttic')}
+                    style={{ '--missing-delay': '380ms' } as React.CSSProperties}
+                    className='space-y-2'
+                  >
                     <FieldLabel hint={t('attic.hint')} required>
                       {t('attic.label')}
                     </FieldLabel>
@@ -232,7 +301,11 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
         </div>
 
         {/* ── Cột PHẢI — Thông tin bổ sung ─────────────────────────── */}
-        <aside className='bg-card h-fit rounded-2xl border p-5'>
+        <aside
+          data-entrance-step='3'
+          data-entrance-from='right'
+          className='bg-card h-fit rounded-2xl border p-5 lg:self-start'
+        >
           <h2 className='mb-4 font-semibold'>{t('extra.title')}</h2>
 
           {!draft.buildingType ? (
@@ -240,7 +313,13 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
               {t('extra.empty')}
             </div>
           ) : (
-            <div id='field-style' className='space-y-2'>
+            <div
+              id='field-style'
+              data-extra-reveal
+              data-missing={missing.includes('style')}
+              style={{ '--missing-delay': '475ms' } as React.CSSProperties}
+              className='space-y-2'
+            >
               <FieldLabel hint={t('style.hint')} required>
                 {t('style.label')}
               </FieldLabel>
@@ -250,6 +329,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                 value={draft.style}
                 onChange={(value) => patchDraft(projectId, { style: value as DesignStyle })}
                 invalid={invalid('style')}
+                entranceStep={2}
               />
             </div>
           )}
@@ -257,9 +337,9 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
       </div>
 
       {/* Hạn mức lượt + nút lớn full-width dưới đáy màn hình (mục IV.3.c). */}
-      <div className='mt-6 space-y-2'>
+      <div data-entrance-step='4' className='mt-6 space-y-2'>
         {quota ? (
-          <p className='text-muted-foreground text-center text-xs'>
+          <p data-quota-message data-ready-pulse={readySweep} className='text-muted-foreground text-center text-xs'>
             {quota.total === null
               ? t('quota.free', { count: quota.remaining })
               : t('quota.plan', { remaining: quota.remaining, total: quota.total })}
@@ -273,10 +353,13 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
           </Button>
         ) : (
           <Button
+            data-estimate-submit
+            data-primary-ready={canSubmit}
+            data-ready-sweep={readySweep}
             size='lg'
             onClick={handleSubmit}
             aria-disabled={!canSubmit}
-            disabled={saveInput.isPending}
+            disabled={saveInput.isPending || leaving}
             className={cn('w-full', !canSubmit && 'opacity-50')}
           >
             {saveInput.isPending ? <Loader2 className='size-4 animate-spin' /> : null}

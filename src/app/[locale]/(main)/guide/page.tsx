@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server'
 
-import { GuideBrowser } from '@/features/guide'
 import type { Locale } from '@/i18n/routing'
+import { GuideView } from './guide-view'
 
 interface PageProps {
   params: Promise<{ locale: Locale }>
@@ -12,5 +12,5 @@ export default async function GuidePage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <GuideBrowser />
+  return <GuideView />
 }

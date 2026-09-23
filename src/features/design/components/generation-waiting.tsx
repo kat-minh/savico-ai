@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { cn } from '@/shared/lib/utils'
+import { Button } from '@/shared/components/ui/button'
 import { useGenerationProgress } from '../hooks/use-generation-progress'
 import { BlueprintIllustration } from './blueprint-illustration'
 import { RenderProgressBars } from './render-progress-bars'
@@ -25,6 +26,8 @@ interface GenerationWaitingProps {
    * vào, vì nội dung thuộc `features/chatbot`.
    */
   chatStream?: ReactNode
+  error?: boolean
+  onRetry?: () => void
 }
 
 /** Ba mốc trạng thái của checklist màn chờ Bước 2 (Hình 07). */
@@ -39,16 +42,29 @@ const CHECKLIST_LENGTH = 3
  * Ở cả hai hình, cột này nằm bên PHẢI còn panel cẩm nang chiếm cột trái —
  * thứ tự do `DesignStepLayout` (prop `waiting`) quyết định.
  */
-export function GenerationWaiting({ flow, complete, expectedMs, province, chatStream }: GenerationWaitingProps) {
+export function GenerationWaiting({
+  flow,
+  complete,
+  expectedMs,
+  province,
+  chatStream,
+  error = false,
+  onRetry
+}: GenerationWaitingProps) {
   const t = useTranslations(`design.progress.${flow}`)
-  const progress = useGenerationProgress({ flow, complete, expectedMs })
+  const progress = useGenerationProgress({ flow, complete, expectedMs, paused: error })
 
   // Mốc đang chạy suy từ %, để checklist và vòng tròn luôn kể cùng một câu chuyện.
   const activeIndex = Math.min(CHECKLIST_LENGTH - 1, Math.floor((progress.percent / 100) * CHECKLIST_LENGTH))
 
   return (
-    <div className='flex flex-col items-center py-4 text-center'>
-      <ProgressRing percent={progress.percent} />
+    <div
+      data-generation-waiting
+      data-stalled={progress.percent >= 94.5}
+      data-error={error}
+      className='flex flex-col items-center py-4 text-center'
+    >
+      <ProgressRing percent={progress.percent} stalled={progress.percent >= 94.5} error={error} />
 
       <h2 className='mt-6 text-xl font-semibold tracking-tight text-balance'>{t('title')}</h2>
 
@@ -63,7 +79,12 @@ export function GenerationWaiting({ flow, complete, expectedMs, province, chatSt
               const done = complete || index < activeIndex
               const active = !complete && index === activeIndex
               return (
-                <li key={index} className='flex items-start gap-2.5'>
+                <li
+                  key={index}
+                  data-progress-row
+                  data-state={done ? 'done' : active ? 'active' : 'pending'}
+                  className='flex items-start gap-2.5'
+                >
                   <span className='mt-0.5 flex size-4 shrink-0 items-center justify-center'>
                     {done ? (
                       <Check className='text-primary size-4' strokeWidth={3} />
@@ -98,21 +119,36 @@ export function GenerationWaiting({ flow, complete, expectedMs, province, chatSt
       )}
 
       {chatStream}
+
+      {error && flow === 'dossier' ? (
+        <div
+          data-render-error
+          className='mt-5 w-full rounded-xl border border-destructive/35 bg-destructive/5 p-4 text-left'
+        >
+          <p className='text-destructive text-sm font-medium'>{t('error')}</p>
+          {onRetry ? (
+            <Button className='mt-3' variant='outline' size='sm' onClick={onRetry}>
+              {t('retry')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }
 
 /** Vòng tròn tiến độ % — số phần trăm nằm giữa vòng. */
-function ProgressRing({ percent }: { percent: number }) {
+function ProgressRing({ percent, stalled, error }: { percent: number; stalled: boolean; error: boolean }) {
   const radius = 68
   const circumference = 2 * Math.PI * radius
   const offset = circumference * (1 - Math.min(100, Math.max(0, percent)) / 100)
 
   return (
-    <div className='relative size-40'>
+    <div data-progress-ring data-stalled={stalled} className='relative size-40'>
       <svg viewBox='0 0 160 160' className='size-full -rotate-90'>
         <circle cx='80' cy='80' r={radius} fill='none' strokeWidth='10' className='stroke-muted' />
         <circle
+          data-progress-arc
           cx='80'
           cy='80'
           r={radius}
@@ -121,7 +157,10 @@ function ProgressRing({ percent }: { percent: number }) {
           strokeLinecap='round'
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className='stroke-primary transition-[stroke-dashoffset] duration-500 ease-out'
+          className={cn(
+            'transition-[stroke-dashoffset,stroke] duration-500 ease-out',
+            error ? 'stroke-destructive' : 'stroke-primary'
+          )}
         />
       </svg>
       {/* Căn giữa ở lớp ngoài, baseline chỉ dùng giữa số và dấu %: đặt

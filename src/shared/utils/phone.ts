@@ -17,3 +17,14 @@ export function normalizePhone(raw: string): string {
 export function isValidPhone(raw: string): boolean {
   return VN_PHONE.test(normalizePhone(raw))
 }
+
+/**
+ * "0938123456" → "0938 123 456" — tách nhóm 4-3-3 cho dễ đọc lúc gõ (modal đặt
+ * lịch tư vấn, mục VIII.3). Bỏ qua dạng `+84...`: gạch bỏ dấu `+` sẽ phá luôn
+ * định dạng quốc tế, trong khi ảnh mô tả chỉ cho ví dụ số nội địa.
+ */
+export function formatPhoneDisplay(raw: string): string {
+  if (raw.trim().startsWith('+')) return raw
+  const digits = raw.replace(/\D/g, '').slice(0, 10)
+  return [digits.slice(0, 4), digits.slice(4, 7), digits.slice(7, 10)].filter(Boolean).join(' ')
+}

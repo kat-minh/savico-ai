@@ -2,8 +2,10 @@
 
 import { Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { CSSProperties } from 'react'
 
 import { cn } from '@/shared/lib/utils'
+import { usePageEntrance } from '@/shared/hooks'
 import { DESIGN_STEPS, STEP_HELP_TOPIC } from '../constants/design.constants'
 import type { DesignStep } from '../types/design.types'
 import { HelpLink } from './help-link'
@@ -23,24 +25,55 @@ interface StepProgressProps {
    * hoàn thành" (mục IV.5: màn kết quả dự toán, Hình 08).
    */
   currentDone?: boolean
+  /** Project-scoped key keeps Back/revisit lifecycle correct across projects. */
+  entranceKey?: string
+  /**
+   * Bước 3 giữ stepper đứng yên giữa M07 → M08 → M09 và cả khi reload; chỉ
+   * nội dung của màn hiện tại được chạy entrance.
+   */
+  animateEntrance?: boolean
 }
 
-export function StepProgress({ current, title, currentDone = false }: StepProgressProps) {
+export function StepProgress({
+  current,
+  title,
+  currentDone = false,
+  entranceKey,
+  animateEntrance = true
+}: StepProgressProps) {
   const t = useTranslations('design.steps')
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance<HTMLElement>(
+    entranceKey ?? `design.step.${current}`,
+    { enabled: animateEntrance }
+  )
 
   return (
     <>
       {/* Tiêu đề màn hình nằm TRÊN stepper và cuộn theo trang (Hình 04) — đặt
           trong `nav` sticky thì nó sẽ dính luôn, chiếm mất chiều cao. */}
       {title ? (
-        <div className='mx-auto w-full max-w-6xl px-4 pt-6 lg:px-8'>
-          <h1 className='text-2xl font-semibold tracking-tight'>{title}</h1>
+        <div
+          data-page-entrance={entranceState}
+          style={entranceStyle}
+          className='mx-auto w-full max-w-6xl px-4 pt-6 lg:px-8'
+        >
+          <h1 data-entrance-step='0' data-entrance-order='1' className='text-2xl font-semibold tracking-tight'>
+            {title}
+          </h1>
         </div>
       ) : null}
 
       {/* Cùng một container với header, footer và nội dung bên dưới — nút "?" phải
           thẳng hàng mép phải của nội dung, không dán vào mép màn hình. */}
-      <nav aria-label={t('label')} className='bg-background/85 sticky top-16 z-30 backdrop-blur-xl'>
+      <nav
+        ref={rootRef}
+        data-design-step-progress
+        data-animate-entrance={animateEntrance}
+        data-page-entrance={entranceState}
+        style={entranceStyle}
+        aria-label={t('label')}
+        className='bg-background/85 backdrop-blur-xl'
+      >
         <div className='mx-auto w-full max-w-6xl px-4 py-4 lg:px-8'>
           {/*
            * Bố cục theo thanh tiến trình trong bản mô tả (Hình S03/S04): vòng
@@ -55,22 +88,45 @@ export function StepProgress({ current, title, currentDone = false }: StepProgre
                 const done = step < current || (step === current && currentDone)
                 const active = step === current && !currentDone
                 return (
-                  <li key={step} className='relative flex min-w-0 flex-1 flex-col items-center gap-1.5'>
+                  <li
+                    key={step}
+                    data-design-step-item
+                    data-entrance-step={animateEntrance ? '0' : undefined}
+                    data-entrance-order={animateEntrance ? index + 1 : undefined}
+                    data-entrance-from={animateEntrance ? 'soft-scale' : undefined}
+                    style={
+                      {
+                        '--entrance-order-delay': `${index * 220}ms`,
+                        zIndex: DESIGN_STEPS.length - index
+                      } as CSSProperties
+                    }
+                    className='relative flex min-w-0 flex-1 flex-col items-center gap-1.5'
+                  >
                     {/* Đường nối vẽ bằng nấc SAU, kéo từ tâm nấc trước sang tâm
                         nấc này — cách duy nhất giữ nó luôn đúng giữa hai vòng
                         tròn khi các cột co giãn theo nhau. */}
                     {index > 0 ? (
                       <span
                         aria-hidden
-                        className={cn(
-                          'absolute top-[1.125rem] -left-1/2 h-0.5 w-full rounded-full',
-                          done || active ? 'bg-primary' : 'bg-border'
-                        )}
-                      />
+                        data-step-connector
+                        data-reached={done || active}
+                        className='bg-border absolute top-[1.125rem] -left-1/2 z-0 h-0.5 w-full overflow-hidden rounded-full'
+                      >
+                        {done || active ? (
+                          <span
+                            data-step-connector-fill
+                            data-current={step === current}
+                            className='bg-primary absolute inset-0 origin-left rounded-full'
+                          />
+                        ) : null}
+                      </span>
                     ) : null}
 
                     <span
                       aria-current={active ? 'step' : undefined}
+                      data-step-dot
+                      data-active={active}
+                      data-done={done}
                       className={cn(
                         'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors',
                         done && 'bg-primary text-primary-foreground',

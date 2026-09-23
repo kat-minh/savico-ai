@@ -17,6 +17,10 @@ interface PhotoProps {
    * bằng: đó là tài liệu kỹ thuật, cắt mất một dải là mất luôn thông tin.
    */
   fit?: 'cover' | 'contain'
+  /** Optional image-only class, leaving the wrapper geometry untouched. */
+  imageClassName?: string
+  /** Fires when the underlying next/image element has loaded. */
+  onLoad?: () => void
 }
 
 /**
@@ -32,7 +36,9 @@ export function Photo({
   className,
   sizes = '(max-width: 768px) 100vw, 400px',
   priority,
-  fit = 'cover'
+  fit = 'cover',
+  imageClassName,
+  onLoad
 }: PhotoProps) {
   return (
     <div className={cn('bg-muted relative overflow-hidden', className)}>
@@ -42,7 +48,8 @@ export function Photo({
         fill
         sizes={sizes}
         priority={priority}
-        className={fit === 'contain' ? 'object-contain' : 'object-cover'}
+        onLoad={onLoad}
+        className={cn(fit === 'contain' ? 'object-contain' : 'object-cover', imageClassName)}
       />
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { Gift, Info } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import type { RefObject } from 'react'
 
 import type { Locale } from '@/i18n/routing'
 import type { SubscriptionPlan } from '@/shared/cms'
@@ -15,7 +16,9 @@ import { giftValueInMillions } from '../services/plan-gift.service'
 interface PlanGiftDialogProps {
   /** Gói đang mở popup quà tặng; `null` là đóng. */
   plan: SubscriptionPlan | null
+  open?: boolean
   onClose: () => void
+  origin?: RefObject<HTMLButtonElement | null>
 }
 
 /**
@@ -32,7 +35,7 @@ interface PlanGiftDialogProps {
  * Nội dung quà tặng nằm trong bản ghi gói ở kho nội dung nên admin sửa được;
  * popup chỉ dựng lại, không giữ chữ riêng.
  */
-export function PlanGiftDialog({ plan, onClose }: PlanGiftDialogProps) {
+export function PlanGiftDialog({ plan, open, onClose, origin }: PlanGiftDialogProps) {
   const t = useTranslations('plans.gift')
   const locale = useLocale() as Locale
   const gift = plan?.gift
@@ -45,10 +48,26 @@ export function PlanGiftDialog({ plan, onClose }: PlanGiftDialogProps) {
   const valueUnit = millions ? t('valueMillionsUnit') : ''
 
   return (
-    <Dialog open={Boolean(gift)} onOpenChange={(open) => (open ? undefined : onClose())}>
+    <Dialog open={open ?? Boolean(gift)} onOpenChange={(nextOpen) => (nextOpen ? undefined : onClose())}>
       <DialogContent
+        ref={(node) => {
+          if (!node || !origin?.current) return
+          const source = origin.current.getBoundingClientRect()
+          const width = node.offsetWidth,
+            height = node.offsetHeight
+          node.style.setProperty('--gift-x', `${source.x + source.width / 2 - innerWidth / 2}px`)
+          node.style.setProperty('--gift-y', `${source.y + source.height / 2 - innerHeight / 2}px`)
+          node.style.setProperty('--gift-sx', String(source.width / width))
+          node.style.setProperty('--gift-sy', String(source.height / height))
+        }}
+        onCloseAutoFocus={(event) => {
+          if (origin?.current) {
+            event.preventDefault()
+            origin.current.focus({ preventScroll: true })
+          }
+        }}
         className={cn(
-          'max-h-[92vh] gap-0 overflow-y-auto bg-[oklch(0.985_0.012_75)] p-0 sm:max-w-lg',
+          'plan-gift-dialog max-h-[92vh] gap-0 overflow-y-auto bg-[oklch(0.985_0.012_75)] p-0 sm:max-w-lg',
           // Hình S02: nút đóng là một VÒNG TRÒN TRẮNG có bóng, không phải dấu ✕ trần.
           '[&>[data-slot=dialog-close]]:bg-card [&>[data-slot=dialog-close]]:text-foreground [&>[data-slot=dialog-close]]:flex [&>[data-slot=dialog-close]]:size-7 [&>[data-slot=dialog-close]]:items-center [&>[data-slot=dialog-close]]:justify-center [&>[data-slot=dialog-close]]:rounded-full [&>[data-slot=dialog-close]]:opacity-100 [&>[data-slot=dialog-close]]:shadow-md'
         )}
@@ -82,7 +101,7 @@ export function PlanGiftDialog({ plan, onClose }: PlanGiftDialogProps) {
                     className='bg-brand-orange/70 h-11 w-10 [clip-path:polygon(0_0,100%_0,100%_100%,0_72%)]'
                   />
                   <DialogTitle className='bg-brand-orange text-brand-orange-foreground -mx-px flex items-center gap-2.5 px-8 py-2.5 text-base font-bold tracking-wide uppercase'>
-                    <Gift className='size-5' />
+                    <Gift className='plan-dialog-gift size-5' />
                     {t('badge')}
                   </DialogTitle>
                   <span

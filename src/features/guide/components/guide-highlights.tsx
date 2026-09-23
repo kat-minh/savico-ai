@@ -1,31 +1,48 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import { revealEase } from '@/shared/components/common'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES } from '@/shared/constants/routes'
 import { HOME_GUIDE_HIGHLIGHT_COUNT } from '../constants/guide.constants'
 import { useGuideVideos } from '../hooks/use-guide'
+import type { GuideVideo } from '../types/guide.types'
+import type { VideoCardOrigin } from './video-card'
 import { VideoCard } from './video-card'
+import { VideoLightbox } from './video-lightbox'
+
+interface GuideHighlightsProps {
+  /** "Tạo dự án ngay" sau khi xem xong video — lớp app nối tới `features/design`. */
+  onCreateProject?: () => void
+}
 
 /**
  * Khu "Hướng dẫn sử dụng" trên trang chủ (mục II.2):
  * 3 thẻ video nổi bật + liên kết "Xem tất cả" mở trang Hướng dẫn.
+ *
+ * ★ Bấm thẻ mở hộp video ngay tại trang (không điều hướng); trong hộp có 2
+ * video còn lại của khối để chuyển qua lại, xem xong thì gợi ý video kế tiếp
+ * + nút "Tạo dự án ngay" (mục II.2, vùng 09).
  */
-export function GuideHighlights() {
+export function GuideHighlights({ onCreateProject }: GuideHighlightsProps) {
   const t = useTranslations('guide.highlights')
   const { data: videos, isPending } = useGuideVideos()
+  const [playing, setPlaying] = useState<GuideVideo | null>(null)
+  const [origin, setOrigin] = useState<VideoCardOrigin | null>(null)
+
+  const highlights = videos?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT) ?? []
 
   return (
     <section className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
-      {/* Cùng khuôn đầu khối với các dải khác của trang chủ: nhãn nhỏ màu thương
-          hiệu ở trên, tiêu đề ở dưới, liên kết "Xem tất cả" căn lên đỉnh. */}
       <header className='mb-8 flex flex-wrap items-start justify-between gap-4'>
         <div className='space-y-2'>
-          <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('title')}</p>
-          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('subtitle')}</h2>
+          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+          <p className='text-muted-foreground max-w-2xl text-sm text-pretty'>{t('subtitle')}</p>
         </div>
         <Link
           href={ROUTES.GUIDE}
@@ -41,10 +58,40 @@ export function GuideHighlights() {
           ? Array.from({ length: HOME_GUIDE_HIGHLIGHT_COUNT }, (_, i) => (
               <Skeleton key={i} className='h-56 w-full rounded-2xl' />
             ))
-          : videos
-              ?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT)
-              .map((video) => <VideoCard key={video.id} video={video} hideDescription durationInTitle={false} />)}
+          : highlights.map((video, index) => (
+              <motion.div
+                key={video.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: revealEase }}
+              >
+                <VideoCard
+                  video={video}
+                  descriptionLines={1}
+                  durationInTitle={false}
+                  showPlayWhenUnavailable
+                  imageOnlyHover
+                  onOpenVideo={(v, cardOrigin) => {
+                    setPlaying(v)
+                    setOrigin(cardOrigin)
+                  }}
+                />
+              </motion.div>
+            ))}
       </div>
+
+      <VideoLightbox
+        video={playing}
+        onClose={() => setPlaying(null)}
+        related={highlights}
+        onSelect={(v) => {
+          setPlaying(v)
+          setOrigin(null)
+        }}
+        onCreateProject={onCreateProject}
+        origin={origin}
+      />
     </section>
   )
 }

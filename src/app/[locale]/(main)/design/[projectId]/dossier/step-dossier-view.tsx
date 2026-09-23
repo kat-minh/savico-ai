@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 
 import {
-  DesignStepLayout,
   DossierOverview,
   DossierReady,
-  GenerationWaiting,
+  DossierRenderWaiting,
+  useDossierRenderFlow,
   StepProgress,
   useAdvisory,
   useCreateShareLink,
@@ -22,29 +24,43 @@ import {
 } from '@/features/design'
 import { ProactiveChatStream } from '@/features/chatbot'
 import { PersonalizedPanel, useHandbookPanelStore, type HandbookFilter } from '@/features/handbook'
+import { useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
+import { designDossierRoute } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
 /**
- * Bước 3 (mục III.4). Màn chờ render dùng lại đúng bố cục của Bước 2 nhưng
- * panel cẩm nang đổi sang nội dung NỘI THẤT (ưu tiên tag phong cách nội thất).
+ * Bước 3 (mục III.4). Trong lúc render, M07 vẫn được giữ mounted: panel "Xuất
+ * hồ sơ" morph thành tiến độ tại chỗ, sau đó panel cẩm nang NỘI THẤT mới vào.
  */
 export function StepDossierView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.dossier')
   const tWaiting = useTranslations('design.progress.dossier')
   const tInput = useTranslations('design.input')
   const tPanel = useTranslations('handbook.panel')
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
+  const enteredFromEstimate = searchParams.get('entry') === 'estimate'
 
   const draft = useDesignStore((s) => s.drafts[projectId])
   const { data: project } = useProject(projectId)
-  const { data: estimate } = useEstimate(projectId)
-  const { data: dossier } = useDossier(projectId)
+  const { data: estimate } = useEstimate(projectId, { readOnly: true })
+  const dossierQuery = useDossier(projectId)
+  const dossier = dossierQuery.data
   const render = useRenderDossier(projectId)
   const createShareLink = useCreateShareLink(projectId)
   const sendEmail = useSendDossierEmail(projectId)
   const advisory = useAdvisory(estimate, user?.name ?? '', draft)
   const panelMinimized = useHandbookPanelStore((s) => s.minimized)
+  const setPanelMinimized = useHandbookPanelStore((s) => s.setMinimized)
+  const openedPanelForRenderRef = useRef(false)
+  const reduced = useReducedMotion()
+  const flow = useDossierRenderFlow({
+    enabled: !render.isIdle,
+    complete: render.isSuccess && dossier?.status === 'ready',
+    error: render.isError
+  })
 
   const filter = useMemo<HandbookFilter>(
     () => ({
@@ -67,9 +83,14 @@ export function StepDossierView({ projectId }: { projectId: string }) {
   // Chatbox AI chuyển sang kịch bản render hồ sơ trong lúc chờ (mục III.4b).
   useProjectChatContext(project?.name ?? '', draft, render.isPending ? 'dossier' : null)
 
+  // Bắt đầu M08 thì Cẩm nang luôn ở trạng thái mở, kể cả M06 trước đó người dùng
+  // đã thu nhỏ panel. Chỉ ép mở một lần; đóng lại trong lúc render là lựa chọn
+  // của người dùng và không bị effect này bật ngược trở lại.
   useEffect(() => {
-    if (render.isSuccess) toast.success(t('readyToast'))
-  }, [render.isSuccess, t])
+    if (!render.isPending || openedPanelForRenderRef.current) return
+    openedPanelForRenderRef.current = true
+    setPanelMinimized(false)
+  }, [render.isPending, setPanelMinimized])
 
   const info: DossierProjectInfo = {
     customerName: user?.name ?? '',
@@ -87,44 +108,102 @@ export function StepDossierView({ projectId }: { projectId: string }) {
     styleLabel: draft?.style ? tInput(`style.options.${draft.style}`) : ''
   }
 
+  const finishing = render.isSuccess && flow.phase !== 'ready'
+  const renderActive = render.isPending || render.isError || finishing
+  // `dossier.status` là dữ liệu bền vững của project. Nếu project từng render
+  // xong, nó vẫn là `ready` khi người dùng quay về M06. Nhưng nút “Nhận hồ sơ
+  // thi công” là một fresh flow: phải đi M07 → M08 → M09, không được dùng
+  // trạng thái `ready` cũ để nhảy thẳng tới M09.
+  const currentRenderStarted = !render.isIdle
+  const showingFiles =
+    dossier?.status === 'ready' &&
+    (!enteredFromEstimate || currentRenderStarted) &&
+    (!renderActive || flow.phase === 'files')
+
+  // Khi fresh flow đã chạy trọn đến M09 thì dọn marker khỏi URL. Sau đó reload
+  // M09 hoặc mở lại từ “Xem hồ sơ” sẽ dùng trạng thái persisted bình thường.
+  useEffect(() => {
+    if (!enteredFromEstimate || flow.phase !== 'ready') return
+    router.replace(designDossierRoute(projectId), { scroll: false })
+  }, [enteredFromEstimate, flow.phase, projectId, router])
+
   return (
     <>
       <StepProgress
         current={3}
-        currentDone={dossier?.status === 'ready'}
-        title={render.isPending ? tWaiting('pageTitle') : t('pageTitle')}
+        currentDone={showingFiles && flow.phase !== 'files'}
+        title={renderActive ? tWaiting('pageTitle') : t('pageTitle')}
+        entranceKey={`design.${projectId}.step3`}
+        animateEntrance={false}
       />
 
-      {render.isPending ? (
-        // Chỉ màn CHỜ render mới có panel cẩm nang (mục IV.7); màn trước và
-        // sau đó là bố cục riêng của Bước 3.
-        <DesignStepLayout
-          sidePanel={<PersonalizedPanel filter={filter} kind='3d' topic='interior' filterLabel={filterLabel} />}
-          sidePanelCollapsed={panelMinimized}
-          waiting
-        >
-          <GenerationWaiting flow='dossier' complete={false} expectedMs={11_000} chatStream={<ProactiveChatStream />} />
-        </DesignStepLayout>
-      ) : dossier?.status === 'ready' ? (
-        <DossierReady
-          dossier={dossier}
-          result={estimate}
-          info={info}
-          advisory={advisory}
-          onRequestShareLink={() => createShareLink.mutate()}
-          onSendEmail={async (email) => {
-            await sendEmail.mutateAsync(email)
-            toast.success(t('share.email.sent', { email }))
-          }}
-        />
-      ) : (
-        <DossierOverview
-          info={info}
-          result={estimate}
-          onRender={() => render.mutate()}
-          isRendering={render.isPending}
-        />
-      )}
+      <div className='relative'>
+        <AnimatePresence mode='sync' initial={false}>
+          {dossierQuery.isPending ? (
+            <div key='dossier-resolving' className='min-h-[28rem]' aria-hidden />
+          ) : showingFiles && dossier ? (
+            <DossierReady
+              key='ready'
+              dossier={dossier}
+              result={estimate}
+              info={info}
+              advisory={advisory}
+              animateCompletion={render.isSuccess}
+              fromRender={render.isSuccess}
+              filesEntering={flow.phase === 'files'}
+              onFilesEntered={flow.finish}
+              onRequestShareLink={() => createShareLink.mutate()}
+              onSendEmail={async (email) => {
+                await sendEmail.mutateAsync(email)
+                toast.success(t('share.email.sent', { email }))
+              }}
+            />
+          ) : (
+            <motion.div
+              key='overview'
+              exit={{
+                opacity: 0,
+                scale: reduced ? 1 : 0.96,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                pointerEvents: 'none'
+              }}
+              transition={{ duration: reduced ? 0 : 0.45 }}
+              data-m08-long-wait={flow.longWait}
+            >
+              <DossierOverview
+                info={info}
+                result={estimate}
+                onRender={() => render.mutate()}
+                isRendering={render.isPending}
+                renderActive={renderActive}
+                renderContent={
+                  <DossierRenderWaiting
+                    flow={flow}
+                    onRetry={() => render.mutate()}
+                    onComplete={flow.showFiles}
+                    chatStream={
+                      <ProactiveChatStream dossierStage={flow.error ? 'error' : flow.task} sessionKey={projectId} />
+                    }
+                  />
+                }
+                waitingPanel={
+                  <PersonalizedPanel
+                    filter={filter}
+                    kind='3d'
+                    topic='interior'
+                    filterLabel={filterLabel}
+                    longWait={flow.longWait}
+                  />
+                }
+                waitingPanelCollapsed={panelMinimized}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </>
   )
 }

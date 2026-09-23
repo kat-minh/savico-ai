@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { isApiError } from '@/shared/lib/api'
 import { designApi } from '../api/design.api'
 import { designKeys } from '../api/design.keys'
-import type { Dossier } from '../types/design.types'
+import type { Dossier, Project } from '../types/design.types'
 
 /** Trạng thái bộ hồ sơ: chưa render / đang render / đã sẵn sàng (mục III.4). */
 export function useDossier(projectId: string) {
@@ -21,15 +21,23 @@ export function useDossier(projectId: string) {
 /** Bấm "Render hồ sơ" → màn chờ render → trạng thái hoàn tất. */
 export function useRenderDossier(projectId: string) {
   const queryClient = useQueryClient()
-  const t = useTranslations('errors')
 
   return useMutation({
     mutationFn: () => designApi.renderDossier(projectId),
     onSuccess: (dossier) => {
       queryClient.setQueryData(designKeys.dossier(projectId), dossier)
-    },
-    onError: (error) => {
-      toast.error(isApiError(error) ? error.message : t('generic'))
+      const completed = (project?: Project) =>
+        project
+          ? { ...project, currentStep: 3 as const, status: 'completed' as const, updatedAt: new Date().toISOString() }
+          : project
+
+      queryClient.setQueryData<Project | undefined>(designKeys.project(projectId), completed)
+      queryClient.setQueryData<Project[] | undefined>(designKeys.projects(), (projects) =>
+        projects?.map((project) => (project.id === projectId ? completed(project)! : project))
+      )
+
+      void queryClient.invalidateQueries({ queryKey: designKeys.project(projectId), exact: true })
+      void queryClient.invalidateQueries({ queryKey: designKeys.projects(), exact: true })
     }
   })
 }

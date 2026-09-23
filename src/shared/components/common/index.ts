@@ -15,7 +15,20 @@ export { PageHeader } from './page-header'
 export { PasswordInput } from './password-input'
 export { PreferenceSwitches } from './preference-switches'
 export { Photo } from './photo'
+export {
+  AnimatedNumber,
+  PricingBackToTop,
+  PricingMotionProvider,
+  PricingReveal,
+  pricingEase,
+  pricingReveal,
+  pricingRevealLeft,
+  pricingSpring,
+  pricingStagger,
+  usePricingMotion
+} from './pricing-motion'
 export { PlanDrawing, type PlanVariant } from './plan-drawing'
+export { RevealPhoto } from './reveal-photo'
 export {
   Reveal,
   RevealStagger,

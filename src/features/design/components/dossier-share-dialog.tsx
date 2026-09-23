@@ -2,7 +2,7 @@
 
 import { Check, Copy, Loader2, Send } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
@@ -21,13 +21,14 @@ interface DossierShareDialogProps {
   /** Token chia sẻ do backend cấp; chưa có thì các cửa sổ hiện trạng thái chờ. */
   token: string | null
   onSendEmail: (email: string) => Promise<void>
+  origin?: { x: number; y: number }
 }
 
 /**
  * Ba thao tác chia sẻ bộ hồ sơ (mục III.4c): tạo link, QR code và gửi email.
  * Gộp một cửa sổ vì cả ba đều xoay quanh cùng một đường dẫn chia sẻ.
  */
-export function DossierShareDialog({ mode, onOpenChange, token, onSendEmail }: DossierShareDialogProps) {
+export function DossierShareDialog({ mode, onOpenChange, token, onSendEmail, origin }: DossierShareDialogProps) {
   const t = useTranslations('design.dossier.share')
   const locale = useLocale() as Locale
 
@@ -67,7 +68,13 @@ export function DossierShareDialog({ mode, onOpenChange, token, onSendEmail }: D
 
   return (
     <Dialog open={mode !== null} onOpenChange={handleOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent
+        data-origin-dialog
+        style={
+          { '--dialog-origin-x': `${origin?.x ?? 0}px`, '--dialog-origin-y': `${origin?.y ?? 0}px` } as CSSProperties
+        }
+        className='sm:max-w-md'
+      >
         <DialogHeader>
           <DialogTitle>{t(`${mode ?? 'link'}.title`)}</DialogTitle>
           <DialogDescription>{t(`${mode ?? 'link'}.description`)}</DialogDescription>

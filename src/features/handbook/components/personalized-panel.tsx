@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useRef, useState } from 'react'
 import { BookOpen, Info, LayoutGrid, Minimize2, Newspaper } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react'
 
 import { useChatContextStore } from '@/shared/chat-context'
 import { Button } from '@/shared/components/ui/button'
@@ -29,6 +30,7 @@ interface PersonalizedPanelProps {
   filterLabel?: string
   /** Chủ đề bài viết: kiến trúc (Bước 2) hoặc nội thất (Bước 3). */
   topic: 'architecture' | 'interior'
+  longWait?: boolean
 }
 
 /**
@@ -38,13 +40,24 @@ interface PersonalizedPanelProps {
  * theo mục đang chọn. Bấm thu nhỏ → panel co thành nút nổi ở góc màn hình;
  * bấm nút nổi để mở lại bất cứ lúc nào.
  */
-export function PersonalizedPanel({ filter, kind, topic, filterLabel }: PersonalizedPanelProps) {
+export const PersonalizedPanel = memo(function PersonalizedPanel({
+  filter,
+  kind,
+  topic,
+  filterLabel,
+  longWait = false
+}: PersonalizedPanelProps) {
   const t = useTranslations('handbook.panel')
   const tab = useHandbookPanelStore((s) => s.tab)
   const setTab = useHandbookPanelStore((s) => s.setTab)
   const minimized = useHandbookPanelStore((s) => s.minimized)
   const setMinimized = useHandbookPanelStore((s) => s.setMinimized)
   const chatOpen = useChatContextStore((s) => s.panelOpen)
+  const reduced = useReducedMotion()
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollPositions = useRef<Record<HandbookPanelTab, number>>({ templates: 0, articles: 0 })
+  const displayedTab = useRef<HandbookPanelTab>(kind === '3d' ? tab : 'templates')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
 
   // Popup xem chi tiết là state cục bộ: nó chỉ sống trong lúc panel đang mở,
   // không cần giữ qua các bước như trạng thái thu nhỏ / mục đang chọn.
@@ -57,6 +70,8 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
   if (minimized) {
     return (
       <Button
+        data-handbook-panel-fab
+        data-long-wait={longWait}
         size='lg'
         onClick={() => setMinimized(false)}
         aria-label={t('restore')}
@@ -90,6 +105,8 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
   return (
     <>
       <section
+        data-handbook-panel
+        data-long-wait={longWait}
         aria-label={t('title')}
         // Panel không bao giờ cao hơn khung nhìn (trừ thanh công cụ + stepper) và
         // tự cuộn bên trong. Để nó dài tự do thì cột phải kéo dài gấp mấy lần cột
@@ -99,25 +116,37 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
       >
         {/* Thanh công cụ dọc bên trái panel — chỉ có ở Bước 3 (Hình 4) */}
         {showTabs ? (
-          <nav className='bg-muted/40 flex w-44 shrink-0 flex-col gap-1 border-r p-2'>
-            {tabs.map(({ id, icon: Icon }) => (
-              <button
-                key={id}
-                type='button'
-                onClick={() => setTab(id)}
-                aria-current={tab === id ? 'true' : undefined}
-                className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
-                  tab === id
-                    ? 'bg-accent text-accent-foreground font-medium'
-                    : 'text-muted-foreground hover:bg-foreground/[0.06]'
-                )}
-              >
-                <Icon className='size-4 shrink-0' />
-                <span className='truncate'>{t(`tabs.${id}`)}</span>
-              </button>
-            ))}
-          </nav>
+          <LayoutGroup id={`handbook-panel-${kind}`}>
+            <nav className='bg-muted/40 flex w-44 shrink-0 flex-col gap-1 border-r p-2'>
+              {tabs.map(({ id, icon: Icon }) => (
+                <button
+                  key={id}
+                  type='button'
+                  onClick={() => {
+                    if (scrollRef.current) scrollPositions.current[displayedTab.current] = scrollRef.current.scrollTop
+                    setTab(id)
+                  }}
+                  aria-current={tab === id ? 'true' : undefined}
+                  className={cn(
+                    'relative flex items-center gap-2 overflow-hidden rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+                    tab === id
+                      ? 'text-accent-foreground font-medium'
+                      : 'text-muted-foreground hover:bg-foreground/[0.06]'
+                  )}
+                >
+                  {tab === id ? (
+                    <motion.span
+                      layoutId='handbook-panel-tab'
+                      className='bg-accent absolute inset-0'
+                      transition={{ type: 'spring', stiffness: 420, damping: 38 }}
+                    />
+                  ) : null}
+                  <Icon className='relative z-10 size-4 shrink-0' />
+                  <span className='relative z-10 truncate'>{t(`tabs.${id}`)}</span>
+                </button>
+              ))}
+            </nav>
+          </LayoutGroup>
         ) : null}
 
         {/* Vùng nội dung bên phải panel */}
@@ -140,27 +169,62 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
             </Button>
           </header>
 
-          <div className='min-h-0 flex-1 overflow-y-auto p-4'>
-            {activeTab === 'templates' ? (
-              templatesPending ? (
-                <PanelSkeleton />
-              ) : (
-                /* Lưới 3×2 đúng Hình 1 / Hình 4 — sáu mẫu, không phải danh sách dọc. */
-                <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
-                  {templates.map((template) => (
-                    <TemplateCard key={template.id} template={template} variant='panel' onOpen={setSelectedTemplate} />
-                  ))}
-                </div>
-              )
-            ) : articlesPending ? (
-              <PanelSkeleton />
-            ) : (
-              <div className='space-y-3'>
-                {articles?.map((article) => (
-                  <ArticleCard key={article.id} article={article} onOpen={setSelectedArticle} />
-                ))}
-              </div>
-            )}
+          <div className='flex min-h-0 flex-1 flex-col'>
+            <AnimatePresence mode='wait' initial={false}>
+              <motion.div
+                key={activeTab}
+                className='min-h-0 flex-1 overflow-y-auto p-4'
+                onScroll={(event) => {
+                  if (activeTab === 'templates' ? templatesPending : articlesPending) return
+                  scrollPositions.current[activeTab] = event.currentTarget.scrollTop
+                }}
+                ref={(node) => {
+                  if (!node) return
+                  scrollRef.current = node
+                  displayedTab.current = activeTab
+                  node.scrollTop = scrollPositions.current[activeTab]
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: reduced ? 0 : 0.18 }}
+              >
+                {activeTab === 'templates' ? (
+                  templatesPending ? (
+                    <PanelSkeleton />
+                  ) : (
+                    /* Lưới 3×2 đúng Hình 1 / Hình 4 — sáu mẫu, không phải danh sách dọc. */
+                    <div data-handbook-panel-grid className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+                      {templates.map((template, index) => (
+                        <div
+                          key={template.id}
+                          data-panel-card
+                          style={{ '--panel-card-delay': `${index * 65}ms` } as React.CSSProperties}
+                        >
+                          <TemplateCard
+                            template={template}
+                            variant='panel'
+                            selected={selectedTemplateId === template.id}
+                            onOpen={(value) => {
+                              setSelectedTemplateId(value.id)
+                              setSelectedTemplate(value)
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : articlesPending ? (
+                  <PanelSkeleton />
+                ) : (
+                  <div className='space-y-3'>
+                    {articles?.map((article) => (
+                      <ArticleCard key={article.id} article={article} onOpen={setSelectedArticle} />
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Dòng gợi ý dưới lưới mẫu — chỉ Bước 3 (Hình 4) */}
@@ -177,7 +241,7 @@ export function PersonalizedPanel({ filter, kind, topic, filterLabel }: Personal
       <ArticleDetailDialog article={selectedArticle} onClose={() => setSelectedArticle(null)} />
     </>
   )
-}
+})
 
 function PanelSkeleton() {
   return (

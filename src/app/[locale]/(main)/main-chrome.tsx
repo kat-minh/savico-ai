@@ -1,19 +1,62 @@
 'use client'
 
-import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect } from 'react'
 
 import { AuthDialog, useLogout } from '@/features/auth'
-import { CreateProjectDialog, useDesignStore } from '@/features/design'
+import { CreateProjectDialog, resumeProjectRoute, useDesignStore } from '@/features/design'
+import { usePathname, useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
 import { AccountMenu } from '@/shared/components/account-menu'
 import { SiteHeader } from '@/shared/layouts'
+import { useActiveProject } from './use-active-project'
 
-/** Signed-in account dropdown, wired with the auth feature's logout flow. */
-function UserMenu() {
+/**
+ * Signed-in account dropdown, wired with the auth feature's logout flow.
+ *
+ * `resumeProject` (chấm xanh trên avatar + "Mở tiếp dự án" đầu menu, mục II.2)
+ * chỉ tính khi đã đăng nhập — dự án là dữ liệu riêng của tài khoản.
+ */
+function UserMenu({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const { user } = useAuth()
   const logout = useLogout()
+  const active = useActiveProject()
   if (!user) return null
-  return <AccountMenu user={user} onLogout={() => logout.mutate()} />
+
+  const resumeProject = active ? { id: active.id, href: resumeProjectRoute(active) } : null
+
+  return (
+    <AccountMenu
+      user={user}
+      onLogout={() => logout.mutate()}
+      onOpenChange={onOpenChange}
+      resumeProject={resumeProject}
+    />
+  )
+}
+
+/**
+ * Cầu nối app-layer cho CTA ở feature khác muốn "Tạo dự án mới" mà không được
+ * import trực tiếp feature/design. URL là contract trung gian, sau khi mở modal
+ * thì query được dọn để refresh/back không tự bật lại.
+ */
+function CreateProjectQueryBridge() {
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const openCreateDialog = useDesignStore((s) => s.openCreateDialog)
+
+  useEffect(() => {
+    if (searchParams.get('createProject') !== '1') return
+
+    openCreateDialog()
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('createProject')
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }, [openCreateDialog, pathname, router, searchParams])
+
+  return null
 }
 
 /**
@@ -36,6 +79,7 @@ export function MainChrome() {
           kia thì phải khai báo ranh giới ở đúng chỗ cần, là đây. */}
       <Suspense fallback={null}>
         <AuthDialog />
+        <CreateProjectQueryBridge />
       </Suspense>
       <CreateProjectDialog />
     </>

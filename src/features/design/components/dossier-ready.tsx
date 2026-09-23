@@ -1,27 +1,21 @@
 'use client'
 
-import {
-  ArrowRight,
-  Check,
-  Download,
-  Link2,
-  Loader2,
-  Mail,
-  MessageCircle,
-  Phone,
-  QrCode,
-  ShieldCheck
-} from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, Check, Download, Link2, Mail, MessageCircle, Phone, QrCode, ShieldCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
+import { useRouter } from '@/i18n/navigation'
 import { siteConfig } from '@/shared/config/site'
 import { EstimateSheet, Photo, PlanDrawing } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
 import { useSiteImage } from '@/shared/cms'
+import { useMounted, usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
+import { ROUTES, shareRoute } from '@/shared/constants/routes'
 import { useDownloadDossier } from '../hooks/use-download-dossier'
 import { costShares } from '../services/estimate.service'
 import type { Dossier, EstimateResult } from '../types/design.types'
@@ -38,6 +32,11 @@ interface DossierReadyProps {
   /** Gọi khi cần token chia sẻ mà `dossier.shareToken` còn trống. */
   onRequestShareLink: () => void
   onSendEmail: (email: string) => Promise<void>
+  /** Chỉ true khi render vừa hoàn tất trong phiên hiện tại; project cũ mở lại giữ final state. */
+  animateCompletion?: boolean
+  fromRender?: boolean
+  filesEntering?: boolean
+  onFilesEntered?: () => void
 }
 
 /**
@@ -59,20 +58,90 @@ type FileKey = (typeof FILES)[number]['key']
  * Dấu tích lớn + lời cảm ơn, rồi hai cột: "Tệp hồ sơ" (lưới 4 thẻ tệp kèm dòng
  * bảo mật) và "Tải xuống & chia sẻ". Cuối trang là dải chuyển đổi liên hệ KTS.
  */
-export function DossierReady({ dossier, result, info, advisory, onRequestShareLink, onSendEmail }: DossierReadyProps) {
+export function DossierReady({
+  dossier,
+  result,
+  info,
+  advisory,
+  onRequestShareLink,
+  onSendEmail,
+  animateCompletion = false,
+  fromRender = false,
+  filesEntering = false,
+  onFilesEntered
+}: DossierReadyProps) {
   const t = useTranslations('design.dossier')
+  const reduced = useReducedMotion()
+  useEffect(() => {
+    if (reduced && filesEntering) onFilesEntered?.()
+  }, [filesEntering, onFilesEntered, reduced])
   // Ảnh phối cảnh mẫu — admin thay ở màn "Hình ảnh site".
   const exteriorImage = useSiteImage('render.villa')
   // Bản vẽ mặt bằng mẫu, cùng nguồn với thẻ xem trước ở màn chưa render.
   const planImage = useSiteImage('plan.garden675x10')
   const locale = useLocale() as Locale
+  const router = useRouter()
   const { contact } = siteConfig
   const [shareMode, setShareMode] = useState<ShareMode>(null)
+  const [linkExpanded, setLinkExpanded] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [downloaded, setDownloaded] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const [celebrate] = useState(() => animateCompletion || fromRender || filesEntering)
+  const [dialogOrigin, setDialogOrigin] = useState({ x: 0, y: 0 })
   const pdf = useDownloadDossier({ dossier, result, info, advisory })
+  const mounted = useMounted()
+  const { rootRef, entranceState, entranceStyle } = usePageEntrance(`design.${info.projectId}.dossier-ready`, {
+    // M09 dùng cùng một choreography cho mọi đường vào. Riêng success mark vẫn
+    // được `celebrate` gate để reload/mở hồ sơ cũ không vẽ lại vòng + tick.
+    replayOnMount: true,
+    offsetMs: 220,
+    settleAfterMs: 3100
+  })
 
   const sizeMb = pdf.size ? formatNumber(pdf.size / 1_000_000, locale, { maximumFractionDigits: 1 }) : null
+  const shareUrl =
+    dossier.shareToken && mounted ? `${window.location.origin}/${locale}${shareRoute(dossier.shareToken)}` : ''
 
   const shares = result ? costShares(result.sections) : null
+
+  useEffect(() => {
+    if (animateCompletion) sessionStorage.setItem('savico.just-completed-project', info.projectId)
+  }, [animateCompletion, info.projectId])
+
+  // Header/account menu nằm ngoài feature này. Chặn riêng link quay về /design
+  // để M09 có một exit slide-right ngắn trước khi route bị unmount; các link
+  // khác vẫn điều hướng bình thường.
+  useEffect(() => {
+    const handleDesignReturn = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        leaving
+      )
+        return
+
+      const element = event.target instanceof Element ? event.target.closest('a') : null
+      if (!(element instanceof HTMLAnchorElement) || element.target === '_blank' || element.hasAttribute('download'))
+        return
+
+      const url = new URL(element.href, window.location.href)
+      const localPath = url.pathname.replace(new RegExp(`^/${locale}(?=/|$)`), '') || '/'
+      if (localPath !== ROUTES.DESIGN) return
+
+      event.preventDefault()
+      sessionStorage.setItem('savico.just-completed-project', info.projectId)
+      setLeaving(true)
+      window.setTimeout(() => router.push(ROUTES.DESIGN), reduced ? 0 : 320)
+    }
+
+    document.addEventListener('click', handleDesignReturn, true)
+    return () => document.removeEventListener('click', handleDesignReturn, true)
+  }, [info.projectId, leaving, locale, reduced, router])
   const percents: [number, number, number] | undefined = shares
     ? [
         shares.find((s) => s.section === 'structure')?.percent ?? 0,
@@ -97,36 +166,126 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
     }
   }
 
-  function openShare(mode: Exclude<ShareMode, null>) {
+  function openShare(mode: Exclude<ShareMode, null>, trigger?: HTMLElement) {
     if (!dossier.shareToken) onRequestShareLink()
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect()
+      setDialogOrigin({
+        x: rect.left + rect.width / 2 - window.innerWidth / 2,
+        y: rect.top + rect.height / 2 - window.innerHeight / 2
+      })
+    }
     setShareMode(mode)
   }
 
+  async function downloadPdf() {
+    await pdf.download()
+    setDownloaded(true)
+    window.setTimeout(() => setDownloaded(false), 900)
+  }
+
+  async function copyShareLink() {
+    if (!shareUrl) return
+    await navigator.clipboard.writeText(shareUrl)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1_500)
+  }
+
   return (
-    <div className='mx-auto w-full max-w-6xl space-y-5 px-4 py-8 lg:px-8'>
+    <div
+      ref={rootRef}
+      data-page-entrance={entranceState}
+      data-dossier-ready
+      data-celebrating={celebrate}
+      data-dossier-handoff={fromRender}
+      data-files-entering={filesEntering}
+      data-m09-leaving={leaving}
+      style={entranceStyle}
+      className='mx-auto w-full max-w-6xl space-y-5 px-4 py-8 lg:px-8'
+    >
       <header className='space-y-3 text-center'>
-        <span className='bg-primary text-primary-foreground mx-auto flex size-14 items-center justify-center rounded-full'>
-          <Check className='size-7' strokeWidth={3} />
-        </span>
-        <h1 className='text-2xl font-semibold tracking-tight text-balance sm:text-3xl'>{t('readyTitle')}</h1>
-        <p className='text-muted-foreground text-pretty'>{t('readyThanks')}</p>
+        <motion.span
+          data-entrance-step={celebrate ? '0' : undefined}
+          data-entrance-from={celebrate ? 'soft-scale' : undefined}
+          data-dossier-success-circle
+          className='bg-primary text-primary-foreground relative mx-auto flex size-14 items-center justify-center rounded-full'
+        >
+          <svg
+            data-dossier-success-ring
+            viewBox='0 0 56 56'
+            className='text-primary pointer-events-none absolute inset-0 size-full -rotate-90'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='3'
+            aria-hidden
+          >
+            <circle cx='28' cy='28' r='25.5' pathLength='1' />
+          </svg>
+          <svg
+            data-dossier-success-check
+            viewBox='0 0 24 24'
+            className='size-7'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='3'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            aria-hidden
+          >
+            {/* Path order is intentional: draw the short down-stroke first,
+                then the long up-stroke. Lucide's Check path is reversed for
+                stroke-dash animation, which made the tick look backwards. */}
+            <path d='M4 12 L9 17 L20 6' />
+          </svg>
+        </motion.span>
+        <h1 data-entrance-step='1' className='text-2xl font-semibold tracking-tight text-balance sm:text-3xl'>
+          {t('readyTitle')}
+        </h1>
+        <p data-entrance-step='1' data-entrance-order='1' className='text-muted-foreground text-pretty'>
+          {t('readyThanks')}
+        </p>
       </header>
 
       <div className='grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]'>
         {/* Cột TRÁI — Tệp hồ sơ */}
-        <section className='bg-card rounded-2xl border p-5'>
+        <section data-entrance-step='2' className='bg-card rounded-2xl border p-5'>
           <h2 className='mb-4 font-semibold tracking-tight'>{t('filesTitle')}</h2>
 
           <ul className='grid gap-4 sm:grid-cols-2'>
             {FILES.map(({ key, kind }, index) => (
-              <li key={key} className='flex gap-3 rounded-xl border p-3'>
-                <span className='bg-muted size-24 shrink-0 overflow-hidden rounded-lg'>{thumbnail(key)}</span>
+              <motion.li
+                key={key}
+                data-dossier-file-card
+                initial={!reduced ? { opacity: 0, y: -30, scale: 0.96 } : false}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: reduced ? 0 : 0.62,
+                  delay: reduced ? 0 : 1.12 + index * 0.18,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
+                onAnimationComplete={index === FILES.length - 1 && filesEntering ? onFilesEntered : undefined}
+                className='group/file flex gap-3 rounded-xl border p-3'
+              >
+                <motion.span
+                  data-file-thumbnail
+                  className='bg-muted size-24 shrink-0 overflow-hidden rounded-lg'
+                  initial={!reduced ? { opacity: 0.4, filter: 'blur(10px)' } : false}
+                  animate={{ opacity: 1, filter: 'blur(0px)' }}
+                  transition={{
+                    duration: reduced ? 0 : 0.5,
+                    delay: reduced ? 0 : 1.24 + index * 0.18,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                >
+                  {thumbnail(key)}
+                </motion.span>
 
                 <div className='flex min-w-0 flex-col gap-1'>
                   <div className='flex items-start gap-2'>
                     <span
+                      data-file-kind
                       className={cn(
-                        'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold text-white',
+                        'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-white transition-[font-weight]',
                         kind === 'pdf' ? 'bg-destructive' : 'bg-primary'
                       )}
                     >
@@ -146,7 +305,7 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
                     <ArrowRight className='size-3' />
                   </span>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
 
@@ -157,26 +316,94 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
         </section>
 
         {/* Cột PHẢI — Tải xuống & chia sẻ */}
-        <aside className='bg-card h-fit space-y-3 rounded-2xl border p-5'>
+        <aside
+          inert={filesEntering}
+          data-entrance-step='3'
+          data-entrance-from='right'
+          className='bg-card h-fit space-y-3 rounded-2xl border p-5'
+        >
           <h2 className='font-semibold tracking-tight'>{t('downloadTitle')}</h2>
 
-          <Button size='lg' className='h-12 w-full' onClick={() => void pdf.download()} disabled={pdf.isPending}>
-            {pdf.isPending ? <Loader2 className='size-4 animate-spin' /> : <Download className='size-4' />}
+          <Button
+            data-dossier-pdf
+            data-entrance-step='3'
+            data-entrance-order='1'
+            size='lg'
+            className='h-12 w-full overflow-hidden'
+            onClick={() => void downloadPdf()}
+            disabled={pdf.isPending}
+          >
+            {pdf.isPending ? (
+              <Download data-download-arrow className='size-4' />
+            ) : downloaded ? (
+              <Check data-download-complete className='size-4' />
+            ) : (
+              <Download className='size-4' />
+            )}
             {/* Hình 11: "Tải hồ sơ PDF ~46 MB" — cỡ nằm cùng dòng, cùng cỡ chữ,
                 dấu "~" báo đây là số ước tính cho tới khi file được dựng. */}
             {t('actions.downloadPdf')}
             {sizeMb && !pdf.isPending ? <span>{t('pdfSize', { size: sizeMb })}</span> : null}
           </Button>
 
-          <Button size='lg' variant='outline' className='h-12 w-full' onClick={() => openShare('link')}>
-            <Link2 className='size-4' />
-            {t('actions.shareLink')}
-          </Button>
-          <Button size='lg' variant='outline' className='h-12 w-full' onClick={() => openShare('email')}>
+          {linkExpanded ? (
+            <div data-share-link-expanded className='flex items-center gap-2'>
+              <Input
+                readOnly
+                value={shareUrl || t('share.preparing')}
+                className='min-w-0 font-mono text-xs'
+                onFocus={(event) => event.currentTarget.select()}
+              />
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                className={cn(
+                  'h-9 shrink-0 overflow-hidden transition-[width,padding] duration-200',
+                  copied ? 'w-20 px-2' : 'w-9 px-0'
+                )}
+                onClick={() => void copyShareLink()}
+                disabled={!shareUrl}
+                aria-label={t('share.link.copy')}
+              >
+                {copied ? (
+                  <span data-copied-label className='text-primary text-xs font-semibold whitespace-nowrap'>
+                    {t('share.link.copied')}
+                  </span>
+                ) : (
+                  <Link2 className='size-4' />
+                )}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size='lg'
+              variant='outline'
+              className='h-12 w-full'
+              onClick={() => {
+                if (!dossier.shareToken) onRequestShareLink()
+                setLinkExpanded(true)
+              }}
+            >
+              <Link2 className='size-4' />
+              {t('actions.shareLink')}
+            </Button>
+          )}
+          <Button
+            size='lg'
+            variant='outline'
+            className='h-12 w-full'
+            onClick={(event) => openShare('email', event.currentTarget)}
+          >
             <Mail className='size-4' />
             {t('actions.email')}
           </Button>
-          <Button size='lg' variant='outline' className='h-12 w-full' onClick={() => openShare('qr')}>
+          <Button
+            size='lg'
+            variant='outline'
+            className='h-12 w-full'
+            onClick={(event) => openShare('qr', event.currentTarget)}
+          >
             <QrCode className='size-4' />
             {t('actions.qr')}
           </Button>
@@ -189,14 +416,19 @@ export function DossierReady({ dossier, result, info, advisory, onRequestShareLi
         mode={shareMode}
         onOpenChange={(open) => setShareMode(open ? shareMode : null)}
         token={dossier.shareToken}
+        origin={dialogOrigin}
         onSendEmail={onSendEmail}
       />
 
       {/* Dải chuyển đổi cuối trang. */}
-      <section className='bg-accent/60 border-primary/20 flex flex-col items-center gap-4 rounded-2xl border p-6 sm:flex-row sm:justify-between'>
+      <section
+        data-contact-strip
+        data-entrance-step='4'
+        className='bg-accent/60 border-primary/20 flex flex-col items-center gap-4 rounded-2xl border p-6 sm:flex-row sm:justify-between'
+      >
         <h2 className='text-primary-strong font-semibold text-balance'>{t('ctaTitle')}</h2>
         <div className='flex shrink-0 flex-col gap-3 sm:flex-row'>
-          <Button asChild size='lg'>
+          <Button data-call-now asChild size='lg'>
             <a href={`tel:${contact.hotline.replace(/\s/g, '')}`}>
               <Phone className='size-4' />
               {t('ctaCall')}

@@ -2,13 +2,36 @@
 
 import Image from 'next/image'
 import { ArrowRight, Play, Star } from 'lucide-react'
+import {
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  type Transition
+} from 'motion/react'
 import { useTranslations } from 'next-intl'
+import { type MouseEvent, useEffect, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { useSiteImage } from '@/shared/cms'
+import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
-import { ROUTES } from '@/shared/constants/routes'
+import { useSessionOnce } from '@/shared/hooks'
+import { scrollToAndFlash } from '@/shared/lib'
 import { HERO_CARD_ROWS } from '../constants/landing.constants'
+
+interface HomeHeroProps {
+  onCreateProject?: () => void
+  /** "▷ Xem hướng dẫn 1 phút" — mở hộp video của vùng 09 ngay tại chỗ. */
+  onWatchIntro?: () => void
+  /** Có dự án dở → nút chính đổi thành "Mở tiếp dự án →" trỏ thẳng route này. */
+  resumeHref?: string
+}
+
+/** Khoá `sessionStorage` — chuỗi mở màn chỉ chạy một lần mỗi phiên (mục II.2). */
+const INTRO_SESSION_KEY = 'savico.hero-intro-played'
 
 /**
  * Khối hero trang chủ (mục II.2, dựng theo ảnh mockup khách gửi).
@@ -20,17 +43,57 @@ import { HERO_CARD_ROWS } from '../constants/landing.constants'
  * Lưới BA cột (chữ · thẻ · khoảng trống) chứ không phải hai: cột trống bên phải
  * là chỗ để công trình trong ảnh lộ ra — đẩy thẻ sát mép phải là che mất đúng
  * phần đáng nhìn nhất của tấm ảnh.
+ *
+ * ★ Mở màn theo thứ tự đọc trong ~1,5 giây, CHỈ chạy lần đầu mỗi phiên
+ * (`useSessionOnce`); cuộn hay bấm trong lúc đang chạy thì `skip` bật lên và
+ * mọi phần còn lại nhảy thẳng tới trạng thái hoàn chỉnh (transition còn 0s).
+ * `#home-hero-end` là mốc để `SiteHeader` biết đã cuộn qua hero hay chưa.
  */
-export function HomeHero({ onCreateProject }: { onCreateProject?: () => void }) {
+export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHeroProps) {
   const t = useTranslations('landing.hero')
   // Chữ hero admin sửa được qua kho `uiStrings` (phủ thẳng lên i18n), nên ở đây
   // chỉ cần `t` — không còn tài liệu `home` song song để lệch nhau nữa.
   const background = useSiteImage('home.hero')
+  const reduceMotion = useReducedMotion()
+
+  const seenBefore = useSessionOnce(INTRO_SESSION_KEY)
+  // Cuộn hay bấm giữa chừng cũng nhảy thẳng tới trạng thái hoàn chỉnh — gộp
+  // chung với "đã xem trước đó" thành một cờ `skip` DUY NHẤT thay vì đồng bộ
+  // hai state riêng bằng effect.
+  const [interacted, setInteracted] = useState(false)
+  const skip = seenBefore || interacted || Boolean(reduceMotion)
+  const skipStar = interacted || Boolean(reduceMotion)
+  const { scrollY } = useScroll()
+
+  useMotionValueEvent(scrollY, 'change', (latest) => {
+    if (!skip && latest > 0) setInteracted(true)
+  })
+
+  useEffect(() => {
+    if (skip) return
+    const fastForward = () => setInteracted(true)
+    window.addEventListener('pointerdown', fastForward, { once: true })
+    return () => window.removeEventListener('pointerdown', fastForward)
+  }, [skip])
+
+  /** Từng mốc thời gian của chuỗi mở màn — 0s hết khi `skip`. */
+  const seq = (delay: number, duration = 0.7): Transition => ({
+    duration: skip ? 0 : duration,
+    delay: skip ? 0 : delay,
+    ease: revealEase
+  })
 
   return (
-    <section className='relative isolate overflow-hidden'>
+    <section id='home-hero' className='relative isolate overflow-hidden'>
       <div aria-hidden className='absolute inset-0 -z-10'>
-        <Image src={background} alt='' fill priority sizes='100vw' className='object-cover object-center' />
+        <motion.div
+          className='hero-photo-drift absolute inset-0'
+          initial={{ opacity: skip ? 1 : 0, scale: 1.03 }}
+          animate={{ opacity: 1 }}
+          transition={seq(1.05, 0.9)}
+        >
+          <Image src={background} alt='' fill priority sizes='100vw' className='object-cover object-center' />
+        </motion.div>
         {/* CHỈ phủ theo chiều ngang — đặc bên trái cho cột chữ, tan dần sang
             phải. Trước đây có thêm lớp phủ dọc làm mép dưới ảnh chìm vào nền
             trang; mất mép thì thẻ số liệu chẳng còn đường viền nào để nằm đè
@@ -38,83 +101,231 @@ export function HomeHero({ onCreateProject }: { onCreateProject?: () => void }) 
         <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r to-transparent' />
       </div>
 
-      {/* Dòng ghi chú viết tay góc phải trên (ảnh mockup). Ẩn dưới lg: chỗ đó
-          không còn ảnh để chú thích, chen vào chỉ làm chật cột chữ. */}
-      <p className='font-hand text-primary pointer-events-none absolute top-10 right-10 hidden max-w-[17rem] -rotate-4 text-center text-xl leading-snug text-balance lg:block xl:right-20 xl:text-[1.375rem]'>
+      {/* Dòng ghi chú viết tay góc phải trên (ảnh mockup) — "vẽ nét" bằng
+          clip-path quét trái→phải, chạy SAU CÙNG trong chuỗi mở màn. Ẩn dưới
+          lg: chỗ đó không còn ảnh để chú thích, chen vào chỉ làm chật cột chữ. */}
+      <motion.p
+        initial={{ clipPath: skip ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
+        animate={{ clipPath: 'inset(0 0% 0 0)' }}
+        transition={seq(1.55, 1.2)}
+        className='font-hand text-primary pointer-events-none absolute top-10 right-10 hidden max-w-[17rem] -rotate-4 text-center text-xl leading-snug text-balance lg:block xl:right-20 xl:text-[1.375rem]'
+      >
         {t('note')}
-      </p>
+      </motion.p>
 
       <div className='mx-auto grid w-full max-w-[90rem] items-center gap-8 px-4 py-14 lg:grid-cols-[minmax(0,1fr)_14rem_minmax(0,0.65fr)] lg:gap-10 lg:px-8 lg:py-20'>
         <div className='space-y-4'>
-          <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('eyebrow')}</p>
+          <motion.p
+            initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={seq(0)}
+            className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'
+          >
+            {t('eyebrow')}
+          </motion.p>
 
           <h1 className='text-3xl leading-[1.15] font-bold tracking-tight text-balance sm:text-4xl lg:text-[2.4rem]'>
-            {t('titleLead')}
+            <motion.span
+              initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={seq(0.1, 0.75)}
+              className='inline-block'
+            >
+              {t('titleLead')}
+            </motion.span>
             <br />
-            <span className='text-primary-strong'>{t('titleAccent')}</span>
+            {/* "tô xanh từ trái": chữ nền mờ luôn đọc được (kể cả tắt JS), lớp
+                xanh nằm đè lên quét trái→phải bằng clip-path — hai lớp cùng
+                chữ nên khớp pixel-perfect, không lệch glyph. */}
+            <motion.span
+              initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={seq(0.1, 0.75)}
+              className='relative inline-block'
+            >
+              <span className='text-foreground/35'>{t('titleAccent')}</span>
+              <motion.span
+                aria-hidden
+                initial={{ clipPath: skip ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
+                animate={{ clipPath: 'inset(0 0% 0 0)' }}
+                transition={seq(0.9, 0.9)}
+                className='text-primary-strong absolute inset-0 whitespace-nowrap'
+              >
+                {t('titleAccent')}
+              </motion.span>
+            </motion.span>
           </h1>
 
           {/* Chỗ xuống dòng nằm TRONG câu chữ (ký tự xuống dòng trong
               `messages/*.json`) và `whitespace-pre-line` tôn trọng nó: mô tả
               ngắt hết câu rồi mới xuống dòng, đúng như ảnh mockup, thay vì
               phó mặc trình duyệt ngắt giữa câu. */}
-          <p className='text-muted-foreground max-w-[38rem] whitespace-pre-line'>{t('subtitle')}</p>
+          <motion.p
+            initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={seq(0.55, 0.75)}
+            className='text-muted-foreground max-w-[38rem] whitespace-pre-line'
+          >
+            {t('subtitle')}
+          </motion.p>
 
-          <div className='flex flex-col gap-3 pt-1 sm:flex-row'>
+          <motion.div
+            initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={seq(0.72, 0.75)}
+            className='flex flex-col gap-3 pt-1 sm:flex-row'
+          >
+            {resumeHref ? (
+              <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>
+                <Link href={resumeHref}>
+                  {t('resumeCta')}
+                  <ArrowRight className='size-4' />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                className='brand-green-button group h-11 rounded-full px-8 text-base active:scale-95 has-[>svg]:px-8'
+                onClick={onCreateProject}
+              >
+                {t('primaryCta')}
+                <ArrowRight className='size-4 transition-transform duration-300 group-hover:translate-x-1' />
+              </Button>
+            )}
             <Button
-              className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'
-              onClick={onCreateProject}
+              type='button'
+              variant='outline'
+              className='bg-card/85 h-11 rounded-full px-8 text-base active:scale-95 has-[>svg]:px-8'
+              onClick={onWatchIntro}
             >
-              {t('primaryCta')}
-              <ArrowRight className='size-4' />
+              <Play className='size-4' />
+              {t('secondaryCta')}
             </Button>
-            <Button asChild variant='outline' className='bg-card/85 h-11 rounded-full px-8 text-base has-[>svg]:px-8'>
-              <Link href={ROUTES.GUIDE}>
-                <Play className='size-4' />
-                {t('secondaryCta')}
-              </Link>
-            </Button>
-          </div>
+          </motion.div>
         </div>
 
-        <HeroDossierCard />
+        <HeroDossierCard skip={skip} skipStar={skipStar} seq={seq} />
       </div>
     </section>
   )
+}
+
+interface HeroDossierCardProps {
+  skip: boolean
+  skipStar: boolean
+  seq: (delay: number, duration?: number) => Transition
 }
 
 /**
  * Thẻ "Hồ sơ dự án" nổi trên ảnh hero — bản rút gọn của khối Thông tin dự án ở
  * Bước 3 (mục III.4). Số liệu là ví dụ minh họa, không phải dự án thật, nên dòng
  * tổng cộng dẫn người xem vào hồ sơ mẫu thay vì nêu một con số tiền.
+ *
+ * Rê chuột: nhấc + nghiêng nhẹ THEO CHUỘT (tilt 3D bám vị trí con trỏ trong
+ * thẻ) — khác `whileHover` tĩnh, cần theo dõi `onMouseMove` để tính góc.
  */
-function HeroDossierCard() {
+function HeroDossierCard({ skip, skipStar, seq }: HeroDossierCardProps) {
   const t = useTranslations('landing.hero.card')
 
+  const rotateX = useMotionValue(0)
+  const rotateY = useMotionValue(0)
+  const springRotateX = useSpring(rotateX, { stiffness: 150, damping: 24, mass: 0.8 })
+  const springRotateY = useSpring(rotateY, { stiffness: 150, damping: 24, mass: 0.8 })
+
+  const onMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const px = (event.clientX - rect.left) / rect.width - 0.5
+    const py = (event.clientY - rect.top) / rect.height - 0.5
+    rotateY.set(px * 6)
+    rotateX.set(py * -6)
+  }
+
+  const onMouseLeave = () => {
+    rotateX.set(0)
+    rotateY.set(0)
+  }
+
   return (
-    <div className='bg-card/95 w-full space-y-2.5 rounded-2xl border p-3 shadow-lg backdrop-blur-sm lg:mt-10 lg:-translate-x-14'>
+    <motion.div
+      initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 24, scale: skip ? 1 : 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={seq(0.55, 0.75)}
+      style={{ rotateX: springRotateX, rotateY: springRotateY, transformPerspective: 800 }}
+      whileHover={{ y: -3, transition: { duration: 0.5, ease: revealEase } }}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      className='bg-card/95 w-full space-y-2.5 rounded-2xl border p-3 shadow-lg backdrop-blur-sm lg:mt-10 lg:-translate-x-14'
+    >
       <p className='flex items-center gap-2 text-xs font-semibold'>
-        <Star className='fill-warning text-warning size-3.5' />
+        <motion.span
+          initial={skipStar ? { opacity: 1, rotate: 0, scale: 1 } : { opacity: 0, rotate: 0, scale: 0.85 }}
+          animate={
+            skipStar
+              ? { opacity: 1, rotate: 0, scale: 1 }
+              : {
+                  opacity: [0, 1, 1, 1],
+                  rotate: [0, 0, 40, 0],
+                  scale: [0.85, 1, 1.22, 1]
+                }
+          }
+          transition={{
+            duration: skipStar ? 0 : 1.05,
+            delay: skipStar ? 0 : 1.35,
+            times: [0, 0.18, 0.55, 1],
+            ease: 'easeInOut'
+          }}
+          className='relative inline-flex'
+        >
+          <motion.span
+            aria-hidden
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={skipStar ? { opacity: 0, scale: 1 } : { opacity: [0, 0, 0.9, 0], scale: [0.6, 0.8, 1.8, 2.1] }}
+            transition={{
+              duration: skipStar ? 0 : 1.05,
+              delay: skipStar ? 0 : 1.35,
+              times: [0, 0.18, 0.55, 1],
+              ease: 'easeInOut'
+            }}
+            className='bg-warning/70 absolute inset-0 rounded-full blur-sm'
+          />
+          <Star className='fill-warning text-warning relative size-3.5' />
+        </motion.span>
         {t('title')}
       </p>
 
       <dl className='space-y-1.5 text-xs'>
-        {HERO_CARD_ROWS.map((row) => (
-          <div key={row} className='flex items-center justify-between gap-4'>
+        {HERO_CARD_ROWS.map((row, index) => (
+          <motion.div
+            key={row}
+            initial={{ opacity: skip ? 1 : 0, x: skip ? 0 : -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={seq(0.85 + index * 0.11, 0.45)}
+            className='flex items-center justify-between gap-4'
+          >
             <dt className='text-muted-foreground'>{t(`rows.${row}.label`)}</dt>
             <dd className='font-medium'>{t(`rows.${row}.value`)}</dd>
-          </div>
+          </motion.div>
         ))}
       </dl>
 
-      <div className='flex items-center justify-between gap-4 border-t pt-2 text-xs'>
+      <motion.div
+        initial={{ opacity: skip ? 1 : 0 }}
+        animate={{ opacity: 1 }}
+        transition={seq(1.2, 0.45)}
+        className='flex items-center justify-between gap-4 border-t pt-2 text-xs'
+      >
         <span className='font-semibold'>{t('totalLabel')}</span>
         <span className='text-primary font-semibold'>{t('totalValue')}</span>
-      </div>
+      </motion.div>
 
-      <Button asChild className='brand-green-button h-8.5 w-full rounded-lg text-xs'>
-        <Link href={ROUTES.HANDBOOK}>{t('cta')}</Link>
+      {/* "Xem hồ sơ mẫu": cuộn mượt TỚI vùng 07 trên cùng trang thay vì điều
+          hướng sang /handbook — thẻ đầu của khối "Hồ sơ mẫu" sáng viền 1 nhịp. */}
+      <Button
+        type='button'
+        className='brand-green-button h-8.5 w-full rounded-lg text-xs'
+        onClick={() => scrollToAndFlash('home-dossier-0')}
+      >
+        {t('cta')}
       </Button>
-    </div>
+    </motion.div>
   )
 }

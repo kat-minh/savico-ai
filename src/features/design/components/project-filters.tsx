@@ -58,6 +58,7 @@ export function ProjectFilters({
             <li key={chip}>
               <button
                 type='button'
+                data-filter-chip
                 onClick={() => onStatusChange(value)}
                 aria-pressed={active}
                 className={cn(

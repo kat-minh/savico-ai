@@ -12,6 +12,9 @@ interface ConsultButtonProps {
   /** `solid` là nút chính ở trang chi tiết mẫu; `link` là liên kết ở trang bài viết. */
   variant?: 'solid' | 'link'
   className?: string
+  templateId?: string
+  pulse?: boolean
+  mobileSticky?: boolean
 }
 
 /**
@@ -21,28 +24,46 @@ interface ConsultButtonProps {
  * đã chốt trang Tư vấn 1:1 (mục VIII) nên nút đưa thẳng sang đó — chọn kiến trúc
  * sư, chọn khung giờ và xác nhận ở một chỗ.
  */
-export function ConsultButton({ variant = 'solid', className }: ConsultButtonProps) {
+export function ConsultButton({
+  variant = 'solid',
+  className,
+  templateId,
+  pulse = false,
+  mobileSticky = false
+}: ConsultButtonProps) {
   const t = useTranslations('handbook.consult')
+  const href = templateId ? `${ROUTES.CONSULT}?template=${encodeURIComponent(templateId)}` : ROUTES.CONSULT
 
   if (variant === 'link') {
     return (
       <Link
-        href={ROUTES.CONSULT}
+        data-consult-link
+        href={href}
         className={cn('text-primary inline-flex items-center gap-2 text-sm font-medium hover:underline', className)}
       >
         <CalendarClock className='size-4' />
         {t('cta')}
-        <ArrowRight className='size-4' />
+        <ArrowRight
+          data-consult-arrow
+          className='size-4 transition-transform duration-200 motion-reduce:transition-none'
+        />
       </Link>
     )
   }
 
   return (
-    <Button asChild size='lg' className={cn('w-full justify-between', className)}>
-      <Link href={ROUTES.CONSULT}>
-        {t('cta')}
-        <ArrowRight className='size-4' />
-      </Link>
-    </Button>
+    <div
+      data-consult-glow-shell
+      data-consult-pulse={pulse}
+      data-consult-mobile-sticky={mobileSticky}
+      className={cn('relative rounded-lg', className)}
+    >
+      <Button asChild size='lg' data-consult-cta data-consult-pulse={pulse} className='w-full justify-between'>
+        <Link href={href}>
+          {t('cta')}
+          <ArrowRight className='size-4' />
+        </Link>
+      </Button>
+    </div>
   )
 }

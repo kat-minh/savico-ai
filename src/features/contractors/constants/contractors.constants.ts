@@ -22,6 +22,21 @@ import type {
  */
 export const MAX_INVITATIONS = 3
 
+/** Nhà thầu chọn từ M01 để M05 ghim đầu danh sách và loé viền đúng một lần. */
+export const MATCHES_PINNED_CONTRACTOR_KEY = 'savico.matches-pinned-contractor'
+
+/** Cờ một lần để M05 chuyển chéo thanh và thay cả cụm kết quả sau khi chọn dự án khác. */
+export const MATCHES_PROJECT_CHANGED_KEY = 'savico.matches-project-changed'
+
+/** Cờ một lần để bộ đếm lời mời lật số khi quay lại M05 từ màn gửi lời mời. */
+export const MATCHES_INVITE_RETURN_KEY = 'savico.matches-invite-return'
+
+/** Tiền tố cờ "M09 đã chạy hiệu ứng vào trang" theo từng mã yêu cầu — tải lại trang thì hiện thẳng. */
+export const INVITE_SENT_INTRO_KEY = 'savico.invite-sent-intro'
+
+/** Cờ một lần: bấm "Theo dõi yêu cầu" ở M09 → M10 trượt vào từ bên phải (đi tới). */
+export const INVITATIONS_ARRIVE_FORWARD_KEY = 'savico.invitations-arrive-forward'
+
 /** Cần ít nhất 2 nhà thầu thì bảng so sánh mới có nghĩa (S15). */
 export const MIN_COMPARE = 2
 

@@ -12,10 +12,11 @@ import { contractorKeys } from '../api/contractors.keys'
 import type { SurveyBooking } from '../types/contractor.types'
 
 /** Lời mời báo giá đã gửi của dự án (S18) + ô đếm "Đã mời x/3" (R1). */
-export function useInvitations(projectId: string) {
+export function useInvitations(projectId: string, options: { live?: boolean } = {}) {
   return useQuery({
     queryKey: contractorKeys.invitationList(projectId),
     queryFn: () => contractorsApi.listInvitations(projectId),
+    refetchInterval: options.live ? 5_000 : false,
     // Chế độ xem thử chưa có dự án nên cũng chưa có lời mời nào để đếm.
     enabled: Boolean(projectId) && projectId !== CONTRACTOR_PREVIEW_ID
   })
@@ -36,7 +37,14 @@ export function useSurveySlots(contractorId: string, date: string) {
  * Nhận MỘT MẢNG booking vì khách có thể mời nhiều nhà thầu trong cùng một lượt
  * từ bảng so sánh (S15); server gộp chúng vào một mã yêu cầu khảo sát.
  */
-export function useSendInvitations(projectId: string) {
+interface SendInvitationMotionOptions {
+  navigateDelayMs?: number
+  errorMessage?: string
+  onSuccess?: () => void
+  onError?: () => void
+}
+
+export function useSendInvitations(projectId: string, options: SendInvitationMotionOptions = {}) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const t = useTranslations('errors')
@@ -46,10 +54,14 @@ export function useSendInvitations(projectId: string) {
     onSuccess: ({ request }) => {
       queryClient.invalidateQueries({ queryKey: contractorKeys.invitationList(projectId) })
       queryClient.invalidateQueries({ queryKey: contractorKeys.brief(projectId) })
-      router.push(contractorInviteSentRoute(projectId, request.id))
+      options.onSuccess?.()
+      const navigate = () => router.push(contractorInviteSentRoute(projectId, request.id))
+      if (options.navigateDelayMs) window.setTimeout(navigate, options.navigateDelayMs)
+      else navigate()
     },
     onError: (error) => {
-      toast.error(isApiError(error) ? error.message : t('generic'))
+      options.onError?.()
+      toast.error(options.errorMessage ?? (isApiError(error) ? error.message : t('generic')))
     }
   })
 }

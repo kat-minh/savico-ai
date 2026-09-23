@@ -133,7 +133,7 @@ export function filterTemplates(
   pool: readonly HandbookTemplate[],
   { kind, buildingType, secondary, query }: LibraryFilter
 ): HandbookTemplate[] {
-  const term = query?.trim().toLowerCase()
+  const term = normalizeTemplateSearch(query ?? '')
 
   return pool.filter((template) => {
     if (template.kind !== kind) return false
@@ -147,17 +147,28 @@ export function filterTemplates(
     }
     if (!term) return true
 
-    const haystack = [
-      template.name,
-      template.styleLabel,
-      template.specs.floorLabel,
-      template.specs.lotSize ?? '',
-      template.specs.floorArea ?? ''
-    ]
-      .join(' ')
-      .toLowerCase()
+    const haystack = normalizeTemplateSearch(
+      [
+        template.name,
+        template.styleLabel,
+        template.specs.floorLabel,
+        template.specs.lotSize ?? '',
+        template.specs.floorArea ?? ''
+      ].join(' ')
+    )
     return haystack.includes(term)
   })
+}
+
+/** Search dimensions naturally: `5x20`, `5 × 20` and `5×20` are equivalent. */
+function normalizeTemplateSearch(value: string): string {
+  return value
+    .normalize('NFC')
+    .toLocaleLowerCase()
+    .replace(/[×✕]/g, 'x')
+    .replace(/\s*x\s*/g, 'x')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /** Số bài của từng chủ đề — nguồn của dòng "(6 bài)" trên bảng chủ đề (Hình 10). */

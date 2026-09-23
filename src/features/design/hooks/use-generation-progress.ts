@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import type { GenerationProgress } from '../types/design.types'
@@ -24,6 +24,8 @@ interface UseGenerationProgressOptions {
    * stages instead of racing to the ceiling and sitting there.
    */
   expectedMs?: number
+  /** Freeze at the current truthful value while the backend is in an error state. */
+  paused?: boolean
 }
 
 /**
@@ -36,19 +38,43 @@ interface UseGenerationProgressOptions {
 export function useGenerationProgress({
   flow,
   complete,
-  expectedMs = 9_000
+  expectedMs = 9_000,
+  paused = false
 }: UseGenerationProgressOptions): GenerationProgress {
   const t = useTranslations(`design.progress.${flow}`)
   const [creep, setCreep] = useState(0)
+  const startedAtRef = useRef<number | null>(null)
+  const pausedAtRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (complete) return
-    const step = (CEILING * TICK_MS) / expectedMs
-    const timer = setInterval(() => {
-      setCreep((current) => Math.min(CEILING, current + step))
-    }, TICK_MS)
-    return () => clearInterval(timer)
-  }, [complete, expectedMs])
+    if (paused) {
+      if (pausedAtRef.current === null) pausedAtRef.current = Date.now()
+      return
+    }
+    if (pausedAtRef.current !== null && startedAtRef.current !== null) {
+      startedAtRef.current += Date.now() - pausedAtRef.current
+      pausedAtRef.current = null
+    }
+    if (startedAtRef.current === null) startedAtRef.current = Date.now() - (creep / CEILING) * expectedMs
+
+    const synchronize = () => {
+      const startedAt = startedAtRef.current ?? Date.now()
+      const elapsed = Math.max(0, Date.now() - startedAt)
+      const truthful = Math.min(CEILING, (elapsed / expectedMs) * CEILING)
+      // Date-based catch-up keeps the ring truthful after a background tab is
+      // restored, while max() guarantees that it never travels backwards.
+      setCreep((current) => Math.max(current, truthful))
+    }
+
+    synchronize()
+    const timer = window.setInterval(synchronize, TICK_MS)
+    document.addEventListener('visibilitychange', synchronize)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', synchronize)
+    }
+  }, [complete, expectedMs, paused])
 
   // 100% is derived, not stored — writing it from the effect would cascade renders.
   const percent = complete ? 100 : creep

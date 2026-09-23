@@ -10,6 +10,8 @@ export { StepProgress } from './components/step-progress'
 export { HelpLink } from './components/help-link'
 export { StepInputForm } from './components/step-input-form'
 export { GenerationWaiting } from './components/generation-waiting'
+export { DossierRenderWaiting } from './components/dossier-render-waiting'
+export { useDossierRenderFlow } from './hooks/use-dossier-render-flow'
 export { BlueprintIllustration } from './components/blueprint-illustration'
 export { ArchitectAvatar } from './components/architect-avatar'
 export { RenderProgressBars } from './components/render-progress-bars'
@@ -68,9 +70,11 @@ export {
   filterProjects,
   matchesQuery,
   miniStepState,
+  mostRecentActiveProject,
   pageCount,
   paginate,
   projectStatus,
+  resumeProjectRoute,
   selectProjects,
   sortProjects,
   type MiniStepState,
