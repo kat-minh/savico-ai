@@ -1815,7 +1815,8 @@
       "contractorFlow": "Tìm nhà thầu",
       "supervision": "Giám sát thi công",
       "consult": "Tư vấn 1:1",
-      "people": "Khách hàng"
+      "people": "Khách hàng",
+      "library": "Thư viện"
     },
     "nav": {
       "dashboard": "Việc cần xử lý",
@@ -1846,6 +1847,7 @@
       "discounts": "Mã giảm giá",
       "surveys": "Lịch khảo sát",
       "contractors": "Nhà thầu",
+      "guideVideos": "Video hướng dẫn",
       "changeRequests": "Yêu cầu sửa đổi",
       "supervisionPackages": "Gói giám sát"
     },

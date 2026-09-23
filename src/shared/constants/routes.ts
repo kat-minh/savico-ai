@@ -87,6 +87,10 @@ export const ADMIN_ROUTES = {
   CHANGE_REQUESTS: '/admin/change-requests',
   /** Danh bạ nhà thầu + xác minh (S12–S15). */
   CONTRACTORS: '/admin/contractors',
+  /** Thư viện mẫu 2D & 3D của trang Cẩm nang — một bảng, lọc theo loại mẫu. */
+  TEMPLATES: '/admin/templates',
+  /** Video hướng dẫn của trang Hướng dẫn. */
+  GUIDE_VIDEOS: '/admin/guide-videos',
   /** Mã giảm giá của ô nhập mã ở S03. */
   DISCOUNTS: '/admin/discounts',
   /** Giá, thời hạn, lượt kiểm tra của ba gói giám sát (S19). */

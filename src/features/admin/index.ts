@@ -28,6 +28,12 @@ export { PlanManager } from './components/business/plan-manager'
 export { QuotaEditor } from './components/business/quota-editor'
 export { ConsultPackageManager } from './components/consult/package-manager'
 
+// Thư viện — kho mẫu và video do đội nội dung nhập, đứng riêng khỏi nhóm CMS
+// theo trang: đây là BẢNG BẢN GHI thêm/sửa/xóa hằng ngày, không phải chữ của
+// một trang cụ thể.
+export { TemplateManager } from './components/handbook/template-manager'
+export { GuideVideoManager } from './components/guide/guide-manager'
+
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
 export { OrderManager } from './components/ops/order-manager'
 export { DiscountManager } from './components/ops/discount-manager'

@@ -1815,7 +1815,8 @@
       "contractorFlow": "Find a contractor",
       "supervision": "Construction supervision",
       "consult": "1:1 consultation",
-      "people": "Customers"
+      "people": "Customers",
+      "library": "Library"
     },
     "nav": {
       "dashboard": "To-do",
@@ -1846,6 +1847,7 @@
       "discounts": "Discount codes",
       "surveys": "Site surveys",
       "contractors": "Contractors",
+      "guideVideos": "Guide videos",
       "changeRequests": "Change requests",
       "supervisionPackages": "Supervision plans"
     },

@@ -41,6 +41,7 @@ import { ADMIN_ROUTES, ROUTES, type AdminRoute, type AppRoute } from '@/shared/c
  *   · Giám sát thi công — xác nhận giai đoạn, yêu cầu sửa đổi.
  *   · Tư vấn 1:1        — lịch hẹn.
  *   · Khách hàng        — tài khoản, dự án thiết kế, kiểm duyệt review / báo cáo.
+ *   · Thư viện          — kho mẫu 2D/3D và video hướng dẫn.
  *   · Cấu hình          — CON SỐ điều khiển hệ thống: giá gói, hạn mức, danh mục, đơn giá.
  *
  * Nhóm theo LUỒNG của khách chứ không theo kiểu dữ liệu: nhận cuộc gọi "tôi mời
@@ -93,6 +94,13 @@ export const ADMIN_NAV = [
       { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
       { key: 'reviews', href: ADMIN_ROUTES.REVIEWS, icon: StarOutlined },
       { key: 'reports', href: ADMIN_ROUTES.REPORTS, icon: FlagOutlined }
+    ]
+  },
+  {
+    key: 'library',
+    items: [
+      { key: 'templates', href: ADMIN_ROUTES.TEMPLATES, icon: BookOutlined },
+      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
     ]
   },
   {
