@@ -22,8 +22,10 @@ type MenuItem = NonNullable<MenuProps['items']>[number]
  * Mở MỘT nhóm tại một thời điểm (kiểu đàn xếp): mở nhiều nhóm cùng lúc thì lại
  * dài đúng như cũ, chẳng giải quyết được gì.
  *
- * Nhóm chỉ có một mục (Tổng quan, Tư vấn 1:1) dựng thẳng thành mục bấm được,
- * không bọc hàng cha — bắt người dùng bấm hai lần để tới một trang là vô ích.
+ * MỌI nhóm đều có hàng cha, kể cả nhóm một mục (Tổng quan, Tư vấn 1:1). Bỏ hàng
+ * cha của riêng chúng cho đỡ một cú bấm thì được, nhưng menu hóa ra hai kiểu
+ * hàng trông giống hệt nhau mà hành xử khác nhau — cái bấm ra trang, cái bấm ra
+ * danh sách. Đều tay dễ đoán hơn là tiết kiệm một cú bấm.
  *
  * Nhóm "Nội dung site" tạm không dựng — nội dung trang công khai đang sửa ở FE;
  * khi làm CMS thì dựng lại nhóm đó từ `admin-pages.config` như trước.
@@ -42,8 +44,7 @@ export function AdminMenu() {
 
   /** Nhóm chứa trang đang xem — luôn phải mở, nếu không thì mục đang chọn bị giấu. */
   const activeGroupKey = useMemo(
-    () =>
-      ADMIN_NAV.find((group) => group.items.length > 1 && group.items.some((item) => item.href === selectedKey))?.key,
+    () => ADMIN_NAV.find((group) => group.items.some((item) => item.href === selectedKey))?.key,
     [selectedKey]
   )
 
@@ -62,27 +63,16 @@ export function AdminMenu() {
 
   const items = useMemo<MenuItem[]>(
     () =>
-      ADMIN_NAV.map((group) => {
-        const only = group.items.length === 1 ? group.items[0] : undefined
-        if (only) {
-          return {
-            key: only.href,
-            icon: createElement(only.icon),
-            label: <Link href={only.href}>{t(`nav.${only.key}`)}</Link>
-          }
-        }
-
-        return {
-          key: group.key,
-          icon: createElement(group.icon),
-          label: t(`navGroups.${group.key}`),
-          children: group.items.map((item) => ({
-            key: item.href,
-            icon: createElement(item.icon),
-            label: <Link href={item.href}>{t(`nav.${item.key}`)}</Link>
-          }))
-        }
-      }),
+      ADMIN_NAV.map((group) => ({
+        key: group.key,
+        icon: createElement(group.icon),
+        label: t(`navGroups.${group.key}`),
+        children: group.items.map((item) => ({
+          key: item.href,
+          icon: createElement(item.icon),
+          label: <Link href={item.href}>{t(`nav.${item.key}`)}</Link>
+        }))
+      })),
     [t]
   )
 
