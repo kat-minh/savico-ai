@@ -1818,6 +1818,22 @@
       "people": "Customers",
       "library": "Library"
     },
+    "charts": {
+      "viewChart": "View chart",
+      "viewTable": "View table",
+      "empty": "No data yet",
+      "tableLabel": "Item",
+      "tableValue": "Value",
+      "revenue": "Revenue, last 6 months",
+      "revenueHint": "Settled transactions summed by month. A month with no transaction still shows an empty column.",
+      "steps": "Design projects by step",
+      "stepsHint": "Projects counted by the step they stalled on — a pile-up marks where customers get stuck.",
+      "step": "Step {step}",
+      "orders": "Orders by status",
+      "ordersHint": "An order still waiting is someone waiting on a transfer to land.",
+      "regions": "Contractors by region",
+      "regionsHint": "Directory coverage — a thin region makes quote invitations there hard to match."
+    },
     "nav": {
       "dashboard": "To-do",
       "homeContent": "Home page",

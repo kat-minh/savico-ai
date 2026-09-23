@@ -7,6 +7,7 @@
  */
 export { AdminShell } from './components/layout/admin-shell'
 export { AdminInbox } from './components/dashboard/admin-inbox'
+export { AdminCharts } from './components/dashboard/admin-charts'
 /** Trang số liệu cũ — tạm không gắn route nào, trang Tổng quan giờ là hàng đợi việc. */
 export { AdminOverview } from './components/dashboard/admin-overview'
 

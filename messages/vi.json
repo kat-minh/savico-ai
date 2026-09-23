@@ -1818,6 +1818,22 @@
       "people": "Khách hàng",
       "library": "Thư viện"
     },
+    "charts": {
+      "viewChart": "Xem biểu đồ",
+      "viewTable": "Xem bảng",
+      "empty": "Chưa có số liệu",
+      "tableLabel": "Mục",
+      "tableValue": "Giá trị",
+      "revenue": "Doanh thu 6 tháng gần nhất",
+      "revenueHint": "Cộng các giao dịch đã thu tiền, gom theo tháng. Tháng chưa có giao dịch vẫn hiện cột rỗng.",
+      "steps": "Dự án thiết kế đang ở bước nào",
+      "stepsHint": "Đếm dự án theo bước đang dừng — chỗ nào đọng nhiều là chỗ khách đang mắc.",
+      "step": "Bước {step}",
+      "orders": "Đơn hàng theo trạng thái",
+      "ordersHint": "Đơn còn nằm ở trạng thái chờ là đơn có người đang đợi tiền về.",
+      "regions": "Nhà thầu theo miền",
+      "regionsHint": "Độ phủ của danh bạ — miền nào mỏng thì lời mời báo giá ở đó sẽ khó khớp."
+    },
     "nav": {
       "dashboard": "Việc cần xử lý",
       "homeContent": "Trang chủ",

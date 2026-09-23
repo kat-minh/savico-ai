@@ -81,6 +81,30 @@ export const SUBSCRIPTIONS_SEED: CmsSubscription[] = [
 ]
 
 export const TRANSACTIONS_SEED: CmsTransaction[] = [
+  // Hai giao dịch webhook sinh ra cho hai đơn `paid` trong ORDERS_SEED — thiếu
+  // chúng thì biểu đồ doanh thu tháng này ra 0 trong khi thẻ KPI (đọc từ đơn) có tiền.
+  {
+    id: 'TXN-SVC-26010',
+    orderId: 'SVC-26010',
+    customerName: 'Đỗ Thanh Tâm',
+    customerEmail: 'tam.do@gmail.com',
+    tier: 'advanced',
+    amount: 1_266_500,
+    method: 'bank-qr',
+    status: 'paid',
+    createdAt: '2026-09-19T14:12:00+07:00'
+  },
+  {
+    id: 'TXN-SVC-26009',
+    orderId: 'SVC-26009',
+    customerName: 'Võ Hoàng Long',
+    customerEmail: 'long.vo@gmail.com',
+    tier: 'check',
+    amount: 8_900_000,
+    method: 'bank-qr',
+    status: 'paid',
+    createdAt: '2026-09-15T10:31:00+07:00'
+  },
   {
     id: 'TXN-2026-1042',
     customerName: 'Nguyễn Văn Hùng',

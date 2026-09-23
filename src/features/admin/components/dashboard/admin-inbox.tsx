@@ -22,6 +22,7 @@ import { formatCurrency } from '@/shared/utils'
 import { useAdminCollection } from '../../hooks/use-admin-data'
 import { invitationNeedsAction, pendingChangeRequests, relativeTime } from '../../services/ops.service'
 import { AdminPage } from '../common/admin-page'
+import { AdminCharts } from './admin-charts'
 
 const { Text } = Typography
 
@@ -147,8 +148,16 @@ export function AdminInbox() {
   const sorted = [...queues.filter((queue) => queue.count > 0), ...queues.filter((queue) => queue.count === 0)]
   const totalOpen = queues.reduce((sum, queue) => sum + queue.count, 0)
 
-  const monthKey = new Date().toISOString().slice(0, 7)
-  const paidThisMonth = orderRows.filter((order) => order.status === 'paid' && order.paidAt?.startsWith(monthKey))
+  // So tháng theo giờ máy — cắt chuỗi `toISOString()` là giờ UTC, lệch tháng
+  // trong 7 tiếng đầu mỗi tháng ở UTC+7.
+  const now = new Date()
+  const isThisMonth = (iso: string) => {
+    const date = new Date(iso)
+    return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
+  }
+  const paidThisMonth = orderRows.filter(
+    (order) => order.status === 'paid' && order.paidAt !== undefined && isThisMonth(order.paidAt)
+  )
   const revenue = paidThisMonth.reduce((sum, order) => sum + order.total, 0)
   const activeSupervision = supervisionRows.filter((project) =>
     project.stages.some((stage) => stage.status !== 'confirmed')
@@ -179,6 +188,8 @@ export function AdminInbox() {
           </Card>
         </Col>
       </Row>
+
+      <AdminCharts />
 
       <Card
         title={t('inbox.queuesTitle')}
