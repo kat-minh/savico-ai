@@ -20,6 +20,7 @@ import {
   SafetyCertificateOutlined,
   ScheduleOutlined,
   SendOutlined,
+  SettingOutlined,
   StarOutlined,
   TagOutlined,
   TeamOutlined,
@@ -59,10 +60,12 @@ import { ADMIN_ROUTES, ROUTES, type AdminRoute, type AppRoute } from '@/shared/c
 export const ADMIN_NAV = [
   {
     key: 'overview',
+    icon: DashboardOutlined,
     items: [{ key: 'dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: DashboardOutlined }]
   },
   {
     key: 'payments',
+    icon: DollarOutlined,
     items: [
       { key: 'orders', href: ADMIN_ROUTES.ORDERS, icon: DollarOutlined },
       { key: 'discounts', href: ADMIN_ROUTES.DISCOUNTS, icon: TagOutlined },
@@ -71,6 +74,7 @@ export const ADMIN_NAV = [
   },
   {
     key: 'contractorFlow',
+    icon: TeamOutlined,
     items: [
       { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined },
       { key: 'contractors', href: ADMIN_ROUTES.CONTRACTORS, icon: TeamOutlined }
@@ -78,6 +82,7 @@ export const ADMIN_NAV = [
   },
   {
     key: 'supervision',
+    icon: SafetyCertificateOutlined,
     items: [
       { key: 'inspections', href: ADMIN_ROUTES.INSPECTIONS, icon: SafetyCertificateOutlined },
       { key: 'changeRequests', href: ADMIN_ROUTES.CHANGE_REQUESTS, icon: DiffOutlined }
@@ -85,10 +90,12 @@ export const ADMIN_NAV = [
   },
   {
     key: 'consult',
+    icon: CalendarOutlined,
     items: [{ key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined }]
   },
   {
     key: 'people',
+    icon: UserOutlined,
     items: [
       { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined },
       { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
@@ -98,6 +105,7 @@ export const ADMIN_NAV = [
   },
   {
     key: 'library',
+    icon: BookOutlined,
     items: [
       { key: 'templates', href: ADMIN_ROUTES.TEMPLATES, icon: BookOutlined },
       { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
@@ -105,6 +113,7 @@ export const ADMIN_NAV = [
   },
   {
     key: 'config',
+    icon: SettingOutlined,
     items: [
       { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: GiftOutlined },
       { key: 'supervisionPackages', href: ADMIN_ROUTES.SUPERVISION_PACKAGES, icon: AuditOutlined },
@@ -116,6 +125,8 @@ export const ADMIN_NAV = [
   }
 ] as const satisfies readonly {
   key: string
+  /** Biểu tượng của hàng cha trong menu gập. */
+  icon: ComponentType
   items: readonly { key: string; href: AdminRoute; icon: ComponentType }[]
 }[]
 

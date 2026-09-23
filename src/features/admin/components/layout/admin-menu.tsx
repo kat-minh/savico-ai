@@ -3,7 +3,7 @@
 import { Menu } from 'antd'
 import type { MenuProps } from 'antd'
 import { useTranslations } from 'next-intl'
-import { createElement, useMemo } from 'react'
+import { createElement, useMemo, useState } from 'react'
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { ADMIN_ROUTES } from '@/shared/constants'
@@ -15,28 +15,22 @@ type MenuItem = NonNullable<MenuProps['items']>[number]
  * Danh sách mục điều hướng. Dùng chung cho `Sider` (màn rộng) và `Drawer`
  * (màn hẹp) nên phần menu tách riêng khỏi khung.
  *
- * Mỗi nhóm là một LUỒNG của khách (xem `admin-nav.config`). Nhóm "Nội dung
- * site" tạm không dựng — nội dung trang công khai đang sửa ở FE; khi làm CMS thì
- * dựng lại nhóm đó từ `admin-pages.config` như trước.
+ * Mỗi nhóm là một LUỒNG của khách (xem `admin-nav.config`) và dựng thành một
+ * hàng CHA GẬP ĐƯỢC: menu phẳng đủ 20 mục dài quá một màn, phải cuộn mới thấy
+ * nhóm cuối. Gập lại thì mọi nhóm nằm gọn trong một màn.
+ *
+ * Mở MỘT nhóm tại một thời điểm (kiểu đàn xếp): mở nhiều nhóm cùng lúc thì lại
+ * dài đúng như cũ, chẳng giải quyết được gì.
+ *
+ * Nhóm chỉ có một mục (Tổng quan, Tư vấn 1:1) dựng thẳng thành mục bấm được,
+ * không bọc hàng cha — bắt người dùng bấm hai lần để tới một trang là vô ích.
+ *
+ * Nhóm "Nội dung site" tạm không dựng — nội dung trang công khai đang sửa ở FE;
+ * khi làm CMS thì dựng lại nhóm đó từ `admin-pages.config` như trước.
  */
 export function AdminMenu() {
   const t = useTranslations('admin')
   const pathname = usePathname()
-
-  const items = useMemo<MenuItem[]>(
-    () =>
-      ADMIN_NAV.map((group) => ({
-        key: group.key,
-        type: 'group' as const,
-        label: t(`navGroups.${group.key}`),
-        children: group.items.map((item) => ({
-          key: item.href,
-          icon: createElement(item.icon),
-          label: <Link href={item.href}>{t(`nav.${item.key}`)}</Link>
-        }))
-      })),
-    [t]
-  )
 
   /** Mục khớp dài nhất thắng — `/admin/bookings/reschedule` không bôi luôn `/admin/bookings`. */
   const selectedKey = useMemo(() => {
@@ -46,5 +40,64 @@ export function AdminMenu() {
     return matches[0]?.href ?? ADMIN_ROUTES.DASHBOARD
   }, [pathname])
 
-  return <Menu mode='inline' selectedKeys={[selectedKey]} items={items} style={{ borderInlineEnd: 0 }} />
+  /** Nhóm chứa trang đang xem — luôn phải mở, nếu không thì mục đang chọn bị giấu. */
+  const activeGroupKey = useMemo(
+    () =>
+      ADMIN_NAV.find((group) => group.items.length > 1 && group.items.some((item) => item.href === selectedKey))?.key,
+    [selectedKey]
+  )
+
+  /**
+   * Lựa chọn TỰ BẤM của người dùng, kèm nhóm của trang lúc bấm.
+   *
+   * Nhóm đang mở suy ra từ trang đang xem, trừ khi người dùng vừa tự gập/mở.
+   * Ghi kèm `forGroup` để khi chuyển sang trang thuộc nhóm khác (qua breadcrumb
+   * hay nút tắt ở Tổng quan) thì lựa chọn cũ hết hiệu lực và nhóm mới tự mở —
+   * làm được việc đó mà không cần effect đồng bộ ngược vào state.
+   */
+  const [manualOpen, setManualOpen] = useState<{ forGroup: string | undefined; keys: string[] } | null>(null)
+
+  const openKeys =
+    manualOpen && manualOpen.forGroup === activeGroupKey ? manualOpen.keys : activeGroupKey ? [activeGroupKey] : []
+
+  const items = useMemo<MenuItem[]>(
+    () =>
+      ADMIN_NAV.map((group) => {
+        const only = group.items.length === 1 ? group.items[0] : undefined
+        if (only) {
+          return {
+            key: only.href,
+            icon: createElement(only.icon),
+            label: <Link href={only.href}>{t(`nav.${only.key}`)}</Link>
+          }
+        }
+
+        return {
+          key: group.key,
+          icon: createElement(group.icon),
+          label: t(`navGroups.${group.key}`),
+          children: group.items.map((item) => ({
+            key: item.href,
+            icon: createElement(item.icon),
+            label: <Link href={item.href}>{t(`nav.${item.key}`)}</Link>
+          }))
+        }
+      }),
+    [t]
+  )
+
+  return (
+    <Menu
+      mode='inline'
+      selectedKeys={[selectedKey]}
+      openKeys={openKeys}
+      onOpenChange={(keys) => {
+        // Giữ lại đúng nhóm vừa mở; bấm vào nhóm đang mở thì đóng hết.
+        const opened = keys.find((key) => !openKeys.includes(key as string))
+        setManualOpen({ forGroup: activeGroupKey, keys: opened ? [opened as string] : [] })
+      }}
+      items={items}
+      style={{ borderInlineEnd: 0 }}
+    />
+  )
 }
