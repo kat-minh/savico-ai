@@ -39,6 +39,7 @@ export type {
   CmsContractor,
   CmsContractorContact,
   CmsContractorInvitation,
+  CmsContractorLegalProfile,
   CmsContractorPartnership,
   CmsContractorPhoto,
   CmsContractorProject,

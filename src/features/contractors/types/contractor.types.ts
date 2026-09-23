@@ -1,6 +1,7 @@
 import type {
   CmsContractor,
   CmsContractorInvitation,
+  CmsContractorLegalProfile,
   CmsContractorPartnership,
   CmsContractorPhoto,
   CmsContractorProject,
@@ -28,7 +29,7 @@ export type ConstructionScope = 'turnkey' | 'shell' | 'finishing' | 'interior'
 export type SiteCondition = 'empty' | 'demolish' | 'renovate'
 
 /** Quy mô công trình — hàng chọn ở Bước 1 (S10). */
-export type ProjectScale = 'ground' | 'ground+1' | 'ground+2' | 'ground+3'
+export type ProjectScale = 'ground' | 'ground+1' | 'ground+2' | 'ground+3' | 'ground+4'
 
 /** Mốc khởi công dự kiến (S10). */
 export type StartWindow = 'asap' | 'in-1-3-months' | 'in-3-6-months' | 'undecided'
@@ -121,6 +122,8 @@ export interface ProjectBrief {
   landArea: number
   siteCondition: SiteCondition
   scale: ProjectScale
+  /** Tum chỉ áp dụng cho các loại nhà; căn hộ khóa một mặt sàn và không tum. */
+  hasAttic?: boolean | null
   address: BriefAddress
   /** Ngân sách dự kiến (VND) của chủ nhà — KHÔNG gửi cho nhà thầu (S18). */
   budget: number
@@ -166,6 +169,9 @@ export type ContractorProject = CmsContractorProject
 
 /** Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14). */
 export type ContractorPartnership = CmsContractorPartnership
+
+/** Hồ sơ pháp lý đã được SAVICO đối chiếu trong tab "Năng lực pháp lý". */
+export type ContractorLegalProfile = CmsContractorLegalProfile
 
 /**
  * Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. Trường

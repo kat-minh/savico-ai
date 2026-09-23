@@ -55,6 +55,7 @@ function blankContractor(): CmsContractor {
     warrantyMonths: 12,
     legalChecks: [],
     featuredProjects: [],
+    verifiedProjects: 0,
     partnership: { verified: false, since: '', contractCode: '', signedAt: '', pageCount: 0 },
     contact: { person: '', phone: '', email: '' },
     // Nhà thầu mới nhập chưa xác minh thì chưa lên danh sách đề xuất.

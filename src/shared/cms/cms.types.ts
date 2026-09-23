@@ -874,6 +874,21 @@ export interface CmsContractorProject {
   name: string
   year: number
   imageUrl?: string
+  /** Dữ liệu tóm tắt trên thẻ ở tab "Dự án đã thực hiện" (Hình S13 mở rộng). */
+  verified?: boolean
+  category?: 'house' | 'villa' | 'renovation' | 'factory'
+  areaM2?: number
+  dimensions?: string
+  scale?: string
+  location?: string
+  constructionScope?: 'turnkey' | 'structural' | 'finishing'
+  contractorRole?: 'general-contractor' | 'contractor'
+  constructionMonths?: number
+  constructionStartedAt?: string
+  constructionEndedAt?: string
+  mainItems?: string
+  verifiedAt?: string
+  galleryUrls?: string[]
   /** Thế mạnh liên quan, dùng để lọc dự án khi bấm tag ở M06. */
   tags?: string[]
 }
@@ -892,6 +907,30 @@ export interface CmsContractorPartnership {
   signedAt: string
   pageCount: number
   scanUrl?: string
+}
+
+/** Hồ sơ pháp lý đã được SAVICO đối chiếu trong tab "Năng lực pháp lý". */
+export interface CmsContractorLegalProfile {
+  legalName: string
+  taxCodeMasked: string
+  establishedAt: string
+  operationYears: number
+  representative: string
+  representativeTitle: string
+  registeredAddress: string
+  primaryBusiness: string
+  workforce: string
+  registrationNumberMasked: string
+  registrationIssuedAt: string
+  registrationStatus: 'verified' | 'pending'
+  verifiedAt: string
+  verifiedUntil: string
+  warrantyMonths: number
+  usesSavicoContract: boolean
+  hasConstructionInsurance: boolean
+  cooperationRank: number
+  cooperationPercent: number
+  complaintCount: number
 }
 
 /**
@@ -940,6 +979,9 @@ export interface CmsContractor {
   warrantyMonths: number
   legalChecks: string[]
   featuredProjects: CmsContractorProject[]
+  /** Số dự án SAVICO đã đối chiếu ảnh thực tế và biên bản nghiệm thu. */
+  verifiedProjects: number
+  legalProfile?: CmsContractorLegalProfile
   partnership: CmsContractorPartnership
   /** Chỉ vận hành thấy — xem `CmsContractorContact`. */
   contact?: CmsContractorContact
