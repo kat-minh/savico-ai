@@ -334,9 +334,13 @@ export function BriefForm({ projectId }: BriefFormProps) {
   /** "Đã lưu nháp - 12:01" hiện cạnh tiêu đề rồi mờ đi (mục 2). */
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null)
   const lastSavedPayload = useRef<string | null>(null)
+  const submitIntent = useRef(false)
   const handleFormBlur = (event: React.FocusEvent<HTMLFormElement>) => {
     const nextTarget = event.relatedTarget
-    if (nextTarget instanceof HTMLElement && nextTarget.closest('[data-brief-navigation], [data-brief-submit]')) {
+    if (
+      submitIntent.current ||
+      (nextTarget instanceof HTMLElement && nextTarget.closest('[data-brief-navigation], [data-brief-submit]'))
+    ) {
       return
     }
     if (!form.formState.isDirty) return
@@ -451,14 +455,16 @@ export function BriefForm({ projectId }: BriefFormProps) {
     selfCreated: true
   })
 
-  const onSubmit = (values: BriefFormValues) => {
-    save.mutate(toPayload(values), {
-      onSuccess: () => {
-        window.sessionStorage.setItem(BRIEF_STEP_TRANSITION_KEY, projectId)
-        setPageTransition('forward')
-        window.setTimeout(() => router.push(contractorReviewRoute(projectId)), reduceMotion ? 0 : 240)
-      }
-    })
+  const onSubmit = async (values: BriefFormValues) => {
+    submitIntent.current = false
+    try {
+      await save.mutateAsync(toPayload(values))
+      window.sessionStorage.setItem(BRIEF_STEP_TRANSITION_KEY, projectId)
+      setPageTransition('forward')
+      window.setTimeout(() => router.push(contractorReviewRoute(projectId)), reduceMotion ? 0 : 240)
+    } catch {
+      // `useSaveBrief` đã hiển thị thông báo lỗi; giữ người dùng ở lại form để thử lại.
+    }
   }
 
   const navigateBack = () => {
@@ -481,6 +487,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
 
   /** Bấm "Tiếp tục" khi còn thiếu trường bắt buộc (mục 7). */
   const onInvalid = (errors: FieldErrors<BriefFormValues>) => {
+    submitIntent.current = false
     const firstError = VALIDATION_FIELD_ORDER.find((name) => errors[name])
     if (firstError) {
       document.getElementById(`brief-field-${firstError}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -1465,12 +1472,21 @@ export function BriefForm({ projectId }: BriefFormProps) {
                 <Button
                   type='submit'
                   data-brief-submit
-                  disabled={save.isPending || pageTransition === 'forward'}
+                  onPointerDownCapture={() => {
+                    submitIntent.current = true
+                  }}
+                  onPointerUpCapture={() => {
+                    submitIntent.current = false
+                  }}
+                  onPointerCancel={() => {
+                    submitIntent.current = false
+                  }}
+                  disabled={form.formState.isSubmitting || pageTransition === 'forward'}
                   className={cn('max-sm:w-full', !requiredFilled && 'opacity-60')}
                 >
-                  {save.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
+                  {form.formState.isSubmitting ? <LoaderCircle className='size-4 animate-spin' /> : null}
                   {t('continue')}
-                  {!save.isPending ? <ArrowRight className='size-4' /> : null}
+                  {!form.formState.isSubmitting ? <ArrowRight className='size-4' /> : null}
                 </Button>
               </motion.span>
             </div>

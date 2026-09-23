@@ -35,7 +35,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -252,7 +251,6 @@ function InviteButton({
 export function ContractorProfile({ projectId, contractorId, tab }: ContractorProfileProps) {
   const t = useTranslations('contractors.firm')
   const tCommon = useTranslations('contractors.common')
-  const tGlobal = useTranslations('common')
   const locale = useLocale() as Locale
   const router = useRouter()
 
@@ -310,7 +308,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
 
   /** Đang xem ảnh nào trong hộp phóng — `null` là đang đóng (mục 6). */
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null)
-  const [reportOpen, setReportOpen] = useState(false)
 
   /** Nút "Mời báo giá" thở một nhịp sau khi hiện (mục 11). */
   const [inviteBreathe, setInviteBreathe] = useState(false)
@@ -714,15 +711,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
             <Lock className='mt-0.5 size-3.5 shrink-0' />
             <span>{t('contactLocked')}</span>
           </p>
-
-          <button
-            type='button'
-            onClick={() => setReportOpen(true)}
-            className='text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-xs'
-          >
-            <FileText className='size-3.5' />
-            {t('report')}
-          </button>
         </motion.aside>
       </div>
 
@@ -815,28 +803,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
             document.body
           )
         : null}
-
-      <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-        <DialogContent className='sm:max-w-sm'>
-          <DialogHeader>
-            <DialogTitle>{t('reportConfirmTitle')}</DialogTitle>
-            <DialogDescription>{t('reportConfirmBody')}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant='outline' onClick={() => setReportOpen(false)}>
-              {tGlobal('cancel')}
-            </Button>
-            <Button
-              onClick={() => {
-                setReportOpen(false)
-                toast.success(t('reportSent'))
-              }}
-            >
-              {t('reportConfirmAction')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <PhotoLightbox
         photos={contractor.photos}
