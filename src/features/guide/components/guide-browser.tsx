@@ -10,6 +10,9 @@ import { Input } from '@/shared/components/ui/input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { useDebouncedValue } from '@/shared/hooks'
+import { useAuthStore } from '@/shared/auth'
+import { useCmsCollection } from '@/shared/cms'
+import { JOURNEY_POPUP_TEST_MODE } from '@/shared/constants'
 import { cn } from '@/shared/lib/utils'
 import { GUIDE_PAGE_SIZE } from '../constants/guide.constants'
 import { useGuideArticles, useGuideVideos } from '../hooks/use-guide'
@@ -17,6 +20,7 @@ import { useGuideProgressStore } from '../store/guide-progress.store'
 import { matchesQuery } from '../services/guide.service'
 import type { GuideVideo } from '../types/guide.types'
 import { HighlightedText, VideoCard, type VideoCardOrigin } from './video-card'
+import { GuideCompletionExperience } from './guide-completion-experience'
 import { VideoLightbox } from './video-lightbox'
 
 const EMPTY_TOPIC_SUGGESTIONS = ['land-photo', 'read-estimate', 'share'] as const
@@ -41,6 +45,9 @@ interface GuideBrowserProps {
 
 export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const t = useTranslations('guide')
+  const user = useAuthStore((state) => state.user)
+  const supervisionProjects = useCmsCollection('supervisionProjects')
+  const transactions = useCmsCollection('transactions')
   const [term, setTerm] = useState('')
   const [page, setPage] = useState(0)
   const [pageDirection, setPageDirection] = useState(1)
@@ -53,6 +60,9 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const [clearPulse, setClearPulse] = useState(0)
   const [justCompletedTopicId, setJustCompletedTopicId] = useState<string | null>(null)
   const [nextCardPulse, setNextCardPulse] = useState(0)
+  const [qualifiedVideo, setQualifiedVideo] = useState<GuideVideo | null>(null)
+  const [endCardOpen, setEndCardOpen] = useState(false)
+  const pendingQualifiedRef = useRef<GuideVideo | null>(null)
   const debouncedTerm = useDebouncedValue(term, 300)
   const query = (term === '' ? '' : debouncedTerm).trim()
 
@@ -69,6 +79,16 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const { data: videos, isPending: videosPending } = useGuideVideos()
   const { data: articles, isPending: articlesPending } = useGuideArticles()
   const [carouselWidth, setCarouselWidth] = useState(0)
+  const isS5 = Boolean(
+    user?.email &&
+    (supervisionProjects.some((project) => project.customer?.email?.toLowerCase() === user.email.toLowerCase()) ||
+      transactions.some(
+        (transaction) =>
+          transaction.customerEmail.toLowerCase() === user.email.toLowerCase() &&
+          transaction.status === 'paid' &&
+          (transaction.tier === 'check' || transaction.tier === 'control')
+      ))
+  )
 
   useEffect(() => {
     const viewport = carouselViewportRef.current
@@ -219,26 +239,69 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
     }, 48)
   }
 
+  function pulseNextSuggestion(video: GuideVideo) {
+    window.dispatchEvent(
+      new CustomEvent('savico:guide-video-completed', { detail: { id: video.id, title: video.title } })
+    )
+    const next = visibleVideos.find(
+      (candidate) =>
+        candidate.id !== video.id && candidate.topic === video.topic && !getProgress(candidate.id)?.completed
+    )
+    if (next) {
+      setJustCompletedTopicId(next.id)
+      setNextCardPulse((n) => n + 1)
+      window.setTimeout(() => setJustCompletedTopicId(null), 1000)
+    }
+  }
+
+  function showEndCard(video: GuideVideo) {
+    if (isS5) return
+    const sessionKey = `savico.page-popup.guide.${video.id}`
+    if (!JOURNEY_POPUP_TEST_MODE && window.sessionStorage.getItem(sessionKey) === '1') return
+    if (!JOURNEY_POPUP_TEST_MODE) window.sessionStorage.setItem(sessionKey, '1')
+
+    pendingQualifiedRef.current = null
+    setQualifiedVideo(video)
+    window.setTimeout(() => setEndCardOpen(true), reduceMotion ? 0 : 120)
+  }
+
   function closeVideo() {
     // Vừa xem xong thì đóng popup → thẻ CHƯA XEM kế tiếp cùng chủ đề sáng viền
     // một nhịp (mục 3, "đóng popup sau khi xem xong").
     if (playing && getProgress(playing.id)?.completed) {
-      window.dispatchEvent(
-        new CustomEvent('savico:guide-video-completed', { detail: { id: playing.id, title: playing.title } })
-      )
-      const next = visibleVideos.find(
-        (v) => v.id !== playing.id && v.topic === playing.topic && !getProgress(v.id)?.completed
-      )
-      if (next) {
-        setJustCompletedTopicId(next.id)
-        setNextCardPulse((n) => n + 1)
-        setTimeout(() => setJustCompletedTopicId(null), 1000)
-      }
+      pulseNextSuggestion(playing)
     }
+    const qualifiedOnClose = pendingQualifiedRef.current?.id === playing?.id ? pendingQualifiedRef.current : null
+    const unavailableVideoFallback = playing && !playing.videoUrl ? playing : null
+    if (qualifiedOnClose && playing && !getProgress(playing.id)?.completed) pulseNextSuggestion(playing)
     const trigger = playOrigin?.element
     setPlaying(null)
     setPlayOrigin(null)
+    if (qualifiedOnClose) showEndCard(qualifiedOnClose)
+    else if (unavailableVideoFallback) showEndCard(unavailableVideoFallback)
     requestAnimationFrame(() => trigger?.focus())
+  }
+
+  function handleQualified(video: GuideVideo, reason: 'threshold' | 'ended') {
+    if (isS5) return
+    const sessionKey = `savico.page-popup.guide.${video.id}`
+    if (!JOURNEY_POPUP_TEST_MODE && window.sessionStorage.getItem(sessionKey) === '1') return
+
+    pendingQualifiedRef.current = video
+    setQualifiedVideo(video)
+
+    if (reason === 'ended') {
+      pulseNextSuggestion(video)
+      window.dispatchEvent(new Event('savico:guide-video-stop'))
+      setPlaying(null)
+      setPlayOrigin(null)
+      showEndCard(video)
+    }
+  }
+
+  function browseMoreGuides() {
+    setEndCardOpen(false)
+    gridRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
   }
 
   const showEmpty = !videosPending && !articlesPending && visibleVideos.length === 0 && visibleArticles.length === 0
@@ -409,6 +472,16 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
         </AnimatePresence>
       </motion.div>
 
+      {qualifiedVideo && !isS5 ? (
+        <GuideCompletionExperience
+          video={qualifiedVideo}
+          popupOpen={endCardOpen}
+          onPopupOpenChange={setEndCardOpen}
+          onCreateProject={onCreateProject}
+          onBrowseGuides={browseMoreGuides}
+        />
+      ) : null}
+
       {videosPending ? (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -535,6 +608,7 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
                             <VideoCard
                               video={video}
                               hideDescription
+                              showPlayWhenUnavailable
                               data-guide-card
                               index={visibleVideos.indexOf(video) + 1}
                               onOpenVideo={openVideo}
@@ -634,6 +708,7 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
         onSelect={(v) => setPlaying(v)}
         origin={playOrigin}
         onCreateProject={onCreateProject}
+        onQualified={handleQualified}
         getArticleHref={(video) => {
           const article = (articles ?? []).find((a) => a.topic === video.topic)
           return article ? `#${video.topic}` : undefined

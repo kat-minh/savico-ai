@@ -6,6 +6,18 @@ import * as React from 'react'
 
 import { cn } from '@/shared/lib/utils'
 
+let activeDialogOverlayCount = 0
+
+function syncDialogPresenceAttribute() {
+  if (typeof document === 'undefined') return
+
+  if (activeDialogOverlayCount > 0) {
+    document.documentElement.setAttribute('data-dialog-overlay-open', 'true')
+  } else {
+    document.documentElement.removeAttribute('data-dialog-overlay-open')
+  }
+}
+
 type DialogPosition =
   | 'center'
   | 'top-left'
@@ -46,6 +58,16 @@ function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.C
 }
 
 function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  React.useLayoutEffect(() => {
+    activeDialogOverlayCount += 1
+    syncDialogPresenceAttribute()
+
+    return () => {
+      activeDialogOverlayCount = Math.max(0, activeDialogOverlayCount - 1)
+      syncDialogPresenceAttribute()
+    }
+  }, [])
+
   return (
     <DialogPrimitive.Overlay
       data-slot='dialog-overlay'

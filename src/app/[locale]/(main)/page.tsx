@@ -9,6 +9,7 @@ import { HomeCtaSection } from './home-cta-section'
 import { HomeDossiersSection } from './home-dossiers-section'
 import { HomeHeroSection } from './home-hero-section'
 import { HomeJourneySection } from './home-journey-section'
+import { HomeReminderHost } from './home-reminder-host'
 import { HomeServicesSection } from './home-services-section'
 
 interface PageProps {
@@ -35,6 +36,7 @@ export default async function HomePage({ params }: PageProps) {
       <HomeBrands />
       <HomeTestimonials />
       <HomeCtaSection />
+      <HomeReminderHost />
     </div>
   )
 }

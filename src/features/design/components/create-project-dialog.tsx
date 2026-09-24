@@ -21,6 +21,46 @@ import { useDesignStore } from '../store/design.store'
 import { FieldLabel } from '@/shared/components/common'
 import { useRouter } from '@/i18n/navigation'
 import { designInputRoute } from '@/shared/constants/routes'
+import { clearProjectTemplateSeed, consumeProjectTemplateSeed } from '@/shared/lib'
+import type { BuildingType, DesignInput, DesignStyle, FloorCount } from '../types/design.types'
+
+const BUILDING_TYPES = ['townhouse', 'villa', 'roofed', 'garden', 'apartment'] as const
+const FLOOR_COUNTS = ['ground', 'ground+1', 'ground+2', 'ground+3', 'ground+4'] as const
+const DESIGN_STYLES = [
+  'modern',
+  'wabi-sabi',
+  'neoclassical',
+  'minimal',
+  'indochine',
+  'thai-roof',
+  'japanese-roof',
+  'garden-thai-roof',
+  'garden-japanese-roof',
+  'garden-villa',
+  'level4-modern'
+] as const
+
+function isBuildingType(value: string | undefined): value is BuildingType {
+  return Boolean(value && (BUILDING_TYPES as readonly string[]).includes(value))
+}
+
+function isFloorCount(value: string | undefined): value is FloorCount {
+  return Boolean(value && (FLOOR_COUNTS as readonly string[]).includes(value))
+}
+
+function isDesignStyle(value: string | undefined): value is DesignStyle {
+  return Boolean(value && (DESIGN_STYLES as readonly string[]).includes(value))
+}
+
+function normalizeTemplateStyle(
+  buildingType: BuildingType | undefined,
+  style: string | undefined
+): DesignStyle | undefined {
+  if (!style) return undefined
+  if (buildingType === 'garden' && style === 'thai-roof') return 'garden-thai-roof'
+  if (buildingType === 'garden' && style === 'japanese-roof') return 'garden-japanese-roof'
+  return isDesignStyle(style) ? style : undefined
+}
 
 /**
  * Cửa sổ Tạo dự án (mục III.1) — hiện trước Bước 1.
@@ -37,6 +77,8 @@ export function CreateProjectDialog() {
   const open = useDesignStore((s) => s.isCreateDialogOpen)
   const origin = useDesignStore((s) => s.createDialogOrigin)
   const close = useDesignStore((s) => s.closeCreateDialog)
+  const patchDraft = useDesignStore((s) => s.patchDraft)
+  const setBuildingType = useDesignStore((s) => s.setBuildingType)
   const router = useRouter()
   const [exiting, setExiting] = useState(false)
   const [invalidPulse, setInvalidPulse] = useState(false)
@@ -60,6 +102,23 @@ export function CreateProjectDialog() {
   })
 
   const createProject = useCreateProject((projectId) => {
+    const sourceTemplate = consumeProjectTemplateSeed()
+    if (sourceTemplate) {
+      const buildingType = isBuildingType(sourceTemplate.buildingType) ? sourceTemplate.buildingType : undefined
+      if (buildingType) {
+        setBuildingType(projectId, buildingType)
+      }
+
+      const patch: Partial<DesignInput> = {
+        wishes: `Mẫu tham khảo: ${sourceTemplate.templateName}`
+      }
+      if (isFloorCount(sourceTemplate.floorCount)) patch.floorCount = sourceTemplate.floorCount
+      if (typeof sourceTemplate.hasAttic === 'boolean') patch.hasAttic = sourceTemplate.hasAttic
+      const style = normalizeTemplateStyle(buildingType, sourceTemplate.style)
+      if (style) patch.style = style
+      patchDraft(projectId, patch)
+    }
+
     setExiting(true)
     window.setTimeout(() => {
       close()
@@ -99,6 +158,7 @@ export function CreateProjectDialog() {
   }
 
   function cancel() {
+    clearProjectTemplateSeed()
     close()
     form.reset()
     setDragY(0)

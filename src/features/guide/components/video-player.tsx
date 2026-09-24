@@ -24,6 +24,7 @@ interface VideoPlayerProps {
   onAdvance: (video: GuideVideo) => void
   onReplay: () => void
   onCreateProject?: () => void
+  onQualified?: (video: GuideVideo, reason: 'threshold' | 'ended') => void
   className?: string
 }
 
@@ -33,7 +34,15 @@ interface VideoPlayerProps {
  * khiển, không có phím tắt riêng, không báo "kết nối chậm", không nhớ vị trí
  * xem dở, không tự đếm ngược sang video kế.
  */
-export function VideoPlayer({ video, nextVideo, onAdvance, onReplay, onCreateProject, className }: VideoPlayerProps) {
+export function VideoPlayer({
+  video,
+  nextVideo,
+  onAdvance,
+  onReplay,
+  onCreateProject,
+  onQualified,
+  className
+}: VideoPlayerProps) {
   const t = useTranslations('guide.lightbox')
   const reduceMotion = useReducedMotion()
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -41,6 +50,8 @@ export function VideoPlayer({ video, nextVideo, onAdvance, onReplay, onCreatePro
   const idleTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const countdownPausedRef = useRef(false)
+  const thresholdQualifiedRef = useRef(false)
+  const onQualifiedRef = useRef(onQualified)
 
   const getProgress = useGuideProgressStore((s) => s.getProgress)
   const saveProgress = useGuideProgressStore((s) => s.saveProgress)
@@ -65,6 +76,10 @@ export function VideoPlayer({ video, nextVideo, onAdvance, onReplay, onCreatePro
   const [flashIcon, setFlashIcon] = useState<{ key: number; icon: 'play' | 'pause' } | null>(null)
   const [ended, setEnded] = useState(false)
   const [countdown, setCountdown] = useState(AUTO_ADVANCE_SECONDS)
+
+  useEffect(() => {
+    onQualifiedRef.current = onQualified
+  }, [onQualified])
 
   // Đồng hồ nhịp 1 lần/giây khi đang chờ tải — chỉ để tính đã chờ bao lâu (qua
   // state, không đọc `Date.now()` lúc render) để đổi từ "chỉ vòng xoay" →
@@ -122,6 +137,12 @@ export function VideoPlayer({ video, nextVideo, onAdvance, onReplay, onCreatePro
     }
     const onTimeUpdate = () => {
       setCurrentTime(el.currentTime)
+      const actualDuration = el.duration || video.durationSeconds
+      if (!thresholdQualifiedRef.current && actualDuration > 0 && el.currentTime / actualDuration >= 0.8) {
+        thresholdQualifiedRef.current = true
+        saveProgress(video.id, el.currentTime, actualDuration)
+        onQualifiedRef.current?.(video, 'threshold')
+      }
       clearTimeout(saveTimer.current)
       saveTimer.current = setTimeout(
         () => saveProgress(video.id, el.currentTime, el.duration || video.durationSeconds),
@@ -139,6 +160,7 @@ export function VideoPlayer({ video, nextVideo, onAdvance, onReplay, onCreatePro
       markCompleted(video.id)
       setEnded(true)
       setCountdown(AUTO_ADVANCE_SECONDS)
+      onQualifiedRef.current?.(video, 'ended')
     }
 
     el.addEventListener('play', onPlay)

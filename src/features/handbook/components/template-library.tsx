@@ -12,7 +12,6 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent
 } from 'react'
-import { toast } from 'sonner'
 
 import { EmptyState, ErrorState } from '@/shared/components/common'
 import { Input } from '@/shared/components/ui/input'
@@ -30,6 +29,7 @@ import { filterTemplates, pageCount, pageSlice } from '../services/handbook.serv
 import type { HandbookTemplate, HandbookTemplateKind } from '../types/handbook.types'
 import { QuotaBadge } from './quota-badge'
 import { TemplateCard } from './template-card'
+import { TemplateLookupExhaustedDialog } from './template-lookup-exhausted-dialog'
 
 const ALL = 'all'
 const FILTER_EXIT_MS = 120
@@ -64,7 +64,6 @@ interface PillStyle {
 
 export function TemplateLibrary() {
   const t = useTranslations('handbook.library')
-  const tQuota = useTranslations('handbook.quota')
   const tDetail = useTranslations('handbook.detail')
 
   const [kind, setKind] = useState<HandbookTemplateKind>('2d')
@@ -74,6 +73,8 @@ export function TemplateLibrary() {
   const [appliedQuery, setAppliedQuery] = useState('')
   const [page, setPage] = useState(1)
   const [quotaShakeNonce, setQuotaShakeNonce] = useState(0)
+  const [blockedTemplateId, setBlockedTemplateId] = useState<string | null>(null)
+  const [quotaDialogOpen, setQuotaDialogOpen] = useState(false)
   const [pillStyle, setPillStyle] = useState<PillStyle>({
     transform: 'translate3d(0,0,0)',
     width: 0,
@@ -654,10 +655,11 @@ export function TemplateLibrary() {
     [appliedQuery, buildingType, kind, safePage, secondary, term]
   )
 
-  const handleBlocked = useCallback(() => {
+  const handleBlocked = useCallback((templateId: string) => {
     setQuotaShakeNonce((value) => value + 1)
-    toast.error(tQuota('exhausted'))
-  }, [tQuota])
+    setBlockedTemplateId(templateId)
+    setQuotaDialogOpen(true)
+  }, [])
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement
@@ -1064,6 +1066,15 @@ export function TemplateLibrary() {
           </>
         )}
       </div>
+
+      <TemplateLookupExhaustedDialog
+        open={quotaDialogOpen}
+        onOpenChange={setQuotaDialogOpen}
+        template={blockedTemplateId ? (pool.find((template) => template.id === blockedTemplateId) ?? null) : null}
+        total={lookupQuota.total}
+        period={lookupQuota.period}
+        planTier={lookupQuota.planTier}
+      />
     </div>
   )
 }

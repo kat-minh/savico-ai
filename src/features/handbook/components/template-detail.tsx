@@ -45,6 +45,7 @@ import { FloorSwitcher, resolveFloor } from './floor-switcher'
 import { QuotaBadge } from './quota-badge'
 import { TemplateFigure } from './template-figure'
 import { TemplateInfo } from './template-info'
+import { TemplateDetailCtaPopup } from './template-detail-cta-popup'
 
 const CONSULT_IDLE_MS = 4800
 const SIMILAR_BLOCK_SHAKE_MS = 520
@@ -800,6 +801,8 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
           )}
         />
       </div>
+
+      <TemplateDetailCtaPopup key={template.id} template={template} />
     </div>
   )
 }

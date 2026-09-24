@@ -21,6 +21,35 @@
     "optional": "tuỳ chọn",
     "showPassword": "Hiện mật khẩu",
     "hidePassword": "Ẩn mật khẩu",
+    "journey": {
+      "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
+      "close": "Đóng popup",
+      "stepOne": {
+        "title": "Bạn đang ở bước nào trong kế hoạch xây nhà?",
+        "subtitle": "Chọn tình trạng hiện tại để SAVICO đưa bạn đến đúng bước tiếp theo.",
+        "later": "Để sau, tôi tự xem",
+        "withoutDrawing": {
+          "imageAlt": "Phối cảnh nhà ở và bản vẽ thiết kế",
+          "title": "Chưa có bản vẽ",
+          "description": "Bắt đầu thiết kế & dự toán từ nhu cầu ban đầu.",
+          "bullet1": "Thiết kế & dự toán",
+          "bullet2": "Nhận bản vẽ hoàn chỉnh",
+          "bullet3": "Dự án sẵn sàng triển khai",
+          "info": "Gói thiết kế từ 399.000 ₫ · còn 1 lượt miễn phí",
+          "cta": "Thiết kế & dự toán"
+        },
+        "withDrawing": {
+          "imageAlt": "Bản vẽ kiến trúc sẵn sàng tải lên",
+          "title": "Đã có bản vẽ",
+          "description": "Tải hồ sơ hiện có để tiếp tục triển khai dự án.",
+          "bullet1": "Upload hồ sơ",
+          "bullet2": "Kiểm tra hồ sơ",
+          "bullet3": "Dự án sẵn sàng triển khai",
+          "info": "Miễn phí · không cần mua gói",
+          "cta": "Upload hồ sơ"
+        }
+      }
+    },
     "combobox": {
       "placeholder": "Chọn một mục",
       "searchPlaceholder": "Tìm kiếm…",
@@ -582,6 +611,47 @@
         "designing": "Thiết kế & dự toán của bạn đang được xử lý — xem tiến độ ngay.",
         "review": "Bản dự toán đã sẵn sàng — xem chi tiết và bước tiếp theo."
       }
+    },
+    "homeReminder": {
+      "eyebrow": "Gợi ý cho bạn",
+      "collapsed": "Gợi ý cho bạn",
+      "collapse": "Thu gọn",
+      "S1": {
+        "title": "Gói PLUS – được chọn nhiều nhất",
+        "body": "{credits} phương án thiết kế + {edits} lượt chỉnh sửa, {price}đ thanh toán 1 lần.",
+        "primary": "Xem gói thiết kế",
+        "secondary": "Hoặc upload hồ sơ có sẵn — miễn phí"
+      },
+      "S2": {
+        "title": "Gói đã sẵn sàng – còn {remaining} phương án",
+        "body": "Bắt đầu dự án đầu tiên để dùng ngay quyền lợi thiết kế & dự toán trong gói của bạn.",
+        "primary": "Tạo dự án mới",
+        "secondary": "Hoặc xem Thư viện mẫu"
+      },
+      "S3": {
+        "title": "Hồ sơ “{project}” đã đủ để tìm nhà thầu",
+        "body": "Các nhà thầu phù hợp đang sẵn sàng để bạn xem, so sánh và mời khảo sát.",
+        "primary": "Xem nhà thầu đề xuất",
+        "secondary": "Hoặc đăng ký thi công trọn gói"
+      },
+      "S4": {
+        "title": "Sắp khảo sát với “{contractor}”",
+        "body": "Chuẩn bị trước cách quản lý chất lượng và các mốc giám sát cho công trình.",
+        "primary": "Xem gói giám sát"
+      },
+      "S5": {
+        "title": "Giai đoạn đang chờ ảnh của bạn",
+        "body": "“{project}” · Giai đoạn {stage}/{total}: {stageName}. Tải ảnh hiện trạng để tiếp tục theo dõi.",
+        "primary": "Mở bảng điều khiển giám sát"
+      },
+      "stages": {
+        "legal": "Pháp lý & chuẩn bị",
+        "foundation": "Móng",
+        "structure": "Kết cấu",
+        "mep": "MEP",
+        "finishing": "Hoàn thiện",
+        "handover": "Bàn giao"
+      }
     }
   },
   "handbook": {
@@ -632,7 +702,9 @@
       "detailRemaining": "Bạn còn {remaining}/{total} lượt xem chi tiết hôm nay",
       "detailSeen": "Mẫu đã xem - không trừ lượt",
       "exhausted": "Hết lượt hôm nay — nâng cấp gói",
-      "tooltip": "Mỗi ngày xem chi tiết {total} mẫu — Làm mới lúc 0h · còn {hours} giờ"
+      "tooltip": "Mỗi ngày xem chi tiết {total} mẫu — Làm mới lúc 0h · còn {hours} giờ",
+      "lookupRemainingMonthly": "Lượt tra tháng này: {remaining}/{total}",
+      "tooltipMonthly": "Gói của bạn có {total} lượt tra cứu thư viện mỗi tháng — tự làm mới vào đầu tháng."
     },
     "info": {
       "planTitle": "Thông tin bản vẽ",
@@ -749,6 +821,48 @@
         "legal": "Pháp lý"
       }
     },
+    "templatePopup": {
+      "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
+      "badge": "Thư viện mẫu",
+      "close": "Đóng",
+      "title": "Bạn muốn làm gì với mẫu này?",
+      "subtitle": "“{name}” — tạo phương án từ mẫu, lưu lại để xem sau, hoặc hỏi kiến trúc sư trước.",
+      "later": "Để sau, xem tiếp",
+      "create": {
+        "imageAlt": "Mẫu thiết kế đang xem",
+        "badge": "Lựa chọn chính",
+        "title": "Tạo phương án từ mẫu này",
+        "subtitle": "Dùng mẫu làm cảm hứng / đầu vào cho dự án của bạn.",
+        "p1": "Đi vào luồng tạo dự án",
+        "p2": "Thiết kế & dự toán theo lô đất của bạn",
+        "p3": "Nhận bản vẽ hoàn chỉnh → sẵn sàng triển khai",
+        "valuePlan": "Dùng lượt trong gói {plan}",
+        "valueFree": "Còn 1 lượt thiết kế miễn phí",
+        "action": "Tạo phương án từ mẫu này"
+      },
+      "save": {
+        "imageAlt": "Mẫu thiết kế để lưu vào tài khoản",
+        "title": "Lưu mẫu",
+        "subtitle": "Lưu vào tài khoản để quay lại sau.",
+        "p1": "Nằm trong “Mẫu đã lưu” của bạn",
+        "p2": "So sánh các mẫu đã lưu",
+        "p3": "Tạo phương án hoặc hỏi KTS từ danh sách",
+        "value": "Miễn phí · không tốn lượt tra",
+        "action": "Lưu mẫu",
+        "savedAction": "Đã lưu",
+        "alreadySaved": "Mẫu này đã nằm trong Mẫu đã lưu"
+      },
+      "consult": {
+        "imageAlt": "Kiến trúc sư SAVICO đang tư vấn bản vẽ",
+        "title": "Hỏi KTS 1:1",
+        "subtitle": "Kiến trúc sư SAVICO tư vấn mẫu này có phù hợp với bạn không.",
+        "p1": "Mẫu có phù hợp lô đất & nhu cầu?",
+        "p2": "Cần điều chỉnh gì · ước tính chi phí, công năng",
+        "p3": "Sau tư vấn: dùng mẫu hoặc đổi mẫu khác",
+        "value": "Miễn phí · kiến trúc sư SAVICO",
+        "action": "Hỏi KTS 1:1"
+      }
+    },
     "consult": {
       "cta": "Đặt lịch tư vấn 1:1"
     },
@@ -780,6 +894,85 @@
         "material": "Vật liệu",
         "interior": "Nội thất",
         "legal": "Pháp lý"
+      }
+    },
+    "lookupExhausted": {
+      "badge": "Đã chạm giới hạn quyền lợi",
+      "close": "Đóng",
+      "titlePlan": "Bạn đã dùng hết {total} lượt tra cứu của gói {plan}",
+      "titleFree": "Bạn đã dùng hết {total} lượt tra cứu hôm nay",
+      "description": "Nâng gói hoặc mua thêm lượt để xem tiếp, hoặc dùng ngay “{name}” để tạo phương án cho dự án của mình.",
+      "chip1": "Nhà phố hiện đại",
+      "chip2": "Biệt thự sân vườn",
+      "chip3": "Nhà cấp 4",
+      "more": "Mở thêm lượt ngay",
+      "useSelected": "Dùng mẫu đã chọn",
+      "consult": "Hỏi KTS tư vấn mẫu",
+      "footnoteDay": "Hết lượt hôm nay. Bạn vẫn có thể dùng mẫu đã chọn hoặc hỏi KTS; lượt tra cứu miễn phí được làm mới vào ngày mới.",
+      "footnoteMonth": "Hết lượt tra cứu của gói trong tháng này. Mở thêm quyền lợi để xem tiếp, hoặc dùng ngay mẫu đã chọn.",
+      "later": "Để sau",
+      "returnToLibrary": "Quay lại Thư viện mẫu"
+    },
+    "articleJourney": {
+      "compact": {
+        "title": "Áp dụng ngay cho dự án của bạn?",
+        "subtitle": "Biến kiến thức vừa đọc thành bước tiếp theo cho ngôi nhà của bạn."
+      },
+      "actions": {
+        "create": "Tạo dự án ngay",
+        "architect": "Hỏi KTS 1:1",
+        "legal": "Tư vấn pháp lý"
+      },
+      "end": {
+        "title": "Sẵn sàng áp dụng cho dự án của bạn?",
+        "subtitle": "Tạo checklist và nhận hỗ trợ từ chuyên gia SAVICO.",
+        "p1": "Áp dụng checklist cho công trình thực tế",
+        "p2": "Kết nối đúng chuyên gia",
+        "p3": "Đi tiếp đến bước triển khai",
+        "tag1": "An toàn",
+        "tag2": "Đúng tiến độ",
+        "tag3": "Tối ưu chi phí",
+        "handwritten": "Biến kế hoạch thành tổ ấm thật",
+        "imageAlt": "Ngôi nhà hiện đại hoàn thiện"
+      },
+      "popup": {
+        "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
+        "badge": "Cẩm nang",
+        "close": "Đóng",
+        "title": "Đọc xong rồi – bắt đầu ngôi nhà của bạn?",
+        "subtitle": "Từ kiến thức đến phương án thật chỉ vài phút. Chọn bước phù hợp với bạn lúc này.",
+        "later": "Để sau, đọc tiếp",
+        "create": {
+          "imageAlt": "Ngôi nhà hiện đại hoàn thiện",
+          "badge": "Bắt đầu ngay",
+          "title": "Tạo dự án ngay",
+          "subtitle": "Đi vào luồng tạo dự án — chưa có bản vẽ thì thiết kế & dự toán.",
+          "p1": "Chưa có bản vẽ → Thiết kế & dự toán",
+          "p2": "Nhận bản vẽ / hồ sơ",
+          "p3": "Dự án sẵn sàng triển khai",
+          "value": "Còn 1 lượt thiết kế miễn phí",
+          "action": "Tạo dự án ngay"
+        },
+        "architect": {
+          "imageAlt": "Kiến trúc sư SAVICO đang rà soát bản vẽ",
+          "title": "Hỏi KTS 1:1",
+          "subtitle": "Kiến trúc sư SAVICO rà soát hồ sơ và bản vẽ của bạn.",
+          "p1": "Form tư vấn kiến trúc",
+          "p2": "Để lại nhu cầu / đặt lịch",
+          "p3": "Hồ sơ ổn → quay lại dự án sẵn sàng",
+          "value": "Miễn phí · kiến trúc sư SAVICO",
+          "action": "Hỏi KTS 1:1"
+        },
+        "legal": {
+          "imageAlt": "Hồ sơ pháp lý và giấy phép xây dựng",
+          "title": "Tư vấn pháp lý",
+          "subtitle": "Chuyên gia pháp lý kiểm tra hồ sơ trước khi xây.",
+          "p1": "Form tư vấn pháp lý",
+          "p2": "Để lại nhu cầu / đặt lịch",
+          "p3": "Hồ sơ pháp lý ổn → tiếp tục triển khai",
+          "value": "Chuyên gia pháp lý SAVICO",
+          "action": "Tư vấn pháp lý"
+        }
       }
     }
   },
@@ -851,6 +1044,56 @@
       "notifyMeConfirmed": "Đã đăng ký nhận thông báo",
       "editingMessage": "Video đang được biên tập",
       "readArticleInstead": "Đọc bài hướng dẫn thay thế"
+    },
+    "endCard": {
+      "section": {
+        "landPhotoTitle": "Bạn đã nắm được cách chụp ảnh lô đất!",
+        "genericTitle": "Bạn đã nắm được “{title}”!",
+        "landPhotoDescription": "Giờ bạn có thể chụp ảnh thực tế khu đất của mình để bắt đầu tạo phương án thiết kế cho ngôi nhà. SAVICO sẽ giúp bạn phân tích hiện trạng và gợi ý thiết kế phù hợp chỉ trong vài phút.",
+        "genericDescription": "Áp dụng ngay những gì vừa xem, học tiếp, hoặc hỏi kiến trúc sư SAVICO.",
+        "create": "Chụp ảnh & tạo dự án",
+        "browse": "Xem thêm hướng dẫn",
+        "consult": "Hỏi KTS 1:1",
+        "readyNote": "Sẵn sàng tạo dự án cho ngôi nhà của bạn!"
+      },
+      "popup": {
+        "badge": "Hướng dẫn",
+        "close": "Đóng",
+        "title": "Bạn vừa xem xong “{title}” — làm gì tiếp?",
+        "subtitle": "Áp dụng ngay những gì vừa xem, học tiếp, hoặc hỏi kiến trúc sư.",
+        "later": "Để sau",
+        "create": {
+          "imageAlt": "Công trường và ảnh hiện trạng lô đất",
+          "badge": "Làm thử ngay",
+          "title": "Chụp ảnh & tạo dự án",
+          "subtitle": "Chỉ cần 1 ảnh lô đất hoặc ảnh hiện trạng để bắt đầu.",
+          "p1": "Tải ảnh lô đất / chụp ảnh hiện trạng",
+          "p2": "Hệ thống phân tích hiện trạng",
+          "p3": "Thiết kế & dự toán → nhận bản vẽ",
+          "value": "Bắt đầu từ ảnh hiện trạng",
+          "action": "Chụp ảnh & tạo dự án"
+        },
+        "browse": {
+          "imageAlt": "Ngôi nhà mẫu trong thư viện hướng dẫn",
+          "title": "Xem thêm hướng dẫn",
+          "subtitle": "Tiếp tục với video / bài hướng dẫn liên quan.",
+          "p1": "Video tiếp theo cùng chủ đề",
+          "p2": "Bài hướng dẫn liên quan",
+          "p3": "Quay lại đây bất cứ lúc nào",
+          "value": "Miễn phí",
+          "action": "Xem video tiếp theo"
+        },
+        "consult": {
+          "imageAlt": "Kiến trúc sư SAVICO đang tư vấn bản vẽ",
+          "title": "Hỏi KTS 1:1",
+          "subtitle": "Chưa rõ chỗ nào? Kiến trúc sư SAVICO giải đáp trực tiếp.",
+          "p1": "Form tư vấn kiến trúc",
+          "p2": "Đặt lịch / mô tả nhu cầu",
+          "p3": "KTS liên hệ tư vấn",
+          "value": "Miễn phí · kiến trúc sư SAVICO",
+          "action": "Hỏi KTS 1:1"
+        }
+      }
     }
   },
   "design": {
@@ -3768,7 +4011,48 @@
         "submit": "Gửi đăng ký"
       },
       "turnkeyRegistered": "Đã ghi nhận. Đội ngũ SAVICO sẽ liên hệ với bạn trong giờ làm việc gần nhất.",
-      "exclusive": "Đặc quyền dành riêng"
+      "exclusive": "Đặc quyền dành riêng",
+      "popup2": {
+        "title": "Dự án đã sẵn sàng — bạn muốn tiếp tục thế nào?",
+        "subtitle": "Chọn hướng phù hợp để đưa dự án đi tiếp đến bước triển khai cuối cùng.",
+        "close": "Đóng",
+        "later": "Để sau",
+        "find": {
+          "imageAlt": "Ngôi nhà hoàn thiện và danh sách nhà thầu",
+          "title": "Tìm nhà thầu",
+          "subtitle": "SAVICO đề xuất và hỗ trợ bạn so sánh nhà thầu phù hợp.",
+          "p1": "Đề xuất 3–5 nhà thầu",
+          "p2": "Mời báo giá & so sánh",
+          "p3": "Chốt nhà thầu phù hợp",
+          "value": "Miễn phí cho chủ nhà",
+          "action": "Tìm nhà thầu"
+        },
+        "turnkey": {
+          "imageAlt": "SAVICO triển khai thi công tại công trường",
+          "badge": "Dịch vụ SAVICO",
+          "titlePro": "Thi công trọn gói cùng SAVICO",
+          "titleDefault": "Triển khai trọn gói cùng SAVICO",
+          "subtitle": "SAVICO tiếp nhận triển khai từ khảo sát đến bàn giao.",
+          "p1": "Flow dịch vụ: khảo sát & đề xuất",
+          "p2": "Ký hợp đồng & thanh toán",
+          "p3": "Triển khai đến bàn giao",
+          "valuePro": "Đặc quyền thiết bị vệ sinh 100 triệu",
+          "valueUpgrade": "Ưu đãi 100 triệu — cần mua thêm gói PRO",
+          "actionPro": "Thi công trọn gói",
+          "actionDefault": "Đăng ký triển khai"
+        },
+        "expert": {
+          "imageAlt": "Bản vẽ với lựa chọn kiến trúc sư và pháp lý",
+          "title": "Tư vấn chuyên gia 1:1",
+          "subtitle": "Kiến trúc sư hoặc chuyên gia pháp lý tư vấn trước khi bạn quyết định.",
+          "p1": "Kiến trúc sư: rà soát bản vẽ, tối ưu công năng",
+          "p2": "Pháp lý: giấy phép & hồ sơ pháp lý",
+          "p3": "Hoàn thiện hồ sơ → quay lại khi sẵn sàng",
+          "value": "Kiến trúc sư: miễn phí · Pháp lý: đặt lịch",
+          "architect": "Kiến trúc sư",
+          "legal": "Pháp lý"
+        }
+      }
     },
     "matches": {
       "title": "Nhà thầu được đề xuất",
@@ -4352,6 +4636,44 @@
       "mep": "Điện nước âm, chống thấm, thử áp lực đường ống.",
       "finishing": "Trát, ốp lát, trần thạch cao, sơn nước, cửa, thiết bị vệ sinh.",
       "handover": "Kiểm tra tổng thể, khắc phục lỗi, bàn giao hồ sơ hoàn công."
+    },
+    "managementPopup": {
+      "title": "Bạn muốn quản lý quá trình thi công như thế nào?",
+      "subtitle": "Sau khi đã chốt nhà thầu, hãy chọn cách SAVICO sẽ đồng hành cùng bạn.",
+      "close": "Đóng",
+      "later": "Để sau",
+      "self": {
+        "imageAlt": "Bản vẽ thi công và dụng cụ quản lý công trình",
+        "title": "Tự quản lý",
+        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; SAVICO lưu hồ sơ và tiến độ cơ bản.",
+        "p1": "Dashboard tự quản lý",
+        "p2": "Theo dõi hồ sơ & tiến độ",
+        "p3": "Thi công",
+        "value": "Miễn phí",
+        "action": "Tự quản lý"
+      },
+      "check": {
+        "imageAlt": "Kỹ sư kiểm tra các mốc quan trọng của công trình",
+        "badge": "Gói An Tâm",
+        "title": "Giám sát theo mốc",
+        "subtitle": "SAVICO kiểm tra các giai đoạn quan trọng của công trình.",
+        "p1": "Kiểm tra theo từng mốc",
+        "p2": "Báo cáo sau mỗi lần kiểm tra",
+        "p3": "{count} lượt giám sát dự kiến",
+        "value": "SVC CHECK · từ {price}",
+        "action": "Chọn giám sát theo mốc"
+      },
+      "control": {
+        "imageAlt": "Kỹ sư SAVICO theo dõi thi công xuyên suốt tại công trường",
+        "badge": "Khuyên dùng · Gói Toàn Diện",
+        "title": "Giám sát xuyên suốt",
+        "subtitle": "SAVICO đồng hành từ khởi công đến hoàn tất và bàn giao.",
+        "p1": "Theo dõi xuyên suốt",
+        "p2": "Kiểm soát chất lượng & phát sinh",
+        "p3": "{count} lượt giám sát dự kiến",
+        "value": "SVC CONTROL · {price}",
+        "action": "Chọn giám sát xuyên suốt"
+      }
     },
     "pricing": {
       "title": "Gói giám sát thi công SVC",

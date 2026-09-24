@@ -12,10 +12,11 @@ import { designKeys } from '../api/design.keys'
 import { useDesignStore } from '../store/design.store'
 
 /** Danh sách "Dự án của tôi" trong Cửa sổ cá nhân (mục IV). */
-export function useProjects() {
+export function useProjects(enabled = true) {
   return useQuery({
     queryKey: designKeys.projects(),
-    queryFn: () => designApi.listProjects()
+    queryFn: () => designApi.listProjects(),
+    enabled
   })
 }
 

@@ -3,6 +3,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 
+import { useAuthStore } from '@/shared/auth'
+import { useCmsCollection } from '@/shared/cms'
 import { env } from '@/shared/config/env'
 import { handbookApi } from '../api/handbook.api'
 import { handbookKeys } from '../api/handbook.keys'
@@ -78,39 +80,105 @@ export function useHandbookQuota() {
  */
 export function useHandbookLookupQuota() {
   const query = useHandbookQuota()
-  const dayKey = useHandbookQuotaLedger((state) => state.dayKey)
+  const user = useAuthStore((state) => state.user)
+  const userEmail = user?.email
+  const plans = useCmsCollection('plans')
+  const subscriptions = useCmsCollection('subscriptions')
+  const transactions = useCmsCollection('transactions')
+  const lookupPeriodKey = useHandbookQuotaLedger((state) => state.lookupPeriodKey)
   const lookupUsed = useHandbookQuotaLedger((state) => state.lookupUsed)
   const resetForToday = useHandbookQuotaLedger((state) => state.resetForToday)
+  const syncLookupPeriod = useHandbookQuotaLedger((state) => state.syncLookupPeriod)
   const consumeLookup = useHandbookQuotaLedger((state) => state.consumeLookup)
   const mockManaged = env.NEXT_PUBLIC_USE_MOCK_API
+  const activeSubscription = useMemo(
+    () =>
+      subscriptions.find(
+        (subscription) =>
+          Boolean(userEmail) &&
+          subscription.customerEmail.toLowerCase() === userEmail?.toLowerCase() &&
+          subscription.status === 'active'
+      ),
+    [subscriptions, userEmail]
+  )
+  const latestPaidTier = useMemo(() => {
+    if (!userEmail) return null
+    return (
+      transactions
+        .filter(
+          (transaction) =>
+            transaction.customerEmail.toLowerCase() === userEmail.toLowerCase() &&
+            transaction.status === 'paid' &&
+            (transaction.tier === 'advanced' || transaction.tier === 'pro')
+        )
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.tier ?? null
+    )
+  }, [transactions, userEmail])
+  const entitlementTier =
+    activeSubscription?.tier === 'advanced' || activeSubscription?.tier === 'pro'
+      ? activeSubscription.tier
+      : latestPaidTier
+  const activePlan = useMemo(
+    () => (entitlementTier ? plans.find((plan) => plan.tier === entitlementTier) : undefined),
+    [entitlementTier, plans]
+  )
+  const paidMockQuota = mockManaged && Boolean(activePlan)
+  const period = paidMockQuota ? ('month' as const) : ('day' as const)
+  const periodKey = paidMockQuota
+    ? `month:${userEmail ?? 'guest'}:${localMonthKey()}:${activePlan?.tier ?? 'none'}`
+    : `day:${localDayKey()}`
 
   useEffect(() => {
     resetForToday()
+    syncLookupPeriod(periodKey)
 
     const now = new Date()
-    const nextMidnight = new Date(now)
-    nextMidnight.setHours(24, 0, 0, 20)
-    const timer = window.setTimeout(resetForToday, Math.max(250, nextMidnight.getTime() - now.getTime()))
+    const nextReset = new Date(now)
+    if (period === 'month') {
+      nextReset.setMonth(now.getMonth() + 1, 1)
+      nextReset.setHours(0, 0, 0, 20)
+    } else {
+      nextReset.setHours(24, 0, 0, 20)
+    }
+    const timer = window.setTimeout(
+      () => {
+        resetForToday()
+        syncLookupPeriod(
+          period === 'month'
+            ? `month:${userEmail ?? 'guest'}:${localMonthKey()}:${activePlan?.tier ?? 'none'}`
+            : `day:${localDayKey()}`
+        )
+      },
+      Math.max(250, nextReset.getTime() - now.getTime())
+    )
     return () => window.clearTimeout(timer)
-  }, [dayKey, resetForToday])
+  }, [activePlan?.tier, period, periodKey, resetForToday, syncLookupPeriod, userEmail])
 
-  const total = query.data?.lookupTotal ?? 0
-  const serverRemaining = query.data?.lookupRemaining ?? 0
-  const usedToday = mockManaged && dayKey === localDayKey() ? lookupUsed : 0
-  const remaining = Math.max(serverRemaining - usedToday, 0)
+  const total = paidMockQuota ? (activePlan?.libraryCredits ?? 0) : (query.data?.lookupTotal ?? 0)
+  const serverRemaining = paidMockQuota ? total : (query.data?.lookupRemaining ?? 0)
+  const usedInPeriod = mockManaged && lookupPeriodKey === periodKey ? lookupUsed : 0
+  const remaining = Math.max(serverRemaining - usedInPeriod, 0)
 
   const consume = useCallback(() => {
     if (remaining <= 0) return false
     if (!mockManaged) return true
-    return consumeLookup(serverRemaining)
-  }, [consumeLookup, mockManaged, remaining, serverRemaining])
+    return consumeLookup(serverRemaining, periodKey)
+  }, [consumeLookup, mockManaged, periodKey, remaining, serverRemaining])
 
   return {
     ...query,
     remaining,
     total,
+    period,
+    planTier: activePlan?.tier ?? null,
     consume
   }
+}
+
+function localMonthKey(date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
 }
 
 /**

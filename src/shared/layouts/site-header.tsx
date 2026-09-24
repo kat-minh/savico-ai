@@ -44,12 +44,14 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
   const reduceMotion = useReducedMotion()
   const [hidden, setHidden] = useState(false)
   const [pastTitle, setPastTitle] = useState(false)
+  const onHome = pathname === ROUTES.HOME
   const onHandbook = pathname === ROUTES.HANDBOOK || pathname.startsWith(`${ROUTES.HANDBOOK}/`)
   const onHandbookArticle = pathname.startsWith(`${ROUTES.HANDBOOK}/bai-viet/`)
   const onDesign = pathname === ROUTES.DESIGN || pathname.startsWith(`${ROUTES.DESIGN}/`)
+  const autoHideHeader = onHome || onHandbook
 
   useEffect(() => {
-    if (!onHandbook) return
+    if (!autoHideHeader) return
 
     let previousY = window.scrollY
     let direction = 0
@@ -57,10 +59,19 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
     let frame = 0
     let titleThreshold = 120
 
-    const measureTitle = () => {
+    const measureBoundary = () => {
+      if (onHome) {
+        const hero = document.getElementById('home-hero')
+        if (!hero) {
+          titleThreshold = 120
+          return
+        }
+        titleThreshold = Math.max(120, hero.offsetTop + hero.offsetHeight - 64)
+        return
+      }
+
       const title = document.querySelector<HTMLElement>('main h1') ?? document.querySelector<HTMLElement>('h1')
-      if (!title) return
-      titleThreshold = Math.max(120, title.offsetTop + title.offsetHeight)
+      titleThreshold = title ? Math.max(120, title.offsetTop + title.offsetHeight) : 120
     }
 
     const onScroll = () => {
@@ -88,20 +99,20 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
       })
     }
 
-    measureTitle()
+    measureBoundary()
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', measureTitle)
+    window.addEventListener('resize', measureBoundary)
 
     return () => {
       cancelAnimationFrame(frame)
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', measureTitle)
+      window.removeEventListener('resize', measureBoundary)
     }
-  }, [onHandbook, pathname])
+  }, [autoHideHeader, onHome, pathname])
 
-  const isHidden = onHandbook && hidden
-  const isCompact = (onHandbook && pastTitle) || (onDesign && scrolled)
+  const isHidden = autoHideHeader && hidden
+  const isCompact = (autoHideHeader && pastTitle) || (onDesign && scrolled)
 
   useEffect(() => {
     const style = document.documentElement.style
@@ -118,7 +129,7 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
 
   return (
     <header
-      data-scrolled={onHandbook ? pastTitle : scrolled}
+      data-scrolled={autoHideHeader ? pastTitle : scrolled}
       data-handbook={onHandbook}
       data-hidden={isHidden}
       className={cn(

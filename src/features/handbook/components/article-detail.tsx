@@ -31,6 +31,7 @@ import { cn } from '@/shared/lib/utils'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { useHandbookArticle, useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, selectRelatedArticles } from '../services/handbook.service'
+import { ArticleCompactCta, ArticleEndExperience } from './article-action-experience'
 import { ConsultButton } from './consult-button'
 
 interface ArticleDetailProps {
@@ -375,89 +376,98 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
           key={article.id}
           ref={articleRef}
           data-article-reading-root
-          className='bg-card space-y-5 rounded-2xl border p-6'
+          className='bg-card overflow-hidden rounded-2xl border'
         >
-          <header data-article-intro data-entrance-step='1' className='space-y-5'>
-            {stage || topic ? (
-              <Badge variant='secondary'>{[stage?.title, topic?.title].filter(Boolean).join(' · ')}</Badge>
-            ) : (
-              <Badge variant='secondary'>{labelName(article.category)}</Badge>
-            )}
-
-            <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>
-
-            <p className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
-              {/* Hình 12 ghi "Cập nhật 08/2026" — dựng chuỗi MM/YYYY thay vì để
-                  Intl tự chọn ("tháng 08, 2026" ở locale vi). */}
-              {t('updatedAt', { date: formatMonthYear(article.publishedAt) })}
-              <span aria-hidden>·</span>
-              <Clock className='size-4' />
-              {t('readingTime', { minutes: article.readingMinutes })}
-            </p>
-          </header>
-
-          <div
-            data-article-hero
-            data-entrance-step='2'
-            className='bg-primary/5 aspect-16/9 w-full overflow-hidden rounded-xl'
-          >
-            <Photo
-              className='bg-primary/5 size-full rounded-xl'
-              imageClassName={cn(
-                'transition-opacity duration-500 ease-out motion-reduce:duration-200',
-                heroLoadedSlug === slug ? 'opacity-100' : 'opacity-0'
+          <div className='space-y-5 p-6'>
+            <header data-article-intro data-entrance-step='1' className='space-y-5'>
+              {stage || topic ? (
+                <Badge variant='secondary'>{[stage?.title, topic?.title].filter(Boolean).join(' · ')}</Badge>
+              ) : (
+                <Badge variant='secondary'>{labelName(article.category)}</Badge>
               )}
-              src={article.imageUrl}
-              alt={article.title}
-              sizes='(max-width: 1024px) 100vw, 760px'
-              priority
-              onLoad={() => setHeroLoadedSlug(slug)}
-            />
-          </div>
 
-          <div data-article-body className='space-y-6'>
-            {article.body.map((section, index) => (
-              <section
-                key={`${article.id}:${section.heading ?? index}`}
-                data-article-section={index + 1}
-                data-entrance-step={index < 2 ? '3' : undefined}
-                data-entrance-order={index < 2 ? String(index + 1) : undefined}
-                data-article-scroll-reveal={index >= 2 ? 'true' : undefined}
-                data-article-reveal={index >= 2 ? 'pending' : undefined}
-                className='space-y-3'
-              >
-                {section.heading ? (
-                  <h2 className='text-primary text-lg font-semibold'>
-                    {index + 1}. {section.heading}
-                  </h2>
-                ) : null}
-                {/* Hình 12: đoạn có ảnh thì chữ chiếm cột trái rộng hơn, ảnh
-                    nằm phải và căn theo đầu đoạn — không kéo cao bằng cột chữ. */}
-                <div
-                  className={cn(
-                    'space-y-2',
-                    section.imageUrl && 'sm:grid sm:grid-cols-[1.35fr_1fr] sm:items-start sm:gap-4 sm:space-y-0'
-                  )}
-                >
-                  <div className='space-y-2'>
-                    {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph} className='text-sm leading-relaxed'>
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                  {section.imageUrl ? (
-                    <Photo
-                      className='aspect-4/3 w-full rounded-lg'
-                      src={section.imageUrl}
-                      alt={section.heading ?? article.title}
-                      sizes='(max-width: 640px) 100vw, 340px'
-                    />
+              <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>
+
+              <p className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
+                {/* Hình 12 ghi "Cập nhật 08/2026" — dựng chuỗi MM/YYYY thay vì để
+                  Intl tự chọn ("tháng 08, 2026" ở locale vi). */}
+                {t('updatedAt', { date: formatMonthYear(article.publishedAt) })}
+                <span aria-hidden>·</span>
+                <Clock className='size-4' />
+                {t('readingTime', { minutes: article.readingMinutes })}
+              </p>
+            </header>
+
+            <div
+              data-article-hero
+              data-entrance-step='2'
+              className='bg-primary/5 aspect-16/9 w-full overflow-hidden rounded-xl'
+            >
+              <Photo
+                className='bg-primary/5 size-full rounded-xl'
+                imageClassName={cn(
+                  'transition-opacity duration-500 ease-out motion-reduce:duration-200',
+                  heroLoadedSlug === slug ? 'opacity-100' : 'opacity-0'
+                )}
+                src={article.imageUrl}
+                alt={article.title}
+                sizes='(max-width: 1024px) 100vw, 760px'
+                priority
+                onLoad={() => setHeroLoadedSlug(slug)}
+              />
+            </div>
+
+            <div data-article-body className='space-y-6'>
+              {article.body.map((section, index) => (
+                <div key={`${article.id}:${section.heading ?? index}`} className='space-y-6'>
+                  <section
+                    data-article-section={index + 1}
+                    data-entrance-step={index < 2 ? '3' : undefined}
+                    data-entrance-order={index < 2 ? String(index + 1) : undefined}
+                    data-article-scroll-reveal={index >= 2 ? 'true' : undefined}
+                    data-article-reveal={index >= 2 ? 'pending' : undefined}
+                    className='space-y-3'
+                  >
+                    {section.heading ? (
+                      <h2 className='text-primary text-lg font-semibold'>
+                        {index + 1}. {section.heading}
+                      </h2>
+                    ) : null}
+                    {/* Hình 12: đoạn có ảnh thì chữ chiếm cột trái rộng hơn, ảnh
+                      nằm phải và căn theo đầu đoạn — không kéo cao bằng cột chữ. */}
+                    <div
+                      className={cn(
+                        'space-y-2',
+                        section.imageUrl && 'sm:grid sm:grid-cols-[1.35fr_1fr] sm:items-start sm:gap-4 sm:space-y-0'
+                      )}
+                    >
+                      <div className='space-y-2'>
+                        {section.paragraphs.map((paragraph) => (
+                          <p key={paragraph} className='text-sm leading-relaxed'>
+                            {paragraph}
+                          </p>
+                        ))}
+                      </div>
+                      {section.imageUrl ? (
+                        <Photo
+                          className='aspect-4/3 w-full rounded-lg'
+                          src={section.imageUrl}
+                          alt={section.heading ?? article.title}
+                          sizes='(max-width: 640px) 100vw, 340px'
+                        />
+                      ) : null}
+                    </div>
+                  </section>
+
+                  {index === Math.max(0, Math.floor(article.body.length / 2) - 1) ? (
+                    <ArticleCompactCta article={article} onCreateProject={onCreateProject} />
                   ) : null}
                 </div>
-              </section>
-            ))}
+              ))}
+            </div>
           </div>
+
+          <ArticleEndExperience article={article} articleRef={articleRef} onCreateProject={onCreateProject} />
         </article>
 
         <aside
@@ -498,7 +508,6 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
             </section>
           ) : null}
 
-          {/* Khối mời tạo dự án — chuyển người đọc từ tra cứu sang dùng sản phẩm. */}
           <section
             data-article-project-card
             data-article-cta-nudge={ctaNudge ? 'true' : 'false'}
@@ -507,7 +516,6 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
             className='bg-primary/5 border-primary/30 space-y-3 rounded-2xl border p-5'
           >
             <FileText className='text-primary size-8' />
-            {/* Hình 12 gọi đích danh chủ đề: "Chưa chắc nên chọn móng nào?" */}
             <p className='font-semibold text-balance'>
               {topic ? t('ctaTitleTopic', { topic: topic.title.toLocaleLowerCase('vi') }) : t('ctaTitle')}
             </p>

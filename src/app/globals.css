@@ -8,6 +8,18 @@
  * ========================================================================== */
 @custom-variant dark (&:is(.dark *));
 
+@media (max-width: 899px) {
+  html[data-dialog-overlay-open='true'] [data-assistant-fab],
+  html[data-dialog-overlay-open='true'] [data-assistant-topic-suggestion],
+  body:has([role='dialog'][data-state='open']) [data-assistant-fab],
+  body:has([role='dialog'][data-state='open']) [data-assistant-topic-suggestion] {
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    transform: translate3d(0, 40px, 0) !important;
+  }
+}
+
 /* =============================================================================
  * SEMANTIC DESIGN TOKENS  (source of truth)
  *

@@ -57,6 +57,7 @@ export function HomeStats() {
 
   return (
     <motion.section
+      id='home-stats'
       initial={reduceMotion ? false : { opacity: 0, y: '20%' }}
       animate={{ opacity: 1, y: 0 }}
       transition={reduceMotion ? { duration: 0 } : { duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}

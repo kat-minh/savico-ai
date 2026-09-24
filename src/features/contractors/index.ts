@@ -17,6 +17,6 @@ export { ProjectContextBar } from './components/project-context-bar'
 export { SurveyScheduler } from './components/survey-scheduler'
 
 export { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from './constants/contractors.constants'
-export { useBrief, useCreateBrief } from './hooks/use-brief'
+export { useBrief, useBriefs, useCreateBrief } from './hooks/use-brief'
 export { useInvitations } from './hooks/use-invitations'
 export type { Contractor, Invitation, ProjectBrief } from './types/contractor.types'

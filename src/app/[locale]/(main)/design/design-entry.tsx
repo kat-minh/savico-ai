@@ -2,6 +2,7 @@
 
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useEffect, useRef } from 'react'
 
 import { ProjectBoard, useDesignStore } from '@/features/design'
 import { Button } from '@/shared/components/ui/button'
@@ -13,10 +14,17 @@ import { usePageEntrance } from '@/shared/hooks'
  * Tiêu đề + dòng phụ + nút "Tạo dự án mới" ở đầu trang, phần còn lại do
  * `ProjectBoard` dựng (4 thẻ đếm, bộ lọc, lưới dự án, phân trang).
  */
-export function DesignEntry() {
+export function DesignEntry({ openCreateProject = false }: { openCreateProject?: boolean }) {
   const t = useTranslations('design.entry')
   const openCreateDialog = useDesignStore((s) => s.openCreateDialog)
+  const queryHandledRef = useRef(false)
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('design.m01.header')
+
+  useEffect(() => {
+    if (queryHandledRef.current || !openCreateProject) return
+    queryHandledRef.current = true
+    openCreateDialog()
+  }, [openCreateDialog, openCreateProject])
 
   return (
     <div

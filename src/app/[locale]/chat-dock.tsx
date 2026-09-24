@@ -34,6 +34,7 @@ export function ChatDock() {
   const suppressed = useChatContextStore((s) => s.dockSuppressed)
   const [ready, setReady] = useState(false)
   const [scrolling, setScrolling] = useState(false)
+  const [mobileDialogOpen, setMobileDialogOpen] = useState(false)
   const [openedOnce, setOpenedOnce] = useState(false)
   const [suggestion, setSuggestion] = useState<TopicSuggestion | null>(null)
   const scrollStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -120,6 +121,35 @@ export function ChatDock() {
   }, [])
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 899px)')
+
+    const syncDialogState = () => {
+      const hasOpenDialog = Boolean(document.querySelector('[role="dialog"][data-state="open"]'))
+      setMobileDialogOpen(mediaQuery.matches && hasOpenDialog)
+    }
+
+    syncDialogState()
+
+    const observer = new MutationObserver(syncDialogState)
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['data-state', 'role']
+    })
+    mediaQuery.addEventListener('change', syncDialogState)
+
+    return () => {
+      observer.disconnect()
+      mediaQuery.removeEventListener('change', syncDialogState)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (mobileDialogOpen && open) setOpen(false)
+  }, [mobileDialogOpen, open, setOpen])
+
+  useEffect(() => {
     const onTopicOpened = (event: Event) => {
       const detail = (event as CustomEvent<TopicSuggestion>).detail
       if (!detail?.id || !detail.title || open) return
@@ -140,7 +170,8 @@ export function ChatDock() {
     }
   }, [open])
 
-  const labelAvailable = ready && !scrolling && !open && !suppressed
+  const dockHidden = suppressed || mobileDialogOpen
+  const labelAvailable = ready && !scrolling && !open && !dockHidden
 
   function toggleAssistant() {
     if (!open) {
@@ -160,7 +191,7 @@ export function ChatDock() {
 
   return (
     <>
-      {suggestion && ready && !open && !suppressed ? (
+      {suggestion && ready && !open && !dockHidden ? (
         <button
           type='button'
           data-assistant-topic-suggestion
@@ -180,10 +211,10 @@ export function ChatDock() {
         aria-expanded={open}
         onClick={toggleAssistant}
         className={cn(
-          'group fixed right-6 bottom-6 z-[60] flex cursor-pointer flex-col items-center drop-shadow-lg transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none',
-          ready && !suppressed ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+          'group fixed right-6 bottom-6 z-[60] flex cursor-pointer flex-col items-center drop-shadow-lg transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none max-[899px]:right-[2px]',
+          ready && !dockHidden ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         )}
-        style={{ transform: ready && !suppressed ? undefined : 'translate3d(0, 40px, 0)' }}
+        style={{ transform: ready && !dockHidden ? undefined : 'translate3d(0, 40px, 0)' }}
       >
         {!openedOnce && ready && !open ? (
           <span
@@ -193,7 +224,10 @@ export function ChatDock() {
           />
         ) : null}
 
-        <span className='brand-gradient text-primary-foreground relative z-10 flex size-14 items-center justify-center rounded-full'>
+        <span
+          data-assistant-fab-core
+          className='brand-gradient text-primary-foreground relative z-10 flex size-14 items-center justify-center rounded-full'
+        >
           <span data-assistant-fab-icon className='relative size-7' aria-hidden>
             <Bot
               data-assistant-bot-icon

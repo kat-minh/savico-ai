@@ -22,13 +22,13 @@ import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { EmptyState, revealEase } from '@/shared/components/common'
+import { EmptyState, ProjectManagementOptionsDialog, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
-import { contractorBriefRoute, contractorMatchesRoute, supervisionPlansRoute } from '@/shared/constants/routes'
+import { contractorBriefRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { siteConfig } from '@/shared/config'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
@@ -76,6 +76,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
   const [newInvitationIds, setNewInvitationIds] = useState<Set<string>>(new Set())
   const [liveUpdateId, setLiveUpdateId] = useState<string | null>(null)
   const [leavingBack, setLeavingBack] = useState(false)
+  const [managementOpen, setManagementOpen] = useState(false)
   const [introMode, setIntroMode] = useState<'checking' | 'play' | 'skip'>('checking')
   const previousStatusesRef = useRef<Map<string, Invitation['status']> | null>(null)
 
@@ -83,7 +84,6 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
     () => [...(invitations ?? [])].sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt)),
     [invitations]
   )
-
   useEffect(() => {
     try {
       const key = `savico.m10-intro.${projectId}`
@@ -310,6 +310,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
                   onHoverStep={setHoveredStep}
                   onDismissNew={() => dismissNew(invitation)}
                   onViewProfile={setProfileContractor}
+                  onChooseManagement={() => setManagementOpen(true)}
                 />
               </motion.div>
             ))}
@@ -376,6 +377,8 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
         version={sent[0]?.dossierVersion ?? 'v1'}
       />
 
+      <ProjectManagementOptionsDialog open={managementOpen} onOpenChange={setManagementOpen} projectId={projectId} />
+
       <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
         <DialogContent className='sm:max-w-sm'>
           <DialogHeader>
@@ -433,7 +436,8 @@ function InvitationCard({
   isNew,
   onHoverStep,
   onDismissNew,
-  onViewProfile
+  onViewProfile,
+  onChooseManagement
 }: {
   invitation: Invitation
   contractor?: Contractor
@@ -448,6 +452,7 @@ function InvitationCard({
   onHoverStep: (status: Invitation['status'] | null) => void
   onDismissNew: () => void
   onViewProfile: (contractor: Contractor) => void
+  onChooseManagement: () => void
 }) {
   const t = useTranslations('contractors.invitations')
   const tCommon = useTranslations('contractors.common')
@@ -759,8 +764,8 @@ function InvitationCard({
           className='bg-accent/40 flex flex-wrap items-center justify-between gap-3 rounded-xl p-3.5 text-sm'
         >
           <span className='text-primary-strong font-medium'>{t('supervisionSuggestion')}</span>
-          <Button asChild size='sm' variant='outline'>
-            <Link href={supervisionPlansRoute(projectId)}>{t('supervisionAction')}</Link>
+          <Button type='button' size='sm' variant='outline' onClick={onChooseManagement}>
+            {t('supervisionAction')}
           </Button>
         </motion.div>
       ) : null}
