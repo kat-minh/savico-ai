@@ -42,9 +42,9 @@
   /* Brand roles: màu logo BuildX.
    *
    * Theo sheet góp ý BuildX (tab "Hình ảnh website"):
-   * `--primary-strong` = xanh đậm của logo #2A753F (nền đặc, tiêu đề, dải CTA);
-   * `--primary` sáng hơn một nấc cho icon và nét mảnh để không chìm vào chữ đen. -------- */
-  --primary: oklch(0.56 0.13 146);
+   * `--primary` và `--primary-strong` cùng là xanh logo #2A753F — trước đây `--primary`
+   * sáng hơn một nấc nên cạnh nhau trông như hai màu xanh khác nhau. -------- */
+  --primary: oklch(0.502 0.112 149.7);
   --primary-foreground: oklch(1 0 0);
   --primary-strong: oklch(0.502 0.112 149.7);
   /* Dải gradient thương hiệu theo logo BuildX: xanh đậm #2A753F → xanh lá nhạt
@@ -57,11 +57,11 @@
   --brand-orange-foreground: oklch(1 0 0);
   --brand-orange-soft: oklch(0.97 0.022 58);
   --secondary: oklch(0.97 0.012 150);
-  --secondary-foreground: oklch(0.33 0.05 150);
+  --secondary-foreground: var(--primary-strong);
   --muted: oklch(0.968 0.006 150);
   --muted-foreground: oklch(0.53 0.015 150);
   --accent: oklch(0.955 0.035 152);
-  --accent-foreground: oklch(0.38 0.09 150);
+  --accent-foreground: var(--primary-strong);
 
   /* Footer luôn nền tối ở CẢ hai theme (quy ước xuyên suốt, mục I). Dùng
    * `bg-foreground` sẽ đảo thành nền sáng khi bật dark mode. ------------- */
@@ -96,7 +96,7 @@
   --chart-2: var(--brand-gradient-to);
   --chart-3: oklch(0.85 0.02 150);
   --chart-4: var(--primary);
-  --chart-5: oklch(0.45 0.11 152);
+  --chart-5: var(--primary-strong);
 
   /* Sidebar (dashboard shell) ------------------------------------------ */
   --sidebar: oklch(1 0 0);
@@ -104,7 +104,7 @@
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.955 0.035 152);
-  --sidebar-accent-foreground: oklch(0.38 0.09 150);
+  --sidebar-accent-foreground: var(--primary-strong);
   --sidebar-border: oklch(0.912 0.012 150);
   --sidebar-ring: var(--primary);
 }
