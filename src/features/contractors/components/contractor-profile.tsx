@@ -1104,10 +1104,12 @@ function PartnershipSummary({ contractor }: { contractor: Contractor }) {
             <ShieldCheck className='size-3.5' />
             {t('verified')}
           </span>
-          <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1'>
-            <CalendarDays className='size-3.5' />
-            {t('since', { since: partnership.since })}
-          </span>
+          {partnership.since ? (
+            <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1'>
+              <CalendarDays className='size-3.5' />
+              {t('since', { since: partnership.since })}
+            </span>
+          ) : null}
         </div>
       </div>
     </motion.section>
@@ -1922,7 +1924,9 @@ function LegalChecks({
               <CircleCheck className='text-primary size-3.5' />
               {tLegal('cooperation.verified')}
             </span>
-            <span>{tLegal('cooperation.since', { since: contractor.partnership.since })}</span>
+            {contractor.partnership.since ? (
+              <span>{tLegal('cooperation.since', { since: contractor.partnership.since })}</span>
+            ) : null}
             <span>
               {tLegal('cooperation.rank', {
                 rank: legal?.cooperationRank ?? 0,
@@ -2092,7 +2096,10 @@ function PartnershipTab({ contractor }: { contractor: Contractor }) {
       key: 'signedAt',
       icon: CalendarDays,
       label: t('signedAt'),
-      value: formatDate(partnership.signedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+      // Nhà thầu chưa ký hợp tác thì ngày ký rỗng — `Intl` ném RangeError nếu định dạng.
+      value: partnership.signedAt
+        ? formatDate(partnership.signedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+        : '—'
     },
     { key: 'pages', icon: FileText, label: t('pages'), value: String(partnership.pageCount) },
     { key: 'state', icon: CircleCheck, label: t('state'), value: t('stateVerified'), highlight: true }
