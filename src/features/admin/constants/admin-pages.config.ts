@@ -160,6 +160,7 @@ const PAGES = [
         keys: [
           'landing.services.eyebrow',
           'landing.services.title',
+          'landing.services.titleMobile',
           'landing.services.subtitle',
           'landing.services.viewAll',
           'landing.services.note',
@@ -183,6 +184,7 @@ const PAGES = [
         keys: [
           'landing.dossiers.eyebrow',
           'landing.dossiers.title',
+          'landing.dossiers.titleMobile',
           'landing.dossiers.viewAll',
           'landing.dossiers.viewOne',
           'landing.dossiers.items.townhouse.badge',
@@ -210,7 +212,7 @@ const PAGES = [
       },
       {
         key: 'handbookBlock',
-        keys: ['handbook.home.eyebrow', 'handbook.home.title', 'handbook.home.viewAll']
+        keys: ['handbook.home.eyebrow', 'handbook.home.title', 'handbook.home.titleMobile', 'handbook.home.viewAll']
       },
       { key: 'guideBlock', keys: ['guide.highlights.title', 'guide.highlights.subtitle', 'guide.highlights.viewAll'] },
       {
@@ -230,6 +232,7 @@ const PAGES = [
         key: 'testimonials',
         keys: [
           'landing.testimonials.label',
+          'landing.testimonials.titleMobile',
           'landing.testimonials.items.tuan.quote',
           'landing.testimonials.items.tuan.name',
           'landing.testimonials.items.tuan.meta',
@@ -250,6 +253,7 @@ const PAGES = [
         keys: [
           'consult.home.eyebrow',
           'consult.home.title',
+          'consult.home.titleMobile',
           'consult.home.subtitle',
           'consult.home.viewAll',
           'consult.home.book'
@@ -374,6 +378,8 @@ const PAGES = [
           'footer.rights'
         ]
       },
+      // Logo hệ thống: chỉ có ảnh, không có chữ (slogan nằm sẵn trong ảnh).
+      { key: 'brand', keys: [], imageKeys: ['brand.logo', 'brand.logoOnDark'] },
       { key: 'assistant', keys: ['assistant.title', 'chatbot.greeting'] },
       {
         key: 'notFound',

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Check, Loader2 } from 'lucide-react'
+import { ArrowRight, ChevronRight, Check, Loader2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -59,12 +59,22 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
   }
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-14 lg:px-8 lg:py-16'>
       <header className='mb-8 flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
         <div className='space-y-2'>
-          <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('eyebrow')}</p>
-          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
-          <p className='text-muted-foreground text-sm'>{t('subtitle')}</p>
+          {/* Cùng khuôn với các khối phía trên: dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Tư vấn 1:1"
+              (`titleMobile`), còn tiêu đề cũ + mô tả gộp thành MỘT mô tả nhỏ. Từ `lg` giữ nguyên. */}
+          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
+            {t('eyebrow')}
+          </p>
+          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
+            <span className='lg:hidden'>{t('titleMobile')}</span>
+            <span className='hidden lg:inline'>{t('title')}</span>
+          </h2>
+          <p className='text-muted-foreground text-sm max-lg:hidden'>{t('subtitle')}</p>
+          <p className='text-muted-foreground text-sm lg:hidden'>
+            {t('title')}. {t('subtitle')}
+          </p>
         </div>
 
         <Link
@@ -72,7 +82,8 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
           className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
         >
           {t('viewAll')}
-          <ArrowRight className='size-4' />
+          <ChevronRight className='size-4 lg:hidden' />
+          <ArrowRight className='hidden size-4 lg:block' />
         </Link>
       </header>
 

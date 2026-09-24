@@ -972,6 +972,17 @@ export interface CmsContractor {
   acceptingProjects: boolean
   intro: string
   strengths: string[]
+  /**
+   * Loại công trình nhận thi công — id của bộ sưu tập `buildingTypes`
+   * (`townhouse`, `villa`…). Bộ lọc "Loại công trình" ở S09 đọc trường này;
+   * bỏ trống nghĩa là chưa khai báo nên KHÔNG bị loại khỏi kết quả lọc.
+   */
+  buildingTypes?: string[]
+  /**
+   * Số lầu cao nhất nhà thầu nhận thi công, không tính trệt (0 = chỉ nhà trệt).
+   * Bộ lọc "Quy mô công trình" ở S09 đọc trường này; bỏ trống thì không bị loại.
+   */
+  maxUpperFloors?: number
   photos: CmsContractorPhoto[]
   foundedYear: number
   teamSize: string

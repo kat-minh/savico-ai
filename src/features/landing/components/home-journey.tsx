@@ -1,6 +1,16 @@
 'use client'
 
-import { ArrowRight, DraftingCompass, FilePen, FileText, House, Sparkles, Users, type LucideIcon } from 'lucide-react'
+import {
+  ArrowRight,
+  ChevronDown,
+  DraftingCompass,
+  FilePen,
+  FileText,
+  House,
+  Sparkles,
+  Users,
+  type LucideIcon
+} from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
@@ -85,13 +95,19 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
   }, [hovered])
 
   return (
-    <section id='home-journey' className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
+    // Dưới `lg`: đệm trên 20px (đồng bộ mọi cụm trang chủ), dòng nhãn ẩn — khối đầu chỉ còn
+    // tiêu đề + mô tả; mô tả là MỘT câu liền: dưới `lg` ký tự xuống dòng trong câu chữ chỉ còn là khoảng trắng, chữ chạy hết bề ngang rồi mới xuống dòng (`text-pretty` tránh chừa một chữ lẻ ở dòng cuối).
+    <section id='home-journey' className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-14 lg:px-8 lg:py-16'>
       <header className='flex flex-wrap items-end justify-between gap-x-10 gap-y-3'>
         <div className='space-y-2'>
-          <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('eyebrow')}</p>
+          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
+            {t('eyebrow')}
+          </p>
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
         </div>
-        <p className='text-muted-foreground max-w-xs text-sm whitespace-pre-line lg:text-right'>{t('note')}</p>
+        <p className='text-muted-foreground text-sm text-pretty lg:max-w-xs lg:text-right lg:whitespace-pre-line'>
+          {t('note')}
+        </p>
       </header>
 
       <ol
@@ -126,7 +142,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                 onMouseLeave={() => setHovered(null)}
                 onClick={() => setExpanded((current) => (current === step ? null : step))}
                 className={cn(
-                  'relative flex h-full cursor-pointer flex-col items-center gap-2 rounded-2xl border p-5 pt-7 text-center transition-colors transition-shadow',
+                  'relative flex h-full cursor-pointer flex-col rounded-2xl border p-4 pt-5 text-left transition-[background-color,border-color,color,box-shadow] duration-500 ease-in-out sm:items-center sm:gap-2 sm:p-5 sm:pt-7 sm:text-center',
                   isPastCard ? 'bg-muted/40' : 'bg-card',
                   isCurrent && 'border-primary shadow-[0_0_0_3px_var(--color-accent)]',
                   isSwept && 'border-primary shadow-[0_0_0_4px_var(--color-accent),0_0_18px_var(--color-accent)]',
@@ -144,27 +160,77 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                   animate={shouldBounce ? { y: [0, -5, 0] } : {}}
                   transition={{ duration: 0.4, ease: revealEase }}
                   className={cn(
-                    'absolute -top-3 left-1/2 -translate-x-1/2 rounded-lg px-2.5 py-1 text-sm font-bold',
+                    'absolute -top-3 left-4 rounded-lg px-2.5 py-1 text-sm font-bold transition-colors duration-500 ease-in-out sm:left-1/2 sm:-translate-x-1/2',
                     isHovered
                       ? 'bg-primary text-primary-foreground'
                       : isPastCard
                         ? 'bg-muted text-muted-foreground'
-                        : 'bg-primary-soft text-primary'
+                        : 'bg-primary-soft text-primary',
+                    // Mobile: thẻ đang mở thì ô nền bọc số đậm lên xanh đậm (thẻ vẫn giữ màu cũ).
+                    isOpen && 'max-sm:bg-primary-strong max-sm:text-primary-foreground'
                   )}
                 >
                   {String(index + 1).padStart(2, '0')}
                 </motion.span>
-                <Icon className='text-primary size-6' strokeWidth={1.75} />
-                <h3 className='text-sm leading-snug font-bold text-balance'>{t(`items.${step}.title`)}</h3>
-                <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
-                  {t(`items.${step}.description`)}
-                </p>
+                {/* Dưới `sm` (mobile): mỗi bước là MỘT HÀNG — icon trong ô vuông bên trái, chữ ở
+                    giữa, mũi tên mở/đóng bên phải; bấm thì chi tiết mở NGAY TRONG thẻ (theo
+                    ảnh khách đề xuất) để khỏi phải cuộn xuống cuối danh sách. Từ `sm` hai
+                    khung bọc `contents` biến mất, thẻ dọc như cũ và chi tiết vẫn ở khung
+                    chung dưới hàng thẻ. */}
+                <div className='flex items-center gap-3 sm:contents'>
+                  <span
+                    className={cn(
+                      'flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-500 ease-in-out sm:size-auto sm:rounded-none sm:bg-transparent',
+                      isOpen ? 'bg-primary-strong text-primary-foreground' : 'bg-muted text-muted-foreground'
+                    )}
+                  >
+                    <Icon className='size-5 sm:text-primary sm:size-6' strokeWidth={1.75} />
+                  </span>
+                  <div className='min-w-0 flex-1 space-y-0.5 sm:contents sm:space-y-0'>
+                    <h3 className='text-sm leading-snug font-bold text-balance'>{t(`items.${step}.title`)}</h3>
+                    <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
+                      {t(`items.${step}.description`)}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    aria-hidden
+                    className={cn(
+                      'text-muted-foreground size-5 shrink-0 transition-transform duration-500 ease-in-out sm:hidden',
+                      isOpen && 'rotate-180'
+                    )}
+                  />
+                </div>
 
                 {isCurrent ? (
-                  <span className='bg-primary/10 text-primary-strong rounded-full px-2.5 py-1 text-[11px] font-semibold'>
+                  <span className='bg-primary/10 text-primary-strong mt-2 self-start rounded-full px-2.5 py-1 text-[11px] font-semibold sm:mt-0 sm:self-auto'>
                     {t('currentStepBadge')}
                   </span>
                 ) : null}
+
+                <AnimatePresence initial={false}>
+                  {isOpen ? (
+                    <motion.dl
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.5, ease: 'easeInOut' }}
+                      onClick={(event) => event.stopPropagation()}
+                      // `pl-[3.25rem]` = ô icon 40px + khoảng hở 12px: chữ thụt vào ĐÚNG cột tiêu đề "Tạo dự án".
+                      className='cursor-auto space-y-3 overflow-hidden pl-[3.25rem] text-left sm:hidden'
+                    >
+                      {DETAIL_FIELDS.map((field) => (
+                        <div key={field} className='first:mt-2'>
+                          <dt className='text-primary text-xs font-semibold tracking-wide uppercase'>
+                            {t(`detailLabels.${field}`)}
+                          </dt>
+                          <dd className='text-muted-foreground mt-1 text-sm leading-relaxed text-pretty'>
+                            {t(`items.${step}.${field}`)}
+                          </dd>
+                        </div>
+                      ))}
+                    </motion.dl>
+                  ) : null}
+                </AnimatePresence>
               </motion.div>
 
               {index < HOME_JOURNEY_STEPS.length - 1 ? (
@@ -184,7 +250,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
         })}
       </ol>
 
-      {/* Bấm 1 thẻ thì khung chi tiết NÀY (chung, nằm dưới hàng thẻ) trượt mở
+      {/* Từ `sm`: bấm 1 thẻ thì khung chi tiết NÀY (chung, nằm dưới hàng thẻ) trượt mở
           ra 3 cột "bạn làm gì / SAVICO làm gì / bạn nhận được" cho bước đó —
           giống ảnh mockup; bấm lại chính thẻ đang mở thì khung đóng lại. */}
       <AnimatePresence initial={false}>
@@ -194,7 +260,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: revealEase }}
-            className='bg-muted/40 mt-4 grid grid-cols-1 gap-x-6 gap-y-3 overflow-hidden rounded-2xl border p-5 text-left sm:grid-cols-3'
+            className='bg-muted/40 mt-4 grid grid-cols-1 gap-x-6 gap-y-3 overflow-hidden rounded-2xl border p-5 text-left max-sm:hidden sm:grid-cols-3'
           >
             {DETAIL_FIELDS.map((field) => (
               <div key={field}>
@@ -215,7 +281,10 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.4, delay: 0.85, ease: revealEase }}
-        className='mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3'
+        // Dưới `sm`: nút ở TRÊN, dòng gợi ý "Chỉ cần 1 tấm ảnh lô đất" ở DƯỚI (xếp dọc). Trước đây `flex-wrap`
+        // chỉ xuống dòng khi nhãn nút dài ("Mở tiếp dự án SVC-…"); nhãn ngắn "Tạo dự án mới" thì hai phần lọt
+        // chung một hàng.
+        className='mt-8 flex flex-col items-center gap-y-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6'
       >
         {activeProject ? (
           <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>

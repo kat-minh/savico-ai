@@ -112,12 +112,14 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
         // tự cuộn bên trong. Để nó dài tự do thì cột phải kéo dài gấp mấy lần cột
         // trái, `sticky` mất tác dụng và người dùng phải cuộn cả trang mới xem hết
         // mẫu. Áp cho mọi bề rộng, không chỉ desktop.
-        className='bg-card flex max-h-[calc(100svh-11rem)] overflow-hidden rounded-2xl border'
+        className='bg-card flex max-h-[calc(100svh-11rem)] flex-col overflow-hidden rounded-2xl border lg:flex-row'
       >
-        {/* Thanh công cụ dọc bên trái panel — chỉ có ở Bước 3 (Hình 4) */}
+        {/* Thanh công cụ bên trái panel — chỉ có ở Bước 3 (Hình 4). Dưới `lg` nó thành THANH NGANG ở đầu
+            panel (hai tab chia đều bề ngang): cột dọc 176px cũ chiếm gần nửa màn hình điện thoại nên nội
+            dung (nhất là "Bài tư vấn") bị bóp còn ~140px. */}
         {showTabs ? (
           <LayoutGroup id={`handbook-panel-${kind}`}>
-            <nav className='bg-muted/40 flex w-44 shrink-0 flex-col gap-1 border-r p-2'>
+            <nav className='bg-muted/40 flex shrink-0 gap-1 border-b p-2 lg:w-44 lg:flex-col lg:border-r lg:border-b-0'>
               {tabs.map(({ id, icon: Icon }) => (
                 <button
                   key={id}
@@ -128,7 +130,7 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
                   }}
                   aria-current={tab === id ? 'true' : undefined}
                   className={cn(
-                    'relative flex items-center gap-2 overflow-hidden rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+                    'relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-lg px-3 py-2.5 text-sm transition-colors lg:flex-none lg:justify-start lg:text-left',
                     tab === id
                       ? 'text-accent-foreground font-medium'
                       : 'text-muted-foreground hover:bg-foreground/[0.06]'
@@ -194,7 +196,7 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
                     <PanelSkeleton />
                   ) : (
                     /* Lưới 3×2 đúng Hình 1 / Hình 4 — sáu mẫu, không phải danh sách dọc. */
-                    <div data-handbook-panel-grid className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+                    <div data-handbook-panel-grid className='grid grid-cols-2 gap-3 lg:grid-cols-3'>
                       {templates.map((template, index) => (
                         <div
                           key={template.id}

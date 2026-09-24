@@ -439,6 +439,7 @@
     "services": {
       "eyebrow": "SAVICO SERVICE PACKAGES",
       "title": "Pick the package that fits where you are",
+      "titleMobile": "SAVICO service packages",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
       "viewAll": "See all packages",
       "note": "Right package,\nright stage!",
@@ -473,7 +474,8 @@
     },
     "dossiers": {
       "eyebrow": "SAMPLE DOSSIERS",
-      "title": "Explore sample design & estimate dossiers",
+      "titleMobile": "Sample dossiers",
+      "title": "Sample library",
       "viewAll": "See all sample dossiers",
       "viewOne": "View sample dossier",
       "items": {
@@ -550,6 +552,7 @@
     },
     "testimonials": {
       "label": "WHAT CUSTOMERS SAY",
+      "titleMobile": "What customers say about SAVICO",
       "items": {
         "tuan": {
           "quote": "“I got a design I love, costs I understand and a contractor I trust.”",
@@ -593,6 +596,7 @@
     "home": {
       "eyebrow": "HOME-BUILDING HANDBOOK",
       "title": "Practical knowledge for your build",
+      "titleMobile": "Home-building handbook",
       "viewAll": "See all articles",
       "newBadge": "New",
       "readTime": "~{minutes} min read →"
@@ -1778,6 +1782,7 @@
       "title": "Book a session with a SAVICO architect",
       "subtitle": "An architect suggests the solution that fits your needs.",
       "eyebrow": "1:1 CONSULTATION",
+      "titleMobile": "1:1 consultation",
       "viewAll": "See all experts",
       "book": "Book",
       "booking": "Booking…",
@@ -2275,6 +2280,8 @@
       "noMatch": "No field matches.",
       "rowCount": "{count} fields",
       "revertField": "Restore original",
+      "manualBreakTitleHint": "Press Enter to break the line exactly where you want, so the browser does not split a phrase. The headline shows at most 3 lines — anything longer is cut off.",
+      "manualBreakBodyHint": "Press Enter to break the line exactly where you want, so the browser does not split a sentence.",
       "resetAll": "Clear all overrides",
       "resetAllTitle": "Clear every edited string?",
       "resetAllBody": "All fields go back to the original. The site only changes once you press Save.",
@@ -2501,8 +2508,8 @@
       "errors_pageNotFound_title": "404 page title",
       "errors_pageNotFound_description": "404 page description",
       "errors_pageNotFound_action": "404 back-home button",
-      "landing_hero_titleLead": "Headline — line 1",
-      "landing_hero_titleAccent": "Headline — line 2 (brand colour)",
+      "landing_hero_titleLead": "Headline — first part",
+      "landing_hero_titleAccent": "Headline — accent part (brand colour)",
       "landing_hero_subtitle": "Short description under the headline",
       "landing_hero_primaryCta": "Primary button",
       "landing_hero_secondaryCta": "Secondary button",
@@ -2586,6 +2593,7 @@
       "landing_journey_items_build_description": "Step 05 — description",
       "landing_services_eyebrow": "Small label above the heading",
       "landing_services_title": "Service band heading",
+      "landing_services_titleMobile": "Service band heading — mobile version (replaces the small label)",
       "landing_services_subtitle": "Description under the heading",
       "landing_services_viewAll": "“See all packages” link",
       "landing_services_note": "Text on the sticky note",
@@ -2602,6 +2610,7 @@
       "landing_services_items_turnkey_description": "Card 4 (turnkey) — description",
       "landing_services_items_turnkey_action": "Card 4 (turnkey) — button",
       "landing_dossiers_eyebrow": "Small label above the heading",
+      "landing_dossiers_titleMobile": "Big heading — mobile version (replaces the small label; the block heading above becomes the small description)",
       "landing_dossiers_title": "Sample-dossier heading",
       "landing_dossiers_viewAll": "“See all” link",
       "landing_dossiers_viewOne": "Per-card link",
@@ -2626,8 +2635,10 @@
       "landing_dossiers_items_garden_floors": "Card 4 (garden) — floors",
       "landing_dossiers_items_garden_options": "Card 4 (garden) — options",
       "handbook_home_eyebrow": "Small label above the heading (home)",
+      "handbook_home_titleMobile": "Big heading — mobile version (replaces the small label; the block heading above becomes the small description)",
       "handbook_home_title": "Handbook block heading (home)",
       "handbook_home_viewAll": "“See all articles” link",
+      "consult_home_titleMobile": "Big heading — mobile version (replaces the small label; the heading + description above merge into the small description)",
       "consult_home_eyebrow": "Small label above the heading (home)",
       "consult_home_viewAll": "“See all experts” link",
       "consult_home_book": "Booking button on the card",
@@ -2639,6 +2650,7 @@
       "landing_brands_items_ancuong": "Brand name — An Cường",
       "landing_brands_items_cadivi": "Brand name — CADIVI",
       "landing_brands_items_scg": "Brand name — SCG",
+      "landing_testimonials_titleMobile": "Big heading of the reviews strip — mobile version (replaces the small label)",
       "landing_testimonials_label": "Testimonials label",
       "landing_testimonials_items_tuan_quote": "Review 1 — quote",
       "landing_testimonials_items_tuan_name": "Review 1 — name",
@@ -2843,7 +2855,9 @@
       "home_home_dossierTownhouse": "Sample dossier card 1 (townhouse)",
       "home_home_dossierVilla": "Sample dossier card 2 (villa)",
       "home_home_dossierResort": "Sample dossier card 3 (resort)",
-      "home_home_dossierGarden": "Sample dossier card 4 (garden)"
+      "home_home_dossierGarden": "Sample dossier card 4 (garden)",
+      "plans_brand_logo": "System logo — top bar, sign-in, checkout (slogan included)",
+      "plans_brand_logoOnDark": "System logo — dark-background version for the footer (empty = built-in drawing)"
     },
     "pageSections": {
       "home_showcase": "Estimate showcase (right of the hero)",
@@ -2865,6 +2879,7 @@
       "design_dossier": "Step 3 — construction dossier",
       "account_header": "Top — title & subtitle",
       "shell_nav": "Top navigation bar (every page)",
+      "plans_brand": "System logo (top-left of the menu bar)",
       "shell_footer": "Footer (every page)",
       "shell_assistant": "AI assistant, bottom right",
       "shell_notFound": "404 page for broken links",
@@ -3072,6 +3087,9 @@
       },
       "intro": "Introduction",
       "strengths": "Strengths",
+      "buildingTypes": "Building types handled",
+      "buildingTypesHint": "Read by the \"Building type\" filter on the contractor search page. Empty = not declared, so the contractor is never filtered out.",
+      "maxUpperFloors": "Max upper floors (excluding ground)",
       "foundedYear": "Founded",
       "teamSize": "Team size",
       "warranty": "Warranty",
@@ -3261,7 +3279,7 @@
         "title": "Match on the criteria that matter",
         "area": "Area & radius",
         "type": "Building type",
-        "typeHint": "new build / repair / renovation / interior",
+        "typeHint": "townhouse / villa / roofed house / garden house / apartment",
         "scale": "Project scale",
         "experience": "Experience on similar projects",
         "rating": "Rating & completed projects",
@@ -3290,7 +3308,8 @@
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "bestMatch": "Best match"
+        "bestMatch": "Best match",
+        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
       },
       "compare": {
         "title": "Transparent comparison",
@@ -3464,7 +3483,6 @@
           "finishing": "e.g. Need a contractor for finishing — plastering, tiling, painting, fixtures — on a shell already built.",
           "interior": "e.g. Need a contractor for interior fit-out — furniture, loose items, decor — in a modern style."
         },
-        "noteHint": "The clearer your description, the better SAVICO can match contractors.",
         "counter": "{current} / {max}"
       },
       "documents": {
@@ -3638,6 +3656,10 @@
         "partnership": "SAVICO partnership"
       },
       "introTitle": "About the company",
+      "introTags": {
+        "buildingType": "Building type",
+        "scope": "Scope of work"
+      },
       "founded": "Founded in {year}",
       "team": "{count} architects & engineers",
       "office": "Office in {address}",

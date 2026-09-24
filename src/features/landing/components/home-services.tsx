@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, HardHat, PencilRuler, ShieldCheck, Users, type LucideIcon } from 'lucide-react'
+import { ArrowRight, ChevronRight, HardHat, PencilRuler, ShieldCheck, Users, type LucideIcon } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
@@ -11,6 +11,7 @@ import { useSiteImage } from '@/shared/cms'
 import { revealEase, TurnkeyRequestDialog } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { ROUTES } from '@/shared/constants/routes'
+import { useMediaQuery } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { HOME_SERVICES, type HomeService } from '../constants/landing.constants'
 
@@ -52,6 +53,10 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
   const [turnkeyOpen, setTurnkeyOpen] = useState(false)
   const [hovered, setHovered] = useState<HomeService | null>(null)
   const [noteReady, setNoteReady] = useState(false)
+  // Mobile cuộn ngang: thẻ kế tiếp chỉ LÓ một mép nên không đạt 40% diện tích → kẹt ở opacity 0
+  // (thẻ trống) cho tới khi vuốt. `some` = chỉ cần thấy 1 pixel là hiện.
+  const isMobile = useMediaQuery('(max-width: 639px)')
+  const revealAmount = isMobile ? 'some' : 0.4
 
   return (
     <section id='home-services' className='bg-primary-strong text-primary-foreground relative isolate overflow-hidden'>
@@ -100,13 +105,18 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
         </motion.div>
       </div>
 
-      <div className='relative mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8 lg:py-12'>
+      <div className='relative mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-12'>
         <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
           <div className='space-y-2'>
-            <p className='text-primary-foreground/70 text-xs font-semibold tracking-[0.16em] uppercase'>
+            {/* Dưới `lg` khối đầu chỉ còn tiêu đề + mô tả: dòng nhãn ẩn, tiêu đề đổi thành
+                "Gói dịch vụ SAVICO" (`titleMobile`) thay cho nhãn. Từ `lg` giữ nguyên cả hai. */}
+            <p className='text-primary-foreground/70 hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
               {t('eyebrow')}
             </p>
-            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
+              <span className='lg:hidden'>{t('titleMobile')}</span>
+              <span className='hidden lg:inline'>{t('title')}</span>
+            </h2>
             <p className='text-primary-foreground/80 max-w-3xl text-sm'>{t('subtitle')}</p>
           </div>
 
@@ -115,14 +125,18 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
             className='inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
           >
             {t('viewAll')}
-            <ArrowRight className='size-4' />
+            <ChevronRight className='size-4 lg:hidden' />
+            <ArrowRight className='hidden size-4 lg:block' />
           </Link>
         </header>
 
         {/* Chừa chỗ HẸP hơn bề ngang ảnh: thẻ cuối cố ý đè lên mép trái ảnh
             minh hoạ một chút, đúng như ảnh mockup. */}
         <div className='mt-8 lg:pr-[13rem]'>
-          <ul className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+          {/* Dưới `sm`: 4 thẻ thành MỘT HÀNG NGANG cuộn được (như hàng 4 cột của desktop), cuối hàng
+              chừa một ô cho ảnh + giấy nhớ — chỗ mà desktop dành ở cột phải (`lg:pr-[13rem]`). Từ `sm`
+              giữ lưới cũ (2 cột, 4 cột ở `xl`). */}
+          <ul className='-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4'>
             {HOME_SERVICES.map((service, index) => {
               const Icon = SERVICE_ICON[service]
               const isHovered = hovered === service
@@ -133,17 +147,17 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
                   key={service}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
+                  viewport={{ once: true, amount: revealAmount }}
                   transition={{ duration: 0.65, delay: index * 0.12, ease: revealEase }}
                   onMouseEnter={() => setHovered(service)}
                   onMouseLeave={() => setHovered(null)}
                   id={`home-service-${service}`}
                   className={cn(
-                    'bg-card text-card-foreground flex h-full flex-col gap-2 rounded-2xl border p-5 transition-[transform,box-shadow,border-color] duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none',
+                    'bg-card text-card-foreground flex h-full w-[68%] shrink-0 snap-start flex-col gap-2 rounded-2xl border p-4 transition-[transform,box-shadow,border-color] sm:w-auto sm:shrink sm:p-5 duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none',
                     isHovered && 'border-primary/50 ring-primary/15 -translate-y-1 shadow-md ring-4'
                   )}
                 >
-                  <div className='flex items-center justify-between gap-2'>
+                  <div className='flex flex-wrap items-center justify-between gap-2'>
                     <Icon className='text-primary size-6 shrink-0' strokeWidth={1.75} />
                     {isOwned ? (
                       <span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-[11px] font-semibold whitespace-nowrap'>
@@ -157,8 +171,9 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
                   </p>
 
                   {/* Dòng "Dùng ở bước…" nằm trong khoảng ĐÃ CHỪA SẴN — thẻ
-                      không đổi chiều cao khi hiện/ẩn. */}
-                  <div className='flex min-h-5 items-end'>
+                      không đổi chiều cao khi hiện/ẩn. Dưới `sm` (cảm ứng, không có rê chuột)
+                      bỏ hẳn khoảng chừa này để thẻ không trống; đệm thẻ 16px, đệm trên nút 4px. */}
+                  <div className='flex min-h-5 items-end max-sm:hidden'>
                     <span
                       className={cn(
                         'text-primary text-[11px] font-semibold transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
@@ -171,7 +186,7 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
 
                   {/* Nút chiếm TRỌN bề ngang thẻ, chữ căn giữa (ảnh mockup);
                       rê thẻ thì nút đầy màu thay vì viền. */}
-                  <div className='mt-auto pt-3'>
+                  <div className='mt-auto pt-3 max-sm:pt-1'>
                     {isOwned ? (
                       <Button
                         asChild
@@ -208,6 +223,19 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
                 </motion.li>
               )
             })}
+
+            {/* Ô cuối hàng (chỉ mobile): ảnh minh hoạ + giấy nhớ như cột phải của desktop. Tĩnh — không
+                chạy hoạt ảnh vẽ chữ của bản desktop. */}
+            <li aria-hidden className='relative min-h-56 w-[62%] shrink-0 snap-start sm:hidden'>
+              <Image src={illustration} alt='' fill sizes='240px' className='object-contain object-right-bottom' />
+              <div className='absolute top-6 left-0 -rotate-6'>
+                <div className='bg-brand-orange-soft text-foreground font-hand relative rounded-sm px-4 py-2 text-base leading-tight whitespace-pre-line shadow-lg'>
+                  <span className='bg-foreground/25 absolute top-1.5 left-2.5 size-1.5 rounded-full' />
+                  <span className='bg-foreground/25 absolute top-1.5 right-2.5 size-1.5 rounded-full' />
+                  {t('note')}
+                </div>
+              </div>
+            </li>
           </ul>
         </div>
       </div>

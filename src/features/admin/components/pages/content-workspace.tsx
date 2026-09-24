@@ -29,6 +29,17 @@ const { Paragraph, Text, Title } = Typography
 /** Chuỗi dài thì cho ô nhập nhiều dòng — mô tả, ghi chú pháp lý, lời chào bot. */
 const MULTILINE_THRESHOLD = 90
 
+/**
+ * Chữ mà admin được ngắt dòng tay — trang công khai giữ ký tự xuống dòng
+ * (`whitespace-pre-line`). Luôn là ô nhiều dòng dù chữ ngắn (ô một dòng không gõ
+ * được Enter), kèm dòng nhắc; `title` còn nhắc giới hạn 3 dòng của tiêu đề hero.
+ */
+const MANUAL_BREAK_KEYS: Record<string, 'title' | 'body'> = {
+  'landing.hero.titleLead': 'title',
+  'landing.hero.titleAccent': 'title',
+  'landing.hero.subtitle': 'body'
+}
+
 /** Quá số ô này thì tab chữ mới cần ô tìm kiếm. */
 const SEARCHABLE_FROM = 20
 
@@ -145,7 +156,17 @@ export function ContentWorkspace({ page }: { page: AdminContentPage }) {
     const rowOf = (key: string): OverrideRow | null => {
       const value = catalog.get(key)
       if (value === undefined) return null
-      return { key, defaultValue: value, multiline: value.length > MULTILINE_THRESHOLD }
+      const manualBreak = MANUAL_BREAK_KEYS[key]
+      return {
+        key,
+        defaultValue: value,
+        multiline: Boolean(manualBreak) || value.length > MULTILINE_THRESHOLD,
+        hint: manualBreak
+          ? manualBreak === 'title'
+            ? t('override.manualBreakTitleHint')
+            : t('override.manualBreakBodyHint')
+          : undefined
+      }
     }
 
     const imageRowOf = (key: string): OverrideRow | null => {

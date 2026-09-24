@@ -57,6 +57,10 @@ export function DesignStepLayout({
       className={cn(
         'min-w-0',
         waiting && twoColumn && 'lg:sticky lg:top-40 lg:self-start',
+        // Màn chờ: dưới `lg` TIẾN ĐỘ lên trước cẩm nang (DOM vẫn để cẩm nang trước cho bố cục desktop
+        // "cẩm nang trái, tiến độ phải"). Nếu không, sau khi bấm gửi ở Bước 1 người dùng rơi vào
+        // danh sách cẩm nang rất dài và phải cuộn xuống mới thấy tiến độ.
+        waiting && twoColumn && 'max-lg:order-first',
         // Khi panel cẩm nang thu nhỏ, cột nội dung phải TRẢI HẾT khung chung.
         // Bó lại `max-w-4xl` rồi canh giữa làm mép thẻ nội dung thụt vào so với
         // thanh tiến trình ngay phía trên, nhìn như bị lệch.
@@ -71,7 +75,9 @@ export function DesignStepLayout({
     <div
       data-entrance-step={waiting ? '0' : undefined}
       data-entrance-from={waiting ? 'left' : undefined}
-      className={cn(!waiting && 'lg:sticky lg:top-40 lg:self-start')}
+      // `min-w-0`: ô lưới mặc định `min-width:auto` nên nội dung cẩm nang rộng hơn màn hình sẽ nới cả
+      // cột ra ngoài mép màn hình — đó là lỗi "item cẩm nang tràn màn hình".
+      className={cn('min-w-0', !waiting && 'lg:sticky lg:top-40 lg:self-start')}
     >
       {sidePanel}
     </div>
@@ -85,7 +91,8 @@ export function DesignStepLayout({
       data-page-entrance={entranceState}
       style={entranceStyle}
       className={cn(
-        'mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 lg:px-8',
+        // `grid-cols-[minmax(0,1fr)]`: cột duy nhất trên mobile phải co được, không thì nó tự nới theo nội dung.
+        'mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-2 pb-6 lg:px-8 lg:pt-6',
         twoColumn && (waiting ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'lg:grid-cols-[minmax(0,1fr)_360px]')
       )}
     >

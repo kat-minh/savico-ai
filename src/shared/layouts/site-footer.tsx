@@ -139,7 +139,7 @@ export function SiteFooter() {
   return (
     // Nen toi o ca light lan dark (quy uoc xuyen suot, muc I).
     <footer className='bg-footer text-footer-foreground mt-auto'>
-      <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8'>
+      <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 pt-10 pb-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8 lg:pt-14'>
         {/* Cot 1 - Thuong hieu */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -147,7 +147,11 @@ export function SiteFooter() {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Logo onDark tagline={t('brandTagline')} />
+          {/* Dưới `lg` logo phóng 1.4 lần (`zoom` ăn vào bố cục, khác `scale`) để chiếm hơn nửa bề ngang
+              hàng thay vì ~40% như trước; từ `lg` giữ cỡ cũ. */}
+          <div className='max-lg:[zoom:1.4]'>
+            <Logo onDark tagline={t('brandTagline')} />
+          </div>
           <p className='text-footer-foreground/70 mt-4 max-w-xs text-sm leading-relaxed'>
             {cmsText(settings.tagline, t('tagline'))}
           </p>

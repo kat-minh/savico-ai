@@ -258,13 +258,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   /** Xem thử — chưa gắn hồ sơ dự án nào (xem `CONTRACTOR_PREVIEW_ID`). */
   const preview = projectId === CONTRACTOR_PREVIEW_ID
 
-  /** Bấm một thẻ "thế mạnh" ở khối giới thiệu -> tab dự án và giữ bộ lọc vừa chọn. */
-  const [projectFilter, setProjectFilter] = useState<string | null>(null)
-  const goToProjectsTab = (strength: string) => {
-    setProjectFilter(strength)
-    router.replace(contractorFirmRoute(projectId, contractorId, 'projects'))
-  }
-
   const { data: brief } = useBrief(projectId)
   const { data: contractor, isPending } = useContractor(contractorId)
   const { data: invitations } = useInvitations(projectId)
@@ -537,8 +530,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               {tab === 'projects' ? (
                 <FeaturedProjects
                   contractor={contractor}
-                  filter={projectFilter}
-                  onClearFilter={() => setProjectFilter(null)}
                   inviteAction={
                     <InviteButton
                       projectId={projectId}
@@ -594,11 +585,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                 <TabPanel key={tab} direction={tabDirection}>
                   {tab === 'overview' ? (
                     <>
-                      <IntroCard
-                        contractor={contractor}
-                        onTagClick={goToProjectsTab}
-                        onOpenPhoto={setActivePhotoIndex}
-                      />
+                      <IntroCard contractor={contractor} onOpenPhoto={setActivePhotoIndex} />
                       <PartnershipSummary contractor={contractor} />
                       <FeaturedProjects contractor={contractor} />
                       <LegalChecks contractor={contractor} />
@@ -822,16 +809,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
  * Ảnh ghép là 1 ảnh lớn + 2 ảnh xếp chồng, mỗi ảnh có chú thích đè lên đáy —
  * đúng ảnh S13. Tỉ lệ 58,6% / 41,4% cũng đo từ ảnh đó.
  */
-function IntroCard({
-  contractor,
-  onTagClick,
-  onOpenPhoto
-}: {
-  contractor: Contractor
-  /** Bấm một thẻ "thế mạnh" → chuyển sang tab "Dự án đã thực hiện" (mục 5). */
-  onTagClick: (strength: string) => void
-  onOpenPhoto: (index: number) => void
-}) {
+function IntroCard({ contractor, onOpenPhoto }: { contractor: Contractor; onOpenPhoto: (index: number) => void }) {
   const t = useTranslations('contractors.firm')
 
   const facts = [
@@ -870,18 +848,15 @@ function IntroCard({
           ))}
         </motion.ul>
 
-        {/* Rê -> nền xanh nhạt; bấm -> chuyển tab dự án. Dữ liệu `tags` trên từng
-            dự án đưa các thẻ phù hợp lên đầu mà vẫn giữ nguyên toàn bộ hồ sơ. */}
+        {/* Hai thẻ mặc định, CHỈ ĐỂ XEM — không bấm được và không chuyển tab. */}
         <motion.ul variants={revealContainerVariants} className='mt-4 flex flex-wrap gap-2'>
-          {contractor.strengths.map((strength) => (
-            <motion.li variants={revealItemVariants} layout key={strength}>
-              <button
-                type='button'
-                onClick={() => onTagClick(strength)}
-                className='border-primary/40 text-primary-strong hover:bg-accent rounded-md border px-2.5 py-1 text-xs transition-colors active:scale-[0.98]'
-              >
-                {strength}
-              </button>
+          {(['buildingType', 'scope'] as const).map((tag) => (
+            <motion.li
+              variants={revealItemVariants}
+              key={tag}
+              className='border-primary/40 text-primary-strong rounded-md border px-2.5 py-1 text-xs'
+            >
+              {t(`introTags.${tag}`)}
             </motion.li>
           ))}
         </motion.ul>

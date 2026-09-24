@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { revealEase, ScribbleArrow } from '@/shared/components/common'
-import { useScrollSnapIndex } from '@/shared/hooks'
 import { scrollToAndFlash } from '@/shared/lib'
 import { cn } from '@/shared/lib/utils'
 import type { HomeJourneyStep } from '../constants/landing.constants'
@@ -51,19 +50,23 @@ export function HomePainPoints() {
   const t = useTranslations('landing.painPoints')
   const [hovered, setHovered] = useState<HomePainPoint | null>(null)
   const hoveredIndex = hovered === null ? -1 : HOME_PAIN_POINTS.indexOf(hovered)
-  const { ref: trackRef, active, scrollTo } = useScrollSnapIndex<HTMLUListElement>()
 
   return (
     <section id='home-pain-points' className='bg-primary-strong text-primary-foreground'>
-      <div className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8 lg:py-12'>
+      {/* Dưới `lg`: đệm trên 50px (40 + 10 theo góp ý) — KHÔNG đưa về 20px như các cụm khác:
+            dải số liệu (`HomeStats`) chờm xuống 38px (`-mb-9.5`) lên đầu khối này, đệm trên
+            thấp hơn thì tiêu đề bị dải đó che. Đệm dưới 50px (trước đây dưới thẻ còn dải
+            chấm chỉ vị trí + `pb-1` nên trống ~66px). */}
+      <div className='mx-auto w-full max-w-[90rem] px-4 pt-12.5 pb-12.5 lg:px-8 lg:py-12'>
         <div className='flex flex-wrap items-end justify-between gap-x-10 gap-y-4'>
           <div className='space-y-2'>
+            {/* Dòng nhãn chỉ hiện từ `lg`: trên mobile khối đầu chỉ còn tiêu đề + mô tả. */}
             <motion.p
               initial={{ opacity: 0, y: '35%' }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.6 }}
               transition={{ duration: 0.7, ease: revealEase }}
-              className='text-primary-foreground/70 text-xs font-semibold tracking-[0.16em] uppercase'
+              className='text-primary-foreground/70 hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'
             >
               {t('eyebrow')}
             </motion.p>
@@ -106,10 +109,10 @@ export function HomePainPoints() {
           </motion.div>
         </div>
 
-        <ul
-          ref={trackRef}
-          className='mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5'
-        >
+        {/* Dưới `sm`: danh sách DỌC, thẻ ngang (icon trái · chữ phải, căn trái) như ảnh đề
+            xuất — bỏ cuộn ngang và dải chấm. `auto-rows-fr`: 5 thẻ CAO BẰNG NHAU (bằng thẻ
+            có mô tả dài nhất); icon nằm trên ô vuông xanh lá nhạt. Cả hai chỉ ở dưới `sm`. Từ `sm` giữ nguyên lưới thẻ dọc cũ. */}
+        <ul className='mt-8 grid auto-rows-fr gap-3 sm:auto-rows-auto sm:grid-cols-2 sm:gap-4 lg:grid-cols-5'>
           {HOME_PAIN_POINTS.map((point, index) => {
             const Icon = PAIN_ICON[point]
             const isHovered = hovered === point
@@ -126,16 +129,17 @@ export function HomePainPoints() {
                 onMouseEnter={() => setHovered(point)}
                 onMouseLeave={() => setHovered(null)}
                 onClick={() => scrollToAndFlash(`home-journey-step-${PAIN_TARGET_STEP[point]}`)}
-                className='flex w-[78%] shrink-0 cursor-pointer snap-start sm:w-auto sm:shrink'
+                className='flex cursor-pointer'
               >
                 <div
                   className={cn(
-                    'bg-card text-card-foreground flex min-h-52 h-full w-full flex-col items-center gap-2.5 rounded-2xl border p-5 text-center transition-[opacity,transform,border-color,box-shadow] duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none',
+                    'bg-card text-card-foreground flex h-full w-full flex-row items-start gap-3 rounded-2xl border p-4 text-left transition-[opacity,transform,border-color,box-shadow] duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none sm:min-h-52 sm:flex-col sm:items-center sm:gap-2.5 sm:p-5 sm:text-center',
                     dimmed ? cn('opacity-45', DIM_DELAY[dimOrder]) : 'delay-0 opacity-100',
                     isHovered && 'border-primary/50 ring-primary/15 -translate-y-1 shadow-md ring-4'
                   )}
                 >
                   <motion.span
+                    className='bg-primary/10 flex size-11 shrink-0 items-center justify-center rounded-xl sm:size-auto sm:rounded-none sm:bg-transparent'
                     initial={{ scale: 1 }}
                     whileInView={{ scale: [1, 1.15, 1] }}
                     viewport={{ once: true, amount: 0.4 }}
@@ -143,11 +147,15 @@ export function HomePainPoints() {
                   >
                     <Icon className='text-primary size-7' strokeWidth={1.75} />
                   </motion.span>
-                  <h3 className='text-sm leading-snug font-bold text-balance'>{t(`items.${point}.title`)}</h3>
-                  <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
-                    {t(`items.${point}.description`)}
-                  </p>
-                  <div className='mt-auto flex min-h-8 items-end justify-center pt-2'>
+                  {/* `sm:contents`: từ `sm` khung bọc này biến mất để tiêu đề, mô tả nằm thẳng
+                      trong cột giữa thẻ như cũ. */}
+                  <div className='min-w-0 flex-1 space-y-1 sm:contents sm:space-y-0'>
+                    <h3 className='text-sm leading-snug font-bold text-balance'>{t(`items.${point}.title`)}</h3>
+                    <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
+                      {t(`items.${point}.description`)}
+                    </p>
+                  </div>
+                  <div className='mt-auto hidden min-h-8 items-end justify-center pt-2 sm:flex'>
                     <span
                       className={cn(
                         'text-primary inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
@@ -163,22 +171,6 @@ export function HomePainPoints() {
             )
           })}
         </ul>
-
-        {/* Chấm chỉ vị trí — chỉ có ý nghĩa trên mobile (cuộn ngang). */}
-        <div className='mt-4 flex items-center justify-center gap-2 sm:hidden'>
-          {HOME_PAIN_POINTS.map((point, index) => (
-            <button
-              key={point}
-              type='button'
-              aria-label={t(`items.${point}.title`)}
-              onClick={() => scrollTo(index)}
-              className={cn(
-                'size-1.5 rounded-full transition-colors',
-                index === active ? 'bg-primary-foreground' : 'bg-primary-foreground/35'
-              )}
-            />
-          ))}
-        </div>
       </div>
     </section>
   )

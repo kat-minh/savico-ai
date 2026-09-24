@@ -1,13 +1,13 @@
 'use client'
 
-import { Menu } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
 import { Button } from '@/shared/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet'
 import { cn } from '@/shared/lib/utils'
 import { SITE_NAV } from './site-nav.config'
 
@@ -20,6 +20,7 @@ import { SITE_NAV } from './site-nav.config'
  */
 export function SiteNavMobile() {
   const t = useTranslations('nav')
+  const tCommon = useTranslations('common')
   const pathname = usePathname()
   const { isAuthenticated } = useAuth()
   const [open, setOpen] = useState(false)
@@ -32,9 +33,24 @@ export function SiteNavMobile() {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side='right' className='w-[17rem] p-0'>
-        <SheetHeader className='border-b px-5 py-4 text-left'>
+      {/* `gap-0`: `SheetContent` mặc định cách các khối con 16px, nên nút đầu tiên
+          bị đẩy xuống thấp hơn hẳn khoảng cách nó cách mép trái. Khoảng cách từ
+          mép panel tới CHỮ của mục là 8 (`nav`) + 12 (mục) = 20px cả ngang lẫn
+          dọc, và bằng `px-5` của tiêu đề "Menu". */}
+      <SheetContent side='right' showCloseButton={false} className='w-[17rem] gap-0 p-0'>
+        {/* Cao đúng bằng thanh header của trang (`--public-header-offset`: 64px,
+            56px khi header thu gọn; header đang ẩn thì biến = 0 nên chặn dưới 56px)
+            để thanh "Menu" khớp thanh header lúc panel trượt ra phủ lên nó. Tiêu
+            đề căn giữa dọc: (64 − 1 viền − 24 dòng chữ) / 2 ≈ 20px = `px-5`, tức
+            khoảng cách tới mép trên bằng khoảng cách tới mép trái. Nút đóng nằm
+            trong cùng hàng để căn giữa theo tiêu đề, không dùng nút mặc định
+            `absolute top-4` (lệch khỏi tâm khi thanh cao hơn 48px). */}
+        <SheetHeader className='h-[max(var(--public-header-offset,64px),56px)] shrink-0 flex-row items-center justify-between gap-0 border-b px-5 py-0 text-left'>
           <SheetTitle className='text-base'>{t('menu')}</SheetTitle>
+          <SheetClose className='text-muted-foreground hover:text-foreground -mr-1 rounded-xs p-1 transition-colors focus-visible:ring-2 focus-visible:outline-hidden'>
+            <X className='size-4' />
+            <span className='sr-only'>{tCommon('close')}</span>
+          </SheetClose>
         </SheetHeader>
 
         <nav className='flex flex-col p-2'>

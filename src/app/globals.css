@@ -113,10 +113,11 @@
   --popover-foreground: oklch(0.988 0.004 91.446);
 
   --primary: oklch(0.68 0.16 149);
-  --primary-foreground: oklch(0.16 0.02 150);
+  /* Chữ nút luôn TRẮNG ở dark mode (yêu cầu đồng bộ) — trước là gần đen. */
+  --primary-foreground: oklch(1 0 0);
   --primary-strong: oklch(0.6 0.16 150);
   --brand-orange: oklch(0.7 0.18 42);
-  --brand-orange-foreground: oklch(0.16 0.02 40);
+  --brand-orange-foreground: oklch(1 0 0);
   --brand-orange-soft: oklch(0.3 0.05 45);
   --secondary: oklch(0.29 0.02 150);
   --secondary-foreground: oklch(0.97 0.01 150);
@@ -2858,6 +2859,13 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   pointer-events: none;
   opacity: 0;
   transform: translateX(-12px);
+}
+/* Dưới `lg` khối trái (thông tin + xem trước) mờ đi nhưng GIỮ chiều cao — cùng ô lưới với cẩm nang nên
+   cẩm nang bị đẩy xuống sau một khoảng trống. Bỏ hẳn khối trái khi cẩm nang đã hiện. */
+@media (max-width: 1023px) {
+  [data-dossier-overview-root][data-waiting-panel-visible='true'] [data-dossier-overview-left] {
+    display: none;
+  }
 }
 [data-dossier-waiting-panel][data-collapsed='false'] {
   animation: design-dossier-waiting-panel-in 420ms var(--ease-out-soft) both;

@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 import { cn } from '@/shared/lib/utils'
 
 interface BrandIconProps {
@@ -10,11 +12,31 @@ interface BrandIconProps {
  * Facebook / YouTube dùng thẳng icon lucide.
  */
 
-/** Zalo — chữ "Zalo" đặt trong khung bo tròn, dạng đơn sắc. */
+/**
+ * Zalo — khung chat bo tròn có đuôi, chữ "Zalo" khoét rỗng bên trong (đơn sắc `currentColor`).
+ *
+ * Bản cũ vẽ chữ bằng một đường path liền nên mất chữ "a" (đọc thành "Zlo"). Nay bốn chữ Z-a-l-o là
+ * nét vẽ riêng, khoét khỏi khung bằng `mask` — không phụ thuộc phông chữ.
+ */
 export function ZaloIcon({ className }: BrandIconProps) {
+  const maskId = useId()
   return (
-    <svg viewBox='0 0 24 24' aria-hidden='true' className={cn('size-4', className)} fill='currentColor'>
-      <path d='M19.25 2H4.75A2.75 2.75 0 0 0 2 4.75v14.5A2.75 2.75 0 0 0 4.75 22h14.5A2.75 2.75 0 0 0 22 19.25V4.75A2.75 2.75 0 0 0 19.25 2Zm-8.4 5.35v1.06L7.9 13.2h3.03v1.28H6.02v-1.06l2.95-4.79H6.16V7.35h4.69Zm2.02 7.13h-1.3V7.1h1.3v7.38Zm3.3.12a2.4 2.4 0 0 1-2.42-2.5 2.4 2.4 0 0 1 2.42-2.5 2.4 2.4 0 0 1 2.43 2.5 2.4 2.4 0 0 1-2.43 2.5Zm0-1.2c.68 0 1.15-.53 1.15-1.3s-.47-1.3-1.15-1.3c-.67 0-1.14.53-1.14 1.3s.47 1.3 1.14 1.3Z' />
+    <svg viewBox='0 0 24 24' aria-hidden='true' className={cn('size-4', className)}>
+      <mask id={maskId}>
+        <rect width='24' height='24' fill='white' />
+        <g fill='none' stroke='black' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'>
+          <path d='M4.4 8.9h4.2l-4.2 5.6h4.4' />
+          <circle cx='12.1' cy='12.7' r='1.75' />
+          <path d='M13.9 10.9v3.6' />
+          <path d='M16.1 8.4v6.1' />
+          <circle cx='19.2' cy='12.7' r='1.75' />
+        </g>
+      </mask>
+      <path
+        mask={`url(#${maskId})`}
+        fill='currentColor'
+        d='M6 2h12a4 4 0 0 1 4 4v9a4 4 0 0 1-4 4h-6.6l-4.3 3.1a.6.6 0 0 1-.95-.5V19H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4Z'
+      />
     </svg>
   )
 }

@@ -4,8 +4,7 @@ import type {
   CmsOrderInvoice,
   CmsOrderKind,
   CmsOrderProduct,
-  CmsOrderStatus,
-  CmsTransferInfo
+  CmsOrderStatus
 } from '@/shared/cms'
 
 /**
@@ -38,9 +37,6 @@ export type OrderInvoice = CmsOrderInvoice
 
 /** Bản chụp sản phẩm tại thời điểm đặt. */
 export type OrderProduct = CmsOrderProduct
-
-/** Thông tin chuyển khoản hiện ở S04 và nhắc lại ở S06. */
-export type TransferInfo = CmsTransferInfo
 
 /** Một đơn mua gói. */
 export type Order = CmsOrder

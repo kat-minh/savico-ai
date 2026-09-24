@@ -84,6 +84,7 @@ export function ContractorManager() {
 
   const { data: contractors = [] } = useAdminCollection('contractors')
   const { data: invitations = [] } = useAdminCollection('contractorInvitations')
+  const { data: buildingTypes = [] } = useAdminCollection('buildingTypes')
   const save = useSaveAdminItem('contractors')
 
   /** Lời mời chưa ở nấc "Hoàn tất" — nhà thầu đang có bao nhiêu việc với SAVICO. */
@@ -271,6 +272,26 @@ export function ContractorManager() {
           <Form.Item name='strengths' label={t('contractors.strengths')}>
             <Select mode='tags' tokenSeparators={[',']} />
           </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} sm={16}>
+              <Form.Item
+                name='buildingTypes'
+                label={t('contractors.buildingTypes')}
+                tooltip={t('contractors.buildingTypesHint')}
+              >
+                <Select
+                  mode='multiple'
+                  allowClear
+                  options={buildingTypes.map((type) => ({ value: type.id, label: type.label }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Form.Item name='maxUpperFloors' label={t('contractors.maxUpperFloors')}>
+                <InputNumber min={0} max={50} style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
           <Row gutter={16}>
             <Col xs={12} sm={6}>
               <Form.Item name='foundedYear' label={t('contractors.foundedYear')}>

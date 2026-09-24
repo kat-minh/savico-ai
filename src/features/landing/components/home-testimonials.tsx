@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 import { revealEase } from '@/shared/components/common'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
-import { useScrollSnapIndex } from '@/shared/hooks'
+import { useMediaQuery, useScrollSnapIndex } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { HOME_TESTIMONIALS, type HomeTestimonial } from '../constants/landing.constants' ////cmt
 
@@ -37,9 +37,12 @@ export function HomeTestimonials() {
   const pageItems = HOME_TESTIMONIALS.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8 lg:py-12'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-10 lg:px-8 lg:py-12'>
       <div className='flex items-center justify-between gap-4'>
-        <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('label')}</p>
+        {/* Dưới `lg` dải này mở bằng tiêu đề LỚN như các khối phía trên (`titleMobile`), không còn
+            là dòng nhãn nhỏ. Từ `lg` giữ nguyên nhãn. */}
+        <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>{t('label')}</p>
+        <h2 className='text-2xl font-bold tracking-tight text-balance lg:hidden'>{t('titleMobile')}</h2>
 
         {pageCount > 1 ? (
           <div className='hidden items-center gap-2 lg:flex'>
@@ -71,7 +74,7 @@ export function HomeTestimonials() {
       <ul
         ref={trackRef}
         key={page}
-        className='mt-4 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-1 lg:grid lg:grid-cols-3 lg:overflow-visible'
+        className='mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden pb-1 lg:mt-4 lg:grid lg:grid-cols-3 lg:overflow-visible'
       >
         {pageItems.map((person, index) => (
           <TestimonialCard key={person} person={person} index={index} />
@@ -97,12 +100,17 @@ export function HomeTestimonials() {
 
 function TestimonialCard({ person, index }: { person: HomeTestimonial; index: number }) {
   const t = useTranslations('landing.testimonials')
+  // Mobile cuộn ngang: thẻ thứ 2 chỉ LÓ một mép nên các phần tử bên trong (thẻ, sao, lời trích)
+  // không bao giờ đạt 30–60% diện tích → kẹt ở opacity 0 ngay lần tải đầu, tới khi vuốt mới hiện.
+  // `some` = chỉ cần thấy 1 pixel là hiện.
+  const isMobile = useMediaQuery('(max-width: 1023px)')
+  const amount = (desktop: number) => (isMobile ? 'some' : desktop)
 
   return (
     <motion.li
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, amount: amount(0.3) }}
       transition={{ duration: 0.65, delay: index * 0.12, ease: revealEase }}
       whileHover={{ y: -2, transition: { duration: 0.5, ease: revealEase } }}
       className='bg-card group relative w-[85%] shrink-0 snap-start overflow-hidden rounded-2xl border p-5 pl-6 shadow-none transition-shadow hover:shadow-lg lg:w-auto lg:shrink'
@@ -117,7 +125,7 @@ function TestimonialCard({ person, index }: { person: HomeTestimonial; index: nu
               key={star}
               initial={{ opacity: 0, scale: 0.4 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.6 }}
+              viewport={{ once: true, amount: amount(0.6) }}
               transition={{ duration: 0.25, delay: index * 0.1 + star * 0.08 }}
             >
               <Star className='fill-warning text-warning size-3.5' />
@@ -128,7 +136,7 @@ function TestimonialCard({ person, index }: { person: HomeTestimonial; index: nu
         <motion.blockquote
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.4 }}
+          viewport={{ once: true, amount: amount(0.4) }}
           transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
           className='text-sm leading-relaxed text-pretty'
         >
@@ -138,7 +146,7 @@ function TestimonialCard({ person, index }: { person: HomeTestimonial; index: nu
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.4 }}
+          viewport={{ once: true, amount: amount(0.4) }}
           transition={{ duration: 0.4, delay: index * 0.1 + 0.65 }}
           className='mt-auto flex items-center gap-3 pt-1'
         >

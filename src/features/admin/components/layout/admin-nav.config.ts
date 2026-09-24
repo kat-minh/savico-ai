@@ -12,9 +12,6 @@ import {
   FileTextOutlined,
   FlagOutlined,
   GiftOutlined,
-  HomeOutlined,
-  LayoutOutlined,
-  MenuOutlined,
   PlayCircleOutlined,
   ProjectOutlined,
   SafetyCertificateOutlined,
@@ -25,8 +22,6 @@ import {
   TagOutlined,
   TeamOutlined,
   ThunderboltOutlined,
-  ToolOutlined,
-  TranslationOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type { ComponentType } from 'react'
@@ -135,20 +130,6 @@ export type AdminNavItem = AdminNavGroup['items'][number]
 
 /** Mọi mục ngoài nhóm nội dung, phẳng — dùng để tra tiêu đề trang theo pathname. */
 export const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = ADMIN_NAV.flatMap<AdminNavItem>((group) => [...group.items])
-
-/** Icon của từng trang nội dung, tra theo `key` trong `admin-pages.config`. */
-export const CONTENT_PAGE_ICON: Record<string, ComponentType> = {
-  home: HomeOutlined,
-  handbook: BookOutlined,
-  guide: PlayCircleOutlined,
-  plans: DollarOutlined,
-  consult: TeamOutlined,
-  design: ToolOutlined,
-  account: UserOutlined,
-  legal: LayoutOutlined,
-  shell: MenuOutlined,
-  common: TranslationOutlined
-}
 
 /** Trang công khai tương ứng — nút "Mở site" mở đúng trang đang sửa. */
 export const CONTENT_PAGE_PUBLIC_HREF: Record<string, AppRoute> = {
