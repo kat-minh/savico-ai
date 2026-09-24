@@ -1475,6 +1475,11 @@ export interface CmsContractor {
   acceptingProjects: boolean
   intro: string
   strengths: string[]
+  /**
+   * Số lầu cao nhất nhà thầu nhận thi công, không tính trệt (0 = chỉ nhà trệt).
+   * Bộ lọc "Quy mô công trình" ở S09 đọc trường này; bỏ trống thì không bị loại.
+   */
+  maxUpperFloors?: number
   photos: CmsContractorPhoto[]
   /** Các Loại công trình nhận thực hiện — lấy từ danh mục dùng chung. */
   buildingTypeIds?: string[]

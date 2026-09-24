@@ -55,6 +55,8 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     intro:
       'ABC Construction là đơn vị thiết kế và thi công nhà ở dân dụng với hơn 8 năm kinh nghiệm. Công ty sở hữu đội ngũ kiến trúc sư, kỹ sư và giám sát chuyên môn, đồng hành cùng khách hàng từ ý tưởng đến khi hoàn thiện công trình.',
     strengths: ['Nhà phố', 'Thi công trọn gói', 'Phần thô', 'Hoàn thiện'],
+    buildingTypeIds: ['townhouse', 'villa', 'roofed'],
+    maxUpperFloors: 4,
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2016,
     teamSize: 32,
@@ -338,6 +340,8 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     intro:
       'An Gia Build tập trung vào nhà phố và biệt thự trọn gói, có xưởng nội thất riêng nên chủ động được tiến độ phần hoàn thiện.',
     strengths: ['Nhà phố', 'Biệt thự', 'Thi công trọn gói', 'Nội thất'],
+    buildingTypeIds: ['townhouse', 'villa', 'apartment'],
+    maxUpperFloors: 4,
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2014,
     teamSize: 45,
@@ -388,6 +392,8 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     intro:
       'Hưng Phát Home nhận phần thô và hoàn thiện cho nhà phố quy mô vừa, thế mạnh là kiểm soát khối lượng vật tư theo từng hạng mục.',
     strengths: ['Nhà phố', 'Phần thô', 'Hoàn thiện'],
+    buildingTypeIds: ['townhouse', 'roofed', 'garden'],
+    maxUpperFloors: 3,
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2018,
     teamSize: 24,
@@ -438,6 +444,8 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     intro:
       'Trường Thịnh E&C thi công biệt thự và công trình có kết cấu phức tạp, có bộ phận quản lý chất lượng độc lập với đội thi công.',
     strengths: ['Biệt thự', 'Thi công trọn gói'],
+    buildingTypeIds: ['villa', 'garden'],
+    maxUpperFloors: 2,
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2012,
     teamSize: 60,
@@ -486,6 +494,8 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     intro:
       'Đại Việt Group nhận phần thô và hoàn thiện tại khu vực Krông Pắc – Ea Kar, quy mô đội nhỏ nên nhận số lượng dự án hạn chế.',
     strengths: ['Phần thô', 'Hoàn thiện'],
+    buildingTypeIds: ['townhouse', 'garden', 'roofed'],
+    maxUpperFloors: 2,
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2019,
     teamSize: 18,

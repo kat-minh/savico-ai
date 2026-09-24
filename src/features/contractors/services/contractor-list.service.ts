@@ -1,5 +1,15 @@
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import type { Contractor, ContractorSort, Invitation, SearchRadiusKm, ServiceRegion } from '../types/contractor.types'
+import type {
+  Contractor,
+  ContractorSort,
+  ExperienceLevel,
+  Invitation,
+  ProjectScale,
+  RatingLevel,
+  SearchRadiusKm,
+  ServiceRegion,
+  StartWindow
+} from '../types/contractor.types'
 
 /**
  * Logic thuần của danh sách nhà thầu (S12) và landing (S09) — không React,
@@ -38,11 +48,72 @@ const COMPARATORS: Record<ContractorSort, (a: Contractor, b: Contractor) => numb
   survey: (a, b) => a.surveyWithinHours - b.surveyWithinHours || a.distanceKm - b.distanceKm
 }
 
-/** Lọc theo bán kính rồi sắp xếp theo chip đang chọn (S12). */
-export function filterContractors(contractors: readonly Contractor[], filters: ContractorFilters): Contractor[] {
+/**
+ * Bộ tiêu chí của khối "Tìm đúng người theo đúng tiêu chí" ở landing (S09).
+ * Trường nào bỏ trống thì tiêu chí đó không lọc.
+ */
+export interface ContractorCriteria {
+  /** id loại công trình (`townhouse`, `villa`…) — khớp `Contractor.buildingTypeIds`. */
+  buildingTypeId?: string
+  scale?: ProjectScale
+  experience?: ExperienceLevel
+  rating?: RatingLevel
+  startWindow?: StartWindow
+}
+
+/** Số lầu (không tính trệt) của một quy mô: `ground` → 0, `ground+3` → 3. */
+function upperFloorsOf(scale: ProjectScale): number {
+  return scale === 'ground' ? 0 : Number(scale.slice('ground+'.length))
+}
+
+const MIN_RATING: Record<RatingLevel, number> = { any: 0, good: 4, great: 4.5 }
+
+/** Số dự án tương tự nằm trong khoảng nào thì thuộc mức kinh nghiệm đó. */
+const EXPERIENCE_RANGE: Record<ExperienceLevel, readonly [min: number, max: number]> = {
+  any: [0, Infinity],
+  junior: [0, 4],
+  mid: [5, 15],
+  senior: [16, Infinity]
+}
+
+/**
+ * Nhà thầu có khớp bộ tiêu chí không.
+ *
+ * Loại công trình và quy mô đọc từ trường nhà thầu khai báo; nhà thầu chưa khai
+ * báo thì KHÔNG bị loại (không có dữ liệu để kết luận là không phù hợp). Mốc
+ * khởi công: "sớm nhất" cần đang nhận dự án và khảo sát được trong 24h, "1–3
+ * tháng" chỉ cần đang nhận dự án; mốc xa hơn thì nhà thầu nào cũng xếp được lịch.
+ */
+export function matchesCriteria(contractor: Contractor, criteria: ContractorCriteria): boolean {
+  const { buildingTypeId, scale, experience, rating, startWindow } = criteria
+
+  if (buildingTypeId && contractor.buildingTypeIds && !contractor.buildingTypeIds.includes(buildingTypeId)) return false
+
+  if (scale && contractor.maxUpperFloors !== undefined && contractor.maxUpperFloors < upperFloorsOf(scale)) return false
+
+  if (experience) {
+    const [min, max] = EXPERIENCE_RANGE[experience]
+    if (contractor.similarProjects < min || contractor.similarProjects > max) return false
+  }
+
+  if (rating && contractor.rating < MIN_RATING[rating]) return false
+
+  if (startWindow === 'asap' && !(contractor.acceptingProjects && contractor.surveyWithinHours <= 24)) return false
+  if (startWindow === 'in-1-3-months' && !contractor.acceptingProjects) return false
+
+  return true
+}
+
+/** Lọc theo bán kính (+ tiêu chí ở landing nếu có) rồi sắp xếp theo chip đang chọn. */
+export function filterContractors(
+  contractors: readonly Contractor[],
+  filters: ContractorFilters,
+  criteria: ContractorCriteria = {}
+): Contractor[] {
   return contractors
     .filter((c) => c.distanceKm <= filters.radiusKm)
     .filter((c) => !filters.region || c.region === filters.region)
+    .filter((c) => matchesCriteria(c, criteria))
     .sort(COMPARATORS[filters.sort])
 }
 

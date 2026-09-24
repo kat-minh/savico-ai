@@ -151,6 +151,13 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
         >
           <Select mode='multiple' options={typeOptions} />
         </Form.Item>
+        <Form.Item
+          name='maxUpperFloors'
+          label={t('contractors.maxUpperFloors')}
+          rules={[{ type: 'integer', min: 0, message: t('contractors.nonNegativeInt') }]}
+        >
+          <InputNumber min={0} max={50} precision={0} style={{ width: 200 }} />
+        </Form.Item>
         <Form.Item name='scopes' label={t('contractors.scopes')}>
           <Checkbox.Group
             options={CONTRACTOR_SCOPES.map((value) => ({ value, label: t(`contractorScope.${value}`) }))}

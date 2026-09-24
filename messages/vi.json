@@ -469,11 +469,12 @@
           "action": "Đăng ký triển khai",
           "usedAtStep": "Dùng ở bước 04–05"
         }
-      }
+      },
+      "titleMobile": "Gói dịch vụ SAVICO"
     },
     "dossiers": {
       "eyebrow": "HỒ SƠ MẪU",
-      "title": "Khám phá hồ sơ thiết kế & dự toán mẫu",
+      "title": "Danh sách thư viện mẫu",
       "viewAll": "Xem tất cả hồ sơ mẫu",
       "viewOne": "Xem hồ sơ mẫu",
       "items": {
@@ -505,7 +506,8 @@
           "floors": "1 tầng",
           "options": "2 phương án"
         }
-      }
+      },
+      "titleMobile": "Hồ sơ mẫu"
     },
     "showcase": {
       "label": "Kết quả mẫu",
@@ -566,7 +568,8 @@
           "name": "Anh Quốc Bảo",
           "meta": "Villa · Đà Lạt"
         }
-      }
+      },
+      "titleMobile": "Khách hàng nói về SAVICO"
     },
     "cta": {
       "title": "Sẵn sàng bắt đầu dự án của bạn?",
@@ -595,7 +598,8 @@
       "title": "Kiến thức thực tế cho hành trình xây nhà",
       "viewAll": "Xem tất cả bài viết",
       "newBadge": "Mới",
-      "readTime": "Đọc ~{minutes} phút →"
+      "readTime": "Đọc ~{minutes} phút →",
+      "titleMobile": "Cẩm nang xây nhà"
     },
     "card": {
       "imageCount": "{count} ảnh 3D"
@@ -1785,7 +1789,8 @@
       "viewAll": "Xem tất cả chuyên gia",
       "book": "Đặt lịch",
       "booking": "Đang đặt lịch…",
-      "booked": "Đã đặt lịch"
+      "booked": "Đã đặt lịch",
+      "titleMobile": "Tư vấn 1:1"
     }
   },
   "admin": {
@@ -2541,7 +2546,8 @@
       "historyAt": "Thời điểm",
       "historyBy": "Người thực hiện",
       "historyGroup": "Nhóm dữ liệu",
-      "historyAction": "Thao tác"
+      "historyAction": "Thao tác",
+      "maxUpperFloors": "Số lầu tối đa (không tính trệt)"
     },
     "discountValidity": {
       "active": "Đang chạy",
@@ -3292,6 +3298,20 @@
       },
       "disclaimer": "Lưu ý cuối khối tư vấn",
       "emptyHint": "Để trống để dùng câu mặc định."
+    },
+    "fieldNames": {
+      "landing_services_titleMobile": "Tiêu đề dải gói dịch vụ — bản mobile (thay cho nhãn nhỏ)",
+      "landing_dossiers_titleMobile": "Tiêu đề lớn — bản mobile (thay cho nhãn nhỏ; dòng “Tiêu đề khối” ở trên thành mô tả nhỏ)",
+      "handbook_home_titleMobile": "Tiêu đề lớn — bản mobile (thay cho nhãn nhỏ; dòng “Tiêu đề khối” ở trên thành mô tả nhỏ)",
+      "consult_home_titleMobile": "Tiêu đề lớn — bản mobile (thay cho nhãn nhỏ; tiêu đề + mô tả ở trên gộp thành mô tả nhỏ)",
+      "landing_testimonials_titleMobile": "Tiêu đề lớn dải đánh giá — bản mobile (thay cho nhãn nhỏ)"
+    },
+    "imageFields": {
+      "plans_brand_logo": "Logo hệ thống — thanh menu, đăng nhập, thanh toán (đã gồm slogan)",
+      "plans_brand_logoOnDark": "Logo hệ thống — bản cho chân trang nền tối (để trống = dùng bản vẽ sẵn)"
+    },
+    "pageSections": {
+      "plans_brand": "Logo hệ thống (góc trái thanh menu)"
     }
   },
   "contractors": {
@@ -3414,7 +3434,7 @@
         "title": "Tìm đúng người theo đúng tiêu chí",
         "area": "Khu vực & bán kính",
         "type": "Loại công trình",
-        "typeHint": "xây mới / sửa chữa / cải tạo / nội thất",
+        "typeHint": "nhà phố / villa / nhà mái / nhà vườn / căn hộ",
         "scale": "Quy mô công trình",
         "experience": "Kinh nghiệm dự án tương tự",
         "rating": "Đánh giá & số dự án hoàn thành",
@@ -3443,7 +3463,8 @@
           "survey": "Khảo sát sớm nhất"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
-        "bestMatch": "Phù hợp nhất"
+        "bestMatch": "Phù hợp nhất",
+        "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
       },
       "compare": {
         "title": "So sánh minh bạch",
@@ -3617,7 +3638,6 @@
           "finishing": "VD: Cần nhà thầu hoàn thiện — trát, ốp lát, sơn, lắp thiết bị — cho nhà đã có phần thô.",
           "interior": "VD: Cần nhà thầu thi công nội thất — đồ gỗ, đồ rời, trang trí — theo phong cách hiện đại."
         },
-        "noteHint": "Mô tả càng rõ, SAVICO càng dễ đề xuất đúng nhà thầu.",
         "counter": "{current} / {max}"
       },
       "documents": {
@@ -3962,6 +3982,10 @@
         "zoomIn": "Phóng to",
         "zoomFit": "Vừa khung",
         "goToPage": "Tới trang {page}"
+      },
+      "introTags": {
+        "buildingType": "Loại công trình",
+        "scope": "Phạm vi thi công"
       }
     },
     "compare": {

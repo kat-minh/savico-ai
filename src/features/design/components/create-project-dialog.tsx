@@ -162,7 +162,9 @@ export function CreateProjectDialog() {
             className='space-y-4'
             aria-busy={createProject.isPending || exiting}
           >
-            <fieldset disabled={createProject.isPending || exiting} className='contents'>
+            {/* `space-y-4` đặt Ở ĐÂY: fieldset là `contents` nên `space-y-4` của <form> chỉ tác động lên
+            chính fieldset, các ô bên trong không được cách nhau. */}
+            <fieldset disabled={createProject.isPending || exiting} className='contents space-y-4'>
               <FormField
                 control={form.control}
                 name='name'

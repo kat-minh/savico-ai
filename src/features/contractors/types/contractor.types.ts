@@ -31,6 +31,12 @@ export type SiteCondition = 'empty' | 'demolish' | 'renovate'
 /** Quy mô công trình — hàng chọn ở Bước 1 (S10). */
 export type ProjectScale = 'ground' | 'ground+1' | 'ground+2' | 'ground+3' | 'ground+4'
 
+/** Mức kinh nghiệm dự án tương tự — bộ lọc ở landing (S09). */
+export type ExperienceLevel = 'any' | 'junior' | 'mid' | 'senior'
+
+/** Mức đánh giá tối thiểu — bộ lọc ở landing (S09). */
+export type RatingLevel = 'any' | 'good' | 'great'
+
 /** Mốc khởi công dự kiến (S10). */
 export type StartWindow = 'asap' | 'in-1-3-months' | 'in-3-6-months' | 'undecided'
 

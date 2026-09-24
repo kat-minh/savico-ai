@@ -31,7 +31,6 @@
     "src/features/supervision/types/supervision.types.ts": ["types"],
     "src/features/contractors/constants/contractors.constants.ts": ["types"],
     "src/features/contractors/types/contractor.types.ts": ["types"],
-    "src/shared/cms/message-catalog.ts": ["exports"],
     "src/shared/components/ui/field.tsx": ["exports"],
     "src/shared/constants/routes.ts": ["exports"]
   }

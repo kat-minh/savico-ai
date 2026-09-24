@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowRight, CalendarDays, Tag } from 'lucide-react'
+import { ArrowRight, ChevronRight, CalendarDays, Tag } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useFormatter, useTranslations } from 'next-intl'
 
@@ -40,11 +40,19 @@ export function HandbookHighlights() {
   const [now] = useState(() => Date.now())
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-16'>
       <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
         <div className='space-y-2'>
-          <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('eyebrow')}</p>
-          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+          {/* Cùng khuôn với các khối phía trên: dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Cẩm nang xây
+              nhà" (`titleMobile`) và câu "Kiến thức thực tế…" thành mô tả nhỏ. Từ `lg` giữ nguyên. */}
+          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
+            {t('eyebrow')}
+          </p>
+          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
+            <span className='lg:hidden'>{t('titleMobile')}</span>
+            <span className='hidden lg:inline'>{t('title')}</span>
+          </h2>
+          <p className='text-muted-foreground text-sm lg:hidden'>{t('title')}</p>
         </div>
 
         <Link
@@ -52,7 +60,8 @@ export function HandbookHighlights() {
           className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
         >
           {t('viewAll')}
-          <ArrowRight className='size-4' />
+          <ChevronRight className='size-4 lg:hidden' />
+          <ArrowRight className='hidden size-4 lg:block' />
         </Link>
       </header>
 
@@ -113,8 +122,10 @@ export function HandbookHighlights() {
                       </span>
                       {/* Khoảng này LUÔN chiếm chỗ sẵn (chiều cao cố định
                           theo dòng chữ) — rê chuột chỉ đổi opacity, không
-                          đổi chiều cao, nên thẻ không bao giờ bị giãn ra. */}
-                      <span className='text-primary mt-auto pt-1 text-xs font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+                          đổi chiều cao, nên thẻ không bao giờ bị giãn ra.
+                          Dưới `sm` (cảm ứng, không có rê chuột) bỏ hẳn để đáy thẻ không trống,
+                          giống thẻ của khối Hướng dẫn. */}
+                      <span className='text-primary mt-auto pt-1 text-xs font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100 max-sm:hidden'>
                         {t('readTime', { minutes: article.readingMinutes })}
                       </span>
                     </span>

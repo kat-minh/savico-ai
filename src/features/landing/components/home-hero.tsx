@@ -113,7 +113,12 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
         {t('note')}
       </motion.p>
 
-      <div className='mx-auto grid w-full max-w-[90rem] items-center gap-8 px-4 py-14 lg:grid-cols-[minmax(0,1fr)_14rem_minmax(0,0.65fr)] lg:gap-10 lg:px-8 lg:py-20'>
+      {/* Dưới `lg` mọi khối xếp dọc: khoảng cách nút "Xem hướng dẫn" → thẻ "Hồ sơ dự án"
+          (`gap-y-4.5` = 18px) phải BẰNG khoảng cách thẻ → dải số liệu bên dưới. Dải
+          số liệu (`HomeStats`) kéo lên chờm `-mt-9.5` (38px) vào `pb-14` (56px) của khối
+          này, nên chỗ hở thật là 56 − 38 = 18px. Đổi `pb-14` hay `-mt-9.5` thì đổi số này theo.
+          Từ `lg` giữ `gap-10` như cũ. */}
+      <div className='mx-auto grid w-full max-w-[90rem] items-center gap-y-4.5 px-4 pt-5 pb-14 lg:grid-cols-[minmax(0,1fr)_14rem_minmax(0,0.65fr)] lg:gap-10 lg:px-8 lg:py-20'>
         <div className='space-y-4'>
           <motion.p
             initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
@@ -124,36 +129,80 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
             {t('eyebrow')}
           </motion.p>
 
-          <h1 className='text-3xl leading-[1.15] font-bold tracking-tight text-balance sm:text-4xl lg:text-[2.4rem]'>
+          {/* Tiêu đề có HAI bản dựng theo cỡ màn, chỉ một bản hiện (`hidden` gỡ
+              bản kia khỏi cây trợ năng nên trình đọc màn hình không đọc đôi):
+
+              · DƯỚI `lg` (mobile/tablet) — chữ chảy liền: phần đầu + phần nhấn là
+                một đoạn văn duy nhất, từ cuối phần đầu và từ đầu phần nhấn nằm
+                chung một dòng, không còn "ngay" đứng một mình. Không `text-balance`
+                (nó co dòng cho đều nên ngắt sớm dù còn chỗ). Tối đa 3 dòng bằng
+                `max-h` 3 × 1.15em (dư 0.05em) chứ KHÔNG `line-clamp-3` — cái đó
+                biến khối thành `-webkit-box` xếp dọc các phần con, mất chuyện chữ
+                chảy liền; chữ dư bị cắt nên CMS có nhắc giới hạn này.
+                Phần nhấn KHÔNG dùng lớp phủ `absolute` (vỡ khi xuống dòng) mà tô
+                màu bằng `background-clip: text` + dải chuyển sắc trượt từ trái;
+                span `inline` nên xuống dòng theo từng từ, dải trượt qua lần lượt
+                từng đoạn dòng.
+              · Từ `lg` (desktop) — giữ NGUYÊN bản cũ: hai khối `inline-block` cách
+                nhau bằng `<br />`, tô xanh bằng lớp phủ clip-path.
+
+              Chỗ ngắt dòng do admin tự đặt: ký tự xuống dòng trong
+              `messages/*.json` / ô nhập của CMS, `whitespace-pre-line` giữ nó —
+              để tránh trình duyệt tự ngắt giữa một cụm từ. */}
+          <h1 className='text-3xl leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.4rem] lg:text-balance'>
             <motion.span
               initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={seq(0.1, 0.75)}
-              className='inline-block'
+              className='block max-h-[3.5em] overflow-hidden whitespace-pre-line lg:hidden'
             >
-              {t('titleLead')}
-            </motion.span>
-            <br />
-            {/* "tô xanh từ trái": chữ nền mờ luôn đọc được (kể cả tắt JS), lớp
-                xanh nằm đè lên quét trái→phải bằng clip-path — hai lớp cùng
-                chữ nên khớp pixel-perfect, không lệch glyph. */}
-            <motion.span
-              initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={seq(0.1, 0.75)}
-              className='relative inline-block'
-            >
-              <span className='text-foreground/35'>{t('titleAccent')}</span>
+              {t('titleLead')}{' '}
               <motion.span
-                aria-hidden
-                initial={{ clipPath: skip ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
-                animate={{ clipPath: 'inset(0 0% 0 0)' }}
+                initial={{ backgroundPositionX: skip ? '0%' : '100%' }}
+                animate={{ backgroundPositionX: '0%' }}
                 transition={seq(0.9, 0.9)}
-                className='text-primary-strong absolute inset-0 whitespace-nowrap'
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, var(--color-primary-strong) 50%, color-mix(in oklab, var(--color-foreground) 35%, transparent) 50%)',
+                  backgroundSize: '200% 100%'
+                }}
+                className='bg-clip-text text-transparent'
               >
                 {t('titleAccent')}
               </motion.span>
             </motion.span>
+
+            <span className='hidden whitespace-pre-line lg:contents'>
+              <motion.span
+                initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={seq(0.1, 0.75)}
+                className='inline-block'
+              >
+                {t('titleLead')}
+              </motion.span>
+              <br />
+              {/* "tô xanh từ trái": chữ nền mờ luôn đọc được (kể cả tắt JS), lớp
+                  xanh nằm đè lên quét trái→phải bằng clip-path — hai lớp cùng
+                  chữ nên khớp pixel-perfect, không lệch glyph. */}
+              <motion.span
+                initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={seq(0.1, 0.75)}
+                className='relative inline-block'
+              >
+                <span className='text-foreground/35'>{t('titleAccent')}</span>
+                <motion.span
+                  aria-hidden
+                  initial={{ clipPath: skip ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
+                  animate={{ clipPath: 'inset(0 0% 0 0)' }}
+                  transition={seq(0.9, 0.9)}
+                  className='text-primary-strong absolute inset-0 whitespace-nowrap'
+                >
+                  {t('titleAccent')}
+                </motion.span>
+              </motion.span>
+            </span>
           </h1>
 
           {/* Chỗ xuống dòng nằm TRONG câu chữ (ký tự xuống dòng trong

@@ -1457,8 +1457,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
                             ) : null}
                           </div>
                         </FormControl>
-                        <div className='text-muted-foreground flex items-center justify-between text-xs'>
-                          <span>{t('needs.noteHint')}</span>
+                        <div className='text-muted-foreground flex items-center justify-end text-xs'>
                           <span
                             className={cn(
                               field.value.length >= BRIEF_NOTE_MAX_LENGTH

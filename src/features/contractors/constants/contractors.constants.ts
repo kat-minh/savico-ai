@@ -1,8 +1,10 @@
 import type {
   ConstructionScope,
   ContractorSort,
+  ExperienceLevel,
   InvitationStatus,
   ProjectScale,
+  RatingLevel,
   ServiceRegion,
   SiteCondition,
   StartWindow
@@ -59,6 +61,12 @@ export const PROJECT_SCALES: readonly ProjectScale[] = [
   'ground+3',
   'ground+4'
 ] as const
+
+/** Mức kinh nghiệm dự án tương tự (S09) — thứ tự hiển thị của bộ lọc. */
+export const EXPERIENCE_LEVELS: readonly ExperienceLevel[] = ['any', 'junior', 'mid', 'senior'] as const
+
+/** Mức đánh giá tối thiểu (S09) — thứ tự hiển thị của bộ lọc. */
+export const RATING_LEVELS: readonly RatingLevel[] = ['any', 'good', 'great'] as const
 
 /** Mốc khởi công dự kiến (S10). */
 export const START_WINDOWS: readonly StartWindow[] = ['asap', 'in-1-3-months', 'in-3-6-months', 'undecided'] as const

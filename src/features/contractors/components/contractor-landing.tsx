@@ -51,14 +51,15 @@ import { useDwellNudge } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
 import {
-  CONSTRUCTION_SCOPES,
   CONTRACTOR_SORTS,
+  EXPERIENCE_LEVELS,
   MATCHES_PINNED_CONTRACTOR_KEY,
   PROJECT_SCALES,
+  RATING_LEVELS,
   START_WINDOWS
 } from '../constants/contractors.constants'
 import { useBriefs, useCreateBrief, useCreateBriefFromDesign } from '../hooks/use-brief'
-import { filterContractors } from '../services/contractor-list.service'
+import { filterContractors, type ContractorCriteria } from '../services/contractor-list.service'
 import type { Contractor, ContractorSort, SearchRadiusKm } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
 import { PartnerRegistrationDialog } from './partner-registration-dialog'
@@ -77,6 +78,17 @@ import { PartnerRegistrationDialog } from './partner-registration-dialog'
  * này, nên đổi trần không làm sai tỉ lệ nào — chỉ thu nhỏ đều toàn bộ.
  */
 const PAGE_CONTAINER = 'mx-auto w-[94%] max-w-[76rem]'
+
+/**
+ * Id danh sách xếp hạng mà `useDwellNudge` theo dõi.
+ *
+ * Mảng id phải là hằng số NGOÀI component: hook đặt nó vào deps của effect, nên
+ * một mảng viết thẳng trong render là mảng mới ở mỗi lần render → effect chạy
+ * lại và bộ đếm 4,5 giây bị đặt về 0 mỗi khi rê chuột đổi thẻ nổi bật hay bấm
+ * đổi tiêu chí lọc.
+ */
+const RANKED_LIST_ID = 'contractor-ranked-list'
+const DWELL_SECTION_IDS = [RANKED_LIST_ID] as const
 
 /** Ba thẻ của khối "An toàn & minh bạch" (Hình S09), theo đúng thứ tự trong ảnh. */
 const SAFETY_CARDS = [{ key: 'privacy' }, { key: 'record' }, { key: 'review' }] as const
@@ -320,6 +332,12 @@ interface CriterionItem {
   icon: typeof MapPin
 }
 
+/** Một lựa chọn của tiêu chí: `value` để lọc, `label` để hiển thị. */
+interface CriterionOption {
+  value: string
+  label: string
+}
+
 /**
  * Sáu tiêu chí của khối "Tìm đúng người theo đúng tiêu chí" (mục 5).
  *
@@ -375,7 +393,6 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
   const t = useTranslations('contractors.landing')
   const tRankTabs = useTranslations('contractors.landing.ranking.tabs')
   const tCommon = useTranslations('contractors.common')
-  const tScope = useTranslations('contractors.scope')
   const tScale = useTranslations('contractors.scale')
   const tStartWindow = useTranslations('contractors.startWindow')
   const tGlobal = useTranslations('common')
@@ -428,10 +445,11 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
   const hasBrief = isAuthenticated && Boolean(briefs?.length)
 
   /**
-   * Bộ lọc tiêu chí (mục 5) — đã xác nhận với khách: chỉ "Khu vực & bán kính"
-   * lọc THẬT `ranked`, 5 tiêu chí còn lại chỉ mở rộng/thu gọn + hiện dòng tóm
-   * tắt vì `Contractor` không có trường loại công trình/kinh nghiệm/mốc đánh
-   * giá/lịch nhận việc để lọc theo.
+   * Bộ lọc tiêu chí (mục 5) — mọi tiêu chí đều lọc THẬT `ranked`: danh sách bên
+   * phải là top 3 nhà thầu khớp bộ tiêu chí đã chọn, xếp theo tab đang bật.
+   * Mỗi mục chỉ chọn được một lựa chọn; bấm lại lựa chọn đang chọn để bỏ.
+   * `criterionSelections` lưu GIÁ TRỊ của lựa chọn (không phải nhãn hiển thị) để
+   * lọc không phụ thuộc bản dịch.
    */
   const [openCriterion, setOpenCriterion] = useState<CriterionItem['key'] | null>(null)
   const radiusOptions = matching.radiusOptions
@@ -440,26 +458,40 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
   const radiusKm = radiusChoice ?? widestRadius
   const [criterionSelections, setCriterionSelections] = useState<Partial<Record<CriterionItem['key'], string>>>({})
 
-  const criterionOptions: Record<CriterionItem['key'], string[]> = {
-    area: radiusOptions.map((km) => tCommon('distanceShort', { km })),
-    type: CONSTRUCTION_SCOPES.map((key) => tScope(key)),
-    scale: PROJECT_SCALES.map((key) => tScale(key)),
-    experience: (['any', 'junior', 'mid', 'senior'] as const).map((key) => t(`criteria.experienceOptions.${key}`)),
-    rating: (['any', 'good', 'great'] as const).map((key) => t(`criteria.ratingOptions.${key}`)),
-    schedule: START_WINDOWS.map((key) => tStartWindow(key))
+  const cmsBuildingTypes = useCmsCollection('buildingTypes')
+  const criterionOptions: Record<CriterionItem['key'], CriterionOption[]> = {
+    area: radiusOptions.map((km) => ({ value: String(km), label: tCommon('distanceShort', { km }) })),
+    // Cùng danh mục "Loại công trình" với Bước 1 của luồng thiết kế/hồ sơ, nên
+    // admin bật/tắt hay đổi tên ở một chỗ là đổi cả hai.
+    type: [...cmsBuildingTypes]
+      .filter((option) => option.status === 'active')
+      .sort((a, b) => a.order - b.order)
+      .map((option) => ({ value: option.id, label: option.label })),
+    scale: PROJECT_SCALES.map((key) => ({ value: key, label: tScale(key) })),
+    experience: EXPERIENCE_LEVELS.map((key) => ({ value: key, label: t(`criteria.experienceOptions.${key}`) })),
+    rating: RATING_LEVELS.map((key) => ({ value: key, label: t(`criteria.ratingOptions.${key}`) })),
+    schedule: START_WINDOWS.map((key) => ({ value: key, label: tStartWindow(key) }))
   }
 
-  const ranked = filterContractors(directory, { radiusKm, sort }).slice(0, 3)
+  const criteria: ContractorCriteria = {
+    buildingTypeId: criterionSelections.type,
+    scale: PROJECT_SCALES.find((key) => key === criterionSelections.scale),
+    experience: EXPERIENCE_LEVELS.find((key) => key === criterionSelections.experience),
+    rating: RATING_LEVELS.find((key) => key === criterionSelections.rating),
+    startWindow: START_WINDOWS.find((key) => key === criterionSelections.schedule)
+  }
+
+  const ranked = filterContractors(directory, { radiusKm, sort }, criteria).slice(0, 3)
 
   /**
    * Đứng ở danh sách xếp hạng lâu không bấm gì → thanh "Tạo hồ sơ dự án - miễn
    * phí" trượt lên dính đáy màn (mục 7).
    */
   const { nudgeSectionId, dismiss: dismissNudge } = useDwellNudge({
-    sectionIds: ['contractor-ranked-list'],
+    sectionIds: DWELL_SECTION_IDS,
     sessionKey: 'savico.contractor-list-nudge'
   })
-  const showStickyNudge = nudgeSectionId === 'contractor-ranked-list'
+  const showStickyNudge = nudgeSectionId === RANKED_LIST_ID
 
   /** "Tạo hồ sơ" cần tài khoản: chưa đăng nhập thì mở popup đăng nhập trước. */
   const createAndOpenBrief = () => {
@@ -844,7 +876,8 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
               {CRITERIA_ITEMS.map((item) => {
                 const open = openCriterion === item.key
                 const options = criterionOptions[item.key]
-                const selected = criterionSelections[item.key]
+                const selectedValue = criterionSelections[item.key]
+                const selected = options.find((option) => option.value === selectedValue)?.label
                 return (
                   // Hình S09: mỗi ô cao 20/135 = 14.8% bề ngang cột tiêu chí,
                   // tức thoáng hơn hẳn `py-3` của bản trước.
@@ -907,7 +940,9 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
                     </button>
 
                     {/* Mở rộng tại chỗ — mục khác đang mở tự thu lại (chỉ một
-                        `openCriterion` cho cả danh sách) (mục 5). */}
+                        `openCriterion` cho cả danh sách) (mục 5). Chọn một lựa
+                        chọn KHÔNG đóng mục: khách còn đổi lựa chọn khác hoặc
+                        bấm lại để bỏ, và thấy danh sách bên phải đổi ngay. */}
                     <AnimatePresence initial={false}>
                       {open ? (
                         <motion.div
@@ -918,40 +953,41 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
                           className='overflow-hidden'
                         >
                           <div className='flex flex-wrap gap-2 px-4 pb-4'>
-                            {options.map((option) => (
-                              <button
-                                key={option}
-                                type='button'
-                                aria-pressed={option === selected}
-                                onClick={() => {
-                                  const shouldDeselect = option === selected
-                                  setCriterionSelections((current) => {
-                                    if (!shouldDeselect) return { ...current, [item.key]: option }
+                            {options.map((option) => {
+                              const isSelected = option.value === selectedValue
+                              return (
+                                <button
+                                  key={option.value}
+                                  type='button'
+                                  aria-pressed={isSelected}
+                                  onClick={() => {
+                                    setCriterionSelections((current) => {
+                                      if (!isSelected) return { ...current, [item.key]: option.value }
 
-                                    const next = { ...current }
-                                    delete next[item.key]
-                                    return next
-                                  })
-                                  if (item.key === 'area') {
-                                    if (shouldDeselect) {
-                                      setRadiusKm(null)
-                                    } else {
-                                      const km = radiusOptions.find((value) => `${value} km` === option)
-                                      if (km) setRadiusKm(km)
+                                      const next = { ...current }
+                                      delete next[item.key]
+                                      return next
+                                    })
+                                    if (item.key === 'area') {
+                                      if (isSelected) {
+                                        setRadiusKm(null)
+                                      } else {
+                                        const km = radiusOptions.find((value) => String(value) === option.value)
+                                        if (km) setRadiusKm(km)
+                                      }
                                     }
-                                  }
-                                  setOpenCriterion(null)
-                                }}
-                                className={cn(
-                                  'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                                  option === selected
-                                    ? 'border-primary bg-accent text-primary-strong'
-                                    : 'hover:border-primary/40'
-                                )}
-                              >
-                                {option}
-                              </button>
-                            ))}
+                                  }}
+                                  className={cn(
+                                    'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                                    isSelected
+                                      ? 'border-primary bg-accent text-primary-strong'
+                                      : 'hover:border-primary/40'
+                                  )}
+                                >
+                                  {option.label}
+                                </button>
+                              )
+                            })}
                           </div>
                         </motion.div>
                       ) : null}
@@ -1015,7 +1051,10 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
                 thì tách riêng cột lịch khảo sát và XẾP CHỒNG hai nút.
                 Chỉ số trong ảnh chỉ có đánh giá và số dự án tương tự — khoảng
                 cách nằm ở S12 chứ không ở landing. */}
-            <ul id='contractor-ranked-list' className='mt-4 divide-y'>
+            <ul id={RANKED_LIST_ID} className='mt-4 divide-y'>
+              {ranked.length === 0 ? (
+                <li className='text-muted-foreground py-10 text-center text-sm text-pretty'>{t('ranking.empty')}</li>
+              ) : null}
               {ranked.map((contractor, index) => (
                 <motion.li
                   key={contractor.id}

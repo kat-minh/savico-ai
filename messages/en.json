@@ -469,11 +469,12 @@
           "action": "Request a call",
           "usedAtStep": "Used in steps 04–05"
         }
-      }
+      },
+      "titleMobile": "SAVICO service packages"
     },
     "dossiers": {
       "eyebrow": "SAMPLE DOSSIERS",
-      "title": "Explore sample design & estimate dossiers",
+      "title": "Sample library",
       "viewAll": "See all sample dossiers",
       "viewOne": "View sample dossier",
       "items": {
@@ -505,7 +506,8 @@
           "floors": "1 floor",
           "options": "2 options"
         }
-      }
+      },
+      "titleMobile": "Sample dossiers"
     },
     "showcase": {
       "label": "Sample output",
@@ -566,7 +568,8 @@
           "name": "Quoc Bao",
           "meta": "Villa · Da Lat"
         }
-      }
+      },
+      "titleMobile": "What customers say about SAVICO"
     },
     "cta": {
       "title": "Ready to start your project?",
@@ -595,7 +598,8 @@
       "title": "Practical knowledge for your build",
       "viewAll": "See all articles",
       "newBadge": "New",
-      "readTime": "~{minutes} min read →"
+      "readTime": "~{minutes} min read →",
+      "titleMobile": "Home-building handbook"
     },
     "card": {
       "imageCount": "{count} 3D images"
@@ -1785,7 +1789,8 @@
       "viewAll": "See all experts",
       "book": "Book",
       "booking": "Booking…",
-      "booked": "Booked"
+      "booked": "Booked",
+      "titleMobile": "1:1 consultation"
     }
   },
   "admin": {
@@ -2541,7 +2546,8 @@
       "historyAt": "Time",
       "historyBy": "By",
       "historyGroup": "Area",
-      "historyAction": "Action"
+      "historyAction": "Action",
+      "maxUpperFloors": "Max upper floors (excluding ground)"
     },
     "discountValidity": {
       "active": "Running",
@@ -3292,6 +3298,20 @@
       },
       "disclaimer": "Closing note",
       "emptyHint": "Leave empty to use the default sentence."
+    },
+    "fieldNames": {
+      "landing_services_titleMobile": "Service band heading — mobile version (replaces the small label)",
+      "landing_dossiers_titleMobile": "Big heading — mobile version (replaces the small label; the block heading above becomes the small description)",
+      "handbook_home_titleMobile": "Big heading — mobile version (replaces the small label; the block heading above becomes the small description)",
+      "consult_home_titleMobile": "Big heading — mobile version (replaces the small label; the heading + description above merge into the small description)",
+      "landing_testimonials_titleMobile": "Big heading of the reviews strip — mobile version (replaces the small label)"
+    },
+    "imageFields": {
+      "plans_brand_logo": "System logo — top bar, sign-in, checkout (slogan included)",
+      "plans_brand_logoOnDark": "System logo — dark-background version for the footer (empty = built-in drawing)"
+    },
+    "pageSections": {
+      "plans_brand": "System logo (top-left of the menu bar)"
     }
   },
   "contractors": {
@@ -3414,7 +3434,7 @@
         "title": "Match on the criteria that matter",
         "area": "Area & radius",
         "type": "Building type",
-        "typeHint": "new build / repair / renovation / interior",
+        "typeHint": "townhouse / villa / roofed house / garden house / apartment",
         "scale": "Project scale",
         "experience": "Experience on similar projects",
         "rating": "Rating & completed projects",
@@ -3443,7 +3463,8 @@
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "bestMatch": "Best match"
+        "bestMatch": "Best match",
+        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
       },
       "compare": {
         "title": "Transparent comparison",
@@ -3617,7 +3638,6 @@
           "finishing": "e.g. Need a contractor for finishing — plastering, tiling, painting, fixtures — on a shell already built.",
           "interior": "e.g. Need a contractor for interior fit-out — furniture, loose items, decor — in a modern style."
         },
-        "noteHint": "The clearer your description, the better SAVICO can match contractors.",
         "counter": "{current} / {max}"
       },
       "documents": {
@@ -3962,6 +3982,10 @@
         "zoomIn": "Zoom in",
         "zoomFit": "Fit to frame",
         "goToPage": "Go to page {page}"
+      },
+      "introTags": {
+        "buildingType": "Building type",
+        "scope": "Scope of work"
       }
     },
     "compare": {

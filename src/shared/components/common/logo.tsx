@@ -1,3 +1,6 @@
+'use client'
+
+import { useSiteImage } from '@/shared/cms'
 import { cn } from '@/shared/lib/utils'
 
 interface LogoProps {
@@ -18,13 +21,30 @@ interface LogoProps {
 }
 
 /**
- * Logo SAVICO — chữ "SAVI" và biểu tượng vòng tuần hoàn "CO" nối nhau, dựng
- * theo bộ nhận diện khách duyệt trong `client-ai-gen/`.
+ * Logo SAVICO.
  *
- * Vẽ bằng SVG thay vì ảnh bitmap để nét luôn sắc ở mọi cỡ và tự đổi màu theo
- * token thương hiệu.
+ * ★ ƯU TIÊN ẢNH: admin đặt ảnh logo ở khóa `brand.logo` (nền sáng) /
+ * `brand.logoOnDark` (chân trang nền tối) thì hiện ảnh đó và KHÔNG dựng gì
+ * thêm — slogan nằm sẵn trong ảnh nên `tagline` bị bỏ qua. Ảnh chỉ cần đủ cao
+ * (`h-10`), bề ngang tự theo tỉ lệ ảnh.
+ *
+ * ★ CHƯA CÓ ẢNH → bản dựng bằng code: chữ "SAVI" và biểu tượng vòng tuần hoàn
+ * "CO" nối nhau, theo bộ nhận diện khách duyệt trong `client-ai-gen/`. Vẽ bằng
+ * SVG để nét luôn sắc ở mọi cỡ và tự đổi màu theo token thương hiệu.
+ *
+ * Là client component vì đọc kho ảnh CMS; server component vẫn nhúng được.
  */
 export function Logo({ className, iconOnly = false, onDark = false, tagline }: LogoProps) {
+  const imageUrl = useSiteImage(onDark ? 'brand.logoOnDark' : 'brand.logo')
+
+  // `iconOnly` cần riêng biểu tượng — một tấm ảnh logo trọn bộ không cắt được.
+  if (imageUrl && !iconOnly) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- URL do admin dán, chưa biết host nên không qua next/image loader
+      <img src={imageUrl} alt='SAVICO' className={cn('h-10 w-auto max-w-60 shrink-0 object-contain', className)} />
+    )
+  }
+
   const mark = (
     <span className={cn('flex items-center gap-1.5', tagline ? undefined : className)}>
       {!iconOnly ? (
