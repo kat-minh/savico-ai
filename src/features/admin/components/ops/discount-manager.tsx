@@ -1,30 +1,52 @@
 'use client'
 
-import { Col, DatePicker, Form, Input, InputNumber, Progress, Radio, Row, Select, Switch, Tag, Typography } from 'antd'
+import {
+  App,
+  Col,
+  DatePicker,
+  Descriptions,
+  Form,
+  Input,
+  InputNumber,
+  Progress,
+  Radio,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Tag,
+  Typography
+} from 'antd'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
 import { discountUsage, normalizeDiscountCode, type CmsDiscountCode } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
-import { useAdminCollection } from '../../hooks/use-admin-data'
+import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
 import { newAdminId, todayKey } from '../../services/admin.service'
+import { StatusSwitch } from '../common/field-kit'
 import { ResourceManager } from '../common/resource-manager'
 import { useProductLabel } from './use-product-label'
 
 const { Text } = Typography
 
-/** Trạng thái hiệu lực suy ra từ cấu hình + hôm nay — không lưu, để không bao giờ lệch. */
-type Validity = 'active' | 'disabled' | 'scheduled' | 'expired' | 'exhausted'
+/**
+ * Hiệu lực suy ra từ trạng thái bật/tắt + thời gian áp dụng + lượt dùng — không
+ * lưu, để không bao giờ lệch. Bốn giá trị đúng spec: hết lượt tính là Đã kết thúc.
+ */
+type Validity = 'active' | 'scheduled' | 'ended' | 'disabled'
 
 const VALIDITY_TAG: Record<Validity, string> = {
   active: 'green',
-  disabled: 'default',
   scheduled: 'blue',
-  expired: 'default',
-  exhausted: 'orange'
+  ended: 'default',
+  disabled: 'default'
 }
+
+/** Mã: chữ không dấu, số, gạch ngang, gạch dưới; không khoảng trắng; tối đa 50 ký tự. */
+const CODE_PATTERN = /^[A-Z0-9_-]{1,50}$/
 
 interface FormValues extends Omit<CmsDiscountCode, 'startsAt' | 'endsAt'> {
   period?: [Dayjs | null, Dayjs | null] | null
@@ -60,23 +82,143 @@ export function DiscountManager() {
   )
 
   const today = todayKey()
+  const { message } = App.useApp()
+  const save = useSaveAdminItem('discountCodes')
+  const { data: codes = [] } = useAdminCollection('discountCodes')
+  const [productFilter, setProductFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<'all' | CmsDiscountCode['type']>('all')
+  const [validityFilter, setValidityFilter] = useState<'all' | Validity>('all')
+
+  /** Lượt đã dùng — chỉ đếm đơn đã thanh toán thành công. */
+  const usedOf = (item: CmsDiscountCode) => discountUsage(item.code, orders).total
 
   function validityOf(item: CmsDiscountCode): Validity {
     if (!item.enabled) return 'disabled'
     if (item.startsAt && today < item.startsAt) return 'scheduled'
-    if (item.endsAt && today > item.endsAt) return 'expired'
-    if (item.usageLimit && discountUsage(item.code, orders).total >= item.usageLimit) return 'exhausted'
+    if (item.endsAt && today > item.endsAt) return 'ended'
+    if (item.usageLimit && usedOf(item) >= item.usageLimit) return 'ended'
     return 'active'
   }
+
+  /** Quy tắc chéo giữa các ô (§3, §4) — trả thông báo lỗi hoặc `null`. */
+  function problemOf(next: CmsDiscountCode, current: CmsDiscountCode): string | null {
+    const used = usedOf(current)
+    if (codes.some((item) => item.id !== next.id && item.code.toUpperCase() === next.code.toUpperCase())) {
+      return t('discounts.duplicateCode')
+    }
+    if (used > 0 && current.code && next.code !== current.code) return t('discounts.codeLocked')
+    if (next.type === 'percent' && (next.value <= 0 || next.value > 100)) return t('discounts.percentRange')
+    if (next.type === 'amount' && next.value <= 0) return t('discounts.amountPositive')
+    if (next.usageLimit != null && next.usageLimit < used) return t('discounts.limitBelowUsed', { used })
+    if (next.usageLimit != null && next.perAccountLimit != null && next.perAccountLimit > next.usageLimit) {
+      return t('discounts.perAccountAboveTotal')
+    }
+    if (next.startsAt && next.endsAt && next.endsAt < next.startsAt) return t('discounts.endBeforeStart')
+    return null
+  }
+
+  const matches = (item: CmsDiscountCode) =>
+    (productFilter === 'all' || item.productIds.length === 0 || item.productIds.includes(productFilter)) &&
+    (typeFilter === 'all' || item.type === typeFilter) &&
+    (validityFilter === 'all' || validityOf(item) === validityFilter)
+
+  const productNames = (ids: string[]) =>
+    ids.length === 0
+      ? t('discounts.allProducts')
+      : ids.map((id) => productOptions.find((option) => option.value === id)?.label ?? id).join(', ')
+  const money = (value: number | null | undefined) => (value ? formatCurrency(value, locale) : '-')
 
   return (
     <ResourceManager
       collection='discountCodes'
       title={t('nav.discounts')}
       description={t('discounts.description')}
-      // Không xóa mã: đơn cũ còn tham chiếu tới mã. Hết dùng thì tắt công tắc.
-      allowDelete={false}
-      searchText={(item) => `${item.code} ${item.note ?? ''}`}
+      // Chỉ xóa được mã CHƯA TỪNG được dùng — đơn cũ còn tham chiếu tới mã đã dùng.
+      deleteBlockedReason={(item) => (usedOf(item) > 0 ? t('discounts.deleteBlocked') : null)}
+      deleteConfirm={(item) => t('discounts.deleteConfirm', { code: item.code, used: usedOf(item) })}
+      searchText={(item) => item.code}
+      filterItems={matches}
+      filterKey={`${productFilter}|${typeFilter}|${validityFilter}`}
+      validate={problemOf}
+      banner={
+        <Space wrap>
+          <Select
+            value={productFilter}
+            onChange={setProductFilter}
+            style={{ minWidth: 200 }}
+            options={[{ value: 'all', label: t('discounts.filterAllProducts') }, ...productOptions]}
+          />
+          <Select<'all' | CmsDiscountCode['type']>
+            value={typeFilter}
+            onChange={setTypeFilter}
+            style={{ minWidth: 180 }}
+            options={[
+              { value: 'all', label: t('discounts.filterAllTypes') },
+              { value: 'percent', label: t('discounts.typePercent') },
+              { value: 'amount', label: t('discounts.typeAmount') }
+            ]}
+          />
+          <Select<'all' | Validity>
+            value={validityFilter}
+            onChange={setValidityFilter}
+            style={{ minWidth: 180 }}
+            options={[
+              { value: 'all', label: t('discounts.filterAllValidity') },
+              ...(['active', 'scheduled', 'ended', 'disabled'] as const).map((value) => ({
+                value,
+                label: t(`discountValidity.${value}`)
+              }))
+            ]}
+          />
+        </Space>
+      }
+      rowActions={(item) => (
+        <StatusSwitch
+          name={item.code}
+          current={item.enabled ? t('discounts.on') : t('discounts.off')}
+          next={item.enabled ? t('discounts.off') : t('discounts.on')}
+          blockedReason={item.enabled ? null : problemOf(item, item)}
+          onConfirm={async () => {
+            await save.mutateAsync({ ...item, enabled: !item.enabled })
+            message.success(t('feedback.saved'))
+          }}
+        />
+      )}
+      renderView={(item) => (
+        <Descriptions
+          size='small'
+          column={1}
+          bordered
+          items={[
+            { key: 'code', label: t('discounts.code'), children: <Text code>{item.code}</Text> },
+            {
+              key: 'enabled',
+              label: t('discounts.enabled'),
+              children: item.enabled ? t('discounts.on') : t('discounts.off')
+            },
+            {
+              key: 'type',
+              label: t('discounts.type'),
+              children: item.type === 'percent' ? t('discounts.typePercent') : t('discounts.typeAmount')
+            },
+            {
+              key: 'value',
+              label: t('discounts.value'),
+              children: item.type === 'percent' ? `${item.value}%` : formatCurrency(item.value, locale)
+            },
+            { key: 'max', label: t('discounts.maxDiscount'), children: money(item.maxDiscount) },
+            { key: 'products', label: t('discounts.products'), children: productNames(item.productIds) },
+            { key: 'min', label: t('discounts.minOrder'), children: money(item.minOrder) },
+            { key: 'start', label: t('discounts.startsAt'), children: item.startsAt ?? '-' },
+            { key: 'end', label: t('discounts.endsAt'), children: item.endsAt ?? '-' },
+            { key: 'limit', label: t('discounts.usageLimit'), children: item.usageLimit ?? '-' },
+            { key: 'used', label: t('discounts.usedCount'), children: usedOf(item) },
+            { key: 'per', label: t('discounts.perAccountLimit'), children: item.perAccountLimit ?? '-' },
+            { key: 'validity', label: t('discounts.state'), children: t(`discountValidity.${validityOf(item)}`) },
+            { key: 'note', label: t('discounts.note'), children: item.note || '-' }
+          ]}
+        />
+      )}
       createItem={(): CmsDiscountCode => ({
         id: newAdminId('dc'),
         code: '',
@@ -104,7 +246,12 @@ export function DiscountManager() {
           code: normalizeDiscountCode(rest.code),
           startsAt: start ? start.format('YYYY-MM-DD') : null,
           endsAt: end ? end.format('YYYY-MM-DD') : null,
-          productIds: rest.productIds ?? []
+          productIds: rest.productIds ?? [],
+          // Ô số để trống trả `undefined` — lưu `null` = không giới hạn.
+          maxDiscount: rest.type === 'percent' ? (rest.maxDiscount ?? null) : null,
+          minOrder: rest.minOrder ?? null,
+          usageLimit: rest.usageLimit ?? null,
+          perAccountLimit: rest.perAccountLimit ?? null
         }
       }}
       columns={[
@@ -204,12 +351,17 @@ export function DiscountManager() {
                 name='code'
                 label={t('discounts.code')}
                 normalize={(value: string) => value.toUpperCase().replace(/\s/g, '')}
+                extra={usedOf(form.getFieldsValue(true) as CmsDiscountCode) > 0 ? t('discounts.codeLocked') : undefined}
                 rules={[
                   { required: true, message: t('fields.requiredMessage') },
-                  { pattern: /^[A-Z0-9_-]{3,20}$/, message: t('discounts.codeRule') }
+                  { pattern: CODE_PATTERN, message: t('discounts.codeRule') }
                 ]}
               >
-                <Input placeholder='KHAITRUONG' />
+                <Input
+                  placeholder='KHAITRUONG'
+                  maxLength={50}
+                  disabled={usedOf(form.getFieldsValue(true) as CmsDiscountCode) > 0}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} sm={10}>
@@ -241,10 +393,10 @@ export function DiscountManager() {
                       rules={[{ required: true, message: t('fields.requiredMessage') }]}
                     >
                       <InputNumber
-                        min={1}
+                        min={isPercent ? 0.01 : 1}
                         max={isPercent ? 100 : 100_000_000}
                         step={isPercent ? 1 : 50_000}
-                        addonAfter={isPercent ? '%' : '₫'}
+                        suffix={isPercent ? '%' : '₫'}
                         style={{ width: '100%' }}
                       />
                     </Form.Item>
@@ -256,7 +408,7 @@ export function DiscountManager() {
                         label={t('discounts.maxDiscount')}
                         extra={t('discounts.emptyUnlimited')}
                       >
-                        <InputNumber min={0} step={50_000} addonAfter='₫' style={{ width: '100%' }} />
+                        <InputNumber min={1} step={50_000} suffix='₫' style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
                   ) : null}
@@ -272,7 +424,7 @@ export function DiscountManager() {
           <Row gutter={16}>
             <Col xs={24} sm={12}>
               <Form.Item name='minOrder' label={t('discounts.minOrder')} extra={t('discounts.emptyUnlimited')}>
-                <InputNumber min={0} step={100_000} addonAfter='₫' style={{ width: '100%' }} />
+                <InputNumber min={1} step={100_000} suffix='₫' style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
@@ -282,7 +434,7 @@ export function DiscountManager() {
             </Col>
             <Col xs={24} sm={12}>
               <Form.Item name='usageLimit' label={t('discounts.usageLimit')} extra={t('discounts.emptyUnlimited')}>
-                <InputNumber min={1} style={{ width: '100%' }} />
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
@@ -291,12 +443,12 @@ export function DiscountManager() {
                 label={t('discounts.perAccountLimit')}
                 extra={t('discounts.emptyUnlimited')}
               >
-                <InputNumber min={1} style={{ width: '100%' }} />
+                <InputNumber min={1} precision={0} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name='note' label={t('discounts.note')}>
+          <Form.Item name='note' label={t('discounts.note')} extra={t('discounts.noteHint')}>
             <Input.TextArea rows={2} />
           </Form.Item>
         </>

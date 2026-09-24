@@ -24,27 +24,33 @@ function currentQuota(): HandbookQuota {
   }
 }
 
+/** Thiếu trạng thái = dữ liệu cũ, coi như đang phát hành. */
+const isPublished = (item: { status?: 'active' | 'inactive' }) => item.status !== 'inactive'
+
 export const mockHandbookApi = {
+  /** Chỉ mẫu Active hiện ở thư viện (2DTemplateManagement §5). */
   listTemplates: async (): Promise<HandbookTemplate[]> => {
     await mockDelay()
-    return cmsDb.list('handbookTemplates')
+    return cmsDb.list('handbookTemplates').filter(isPublished)
   },
 
   getTemplate: async (id: string): Promise<HandbookTemplate | null> => {
     await mockDelay()
-    return cmsDb.find('handbookTemplates', id)
+    const template = cmsDb.find('handbookTemplates', id)
+    return template && isPublished(template) ? template : null
   },
 
+  /** Chỉ bài Active hiện phía khách hàng (BR-134, BR-135). */
   listArticles: async (topic?: string): Promise<HandbookArticle[]> => {
     await mockDelay()
-    const articles = cmsDb.list('handbookArticles')
+    const articles = cmsDb.list('handbookArticles').filter(isPublished)
     if (!topic) return articles
     return articles.filter((article) => article.panelTopic === topic)
   },
 
   getArticle: async (slug: string): Promise<HandbookArticle | null> => {
     await mockDelay()
-    return cmsDb.list('handbookArticles').find((article) => article.slug === slug) ?? null
+    return cmsDb.list('handbookArticles').find((article) => article.slug === slug && isPublished(article)) ?? null
   },
 
   listStages: async (): Promise<HandbookStage[]> => {

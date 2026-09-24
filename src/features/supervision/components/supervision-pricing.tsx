@@ -331,7 +331,7 @@ function PackageCard({
             item.recommended ? 'text-brand-orange' : 'text-primary-strong'
           )}
         >
-          {tTiers(item.tier)}
+          {item.name || tTiers(item.tier)}
         </h2>
 
         {/* CHỖ CHỜ ASSET: Hình S19 dùng tranh minh hoạ riêng cho từng gói
@@ -439,7 +439,7 @@ function PackageCard({
               onClick={() => rememberCheckoutReturn(item.id, projectId)}
               className={cn('supervision-buy group', item.recommended && 'supervision-buy-control')}
             >
-              {t('choose', { tier: tTiers(item.tier) })}
+              {t('choose', { tier: item.name || tTiers(item.tier) })}
               <ArrowRight className='size-4 transition-transform duration-300 group-hover:translate-x-1.5' />
             </Link>
           </Button>
@@ -570,7 +570,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                   tier === 'control' && 'supervision-control-column bg-brand-orange-soft text-brand-orange'
                 )}
               >
-                {tTiers(tier)}
+                {byTier(tier)?.name || tTiers(tier)}
                 <small className='text-muted-foreground mt-0.5 block text-[10px] font-medium normal-case'>
                   {formatCurrency(byTier(tier)?.price ?? 0, locale)}
                 </small>
@@ -624,7 +624,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                       tier === 'control' ? 'text-brand-orange' : 'text-primary-strong'
                     )}
                   >
-                    {tTiers(tier)}
+                    {byTier(tier)?.name || tTiers(tier)}
                   </span>
                   <span className='supervision-sticky-price text-muted-foreground mt-0.5 text-[10px] font-medium'>
                     {formatCurrency(byTier(tier)?.price ?? 0, locale)}
@@ -736,7 +736,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                           href={checkoutConfirmRoute(item.id, projectId)}
                           onClick={() => rememberCheckoutReturn(item.id, projectId)}
                         >
-                          {tPricing('choose', { tier: tTiers(tier) })}
+                          {tPricing('choose', { tier: byTier(tier)?.name || tTiers(tier) })}
                         </Link>
                       </Button>
                     ) : (
@@ -1145,6 +1145,8 @@ const VALUE_ICONS: Record<SupervisionValueRowKey, typeof ShieldCheck> = {
 function ValueTable() {
   const t = useTranslations('supervision.pricing.value')
   const tTiers = useTranslations('supervision.tiers')
+  const packages = useCmsCollection('supervisionPackages')
+  const byTier = (tier: SupervisionTier) => packages.find((item) => item.tier === tier)
 
   return (
     <section className='supervision-value'>
@@ -1172,7 +1174,7 @@ function ValueTable() {
                     tier === 'control' ? 'text-brand-orange bg-brand-orange-soft/35' : 'text-primary-strong'
                   )}
                 >
-                  {tTiers(tier)}
+                  {byTier(tier)?.name || tTiers(tier)}
                 </th>
               ))}
             </tr>

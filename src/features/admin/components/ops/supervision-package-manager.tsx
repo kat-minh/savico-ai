@@ -38,7 +38,9 @@ export function SupervisionPackageManager() {
           width: 180,
           render: (_, record) => (
             <span>
-              <Tag color='purple'>{productLabel('supervision', record.id)}</Tag>
+              <Text strong style={{ marginInlineEnd: 8 }}>
+                {record.name || productLabel('supervision', record.id)}
+              </Text>
               {record.recommended ? <Tag color='gold'>{t('supervisionPackages.recommended')}</Tag> : null}
             </span>
           )
@@ -66,35 +68,60 @@ export function SupervisionPackageManager() {
       fromFormValues={(values, current): SupervisionPackage => ({
         ...current,
         ...(values as Partial<SupervisionPackage>),
+        name: ((values.name as string | undefined) ?? current.name).trim(),
+        fitLine: ((values.fitLine as string | undefined) ?? current.fitLine).trim(),
+        benefits: ((values.benefits as string[] | undefined) ?? current.benefits)
+          .map((item) => item.trim())
+          .filter(Boolean),
         // Gói tự quản lý không có kỹ sư — giữ `null` thay vì 0 để thẻ không in "0 lượt".
         inspections: current.tier === 'self' ? null : ((values.inspections as number | null) ?? 0)
       })}
       renderForm={(form) => (
         <>
+          <Form.Item
+            name='name'
+            label={t('supervisionPackages.name')}
+            rules={[
+              { required: true, whitespace: true, message: t('fields.requiredMessage') },
+              { max: 60, message: t('fields.maxLength', { max: 60 }) }
+            ]}
+          >
+            <Input maxLength={60} />
+          </Form.Item>
           <Row gutter={16}>
             <Col xs={24} md={12}>
-              <Form.Item name='price' label={t('supervisionPackages.price')}>
+              <Form.Item
+                name='price'
+                label={t('supervisionPackages.price')}
+                rules={[{ required: true, type: 'number', min: 0, message: t('supervisionPackages.priceRule') }]}
+              >
                 <InputNumber<number>
                   min={0}
                   step={100_000}
                   style={{ width: '100%' }}
                   formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                   parser={(value) => Number(`${value}`.replace(/\./g, ''))}
-                  addonAfter='₫'
+                  suffix='₫'
                 />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item name='durationMonths' label={t('supervisionPackages.duration')}>
-                <InputNumber min={1} max={36} addonAfter={t('supervisionPackages.months')} style={{ width: '100%' }} />
+                <InputNumber min={1} max={36} suffix={t('supervisionPackages.months')} style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
               <Form.Item noStyle shouldUpdate>
                 {() =>
                   form.getFieldValue('tier') === 'self' ? null : (
-                    <Form.Item name='inspections' label={t('supervisionPackages.inspections')}>
-                      <InputNumber min={0} max={100} style={{ width: '100%' }} />
+                    <Form.Item
+                      name='inspections'
+                      label={t('supervisionPackages.inspections')}
+                      rules={[
+                        { required: true, type: 'integer', min: 1, message: t('supervisionPackages.inspectionsRule') }
+                      ]}
+                    >
+                      <InputNumber min={1} max={100} precision={0} style={{ width: '100%' }} />
                     </Form.Item>
                   )
                 }
@@ -106,8 +133,12 @@ export function SupervisionPackageManager() {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name='fitLine' label={t('supervisionPackages.fitLine')}>
-            <Input />
+          <Form.Item
+            name='fitLine'
+            label={t('supervisionPackages.fitLine')}
+            rules={[{ required: true, whitespace: true, message: t('fields.requiredMessage') }]}
+          >
+            <Input.TextArea rows={2} />
           </Form.Item>
           <StringListField name='benefits' label={t('supervisionPackages.benefits')} />
         </>

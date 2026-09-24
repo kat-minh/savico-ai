@@ -23,10 +23,17 @@ export const BRIEF_NOTE_MAX_LENGTH = 1000
  *
  * Các trường có dấu * trên giao diện là bắt buộc: tên dự án, loại công trình,
  * diện tích đất, hiện trạng, địa chỉ, ngân sách dự kiến, phạm vi thi công và mô
- * tả nhu cầu. Số tầng/tum bắt buộc với loại nhà nhưng ẩn với căn hộ. "Dự kiến
- * khởi công" và tài liệu đính kèm không bắt buộc.
+ * tả nhu cầu. Số tầng/Tum hiện và bắt buộc hay không theo cấu hình Loại công
+ * trình của admin (`requiredOf`). "Dự kiến khởi công" và tài liệu đính kèm không
+ * bắt buộc.
  */
-export function createBriefSchema(m: BriefSchemaMessages) {
+export function createBriefSchema(
+  m: BriefSchemaMessages,
+  requiredOf: (buildingTypeId: string | null) => { floor: boolean; attic: boolean } = () => ({
+    floor: false,
+    attic: false
+  })
+) {
   return z
     .object({
       name: z.string().trim().min(1, { message: m.required }).max(BRIEF_NAME_MAX_LENGTH, { message: m.nameMaxLength }),
@@ -55,13 +62,13 @@ export function createBriefSchema(m: BriefSchemaMessages) {
         .max(BRIEF_NOTE_MAX_LENGTH, { message: m.noteMaxLength })
     })
     .superRefine((values, context) => {
-      // Đồng bộ với luồng Tạo dự án mới: căn hộ chỉ có một mặt sàn và không có tum.
-      if (!values.buildingType || values.buildingTypeId === 'apartment') return
+      if (!values.buildingType) return
+      const required = requiredOf(values.buildingTypeId)
 
-      if (!values.scale) {
+      if (required.floor && !values.scale) {
         context.addIssue({ code: 'custom', path: ['scale'], message: m.required })
       }
-      if (values.hasAttic === null) {
+      if (required.attic && values.hasAttic === null) {
         context.addIssue({ code: 'custom', path: ['hasAttic'], message: m.required })
       }
     })

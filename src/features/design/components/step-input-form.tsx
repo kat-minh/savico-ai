@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/shared/components/ui/textarea'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { FLOOR_COUNTS, WISHES_MAX_LENGTH } from '../constants/design.constants'
+import { WISHES_MAX_LENGTH } from '../constants/design.constants'
 import {
   composeAddress,
   EMPTY_DESIGN_INPUT,
@@ -95,7 +95,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
     }
   }, [canSubmit])
 
-  const floorOptions: ChoiceOption[] = FLOOR_COUNTS.map((value) => ({
+  const floorOptions: ChoiceOption[] = fields.floorOptions.map((value) => ({
     value,
     label: t(`floorCount.options.${value}`)
   }))
@@ -258,7 +258,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                     style={{ '--missing-delay': '285ms' } as React.CSSProperties}
                     className='space-y-2'
                   >
-                    <FieldLabel hint={t('floorCount.hint')} required>
+                    <FieldLabel hint={t('floorCount.hint')} required={fields.floorRequired}>
                       {t('floorCount.label')}
                     </FieldLabel>
                     <ChoiceCards
@@ -278,7 +278,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                     style={{ '--missing-delay': '380ms' } as React.CSSProperties}
                     className='space-y-2'
                   >
-                    <FieldLabel hint={t('attic.hint')} required>
+                    <FieldLabel hint={t('attic.hint')} required={fields.atticRequired}>
                       {t('attic.label')}
                     </FieldLabel>
                     <ChoiceCards

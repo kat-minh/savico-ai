@@ -30,7 +30,7 @@ import type { Locale } from '@/i18n/routing'
 import { formatPriceTag } from '@/shared/utils'
 import { giftValueInMillions } from '../services/plan-gift.service'
 import { PlanGiftDialog } from './plan-gift-dialog'
-import type { PlanTier, SubscriptionPlan } from '@/shared/cms'
+import type { PlanTier } from '@/shared/cms'
 import { Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -38,7 +38,15 @@ import { checkoutConfirmRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { rememberCheckoutReturn } from '@/shared/lib/checkout-return'
-import { PLAN_COMPARISON, PLAN_VALUE_ROWS, type PlanCell, type PlanValueKey } from '../constants/plan-comparison'
+import {
+  PLAN_COMPARISON,
+  PLAN_VALUE_ROWS,
+  planCell,
+  type PlanCell,
+  type PlanValueKey
+} from '../constants/plan-comparison'
+import { usePlanHighlights } from '../hooks/use-plan-highlights'
+import type { PlanView } from '../types/plan.types'
 import { usePlans } from '../hooks/use-plans'
 
 const TIERS: readonly PlanTier[] = ['basic', 'advanced', 'pro'] as const
@@ -56,7 +64,6 @@ const PRICE_COUNT_DURATION_MS: Record<PlanTier, number> = {
 const PRICE_SETTLE_PULSE_MS = 240
 
 /** Gói được tô cam xuyên suốt trang (Hình S01) — cột PLUS của bảng so sánh. */
-const POPULAR_TIER: PlanTier = 'advanced'
 
 /** Icon đứng trước mỗi hàng của bảng "Giá trị khách hàng nhận được" (Hình S01). */
 const VALUE_ROW_ICON: Record<(typeof PLAN_VALUE_ROWS)[number], LucideIcon> = {
@@ -201,7 +208,7 @@ function PlanPricingContent() {
  * không co nhỏ hơn được nữa thì người đọc vẫn biết mình đang ở dòng nào — bản mô
  * tả không nói gì về màn hình hẹp, mà đây là bảng dài nhất của trang.
  */
-function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
+function ComparisonTable({ plans }: { plans: PlanView[] }) {
   const t = useTranslations('plans')
   const locale = useLocale() as Locale
   const tRows = useTranslations('plans.comparison.rows')
@@ -214,6 +221,12 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
   const { reduceMotion } = usePricingMotion()
 
   const byTier = (tier: PlanTier) => plans.find((plan) => plan.tier === tier)
+  /** Gói phổ biến do admin đánh dấu (tối đa một) — cột được tô nhấn. */
+  const POPULAR_TIER = plans.find((plan) => plan.popular)?.tier ?? null
+  const giftTextOf = (tier: PlanTier) => {
+    const gift = byTier(tier)?.gift
+    return gift ? `${gift.title} ${t('gift.valuePrefix')} ${formatPriceTag(gift.value, locale)}` : ''
+  }
 
   useEffect(() => {
     const update = () => {
@@ -268,7 +281,7 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
                   tier === POPULAR_TIER && 'bg-brand-orange-soft text-brand-orange'
                 )}
               >
-                {t(`tiers.${tier}`)}
+                {byTier(tier)?.name ?? t(`tiers.${tier}`)}
                 <small className='text-muted-foreground mt-0.5 block text-[10px] font-medium normal-case'>
                   {byTier(tier) ? formatPriceTag(byTier(tier)!.price, locale) : ''}
                 </small>
@@ -326,7 +339,7 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
                       tier === POPULAR_TIER ? 'text-brand-orange' : 'text-primary-strong'
                     )}
                   >
-                    {t(`tiers.${tier}`)}
+                    {byTier(tier)?.name ?? t(`tiers.${tier}`)}
                   </span>
                   <span className='plan-sticky-price text-muted-foreground mt-0.5 text-[10px] font-medium'>
                     {byTier(tier) ? formatPriceTag(byTier(tier)!.price, locale) : ''}
@@ -340,16 +353,19 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
             {/* Nhóm "Quyền lợi chính" đọc thẳng số từ bản ghi gói. */}
             <GroupRow label={t('comparison.groups.core')} />
             <CoreRow
+              popularTier={POPULAR_TIER}
               index={0}
               label={t('comparison.core.designOptions')}
               values={TIERS.map((tier) => t('comparison.core.optionUnit', { count: byTier(tier)?.designCredits ?? 0 }))}
             />
             <CoreRow
+              popularTier={POPULAR_TIER}
               index={1}
               label={t('comparison.core.editCredits')}
               values={TIERS.map((tier) => t('comparison.core.editUnit', { count: byTier(tier)?.designCredits ?? 0 }))}
             />
             <CoreRow
+              popularTier={POPULAR_TIER}
               index={2}
               label={t('comparison.core.libraryCredits')}
               values={TIERS.map((tier) =>
@@ -362,8 +378,8 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
                 <GroupRow label={t(`comparison.groups.${group.key}`)} highlight={group.highlight} />
                 {group.rows.map((row, rowIndex) => (
                   <motion.tr
-                    key={row.key}
-                    data-hovered={hoveredRow === row.key || undefined}
+                    key={row}
+                    data-hovered={hoveredRow === row || undefined}
                     className='plan-comparison-row divide-border divide-x'
                     initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -373,15 +389,15 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
                       delay: reduceMotion ? 0 : (group.highlight ? 0.58 : 0.28) + rowIndex * 0.075,
                       ease: pricingEase
                     }}
-                    onMouseEnter={() => setHoveredRow(row.key)}
+                    onMouseEnter={() => setHoveredRow(row)}
                   >
                     <th
                       className={cn(
                         'bg-card sticky left-0 z-10 px-3 py-2 text-left text-xs font-medium transition-colors',
-                        hoveredRow === row.key && 'bg-accent/80 font-semibold'
+                        hoveredRow === row && 'bg-accent/80 font-semibold'
                       )}
                     >
-                      {tRows(row.key)}
+                      {tRows(row)}
                     </th>
                     {TIERS.map((tier) => (
                       <td
@@ -392,11 +408,15 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
                           'plan-comparison-cell',
                           tier === POPULAR_TIER && 'plan-plus-column bg-brand-orange-soft/60',
                           hoveredColumn === tier && 'is-column-hovered',
-                          hoveredRow === row.key && hoveredColumn === tier && 'is-intersection font-semibold',
-                          row.key === 'gift' && tier === 'pro' && 'plan-pro-gift-cell'
+                          hoveredRow === row && hoveredColumn === tier && 'is-intersection font-semibold',
+                          row === 'gift' && byTier(tier)?.gift && 'plan-pro-gift-cell'
                         )}
                       >
-                        <Cell value={row.values[tier]} label={tValues} index={TIERS.indexOf(tier)} />
+                        <Cell
+                          value={planCell(byTier(tier), row, giftTextOf(tier))}
+                          label={tValues}
+                          index={TIERS.indexOf(tier)}
+                        />
                       </td>
                     ))}
                   </motion.tr>
@@ -437,7 +457,7 @@ function ComparisonTable({ plans }: { plans: SubscriptionPlan[] }) {
                         )}
                       >
                         <Link href={checkoutConfirmRoute(plan.id)} onClick={() => rememberCheckoutReturn(plan.id)}>
-                          {t(`cta.${tier}`)}
+                          {plan.ctaLabel || t(`cta.${tier}`)}
                         </Link>
                       </Button>
                     ) : null}
@@ -561,7 +581,17 @@ function GroupRow({ label, highlight = false }: { label: string; highlight?: boo
   )
 }
 
-function CoreRow({ label, values, index }: { label: string; values: string[]; index: number }) {
+function CoreRow({
+  label,
+  values,
+  index,
+  popularTier
+}: {
+  label: string
+  values: string[]
+  index: number
+  popularTier: PlanTier | null
+}) {
   const { reduceMotion } = usePricingMotion()
   return (
     <motion.tr
@@ -577,7 +607,7 @@ function CoreRow({ label, values, index }: { label: string; values: string[]; in
           key={`${label}-${index}`}
           className={cn(
             'plan-comparison-cell px-3 py-2 text-center text-xs',
-            TIERS[index] === POPULAR_TIER && 'plan-plus-column bg-brand-orange-soft/60'
+            TIERS[index] === popularTier && 'plan-plus-column bg-brand-orange-soft/60'
           )}
         >
           {value}
@@ -596,6 +626,7 @@ function Cell({ value, label, index }: { value: PlanCell; label: (key: PlanValue
       </span>
     )
   if (value === false) return <Minus className='text-muted-foreground mx-auto size-4' />
+  if (typeof value === 'object') return <span className='text-pretty'>{value.text}</span>
   return <span className='text-pretty'>{label(value)}</span>
 }
 
@@ -632,7 +663,7 @@ function PlanHeading() {
   )
 }
 
-function PlanCards({ plans }: { plans: SubscriptionPlan[] }) {
+function PlanCards({ plans }: { plans: PlanView[] }) {
   const t = useTranslations('plans')
   const track = useRef<HTMLUListElement>(null)
   const [hovered, setHovered] = useState<string | null>(null)
@@ -641,7 +672,7 @@ function PlanCards({ plans }: { plans: SubscriptionPlan[] }) {
   const [pricesStarted, setPricesStarted] = useState(false)
   const [pricesDone, setPricesDone] = useState(false)
   const [pricesInstant, setPricesInstant] = useState(false)
-  const [gift, setGift] = useState<SubscriptionPlan | null>(null)
+  const [gift, setGift] = useState<PlanView | null>(null)
   const [giftOpen, setGiftOpen] = useState(false)
   const giftOrigin = useRef<HTMLButtonElement | null>(null)
   const progress = useMotionValue(1)
@@ -819,7 +850,7 @@ function PlanCards({ plans }: { plans: SubscriptionPlan[] }) {
           <button
             key={plan.id}
             type='button'
-            aria-label={t(`tiers.${plan.tier}`)}
+            aria-label={plan.name}
             className='relative size-5 rounded-full bg-primary/15'
             onClick={() => {
               const root = track.current,
@@ -862,7 +893,7 @@ function PlanCard({
   onSelect,
   onGift
 }: {
-  plan: SubscriptionPlan
+  plan: PlanView
   index: number
   imagesReady: boolean
   pricesStarted: boolean
@@ -874,6 +905,7 @@ function PlanCard({
   onSelect: (id: string) => void
   onGift: (button: HTMLButtonElement) => void
 }) {
+  const highlights = usePlanHighlights()
   const t = useTranslations('plans')
   const locale = useLocale() as Locale
   const giftMillions = plan.gift ? giftValueInMillions(plan.gift.value) : null
@@ -946,7 +978,7 @@ function PlanCard({
                 plan.popular ? 'text-brand-orange' : 'text-primary-foreground'
               )}
             >
-              {t(`tiers.${plan.tier}`)}
+              {plan.name}
               {/* Hình S01: mỗi tên gói có một chiếc lá nhỏ đứng ngay sau. */}
               <Leaf
                 aria-hidden
@@ -1031,7 +1063,7 @@ function PlanCard({
                 {t(`featuresTitleByTier.${plan.tier}`)}
               </p>
               <ul className='mt-3 flex-1 space-y-2'>
-                {(plan.features ?? [plan.perk]).map((feature, i) => (
+                {highlights(plan).map((feature, i) => (
                   <li
                     key={feature}
                     style={{ '--line-delay': `${0.2 + delay + i * 0.09}s` } as CSSProperties}
@@ -1200,15 +1232,7 @@ function PlanPrice({
   )
 }
 
-function PlanBuyButton({
-  plan,
-  disabled,
-  onSelect
-}: {
-  plan: SubscriptionPlan
-  disabled: boolean
-  onSelect: () => void
-}) {
+function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled: boolean; onSelect: () => void }) {
   const t = useTranslations('plans')
   const common = useTranslations('common')
   const router = useRouter()
@@ -1261,7 +1285,7 @@ function PlanBuyButton({
         )}
       >
         <span className={cn('transition-all', pending && 'mx-auto text-sm')}>
-          {pending ? common('loading') : t(`cta.${plan.tier}`)}
+          {pending ? common('loading') : plan.ctaLabel || t(`cta.${plan.tier}`)}
         </span>
         {pending ? (
           <LoaderCircle className='size-5 animate-spin' />

@@ -1,7 +1,8 @@
 'use client'
 
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Form, Image, Input, Row, Space, Typography, type FormInstance } from 'antd'
+import { DeleteOutlined, PlusOutlined, SwapOutlined } from '@ant-design/icons'
+import { Button, Col, Form, Image, Input, Popconfirm, Row, Space, Tooltip, Typography, type FormInstance } from 'antd'
+import type { ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import type { NamePath } from 'antd/es/form/interface'
 
@@ -274,5 +275,58 @@ export function RowListField({
         </Space>
       )}
     </Form.List>
+  )
+}
+
+/**
+ * Nút "Chuyển trạng thái" có bước xác nhận — mọi epic của spec admin đều yêu cầu
+ * hộp xác nhận hiện TRẠNG THÁI HIỆN TẠI và TRẠNG THÁI SAU KHI CHUYỂN. Có
+ * `blockedReason` thì nút mờ đi và giải thích vì sao chưa chuyển được (thiếu dữ
+ * liệu bắt buộc, đang được sử dụng…).
+ */
+export function StatusSwitch({
+  name,
+  current,
+  next,
+  onConfirm,
+  blockedReason,
+  warning
+}: {
+  /** Tên bản ghi hiện trong hộp xác nhận. */
+  name: string
+  current: string
+  next: string
+  onConfirm: () => Promise<unknown> | void
+  blockedReason?: string | null
+  /** Cảnh báo ảnh hưởng (gói đang dùng quà này, lịch còn hiệu lực…). */
+  warning?: ReactNode
+}) {
+  const t = useTranslations('admin')
+
+  if (blockedReason) {
+    return (
+      <Tooltip title={blockedReason}>
+        <Button type='text' size='small' disabled icon={<SwapOutlined />} aria-label={t('actions.switchStatus')} />
+      </Tooltip>
+    )
+  }
+
+  return (
+    <Popconfirm
+      title={t('actions.switchStatusTitle', { name })}
+      description={
+        <div style={{ maxWidth: 300 }}>
+          <Text>{t('actions.switchStatusBody', { current, next })}</Text>
+          {warning ? <div style={{ marginTop: 6 }}>{warning}</div> : null}
+        </div>
+      }
+      okText={t('actions.confirm')}
+      cancelText={t('actions.cancel')}
+      onConfirm={onConfirm}
+    >
+      <Tooltip title={t('actions.switchStatus')}>
+        <Button type='text' size='small' icon={<SwapOutlined />} aria-label={t('actions.switchStatus')} />
+      </Tooltip>
+    </Popconfirm>
   )
 }

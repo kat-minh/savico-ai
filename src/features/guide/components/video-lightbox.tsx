@@ -77,7 +77,7 @@ export function VideoLightbox({
     setTimeout(onCreateProject, reduceMotion ? 0 : 220)
   }
 
-  const editing = video ? !video.videoUrl : false
+  const editing = video ? !video.videoUrl && !video.youtubeId : false
   const articleHref = video ? getArticleHref?.(video) : undefined
 
   const dx = origin?.dx ?? 0
@@ -215,6 +215,8 @@ export function VideoLightbox({
                           >
                             {editing ? (
                               <EditingCover video={video} articleHref={articleHref} />
+                            ) : video.youtubeId ? (
+                              <YouTubeFrame key={video.id} videoId={video.youtubeId} title={video.title} />
                             ) : (
                               <VideoPlayer
                                 key={video.id}
@@ -270,6 +272,21 @@ export function VideoLightbox({
  * clapper mờ vào rồi "đóng nắp" một lần, không thanh điều khiển, không tự
  * phát. "Nhận thông báo" đổi thành ✓ nảy nhẹ một lần sau khi bấm.
  */
+/** Bước hướng dẫn dùng video YouTube (epic GuideStepManagement §7) — trình phát nhúng của YouTube. */
+function YouTubeFrame({ videoId, title }: { videoId: string; title: string }) {
+  return (
+    <div className='bg-muted relative aspect-video w-full overflow-hidden rounded-xl'>
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}
+        title={title}
+        allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
+        allowFullScreen
+        className='absolute inset-0 size-full border-0'
+      />
+    </div>
+  )
+}
+
 function EditingCover({ video, articleHref }: { video: GuideVideo; articleHref?: string }) {
   const t = useTranslations('guide.lightbox')
   const reduceMotion = useReducedMotion()

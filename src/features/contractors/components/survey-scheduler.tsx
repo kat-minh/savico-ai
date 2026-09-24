@@ -29,6 +29,7 @@ import { toast } from 'sonner'
 import { useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth } from '@/shared/auth'
+import { surveyBookableDays, useCmsDocument } from '@/shared/cms'
 import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -46,7 +47,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/
 import { contractorCompareRoute, contractorInviteRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatNumber } from '@/shared/utils'
-import { MAX_INVITATIONS, SURVEY_WINDOW_DAYS } from '../constants/contractors.constants'
+import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor } from '../hooks/use-contractors'
 import { useInvitations, useSendInvitations, useSurveySlots } from '../hooks/use-invitations'
@@ -119,21 +120,13 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const clearCompare = useContractorsStore((s) => s.clearCompare)
 
   /**
-   * 7 ngày làm việc kế tiếp — BỎ CHỦ NHẬT.
-   *
-   * Khung giờ ghi rõ "08:00–17:00, Thứ 2 – Thứ 7"; liệt kê cả Chủ nhật rồi để
-   * khách chọn xong mới biết không ai đi khảo sát là mời họ đặt một lịch chết.
+   * Các ngày làm việc kế tiếp theo Lịch khảo sát do admin cấu hình (spec admin
+   * #13): bỏ ngày nghỉ trong tuần và ngày bị khóa cả ngày — liệt kê một ngày
+   * không ai đi khảo sát là mời khách đặt một lịch chết.
    */
-  const days = useMemo(() => {
-    const today = new Date()
-    const result: Date[] = []
-    for (let offset = 1; result.length < SURVEY_WINDOW_DAYS; offset += 1) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + offset)
-      if (date.getDay() !== 0) result.push(date)
-    }
-    return result
-  }, [])
+  const schedule = useCmsDocument('surveySchedule')
+  const windowDays = schedule.windowDays
+  const days = useMemo(() => surveyBookableDays(schedule), [schedule])
 
   const selectable = useMemo(() => new Set(days.map(toDateKey)), [days])
 
@@ -478,7 +471,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                 {/* Cột trái: lịch tháng. */}
                 <section className='border-b p-5 lg:border-r lg:border-b-0'>
                   <h2 className='font-semibold'>{t('dateTitle')}</h2>
-                  <p className='text-muted-foreground mt-1 text-sm'>{t('dateHint', { days: SURVEY_WINDOW_DAYS })}</p>
+                  <p className='text-muted-foreground mt-1 text-sm'>{t('dateHint', { days: windowDays })}</p>
 
                   <FormField
                     control={form.control}
@@ -499,6 +492,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                           prevLabel={t('prevMonth')}
                           nextLabel={t('nextMonth')}
                           firstAvailableDate={firstDay}
+                          windowDays={windowDays}
                         />
                         <FormMessage />
                       </FormItem>
@@ -1036,7 +1030,8 @@ function MonthCalendar({
   onSelect,
   prevLabel,
   nextLabel,
-  firstAvailableDate
+  firstAvailableDate,
+  windowDays
 }: {
   locale: Locale
   month: Date
@@ -1048,6 +1043,8 @@ function MonthCalendar({
   nextLabel: string
   /** Nhảy về đây khi tháng đang xem không có ngày khả dụng nào (mục 4). */
   firstAvailableDate?: Date
+  /** Số ngày làm việc khách được chọn — theo Lịch khảo sát do admin cấu hình. */
+  windowDays: number
 }) {
   const t = useTranslations('contractors.survey')
   const reduceMotion = useReducedMotion()
@@ -1231,7 +1228,7 @@ function MonthCalendar({
                       <span className={cn('relative z-10', active && 'text-primary-foreground')}>{day.getDate()}</span>
                     </motion.button>
                   </TooltipTrigger>
-                  {!canPick ? <TooltipContent>{t('dateHint', { days: SURVEY_WINDOW_DAYS })}</TooltipContent> : null}
+                  {!canPick ? <TooltipContent>{t('dateHint', { days: windowDays })}</TooltipContent> : null}
                 </Tooltip>
               </motion.div>
             )
@@ -1247,7 +1244,7 @@ function MonthCalendar({
             exit={{ opacity: 0, height: 0 }}
             className='text-brand-orange mt-2 overflow-hidden text-xs'
           >
-            {t('dateHint', { days: SURVEY_WINDOW_DAYS })}
+            {t('dateHint', { days: windowDays })}
           </motion.p>
         ) : null}
       </AnimatePresence>

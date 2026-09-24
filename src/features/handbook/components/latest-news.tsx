@@ -9,6 +9,7 @@ import { Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
+import { useArticleLabels } from '../hooks/use-article-labels'
 import { LATEST_NEWS_COUNT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
 import { sortByNewest } from '../services/handbook.service'
@@ -53,6 +54,7 @@ function NewBadge({ articleId, label }: { articleId: string; label: string }) {
  */
 export function LatestNews() {
   const t = useTranslations('handbook.latest')
+  const { nameOf: labelName } = useArticleLabels()
   const { data: articles, isPending } = useHandbookArticles()
   const latest = useMemo(() => sortByNewest(articles ?? []).slice(0, LATEST_NEWS_COUNT), [articles])
   const [newArticleIds, setNewArticleIds] = useState<Set<string>>(() => new Set())
@@ -291,7 +293,7 @@ export function LatestNews() {
               </span>
               <span className='min-w-0 flex-1 space-y-1.5 p-3'>
                 <span data-latest-reveal='tag' className='flex flex-wrap items-center gap-1.5 group-hover:font-bold'>
-                  <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
+                  <Badge variant='secondary'>{labelName(article.category)}</Badge>
                   {newArticleIds.has(article.id) ? <NewBadge articleId={article.id} label={t('new')} /> : null}
                 </span>
                 <span

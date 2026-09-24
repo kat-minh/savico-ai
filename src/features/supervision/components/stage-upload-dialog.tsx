@@ -12,6 +12,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { cn } from '@/shared/lib/utils'
+import { useStageLabel } from '../hooks/use-stage-label'
 import { STAGE_DOCUMENT_ACCEPT, STAGE_FILE_MAX_BYTES, STAGE_PHOTO_ACCEPT } from '../constants/supervision.constants'
 import { useStageActions } from '../hooks/use-supervision'
 import type { SupervisionStage } from '../types/supervision.types'
@@ -38,7 +39,7 @@ interface PickedFile {
  */
 export function StageUploadDialog({ projectId, stage, onClose }: StageUploadDialogProps) {
   const t = useTranslations('supervision.dashboard.upload')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
   const { user } = useAuth()
   const { upload } = useStageActions(projectId)
 

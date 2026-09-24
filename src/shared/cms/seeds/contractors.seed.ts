@@ -1,5 +1,12 @@
 import { BUILDING_IMAGE } from '@/shared/lib/imagery'
-import type { CmsContractor, CmsContractorContact } from '../cms.types'
+import type {
+  CmsContractor,
+  CmsContractorContact,
+  CmsContractorMatching,
+  CmsContractorProject,
+  CmsContractorScope,
+  CmsSurveySchedule
+} from '../cms.types'
 
 /**
  * Danh bạ nhà thầu mẫu cho bản mock (S12–S15).
@@ -50,7 +57,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     strengths: ['Nhà phố', 'Thi công trọn gói', 'Phần thô', 'Hoàn thiện'],
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2016,
-    teamSize: '32',
+    teamSize: 32,
     officeAddress: 'TP. Buôn Ma Thuột, Đắk Lắk',
     warrantyMonths: 24,
     legalChecks: [
@@ -333,7 +340,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     strengths: ['Nhà phố', 'Biệt thự', 'Thi công trọn gói', 'Nội thất'],
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2014,
-    teamSize: '45',
+    teamSize: 45,
     officeAddress: 'TP. Buôn Ma Thuột, Đắk Lắk',
     warrantyMonths: 18,
     legalChecks: ['Giấy phép kinh doanh đã xác minh', 'Đội ngũ kỹ sư phụ trách', 'Cam kết bảo hành'],
@@ -383,7 +390,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     strengths: ['Nhà phố', 'Phần thô', 'Hoàn thiện'],
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2018,
-    teamSize: '24',
+    teamSize: 24,
     officeAddress: 'TP. Buôn Ma Thuột, Đắk Lắk',
     warrantyMonths: 24,
     legalChecks: ['Giấy phép kinh doanh đã xác minh', 'Đội ngũ kỹ sư phụ trách', 'Bảo hiểm công trình'],
@@ -433,7 +440,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     strengths: ['Biệt thự', 'Thi công trọn gói'],
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2012,
-    teamSize: '60',
+    teamSize: 60,
     officeAddress: 'Cư M’gar, Đắk Lắk',
     warrantyMonths: 36,
     legalChecks: [
@@ -481,7 +488,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     strengths: ['Phần thô', 'Hoàn thiện'],
     photos: [{ caption: 'Trụ sở công ty' }, { caption: 'Văn phòng làm việc' }, { caption: 'Đội ngũ nhân sự' }],
     foundedYear: 2019,
-    teamSize: '18',
+    teamSize: 18,
     officeAddress: 'Krông Pắc, Đắk Lắk',
     warrantyMonths: 12,
     legalChecks: ['Giấy phép kinh doanh đã xác minh', 'Cam kết bảo hành'],
@@ -531,7 +538,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1BAD1Vg29QdMrofKnlOATzo3WuvhabTmz'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2012,
-    teamSize: '19',
+    teamSize: 19,
     officeAddress: 'Quận Hà Đông, Hà Nội',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -665,7 +672,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('19TCVYWDLhsV_nRVxi3FHv3peUrVpvHKI'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2017,
-    teamSize: '15',
+    teamSize: 15,
     officeAddress: 'Quận Cầu Giấy, Hà Nội',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -802,7 +809,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1ypXzZK7I6-JrZrn_dB4xofTHZghLj-fq'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2009,
-    teamSize: '22',
+    teamSize: 22,
     officeAddress: 'TP. Bắc Giang, tỉnh Bắc Giang',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -934,7 +941,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1umlGtWBH61RhDxFkrf8ybLB845dLOkyu'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2013,
-    teamSize: '22',
+    teamSize: 22,
     officeAddress: 'Quận Hải Châu, TP. Đà Nẵng',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1054,7 +1061,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1xzurPOv5lvEZ9Ybehi8F69AIALCq_oND'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2018,
-    teamSize: '11',
+    teamSize: 11,
     officeAddress: 'TP. Huế',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1198,7 +1205,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('18hClLPu4LIjbMWWxq_18GYeIUlQmPjVR'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2013,
-    teamSize: '28',
+    teamSize: 28,
     officeAddress: 'TP. Nha Trang, tỉnh Khánh Hòa',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1334,7 +1341,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1GHJhe2W9vaT_YkJqcx7aY82DNVNfrJQq'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2015,
-    teamSize: '14',
+    teamSize: 14,
     officeAddress: 'TP. Quy Nhơn, tỉnh Bình Định',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1467,7 +1474,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1U5y7T8qNhE2kladkqY7YCWgnIR592mDQ'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2011,
-    teamSize: '32',
+    teamSize: 32,
     officeAddress: 'Quận Tân Bình, TP. Hồ Chí Minh',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1592,7 +1599,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1yzVXB9CtpkHRftDFIVkuUsrziHVhnBes'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2019,
-    teamSize: '16',
+    teamSize: 16,
     officeAddress: 'Quận Bình Thạnh, TP. Hồ Chí Minh',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1726,7 +1733,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('16jHFYSwuwldc88HZTFQntnlkLs7mw3t8'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2010,
-    teamSize: '30',
+    teamSize: 30,
     officeAddress: 'TP. Thủ Dầu Một, tỉnh Bình Dương',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1851,7 +1858,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1sPvY4uU0t8VWEcIpOpI65CQFMhQXPgNC'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2016,
-    teamSize: '12',
+    teamSize: 12,
     officeAddress: 'TP. Cần Thơ',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -1984,7 +1991,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     ],
     // Chưa có trong sheet — số tạm, chờ Hải Âu bổ sung.
     foundedYear: 2015,
-    teamSize: '20',
+    teamSize: 20,
     officeAddress: 'TP. Vũng Tàu',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -2134,7 +2141,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
       { url: driveImage('1Pyu2B65JQAyhRqQqMizweVojx_66yUBR'), caption: 'Đội ngũ nhân sự' }
     ],
     foundedYear: 2011,
-    teamSize: '160+',
+    teamSize: 160,
     officeAddress: 'TP. Hồ Chí Minh',
     warrantyMonths: 24,
     legalChecks: LEGAL_CHECKS,
@@ -2248,7 +2255,94 @@ const CONTACTS: Record<string, CmsContractorContact> = {
   'ctr-daiviet': { person: 'Võ Đại', phone: '0903 987 654', email: 'info@daivietgroup.vn' }
 }
 
-export const CONTRACTORS_SEED: CmsContractor[] = DIRECTORY.map((contractor) => {
+/** Nhóm lọc cũ của dự án → Loại công trình / Phạm vi thi công theo danh mục mới. */
+const TYPE_OF_CATEGORY: Partial<Record<NonNullable<CmsContractorProject['category']>, string>> = {
+  house: 'townhouse',
+  villa: 'villa',
+  renovation: 'townhouse'
+}
+const SCOPE_OF_CONSTRUCTION: Record<NonNullable<CmsContractorProject['constructionScope']>, CmsContractorScope> = {
+  turnkey: 'turnkey',
+  structural: 'shell',
+  finishing: 'finishing'
+}
+
+/**
+ * Điền các trường năng lực của epic Quản lý nhà thầu cho dữ liệu mẫu nhập từ
+ * sheet trước khi có epic: Loại công trình và Phạm vi thi công suy từ dự án đã
+ * làm, số năm kinh nghiệm từ năm thành lập. Dự án nào đã có giá trị thì giữ.
+ */
+function withCapability(contractor: Omit<CmsContractor, 'contact'>): Omit<CmsContractor, 'contact'> {
+  const projects = contractor.featuredProjects.map((project) => ({
+    ...project,
+    buildingTypeId: project.buildingTypeId ?? (project.category ? TYPE_OF_CATEGORY[project.category] : undefined),
+    scope:
+      project.scope ??
+      (project.category === 'renovation'
+        ? 'finishing'
+        : project.constructionScope
+          ? SCOPE_OF_CONSTRUCTION[project.constructionScope]
+          : undefined),
+    featured: project.featured ?? false,
+    hidden: project.hidden ?? false
+  }))
+  const types = [...new Set(projects.map((project) => project.buildingTypeId).filter((id) => id !== undefined))]
+  const scopes = [...new Set(projects.map((project) => project.scope).filter((scope) => scope !== undefined))]
+  return {
+    ...contractor,
+    featuredProjects: projects,
+    // Nhà thầu xây dựng dân dụng trong danh bạ mẫu đều nhận nhà phố / biệt thự và
+    // ba phạm vi xây dựng; dự án đã làm bổ sung thêm loại, phạm vi thực tế khác.
+    buildingTypeIds: contractor.buildingTypeIds ?? [...new Set(['townhouse', 'villa', ...types])],
+    scopes: contractor.scopes ?? [...new Set<CmsContractorScope>(['turnkey', 'shell', 'finishing', ...scopes])],
+    experienceYears: contractor.experienceYears ?? Math.max(0, 2026 - contractor.foundedYear),
+    surveyCapable: contractor.surveyCapable ?? contractor.surveyWithinHours > 0
+  }
+}
+
+export const CONTRACTORS_SEED: CmsContractor[] = DIRECTORY.map((raw) => {
+  const contractor = withCapability(raw)
   const contact = CONTACTS[contractor.id]
   return contact ? { ...contractor, contact } : { ...contractor }
 })
+
+/**
+ * Quy tắc đề xuất mặc định: cả ba miền, 4 nấc bán kính của S12 (mặc định 10 km),
+ * mọi loại công trình nhà ở, và chỉ đề xuất nhà thầu Đang nhận dự án có năng lực
+ * khớp hồ sơ (ContractorManagement §1, §12).
+ */
+export const CONTRACTOR_MATCHING_SEED: CmsContractorMatching = {
+  supportedRegions: ['north', 'central', 'south'],
+  radiusOptions: [5, 10, 20, 50],
+  defaultRadiusKm: 10,
+  buildingTypeIds: ['townhouse', 'villa', 'roofed', 'garden', 'apartment'],
+  criteria: {
+    acceptingOnly: true,
+    verifiedOnly: false,
+    legalVerifiedOnly: false,
+    surveyCapableOnly: false,
+    capabilityMatch: true,
+    minRating: 0
+  }
+}
+
+/**
+ * Lịch khảo sát mặc định (STORY-029): Thứ 2 – Thứ 7, 7 ngày làm việc kế tiếp,
+ * khung 1 tiếng 08:00–17:00 nghỉ trưa 12:00–13:00. Mã `slot-0…7` giữ đúng thứ tự
+ * cũ vì lời mời đã gửi trỏ tới các mã này.
+ */
+export const SURVEY_SCHEDULE_SEED: CmsSurveySchedule = {
+  workingDays: [1, 2, 3, 4, 5, 6],
+  windowDays: 7,
+  slots: [
+    ['08:00', '09:00'],
+    ['09:00', '10:00'],
+    ['10:00', '11:00'],
+    ['11:00', '12:00'],
+    ['13:00', '14:00'],
+    ['14:00', '15:00'],
+    ['15:00', '16:00'],
+    ['16:00', '17:00']
+  ].map(([start = '', end = ''], index) => ({ id: `slot-${index}`, start, end, active: true })),
+  closures: []
+}

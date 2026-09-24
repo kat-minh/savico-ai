@@ -18,7 +18,9 @@ const nextConfig: NextConfig = {
       // Replace with the CMS asset host once admin uploads the real catalogue.
       { protocol: 'https', hostname: 'images.unsplash.com' },
       // Ảnh nhà thầu gửi qua Google Drive (`driveImage` trong contractors.seed).
-      { protocol: 'https', hostname: 'lh3.googleusercontent.com' }
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      // Thumbnail video YouTube của các bước hướng dẫn (epic GuideStepManagement).
+      { protocol: 'https', hostname: 'i.ytimg.com' }
       // Add CDN / asset hosts served by the backend here.
       // { protocol: 'https', hostname: 'cdn.example.com' },
     ]

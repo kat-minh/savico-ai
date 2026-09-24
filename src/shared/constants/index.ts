@@ -1,6 +1,8 @@
 export { QUERY_KEY_ROOTS, type QueryKeyRoot } from './query-keys'
 export {
   ADMIN_ROUTE_PREFIX,
+  adminContractorRoute,
+  adminCustomerRoute,
   ADMIN_ROUTES,
   GUEST_ONLY_ROUTES,
   PROTECTED_ROUTE_PREFIXES,

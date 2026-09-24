@@ -13,16 +13,13 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import type { ReactNode } from 'react'
 
-import { useSearchParams } from 'next/navigation'
-
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { LOCALES, type Locale } from '@/i18n/routing'
 import { CMS_LOCALES } from '@/shared/cms'
 import { ROUTES } from '@/shared/constants'
 import { useCmsLocaleStore } from '../../store/cms-locale.store'
 import { useHasUnsavedChanges } from '../../store/dirty.store'
-import { ADMIN_CONTENT_PAGES, contentPanelsOf } from '../../constants/admin-pages.config'
-import { ADMIN_NAV, CONTENT_PAGE_PUBLIC_HREF } from './admin-nav.config'
+import { ADMIN_NAV } from './admin-nav.config'
 
 const { Header } = Layout
 const { Text } = Typography
@@ -53,7 +50,6 @@ export function AdminHeader({
   const pathname = usePathname()
   const router = useRouter()
   const uiLocale = useLocale()
-  const searchParams = useSearchParams()
   const screens = Grid.useBreakpoint()
   const { modal } = App.useApp()
   const { resolvedTheme, setTheme } = useTheme()
@@ -81,36 +77,11 @@ export function AdminHeader({
     })
   }
 
-  /**
-   * Đường dẫn hiển thị: NHÓM › TRANG › KHỐI.
-   *
-   * Trang nội dung nằm ở route động `/admin/content/[page]` với khối trong
-   * `?tab=`, nên tra riêng; các mục còn lại tra thẳng trong `ADMIN_NAV`.
-   */
-  const contentPage = ADMIN_CONTENT_PAGES.find((page) => page.route === pathname)
-
-  const trail: string[] = (() => {
-    if (contentPage) {
-      const panels = contentPanelsOf(contentPage)
-      const requested = searchParams.get('tab') ?? ''
-      const active = panels.find((panel) => panel === requested) ?? panels[0]
-      return [
-        t('navGroups.content'),
-        t(`pages.${contentPage.key}.title`),
-        // Trang một khối thì tên khối chỉ lặp lại tên trang — bỏ.
-        ...(panels.length > 1 && active ? [t(`workspace.panels.${active}`)] : [])
-      ]
-    }
-
-    const match = ADMIN_NAV.flatMap((group) => group.items.map((item) => ({ group, item })))
-      .filter(({ item }) => pathname === item.href || pathname.startsWith(`${item.href}/`))
-      .sort((a, b) => b.item.href.length - a.item.href.length)[0]
-
-    return match ? [t(`navGroups.${match.group.key}`), t(`nav.${match.item.key}`)] : [t('shell.title')]
-  })()
-
-  // Chỉ trang nội dung mới có trang công khai tương ứng; còn lại mở trang chủ.
-  const publicHref = (contentPage && CONTENT_PAGE_PUBLIC_HREF[contentPage.key]) ?? ROUTES.HOME
+  /** Đường dẫn hiển thị: NHÓM › TRANG, tra trong `ADMIN_NAV` (mục dài nhất khớp trước). */
+  const match = ADMIN_NAV.flatMap((group) => group.items.map((item) => ({ group, item })))
+    .filter(({ item }) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.item.href.length - a.item.href.length)[0]
+  const trail = match ? [t(`navGroups.${match.group.key}`), t(`nav.${match.item.key}`)] : [t('shell.title')]
 
   return (
     <Header
@@ -174,10 +145,8 @@ export function AdminHeader({
           />
         </Tooltip>
 
-        {/* Mở đúng TRANG ĐANG SỬA chứ không phải luôn về trang chủ — sửa xong
-            là xem được ngay kết quả, không phải tự dò đường. */}
         <Tooltip title={t('shell.viewSite')}>
-          <Link href={publicHref} target='_blank' rel='noreferrer'>
+          <Link href={ROUTES.HOME} target='_blank' rel='noreferrer'>
             <Button type='text' aria-label={t('shell.viewSite')} icon={<ExportOutlined />} />
           </Link>
         </Tooltip>

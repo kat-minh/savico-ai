@@ -11,6 +11,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, supervisionRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDayMonth } from '@/shared/utils'
+import { useStageLabel } from '../hooks/use-stage-label'
 import { STAGE_COUNT, STANDARD_SCHEDULE_DAYS } from '../constants/supervision.constants'
 import { useSupervisionProject } from '../hooks/use-supervision'
 import {
@@ -46,7 +47,7 @@ interface SupervisionDashboardProps {
  */
 export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashboardProps) {
   const t = useTranslations('supervision.dashboard')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
   const { data: project, isPending } = useSupervisionProject(projectId)
 
   const [uploadStage, setUploadStage] = useState<SupervisionStage | null>(null)
@@ -221,7 +222,7 @@ function DashboardBanner({
   onUpload: (stage: SupervisionStage) => void
 }) {
   const t = useTranslations('supervision.dashboard.banner')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
 
   const stage = currentStage(project)
   const remaining = daysUntil(stage.plannedEnd)
@@ -276,7 +277,7 @@ function DashboardBanner({
 /** Thẻ dự án + 5 ô số của bản mô tả. */
 function ProjectCard({ project }: { project: SupervisionProject }) {
   const t = useTranslations('supervision.dashboard.project')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
   const tAlias = useTranslations('supervision.tierAlias')
   const tTiers = useTranslations('supervision.tiers')
 
@@ -362,7 +363,7 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
 /** Sợi chỉ 6 giai đoạn có mốc HÔM NAY. */
 function StageThread({ project }: { project: SupervisionProject }) {
   const t = useTranslations('supervision.dashboard.thread')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
   const elapsed = elapsedPercent(project)
 
   /**
@@ -517,7 +518,7 @@ function StageReminderChip({ stage, plain = false }: { stage: SupervisionStage; 
 /** Bảng "Lịch trình 6 giai đoạn" — luôn mở (xem ghi chú ở đầu file). */
 function ScheduleTable({ project }: { project: SupervisionProject }) {
   const t = useTranslations('supervision.dashboard.schedule')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
   const tStatus = useTranslations('supervision.dashboard.status')
 
   const short = (value?: string) => (value ? formatDayMonth(value) : '—')

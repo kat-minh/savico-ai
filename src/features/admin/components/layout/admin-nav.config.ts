@@ -1,37 +1,33 @@
 'use client'
 
 import {
+  AimOutlined,
   AppstoreOutlined,
   AuditOutlined,
   BookOutlined,
   CalculatorOutlined,
   CalendarOutlined,
   DashboardOutlined,
-  DiffOutlined,
   DollarOutlined,
   FileTextOutlined,
-  FlagOutlined,
   GiftOutlined,
   HomeOutlined,
-  LayoutOutlined,
-  MenuOutlined,
+  OrderedListOutlined,
+  PictureOutlined,
   PlayCircleOutlined,
-  ProjectOutlined,
   SafetyCertificateOutlined,
   ScheduleOutlined,
   SendOutlined,
   SettingOutlined,
-  StarOutlined,
+  SkinOutlined,
   TagOutlined,
   TeamOutlined,
   ThunderboltOutlined,
-  ToolOutlined,
-  TranslationOutlined,
   UserOutlined
 } from '@ant-design/icons'
 import type { ComponentType } from 'react'
 
-import { ADMIN_ROUTES, ROUTES, type AdminRoute, type AppRoute } from '@/shared/constants'
+import { ADMIN_ROUTES, type AdminRoute } from '@/shared/constants'
 
 /**
  * Menu trái — dựng quanh VIỆC VẬN HÀNH HẰNG NGÀY, theo thứ tự ưu tiên.
@@ -73,11 +69,22 @@ export const ADMIN_NAV = [
     ]
   },
   {
+    key: 'packages',
+    icon: GiftOutlined,
+    items: [
+      { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: GiftOutlined },
+      { key: 'gifts', href: ADMIN_ROUTES.GIFTS, icon: GiftOutlined },
+      { key: 'supervisionPackages', href: ADMIN_ROUTES.SUPERVISION_PACKAGES, icon: AuditOutlined }
+    ]
+  },
+  {
     key: 'contractorFlow',
     icon: TeamOutlined,
     items: [
-      { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined },
-      { key: 'contractors', href: ADMIN_ROUTES.CONTRACTORS, icon: TeamOutlined }
+      { key: 'contractors', href: ADMIN_ROUTES.CONTRACTORS, icon: TeamOutlined },
+      { key: 'contractorMatching', href: ADMIN_ROUTES.CONTRACTOR_MATCHING, icon: AimOutlined },
+      { key: 'surveySchedule', href: ADMIN_ROUTES.SURVEY_SCHEDULE, icon: ScheduleOutlined },
+      { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined }
     ]
   },
   {
@@ -85,22 +92,29 @@ export const ADMIN_NAV = [
     icon: SafetyCertificateOutlined,
     items: [
       { key: 'inspections', href: ADMIN_ROUTES.INSPECTIONS, icon: SafetyCertificateOutlined },
-      { key: 'changeRequests', href: ADMIN_ROUTES.CHANGE_REQUESTS, icon: DiffOutlined }
+      { key: 'supervisionStages', href: ADMIN_ROUTES.SUPERVISION_STAGES, icon: OrderedListOutlined }
     ]
   },
   {
     key: 'consult',
     icon: CalendarOutlined,
-    items: [{ key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined }]
+    items: [
+      { key: 'consultants', href: ADMIN_ROUTES.CONSULTANTS, icon: TeamOutlined },
+      { key: 'bookings', href: ADMIN_ROUTES.BOOKINGS, icon: CalendarOutlined }
+    ]
   },
   {
     key: 'people',
     icon: UserOutlined,
+    items: [{ key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined }]
+  },
+  {
+    key: 'catalog',
+    icon: AppstoreOutlined,
     items: [
-      { key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined },
-      { key: 'projects', href: ADMIN_ROUTES.PROJECTS, icon: ProjectOutlined },
-      { key: 'reviews', href: ADMIN_ROUTES.REVIEWS, icon: StarOutlined },
-      { key: 'reports', href: ADMIN_ROUTES.REPORTS, icon: FlagOutlined }
+      { key: 'buildingTypes', href: ADMIN_ROUTES.BUILDING_TYPES, icon: AppstoreOutlined },
+      { key: 'architectureStyles', href: ADMIN_ROUTES.ARCHITECTURE_STYLES, icon: HomeOutlined },
+      { key: 'interiorStyles', href: ADMIN_ROUTES.INTERIOR_STYLES, icon: SkinOutlined }
     ]
   },
   {
@@ -108,6 +122,11 @@ export const ADMIN_NAV = [
     icon: BookOutlined,
     items: [
       { key: 'templates', href: ADMIN_ROUTES.TEMPLATES, icon: BookOutlined },
+      { key: 'templates3d', href: ADMIN_ROUTES.TEMPLATES_3D, icon: PictureOutlined },
+      { key: 'templateViews', href: ADMIN_ROUTES.TEMPLATE_VIEWS, icon: ThunderboltOutlined },
+      { key: 'articles', href: ADMIN_ROUTES.ARTICLES, icon: FileTextOutlined },
+      { key: 'articleLabels', href: ADMIN_ROUTES.ARTICLE_LABELS, icon: TagOutlined },
+      { key: 'handbookSteps', href: ADMIN_ROUTES.HANDBOOK_STEPS, icon: OrderedListOutlined },
       { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
     ]
   },
@@ -115,12 +134,10 @@ export const ADMIN_NAV = [
     key: 'config',
     icon: SettingOutlined,
     items: [
-      { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: GiftOutlined },
-      { key: 'supervisionPackages', href: ADMIN_ROUTES.SUPERVISION_PACKAGES, icon: AuditOutlined },
-      { key: 'consultPackages', href: ADMIN_ROUTES.CONSULT_PACKAGES, icon: ScheduleOutlined },
-      { key: 'quotas', href: ADMIN_ROUTES.QUOTAS, icon: ThunderboltOutlined },
-      { key: 'catalog', href: ADMIN_ROUTES.CATALOG, icon: AppstoreOutlined },
-      { key: 'pricing', href: ADMIN_ROUTES.PRICING, icon: CalculatorOutlined }
+      { key: 'costGroups', href: ADMIN_ROUTES.COST_GROUPS, icon: AppstoreOutlined },
+      { key: 'costItems', href: ADMIN_ROUTES.COST_ITEMS, icon: OrderedListOutlined },
+      { key: 'materialPrices', href: ADMIN_ROUTES.MATERIAL_PRICES, icon: CalculatorOutlined },
+      { key: 'estimateAdvice', href: ADMIN_ROUTES.ESTIMATE_ADVICE, icon: FileTextOutlined }
     ]
   }
 ] as const satisfies readonly {
@@ -135,29 +152,3 @@ export type AdminNavItem = AdminNavGroup['items'][number]
 
 /** Mọi mục ngoài nhóm nội dung, phẳng — dùng để tra tiêu đề trang theo pathname. */
 export const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = ADMIN_NAV.flatMap<AdminNavItem>((group) => [...group.items])
-
-/** Icon của từng trang nội dung, tra theo `key` trong `admin-pages.config`. */
-export const CONTENT_PAGE_ICON: Record<string, ComponentType> = {
-  home: HomeOutlined,
-  handbook: BookOutlined,
-  guide: PlayCircleOutlined,
-  plans: DollarOutlined,
-  consult: TeamOutlined,
-  design: ToolOutlined,
-  account: UserOutlined,
-  legal: LayoutOutlined,
-  shell: MenuOutlined,
-  common: TranslationOutlined
-}
-
-/** Trang công khai tương ứng — nút "Mở site" mở đúng trang đang sửa. */
-export const CONTENT_PAGE_PUBLIC_HREF: Record<string, AppRoute> = {
-  home: ROUTES.HOME,
-  handbook: ROUTES.HANDBOOK,
-  guide: ROUTES.GUIDE,
-  plans: ROUTES.PLANS,
-  consult: ROUTES.CONSULT,
-  design: ROUTES.DESIGN,
-  account: ROUTES.ACCOUNT,
-  legal: ROUTES.TERMS
-}

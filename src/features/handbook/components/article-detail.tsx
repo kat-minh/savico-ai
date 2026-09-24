@@ -28,6 +28,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
+import { useArticleLabels } from '../hooks/use-article-labels'
 import { useHandbookArticle, useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, selectRelatedArticles } from '../services/handbook.service'
 import { ConsultButton } from './consult-button'
@@ -46,6 +47,7 @@ interface ArticleDetailProps {
  */
 export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   const t = useTranslations('handbook.article')
+  const { nameOf: labelName } = useArticleLabels()
   const router = useRouter()
 
   const { data: article, isPending, isError, refetch } = useHandbookArticle(slug)
@@ -379,7 +381,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
             {stage || topic ? (
               <Badge variant='secondary'>{[stage?.title, topic?.title].filter(Boolean).join(' · ')}</Badge>
             ) : (
-              <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
+              <Badge variant='secondary'>{labelName(article.category)}</Badge>
             )}
 
             <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>

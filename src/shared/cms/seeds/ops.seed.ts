@@ -19,7 +19,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 4,
     libraryCreditsLeft: 40,
     status: 'active',
-    createdAt: '2026-06-02'
+    createdAt: '2026-06-02',
+    emailVerified: true,
+    loginMethod: 'google'
   },
   {
     id: 'usr-0002',
@@ -32,7 +34,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 1,
     libraryCreditsLeft: 10,
     status: 'active',
-    createdAt: '2026-06-14'
+    createdAt: '2026-06-14',
+    emailVerified: true,
+    loginMethod: 'password'
   },
   {
     id: 'usr-0003',
@@ -45,7 +49,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 16,
     libraryCreditsLeft: 160,
     status: 'active',
-    createdAt: '2026-05-21'
+    createdAt: '2026-05-21',
+    emailVerified: true,
+    loginMethod: 'password'
   },
   {
     id: 'usr-0004',
@@ -56,7 +62,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 1,
     libraryCreditsLeft: 10,
     status: 'active',
-    createdAt: '2026-07-30'
+    createdAt: '2026-07-30',
+    emailVerified: false,
+    loginMethod: 'google'
   },
   {
     id: 'usr-0005',
@@ -69,7 +77,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 0,
     libraryCreditsLeft: 0,
     status: 'active',
-    createdAt: '2026-07-19'
+    createdAt: '2026-07-19',
+    emailVerified: true,
+    loginMethod: 'password'
   },
   {
     id: 'usr-0006',
@@ -81,7 +91,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 0,
     libraryCreditsLeft: 0,
     status: 'suspended',
-    createdAt: '2026-04-08'
+    createdAt: '2026-04-08',
+    emailVerified: true,
+    loginMethod: 'google'
   },
   {
     id: 'usr-0007',
@@ -94,7 +106,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 2,
     libraryCreditsLeft: 20,
     status: 'active',
-    createdAt: '2026-08-06'
+    createdAt: '2026-08-06',
+    emailVerified: true,
+    loginMethod: 'password'
   },
   {
     id: 'usr-0008',
@@ -107,7 +121,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 9,
     libraryCreditsLeft: 90,
     status: 'active',
-    createdAt: '2026-03-27'
+    createdAt: '2026-03-27',
+    emailVerified: true,
+    loginMethod: 'password'
   },
   {
     id: 'usr-0009',
@@ -118,7 +134,9 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 1,
     libraryCreditsLeft: 10,
     status: 'active',
-    createdAt: '2026-08-11'
+    createdAt: '2026-08-11',
+    emailVerified: false,
+    loginMethod: 'google'
   },
   {
     id: 'usr-0010',
@@ -130,7 +148,38 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
     designCreditsLeft: 0,
     libraryCreditsLeft: 0,
     status: 'active',
-    createdAt: '2026-01-05'
+    createdAt: '2026-01-05',
+    emailVerified: true,
+    loginMethod: 'password'
+  },
+  {
+    id: 'usr-0011',
+    name: 'Đỗ Thanh Tâm',
+    email: 'tam.do@gmail.com',
+    phone: '0909222333',
+    role: 'customer',
+    planTier: 'advanced',
+    planExpiresAt: '2026-12-18',
+    designCreditsLeft: 4,
+    libraryCreditsLeft: 26,
+    status: 'active',
+    createdAt: '2026-09-18',
+    emailVerified: true,
+    loginMethod: 'google'
+  },
+  {
+    id: 'usr-0012',
+    name: 'Võ Hoàng Long',
+    email: 'long.vo@gmail.com',
+    phone: '0914777888',
+    role: 'customer',
+    planTier: null,
+    designCreditsLeft: 0,
+    libraryCreditsLeft: 0,
+    status: 'active',
+    createdAt: '2026-09-10',
+    emailVerified: true,
+    loginMethod: 'password'
   }
 ]
 

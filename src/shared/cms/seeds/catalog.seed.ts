@@ -1,21 +1,46 @@
 import { STYLE_IMAGE } from '@/shared/lib/imagery'
-import type { CmsBuildingTypeOption, CmsStyleOption, CmsUnitPrice } from '../cms.types'
+import type { CmsBuildingTypeOption, CmsFloorOption, CmsStyleOption } from '../cms.types'
 
 /**
  * Danh mục Bước 1 và bảng đơn giá dự toán — mục X, #6 ghi rõ admin cấu hình
  * được. Seed dưới đây phản chiếu `features/design/constants` để hai bên khớp
  * nhau; sửa ở trang quản trị là đổi bảng cấu hình admin đang dùng.
  */
+/** Năm phương án Số tầng xác nhận từ giao diện (epic ConstructionTypeManagement §3). */
+export const FLOOR_OPTIONS_SEED: CmsFloorOption[] = [
+  { id: 'ground', label: 'Trệt', status: 'active', order: 1 },
+  { id: 'ground+1', label: 'Trệt + 1 lầu', status: 'active', order: 2 },
+  { id: 'ground+2', label: 'Trệt + 2 lầu', status: 'active', order: 3 },
+  { id: 'ground+3', label: 'Trệt + 3 lầu', status: 'active', order: 4 },
+  { id: 'ground+4', label: 'Trệt + 4 lầu', status: 'active', order: 5 }
+]
+
+const ALL_FLOORS = FLOOR_OPTIONS_SEED.map((option) => option.id)
+
+/** Nhà ở nhiều tầng: hỏi Số tầng và Tum, cả hai bắt buộc. */
+const HOUSE_CONFIG: Pick<CmsBuildingTypeOption, 'floors' | 'attic'> = {
+  floors: { applies: true, required: true, optionIds: ALL_FLOORS },
+  attic: { mode: 'choice', required: true }
+}
+
 export const BUILDING_TYPES_SEED: CmsBuildingTypeOption[] = [
-  { id: 'townhouse', label: 'Nhà phố', enabled: true, order: 1 },
-  { id: 'villa', label: 'Villa - Biệt thự', enabled: true, order: 2 },
-  { id: 'roofed', label: 'Nhà mái', enabled: true, order: 3 },
-  { id: 'garden', label: 'Nhà vườn - Nhà cấp 4', enabled: true, order: 4 },
-  { id: 'apartment', label: 'Căn hộ', enabled: true, order: 5 }
+  { id: 'townhouse', label: 'Nhà phố', status: 'active', order: 1, ...HOUSE_CONFIG },
+  { id: 'villa', label: 'Villa - Biệt thự', status: 'active', order: 2, ...HOUSE_CONFIG },
+  { id: 'roofed', label: 'Nhà mái', status: 'active', order: 3, ...HOUSE_CONFIG },
+  { id: 'garden', label: 'Nhà vườn - Nhà cấp 4', status: 'active', order: 4, ...HOUSE_CONFIG },
+  {
+    id: 'apartment',
+    label: 'Căn hộ',
+    description: 'Căn hộ khóa một mặt sàn — không hỏi Số tầng và Tum.',
+    status: 'active',
+    order: 5,
+    floors: { applies: false, required: false, optionIds: [] },
+    attic: { mode: 'none', required: false }
+  }
 ]
 
 /** Kiểu kiến trúc & phong cách, kèm loại công trình mà nó xuất hiện (Phụ lục A, trường 7). */
-export const STYLE_OPTIONS_SEED: CmsStyleOption[] = [
+const ARCHITECTURE_STYLES: Omit<CmsStyleOption, 'kind'>[] = [
   {
     id: 'modern',
     label: 'Hiện đại',
@@ -106,117 +131,27 @@ export const STYLE_OPTIONS_SEED: CmsStyleOption[] = [
   }
 ]
 
-/**
- * Đơn giá theo m² sàn cho ba gói hoàn thiện (mục III.2, trường 6). Con số minh
- * họa — Bên A chốt bảng chính thức, admin cập nhật không cần deploy.
- */
-export const UNIT_PRICES_SEED: CmsUnitPrice[] = [
-  {
-    id: 'up-foundation',
-    section: 'structure',
-    label: 'Phần móng',
-    unit: 'm² sàn',
-    basic: 1_450_000,
-    standard: 1_650_000,
-    vip: 1_900_000
-  },
-  {
-    id: 'up-frame',
-    section: 'structure',
-    label: 'Kết cấu cột - dầm - sàn',
-    unit: 'm² sàn',
-    basic: 2_100_000,
-    standard: 2_400_000,
-    vip: 2_850_000
-  },
-  {
-    id: 'up-masonry',
-    section: 'structure',
-    label: 'Tường xây - tô trát',
-    unit: 'm² sàn',
-    basic: 680_000,
-    standard: 760_000,
-    vip: 880_000
-  },
-  {
-    id: 'up-roof',
-    section: 'structure',
-    label: 'Mái & chống thấm',
-    unit: 'm² sàn',
-    basic: 420_000,
-    standard: 510_000,
-    vip: 640_000
-  },
-  {
-    id: 'up-tiling',
-    section: 'finishing',
-    label: 'Ốp lát',
-    unit: 'm² sàn',
-    basic: 520_000,
-    standard: 720_000,
-    vip: 1_150_000
-  },
-  {
-    id: 'up-painting',
-    section: 'finishing',
-    label: 'Sơn bả',
-    unit: 'm² sàn',
-    basic: 180_000,
-    standard: 240_000,
-    vip: 340_000
-  },
-  {
-    id: 'up-doors',
-    section: 'finishing',
-    label: 'Cửa & vách',
-    unit: 'm² sàn',
-    basic: 460_000,
-    standard: 680_000,
-    vip: 1_050_000
-  },
-  {
-    id: 'up-sanitary',
-    section: 'finishing',
-    label: 'Thiết bị vệ sinh',
-    unit: 'bộ',
-    basic: 8_500_000,
-    standard: 14_000_000,
-    vip: 26_000_000
-  },
-  {
-    id: 'up-mep',
-    section: 'finishing',
-    label: 'Điện nước & chiếu sáng',
-    unit: 'm² sàn',
-    basic: 350_000,
-    standard: 460_000,
-    vip: 690_000
-  },
-  {
-    id: 'up-joinery',
-    section: 'interior',
-    label: 'Đồ gỗ cố định',
-    unit: 'm² sàn',
-    basic: 1_200_000,
-    standard: 2_100_000,
-    vip: 3_800_000
-  },
-  {
-    id: 'up-loose',
-    section: 'interior',
-    label: 'Đồ rời & trang trí',
-    unit: 'm² sàn',
-    basic: 650_000,
-    standard: 1_150_000,
-    vip: 2_400_000
-  },
-  {
-    id: 'up-design',
-    section: 'interior',
-    label: 'Thiết kế nội thất',
-    unit: 'm² sàn',
-    basic: 120_000,
-    standard: 180_000,
-    vip: 300_000
-  }
+/** Phong cách nội thất (STORY-004) — áp cho mọi loại công trình. */
+const INTERIOR_STYLES: Omit<CmsStyleOption, 'kind'>[] = [
+  ['in-modern', 'Hiện đại (Modern)'],
+  ['in-japandi', 'Japandi'],
+  ['in-neoclassical', 'Tân cổ điển (Neoclassical)'],
+  ['in-indochine', 'Indochine'],
+  ['in-luxury', 'Luxury'],
+  ['in-scandinavian', 'Scandinavian'],
+  ['in-minimalism', 'Minimalism'],
+  ['in-wabi-sabi', 'Wabi-Sabi']
+].map(([id = '', label = ''], index) => ({
+  id,
+  label,
+  imageUrl: '',
+  buildingTypeIds: BUILDING_TYPES_SEED.map((type) => type.id),
+  enabled: true,
+  order: index + 1
+}))
+
+/** Hai danh mục phong cách chung một bảng, phân biệt bằng `kind` (spec admin #1). */
+export const STYLE_OPTIONS_SEED: CmsStyleOption[] = [
+  ...ARCHITECTURE_STYLES.map((style) => ({ ...style, kind: 'architecture' as const })),
+  ...INTERIOR_STYLES.map((style) => ({ ...style, kind: 'interior' as const }))
 ]

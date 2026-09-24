@@ -20,14 +20,16 @@ const STATUS_TONE: Record<Invitation['status'], string> = {
   sent: 'text-warning-strong',
   received: 'text-primary',
   accepted: 'text-primary',
-  done: 'text-primary-strong'
+  done: 'text-primary-strong',
+  rejected: 'text-destructive'
 }
 
 const STATUS_DOT_TONE: Record<Invitation['status'], string> = {
   sent: 'bg-warning-strong',
   received: 'bg-primary',
   accepted: 'bg-primary',
-  done: 'bg-primary-strong'
+  done: 'bg-primary-strong',
+  rejected: 'bg-destructive'
 }
 
 function DossierRow({

@@ -43,7 +43,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth, useAuthDialogStore } from '@/shared/auth'
-import { useCmsCollection, useCmsDocument } from '@/shared/cms'
+import { isContractorEligible, useCmsCollection, useCmsDocument } from '@/shared/cms'
 import { Photo, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { CONTRACTOR_PREVIEW_ID, contractorFirmRoute, contractorMatchesRoute } from '@/shared/constants/routes'
@@ -55,7 +55,6 @@ import {
   CONTRACTOR_SORTS,
   MATCHES_PINNED_CONTRACTOR_KEY,
   PROJECT_SCALES,
-  SEARCH_RADII,
   START_WINDOWS
 } from '../constants/contractors.constants'
 import { useBriefs, useCreateBrief, useCreateBriefFromDesign } from '../hooks/use-brief'
@@ -398,8 +397,13 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
    * site"; chưa thay thì để khung nét đứt như mọi chỗ chờ asset khác.
    */
   const mapImage = useCmsDocument('uiAssets')['map.contractors']?.trim()
-  // Danh bạ do vận hành quản lý ở /admin/contractors; nhà thầu bị ẩn không lên landing.
-  const directory = useCmsCollection('contractors').filter((contractor) => !contractor.hidden)
+  // Danh bạ do vận hành quản lý ở /admin/contractors; chỉ nhà thầu đạt Quy tắc đề
+  // xuất (không Ẩn, đúng khu vực, đủ tiêu chí) mới lên landing.
+  const matching = useCmsDocument('contractorMatching')
+  const today = new Date().toISOString().slice(0, 10)
+  const directory = useCmsCollection('contractors').filter((contractor) =>
+    isContractorEligible(contractor, matching, today)
+  )
   const [featuredContractorId, setFeaturedContractorId] = useState('')
   const featured = useMemo(
     () => directory.find((contractor) => contractor.id === featuredContractorId) ?? directory[0],
@@ -430,11 +434,14 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
    * giá/lịch nhận việc để lọc theo.
    */
   const [openCriterion, setOpenCriterion] = useState<CriterionItem['key'] | null>(null)
-  const [radiusKm, setRadiusKm] = useState<SearchRadiusKm>(50)
+  const radiusOptions = matching.radiusOptions
+  const widestRadius = radiusOptions.at(-1) ?? 50
+  const [radiusChoice, setRadiusKm] = useState<SearchRadiusKm | null>(null)
+  const radiusKm = radiusChoice ?? widestRadius
   const [criterionSelections, setCriterionSelections] = useState<Partial<Record<CriterionItem['key'], string>>>({})
 
   const criterionOptions: Record<CriterionItem['key'], string[]> = {
-    area: SEARCH_RADII.map((km) => tCommon('distanceShort', { km })),
+    area: radiusOptions.map((km) => tCommon('distanceShort', { km })),
     type: CONSTRUCTION_SCOPES.map((key) => tScope(key)),
     scale: PROJECT_SCALES.map((key) => tScale(key)),
     experience: (['any', 'junior', 'mid', 'senior'] as const).map((key) => t(`criteria.experienceOptions.${key}`)),
@@ -927,9 +934,9 @@ export function ContractorLanding({ designHandoff }: ContractorLandingProps = {}
                                   })
                                   if (item.key === 'area') {
                                     if (shouldDeselect) {
-                                      setRadiusKm(50)
+                                      setRadiusKm(null)
                                     } else {
-                                      const km = SEARCH_RADII.find((value) => `${value} km` === option)
+                                      const km = radiusOptions.find((value) => `${value} km` === option)
                                       if (km) setRadiusKm(km)
                                     }
                                   }

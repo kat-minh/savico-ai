@@ -48,72 +48,71 @@ export const ADMIN_ROUTES = {
   DASHBOARD: '/admin',
 
   /* ---------------------------------------------------------------------------
-   * Nội dung site — MỘT MÀN CHO MỖI TRANG CÔNG KHAI.
-   *
-   * Chia theo trang chứ không theo loại thứ: sửa trang Cẩm nang thì chữ, ảnh và
-   * các bảng của chính nó nằm chung một chỗ, không phải đi ba mục khác nhau.
-   * Tất cả chạy qua route động `/admin/content/[page]` — xem
-   * `features/admin/constants/admin-pages.config.ts`.
-   * ------------------------------------------------------------------------ */
-  PAGE_HOME: '/admin/content/home',
-  PAGE_HANDBOOK: '/admin/content/handbook',
-  PAGE_GUIDE: '/admin/content/guide',
-  PAGE_PLANS: '/admin/content/plans',
-  PAGE_CONSULT: '/admin/content/consult',
-  PAGE_DESIGN: '/admin/content/design',
-  PAGE_ACCOUNT: '/admin/content/account',
-  PAGE_LEGAL: '/admin/content/legal',
-  /** Thanh điều hướng, chân trang, thông báo lỗi + thông tin liên hệ & SEO. */
-  PAGE_SHELL: '/admin/content/shell',
-  /** Chữ không thuộc riêng trang nào — nút chung, popup đăng nhập, thông báo lỗi. */
-  PAGE_COMMON: '/admin/content/common',
-
-  /* ---------------------------------------------------------------------------
    * Cấu hình hệ thống — CON SỐ điều khiển cách hệ thống chạy, không phải chữ
    * khách đọc. Tách hẳn khỏi nhóm nội dung: sửa giá gói hay hạn mức lượt AI là
    * việc khác hẳn với sửa tiêu đề một trang, trộn chung thì không ai biết mình
    * đang đụng vào cái gì.
    * ------------------------------------------------------------------------ */
   PLAN_TABLE: '/admin/plans',
-  QUOTAS: '/admin/quotas',
-  CONSULT_PACKAGES: '/admin/consult-packages',
+  /** Danh mục quà tặng của gói thiết kế (epic GiftManagement). */
+  GIFTS: '/admin/gifts',
+  /** Lượt đọc chi tiết mẫu mỗi ngày (epic TemplateViewManagement). */
+  TEMPLATE_VIEWS: '/admin/template-views',
 
   // Vận hành — dữ liệu backend sinh ra, không phải nội dung biên tập
   /** Đơn hàng & đối soát chuyển khoản QR (R10). */
   ORDERS: '/admin/orders',
-  /** Lịch khảo sát — vận hành gọi xác nhận với khách và nhà thầu (S16, R3). */
-  SURVEYS: '/admin/surveys',
-  /** Yêu cầu sửa đổi hồ sơ giai đoạn đã khóa do khách gửi (S23, R5). */
-  CHANGE_REQUESTS: '/admin/change-requests',
   /** Danh bạ nhà thầu + xác minh (S12–S15). */
   CONTRACTORS: '/admin/contractors',
+  /** Quy tắc đề xuất nhà thầu (spec admin #12). */
+  CONTRACTOR_MATCHING: '/admin/contractor-matching',
+  /** Lịch khảo sát nhà thầu (spec admin #13). */
+  SURVEY_SCHEDULE: '/admin/survey-schedule',
   /** Thư viện mẫu 2D & 3D của trang Cẩm nang — một bảng, lọc theo loại mẫu. */
   TEMPLATES: '/admin/templates',
+  /** Mẫu nội thất / không gian 3D (spec admin #2). */
+  TEMPLATES_3D: '/admin/templates-3d',
+  /** Bài viết + nhãn bài viết Cẩm nang (epic ArticleManagement, BR-136). */
+  ARTICLES: '/admin/articles',
+  ARTICLE_LABELS: '/admin/article-labels',
+  /** Các bước trong Cẩm nang + Nhóm cẩm nang (epic HandbookStepManagement). */
+  HANDBOOK_STEPS: '/admin/handbook-steps',
   /** Video hướng dẫn của trang Hướng dẫn. */
   GUIDE_VIDEOS: '/admin/guide-videos',
   /** Mã giảm giá của ô nhập mã ở S03. */
   DISCOUNTS: '/admin/discounts',
   /** Giá, thời hạn, lượt kiểm tra của ba gói giám sát (S19). */
   SUPERVISION_PACKAGES: '/admin/supervision-packages',
+  /** Danh mục giai đoạn giám sát (spec admin #15). */
+  SUPERVISION_STAGES: '/admin/supervision-stages',
+  /** Kiến trúc sư tư vấn 1:1 + lịch tư vấn (epic ArchitectManagement). */
+  CONSULTANTS: '/admin/consultants',
   BOOKINGS: '/admin/bookings',
-  RESCHEDULE: '/admin/bookings/reschedule',
-  SUBSCRIPTIONS: '/admin/subscriptions',
   TRANSACTIONS: '/admin/transactions',
-  REVIEWS: '/admin/reviews',
-  REPORTS: '/admin/reports',
-  PROJECTS: '/admin/projects',
   /** Lời mời báo giá — vận hành đẩy 4 nấc trạng thái của S18 (R4). */
   INVITATIONS: '/admin/invitations',
   /** Giám sát thi công — kỹ sư ghi kết quả kiểm tra và khóa giai đoạn (R5). */
   INSPECTIONS: '/admin/inspections',
   CUSTOMERS: '/admin/customers',
 
-  // Danh mục cấu hình — mục X, #6
-  CATALOG: '/admin/catalog',
-  PRICING: '/admin/pricing'
+  // Danh mục nhập liệu công trình (spec admin #1, #17)
+  BUILDING_TYPES: '/admin/building-types',
+  ARCHITECTURE_STYLES: '/admin/architecture-styles',
+  INTERIOR_STYLES: '/admin/interior-styles',
+  /** Cấu hình dự toán (spec admin #3). */
+  COST_GROUPS: '/admin/cost-groups',
+  COST_ITEMS: '/admin/cost-items',
+  MATERIAL_PRICES: '/admin/material-prices',
+  ESTIMATE_ADVICE: '/admin/estimate-advice'
 } as const
 
 export type AdminRoute = (typeof ADMIN_ROUTES)[keyof typeof ADMIN_ROUTES]
+
+/** Trang chi tiết một tài khoản khách hàng trong admin. */
+export const adminCustomerRoute = (customerId: string) => `${ADMIN_ROUTES.CUSTOMERS}/${customerId}`
+
+/** Trang chi tiết nhà thầu trong khu quản trị (ContractorManagement §2). */
+export const adminContractorRoute = (contractorId: string) => `${ADMIN_ROUTES.CONTRACTORS}/${contractorId}`
 
 /** Trang chi tiết một mẫu trong thư viện Cẩm nang (mẫu bản vẽ 2D / nội thất 3D). */
 export const handbookTemplateRoute = (id: string) => `${ROUTES.HANDBOOK}/mau/${id}`

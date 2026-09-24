@@ -35,9 +35,35 @@ export function relativeTime(iso: string | undefined, locale: string, now = Date
 /** Bốn nấc của thanh trạng thái ở S18, đúng thứ tự đi tới. */
 export const INVITATION_STATUS_ORDER: readonly CmsInvitationStatus[] = ['sent', 'received', 'accepted', 'done']
 
-/** Nấc kế tiếp, hoặc `null` khi lời mời đã ở nấc cuối. */
+/** Nấc kế tiếp, hoặc `null` khi lời mời đã ở nấc cuối / đã bị từ chối. */
 export function nextInvitationStatus(status: CmsInvitationStatus): CmsInvitationStatus | null {
+  if (status === 'rejected') return null
   return INVITATION_STATUS_ORDER[INVITATION_STATUS_ORDER.indexOf(status) + 1] ?? null
+}
+
+/** Lời mời đã kết thúc: Hoàn tất hoặc Đã từ chối. */
+export function isInvitationClosed(invitation: CmsContractorInvitation): boolean {
+  return invitation.status === 'done' || invitation.status === 'rejected'
+}
+
+/**
+ * Từ chối lời mời (spec admin #14) — nhánh kết thúc, bắt buộc lý do, ghi mốc
+ * vào `steps` để dòng thời gian có thời điểm từ chối. Lịch khảo sát đi kèm
+ * không còn giữ khung giờ (`isActiveSurvey`).
+ */
+export function rejectInvitation(
+  invitation: CmsContractorInvitation,
+  reason: string,
+  now = new Date()
+): CmsContractorInvitation {
+  const at = now.toISOString()
+  return {
+    ...invitation,
+    status: 'rejected',
+    rejectReason: reason.trim(),
+    updatedAt: at,
+    steps: [...invitation.steps, { status: 'rejected', at }]
+  }
 }
 
 /** Nấc liền trước, hoặc `null` khi lời mời còn ở nấc đầu (nấc do khách tạo, không lùi được). */
@@ -88,6 +114,7 @@ export function surveyNeedsAction(invitation: CmsContractorInvitation): boolean 
  * và hàng đợi cùng tên ở trang Tổng quan đếm theo đúng hàm này.
  */
 export function invitationNeedsAction(invitation: CmsContractorInvitation): boolean {
+  if (invitation.status === 'rejected') return false
   return surveyNeedsAction(invitation) || invitation.status === 'sent'
 }
 

@@ -5,17 +5,17 @@ import { useLocale, useTranslations } from 'next-intl'
 import type { RefObject } from 'react'
 
 import type { Locale } from '@/i18n/routing'
-import type { SubscriptionPlan } from '@/shared/cms'
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/components/ui/dialog'
 import { cn } from '@/shared/lib/utils'
 import { formatCurrency } from '@/shared/utils'
 import { giftValueInMillions } from '../services/plan-gift.service'
+import type { PlanView } from '../types/plan.types'
 
 interface PlanGiftDialogProps {
   /** Gói đang mở popup quà tặng; `null` là đóng. */
-  plan: SubscriptionPlan | null
+  plan: PlanView | null
   open?: boolean
   onClose: () => void
   origin?: RefObject<HTMLButtonElement | null>
@@ -114,6 +114,9 @@ export function PlanGiftDialog({ plan, open, onClose, origin }: PlanGiftDialogPr
                   <DialogDescription className='text-foreground text-base font-bold text-pretty'>
                     {gift.title}
                   </DialogDescription>
+                  {gift.description ? (
+                    <p className='text-muted-foreground mt-1 text-sm text-pretty'>{gift.description}</p>
+                  ) : null}
                   <p className='text-muted-foreground mt-1 text-xs'>{t('valuePrefix')}</p>
                   <p className='text-brand-orange mt-1 text-5xl leading-none font-extrabold tracking-tight tabular-nums'>
                     {valueNumber}
@@ -128,15 +131,17 @@ export function PlanGiftDialog({ plan, open, onClose, origin }: PlanGiftDialogPr
             <div className='space-y-3 px-6 pt-1 pb-5'>
               {/* Hình S02: khối này nền CAM NHẠT (không phải trắng), icon hộp quà to
                   trong vòng tròn trắng. */}
-              <section className='bg-brand-orange-soft flex items-center gap-4 rounded-2xl p-4'>
-                <span className='bg-card text-brand-orange flex size-14 shrink-0 items-center justify-center rounded-full shadow-sm'>
-                  <Gift className='size-8' strokeWidth={2.25} />
-                </span>
-                <div className='min-w-0'>
-                  <p className='text-brand-orange text-base font-bold tracking-wide uppercase'>{gift.extraTitle}</p>
-                  <p className='mt-1.5 text-sm leading-relaxed text-pretty'>{gift.extraBody}</p>
-                </div>
-              </section>
+              {gift.extraBody ? (
+                <section className='bg-brand-orange-soft flex items-center gap-4 rounded-2xl p-4'>
+                  <span className='bg-card text-brand-orange flex size-14 shrink-0 items-center justify-center rounded-full shadow-sm'>
+                    <Gift className='size-8' strokeWidth={2.25} />
+                  </span>
+                  <div className='min-w-0'>
+                    <p className='text-brand-orange text-base font-bold tracking-wide uppercase'>{t('extraTitle')}</p>
+                    <p className='mt-1.5 text-sm leading-relaxed text-pretty'>{gift.extraBody}</p>
+                  </div>
+                </section>
+              ) : null}
 
               <Button className='brand-green-button h-12 w-full text-base' onClick={onClose}>
                 {t('understood')}

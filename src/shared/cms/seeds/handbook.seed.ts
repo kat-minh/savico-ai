@@ -8,7 +8,7 @@ import {
   STYLE_IMAGE,
   TOPIC_IMAGE
 } from '@/shared/lib/imagery'
-import type { HandbookArticle, HandbookFloor, HandbookStage, HandbookTemplate } from '../cms.types'
+import type { CmsArticleLabel, HandbookArticle, HandbookFloor, HandbookStage, HandbookTemplate } from '../cms.types'
 
 /**
  * Seed catalogue của Cẩm nang (mục VI) — nội dung khởi điểm admin biên soạn
@@ -624,14 +624,14 @@ const STAGES: HandbookStage[] = [
     description: 'Kết cấu chịu lực, tường, mái và hệ thống kỹ thuật âm.',
     imageUrl: STAGE_IMAGE.structure,
     topics: [
-      { id: 'foundation', stage: 'structure', title: 'Móng' },
-      { id: 'piling', stage: 'structure', title: 'Cọc - ép cọc' },
-      { id: 'frame', stage: 'structure', title: 'Cột - dầm - sàn' },
-      { id: 'masonry', stage: 'structure', title: 'Tường xây - tô trát' },
-      { id: 'roofing', stage: 'structure', title: 'Mái & chống thấm' },
-      { id: 'stairs', stage: 'structure', title: 'Cầu thang' },
-      { id: 'mep', stage: 'structure', title: 'Điện nước âm' },
-      { id: 'structure-handover', stage: 'structure', title: 'Nghiệm thu phần thô' }
+      { id: 'foundation', stage: 'structure', title: 'Móng', icon: 'layers' },
+      { id: 'piling', stage: 'structure', title: 'Cọc - ép cọc', icon: 'anchor' },
+      { id: 'frame', stage: 'structure', title: 'Cột - dầm - sàn', icon: 'blocks' },
+      { id: 'masonry', stage: 'structure', title: 'Tường xây - tô trát', icon: 'brick' },
+      { id: 'roofing', stage: 'structure', title: 'Mái & chống thấm', icon: 'home' },
+      { id: 'stairs', stage: 'structure', title: 'Cầu thang', icon: 'footprints' },
+      { id: 'mep', stage: 'structure', title: 'Điện nước âm', icon: 'plug' },
+      { id: 'structure-handover', stage: 'structure', title: 'Nghiệm thu phần thô', icon: 'check' }
     ]
   },
   {
@@ -641,12 +641,12 @@ const STAGES: HandbookStage[] = [
     description: 'Trát, ốp lát, sơn bả, cửa và thiết bị.',
     imageUrl: STAGE_IMAGE.finishing,
     topics: [
-      { id: 'tiling', stage: 'finishing', title: 'Ốp lát' },
-      { id: 'painting', stage: 'finishing', title: 'Sơn bả' },
-      { id: 'doors', stage: 'finishing', title: 'Cửa & vách' },
-      { id: 'sanitary', stage: 'finishing', title: 'Thiết bị vệ sinh' },
-      { id: 'lighting', stage: 'finishing', title: 'Điện chiếu sáng' },
-      { id: 'finishing-handover', stage: 'finishing', title: 'Nghiệm thu hoàn thiện' }
+      { id: 'tiling', stage: 'finishing', title: 'Ốp lát', icon: 'grid' },
+      { id: 'painting', stage: 'finishing', title: 'Sơn bả', icon: 'brush' },
+      { id: 'doors', stage: 'finishing', title: 'Cửa & vách', icon: 'door' },
+      { id: 'sanitary', stage: 'finishing', title: 'Thiết bị vệ sinh', icon: 'shower' },
+      { id: 'lighting', stage: 'finishing', title: 'Điện chiếu sáng', icon: 'light' },
+      { id: 'finishing-handover', stage: 'finishing', title: 'Nghiệm thu hoàn thiện', icon: 'check' }
     ]
   },
   {
@@ -656,10 +656,10 @@ const STAGES: HandbookStage[] = [
     description: 'Thiết kế nội thất, đồ gỗ, đồ rời và trang trí không gian.',
     imageUrl: STAGE_IMAGE.interior,
     topics: [
-      { id: 'interior-design', stage: 'interior', title: 'Thiết kế nội thất' },
-      { id: 'joinery', stage: 'interior', title: 'Đồ gỗ' },
-      { id: 'loose-furniture', stage: 'interior', title: 'Đồ rời & trang trí' },
-      { id: 'interior-budget', stage: 'interior', title: 'Ngân sách nội thất' }
+      { id: 'interior-design', stage: 'interior', title: 'Thiết kế nội thất', icon: 'ruler' },
+      { id: 'joinery', stage: 'interior', title: 'Đồ gỗ', icon: 'hammer' },
+      { id: 'loose-furniture', stage: 'interior', title: 'Đồ rời & trang trí', icon: 'sofa' },
+      { id: 'interior-budget', stage: 'interior', title: 'Ngân sách nội thất', icon: 'wallet' }
     ]
   }
 ]
@@ -1400,6 +1400,41 @@ const ARTICLES: HandbookArticle[] = [
   }
 ]
 
-export const HANDBOOK_TEMPLATES_SEED: HandbookTemplate[] = TEMPLATES
+/** Mẫu có sẵn đều đang phát hành; mẫu 2D mang thêm các trường có cấu trúc của epic 2D. */
+export const HANDBOOK_TEMPLATES_SEED: HandbookTemplate[] = TEMPLATES.map((template) => {
+  if (template.kind === '3d') {
+    const style = template.tags.interiorStyle
+    return {
+      ...template,
+      status: 'active',
+      buildingTypeId: template.tags.buildingType,
+      room: template.specs.floorLabel,
+      interiorStyleId: style === 'minimal' ? 'in-minimalism' : style ? `in-${style}` : undefined
+    }
+  }
+  const seed = PLAN_SEEDS.find((item) => item.id === template.id)
+  return {
+    ...template,
+    status: 'active',
+    buildingTypeId: seed?.buildingType,
+    floorCount: seed?.levels,
+    lotWidth: seed?.width,
+    lotLength: seed?.depth,
+    area: seed?.area
+  }
+})
 export const HANDBOOK_STAGES_SEED: HandbookStage[] = STAGES
-export const HANDBOOK_ARTICLES_SEED: HandbookArticle[] = ARTICLES
+/** Bài có sẵn đều Active; thời gian tạo lấy theo ngày phát hành. */
+export const HANDBOOK_ARTICLES_SEED: HandbookArticle[] = ARTICLES.map((article) => ({
+  ...article,
+  status: 'active',
+  createdAt: `${article.publishedAt}T02:00:00.000Z`
+}))
+
+/** Bốn nhãn gốc của bài viết (ArticleManagement §1). */
+export const ARTICLE_LABELS_SEED: CmsArticleLabel[] = [
+  { id: 'experience', name: 'Kinh nghiệm xây nhà', status: 'active', order: 1 },
+  { id: 'material', name: 'Vật liệu', status: 'active', order: 2 },
+  { id: 'interior', name: 'Nội thất', status: 'active', order: 3 },
+  { id: 'legal', name: 'Pháp lý', status: 'active', order: 4 }
+]

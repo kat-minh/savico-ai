@@ -1,7 +1,17 @@
-import { cmsDb } from '@/shared/cms'
+import {
+  cmsDb,
+  isActiveSurvey,
+  isBriefSupported,
+  isContractorEligible,
+  isSurveySlotClosed,
+  surveyBookableDays,
+  surveyDateKey,
+  surveySlotRange
+} from '@/shared/cms'
+import { useAuthStore } from '@/shared/auth'
 import { mockDelay } from '@/shared/lib/mock'
-import { MAX_INVITATIONS, SURVEY_SLOTS } from '../constants/contractors.constants'
-import { emptyBrief } from '../services/brief.service'
+import { MAX_INVITATIONS } from '../constants/contractors.constants'
+import { emptyBrief, fullAddress } from '../services/brief.service'
 import type {
   Contractor,
   ContractorReview,
@@ -140,11 +150,58 @@ function withDerivedStatus(brief: ProjectBrief): ProjectBrief {
 }
 
 /**
- * Bản công khai của một nhà thầu. Đầu mối liên hệ và ghi chú nội bộ là dữ liệu
- * của vận hành — backend thật không trả chúng ra trang công khai, mock cũng vậy.
+ * Bản công khai của một nhà thầu (epic ContractorManagement §4, §8, §10, §12).
+ * Đầu mối liên hệ, ghi chú nội bộ, lịch sử quản trị, mã số pháp lý đầy đủ và
+ * bằng chứng xác minh dự án là dữ liệu của vận hành — backend thật không trả
+ * chúng ra trang công khai, mock cũng vậy. Dự án Ẩn không lên hồ sơ; bản scan
+ * hợp tác chỉ hiện khi được phép công khai; giấy phép quá hạn không còn là Đã
+ * xác minh.
  */
-function publicProfile({ contact: _contact, opsNote: _opsNote, ...contractor }: Contractor): Contractor {
-  return contractor
+function publicProfile({
+  contact: _contact,
+  opsNote: _opsNote,
+  history: _history,
+  unverifyReason: _unverifyReason,
+  ...contractor
+}: Contractor): Contractor {
+  const today = new Date().toISOString().slice(0, 10)
+  const legal = contractor.legalProfile
+  const { internalNote: _internalNote, ...partnership } = contractor.partnership
+  return {
+    ...contractor,
+    featuredProjects: contractor.featuredProjects
+      .filter((project) => !project.hidden)
+      .map(
+        ({ evidence: _evidence, verifiedBy: _verifiedBy, unverifications: _unverifications, ...project }) => project
+      ),
+    partnership: partnership.scanPublic === false ? { ...partnership, scanUrl: undefined } : partnership,
+    legalProfile: legal
+      ? {
+          ...legal,
+          taxCode: undefined,
+          registrationNumber: undefined,
+          licenseScanUrl: undefined,
+          licenseHistory: undefined,
+          licenseRejectReason: undefined,
+          licenseReviewedBy: undefined,
+          registrationStatus:
+            legal.licenseValidUntil && legal.licenseValidUntil < today ? 'pending' : legal.registrationStatus
+        }
+      : legal
+  }
+}
+
+/** Nhà thầu đã có lịch khảo sát còn hiệu lực đúng ngày + khung giờ này. */
+function isSlotTaken(contractorId: string, date: string, slotId: string): boolean {
+  return cmsDb
+    .list('contractorInvitations')
+    .some(
+      (invitation) =>
+        invitation.contractorId === contractorId &&
+        invitation.survey.date === date &&
+        invitation.survey.slotId === slotId &&
+        isActiveSurvey(invitation)
+    )
 }
 
 function contractorName(contractorId: string): string {
@@ -152,12 +209,26 @@ function contractorName(contractorId: string): string {
 }
 
 export const mockContractorsApi = {
-  /** Nhà thầu vận hành đã ẩn (`hidden`) không vào danh sách đề xuất (S09, S12). */
-  listContractors: async (_projectId: string): Promise<Contractor[]> => {
+  /**
+   * Danh sách đề xuất theo Quy tắc đề xuất nhà thầu do admin cấu hình (spec
+   * admin #12, BR-075): nhà thầu Ẩn không bao giờ vào; khu vực, tiêu chí đủ điều
+   * kiện và năng lực khớp hồ sơ đang chọn. Hồ sơ thuộc loại công trình không
+   * được hỗ trợ thì không có đề xuất. Bán kính và tab vùng lọc tiếp ở giao diện.
+   */
+  listContractors: async (projectId: string): Promise<Contractor[]> => {
     await mockDelay(250)
+    const rules = cmsDb.getDocument('contractorMatching')
+    const brief = loadStore().briefs[projectId]
+    // Hồ sơ lưu nhãn loại công trình — quy về mã trong danh mục dùng chung để so năng lực.
+    const buildingTypeId = brief
+      ? (cmsDb.list('buildingTypes').find((type) => type.label === brief.buildingType)?.id ?? null)
+      : null
+    const context = brief ? { buildingTypeId, scope: brief.scope } : undefined
+    if (!isBriefSupported(rules, context)) return []
+    const today = new Date().toISOString().slice(0, 10)
     return cmsDb
       .list('contractors')
-      .filter((contractor) => !contractor.hidden)
+      .filter((contractor) => isContractorEligible(contractor, rules, today, context))
       .map(publicProfile)
   },
 
@@ -248,16 +319,21 @@ export const mockContractorsApi = {
     return updated
   },
 
+  /**
+   * Khung giờ của một ngày theo Lịch khảo sát do admin cấu hình (spec admin
+   * #13): chỉ khung đang bật; khung bị khóa hoặc nhà thầu đã có lịch khảo sát
+   * còn hiệu lực đúng khung đó thì không chọn được.
+   */
   listSlots: async (contractorId: string, date: string): Promise<SurveySlot[]> => {
     await mockDelay(150)
-    // Vài khung bận cố định theo cặp (nhà thầu, ngày) để lịch trông thật mà vẫn
-    // ổn định giữa các lần render — random sẽ nhảy mỗi lần refetch.
-    const seed = [...`${contractorId}${date}`].reduce((sum, char) => sum + char.charCodeAt(0), 0)
-    return SURVEY_SLOTS.map((label, index) => ({
-      id: `slot-${index}`,
-      label,
-      available: (seed + index * 7) % 5 !== 0
-    }))
+    const schedule = cmsDb.getDocument('surveySchedule')
+    return schedule.slots
+      .filter((slot) => slot.active)
+      .map((slot) => ({
+        id: slot.id,
+        label: surveySlotRange(slot),
+        available: !isSurveySlotClosed(schedule, date, slot.id) && !isSlotTaken(contractorId, date, slot.id)
+      }))
   },
 
   listInvitations: async (projectId: string): Promise<Invitation[]> => {
@@ -275,6 +351,18 @@ export const mockContractorsApi = {
     const room = MAX_INVITATIONS - existing.length
     if (room <= 0) throw new Error('Mock: dự án đã đủ 3 lời mời')
 
+    // STORY-029 — kiểm tra lại ngày / khung giờ với dữ liệu mới nhất lúc gửi.
+    const schedule = cmsDb.getDocument('surveySchedule')
+    const bookable = new Set(surveyBookableDays(schedule).map(surveyDateKey))
+    const stale = bookings.find(
+      (booking) =>
+        !bookable.has(booking.date) ||
+        !schedule.slots.some((slot) => slot.id === booking.slotId && slot.active) ||
+        isSurveySlotClosed(schedule, booking.date, booking.slotId) ||
+        isSlotTaken(booking.contractorId, booking.date, booking.slotId)
+    )
+    if (stale) throw new Error('Mock: khung giờ khảo sát vừa chọn không còn trống')
+
     const sentAt = new Date().toISOString()
     const brief = store.briefs[projectId]
     const created = bookings.slice(0, room).map<Invitation>((booking) => ({
@@ -291,7 +379,22 @@ export const mockContractorsApi = {
       steps: initialSteps(sentAt),
       dossierVersion: 'v1',
       fileCount: brief?.documents.length ?? 0,
-      survey: booking
+      survey: booking,
+      customerName: useAuthStore.getState().user?.name,
+      // Bản chụp hồ sơ lúc gửi — không kèm ngân sách (S18).
+      dossier: brief
+        ? {
+            buildingType: brief.buildingType,
+            landArea: brief.landArea,
+            scale: brief.scale,
+            hasAttic: brief.hasAttic,
+            address: fullAddress(brief),
+            scope: brief.scope,
+            scopeNote: brief.scopeNote,
+            startWindow: brief.startWindow,
+            documents: brief.documents.map(({ name, sizeBytes }) => ({ name, sizeBytes }))
+          }
+        : undefined
     }))
 
     const request: SurveyRequest = {

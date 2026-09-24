@@ -16,9 +16,9 @@ import { cn } from '@/shared/lib/utils'
 import {
   ARTICLE_PAGE_SIZE,
   HANDBOOK_ARTICLE_LIST_HISTORY_KEY,
-  HANDBOOK_CATEGORIES,
   HANDBOOK_CATEGORY_SELECT_EVENT
 } from '../constants/handbook.constants'
+import { useArticleLabels } from '../hooks/use-article-labels'
 import { useHandbookArticles } from '../hooks/use-handbook'
 import { sortByNewest } from '../services/handbook.service'
 import type { HandbookArticle, HandbookCategory } from '../types/handbook.types'
@@ -80,7 +80,8 @@ function readArticleListRestoreState(): ArticleListRestoreState | null {
 
   const candidate = value as Partial<ArticleListRestoreState>
   const category = candidate.category
-  const categoryValid = category === ALL || (category !== undefined && HANDBOOK_CATEGORIES.includes(category))
+  // Nhãn có thể đã bị admin chuyển Inactive — kiểm tra lại khi dựng danh sách.
+  const categoryValid = category !== undefined
   if (!categoryValid || typeof candidate.term !== 'string') return null
 
   return {
@@ -105,6 +106,7 @@ function readArticleListRestoreState(): ArticleListRestoreState | null {
  */
 export function ArticleList() {
   const t = useTranslations('handbook.articles')
+  const { nameOf: labelName, options: labelOptions } = useArticleLabels()
   const format = useFormatter()
   const [restoreState] = useState(readArticleListRestoreState)
   const initialCategory = restoreState?.category ?? ALL
@@ -220,7 +222,7 @@ export function ArticleList() {
   useEffect(() => {
     const handleCategorySelect = (event: Event) => {
       const detail = (event as CustomEvent<CategorySelectDetail>).detail
-      if (!detail || !HANDBOOK_CATEGORIES.includes(detail.category)) return
+      if (!detail || !labelOptions.includes(detail.category)) return
 
       setVisualCategory(detail.category)
       visualCategoryRef.current = detail.category
@@ -230,7 +232,7 @@ export function ArticleList() {
 
     window.addEventListener(HANDBOOK_CATEGORY_SELECT_EVENT, handleCategorySelect)
     return () => window.removeEventListener(HANDBOOK_CATEGORY_SELECT_EVENT, handleCategorySelect)
-  }, [runFilterTransition])
+  }, [labelOptions, runFilterTransition])
 
   useLayoutEffect(() => {
     const previous = previousRectsRef.current
@@ -491,7 +493,7 @@ export function ArticleList() {
             aria-hidden
             className='pointer-events-none absolute top-0 left-0 z-0 rounded-full'
           />
-          {([ALL, ...HANDBOOK_CATEGORIES] as ArticleFilter[]).map((option) => {
+          {([ALL, ...labelOptions] as ArticleFilter[]).map((option) => {
             const active = visualCategory === option
             return (
               <button
@@ -508,7 +510,7 @@ export function ArticleList() {
                     : 'text-muted-foreground hover:border-primary/50 hover:text-primary focus-visible:border-primary/50 focus-visible:text-primary'
                 )}
               >
-                <span className='relative z-10'>{option === ALL ? t('all') : t(`categories.${option}`)}</span>
+                <span className='relative z-10'>{option === ALL ? t('all') : labelName(option)}</span>
               </button>
             )
           })}
@@ -576,7 +578,7 @@ export function ArticleList() {
                       <Photo className='size-16 rounded-lg' src={article.imageUrl} alt={article.title} sizes='64px' />
                     </div>
                     <div className='min-w-0 flex-1 space-y-1'>
-                      <Badge variant='secondary'>{t(`categories.${article.category}`)}</Badge>
+                      <Badge variant='secondary'>{labelName(article.category)}</Badge>
                       <h3 data-article-row-title className='text-sm font-semibold transition-colors duration-200'>
                         <HighlightText text={article.title} query={appliedQuery} />
                       </h3>

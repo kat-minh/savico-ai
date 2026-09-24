@@ -80,6 +80,23 @@ export interface HandbookTemplate {
   description: string[]
   floors: HandbookFloor[]
   tags: HandbookTags
+  /**
+   * Active / Inactive (epic 2DTemplateManagement §5) — chỉ mẫu Active hiện ở thư
+   * viện phía người dùng; mẫu mới mặc định Inactive. Thiếu = Active (dữ liệu cũ).
+   */
+  status?: 'active' | 'inactive'
+  /** Mẫu 2D: loại công trình theo danh mục dùng chung (Nhà phố / Nhà vườn). */
+  buildingTypeId?: string
+  /** Mẫu 2D: quy mô 1–3 tầng — số ảnh tầng phải khớp đúng số này. */
+  floorCount?: number
+  /** Mẫu 2D: kích thước lô (m) và diện tích (m²), số thực > 0. */
+  lotWidth?: number
+  lotLength?: number
+  area?: number
+  /** Mẫu 3D: phong cách nội thất theo danh mục dùng chung. */
+  interiorStyleId?: string
+  /** Mẫu 3D: tên phòng / không gian — một mẫu 3D là một phòng với nhiều ảnh. */
+  room?: string
 }
 
 /** Ba giai đoạn xây nhà — khung cố định của cẩm nang nền tảng (Phần 3). */
@@ -90,6 +107,8 @@ export interface HandbookTopic {
   id: string
   stage: HandbookStageId
   title: string
+  /** Khóa icon trong bộ `HANDBOOK_TOPIC_ICONS` (epic HandbookStepManagement §4). */
+  icon?: string
 }
 
 export interface HandbookStage {
@@ -102,8 +121,21 @@ export interface HandbookStage {
   topics: HandbookTopic[]
 }
 
-/** Chuyên mục của bài viết — bộ lọc ở khối "Tất cả bài viết" (Hình 11). */
-export type HandbookCategory = 'experience' | 'material' | 'interior' | 'legal'
+/**
+ * Nhãn của bài viết — mã một bản ghi trong bảng `articleLabels` (BR-136), bộ lọc
+ * ở khối "Tất cả bài viết" (Hình 11). Bốn nhãn gốc: experience / material /
+ * interior / legal.
+ */
+export type HandbookCategory = string
+
+/** Nhãn bài viết (BR-136) — không xóa cứng, chỉ chuyển Inactive. */
+export interface CmsArticleLabel {
+  id: string
+  name: string
+  status: 'active' | 'inactive'
+  /** Thứ tự trong bộ lọc phía khách hàng. */
+  order: number
+}
 
 /** Một mục trong thân bài: tiêu đề đánh số + các đoạn văn, có thể kèm ảnh. */
 export interface HandbookArticleSection {
@@ -135,6 +167,10 @@ export interface HandbookArticle {
   tags: HandbookTags
   /** Bài tư vấn trong panel màn chờ: kiến trúc (Bước 2) / nội thất (Bước 3). */
   panelTopic?: 'architecture' | 'interior'
+  /** Active / Inactive (BR-134) — bài mới mặc định Inactive; thiếu = Active (dữ liệu cũ). */
+  status?: 'active' | 'inactive'
+  /** Thời gian tạo do hệ thống ghi — quyết định "bài liên quan" mới nhất (ArticleManagement §8). */
+  createdAt?: string
 }
 
 /* ===========================================================================
@@ -152,13 +188,21 @@ export interface GuideVideo {
   description: string
   thumbnailUrl: string
   videoUrl: string
-  /** Thời lượng tính bằng giây. */
+  /** Thời lượng tính bằng giây — hệ thống lấy từ YouTube, admin không nhập. */
   durationSeconds: number
   /**
    * Video nổi bật hiện lớn ở đầu trang Hướng dẫn (mục VI). Admin chọn video nào
    * là nổi bật (mục X, #3); chỉ MỘT video mang cờ này.
    */
   featured?: boolean
+  /** Mã video YouTube đã chuẩn hóa (epic GuideStepManagement §3). */
+  youtubeId?: string
+  /** Hiển thị / Ẩn — bước mới mặc định Ẩn; thiếu = Hiển thị (dữ liệu cũ). */
+  status?: 'visible' | 'hidden'
+  /** Thời gian tạo — quyết định thứ tự và số bước. */
+  createdAt?: string
+  /** Hệ thống phát hiện video bị xóa / riêng tư / chặn phát nhúng — không lên trang công khai. */
+  unavailable?: boolean
 }
 
 /** Bài hướng dẫn dạng chữ kèm ảnh. */
@@ -190,53 +234,139 @@ export type PlanTier = 'basic' | 'advanced' | 'pro'
 export interface PlanGift {
   /** "Bộ thiết bị vệ sinh châu Âu". */
   title: string
+  description?: string
   /** Giá trị quy đổi, VND — hiển thị "trị giá 100 triệu đồng". */
   value: number
   /** Khối "+ Ưu đãi thêm": phí gói được khấu trừ vào giá trị hợp đồng thi công. */
-  extraTitle: string
   extraBody: string
   /** Dòng điều kiện ĐẦY ĐỦ ở đáy popup S02. */
   conditions: string
-  /** Bản rút gọn in trong khối quà ở thẻ gói (S01) — bản mô tả ghi hai câu khác nhau. */
+  /** Bản in trong khối quà ở thẻ gói (S01). */
   conditionsShort: string
-  /**
-   * Ảnh hộp quà / bộ sản phẩm — Hình S01 (khối quà thẻ PRO) và Hình S02 (popup).
-   * Khách gửi file sau; còn trống thì hai chỗ đó dùng icon cùng khung, bố cục
-   * không đổi khi ảnh về.
-   */
+  /** Ảnh hộp quà / bộ sản phẩm — Hình S01 (khối quà thẻ PRO) và Hình S02 (popup). */
   imageUrl?: string
 }
 
-/** Một gói đăng ký hiển thị trên trang Gói đăng ký (mục VII, Hình 13). */
+/**
+ * Quyền lợi dạng bật/tắt của gói (epic DesignPackageManagement §5) — khóa trùng
+ * dòng của bảng "So sánh chi tiết 3 gói" ngoài trang Bảng giá.
+ */
+export type PlanToggleBenefitKey =
+  | 'uploadPhoto'
+  | 'siteInfo'
+  | 'buildingType'
+  | 'style'
+  | 'renderImages'
+  | 'structureEstimate'
+  | 'finishingEstimate'
+  | 'materialList'
+  | 'boq'
+  | 'exportDossier'
+  | 'contractorPack'
+  | 'compareOptions'
+  | 'compareCost'
+  | 'compareMaterial'
+  | 'optimizeBudget'
+  | 'costDelta'
+  | 'materialAlternatives'
+  | 'render3d'
+
+/**
+ * Một quyền lợi bật/tắt. Tắt → gạch ngang trên bảng công khai; bật không nội
+ * dung → dấu tích; bật có nội dung (≤ 200 ký tự) → hiện nội dung. Tắt đi không
+ * xóa nội dung cũ — bật lại là khôi phục để sửa tiếp.
+ */
+export interface PlanToggleBenefit {
+  enabled: boolean
+  text?: string
+}
+
+export type PlanLayoutLevel = 'none' | 'basic' | '2d3d' | '2d3dPlus' | 'custom'
+export type PlanEstimateLevel = 'none' | 'rough' | 'detailed' | 'optimized' | 'custom'
+export type PlanAdvisoryLevel = 'none' | 'online' | 'priority' | 'expert' | 'custom'
+
+/** Toàn bộ quyền lợi và nội dung so sánh của một gói — một nguồn cho thẻ gói lẫn bảng so sánh. */
+export interface PlanBenefits {
+  toggles: Record<PlanToggleBenefitKey, PlanToggleBenefit>
+  /** Bố trí công năng: Không có / Cơ bản / 2D & 3D / 2D & 3D nâng cao / nội dung khác. */
+  layout: { level: PlanLayoutLevel; text?: string }
+  /** Dự toán nội thất: Không có / Sơ bộ / Chi tiết / Chi tiết & tối ưu / nội dung khác. */
+  interiorEstimate: { level: PlanEstimateLevel; text?: string }
+  /** Hình thức hỗ trợ tư vấn: Không có / Online / Ưu tiên / 1:1 cùng chuyên gia / nội dung khác. */
+  advisory: { level: PlanAdvisoryLevel; text?: string }
+}
+
+/** Quyền lợi chọn làm "nổi bật" trên thẻ gói — chỉ chọn được quyền lợi đang bật. */
+export type PlanHighlightKey =
+  | PlanToggleBenefitKey
+  | 'layout'
+  | 'interiorEstimate'
+  | 'advisory'
+  | 'designCredits'
+  | 'libraryCredits'
+
+/**
+ * Gói thiết kế (epic DesignPackageManagement) — ba gói CỐ ĐỊNH BASIC / PLUS /
+ * PRO, admin chỉ cập nhật, không thêm hay xóa. Chu kỳ sử dụng là cấu hình DÙNG
+ * CHUNG (`planSettings.periodDays`), không nằm ở từng gói.
+ */
 export interface SubscriptionPlan {
-  /** Khóa CRUD của admin; trùng `tier` với ba gói gốc. */
+  /** Khóa bản ghi; trùng `tier` với ba gói gốc. */
   id: string
   tier: PlanTier
-  /** Giá cho một chu kỳ, đơn vị VND. */
-  price: number
-  /** Số ngày hiệu lực của gói. */
-  periodDays: number
-  /** Số lượt thiết kế - dự toán trong kỳ. */
-  designCredits: number
-  /** Số lượt tra thư viện mẫu trong kỳ. */
-  libraryCredits: number
-  /**
-   * Quyền lợi thêm ngoài hai hạn mức trên — một dòng, do admin soạn
-   * (mục X, #4). Ví dụ "Ưu tiên hàng đợi render".
-   */
-  perk: string
-  /** Dòng "Phù hợp: ..." dưới danh sách quyền lợi. */
-  audience: string
-  /** Thẻ nổi bật giữa trang, gắn badge "Phổ biến". */
+  /** Mã gói: chữ in hoa, số, `-`, `_`; không trùng; khóa sửa khi gói đã phát sinh đơn. */
+  code: string
+  /** Tên gói, 1–100 ký tự. */
+  name: string
+  /** Nhãn ngắn, tối đa 50 ký tự. */
+  shortLabel?: string
+  /** Tối đa MỘT gói phổ biến tại một thời điểm. */
   popular?: boolean
-  /** Câu "Phù hợp khi bạn..." ngay dưới ảnh thẻ gói (S01). */
-  fitLine?: string
-  /** Danh sách tính năng in trên thẻ gói (S01). */
-  features?: string[]
-  /** Ảnh minh họa trên đầu thẻ gói (S01). */
-  imageUrl?: string
-  /** Quà tặng kèm — chỉ gói cao nhất có (S01, S02). */
-  gift?: PlanGift
+  /** Giá bán, số nguyên VND ≥ 1.000. */
+  price: number
+  /** Mô tả đối tượng phù hợp, tối đa 200 ký tự. */
+  fitLine: string
+  /** Ảnh gói (JPG/PNG/WebP ≤ 5 MB). */
+  imageUrl: string
+  /** Nội dung nút đăng ký, tối đa 50 ký tự. */
+  ctaLabel: string
+  /** Chỉ gói Đang bán hiện ở trang Bảng giá và được tạo đơn mới. */
+  status: 'selling' | 'hidden'
+  /** Số phương án thiết kế (> 0). */
+  designCredits: number
+  /** Số lượt tra cứu thư viện mẫu (> 0). */
+  libraryCredits: number
+  benefits: PlanBenefits
+  /** Quyền lợi nổi bật in trên thẻ gói. */
+  highlights: PlanHighlightKey[]
+  /** Quà tặng từ Danh mục quà tặng; `null` = Không có quà tặng. */
+  giftId: string | null
+  /** Điều kiện nhận quà — bắt buộc khi có quà, tối đa 500 ký tự. */
+  giftConditions?: string
+}
+
+/** Cấu hình chung của gói thiết kế — mọi gói dùng chung một chu kỳ (§4). */
+export interface CmsPlanSettings {
+  /** Số ngày sử dụng, snapshot khi tạo đơn. Mặc định 90. */
+  periodDays: number
+}
+
+/**
+ * Quà tặng trong Danh mục quà tặng (epic GiftManagement). Gói chọn một quà Đang
+ * hoạt động; quà được snapshot vào đơn nên sửa / ẩn sau đó không đổi đơn cũ.
+ */
+export interface CmsGift {
+  id: string
+  /** Tối đa 150 ký tự. */
+  title: string
+  /** Tối đa 500 ký tự. */
+  description?: string
+  /** Giá trị quà, số nguyên VND > 0. */
+  value: number
+  imageUrl: string
+  /** Nội dung "Ưu đãi thêm" trong popup quà tặng, tối đa 500 ký tự. */
+  extraOffer?: string
+  status: 'active' | 'hidden'
 }
 
 /* ===========================================================================
@@ -255,6 +385,8 @@ export type SupervisionTier = 'self' | 'check' | 'control'
 export interface SupervisionPackage {
   id: string
   tier: SupervisionTier
+  /** Tên gói hiển thị trên thẻ và bảng so sánh (spec admin #15). */
+  name: string
   /** Giá cho MỘT dự án, đơn vị VND. Gói tự quản lý là 0. */
   price: number
   /** Thời hạn áp dụng, tính theo tháng; hết hạn thì gia hạn qua add-on. */
@@ -313,13 +445,34 @@ export interface Consultant {
   reviewCount: number
   /** 4 ảnh công trình tiêu biểu (Hình 15). */
   works: ConsultantWork[]
+  /** Chỉ kiến trúc sư Đang hiển thị xuất hiện ở màn đặt lịch. KTS mới mặc định Ẩn. */
+  visible: boolean
+  /** Các phạm vi Không tư vấn admin đánh dấu (ArchitectManagement §5). */
+  closures?: CmsConsultClosure[]
+}
+
+/** Buổi tư vấn: sáng / chiều. */
+export type ConsultSession = 'morning' | 'afternoon'
+
+/**
+ * Một phạm vi Không tư vấn: cả ngày (chỉ `date`), cả buổi (`date` + `session`)
+ * hoặc một khung giờ (`date` + `time`). Không tự hủy lịch đã đặt.
+ */
+export interface CmsConsultClosure {
+  date: string
+  session?: ConsultSession
+  time?: string
 }
 
 /* ===========================================================================
  * Vận hành — dữ liệu admin theo dõi, không phải nội dung site
  * ======================================================================== */
 
-export type CmsBookingStatus = 'pending' | 'confirmed' | 'done' | 'cancelled'
+/**
+ * `rejected` là admin từ chối (bắt buộc có lý do); `cancelled` là lịch cũ bị hủy
+ * trước khi có luồng từ chối — giữ lại để bản ghi cũ vẫn đọc được.
+ */
+export type CmsBookingStatus = 'pending' | 'confirmed' | 'rejected' | 'done' | 'cancelled'
 
 /**
  * Lịch hẹn tư vấn. Khách đặt ở màn Tư vấn 1:1 (mục VIII.3), admin xác nhận /
@@ -337,12 +490,19 @@ export interface CmsBooking {
   time: string
   /** Ghi chú khách để lại khi đặt. */
   note?: string
+  email?: string
   status: CmsBookingStatus
   createdAt: string
   /** Ghi chú nội bộ của vận hành — đã gọi ai, lý do hủy… Khách không thấy. */
   opsNote?: string
+  /** Lý do từ chối — bắt buộc khi `status === 'rejected'`. */
+  rejectReason?: string
+  confirmedAt?: string
+  rejectedAt?: string
+  completedAt?: string
 }
 
+/** `suspended` = "Đã ban": không đăng nhập được, dữ liệu gói/đơn giữ nguyên. */
 export type CmsCustomerStatus = 'active' | 'suspended'
 
 /** Một tài khoản người dùng trong trang Người dùng của admin. */
@@ -362,7 +522,74 @@ export interface CmsCustomer {
   /** Lượt tra thư viện mẫu còn lại trong kỳ. */
   libraryCreditsLeft: number
   status: CmsCustomerStatus
+  /** Lý do ban (không bắt buộc) — hiện lại khi mở ban. */
+  banReason?: string
+  bannedAt?: string
   createdAt: string
+  avatarUrl?: string
+  emailVerified: boolean
+  /** Phương thức đăng nhập — chỉ đọc; không lưu mật khẩu hay token ở đây. */
+  loginMethod: 'password' | 'google' | 'other'
+}
+
+/** Trạng thái kích hoạt gói — chỉ theo dõi, admin không kích hoạt / kích hoạt lại. */
+export type CmsPackageActivation = 'pending' | 'active' | 'failed' | 'ended'
+
+/** Quota của một loại lượt, theo snapshot của đơn đã mua. Còn lại = cấp − giữ − dùng (≥ 0). */
+export interface CmsQuotaBalance {
+  granted: number
+  held: number
+  used: number
+}
+
+/**
+ * Gói khách đã mua (epic UserAccountManagement §3) — lấy theo SNAPSHOT của đơn,
+ * không theo cấu hình gói đang bán. Chỉ đọc trong admin.
+ */
+export interface CmsCustomerPackage {
+  id: string
+  customerId: string
+  kind: 'design' | 'supervision'
+  planName: string
+  planCode: string
+  orderId: string
+  startsAt: string
+  endsAt: string
+  status: CmsPackageActivation
+  /** Lý do kết thúc — hết thời hạn hoặc đã dùng hết mọi hạn mức hữu hạn. */
+  endReason?: 'expired' | 'exhausted'
+  /** Danh sách quyền lợi theo snapshot của đơn. */
+  benefits: string[]
+  /** Gói thiết kế. */
+  designQuota?: CmsQuotaBalance
+  libraryQuota?: CmsQuotaBalance
+  gift?: { title: string; conditions: string }
+  /** Gói giám sát. */
+  supervision?: {
+    projectId: string
+    projectName: string
+    currentStage: string
+    inspectionsTotal: number
+    inspectionsUsed: number
+  }
+}
+
+/**
+ * Một bản ghi giữ / trừ / hoàn lượt (epic UserAccountManagement §6) — chỉ đọc,
+ * admin không thêm, sửa, xóa hay hoàn lượt thủ công.
+ */
+export interface CmsQuotaEvent {
+  id: string
+  customerId: string
+  at: string
+  quotaType: 'design' | 'library'
+  action: 'hold' | 'deduct' | 'refund'
+  delta: number
+  before: number
+  after: number
+  result: 'success' | 'failed' | 'timeout'
+  /** Mã dự án / mã yêu cầu với lượt thiết kế; lượt thư viện không ghi mẫu nào. */
+  ref?: string
 }
 
 export type CmsProjectStatus = 'input' | 'designing' | 'review' | 'completed'
@@ -391,20 +618,65 @@ export interface CmsDesignProject {
  * ======================================================================== */
 
 /** Loại công trình của Bước 1 (Phụ lục A, trường 3). */
-export interface CmsBuildingTypeOption {
+/** Trạng thái dùng chung của các danh mục cấu hình (epic ConstructionTypeManagement). */
+export type CmsCatalogStatus = 'active' | 'inactive'
+
+/**
+ * Phương án Số tầng dùng chung (Trệt, Trệt + 1 lầu…) — admin thêm, đổi tên, bật
+ * tắt; mỗi loại công trình chọn ra những phương án nó cho phép. Phương án đã
+ * được dùng không xóa cứng, chỉ Ngừng hoạt động.
+ */
+export interface CmsFloorOption {
   id: string
   label: string
-  /** Ẩn khỏi Bước 1 mà không phải xóa. */
-  enabled: boolean
+  status: CmsCatalogStatus
   order: number
 }
 
 /**
- * Kiểu kiến trúc & phong cách (Phụ lục A, trường 7) — danh mục hiển thị đổi
- * theo loại công trình, admin cấu hình (mục X, #6).
+ * Cấu hình Tum của một loại công trình:
+ * - `none`      — form không hiện trường Tum, hồ sơ không lưu giá trị.
+ * - `choice`    — form hiện Có tum / Không tum.
+ * - `fixed-yes` — mặc định Có tum, không hỏi người dùng.
+ * - `fixed-no`  — mặc định Không tum, không hỏi người dùng.
+ */
+export type CmsAtticMode = 'none' | 'choice' | 'fixed-yes' | 'fixed-no'
+
+/**
+ * Loại công trình dùng chung (epic ConstructionTypeManagement) — form hồ sơ dự
+ * án, dự án nhà thầu và mẫu 2D cùng đọc một danh mục. Cấu hình Số tầng và Tum
+ * quyết định form người dùng hiện trường nào, phương án nào, bắt buộc hay không.
+ */
+export interface CmsBuildingTypeOption {
+  id: string
+  label: string
+  description?: string
+  /** Chỉ `active` mới xuất hiện ở form tạo / sửa hồ sơ mới. Loại mới mặc định `inactive`. */
+  status: CmsCatalogStatus
+  order: number
+  floors: {
+    applies: boolean
+    required: boolean
+    /** Phương án Số tầng được phép cho loại này — chỉ chọn phương án `active`. */
+    optionIds: string[]
+    /** Phương án chọn sẵn, phải thuộc `optionIds`. */
+    defaultOptionId?: string
+  }
+  attic: {
+    mode: CmsAtticMode
+    /** Chỉ có nghĩa với `choice`. */
+    required: boolean
+  }
+}
+
+/**
+ * Phong cách kiến trúc / phong cách nội thất (spec admin #1: hai danh mục CRUD
+ * riêng) — danh mục hiển thị đổi theo loại công trình.
  */
 export interface CmsStyleOption {
   id: string
+  /** Danh mục phong cách kiến trúc hay phong cách nội thất. */
+  kind: 'architecture' | 'interior'
   label: string
   imageUrl: string
   /** Id các loại công trình mà phong cách này xuất hiện. */
@@ -414,18 +686,56 @@ export interface CmsStyleOption {
 }
 
 /** Hệ số / đơn giá dùng cho công thức dự toán (mục III.3). */
-export interface CmsUnitPrice {
+/* ===========================================================================
+ * Cấu hình dự toán (spec admin #3, STORY-005, BR-026): Nhóm chi phí → Hạng mục
+ * → Hạng mục con; giá vật tư theo khu vực gắn vào từng hạng mục con.
+ * ======================================================================== */
+
+/** Nhóm chi phí — kết quả dự toán trình bày theo các nhóm này (BR-026). */
+export interface CmsCostGroup {
   id: string
-  /** `structure` | `finishing` | `interior` — ba phần chi phí. */
-  section: 'structure' | 'finishing' | 'interior'
-  label: string
+  name: string
+  order: number
+}
+
+/** Hạng mục con — đơn vị tính cố định; khối lượng do hệ thống ước tính theo dự án. */
+export interface CmsCostSubItem {
+  id: string
+  name: string
   unit: string
-  /** Đơn giá theo gói Cơ bản, VND. */
+}
+
+/** Hạng mục lớn của một nhóm chi phí, gồm các hạng mục con. */
+export interface CmsCostItem {
+  id: string
+  groupId: string
+  name: string
+  order: number
+  /** Không đặt tên `children` — bảng antd sẽ hiểu nhầm thành cây con. */
+  subItems: CmsCostSubItem[]
+}
+
+/** Giá vật tư của một hạng mục con tại một khu vực — ba mức theo gói hoàn thiện ở Bước 1. */
+export interface CmsMaterialPrice {
+  id: string
+  itemId: string
+  subItemId: string
+  region: CmsServiceRegion
+  /** VND / đơn vị của hạng mục con. */
   basic: number
-  /** Gói Tiêu chuẩn, VND. */
   standard: number
-  /** Gói VIP, VND. */
   vip: number
+}
+
+/**
+ * Nội dung tư vấn SAVICO dưới bảng dự toán (spec admin #3) — các đoạn cố định
+ * của khối tư vấn. Trống thì dùng câu mặc định trong bản dịch.
+ */
+export interface CmsEstimateAdvice {
+  /** Nhận xét khi một nhóm chiếm tỷ trọng lớn nhất. */
+  dominant: { structure: string; finishing: string; interior: string }
+  /** Lưu ý cuối khối tư vấn. */
+  disclaimer: string
 }
 
 /* ===========================================================================
@@ -551,7 +861,8 @@ export interface CmsSubscription {
 }
 
 export type CmsTransactionStatus = 'paid' | 'pending' | 'failed' | 'refunded'
-export type CmsTransactionMethod = 'bank-qr' | 'card' | 'manual'
+/** Phương thức thanh toán — hiện chỉ có QR chuyển khoản. */
+export type CmsTransactionMethod = 'bank-qr'
 
 /** Một giao dịch thanh toán trong hệ thống. */
 export interface CmsTransaction {
@@ -622,8 +933,30 @@ export interface CmsPackageReview {
 
 export type CmsReportStatus = 'open' | 'resolved' | 'dismissed'
 
-/** Bốn nấc trạng thái của một lời mời báo giá (S18, R4). */
-export type CmsInvitationStatus = 'sent' | 'received' | 'accepted' | 'done'
+/**
+ * Trạng thái của một lời mời (S18, R4, spec admin #14): bốn nấc tiến trình +
+ * `rejected` (Đã từ chối) — nhánh kết thúc rẽ ra từ một nấc bất kỳ chưa Hoàn tất.
+ */
+export type CmsInvitationStatus = 'sent' | 'received' | 'accepted' | 'done' | 'rejected'
+
+/**
+ * Bản chụp hồ sơ dự án tại thời điểm gửi lời mời — admin xem đúng hồ sơ nhà thầu
+ * nhận được dù khách sửa hồ sơ về sau. Không gồm ngân sách (không gửi nhà thầu, S18).
+ */
+export interface CmsInvitationDossier {
+  buildingType: string
+  landArea: number
+  /** Mã quy mô (`ground+1`…) — giao diện dịch. */
+  scale: string
+  hasAttic?: boolean | null
+  address: string
+  /** Mã phạm vi thi công. */
+  scope: string
+  scopeNote: string
+  /** Mã mốc khởi công. */
+  startWindow: string
+  documents: { name: string; sizeBytes: number }[]
+}
 
 /** Một nấc đã đi qua trên thanh trạng thái lời mời. */
 export interface CmsInvitationStep {
@@ -639,6 +972,39 @@ export interface CmsInvitationStep {
  * S16, chưa ai gọi xác nhận.
  */
 export type CmsSurveyStatus = 'requested' | 'confirmed' | 'rescheduled' | 'cancelled'
+
+/** Một khung giờ khảo sát — mã `slot-<n>` cố định vì lịch đã đặt trỏ tới nó. */
+export interface CmsSurveySlot {
+  id: string
+  /** `HH:mm`. */
+  start: string
+  end: string
+  /** Tắt = không nhận lịch mới ở khung này; lịch đã đặt giữ nguyên. */
+  active: boolean
+}
+
+/** Một lần khóa: cả ngày (`slotId: null`) hoặc một khung giờ của ngày đó. */
+export interface CmsSurveyClosure {
+  id: string
+  /** `YYYY-MM-DD`. */
+  date: string
+  slotId: string | null
+  reason?: string
+}
+
+/**
+ * Lịch khảo sát nhà thầu (spec admin #13, STORY-029) — cấu hình chung mà màn
+ * chọn thời gian khảo sát của khách đọc: ngày làm việc trong tuần, số ngày làm
+ * việc kế tiếp được phép chọn, danh sách khung giờ và các ngày / khung bị khóa.
+ */
+export interface CmsSurveySchedule {
+  /** Thứ trong tuần theo `Date.getDay()` (0 = Chủ nhật … 6 = Thứ 7). */
+  workingDays: number[]
+  /** Khách được chọn trong bao nhiêu ngày làm việc kế tiếp. */
+  windowDays: number
+  slots: CmsSurveySlot[]
+  closures: CmsSurveyClosure[]
+}
 
 /** Lịch khảo sát khách chọn khi gửi lời mời (S16). */
 export interface CmsSurveyBooking {
@@ -688,6 +1054,11 @@ export interface CmsContractorInvitation {
   dossierVersion: string
   fileCount: number
   survey: CmsSurveyBooking
+  /** Tên khách gửi lời mời — để tìm kiếm ở màn quản trị. */
+  customerName?: string
+  dossier?: CmsInvitationDossier
+  /** Lý do từ chối — bắt buộc khi chuyển sang Đã từ chối. */
+  rejectReason?: string
 }
 
 /* ---------------------------------------------------------------------------
@@ -701,6 +1072,21 @@ export interface CmsContractorInvitation {
 
 /** 6 giai đoạn cố định (R5). Thứ tự mảng cũng là thứ tự thi công. */
 export type CmsStageKey = 'legal' | 'foundation' | 'structure' | 'mep' | 'finishing' | 'handover'
+
+/**
+ * Danh mục giai đoạn giám sát (spec admin #15) — admin sửa tên, tên ngắn, mô tả
+ * và thứ tự. Mã giai đoạn cố định vì tiến độ từng dự án và kết quả kiểm tra của
+ * kỹ sư gắn theo mã, nên danh mục chỉ Xem / Cập nhật, không thêm / xóa. Thứ tự
+ * áp dụng cho dự án giám sát mới; dự án đang chạy giữ thứ tự lúc khởi tạo.
+ */
+export interface CmsSupervisionStageDef {
+  id: CmsStageKey
+  name: string
+  /** Tên rút gọn ở thanh tiến độ hẹp. */
+  shortName: string
+  description: string
+  order: number
+}
 
 /** Trạng thái một giai đoạn — quyết định luôn màn S20 / S21 / S22 / S23. */
 export type CmsStageStatus = 'confirmed' | 'inProgress' | 'upcoming'
@@ -873,6 +1259,28 @@ export interface CmsContractorProject {
   id: string
   name: string
   year: number
+  /** Loại công trình lấy từ danh mục dùng chung (epic ContractorManagement §7). */
+  buildingTypeId?: string
+  /** Phương án Số tầng — chỉ khi loại công trình áp dụng Số tầng. */
+  floorOptionId?: string
+  /** Tum — chỉ khi loại công trình áp dụng Tum. */
+  hasAttic?: boolean
+  /** Phạm vi thi công của dự án — chọn đúng một (ContractorManagement §7). */
+  scope?: CmsContractorScope
+  /** Nổi bật — chỉ dự án Đang hiển thị mới được nổi bật; ẩn dự án là tự bỏ nổi bật. */
+  featured?: boolean
+  /** Ẩn khỏi hồ sơ người dùng mà không xóa tệp hay lịch sử xác minh. */
+  hidden?: boolean
+  order?: number
+  /** Liên kết thư mục ảnh và bài viết / hồ sơ chi tiết của dự án. */
+  photoFolderUrl?: string
+  articleUrl?: string
+  /** Bằng chứng xác minh: ảnh thực tế + biên bản nghiệm thu có chữ ký chủ nhà. */
+  evidence?: { sitePhotoUrls: string[]; acceptanceDocUrl?: string }
+  /** Admin thực hiện xác minh gần nhất. */
+  verifiedBy?: string
+  /** Lịch sử hủy xác minh — không ghi đè. */
+  unverifications?: { at: string; by: string; reason: string }[]
   imageUrl?: string
   /** Dữ liệu tóm tắt trên thẻ ở tab "Dự án đã thực hiện" (Hình S13 mở rộng). */
   verified?: boolean
@@ -900,7 +1308,19 @@ export interface CmsContractorProject {
  * hành tải lên, ở mock chỉ có siêu dữ liệu.
  */
 export interface CmsContractorPartnership {
+  /** Chỉ `true` khi quan hệ hợp tác VÀ tài liệu đã được SAVICO xác minh. */
   verified: boolean
+  /** Trạng thái đối tác (ContractorManagement §10). */
+  status?: 'none' | 'pending' | 'verified' | 'paused' | 'ended'
+  endedAt?: string
+  /** Trạng thái xác minh tài liệu hợp tác. */
+  docStatus?: 'pending' | 'verified'
+  /** Bản scan được phép công khai ở tab Hợp tác SAVICO của người dùng. */
+  scanPublic?: boolean
+  /** Tỷ lệ phản hồi lời mời (%), nếu có dữ liệu. */
+  responseRate?: number
+  /** Ghi chú nội bộ — không hiện cho người dùng hay nhà thầu. */
+  internalNote?: string
   /** Hợp tác từ tháng/năm — hiển thị "08/2026". */
   since: string
   contractCode: string
@@ -911,6 +1331,21 @@ export interface CmsContractorPartnership {
 
 /** Hồ sơ pháp lý đã được SAVICO đối chiếu trong tab "Năng lực pháp lý". */
 export interface CmsContractorLegalProfile {
+  /** Mã số thuế / mã số doanh nghiệp đầy đủ — chỉ admin thấy; người dùng xem bản che. */
+  taxCode?: string
+  /** Số hiệu giấy chứng nhận đăng ký doanh nghiệp đầy đủ. */
+  registrationNumber?: string
+  licenseIssuer?: string
+  /** Hiệu lực tới ngày (ISO) — bỏ trống là không thời hạn. */
+  licenseValidUntil?: string
+  licenseScanUrl?: string
+  /** Trạng thái kiểm duyệt giấy phép (ContractorManagement §8). */
+  licenseStatus?: 'pending' | 'verified' | 'rejected' | 'expired'
+  licenseRejectReason?: string
+  licenseReviewedAt?: string
+  licenseReviewedBy?: string
+  /** Lịch sử kiểm duyệt — không ghi đè người duyệt, thời điểm, kết quả trước đó. */
+  licenseHistory?: { at: string; by: string; status: string; reason?: string }[]
   legalName: string
   taxCodeMasked: string
   establishedAt: string
@@ -946,6 +1381,74 @@ export interface CmsContractorContact {
   email: string
 }
 
+/**
+ * Quy tắc đề xuất nhà thầu (spec admin #12, STORY-027, BR-074 → BR-076) — một
+ * tài liệu cấu hình: khu vực được hỗ trợ, các nấc bán kính, loại công trình
+ * được đề xuất và tiêu chí để một nhà thầu đủ điều kiện vào danh sách.
+ * Nhà thầu Ẩn không bao giờ được đề xuất, bất kể cấu hình (BR-075).
+ */
+export interface CmsContractorMatching {
+  /** Khu vực được hỗ trợ — tab vùng ở trang đề xuất chỉ hiện các khu vực này. */
+  supportedRegions: CmsServiceRegion[]
+  /** Các nấc bán kính (km) người dùng được chọn, tăng dần. */
+  radiusOptions: number[]
+  /** Nấc mặc định khi mở trang — phải thuộc `radiusOptions`. */
+  defaultRadiusKm: number
+  /** Loại công trình được đề xuất nhà thầu — hồ sơ thuộc loại khác không có đề xuất. */
+  buildingTypeIds: string[]
+  criteria: {
+    /** Chỉ nhà thầu Đang nhận dự án. */
+    acceptingOnly: boolean
+    /** Chỉ nhà thầu có hồ sơ Đã xác minh. */
+    verifiedOnly: boolean
+    /** Chỉ nhà thầu có hồ sơ pháp lý Đã xác minh. */
+    legalVerifiedOnly: boolean
+    /** Chỉ nhà thầu có thể khảo sát. */
+    surveyCapableOnly: boolean
+    /** Loại công trình VÀ Phạm vi thi công của hồ sơ phải nằm trong năng lực nhà thầu. */
+    capabilityMatch: boolean
+    /** Điểm đánh giá tối thiểu (0 = không xét); nhà thầu chưa có đánh giá không bị loại. */
+    minRating: number
+  }
+}
+
+/** Phạm vi thi công: Thi công trọn gói / Phần thô / Hoàn thiện / Nội thất. */
+export type CmsContractorScope = 'turnkey' | 'shell' | 'finishing' | 'interior'
+
+/** Địa điểm của nhà thầu — mã hành chính + tên để dữ liệu cũ vẫn đọc được khi danh mục đổi. */
+export interface CmsContractorLocation {
+  provinceCode: number | null
+  provinceName: string
+  wardCode: number | null
+  wardName: string
+  /** Số nhà, tên đường — tối đa 255 ký tự. */
+  street: string
+  lat: number | null
+  lng: number | null
+  /** Bán kính hoạt động (km) quanh địa điểm này. */
+  radiusKm: number | null
+}
+
+export interface CmsContractorBranch extends CmsContractorLocation {
+  id: string
+  name: string
+  /** Chi nhánh ngừng hoạt động không dùng để xác định phạm vi phục vụ. */
+  active: boolean
+}
+
+/** Một dòng lịch sử quản trị của nhà thầu. */
+export interface CmsContractorHistoryEntry {
+  id: string
+  at: string
+  by: string
+  /** Nhóm dữ liệu: hồ sơ, dự án, pháp lý, hợp tác, hiển thị… */
+  group: 'profile' | 'project' | 'legal' | 'partnership' | 'visibility' | 'verification'
+  action: string
+  before?: string
+  after?: string
+  reason?: string
+}
+
 /** Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. */
 export interface CmsContractor {
   id: string
@@ -973,8 +1476,26 @@ export interface CmsContractor {
   intro: string
   strengths: string[]
   photos: CmsContractorPhoto[]
+  /** Các Loại công trình nhận thực hiện — lấy từ danh mục dùng chung. */
+  buildingTypeIds?: string[]
+  /** Các Phạm vi thi công nhận thực hiện. */
+  scopes?: CmsContractorScope[]
+  /** Mô tả ngắn dưới tên. */
+  shortDescription?: string
+  /** Số năm kinh nghiệm — nhập tay, không tự tính từ năm thành lập. */
+  experienceYears?: number
+  /** Có thể khảo sát hay không — có thì `surveyWithinHours` bắt buộc > 0. */
+  surveyCapable?: boolean
+  /** Trụ sở chính — địa chỉ theo danh mục hành chính + tọa độ + bán kính phục vụ. */
+  headquarters?: CmsContractorLocation
+  branches?: CmsContractorBranch[]
+  /** Lý do hủy xác minh gần nhất. */
+  unverifyReason?: string
+  /** Lịch sử thay đổi quản trị — chỉ đọc (ContractorManagement §13). */
+  history?: CmsContractorHistoryEntry[]
   foundedYear: number
-  teamSize: string
+  /** Số kiến trúc sư & kỹ sư — lưu số, giao diện ghép chữ. */
+  teamSize: number
   officeAddress: string
   warrantyMonths: number
   legalChecks: string[]
@@ -1010,7 +1531,12 @@ export type CmsOrderKind = 'design' | 'supervision'
  * Trạng thái đơn — cũng là thứ quyết định màn nào của khách được mở:
  * `awaiting` → S04 (QR), `verifying` → S06, `failed` → S07, `paid` → S08.
  */
-export type CmsOrderStatus = 'awaiting' | 'verifying' | 'failed' | 'paid'
+/**
+ * Trạng thái thanh toán của đơn (epic OrderManagement): `awaiting` / `verifying`
+ * đều là "Chờ thanh toán" (verifying = khách đã báo chuyển khoản); còn lại là
+ * Đã thanh toán, Thất bại, Hết hạn, Đã hủy, Đã hoàn tiền. Do backend cập nhật.
+ */
+export type CmsOrderStatus = 'awaiting' | 'verifying' | 'failed' | 'paid' | 'expired' | 'cancelled' | 'refunded'
 
 /** Thông tin người mua, sửa được ngay trên màn xác nhận đơn (S03). */
 export interface CmsOrderBuyer {
@@ -1037,6 +1563,11 @@ export interface CmsOrderProduct {
   price: number
   /** Vài dòng quyền lợi in trong khối "Đơn hàng của bạn". */
   benefits: string[]
+  /** Snapshot lúc tạo đơn — chu kỳ sử dụng (ngày) hoặc thời hạn gói giám sát (tháng). */
+  periodDays?: number
+  designCredits?: number
+  libraryCredits?: number
+  gift?: { title: string; conditions: string }
 }
 
 /** Thông tin chuyển khoản hiện ở S04 và nhắc lại ở S06. */
@@ -1061,6 +1592,9 @@ export interface CmsOrder {
   invoice: CmsOrderInvoice
   /** Mã giảm giá đã áp dụng, rỗng nếu chưa áp. */
   discountCode: string
+  /** Snapshot cấu hình mã lúc tạo đơn — hình thức và giá trị cấu hình. */
+  discountType?: CmsDiscountType
+  discountValue?: number
   subtotal: number
   discountAmount: number
   total: number

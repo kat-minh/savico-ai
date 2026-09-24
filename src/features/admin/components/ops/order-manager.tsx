@@ -1,69 +1,93 @@
 'use client'
 
-import { Descriptions, Form, Input, Segmented, Space, Tag, Typography } from 'antd'
+import { DatePicker, Descriptions, Select, Space, Table, Tag, Typography } from 'antd'
+import dayjs, { type Dayjs } from 'dayjs'
+import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
-import type { CmsOrder, CmsOrderStatus } from '@/shared/cms'
+import type { CmsOrder, CmsOrderKind, CmsOrderStatus, CmsTransaction } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
 import { useAdminCollection } from '../../hooks/use-admin-data'
-import { relativeTime } from '../../services/ops.service'
 import { ResourceManager } from '../common/resource-manager'
 import { useProductLabel } from './use-product-label'
 
 const { Text } = Typography
 
-const STATUS_TAG: Record<CmsOrderStatus, string> = {
-  awaiting: 'blue',
-  verifying: 'gold',
+/** Sáu trạng thái thanh toán của spec — "Chờ thanh toán" gộp `awaiting` và `verifying`. */
+type PaymentState = 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled' | 'refunded'
+
+const PAYMENT_STATES: PaymentState[] = ['pending', 'paid', 'failed', 'expired', 'cancelled', 'refunded']
+
+const STATE_TAG: Record<PaymentState, string> = {
+  pending: 'gold',
+  paid: 'green',
   failed: 'red',
-  paid: 'green'
+  expired: 'default',
+  cancelled: 'default',
+  refunded: 'blue'
 }
 
-type View = 'all' | 'paid' | 'pending' | 'failed'
-
-/** "Đang chờ" gộp hai trạng thái chưa có kết quả: chưa chuyển và đang chờ ngân hàng báo về. */
-function inPending(order: CmsOrder): boolean {
-  return order.status === 'awaiting' || order.status === 'verifying'
+function paymentState(status: CmsOrderStatus): PaymentState {
+  return status === 'awaiting' || status === 'verifying' ? 'pending' : status
 }
 
-function stamp(iso: string): string {
-  return iso.slice(0, 16).replace('T', ' ')
+function stamp(value?: string): string {
+  return value ? dayjs(value).format('DD/MM/YYYY HH:mm') : '-'
 }
 
 /**
- * ĐƠN HÀNG — màn TRA CỨU, không phải hàng đợi xử lý.
+ * ĐƠN MUA GÓI (epic OrderManagement) — TRA CỨU, chỉ đọc.
  *
- * Trạng thái thanh toán do backend cập nhật qua webhook của ngân hàng / cổng
- * QR: tiền về là đơn tự sang `paid` và màn S06 của khách tự sang S08. Vận hành
- * KHÔNG xác nhận tiền bằng tay, nên màn này không có nút nào đổi trạng thái.
- *
- * Việc của vận hành ở đây là trả lời khi khách gọi: tìm theo mã đơn, nội dung
- * chuyển khoản, tên, SĐT hoặc email; xem đơn đang ở đâu, thông tin xuất hóa
- * đơn, và ghi chú nội bộ lại cuộc gọi. Ngăn kéo chỉ sửa được đúng ghi chú đó.
- *
- * Không có nút xóa: đơn đã tạo là chứng từ.
+ * Giá, mã giảm giá, tổng tiền và trạng thái thanh toán do backend xác định và
+ * snapshot lúc tạo đơn; admin không tạo, sửa, xóa đơn, không đổi trạng thái
+ * thanh toán và không kích hoạt gói thủ công. Chi tiết đơn hiện snapshot gói,
+ * thông tin thanh toán và mọi giao dịch thuộc đơn.
  */
 export function OrderManager() {
   const t = useTranslations('admin')
   const locale = useLocale() as Locale
   const productLabel = useProductLabel()
-  const [view, setView] = useState<View>('all')
+  const searchParams = useSearchParams()
 
   const { data: orders = [] } = useAdminCollection('orders')
+  const { data: transactions = [] } = useAdminCollection('transactions')
 
-  const counts: Record<View, number> = {
-    all: orders.length,
-    paid: orders.filter((order) => order.status === 'paid').length,
-    pending: orders.filter(inPending).length,
-    failed: orders.filter((order) => order.status === 'failed').length
+  const [kind, setKind] = useState<'all' | CmsOrderKind>('all')
+  const [product, setProduct] = useState<string>('all')
+  const [state, setState] = useState<'all' | PaymentState>('all')
+  const [range, setRange] = useState<[Dayjs | null, Dayjs | null] | null>(null)
+
+  const productOptions = [...new Map(orders.map((order) => [order.product.id, order.product])).values()].map(
+    (item) => ({ value: item.id, label: productLabel(item.kind, item.id) })
+  )
+  const money = (value: number) => formatCurrency(value, locale)
+  const nameOf = (order: CmsOrder) => productLabel(order.product.kind, order.product.id)
+
+  const matches = (order: CmsOrder) => {
+    if (kind !== 'all' && order.product.kind !== kind) return false
+    if (product !== 'all' && order.product.id !== product) return false
+    if (state !== 'all' && paymentState(order.status) !== state) return false
+    const [from, to] = range ?? [null, null]
+    const created = dayjs(order.createdAt)
+    if (from && created.isBefore(from.startOf('day'))) return false
+    if (to && created.isAfter(to.endOf('day'))) return false
+    return true
   }
 
-  const inView = (order: CmsOrder) => {
-    if (view === 'all') return true
-    if (view === 'pending') return inPending(order)
-    return order.status === view
+  const stateTag = (status: CmsOrderStatus) => {
+    const value = paymentState(status)
+    return (
+      <Space orientation='vertical' size={2}>
+        <Tag color={STATE_TAG[value]}>{t(`orderPayment.${value}`)}</Tag>
+        {status === 'verifying' ? (
+          <Text type='secondary' style={{ fontSize: 12 }}>
+            {t('orders.customerReportedTransfer')}
+          </Text>
+        ) : null}
+      </Space>
+    )
   }
 
   return (
@@ -72,37 +96,57 @@ export function OrderManager() {
       title={t('nav.orders')}
       description={t('orders.description')}
       allowDelete={false}
-      drawerWidth={620}
-      searchText={(item) =>
-        `${item.id} ${item.transfer.content} ${item.buyer.name} ${item.buyer.phone} ${item.buyer.email} ${item.total}`
-      }
-      filterItems={inView}
+      allowEdit={false}
+      drawerWidth={680}
+      initialViewId={searchParams.get('order')}
+      searchText={(item) => `${item.id} ${item.buyer.name} ${item.buyer.email} ${item.buyer.phone} ${nameOf(item)}`}
+      filterItems={matches}
+      filterKey={`${kind}|${product}|${state}|${range?.[0]?.valueOf() ?? ''}|${range?.[1]?.valueOf() ?? ''}`}
       banner={
-        <Segmented<View>
-          value={view}
-          onChange={setView}
-          options={(['all', 'paid', 'pending', 'failed'] as const).map((value) => ({
-            value,
-            label: `${t(`orders.views.${value}`)} (${counts[value]})`
-          }))}
-        />
+        <Space wrap>
+          <Select<'all' | CmsOrderKind>
+            value={kind}
+            onChange={setKind}
+            style={{ minWidth: 170 }}
+            options={[
+              { value: 'all', label: t('orders.allKinds') },
+              { value: 'design', label: t('customers.packageKinds.design') },
+              { value: 'supervision', label: t('customers.packageKinds.supervision') }
+            ]}
+          />
+          <Select
+            value={product}
+            onChange={setProduct}
+            style={{ minWidth: 170 }}
+            options={[{ value: 'all', label: t('orders.allPlans') }, ...productOptions]}
+          />
+          <Select<'all' | PaymentState>
+            value={state}
+            onChange={setState}
+            style={{ minWidth: 190 }}
+            options={[
+              { value: 'all', label: t('orders.allStates') },
+              ...PAYMENT_STATES.map((value) => ({ value, label: t(`orderPayment.${value}`) }))
+            ]}
+          />
+          <DatePicker.RangePicker
+            value={range}
+            onChange={(value) => setRange(value as [Dayjs | null, Dayjs | null] | null)}
+            format='DD/MM/YYYY'
+            allowEmpty={[true, true]}
+            placeholder={[t('orders.createdFrom'), t('orders.createdTo')]}
+          />
+        </Space>
       }
       columns={[
         {
           title: t('orders.code'),
           dataIndex: 'id',
-          width: 170,
-          render: (id: string, record) => (
-            <div style={{ minWidth: 0 }}>
-              <Text code>{id}</Text>
-              <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
-                {t('orders.transferContent')}: <Text copyable>{record.transfer.content}</Text>
-              </Text>
-            </div>
-          )
+          width: 120,
+          render: (id: string) => <Text code>{id}</Text>
         },
         {
-          title: t('orders.buyer'),
+          title: t('orders.customer'),
           key: 'buyer',
           render: (_, record) => (
             <div style={{ minWidth: 0 }}>
@@ -110,69 +154,49 @@ export function OrderManager() {
                 {record.buyer.name}
               </Text>
               <Text type='secondary' style={{ fontSize: 12 }}>
-                {record.buyer.phone} · {record.buyer.email}
+                {record.buyer.email} · {record.buyer.phone}
               </Text>
             </div>
           )
         },
         {
-          title: t('orders.product'),
-          key: 'product',
-          width: 170,
+          title: t('customers.packageKind'),
+          key: 'kind',
+          width: 130,
           render: (_, record) => (
-            <Space orientation='vertical' size={2}>
-              <Tag color={record.product.kind === 'design' ? 'green' : 'purple'}>
-                {productLabel(record.product.kind, record.product.id)}
-              </Tag>
-              {record.projectId ? (
-                <Text type='secondary' style={{ fontSize: 12 }}>
-                  {record.projectId}
-                </Text>
-              ) : null}
-              {record.invoice.enabled ? <Tag>{t('orders.invoiceRequested')}</Tag> : null}
-            </Space>
+            <Tag color={record.product.kind === 'design' ? 'green' : 'purple'}>
+              {t(`customers.packageKinds.${record.product.kind}`)}
+            </Tag>
           )
         },
+        { title: t('orders.planName'), key: 'plan', width: 130, render: (_, record) => nameOf(record) },
         {
-          title: t('orders.amount'),
+          title: t('customers.subtotal'),
+          dataIndex: 'subtotal',
+          width: 130,
+          align: 'right' as const,
+          render: (value: number) => money(value)
+        },
+        {
+          title: t('customers.discount'),
+          dataIndex: 'discountAmount',
+          width: 130,
+          align: 'right' as const,
+          render: (value: number) => (value ? `−${money(value)}` : '-')
+        },
+        {
+          title: t('customers.total'),
           dataIndex: 'total',
-          width: 160,
+          width: 140,
           align: 'right' as const,
           sorter: (a, b) => a.total - b.total,
-          render: (total: number, record) => (
-            <div>
-              <Text strong>{formatCurrency(total, locale)}</Text>
-              {record.discountAmount > 0 ? (
-                <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
-                  {record.discountCode} −{formatCurrency(record.discountAmount, locale)}
-                </Text>
-              ) : null}
-            </div>
-          )
+          render: (value: number) => <Text strong>{money(value)}</Text>
         },
         {
           title: t('orders.status'),
           dataIndex: 'status',
           width: 190,
-          render: (status: CmsOrderStatus, record) => (
-            <div>
-              <Tag color={STATUS_TAG[status]}>{t(`orderStatus.${status}`)}</Tag>
-              <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
-                {status === 'paid'
-                  ? t('orders.paidAgo', { time: relativeTime(record.paidAt, locale) })
-                  : t('orders.createdAgo', { time: relativeTime(record.createdAt, locale) })}
-              </Text>
-              {record.opsNote ? (
-                <Text
-                  type='secondary'
-                  style={{ display: 'block', fontSize: 12 }}
-                  ellipsis={{ tooltip: record.opsNote }}
-                >
-                  {record.opsNote}
-                </Text>
-              ) : null}
-            </div>
-          )
+          render: (status: CmsOrderStatus) => stateTag(status)
         },
         {
           title: t('orders.createdAt'),
@@ -180,58 +204,167 @@ export function OrderManager() {
           width: 150,
           sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
           defaultSortOrder: 'descend' as const,
-          render: (createdAt: string) => <Text>{stamp(createdAt)}</Text>
+          render: (value: string) => stamp(value)
         }
       ]}
-      renderDetail={(order) => (
-        <Space orientation='vertical' size={16} style={{ width: '100%' }}>
-          <Descriptions size='small' column={1} bordered title={t('orders.transferBlock')}>
-            <Descriptions.Item label={t('orders.status')}>
-              <Tag color={STATUS_TAG[order.status]}>{t(`orderStatus.${order.status}`)}</Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label={t('orders.amount')}>{formatCurrency(order.total, locale)}</Descriptions.Item>
-            <Descriptions.Item label={t('orders.transferContent')}>
-              <Text copyable>{order.transfer.content}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label={t('orders.bankAccount')}>
-              {order.transfer.bankName} · {order.transfer.accountNumber}
-            </Descriptions.Item>
-          </Descriptions>
-          <Descriptions size='small' column={1} bordered title={t('orders.buyer')}>
-            <Descriptions.Item label={t('fields.name')}>{order.buyer.name}</Descriptions.Item>
-            <Descriptions.Item label={t('orders.phone')}>
-              <Text copyable>{order.buyer.phone}</Text>
-            </Descriptions.Item>
-            <Descriptions.Item label='Email'>
-              <Text copyable>{order.buyer.email}</Text>
-            </Descriptions.Item>
-          </Descriptions>
-          {order.invoice.enabled ? (
-            <Descriptions size='small' column={1} bordered title={t('orders.invoiceBlock')}>
-              <Descriptions.Item label={t('orders.company')}>{order.invoice.company}</Descriptions.Item>
-              <Descriptions.Item label={t('orders.taxCode')}>
-                <Text copyable>{order.invoice.taxCode}</Text>
-              </Descriptions.Item>
-              <Descriptions.Item label={t('orders.address')}>{order.invoice.address}</Descriptions.Item>
-              <Descriptions.Item label='Email'>{order.invoice.email}</Descriptions.Item>
-            </Descriptions>
-          ) : null}
-          <Descriptions size='small' column={1} bordered title={t('orders.timeline')}>
-            <Descriptions.Item label={t('orders.createdAt')}>{stamp(order.createdAt)}</Descriptions.Item>
-            {order.transferredAt ? (
-              <Descriptions.Item label={t('orders.transferredAt')}>{stamp(order.transferredAt)}</Descriptions.Item>
-            ) : null}
-            {order.paidAt ? (
-              <Descriptions.Item label={t('orders.paidAt')}>{stamp(order.paidAt)}</Descriptions.Item>
-            ) : null}
-          </Descriptions>
-        </Space>
-      )}
-      renderForm={() => (
-        <Form.Item name='opsNote' label={t('orders.opsNote')} extra={t('orders.opsNoteHint')}>
-          <Input.TextArea rows={3} />
-        </Form.Item>
-      )}
+      renderView={(order) => {
+        const ownTransactions = transactions
+          .filter((tx) => tx.orderId === order.id)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        const snapshot = order.product
+        return (
+          <Space orientation='vertical' size={16} style={{ width: '100%' }}>
+            <Descriptions
+              size='small'
+              column={1}
+              bordered
+              title={t('orders.orderBlock')}
+              items={[
+                { key: 'id', label: t('orders.code'), children: <Text code>{order.id}</Text> },
+                {
+                  key: 'kind',
+                  label: t('customers.packageKind'),
+                  children: t(`customers.packageKinds.${snapshot.kind}`)
+                },
+                { key: 'name', label: t('orders.planName'), children: nameOf(order) },
+                { key: 'code', label: t('orders.planCode'), children: snapshot.id.toUpperCase() },
+                { key: 'status', label: t('orders.status'), children: stateTag(order.status) },
+                { key: 'created', label: t('orders.createdAt'), children: stamp(order.createdAt) },
+                { key: 'paid', label: t('orders.paidAt'), children: stamp(order.paidAt) },
+                { key: 'expires', label: t('orders.expiresAt'), children: stamp(order.expiresAt) }
+              ]}
+            />
+            <Descriptions
+              size='small'
+              column={1}
+              bordered
+              title={t('orders.buyerBlock')}
+              items={[
+                { key: 'name', label: t('fields.name'), children: order.buyer.name },
+                { key: 'email', label: 'Email', children: order.buyer.email },
+                { key: 'phone', label: t('orders.phone'), children: order.buyer.phone },
+                {
+                  key: 'invoice',
+                  label: t('orders.invoiceBlock'),
+                  children: order.invoice.enabled ? (
+                    <div>
+                      <div>{order.invoice.company}</div>
+                      <div>
+                        {t('orders.taxCode')}: {order.invoice.taxCode}
+                      </div>
+                      <div>{order.invoice.address}</div>
+                      <div>{order.invoice.email}</div>
+                    </div>
+                  ) : (
+                    t('orders.noInvoice')
+                  )
+                }
+              ]}
+            />
+            <Descriptions
+              size='small'
+              column={1}
+              bordered
+              title={t('orders.paymentBlock')}
+              items={[
+                { key: 'subtotal', label: t('orders.basePrice'), children: money(order.subtotal) },
+                { key: 'code', label: t('orders.discountCode'), children: order.discountCode || '-' },
+                {
+                  key: 'type',
+                  label: t('orders.discountType'),
+                  children: order.discountType
+                    ? order.discountType === 'percent'
+                      ? t('discounts.typePercent')
+                      : t('discounts.typeAmount')
+                    : '-'
+                },
+                {
+                  key: 'value',
+                  label: t('orders.discountConfigured'),
+                  children:
+                    order.discountValue === undefined
+                      ? '-'
+                      : order.discountType === 'percent'
+                        ? `${order.discountValue}%`
+                        : money(order.discountValue)
+                },
+                {
+                  key: 'discount',
+                  label: t('orders.discountApplied'),
+                  children: order.discountAmount ? `−${money(order.discountAmount)}` : '-'
+                },
+                { key: 'total', label: t('orders.totalDue'), children: <Text strong>{money(order.total)}</Text> },
+                { key: 'method', label: t('customers.method'), children: t('transactionMethod.bank-qr') }
+              ]}
+            />
+            <Descriptions
+              size='small'
+              column={1}
+              bordered
+              title={t('orders.snapshotBlock')}
+              items={[
+                { key: 'price', label: t('orders.snapshotPrice'), children: money(snapshot.price) },
+                {
+                  key: 'period',
+                  label: t('orders.snapshotPeriod'),
+                  children: snapshot.periodDays ? t('orders.days', { days: snapshot.periodDays }) : '-'
+                },
+                {
+                  key: 'credits',
+                  label: t('orders.snapshotCredits'),
+                  children:
+                    snapshot.designCredits !== undefined
+                      ? t('orders.creditsLine', {
+                          design: snapshot.designCredits,
+                          library: snapshot.libraryCredits ?? 0
+                        })
+                      : '-'
+                },
+                {
+                  key: 'benefits',
+                  label: t('customers.benefits'),
+                  children: (
+                    <ul className='m-0 list-disc pl-4'>
+                      {snapshot.benefits.map((benefit) => (
+                        <li key={benefit}>{benefit}</li>
+                      ))}
+                    </ul>
+                  )
+                },
+                {
+                  key: 'gift',
+                  label: t('customers.gift'),
+                  children: snapshot.gift ? `${snapshot.gift.title} — ${snapshot.gift.conditions}` : '-'
+                }
+              ]}
+            />
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>
+                {t('orders.transactionsBlock')}
+              </Text>
+              <Table<CmsTransaction>
+                rowKey='id'
+                size='small'
+                pagination={false}
+                dataSource={ownTransactions}
+                locale={{ emptyText: t('table.empty') }}
+                columns={[
+                  { title: t('customers.txCode'), dataIndex: 'id', render: (id: string) => <Text code>{id}</Text> },
+                  {
+                    title: t('customers.txStatus'),
+                    dataIndex: 'status',
+                    render: (value: CmsTransaction['status']) => <Tag>{t(`transactionStatus.${value}`)}</Tag>
+                  },
+                  { title: t('customers.amount'), dataIndex: 'amount', render: (value: number) => money(value) },
+                  { title: t('customers.txTime'), dataIndex: 'createdAt', render: (value: string) => stamp(value) },
+                  { title: t('orders.note'), dataIndex: 'note', render: (value?: string) => value ?? '-' }
+                ]}
+              />
+            </div>
+          </Space>
+        )
+      }}
+      renderForm={() => null}
     />
   )
 }

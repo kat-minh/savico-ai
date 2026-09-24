@@ -2,11 +2,24 @@ import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/i18n/routing'
 import type {
   CmsBooking,
   CmsBuildingTypeOption,
+  CmsFloorOption,
+  CmsGift,
+  CmsPlanSettings,
+  CmsContractorMatching,
+  CmsSurveySchedule,
+  CmsSupervisionStageDef,
+  CmsArticleLabel,
+  CmsCostGroup,
+  CmsCostItem,
+  CmsMaterialPrice,
+  CmsEstimateAdvice,
   CmsContractor,
   CmsContractorInvitation,
   CmsDiscountCode,
   CmsOrder,
   CmsCustomer,
+  CmsCustomerPackage,
+  CmsQuotaEvent,
   CmsDesignProject,
   CmsConsultPackage,
   CmsPackageReview,
@@ -21,7 +34,6 @@ import type {
   CmsStyleOption,
   CmsUiAssets,
   CmsUiStrings,
-  CmsUnitPrice,
   Consultant,
   GuideArticle,
   GuideVideo,
@@ -34,6 +46,17 @@ import type {
 import {
   BOOKINGS_SEED,
   BUILDING_TYPES_SEED,
+  FLOOR_OPTIONS_SEED,
+  GIFTS_SEED,
+  PLAN_SETTINGS_SEED,
+  CONTRACTOR_MATCHING_SEED,
+  SURVEY_SCHEDULE_SEED,
+  SUPERVISION_STAGES_SEED,
+  ARTICLE_LABELS_SEED,
+  COST_GROUPS_SEED,
+  COST_ITEMS_SEED,
+  MATERIAL_PRICES_SEED,
+  ESTIMATE_ADVICE_SEED,
   CONSULT_PACKAGES_SEED,
   CONTRACTOR_INVITATIONS_SEED,
   CONTRACTORS_SEED,
@@ -46,6 +69,8 @@ import {
   TRANSACTIONS_SEED,
   CONSULTANTS_SEED,
   CUSTOMERS_SEED,
+  CUSTOMER_PACKAGES_SEED,
+  QUOTA_EVENTS_SEED,
   DESIGN_PROJECTS_SEED,
   GUIDE_ARTICLES_SEED,
   GUIDE_VIDEOS_SEED,
@@ -58,8 +83,7 @@ import {
   QUOTAS_SEED,
   SITE_SETTINGS_SEED,
   STYLE_OPTIONS_SEED,
-  TERMS_PAGE_SEED,
-  UNIT_PRICES_SEED
+  TERMS_PAGE_SEED
 } from './seeds'
 
 /**
@@ -87,18 +111,33 @@ export interface CmsCollectionMap {
   handbookTemplates: HandbookTemplate
   handbookArticles: HandbookArticle
   handbookStages: HandbookStage
+  /** Nhãn bài viết (BR-136). */
+  articleLabels: CmsArticleLabel
   guideVideos: GuideVideo
   guideArticles: GuideArticle
   plans: SubscriptionPlan
+  /** Danh mục quà tặng — gói chọn một quà Đang hoạt động (GiftManagement). */
+  gifts: CmsGift
   /** Ba lựa chọn quản lý thi công của trang Gói giám sát (S19). */
   supervisionPackages: SupervisionPackage
+  /** Danh mục giai đoạn giám sát (spec admin #15). */
+  supervisionStages: CmsSupervisionStageDef
   consultants: Consultant
   bookings: CmsBooking
   customers: CmsCustomer
+  /** Gói khách đã mua, theo snapshot đơn — admin chỉ xem (UserAccountManagement §3). */
+  customerPackages: CmsCustomerPackage
+  /** Lịch sử giữ / trừ / hoàn lượt — chỉ đọc (UserAccountManagement §6). */
+  quotaEvents: CmsQuotaEvent
   designProjects: CmsDesignProject
   buildingTypes: CmsBuildingTypeOption
+  /** Phương án Số tầng dùng chung — loại công trình chọn ra phương án nó cho phép. */
+  floorOptions: CmsFloorOption
   styleOptions: CmsStyleOption
-  unitPrices: CmsUnitPrice
+  /** Cấu hình dự toán (spec admin #3). */
+  costGroups: CmsCostGroup
+  costItems: CmsCostItem
+  materialPrices: CmsMaterialPrice
   subscriptions: CmsSubscription
   transactions: CmsTransaction
   rescheduleRequests: CmsRescheduleRequest
@@ -126,6 +165,14 @@ export interface CmsDocumentMap {
   privacyPage: CmsStaticPage
   /** Hạn mức miễn phí & theo ngày — con số, không có bản dịch riêng. */
   quotas: CmsQuotas
+  /** Chu kỳ sử dụng chung của gói thiết kế (DesignPackageManagement §4). */
+  planSettings: CmsPlanSettings
+  /** Quy tắc đề xuất nhà thầu (spec admin #12). */
+  contractorMatching: CmsContractorMatching
+  /** Nội dung tư vấn SAVICO dưới bảng dự toán (spec admin #3). */
+  estimateAdvice: CmsEstimateAdvice
+  /** Lịch khảo sát nhà thầu (spec admin #13). */
+  surveySchedule: CmsSurveySchedule
   /** Ghi đè chuỗi giao diện — phủ nốt chữ không nằm trong các bảng trên. */
   uiStrings: CmsUiStrings
   /** Ghi đè ảnh minh họa dùng chung của giao diện. */
@@ -141,6 +188,8 @@ export type CmsDocument = keyof CmsDocumentMap
 const SHARED_COLLECTIONS: readonly CmsCollection[] = [
   'bookings',
   'customers',
+  'customerPackages',
+  'quotaEvents',
   'designProjects',
   'subscriptions',
   'transactions',
@@ -151,7 +200,10 @@ const SHARED_COLLECTIONS: readonly CmsCollection[] = [
   'supervisionProjects',
   'contractors',
   'orders',
-  'discountCodes'
+  'discountCodes',
+  // Số liệu cấu hình, không có bản dịch.
+  'floorOptions',
+  'materialPrices'
 ]
 
 /** Ngăn lưu: một ngăn cho mỗi ngôn ngữ, cộng ngăn `shared` cho dữ liệu vận hành. */
@@ -177,6 +229,21 @@ export function isLocalizedCollection(collection: CmsCollection): boolean {
  */
 const NO_LOCALE_FALLBACK_DOCUMENTS: readonly CmsDocument[] = ['uiStrings']
 
+/**
+ * Tài liệu cấu hình thuần SỐ / QUY TẮC — không có bản dịch, cả hai ngôn ngữ dùng
+ * chung một bản (lưu ở ngăn ngôn ngữ mặc định). Để theo ngôn ngữ thì admin sửa
+ * khi đang ở chế độ EN sẽ không áp cho site tiếng Việt.
+ */
+const SHARED_DOCUMENTS: readonly CmsDocument[] = ['quotas', 'planSettings', 'contractorMatching', 'surveySchedule']
+
+const documentLocale = (document: CmsDocument, locale: Locale): Locale =>
+  SHARED_DOCUMENTS.includes(document) ? DEFAULT_LOCALE : locale
+
+/** Tài liệu này có bản dịch riêng theo ngôn ngữ hay không. */
+export function isLocalizedDocument(document: CmsDocument): boolean {
+  return !SHARED_DOCUMENTS.includes(document)
+}
+
 /** Ngôn ngữ nào có bản dịch riêng — dùng cho công tắc "ngôn ngữ nội dung". */
 export const CMS_LOCALES: readonly Locale[] = LOCALES
 
@@ -184,17 +251,25 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   handbookTemplates: HANDBOOK_TEMPLATES_SEED,
   handbookArticles: HANDBOOK_ARTICLES_SEED,
   handbookStages: HANDBOOK_STAGES_SEED,
+  articleLabels: ARTICLE_LABELS_SEED,
   guideVideos: GUIDE_VIDEOS_SEED,
   guideArticles: GUIDE_ARTICLES_SEED,
   plans: PLANS_SEED,
+  gifts: GIFTS_SEED,
   supervisionPackages: SUPERVISION_PACKAGES_SEED,
+  supervisionStages: SUPERVISION_STAGES_SEED,
   consultants: CONSULTANTS_SEED,
   bookings: BOOKINGS_SEED,
   customers: CUSTOMERS_SEED,
+  customerPackages: CUSTOMER_PACKAGES_SEED,
+  quotaEvents: QUOTA_EVENTS_SEED,
   designProjects: DESIGN_PROJECTS_SEED,
   buildingTypes: BUILDING_TYPES_SEED,
+  floorOptions: FLOOR_OPTIONS_SEED,
   styleOptions: STYLE_OPTIONS_SEED,
-  unitPrices: UNIT_PRICES_SEED,
+  costGroups: COST_GROUPS_SEED,
+  costItems: COST_ITEMS_SEED,
+  materialPrices: MATERIAL_PRICES_SEED,
   subscriptions: SUBSCRIPTIONS_SEED,
   transactions: TRANSACTIONS_SEED,
   rescheduleRequests: RESCHEDULE_REQUESTS_SEED,
@@ -218,6 +293,10 @@ const DOCUMENT_SEEDS: { [K in CmsDocument]: CmsDocumentMap[K] } = {
   termsPage: TERMS_PAGE_SEED,
   privacyPage: PRIVACY_PAGE_SEED,
   quotas: QUOTAS_SEED,
+  planSettings: PLAN_SETTINGS_SEED,
+  contractorMatching: CONTRACTOR_MATCHING_SEED,
+  estimateAdvice: ESTIMATE_ADVICE_SEED,
+  surveySchedule: SURVEY_SCHEDULE_SEED,
   // Rỗng = chưa sửa gì: site chạy nguyên bản dịch trong `messages/` và sổ ảnh
   // trong `shared/lib/imagery`. Hai hằng này phải là THAM CHIẾU CỐ ĐỊNH, vì
   // `useSyncExternalStore` so sánh theo tham chiếu khi chưa có bản ghi nào.
@@ -227,7 +306,7 @@ const DOCUMENT_SEEDS: { [K in CmsDocument]: CmsDocumentMap[K] } = {
 
 /** Khóa localStorage. Đổi `VERSION` để bỏ bản ghi cũ khi cấu trúc thay đổi. */
 const STORAGE_KEY = 'savico.cms'
-const VERSION = 2
+const VERSION = 9
 
 interface CmsSnapshot {
   version: number
@@ -369,7 +448,8 @@ export const cmsDb = {
     )
   },
 
-  getDocument<K extends CmsDocument>(document: K, locale: Locale = currentCmsLocale()): CmsDocumentMap[K] {
+  getDocument<K extends CmsDocument>(document: K, requested: Locale = currentCmsLocale()): CmsDocumentMap[K] {
+    const locale = documentLocale(document, requested)
     const stored = load().documents
     const own = stored[locale]?.[document] as CmsDocumentMap[K] | undefined
     if (own) return own
@@ -388,8 +468,9 @@ export const cmsDb = {
   saveDocument<K extends CmsDocument>(
     document: K,
     value: CmsDocumentMap[K],
-    locale: Locale = currentCmsLocale()
+    requested: Locale = currentCmsLocale()
   ): CmsDocumentMap[K] {
+    const locale = documentLocale(document, requested)
     const stored = load()
     persist({
       ...stored,

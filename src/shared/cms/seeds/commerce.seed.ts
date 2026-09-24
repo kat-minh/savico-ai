@@ -174,5 +174,23 @@ export const ORDERS_SEED: CmsOrder[] = [
     expiresAt: '2026-09-15T10:35:00+07:00',
     transferredAt: '2026-09-15T10:26:00+07:00',
     paidAt: '2026-09-15T10:31:00+07:00'
+  }),
+  order('SVC-26003', {
+    product: PLUS,
+    buyer: { name: 'Nguyễn Văn Hùng', phone: '0901 234 567', email: 'hung.nguyen@gmail.com' },
+    status: 'paid',
+    createdAt: '2026-08-13T09:10:00+07:00',
+    expiresAt: '2026-08-13T09:25:00+07:00',
+    transferredAt: '2026-08-13T09:18:00+07:00',
+    paidAt: '2026-08-13T09:24:00+07:00'
+  }),
+  order('SVC-26002', {
+    product: PRO,
+    buyer: { name: 'Lê Hoàng Nam', phone: '0987 654 321', email: 'nam.le@savicogroup.vn' },
+    status: 'paid',
+    createdAt: '2026-08-01T15:40:00+07:00',
+    expiresAt: '2026-08-01T15:55:00+07:00',
+    transferredAt: '2026-08-01T15:44:00+07:00',
+    paidAt: '2026-08-01T15:47:00+07:00'
   })
 ]

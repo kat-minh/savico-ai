@@ -1,6 +1,6 @@
 import { setRequestLocale } from 'next-intl/server'
 
-import { TemplateManager } from '@/features/admin'
+import { Template2DManager } from '@/features/admin'
 import type { Locale } from '@/i18n/routing'
 
 interface PageProps {
@@ -12,5 +12,5 @@ export default async function AdminTemplatesPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <TemplateManager />
+  return <Template2DManager />
 }

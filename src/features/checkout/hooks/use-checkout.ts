@@ -132,6 +132,9 @@ export function routeForStatus(order: Order): string {
     case 'verifying':
       return checkoutVerifyingRoute(order.id)
     case 'failed':
+    case 'expired':
+    case 'cancelled':
+    case 'refunded':
       return checkoutFailedRoute(order.id)
     case 'paid':
       return checkoutDoneRoute(order.id)

@@ -4,7 +4,7 @@ import { App, Badge, Button, Card, Form, Popconfirm, Skeleton, Space, type FormI
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 
-import type { CmsDocument, CmsDocumentMap } from '@/shared/cms'
+import { isLocalizedDocument, type CmsDocument, type CmsDocumentMap } from '@/shared/cms'
 import { useAdminDocument, useSaveAdminDocument } from '../../hooks/use-admin-data'
 import { useUnsavedGuard } from '../../hooks/use-unsaved-guard'
 import { AdminPage } from './admin-page'
@@ -67,7 +67,9 @@ export function DocumentEditor<K extends CmsDocument>({
   useUnsavedGuard(dirty)
 
   async function submit() {
-    const values = (await form.validateFields()) as CmsDocumentMap[K]
+    // Form sai thì antd reject kèm lỗi từng ô — đã hiện dưới ô, không cần ném tiếp.
+    const values = (await form.validateFields().catch(() => null)) as CmsDocumentMap[K] | null
+    if (!values) return
     await save.mutateAsync({ ...(data as CmsDocumentMap[K]), ...values })
     setDirty(false)
     message.success(t('feedback.saved'))
@@ -99,7 +101,7 @@ export function DocumentEditor<K extends CmsDocument>({
         </Space>
       }
     >
-      <ContentLocaleBanner />
+      {isLocalizedDocument(document) ? <ContentLocaleBanner /> : null}
       <Card>
         {isPending ? (
           <Skeleton active paragraph={{ rows: 8 }} />

@@ -25,6 +25,7 @@ const CONSULTANTS: Consultant[] = [
     ],
     rating: 4.9,
     reviewCount: 128,
+    visible: true,
     works: [
       { imageUrl: STYLE_IMAGE.modern, label: 'Nhà phố hiện đại 3 tầng' },
       { imageUrl: BUILDING_IMAGE.villa, label: 'Biệt thự sân vườn' },
@@ -51,6 +52,7 @@ const CONSULTANTS: Consultant[] = [
     ],
     rating: 4.8,
     reviewCount: 96,
+    visible: true,
     works: [
       { imageUrl: BUILDING_IMAGE.apartment, label: 'Căn hộ 2 phòng ngủ' },
       { imageUrl: INTERIOR_IMAGE.minimal, label: 'Nội thất tối giản' },
@@ -77,6 +79,7 @@ const CONSULTANTS: Consultant[] = [
     ],
     rating: 4.9,
     reviewCount: 88,
+    visible: true,
     works: [
       { imageUrl: STYLE_IMAGE['thai-roof'], label: 'Nhà mái Thái hiện đại' },
       { imageUrl: STYLE_IMAGE['garden-villa'], label: 'Biệt thự sân vườn' },
@@ -103,6 +106,7 @@ const CONSULTANTS: Consultant[] = [
     ],
     rating: 4.7,
     reviewCount: 64,
+    visible: true,
     works: [
       { imageUrl: STYLE_IMAGE.minimal, label: 'Nhà phố tối giản' },
       { imageUrl: INTERIOR_IMAGE.minimal, label: 'Nội thất tối giản' },
@@ -129,6 +133,7 @@ const CONSULTANTS: Consultant[] = [
     ],
     rating: 4.9,
     reviewCount: 142,
+    visible: true,
     works: [
       { imageUrl: STYLE_IMAGE.neoclassical, label: 'Biệt thự tân cổ điển' },
       { imageUrl: BUILDING_IMAGE.villa, label: 'Villa 2 tầng' },
@@ -155,6 +160,7 @@ const CONSULTANTS: Consultant[] = [
     ],
     rating: 4.8,
     reviewCount: 57,
+    visible: true,
     works: [
       { imageUrl: STYLE_IMAGE['wabi-sabi'], label: 'Không gian wabi-sabi' },
       { imageUrl: BUILDING_IMAGE.apartment, label: 'Căn hộ ban công xanh' },

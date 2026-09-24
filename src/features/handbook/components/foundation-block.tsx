@@ -1,30 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import {
-  Anchor,
-  ArrowRight,
-  Blocks,
-  BookOpenCheck,
-  BrickWall,
-  Brush,
-  ClipboardCheck,
-  Clock,
-  DoorOpen,
-  Footprints,
-  Grid2x2,
-  Hammer,
-  Home,
-  Layers,
-  Lightbulb,
-  PencilRuler,
-  PlugZap,
-  Plus,
-  ShowerHead,
-  Sofa,
-  Wallet,
-  X
-} from 'lucide-react'
+import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { ArrowRight, Blocks, BookOpenCheck, Brush, Clock, Plus, Sofa, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -34,6 +11,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { handbookTopicIcon } from '@/shared/lib/handbook-icons'
 import { useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, countArticlesByTopic } from '../services/handbook.service'
 import type { HandbookStage, HandbookStageId } from '../types/handbook.types'
@@ -45,35 +23,9 @@ const STAGE_ICON: Record<HandbookStageId, typeof Blocks> = {
   interior: Sofa
 }
 
-/**
- * Biểu tượng của từng chủ đề trong bảng chủ đề (Hình 10). Chủ đề nào chưa có
- * biểu tượng riêng thì dùng `Layers` — bảng vẫn đều mắt.
- */
-const TOPIC_ICON: Record<string, typeof Blocks> = {
-  foundation: Layers,
-  piling: Anchor,
-  frame: Blocks,
-  masonry: BrickWall,
-  roofing: Home,
-  stairs: Footprints,
-  mep: PlugZap,
-  'structure-handover': ClipboardCheck,
-  tiling: Grid2x2,
-  painting: Brush,
-  doors: DoorOpen,
-  sanitary: ShowerHead,
-  lighting: Lightbulb,
-  'finishing-handover': ClipboardCheck,
-  'interior-design': PencilRuler,
-  joinery: Hammer,
-  'loose-furniture': Sofa,
-  'interior-budget': Wallet
-}
-
-/** Biểu tượng của một chủ đề, cỡ đồng nhất trong bảng chủ đề. */
-function TopicIcon({ topicId }: { topicId: string }) {
-  const Icon = TOPIC_ICON[topicId] ?? Layers
-  return <Icon className='size-4' />
+/** Biểu tượng của một Nhóm cẩm nang — admin chọn trong bộ icon dùng chung (HandbookStepManagement §4). */
+function TopicIcon({ icon }: { icon?: string }) {
+  return createElement(handbookTopicIcon(icon), { className: 'size-4' })
 }
 
 const STEP_TOGGLE_ROTATE_DURATION = 300
@@ -950,7 +902,7 @@ export function FoundationBlock() {
               >
                 <span className='flex items-start gap-2.5'>
                   <span className='text-primary mt-0.5 shrink-0'>
-                    <TopicIcon topicId={topic.id} />
+                    <TopicIcon icon={topic.icon} />
                   </span>
                   <span className='min-w-0'>
                     <span className='block text-sm font-medium'>{topic.title}</span>

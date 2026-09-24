@@ -1,7 +1,13 @@
-import type { CmsBuildingTypeOption, CmsStyleOption } from '@/shared/cms'
+import { cmsDb, type CmsBuildingTypeOption, type CmsFloorOption, type CmsStyleOption } from '@/shared/cms'
 
-import { BUILDING_TYPES, DESIGN_STYLES, STYLES_BY_BUILDING_TYPE } from '../constants/design.constants'
-import type { BuildingType, DesignStyle } from '../types/design.types'
+import {
+  BUILDING_TYPES,
+  DESIGN_STYLES,
+  FIELDS_BY_BUILDING_TYPE,
+  FLOOR_COUNTS,
+  STYLES_BY_BUILDING_TYPE
+} from '../constants/design.constants'
+import type { BuildingType, DesignStyle, FloorCount } from '../types/design.types'
 
 /**
  * Danh mục Bước 1 lấy từ kho nội dung (mục X, #6: admin cấu hình loại công
@@ -42,7 +48,7 @@ function isDesignStyle(id: string): id is DesignStyle {
 /** Loại công trình hiện trong ô chọn, theo thứ tự admin xếp. */
 export function catalogBuildingTypes(options: readonly CmsBuildingTypeOption[]): readonly CatalogBuildingType[] {
   const fromCms = options
-    .filter((option) => option.enabled)
+    .filter((option) => option.status === 'active')
     .sort((a, b) => a.order - b.order)
     .flatMap<CatalogBuildingType>((option) =>
       isBuildingType(option.id) ? [{ value: option.id, label: option.label }] : []
@@ -59,11 +65,69 @@ export function catalogStyles(
   if (!buildingType) return []
 
   const fromCms = options
-    .filter((option) => option.enabled && option.buildingTypeIds.includes(buildingType))
+    // Trường phong cách của Bước 1 là phong cách KIẾN TRÚC; danh mục nội thất đi riêng.
+    .filter(
+      (option) => option.kind === 'architecture' && option.enabled && option.buildingTypeIds.includes(buildingType)
+    )
     .sort((a, b) => a.order - b.order)
     .flatMap<CatalogStyle>((option) =>
       isDesignStyle(option.id) ? [{ value: option.id, label: option.label, imageUrl: option.imageUrl }] : []
     )
 
   return fromCms.length > 0 ? fromCms : STYLES_BY_BUILDING_TYPE[buildingType].map((value) => ({ value }))
+}
+
+/**
+ * Cấu hình Số tầng / Tum của một loại công trình (epic ConstructionTypeManagement
+ * §3, §4, §7) — admin quyết định form hiện trường nào, phương án nào, bắt buộc
+ * hay không. Loại chưa có trong kho thì rơi về `FIELDS_BY_BUILDING_TYPE`.
+ */
+export interface BuildingTypeFieldConfig {
+  floorCount: boolean
+  floorRequired: boolean
+  /** Phương án Số tầng được phép, theo thứ tự admin xếp. */
+  floorOptions: readonly FloorCount[]
+  /** Chỉ `true` khi Tum ở chế độ "cho phép lựa chọn". */
+  attic: boolean
+  atticRequired: boolean
+  /** Giá trị Tum cố định (không hỏi người dùng); `null` khi không cố định. */
+  atticFixed: boolean | null
+}
+
+function isFloorCount(id: string): id is FloorCount {
+  return (FLOOR_COUNTS as readonly string[]).includes(id)
+}
+
+export function buildingTypeFieldConfig(
+  buildingType: BuildingType,
+  options: readonly CmsBuildingTypeOption[] = cmsDb.list('buildingTypes'),
+  floorOptions: readonly CmsFloorOption[] = cmsDb.list('floorOptions')
+): BuildingTypeFieldConfig {
+  const option = options.find((item) => item.id === buildingType)
+  if (!option) {
+    const fallback = FIELDS_BY_BUILDING_TYPE[buildingType]
+    return {
+      floorCount: fallback.floorCount,
+      floorRequired: fallback.floorCount,
+      floorOptions: fallback.floorCount ? FLOOR_COUNTS : [],
+      attic: fallback.attic,
+      atticRequired: fallback.attic,
+      atticFixed: null
+    }
+  }
+
+  const allowed = floorOptions
+    .filter((floor) => floor.status === 'active' && option.floors.optionIds.includes(floor.id))
+    .sort((a, b) => a.order - b.order)
+    .map((floor) => floor.id)
+    .filter(isFloorCount)
+
+  return {
+    floorCount: option.floors.applies,
+    floorRequired: option.floors.applies && option.floors.required,
+    floorOptions: option.floors.applies ? allowed : [],
+    attic: option.attic.mode === 'choice',
+    atticRequired: option.attic.mode === 'choice' && option.attic.required,
+    atticFixed: option.attic.mode === 'fixed-yes' ? true : option.attic.mode === 'fixed-no' ? false : null
+  }
 }

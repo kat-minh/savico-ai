@@ -39,7 +39,7 @@ export const CONTRACTOR_INVITATIONS_SEED: CmsContractorInvitation[] = [
     ],
     dossierVersion: 'v1',
     fileCount: 2,
-    survey: survey('ctr-abc', '2026-09-04', 'slot-0900')
+    survey: survey('ctr-abc', '2026-09-04', 'slot-1')
   },
   {
     id: 'INV-2026-0143',
@@ -56,7 +56,7 @@ export const CONTRACTOR_INVITATIONS_SEED: CmsContractorInvitation[] = [
     ],
     dossierVersion: 'v1',
     fileCount: 2,
-    survey: survey('ctr-angia', '2026-09-05', 'slot-1400')
+    survey: survey('ctr-angia', '2026-09-05', 'slot-5')
   },
 
   {
@@ -75,7 +75,7 @@ export const CONTRACTOR_INVITATIONS_SEED: CmsContractorInvitation[] = [
     ],
     dossierVersion: 'v1',
     fileCount: 3,
-    survey: survey('ctr-abc', '2026-08-26', 'slot-0900')
+    survey: survey('ctr-abc', '2026-08-26', 'slot-1')
   },
   {
     id: 'INV-2026-0137',
@@ -92,7 +92,7 @@ export const CONTRACTOR_INVITATIONS_SEED: CmsContractorInvitation[] = [
     ],
     dossierVersion: 'v1',
     fileCount: 3,
-    survey: survey('ctr-angia', '2026-08-27', 'slot-1400')
+    survey: survey('ctr-angia', '2026-08-27', 'slot-5')
   },
   {
     id: 'INV-2026-0138',
@@ -106,7 +106,7 @@ export const CONTRACTOR_INVITATIONS_SEED: CmsContractorInvitation[] = [
     steps: [{ status: 'sent', at: '2026-08-18T01:00:00.000Z' }],
     dossierVersion: 'v1',
     fileCount: 3,
-    survey: survey('ctr-hungphat', '2026-08-28', 'slot-1000')
+    survey: survey('ctr-hungphat', '2026-08-28', 'slot-2')
   },
 
   {
@@ -126,6 +126,6 @@ export const CONTRACTOR_INVITATIONS_SEED: CmsContractorInvitation[] = [
     ],
     dossierVersion: 'v1',
     fileCount: 1,
-    survey: survey('ctr-abc', '2026-07-06', 'slot-0900')
+    survey: survey('ctr-abc', '2026-07-06', 'slot-1')
   }
 ]

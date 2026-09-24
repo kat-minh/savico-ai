@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
+import { useCmsDocument } from '@/shared/cms'
 import { formatCurrency, formatNumber } from '@/shared/utils'
 import { advisoryFacts } from '../services/advisory.service'
 import type { DesignInput, EstimateResult } from '../types/design.types'
@@ -18,6 +19,8 @@ export function useAdvisory(result: EstimateResult | undefined, customerName: st
   const t = useTranslations('design.estimate.advisory')
   const tInput = useTranslations('design.input')
   const locale = useLocale() as Locale
+  // Nội dung tư vấn SAVICO admin soạn (spec admin #3); trống thì dùng câu mặc định.
+  const advice = useCmsDocument('estimateAdvice')
 
   if (!result) return []
   if (result.advisory) return result.advisory.split(/\n{2,}/).filter(Boolean)
@@ -50,8 +53,8 @@ export function useAdvisory(result: EstimateResult | undefined, customerName: st
       finishing: facts.percentBySection.finishing,
       interior: facts.percentBySection.interior
     }),
-    t(`dominant.${facts.dominantSection}`),
+    advice.dominant[facts.dominantSection].trim() || t(`dominant.${facts.dominantSection}`),
     interiorLabel ? t('style', { style: interiorLabel }) : null,
-    t('disclaimer')
+    advice.disclaimer.trim() || t('disclaimer')
   ].filter((paragraph) => paragraph !== null)
 }

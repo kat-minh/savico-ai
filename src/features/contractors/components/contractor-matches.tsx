@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import { useCmsDocument } from '@/shared/cms'
 import { EmptyState, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -13,13 +14,11 @@ import { CONTRACTOR_PREVIEW_ID, contractorCompareRoute, contractorInvitationsRou
 import { cn } from '@/shared/lib/utils'
 import {
   CONTRACTOR_SORTS,
-  DEFAULT_RADIUS,
   MATCHES_INVITE_RETURN_KEY,
   MATCHES_PINNED_CONTRACTOR_KEY,
   MATCHES_PROJECT_CHANGED_KEY,
   MAX_INVITATIONS,
   MIN_COMPARE,
-  SEARCH_RADII,
   SERVICE_REGIONS
 } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
@@ -161,7 +160,15 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
    */
   const preview = projectId === CONTRACTOR_PREVIEW_ID
 
-  const [radiusKm, setRadiusKm] = useState<SearchRadiusKm>(DEFAULT_RADIUS)
+  // Nấc bán kính, mặc định và khu vực được hỗ trợ do admin cấu hình (Quy tắc đề xuất nhà thầu).
+  const rules = useCmsDocument('contractorMatching')
+  const regions = useMemo(
+    () => SERVICE_REGIONS.filter((value) => rules.supportedRegions.includes(value)),
+    [rules.supportedRegions]
+  )
+  const [radiusChoice, setRadiusKm] = useState<SearchRadiusKm | null>(null)
+  const radiusKm =
+    radiusChoice !== null && rules.radiusOptions.includes(radiusChoice) ? radiusChoice : rules.defaultRadiusKm
   const [sort, setSort] = useState<ContractorSort>('match')
   /**
    * Vùng đang chọn. Mặc định lấy vùng có NHIỀU nhà thầu nhất trong danh bạ chứ
@@ -177,10 +184,10 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
 
     const tally = new Map<ServiceRegion, number>()
     for (const contractor of contractors ?? []) tally.set(contractor.region, (tally.get(contractor.region) ?? 0) + 1)
-    return SERVICE_REGIONS.reduce((best, candidate) =>
+    return (regions.length ? regions : SERVICE_REGIONS).reduce((best, candidate) =>
       (tally.get(candidate) ?? 0) > (tally.get(best) ?? 0) ? candidate : best
     )
-  }, [brief, contractors])
+  }, [brief, contractors, regions])
 
   const activeRegion = region ?? defaultRegion
 
@@ -491,8 +498,11 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
       {/* Hàng tab vùng: nhãn bên trái, ba tab chia đều phần còn lại. */}
       <section className='order-3 flex flex-wrap items-center gap-3'>
         <span className='text-muted-foreground text-sm font-medium'>{t('regionLabel')}</span>
-        <div className='grid min-w-0 flex-1 grid-cols-3 overflow-hidden rounded-xl border'>
-          {SERVICE_REGIONS.map((value) => (
+        <div
+          className='grid min-w-0 flex-1 overflow-hidden rounded-xl border'
+          style={{ gridTemplateColumns: `repeat(${Math.max(1, regions.length)}, minmax(0, 1fr))` }}
+        >
+          {regions.map((value) => (
             <button
               key={value}
               type='button'
@@ -555,7 +565,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         <div className='ml-auto flex w-full flex-col items-start gap-1.5 sm:items-end lg:w-auto'>
           <div className='flex flex-wrap items-center gap-2'>
             <span className='text-muted-foreground text-sm font-medium'>{t('radiusShort')}</span>
-            {SEARCH_RADII.map((km) => (
+            {rules.radiusOptions.map((km) => (
               <motion.button
                 key={km}
                 variants={revealItemVariants}

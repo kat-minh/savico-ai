@@ -3,7 +3,6 @@ import type {
   ContractorSort,
   InvitationStatus,
   ProjectScale,
-  SearchRadiusKm,
   ServiceRegion,
   SiteCondition,
   StartWindow
@@ -40,12 +39,6 @@ export const INVITATIONS_ARRIVE_FORWARD_KEY = 'savico.invitations-arrive-forward
 /** Cần ít nhất 2 nhà thầu thì bảng so sánh mới có nghĩa (S15). */
 export const MIN_COMPARE = 2
 
-/** Bán kính tìm kiếm — 4 nấc ở header dự án (S12). */
-export const SEARCH_RADII: readonly SearchRadiusKm[] = [5, 10, 20, 50] as const
-
-/** Mặc định 10 km: đủ rộng để có kết quả, đủ hẹp để nhà thầu chịu đi khảo sát. */
-export const DEFAULT_RADIUS: SearchRadiusKm = 10
-
 /** Tab vùng phục vụ (S12). */
 export const SERVICE_REGIONS: readonly ServiceRegion[] = ['north', 'central', 'south'] as const
 
@@ -72,12 +65,6 @@ export const START_WINDOWS: readonly StartWindow[] = ['asap', 'in-1-3-months', '
 
 /** Thanh 4 nấc trạng thái lời mời (S18) — thứ tự cũng là thứ tự thời gian. */
 export const INVITATION_STEPS: readonly InvitationStatus[] = ['sent', 'received', 'accepted', 'done'] as const
-
-/** Giờ hành chính T2–T7 (S16). Nằm ở `shared/cms` vì hàng đợi lịch khảo sát của vận hành cũng đọc. */
-export { SURVEY_SLOTS } from '@/shared/cms'
-
-/** Nhà thầu chỉ nhận lịch khảo sát trong 7 ngày tới (S16). */
-export const SURVEY_WINDOW_DAYS = 7
 
 /** Tệp đính kèm hồ sơ dự án: PDF/JPG/PNG/XLSX, tối đa 10 MB mỗi tệp (S10). */
 export const BRIEF_FILE_MAX_BYTES = 10 * 1024 * 1024

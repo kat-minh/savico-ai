@@ -25,11 +25,11 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorInvitationsRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
+import { surveySlotLabel } from '@/shared/cms'
 import {
   INVITATIONS_ARRIVE_FORWARD_KEY,
   INVITE_SENT_INTRO_KEY,
-  MATCHES_INVITE_RETURN_KEY,
-  SURVEY_SLOTS
+  MATCHES_INVITE_RETURN_KEY
 } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractors } from '../hooks/use-contractors'
@@ -44,10 +44,9 @@ interface InviteSentProps {
   requestId: string
 }
 
-/** "slot-3" → "11:00 – 12:00". Khung giờ là danh mục cố định (S16). */
+/** "slot-3" → "11:00 – 12:00" theo Lịch khảo sát do admin cấu hình. */
 function slotLabel(slotId: string): string {
-  const index = Number(slotId.replace('slot-', ''))
-  return SURVEY_SLOTS[index] ?? slotId
+  return surveySlotLabel(slotId)
 }
 
 /** Góc (độ) của sáu chấm xanh bung ra từ mép vòng tròn — tinh tế, không pháo hoa (mục 1). */

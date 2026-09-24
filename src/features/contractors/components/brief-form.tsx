@@ -19,7 +19,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, type FieldErrors } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -50,11 +50,11 @@ import {
   BRIEF_FILE_ACCEPT,
   BRIEF_FILE_MAX_BYTES,
   CONSTRUCTION_SCOPES,
-  PROJECT_SCALES,
   SITE_CONDITIONS,
   START_WINDOWS
 } from '../constants/contractors.constants'
 import { useBrief, useSaveBrief } from '../hooks/use-brief'
+import { briefFieldConfig } from '../services/brief-fields.service'
 import { BRIEF_NOTE_MAX_LENGTH, createBriefSchema, parseAmount, type BriefFormValues } from '../schemas/brief.schema'
 import type { BriefDocument } from '../types/contractor.types'
 
@@ -215,6 +215,11 @@ export function BriefForm({ projectId }: BriefFormProps) {
   const { data: brief, isPending } = useBrief(projectId)
   const save = useSaveBrief(projectId)
   const buildingTypes = useCmsCollection('buildingTypes')
+  const floorOptions = useCmsCollection('floorOptions')
+  const fieldsOf = useCallback(
+    (buildingTypeId: string | null) => briefFieldConfig(buildingTypeId, buildingTypes, floorOptions),
+    [buildingTypes, floorOptions]
+  )
 
   const [documents, setDocuments] = useState<BriefDocument[]>([])
   const fileInput = useRef<HTMLInputElement>(null)
@@ -222,15 +227,21 @@ export function BriefForm({ projectId }: BriefFormProps) {
 
   const schema = useMemo(
     () =>
-      createBriefSchema({
-        required: tValidation('required'),
-        nameMaxLength: tValidation('maxLength', { max: 120 }),
-        areaPositive: tValidation('positiveNumber'),
-        budgetPositive: tValidation('positiveNumber'),
-        noteRequired: tValidation('required'),
-        noteMaxLength: tValidation('maxLength', { max: BRIEF_NOTE_MAX_LENGTH })
-      }),
-    [tValidation]
+      createBriefSchema(
+        {
+          required: tValidation('required'),
+          nameMaxLength: tValidation('maxLength', { max: 120 }),
+          areaPositive: tValidation('positiveNumber'),
+          budgetPositive: tValidation('positiveNumber'),
+          noteRequired: tValidation('required'),
+          noteMaxLength: tValidation('maxLength', { max: BRIEF_NOTE_MAX_LENGTH })
+        },
+        (buildingTypeId) => {
+          const fields = fieldsOf(buildingTypeId)
+          return { floor: fields.floorRequired, attic: fields.atticRequired }
+        }
+      ),
+    [tValidation, fieldsOf]
   )
 
   const form = useForm<BriefFormValues>({
@@ -396,7 +407,9 @@ export function BriefForm({ projectId }: BriefFormProps) {
   const scale = form.watch('scale')
   const hasAttic = form.watch('hasAttic')
   const buildingTypeId = form.watch('buildingTypeId')
-  const showScaleFields = Boolean(buildingTypeId && buildingTypeId !== 'apartment')
+  const fields = fieldsOf(buildingTypeId)
+  const showScaleFields = fields.floors || fields.attic
+  const conditionalTotal = Number(fields.floorRequired) + Number(fields.atticRequired)
   const filledRequiredCount = [
     nameVal,
     buildingTypeVal,
@@ -407,12 +420,13 @@ export function BriefForm({ projectId }: BriefFormProps) {
     budgetVal,
     scopeNoteVal
   ].filter(Boolean).length
-  const conditionalRequiredCount = showScaleFields ? Number(Boolean(scale)) + Number(hasAttic !== null) : 0
+  const conditionalRequiredCount =
+    Number(fields.floorRequired && Boolean(scale)) + Number(fields.atticRequired && hasAttic !== null)
   const requiredFilled =
-    filledRequiredCount === REQUIRED_FIELD_ORDER.length && (!showScaleFields || conditionalRequiredCount === 2)
+    filledRequiredCount === REQUIRED_FIELD_ORDER.length && conditionalRequiredCount === conditionalTotal
   const progressFilledCount =
     filledRequiredCount + Number(Boolean(siteCondition)) + Number(Boolean(scope)) + conditionalRequiredCount
-  const requiredProgress = progressFilledCount / (REQUIRED_FIELD_ORDER.length + 2 + (showScaleFields ? 2 : 0))
+  const requiredProgress = progressFilledCount / (REQUIRED_FIELD_ORDER.length + 2 + conditionalTotal)
   const hasUserData =
     Boolean(
       nameVal || buildingTypeVal || landAreaVal || provinceVal || wardVal || streetVal || budgetVal || scopeNoteVal
@@ -750,12 +764,21 @@ export function BriefForm({ projectId }: BriefFormProps) {
                               form.setValue('buildingTypeId', nextType?.id ?? null, { shouldDirty: true })
                               form.clearErrors(['scale', 'hasAttic'])
 
-                              if (nextType?.id === 'apartment') {
-                                form.setValue('scale', 'ground', { shouldDirty: true })
-                                form.setValue('hasAttic', false, { shouldDirty: true })
-                              } else if (!previousTypeId || previousTypeId === 'apartment') {
-                                form.setValue('scale', null, { shouldDirty: true })
-                                form.setValue('hasAttic', null, { shouldDirty: true })
+                              // Đổi loại: giá trị không còn hợp lệ theo cấu hình mới thì bỏ,
+                              // Tum cố định thì lấy đúng giá trị cố định (§7).
+                              const next = fieldsOf(nextType?.id ?? null)
+                              const currentScale = form.getValues('scale')
+                              if (previousTypeId !== nextType?.id) {
+                                form.setValue(
+                                  'scale',
+                                  currentScale && next.floorOptions.includes(currentScale) ? currentScale : null,
+                                  { shouldDirty: true }
+                                )
+                                form.setValue(
+                                  'hasAttic',
+                                  next.atticFixed ?? (next.attic ? form.getValues('hasAttic') : null),
+                                  { shouldDirty: true }
+                                )
                               }
                             }}
                           >
@@ -774,7 +797,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
                             </FormControl>
                             <SelectContent>
                               {buildingTypes
-                                .filter((option) => option.enabled)
+                                .filter((option) => option.status === 'active')
                                 .map((option) => (
                                   <SelectItem key={option.id} value={option.label}>
                                     {option.label}
@@ -877,57 +900,61 @@ export function BriefForm({ projectId }: BriefFormProps) {
                       transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
                       className='space-y-4 overflow-hidden'
                     >
-                      <ShakeField id='brief-field-scale' active={shakeField === 'scale'}>
-                        <FormField
-                          control={form.control}
-                          name='scale'
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                {t('site.scale')}
-                                <Req />
-                              </FormLabel>
-                              <ChoiceRow
-                                options={PROJECT_SCALES.map((value) => ({ value, label: tScale(value) }))}
-                                value={field.value}
-                                onChange={(value) => {
-                                  field.onChange(value)
-                                  form.clearErrors('scale')
-                                }}
-                                className='flex-nowrap overflow-x-auto pb-1'
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </ShakeField>
+                      {fields.floors ? (
+                        <ShakeField id='brief-field-scale' active={shakeField === 'scale'}>
+                          <FormField
+                            control={form.control}
+                            name='scale'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  {t('site.scale')}
+                                  {fields.floorRequired ? <Req /> : null}
+                                </FormLabel>
+                                <ChoiceRow
+                                  options={fields.floorOptions.map((value) => ({ value, label: tScale(value) }))}
+                                  value={field.value}
+                                  onChange={(value) => {
+                                    field.onChange(value)
+                                    form.clearErrors('scale')
+                                  }}
+                                  className='flex-nowrap overflow-x-auto pb-1'
+                                />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </ShakeField>
+                      ) : null}
 
-                      <ShakeField id='brief-field-hasAttic' active={shakeField === 'hasAttic'}>
-                        <FormField
-                          control={form.control}
-                          name='hasAttic'
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                {t('site.attic')}
-                                <Req />
-                              </FormLabel>
-                              <ChoiceRow
-                                options={[
-                                  { value: 'yes', label: t('site.atticYes') },
-                                  { value: 'no', label: t('site.atticNo') }
-                                ]}
-                                value={field.value === null ? null : field.value ? 'yes' : 'no'}
-                                onChange={(value) => {
-                                  field.onChange(value === 'yes')
-                                  form.clearErrors('hasAttic')
-                                }}
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </ShakeField>
+                      {fields.attic ? (
+                        <ShakeField id='brief-field-hasAttic' active={shakeField === 'hasAttic'}>
+                          <FormField
+                            control={form.control}
+                            name='hasAttic'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  {t('site.attic')}
+                                  {fields.atticRequired ? <Req /> : null}
+                                </FormLabel>
+                                <ChoiceRow
+                                  options={[
+                                    { value: 'yes', label: t('site.atticYes') },
+                                    { value: 'no', label: t('site.atticNo') }
+                                  ]}
+                                  value={field.value === null ? null : field.value ? 'yes' : 'no'}
+                                  onChange={(value) => {
+                                    field.onChange(value === 'yes')
+                                    form.clearErrors('hasAttic')
+                                  }}
+                                />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </ShakeField>
+                      ) : null}
                     </motion.div>
                   ) : null}
                 </AnimatePresence>

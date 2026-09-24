@@ -112,6 +112,7 @@ export const TRANSACTIONS_SEED: CmsTransaction[] = [
     tier: 'advanced',
     amount: 1_990_000,
     method: 'bank-qr',
+    orderId: 'SVC-26003',
     status: 'paid',
     createdAt: '2026-08-13T09:24:00'
   },
@@ -121,7 +122,8 @@ export const TRANSACTIONS_SEED: CmsTransaction[] = [
     customerEmail: 'nam.le@savicogroup.vn',
     tier: 'pro',
     amount: 14_970_000,
-    method: 'manual',
+    method: 'bank-qr',
+    orderId: 'SVC-26002',
     status: 'paid',
     createdAt: '2026-08-02T14:05:00',
     note: 'Chuyển khoản hợp đồng 3 tháng, kế toán xác nhận.'
@@ -142,7 +144,7 @@ export const TRANSACTIONS_SEED: CmsTransaction[] = [
     customerEmail: 'trang.pham@outlook.com',
     tier: 'basic',
     amount: 990_000,
-    method: 'card',
+    method: 'bank-qr',
     status: 'pending',
     createdAt: '2026-08-19T16:40:00'
   },
@@ -152,7 +154,7 @@ export const TRANSACTIONS_SEED: CmsTransaction[] = [
     customerEmail: 'khoa.do@gmail.com',
     tier: 'advanced',
     amount: 1_990_000,
-    method: 'card',
+    method: 'bank-qr',
     status: 'failed',
     createdAt: '2026-08-19T08:03:00',
     note: 'Thẻ bị từ chối — khách sẽ thử lại bằng QR.'
@@ -184,7 +186,7 @@ export const TRANSACTIONS_SEED: CmsTransaction[] = [
     customerEmail: 'dat.bui@nhathaudat.vn',
     tier: 'pro',
     amount: 14_970_000,
-    method: 'manual',
+    method: 'bank-qr',
     status: 'paid',
     createdAt: '2026-07-16T15:47:00'
   }

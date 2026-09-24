@@ -1,5 +1,6 @@
-import { DEFAULT_PACKAGE_TIER, FIELDS_BY_BUILDING_TYPE, STYLES_BY_BUILDING_TYPE } from '../constants/design.constants'
+import { DEFAULT_PACKAGE_TIER, STYLES_BY_BUILDING_TYPE } from '../constants/design.constants'
 import type { BuildingType, DesignInput } from '../types/design.types'
+import { buildingTypeFieldConfig, type BuildingTypeFieldConfig } from './design-catalog.service'
 
 /**
  * Frozen empty Bước 1 state — gói Tiêu chuẩn được chọn sẵn (mục III.2, trường 6).
@@ -35,10 +36,21 @@ export function composeAddress(detail: DesignInput['addressDetail']): string {
   return [detail.street.trim(), detail.wardName, detail.provinceName].filter(Boolean).join(', ')
 }
 
-/** Which conditional fields the chosen building type shows (Phụ lục A). */
-export function visibleFields(buildingType: BuildingType | null) {
-  if (!buildingType) return { floorCount: false, attic: false }
-  return FIELDS_BY_BUILDING_TYPE[buildingType]
+const NO_FIELDS: BuildingTypeFieldConfig = {
+  floorCount: false,
+  floorRequired: false,
+  floorOptions: [],
+  attic: false,
+  atticRequired: false,
+  atticFixed: null
+}
+
+/**
+ * Trường điều kiện của loại công trình đang chọn — theo cấu hình Số tầng / Tum
+ * admin đặt ở danh mục Loại công trình (epic ConstructionTypeManagement §7).
+ */
+export function visibleFields(buildingType: BuildingType | null): BuildingTypeFieldConfig {
+  return buildingType ? buildingTypeFieldConfig(buildingType) : NO_FIELDS
 }
 
 /**
@@ -46,15 +58,17 @@ export function visibleFields(buildingType: BuildingType | null) {
  * các trường còn lại giữ nguyên (mục III.2, ghi chú).
  */
 export function applyBuildingTypeChange(input: DesignInput, buildingType: BuildingType): DesignInput {
-  const fields = FIELDS_BY_BUILDING_TYPE[buildingType]
+  const fields = buildingTypeFieldConfig(buildingType)
   // Danh mục phong cách đổi theo loại; phong cách cũ không còn trong danh mục
   // mới thì bỏ chọn, nếu không thẻ đang chọn sẽ biến mất mà state vẫn giữ.
   const styles = STYLES_BY_BUILDING_TYPE[buildingType]
   return {
     ...input,
     buildingType,
-    floorCount: fields.floorCount ? input.floorCount : null,
-    hasAttic: fields.attic ? input.hasAttic : null,
+    // Không gửi giá trị không còn áp dụng: số tầng ngoài danh sách phương án mới
+    // bị bỏ, Tum cố định thì lấy đúng giá trị cố định (§7).
+    floorCount: input.floorCount && fields.floorOptions.includes(input.floorCount) ? input.floorCount : null,
+    hasAttic: fields.atticFixed ?? (fields.attic ? input.hasAttic : null),
     style: input.style && styles.includes(input.style) ? input.style : null
   }
 }
@@ -73,8 +87,8 @@ export function missingRequiredFields(input: DesignInput): RequiredInputField[] 
   if (!input.landPhotoUrl) missing.push('landPhotoUrl')
   if (!input.address.trim()) missing.push('address')
   if (!input.buildingType) missing.push('buildingType')
-  if (fields.floorCount && !input.floorCount) missing.push('floorCount')
-  if (fields.attic && input.hasAttic === null) missing.push('hasAttic')
+  if (fields.floorRequired && !input.floorCount) missing.push('floorCount')
+  if (fields.atticRequired && input.hasAttic === null) missing.push('hasAttic')
   if (!input.style) missing.push('style')
 
   return missing

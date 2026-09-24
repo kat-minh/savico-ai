@@ -8,55 +8,45 @@
 export { AdminShell } from './components/layout/admin-shell'
 export { AdminInbox } from './components/dashboard/admin-inbox'
 export { AdminCharts } from './components/dashboard/admin-charts'
-/** Trang số liệu cũ — tạm không gắn route nào, trang Tổng quan giờ là hàng đợi việc. */
-export { AdminOverview } from './components/dashboard/admin-overview'
-
-/**
- * Nội dung site — MỘT màn cho mỗi trang công khai. Các trình soạn và bảng dữ
- * liệu bên trong không xuất ra ngoài nữa: chúng là TAB của `ContentWorkspace`,
- * không còn là màn đứng riêng.
- */
-export { ContentWorkspace } from './components/pages/content-workspace'
-export {
-  ADMIN_CONTENT_PAGES,
-  adminContentPageOf,
-  type AdminContentPage,
-  type AdminContentPageKey
-} from './constants/admin-pages.config'
 
 // Cấu hình hệ thống — con số điều khiển cách hệ thống chạy.
 export { PlanManager } from './components/business/plan-manager'
+export { GiftManager } from './components/business/gift-manager'
 export { QuotaEditor } from './components/business/quota-editor'
-export { ConsultPackageManager } from './components/consult/package-manager'
 
 // Thư viện — kho mẫu và video do đội nội dung nhập, đứng riêng khỏi nhóm CMS
 // theo trang: đây là BẢNG BẢN GHI thêm/sửa/xóa hằng ngày, không phải chữ của
 // một trang cụ thể.
-export { TemplateManager } from './components/handbook/template-manager'
+export { Template2DManager } from './components/handbook/template-2d-manager'
+export { Template3DManager } from './components/handbook/template-3d-manager'
+export { ArticleManager } from './components/handbook/article-manager'
+export { ArticleLabelManager } from './components/handbook/article-label-manager'
+export { HandbookStepManager } from './components/handbook/handbook-step-manager'
 export { GuideVideoManager } from './components/guide/guide-manager'
 
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
 export { OrderManager } from './components/ops/order-manager'
 export { DiscountManager } from './components/ops/discount-manager'
-export { SurveyManager } from './components/ops/survey-manager'
 export { ContractorManager } from './components/ops/contractor-manager'
-export { ChangeRequestManager } from './components/ops/change-request-manager'
+export { ContractorDetail } from './components/ops/contractor-detail'
+export { ContractorMatchingEditor } from './components/ops/contractor-matching'
+export { SurveyScheduleManager } from './components/ops/survey-schedule'
 export { SupervisionPackageManager } from './components/ops/supervision-package-manager'
+export { SupervisionStageManager } from './components/ops/supervision-stage-manager'
 export { BookingManager } from './components/consult/booking-manager'
-/** Bản lịch tháng cũ — tạm không gắn route, lịch tư vấn giờ là bảng như các hàng đợi khác. */
-export { BookingCalendar } from './components/consult/booking-calendar'
-export { RescheduleManager } from './components/consult/reschedule-manager'
-export { SubscriptionManager } from './components/business/subscription-manager'
+export { ConsultantManager } from './components/consult/consultant-manager'
 export { TransactionManager } from './components/business/transaction-manager'
-export { ReviewManager } from './components/consult/review-manager'
-export { ReportManager } from './components/business/report-manager'
-export { ProjectManager } from './components/business/project-manager'
 export { InvitationManager } from './components/business/invitation-manager'
 export { InspectionManager } from './components/business/inspection-manager'
 export { CustomerManager } from './components/business/customer-manager'
+export { CustomerDetail } from './components/business/customer-detail'
 
-export { CatalogManager } from './components/catalog/catalog-manager'
-export { PricingManager } from './components/catalog/pricing-manager'
+export { BuildingTypeManager } from './components/catalog/building-type-manager'
+export { StyleManager } from './components/catalog/style-manager'
+export { CostGroupManager } from './components/estimate/cost-group-manager'
+export { CostItemManager } from './components/estimate/cost-item-manager'
+export { MaterialPriceManager } from './components/estimate/material-price-manager'
+export { EstimateAdviceEditor } from './components/estimate/estimate-advice-editor'
 
 export { ADMIN_NAV, ADMIN_NAV_ITEMS, type AdminNavGroup, type AdminNavItem } from './components/layout/admin-nav.config'
 export { adminApi } from './api/admin.api'
@@ -65,13 +55,10 @@ export {
   useAdminCollection,
   useCmsLocale,
   useAdminDocument,
-  useAdminStats,
   useDeleteAdminItem,
   useReorderAdminCollection,
-  useResetAdminContent,
   useSaveAdminDocument,
   useSaveAdminItem
 } from './hooks/use-admin-data'
 export { useCmsLocaleStore } from './store/cms-locale.store'
 export { newAdminId, slugify, todayKey } from './services/admin.service'
-export { ADMIN_CONTENT_COLLECTIONS, type AdminStats } from './types/admin.types'

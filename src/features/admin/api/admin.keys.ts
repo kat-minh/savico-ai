@@ -16,7 +16,5 @@ export const adminKeys = {
   collectionAllLocales: (collection: CmsCollection) => [...adminKeys.collections(), collection] as const,
 
   documents: () => [...adminKeys.all, 'document'] as const,
-  document: (document: CmsDocument, locale: Locale) => [...adminKeys.documents(), document, locale] as const,
-
-  stats: () => [...adminKeys.all, 'stats'] as const
+  document: (document: CmsDocument, locale: Locale) => [...adminKeys.documents(), document, locale] as const
 } as const

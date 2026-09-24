@@ -1,4 +1,4 @@
-import { cmsDb } from '@/shared/cms'
+import { cmsDb, consultSlotState } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import { AVAILABILITY_DAYS, SESSION_TIMES } from '../constants/consultation.constants'
 import type {
@@ -25,17 +25,12 @@ function toDateKey(date: Date): string {
 }
 
 /**
- * Slot nào "Kín" — băm từ (mã KTS, ngày, giờ) thay vì `Math.random` để lịch
- * không nhảy mỗi lần render và mock giữ nguyên kết quả giữa các lần gọi.
+ * Lịch 7 ngày kể từ hôm nay của một KTS (mục VIII.2). Khung "Kín" là khung đã
+ * có lịch đặt; khung admin đánh dấu Không tư vấn không cho chọn (ArchitectManagement §5).
  */
-function isFull(seed: string): boolean {
-  let hash = 0
-  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) % 997
-  return hash % 5 === 0
-}
-
-/** Lịch trống 7 ngày kể từ hôm nay của một KTS (mục VIII.2). */
 function buildAvailability(consultantId: string): ConsultationDay[] {
+  const closures = cmsDb.find('consultants', consultantId)?.closures ?? []
+  const bookings = cmsDb.list('bookings')
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -49,7 +44,7 @@ function buildAvailability(consultantId: string): ConsultationDay[] {
         id: `${dateKey}-${time}`,
         time,
         session,
-        full: isFull(`${consultantId}-${dateKey}-${time}`)
+        full: consultSlotState(closures, bookings, consultantId, dateKey, time) !== 'open'
       }))
     )
 
@@ -141,7 +136,8 @@ function availabilityOf(consultantId: string): ConsultationDay[] {
 export const mockConsultationApi = {
   listConsultants: async (): Promise<Consultant[]> => {
     await mockDelay(250)
-    return cmsDb.list('consultants')
+    // Chỉ kiến trúc sư Đang hiển thị xuất hiện ở màn đặt lịch.
+    return cmsDb.list('consultants').filter((consultant) => consultant.visible)
   },
 
   getConsultant: async (id: string): Promise<Consultant | null> => {
@@ -151,6 +147,8 @@ export const mockConsultationApi = {
 
   getAvailability: async (consultantId: string): Promise<ConsultationDay[]> => {
     await mockDelay(250)
+    // Dựng lại mỗi lần: admin vừa khóa ngày / khung giờ là màn đặt lịch thấy ngay.
+    availabilityByConsultant.delete(consultantId)
     return availabilityOf(consultantId)
   },
 

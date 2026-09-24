@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { useCmsCollection, type PlanGift } from '@/shared/cms'
+import { resolvePlanGift, useCmsCollection, type PlanGift } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { ROUTES } from '@/shared/constants/routes'
@@ -63,7 +63,9 @@ export function StartOptions({
 }: StartOptionsProps) {
   // Quà tặng lấy từ kho nội dung (gói nào có quà thì dùng gói đó) — admin sửa
   // một chỗ là cả S01, S02 lẫn thẻ này đổi theo.
-  const gift = useCmsCollection('plans').find((plan) => plan.gift)?.gift
+  const gifts = useCmsCollection('gifts')
+  const giftPlan = useCmsCollection('plans').find((plan) => plan.status === 'selling' && plan.giftId)
+  const gift = giftPlan ? resolvePlanGift(giftPlan, gifts) : undefined
   const consultPackages = useCmsCollection('consultPackages')
   const t = useTranslations('contractors.start')
   const locale = useLocale() as Locale

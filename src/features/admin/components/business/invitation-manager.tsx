@@ -6,6 +6,7 @@ import {
   CheckOutlined,
   CloseOutlined,
   PhoneOutlined,
+  StopOutlined,
   UndoOutlined
 } from '@ant-design/icons'
 import {
@@ -13,6 +14,8 @@ import {
   App,
   Button,
   DatePicker,
+  Descriptions,
+  Empty,
   Form,
   Input,
   Modal,
@@ -22,6 +25,7 @@ import {
   Space,
   Steps,
   Tag,
+  Timeline,
   Tooltip,
   Typography
 } from 'antd'
@@ -31,17 +35,21 @@ import { useMemo, useState, type CSSProperties } from 'react'
 
 import type { Locale } from '@/i18n/routing'
 import {
-  SURVEY_SLOTS,
-  surveySlotId,
+  isActiveSurvey,
+  isSurveyDayClosed,
+  isSurveySlotClosed,
   surveySlotLabel,
+  surveySlotRange,
   type CmsContractorInvitation,
   type CmsSurveyStatus
 } from '@/shared/cms'
-import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
+import { useAdminCollection, useAdminDocument, useSaveAdminItem } from '../../hooks/use-admin-data'
 import {
   INVITATION_STATUS_ORDER,
   advanceInvitation,
   invitationNeedsAction,
+  isInvitationClosed,
+  rejectInvitation,
   nextInvitationStatus,
   previousInvitationStatus,
   relativeTime,
@@ -60,7 +68,7 @@ const SURVEY_TAG: Record<CmsSurveyStatus, string> = {
   cancelled: 'default'
 }
 
-type View = 'action' | 'open' | 'done' | 'all'
+type View = 'action' | 'open' | 'done' | 'rejected' | 'all'
 type SurveyAction = 'confirm' | 'reschedule' | 'cancel'
 
 interface SurveyFormValues {
@@ -106,10 +114,17 @@ export function InvitationManager() {
 
   const [view, setView] = useState<View>('action')
   const [pending, setPending] = useState<{ action: SurveyAction; invitation: CmsContractorInvitation } | null>(null)
+  const [rejecting, setRejecting] = useState<CmsContractorInvitation | null>(null)
+  const [rejectForm] = Form.useForm<{ reason: string }>()
+  const tScope = useTranslations('contractors.scope')
+  const tScale = useTranslations('contractors.scale')
+  const tStart = useTranslations('contractors.startWindow')
 
   const { data: invitations = [] } = useAdminCollection('contractorInvitations')
   const { data: contractors = [] } = useAdminCollection('contractors')
   const save = useSaveAdminItem('contractorInvitations')
+  const { data: schedule } = useAdminDocument('surveySchedule')
+  const rescheduleDate = Form.useWatch('date', form) as Dayjs | undefined
 
   const contactOf = useMemo(() => {
     const map = new Map(contractors.map((contractor) => [contractor.id, contractor.contact]))
@@ -118,8 +133,9 @@ export function InvitationManager() {
 
   const matchesView = (item: CmsContractorInvitation, target: View) => {
     if (target === 'action') return invitationNeedsAction(item)
-    if (target === 'open') return item.status !== 'done'
+    if (target === 'open') return !isInvitationClosed(item)
     if (target === 'done') return item.status === 'done'
+    if (target === 'rejected') return item.status === 'rejected'
     return true
   }
 
@@ -141,6 +157,137 @@ export function InvitationManager() {
     )
   }
 
+  const submitReject = async () => {
+    const values = await rejectForm.validateFields().catch(() => null)
+    if (!values || !rejecting) return
+    await save.mutateAsync(rejectInvitation(rejecting, values.reason))
+    message.success(t('invitations.rejectedToast', { code: rejecting.id }))
+    setRejecting(null)
+  }
+
+  const stamp = (value?: string) => (value ? dayjs(value).format('DD/MM/YYYY HH:mm') : '-')
+
+  /** Ngăn kéo "Xem chi tiết": hồ sơ dự án đã gửi + mốc thời gian từng trạng thái (spec admin #14). */
+  const renderView = (record: CmsContractorInvitation) => {
+    const dossier = record.dossier
+    return (
+      <Space orientation='vertical' size={16} style={{ width: '100%' }}>
+        <Descriptions
+          size='small'
+          column={1}
+          bordered
+          title={t('invitations.summary')}
+          items={[
+            { key: 'code', label: t('invitations.code'), children: record.id },
+            {
+              key: 'project',
+              label: t('invitations.project'),
+              children: `${record.projectName} · ${record.projectId}`
+            },
+            {
+              key: 'customer',
+              label: t('invitations.customer'),
+              children: [record.customerName, record.survey.phone, record.survey.email].filter(Boolean).join(' · ')
+            },
+            { key: 'contractor', label: t('invitations.contractor'), children: record.contractorName },
+            {
+              key: 'status',
+              label: t('invitations.status'),
+              children: (
+                <Tag color={record.status === 'rejected' ? 'red' : record.status === 'done' ? 'green' : 'blue'}>
+                  {t(`invitationStatus.${record.status}`)}
+                </Tag>
+              )
+            },
+            ...(record.status === 'rejected'
+              ? [{ key: 'reason', label: t('invitations.rejectReason'), children: record.rejectReason || '-' }]
+              : [])
+          ]}
+        />
+
+        <div>
+          <Text strong style={{ display: 'block', marginBottom: 8 }}>
+            {t('invitations.timeline')}
+          </Text>
+          <Timeline
+            items={record.steps.map((step) => ({
+              color: step.status === 'rejected' ? 'red' : 'blue',
+              content: (
+                <span>
+                  <Text strong>{t(`invitationStatus.${step.status}`)}</Text>{' '}
+                  <Text type='secondary'>{stamp(step.at)}</Text>
+                </span>
+              )
+            }))}
+          />
+        </div>
+
+        <div>
+          <Text strong style={{ display: 'block', marginBottom: 8 }}>
+            {t('invitations.dossierTitle', { version: record.dossierVersion, files: record.fileCount })}
+          </Text>
+          {dossier ? (
+            <Descriptions
+              size='small'
+              column={1}
+              bordered
+              items={[
+                {
+                  key: 'type',
+                  label: t('invitations.dossierFields.buildingType'),
+                  children: dossier.buildingType || '-'
+                },
+                {
+                  key: 'scale',
+                  label: t('invitations.dossierFields.scale'),
+                  children: [
+                    t('invitations.dossierFields.area', { area: dossier.landArea }),
+                    tScale.has(dossier.scale as 'ground') ? tScale(dossier.scale as 'ground') : dossier.scale,
+                    dossier.hasAttic ? t('invitations.dossierFields.attic') : null
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')
+                },
+                { key: 'address', label: t('invitations.dossierFields.address'), children: dossier.address || '-' },
+                {
+                  key: 'scope',
+                  label: t('invitations.dossierFields.scope'),
+                  children: `${tScope.has(dossier.scope as 'turnkey') ? tScope(dossier.scope as 'turnkey') : dossier.scope}${
+                    dossier.scopeNote ? ` — ${dossier.scopeNote}` : ''
+                  }`
+                },
+                {
+                  key: 'start',
+                  label: t('invitations.dossierFields.start'),
+                  children: tStart.has(dossier.startWindow as 'asap')
+                    ? tStart(dossier.startWindow as 'asap')
+                    : dossier.startWindow
+                },
+                {
+                  key: 'docs',
+                  label: t('invitations.dossierFields.documents'),
+                  children: dossier.documents.length
+                    ? dossier.documents.map((doc) => (
+                        <div key={doc.name}>
+                          {doc.name}{' '}
+                          <Text type='secondary' style={{ fontSize: 12 }}>
+                            ({(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB)
+                          </Text>
+                        </div>
+                      ))
+                    : '-'
+                },
+                { key: 'note', label: t('invitations.dossierFields.surveyNote'), children: record.survey.note || '-' }
+              ]}
+            />
+          ) : (
+            <Empty description={t('invitations.noDossier')} />
+          )}
+        </div>
+      </Space>
+    )
+  }
+
   /* ---- Khảo sát (nội bộ) ---- */
 
   function openSurvey(action: SurveyAction, invitation: CmsContractorInvitation) {
@@ -150,7 +297,9 @@ export function InvitationManager() {
 
   async function submitSurvey() {
     if (!pending) return
-    const values = await form.validateFields()
+    // Form sai thì antd reject kèm lỗi từng ô — đã hiện dưới ô, không cần ném tiếp.
+    const values = await form.validateFields().catch(() => null)
+    if (!values) return
     const status: CmsSurveyStatus =
       pending.action === 'confirm' ? 'confirmed' : pending.action === 'cancel' ? 'cancelled' : 'rescheduled'
 
@@ -176,14 +325,15 @@ export function InvitationManager() {
         allowDelete={false}
         allowEdit={false}
         searchText={(item) =>
-          `${item.id} ${item.projectId} ${item.projectName} ${item.contractorName} ${item.survey.phone} ${item.survey.email}`
+          `${item.id} ${item.projectId} ${item.projectName} ${item.customerName ?? ''} ${item.contractorName} ${item.survey.phone} ${item.survey.email}`
         }
+        renderView={renderView}
         filterItems={(item) => matchesView(item, view)}
         banner={
           <Segmented<View>
             value={view}
             onChange={setView}
-            options={(['action', 'open', 'done', 'all'] as const).map((value) => ({
+            options={(['action', 'open', 'done', 'rejected', 'all'] as const).map((value) => ({
               value,
               label: `${t(`invitations.views.${value}`)} (${invitations.filter((item) => matchesView(item, value)).length})`
             }))}
@@ -202,6 +352,11 @@ export function InvitationManager() {
                 <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
                   {record.projectId} · {record.id}
                 </Text>
+                {record.customerName ? (
+                  <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
+                    {record.customerName}
+                  </Text>
+                ) : null}
                 <Text copyable type='secondary' style={{ fontSize: 12 }}>
                   <PhoneOutlined /> {record.survey.phone}
                 </Text>
@@ -239,7 +394,7 @@ export function InvitationManager() {
             sorter: (a, b) => `${a.survey.date}${a.survey.slotId}`.localeCompare(`${b.survey.date}${b.survey.slotId}`),
             render: (_, record) => {
               const status = surveyStatusOf(record)
-              const closed = status === 'cancelled'
+              const closed = status === 'cancelled' || record.status === 'rejected'
               return (
                 <div>
                   <Space size={6} style={{ marginBottom: 6 }}>
@@ -299,19 +454,37 @@ export function InvitationManager() {
             render: (_, record) => {
               const next = nextInvitationStatus(record.status)
               const previous = previousInvitationStatus(record.status)
+              const rejected = record.status === 'rejected'
+              const stampOf = (status: string) => record.steps.findLast((step) => step.status === status)?.at
+              // Bị từ chối: Steps dừng ở nấc cuối đã đi qua và tô lỗi.
+              const reached = rejected
+                ? INVITATION_STATUS_ORDER.indexOf(
+                    record.steps.findLast((step) => step.status !== 'rejected')?.status ?? 'sent'
+                  )
+                : INVITATION_STATUS_ORDER.indexOf(record.status)
               return (
                 <div style={{ minWidth: 370 }}>
+                  {rejected ? (
+                    <Tag color='red' style={{ marginBottom: 6 }}>
+                      {t('invitationStatus.rejected')} · {stamp(stampOf('rejected'))}
+                    </Tag>
+                  ) : null}
                   <Steps
                     size='small'
-                    current={INVITATION_STATUS_ORDER.indexOf(record.status)}
-                    status={record.status === 'done' ? 'finish' : 'process'}
-                    items={INVITATION_STATUS_ORDER.map((status) => ({
-                      title: (
-                        <Tooltip title={tMeaning(status)}>
-                          <span style={{ fontSize: 12 }}>{t(`invitationStatus.${status}`)}</span>
-                        </Tooltip>
-                      )
-                    }))}
+                    current={reached}
+                    status={rejected ? 'error' : record.status === 'done' ? 'finish' : 'process'}
+                    items={INVITATION_STATUS_ORDER.map((status) => {
+                      const at = stampOf(status)
+                      return {
+                        title: (
+                          <Tooltip title={tMeaning(status as 'sent')}>
+                            <span style={{ fontSize: 12 }}>{t(`invitationStatus.${status}`)}</span>
+                          </Tooltip>
+                        ),
+                        // Ghi nhận thời gian của từng trạng thái (spec admin #14).
+                        content: at ? <span style={{ fontSize: 11 }}>{dayjs(at).format('DD/MM HH:mm')}</span> : null
+                      }
+                    })}
                   />
                   <div className='mt-1.5 flex items-center gap-1.5 whitespace-nowrap'>
                     {next ? (
@@ -322,17 +495,19 @@ export function InvitationManager() {
                             {t('invitations.advanceConfirmBody', { meaning: tMeaning(next) })}
                           </div>
                         }
-                        okText={t('invitations.advance')}
+                        okText={t(`invitations.advanceTo.${next as 'received'}`)}
                         cancelText={t('actions.cancel')}
                         onConfirm={() => advance(record)}
                       >
                         <Button size='small' type='primary' icon={<ArrowRightOutlined />} style={FIXED(ADVANCE_BUTTON)}>
-                          {t('invitations.advance')}
+                          <span className='truncate'>{t(`invitations.advanceTo.${next as 'received'}`)}</span>
                         </Button>
                       </Popconfirm>
                     ) : (
                       <Button size='small' disabled icon={<CheckOutlined />} style={FIXED(ADVANCE_BUTTON)}>
-                        <span className='truncate'>{t('invitations.finished')}</span>
+                        <span className='truncate'>
+                          {rejected ? t('invitationStatus.rejected') : t('invitations.finished')}
+                        </span>
                       </Button>
                     )}
                     <Popconfirm
@@ -351,6 +526,19 @@ export function InvitationManager() {
                         {t('invitations.revert')}
                       </Button>
                     </Popconfirm>
+                    <Tooltip title={t('invitations.reject')}>
+                      <Button
+                        size='small'
+                        danger
+                        icon={<StopOutlined />}
+                        disabled={isInvitationClosed(record)}
+                        aria-label={t('invitations.reject')}
+                        onClick={() => {
+                          rejectForm.resetFields()
+                          setRejecting(record)
+                        }}
+                      />
+                    </Tooltip>
                     <Text type='secondary' style={{ fontSize: 12 }}>
                       {t('invitations.updatedAgo', { time: relativeTime(record.updatedAt, locale) })}
                     </Text>
@@ -362,6 +550,29 @@ export function InvitationManager() {
         ]}
         renderForm={() => null}
       />
+
+      <Modal
+        open={rejecting !== null}
+        onCancel={() => setRejecting(null)}
+        onOk={submitReject}
+        confirmLoading={save.isPending}
+        okText={t('invitations.reject')}
+        okButtonProps={{ danger: true }}
+        cancelText={t('actions.cancel')}
+        title={rejecting ? t('invitations.rejectTitle', { code: rejecting.id }) : ''}
+        destroyOnHidden
+      >
+        <Form form={rejectForm} layout='vertical' preserve={false}>
+          <Alert type='warning' showIcon style={{ marginBottom: 16 }} title={t('invitations.rejectHint')} />
+          <Form.Item
+            name='reason'
+            label={t('invitations.rejectReason')}
+            rules={[{ required: true, whitespace: true, message: t('invitations.rejectReasonRequired') }]}
+          >
+            <Input.TextArea rows={3} maxLength={500} showCount />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Modal
         open={pending !== null}
@@ -394,7 +605,12 @@ export function InvitationManager() {
                 >
                   <DatePicker
                     format='DD/MM/YYYY'
-                    disabledDate={(day) => day.isBefore(dayjs(), 'day') || day.day() === 0}
+                    disabledDate={(day) =>
+                      day.isBefore(dayjs(), 'day') ||
+                      !(schedule?.workingDays ?? []).includes(day.day()) ||
+                      (schedule ? isSurveyDayClosed(schedule, day.format('YYYY-MM-DD')) : false)
+                    }
+                    onChange={() => form.setFieldValue('slotId', undefined)}
                   />
                 </Form.Item>
                 <Form.Item
@@ -404,7 +620,25 @@ export function InvitationManager() {
                 >
                   <Select
                     style={{ minWidth: 180 }}
-                    options={SURVEY_SLOTS.map((label, index) => ({ value: surveySlotId(index), label }))}
+                    options={(schedule?.slots ?? [])
+                      .filter((slot) => slot.active)
+                      .map((slot) => {
+                        const date = rescheduleDate?.format('YYYY-MM-DD') ?? ''
+                        // Khung bị khóa hoặc nhà thầu đã có lịch khác đúng khung đó thì không chọn được.
+                        const taken = invitations.some(
+                          (item) =>
+                            item.id !== pending.invitation.id &&
+                            item.contractorId === pending.invitation.contractorId &&
+                            item.survey.date === date &&
+                            item.survey.slotId === slot.id &&
+                            isActiveSurvey(item)
+                        )
+                        return {
+                          value: slot.id,
+                          label: surveySlotRange(slot),
+                          disabled: taken || (schedule ? isSurveySlotClosed(schedule, date, slot.id) : false)
+                        }
+                      })}
                   />
                 </Form.Item>
               </Space>

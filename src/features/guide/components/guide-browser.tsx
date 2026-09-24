@@ -82,19 +82,14 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
 
   const visibleArticles = (articles ?? []).filter((a) => matchesQuery(a.title, query) || matchesQuery(a.excerpt, query))
 
-  // Giữ NGUYÊN thứ tự API trả về — đó là thứ tự admin sắp (mục X, #3) và cũng là
-  // thứ tự đánh số trong Hình 12; video được đánh dấu nổi bật đứng đầu.
-  const allVideos = useMemo(
-    () => [...(videos ?? [])].sort((a, b) => Number(b.featured ?? false) - Number(a.featured ?? false)),
-    [videos]
-  )
-  const visibleVideos = allVideos.filter((v) => matchesQuery(v.title, query) || matchesQuery(v.description, query))
+  // Giữ NGUYÊN thứ tự API trả về — thời gian tạo tăng dần, cũng là thứ tự đánh số
+  // bước (epic GuideStepManagement §7). Tìm kiếm theo tiêu đề bước.
+  const allVideos = useMemo(() => videos ?? [], [videos])
+  const visibleVideos = allVideos.filter((v) => matchesQuery(v.title, query))
 
   const instantQuery = term.trim()
   const suggestedVideos = instantQuery
-    ? allVideos
-        .filter((video) => matchesQuery(video.title, instantQuery) || matchesQuery(video.description, instantQuery))
-        .slice(0, 4)
+    ? allVideos.filter((video) => matchesQuery(video.title, instantQuery)).slice(0, 4)
     : []
   const suggestedArticles = instantQuery
     ? (articles ?? [])

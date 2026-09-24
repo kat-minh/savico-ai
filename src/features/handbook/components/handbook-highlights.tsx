@@ -9,6 +9,7 @@ import { Link } from '@/i18n/navigation'
 import { revealEase, RevealPhoto } from '@/shared/components/common'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
+import { useArticleLabels } from '../hooks/use-article-labels'
 import { HOME_HANDBOOK_COUNT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
 import { sortByNewest } from '../services/handbook.service'
@@ -28,7 +29,7 @@ const NEW_BADGE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000
  */
 export function HandbookHighlights() {
   const t = useTranslations('handbook.home')
-  const tCategory = useTranslations('handbook.latest.categories')
+  const { nameOf: labelName } = useArticleLabels()
   const format = useFormatter()
 
   const { data: articles, isPending } = useHandbookArticles()
@@ -99,7 +100,7 @@ export function HandbookHighlights() {
                       <span className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
                         <span className='flex items-center gap-1.5'>
                           <Tag className='text-primary/70 size-3.5' />
-                          {tCategory(article.category)}
+                          {labelName(article.category)}
                         </span>
                         <span className='flex items-center gap-1.5 border-l pl-4'>
                           <CalendarDays className='text-primary/70 size-3.5' />

@@ -9,6 +9,7 @@ import { Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
+import { useArticleLabels } from '../hooks/use-article-labels'
 import { HANDBOOK_ARTICLE_LIST_HISTORY_KEY, HANDBOOK_CATEGORY_SELECT_EVENT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
 import { featuredArticles, sortByNewest } from '../services/handbook.service'
@@ -23,6 +24,7 @@ import type { HandbookArticle } from '../types/handbook.types'
  */
 export function NewsletterBlock() {
   const t = useTranslations('handbook.newsletter')
+  const { nameOf: labelName } = useArticleLabels()
   const format = useFormatter()
   const sectionRef = useRef<HTMLElement>(null)
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -397,7 +399,7 @@ export function NewsletterBlock() {
               <div className='space-y-2'>
                 <div className='flex items-center justify-between gap-2'>
                   <span data-newsletter-lead-part>
-                    <Badge variant='secondary'>{t(`categories.${displayedLead.category}`)}</Badge>
+                    <Badge variant='secondary'>{labelName(displayedLead.category)}</Badge>
                   </span>
                   <span data-newsletter-lead-number className='text-primary/50 text-3xl font-bold'>
                     {displayedLeadNumber}
@@ -493,6 +495,7 @@ export function NewsletterBlock() {
 
 function RelatedRow({ article }: { article: HandbookArticle }) {
   const t = useTranslations('handbook.newsletter')
+  const { nameOf: labelName } = useArticleLabels()
 
   return (
     <Link
@@ -508,7 +511,7 @@ function RelatedRow({ article }: { article: HandbookArticle }) {
           {article.title}
         </span>
         <span className='block text-xs'>
-          <span className='text-primary'>{t(`categories.${article.category}`)}</span>
+          <span className='text-primary'>{labelName(article.category)}</span>
           <span className='text-muted-foreground'> · {t('readingTime', { minutes: article.readingMinutes })}</span>
         </span>
       </span>

@@ -2,7 +2,6 @@ import type { Locale } from '@/i18n/routing'
 import type { CmsCollection, CmsCollectionMap, CmsDocument, CmsDocumentMap } from '@/shared/cms'
 import { env } from '@/shared/config/env'
 import { http } from '@/shared/lib/api'
-import type { AdminStats } from '../types/admin.types'
 import { mockAdminApi } from './admin.mock'
 
 /**
@@ -22,14 +21,22 @@ const ENDPOINTS: Record<CmsCollection, string> = {
   guideVideos: '/admin/guide/videos',
   guideArticles: '/admin/guide/articles',
   plans: '/admin/plans',
+  gifts: '/admin/gifts',
+  costGroups: '/admin/estimate/groups',
+  costItems: '/admin/estimate/items',
+  materialPrices: '/admin/estimate/material-prices',
+  articleLabels: '/admin/handbook/labels',
+  supervisionStages: '/admin/supervision/stages',
   supervisionPackages: '/admin/supervision-packages',
   consultants: '/admin/consultants',
   bookings: '/admin/bookings',
   customers: '/admin/customers',
+  customerPackages: '/admin/customer-packages',
+  quotaEvents: '/admin/quota-events',
   designProjects: '/admin/projects',
   buildingTypes: '/admin/catalog/building-types',
+  floorOptions: '/admin/catalog/floor-options',
   styleOptions: '/admin/catalog/styles',
-  unitPrices: '/admin/catalog/unit-prices',
   subscriptions: '/admin/subscriptions',
   transactions: '/admin/transactions',
   rescheduleRequests: '/admin/bookings/reschedule-requests',
@@ -48,6 +55,10 @@ const DOCUMENT_ENDPOINTS: Record<CmsDocument, string> = {
   termsPage: '/admin/content/pages/terms',
   privacyPage: '/admin/content/pages/privacy',
   quotas: '/admin/quotas',
+  planSettings: '/admin/plans/settings',
+  contractorMatching: '/admin/contractors/matching',
+  estimateAdvice: '/admin/estimate/advice',
+  surveySchedule: '/admin/contractors/survey-schedule',
   uiStrings: '/admin/content/strings',
   uiAssets: '/admin/content/assets'
 }
@@ -75,12 +86,7 @@ const AdminApi = {
     http.get<CmsDocumentMap[K]>(DOCUMENT_ENDPOINTS[document], { params: { locale } }),
 
   saveDocument: <K extends CmsDocument>(document: K, value: CmsDocumentMap[K], locale: Locale) =>
-    http.put<CmsDocumentMap[K]>(DOCUMENT_ENDPOINTS[document], value, { params: { locale } }),
-
-  stats: (locale: Locale) => http.get<AdminStats>('/admin/stats', { params: { locale } }),
-
-  /** Backend thật không cho xóa trắng nội dung — chỉ có ý nghĩa ở chế độ mock. */
-  resetContent: async (): Promise<void> => {}
+    http.put<CmsDocumentMap[K]>(DOCUMENT_ENDPOINTS[document], value, { params: { locale } })
 }
 
 export const adminApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockAdminApi : AdminApi

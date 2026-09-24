@@ -1,11 +1,12 @@
 'use client'
 
 import { Select, Space, Tag, Typography } from 'antd'
+import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
-import type { CmsTransaction, CmsTransactionMethod, CmsTransactionStatus } from '@/shared/cms'
+import type { CmsTransaction, CmsTransactionStatus } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
 import { ResourceManager } from '../common/resource-manager'
 import { useProductLabel } from '../ops/use-product-label'
@@ -13,7 +14,6 @@ import { useProductLabel } from '../ops/use-product-label'
 const { Text } = Typography
 
 const STATUSES: CmsTransactionStatus[] = ['paid', 'pending', 'failed', 'refunded']
-const METHODS: CmsTransactionMethod[] = ['bank-qr', 'card', 'manual']
 
 /** Mã gói thuộc gói giám sát (S19) hay gói thiết kế (S01). */
 const SUPERVISION_TIERS: readonly string[] = ['self', 'check', 'control']
@@ -38,6 +38,8 @@ export function TransactionManager() {
   const t = useTranslations('admin')
   const locale = useLocale() as Locale
   const [status, setStatus] = useState<CmsTransactionStatus | 'all'>('all')
+  const [tier, setTier] = useState<CmsTransaction['tier'] | 'all'>('all')
+  const searchParams = useSearchParams()
   const productLabel = useProductLabel()
   const tierLabel = (tier: CmsTransaction['tier']) =>
     productLabel(SUPERVISION_TIERS.includes(tier) ? 'supervision' : 'design', tier)
@@ -50,18 +52,31 @@ export function TransactionManager() {
       allowDelete={false}
       allowEdit={false}
       searchText={(item) => `${item.id} ${item.customerName} ${item.customerEmail}`}
+      initialQuery={searchParams.get('q') ?? undefined}
+      filterKey={`${status}|${tier}`}
       extraActions={
-        <Select
-          value={status}
-          onChange={setStatus}
-          style={{ minWidth: 180 }}
-          options={[
-            { value: 'all', label: t('transactions.allStatuses') },
-            ...STATUSES.map((value) => ({ value, label: t(`transactionStatus.${value}`) }))
-          ]}
-        />
+        <Space wrap>
+          <Select<CmsTransaction['tier'] | 'all'>
+            value={tier}
+            onChange={setTier}
+            style={{ minWidth: 180 }}
+            options={[
+              { value: 'all', label: t('transactions.allPlans') },
+              ...TIERS.map((value) => ({ value, label: tierLabel(value) }))
+            ]}
+          />
+          <Select
+            value={status}
+            onChange={setStatus}
+            style={{ minWidth: 180 }}
+            options={[
+              { value: 'all', label: t('transactions.allStatuses') },
+              ...STATUSES.map((value) => ({ value, label: t(`transactionStatus.${value}`) }))
+            ]}
+          />
+        </Space>
       }
-      filterItems={(item) => status === 'all' || item.status === status}
+      filterItems={(item) => (status === 'all' || item.status === status) && (tier === 'all' || item.tier === tier)}
       columns={[
         {
           title: t('transactions.code'),
@@ -96,9 +111,7 @@ export function TransactionManager() {
           title: t('customers.plan'),
           dataIndex: 'tier',
           width: 120,
-          filters: TIERS.map((tier) => ({ text: tierLabel(tier), value: tier })),
-          onFilter: (value, record) => record.tier === value,
-          render: (tier: CmsTransaction['tier']) => <Tag>{tierLabel(tier)}</Tag>
+          render: (value: CmsTransaction['tier']) => <Tag>{tierLabel(value)}</Tag>
         },
         {
           title: t('transactions.amount'),
@@ -112,9 +125,8 @@ export function TransactionManager() {
           title: t('transactions.method'),
           dataIndex: 'method',
           width: 150,
-          filters: METHODS.map((method) => ({ text: t(`transactionMethod.${method}`), value: method })),
-          onFilter: (value, record) => record.method === value,
-          render: (method: CmsTransactionMethod) => t(`transactionMethod.${method}`)
+          // Phương thức hiện tại chỉ có QR chuyển khoản.
+          render: () => t('transactionMethod.bank-qr')
         },
         {
           title: t('bookings.status'),

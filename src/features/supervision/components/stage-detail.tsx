@@ -9,6 +9,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/utils'
 import { formatDayMonth } from '@/shared/utils'
+import { useStageLabel } from '../hooks/use-stage-label'
 import { useStageActions } from '../hooks/use-supervision'
 import { canUpload, daysUntil, isLocked, stageConfirmDrift, stageVersions } from '../services/supervision.service'
 import type { StageFile, SupervisionStage } from '../types/supervision.types'
@@ -37,7 +38,7 @@ const ROLE_SUPERVISOR = 'GS'
 
 export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
   const t = useTranslations('supervision.dashboard.stage')
-  const tStages = useTranslations('supervision.stages')
+  const tStages = useStageLabel()
   const tChange = useTranslations('supervision.dashboard.change')
   const tStatus = useTranslations('supervision.dashboard.status')
 

@@ -1,12 +1,13 @@
 'use client'
 
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons'
-import { Alert, App, Button, Card, Empty, Form, Input, Modal, Space, Table, Tag, Typography } from 'antd'
+import { Alert, App, Button, Empty, Form, Input, Modal, Space, Table, Tag, Typography } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
-import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
+import type { CmsSupervisionProject } from '@/shared/cms'
+import { useSaveAdminItem } from '../../hooks/use-admin-data'
 import {
   decideChangeRequest,
   nextVersion,
@@ -14,38 +15,37 @@ import {
   relativeTime,
   type PendingChangeRequest
 } from '../../services/ops.service'
-import { AdminPage } from '../common/admin-page'
 
 const { Text, Paragraph } = Typography
 
 /**
- * YÊU CẦU SỬA ĐỔI — CR khách gửi trên hồ sơ giai đoạn ĐÃ KHÓA (S23, R5).
+ * YÊU CẦU SỬA ĐỔI của MỘT dự án giám sát (S23, R5) — mở từ dòng dự án ở màn
+ * Dự án giám sát, vì duyệt phiên bản hồ sơ giai đoạn là một phần của "cập nhật
+ * tiến độ" (spec admin #15), không phải một màn riêng.
  *
- * R5: sau khi Giám sát xác nhận, hồ sơ giai đoạn khóa và chỉ đổi được qua một
- * yêu cầu sửa đổi bên kia duyệt. CR do khách gửi thì phía SAVICO duyệt — trước
- * đây bảng điều khiển của khách gửi được CR nhưng không có chỗ nào để duyệt, nên
- * CR đứng "Chờ duyệt" mãi.
- *
- * CR nằm lồng trong từng giai đoạn của từng dự án giám sát, nên màn này DỰNG
- * hàng đợi từ bảng dự án chứ không có kho CR riêng: duyệt xong là ghi lại cả dự
- * án, bảng điều khiển của khách thấy ngay phiên bản mới.
- *
- * CR do Giám sát đề xuất (`by: 'GS'`) không có ở đây — cái đó khách duyệt (S22).
+ * CR nằm lồng trong từng giai đoạn nên danh sách dựng thẳng từ bản ghi dự án;
+ * duyệt xong ghi lại cả dự án, bảng điều khiển của khách thấy ngay phiên bản
+ * mới. CR do Giám sát đề xuất (`by: 'GS'`) không có ở đây — cái đó khách duyệt.
  */
-export function ChangeRequestManager() {
+export function ChangeRequestModal({
+  project,
+  onClose
+}: {
+  project: CmsSupervisionProject | null
+  onClose: () => void
+}) {
   const t = useTranslations('admin')
   const tStage = useTranslations('supervision.stages')
   const locale = useLocale() as Locale
   const { message } = App.useApp()
   const [form] = Form.useForm<{ response: string }>()
 
-  const { data: projects = [], isPending } = useAdminCollection('supervisionProjects')
   const save = useSaveAdminItem('supervisionProjects')
   const [target, setTarget] = useState<{ request: PendingChangeRequest; approve: boolean } | null>(null)
 
   const rows = useMemo(
-    () => pendingChangeRequests(projects).sort((a, b) => a.proposedAt.localeCompare(b.proposedAt)),
-    [projects]
+    () => (project ? pendingChangeRequests([project]).sort((a, b) => a.proposedAt.localeCompare(b.proposedAt)) : []),
+    [project]
   )
 
   function open(request: PendingChangeRequest, approve: boolean) {
@@ -54,16 +54,16 @@ export function ChangeRequestManager() {
   }
 
   async function submit() {
-    if (!target) return
-    const { response } = await form.validateFields()
-    const project = projects.find((item) => item.id === target.request.projectId)
-    if (!project) return
+    if (!target || !project) return
+    // Form sai thì antd reject kèm lỗi từng ô — đã hiện dưới ô, không cần ném tiếp.
+    const values = await form.validateFields().catch(() => null)
+    if (!values) return
 
     await save.mutateAsync(
       decideChangeRequest(
         project,
         { stageKey: target.request.stageKey, changeRequestId: target.request.changeRequestId },
-        { approve: target.approve, response }
+        { approve: target.approve, response: values.response }
       )
     )
     message.success(
@@ -76,89 +76,77 @@ export function ChangeRequestManager() {
   }
 
   return (
-    <AdminPage title={t('nav.changeRequests')} description={t('changeRequests.description')}>
-      <Card className='admin-table-card' styles={{ body: { padding: 0 } }}>
-        <Table<PendingChangeRequest>
-          rowKey={(row) => `${row.projectId}:${row.stageKey}:${row.changeRequestId}`}
-          loading={isPending}
-          dataSource={rows}
-          scroll={{ x: 'max-content' }}
-          pagination={{ pageSize: 10, hideOnSinglePage: true }}
-          locale={{ emptyText: isPending ? ' ' : <Empty description={t('changeRequests.empty')} /> }}
-          columns={[
-            {
-              title: t('changeRequests.code'),
-              dataIndex: 'changeRequestId',
-              width: 110,
-              render: (id: string, row) => (
-                <div>
-                  <Text code>{id}</Text>
-                  <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
-                    {relativeTime(row.proposedAt, locale)}
-                  </Text>
-                </div>
-              )
-            },
-            {
-              title: t('changeRequests.project'),
-              key: 'project',
-              render: (_, row) => (
-                <div style={{ minWidth: 0 }}>
-                  <Text strong style={{ display: 'block' }}>
-                    {row.projectName}
-                  </Text>
-                  <Text type='secondary' style={{ fontSize: 12 }}>
-                    {row.projectId} · {t('changeRequests.engineer', { name: row.engineer })}
-                  </Text>
-                </div>
-              )
-            },
-            {
-              title: t('changeRequests.stage'),
-              key: 'stage',
-              width: 230,
-              render: (_, row) => (
-                <Space orientation='vertical' size={2}>
-                  <Text>{t('changeRequests.stageLabel', { index: row.stageIndex, name: tStage(row.stageKey) })}</Text>
-                  <Tag>
-                    {t('changeRequests.version', { from: row.stageVersion, to: nextVersion(row.stageVersion) })}
-                  </Tag>
-                </Space>
-              )
-            },
-            {
-              title: t('changeRequests.reason'),
-              dataIndex: 'reason',
-              render: (reason: string) => (
-                <Paragraph style={{ margin: 0, maxWidth: 360 }} ellipsis={{ rows: 3, tooltip: reason }}>
-                  {reason}
-                </Paragraph>
-              )
-            },
-            {
-              title: t('changeRequests.due'),
-              dataIndex: 'dueAt',
-              width: 120,
-              render: (dueAt?: string) => (dueAt ? <Text>{dueAt.slice(0, 10)}</Text> : <Text type='secondary'>—</Text>)
-            },
-            {
-              title: t('table.actions'),
-              key: 'decide',
-              width: 210,
-              render: (_, row) => (
-                <Space size={6}>
-                  <Button size='small' type='primary' icon={<CheckOutlined />} onClick={() => open(row, true)}>
-                    {t('changeRequests.approve')}
-                  </Button>
-                  <Button size='small' danger icon={<CloseOutlined />} onClick={() => open(row, false)}>
-                    {t('changeRequests.reject')}
-                  </Button>
-                </Space>
-              )
-            }
-          ]}
-        />
-      </Card>
+    <Modal
+      open={project !== null}
+      onCancel={onClose}
+      footer={null}
+      width={960}
+      title={project ? t('changeRequests.modalListTitle', { project: project.projectName }) : ''}
+      destroyOnHidden
+    >
+      <Table<PendingChangeRequest>
+        rowKey={(row) => `${row.stageKey}:${row.changeRequestId}`}
+        dataSource={rows}
+        scroll={{ x: 'max-content' }}
+        pagination={false}
+        locale={{ emptyText: <Empty description={t('changeRequests.empty')} /> }}
+        columns={[
+          {
+            title: t('changeRequests.code'),
+            dataIndex: 'changeRequestId',
+            width: 110,
+            render: (id: string, row) => (
+              <div>
+                <Text code>{id}</Text>
+                <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
+                  {relativeTime(row.proposedAt, locale)}
+                </Text>
+              </div>
+            )
+          },
+          {
+            title: t('changeRequests.stage'),
+            key: 'stage',
+            width: 230,
+            render: (_, row) => (
+              <Space orientation='vertical' size={2}>
+                <Text>{t('changeRequests.stageLabel', { index: row.stageIndex, name: tStage(row.stageKey) })}</Text>
+                <Tag>{t('changeRequests.version', { from: row.stageVersion, to: nextVersion(row.stageVersion) })}</Tag>
+              </Space>
+            )
+          },
+          {
+            title: t('changeRequests.reason'),
+            dataIndex: 'reason',
+            render: (reason: string) => (
+              <Paragraph style={{ margin: 0, maxWidth: 320 }} ellipsis={{ rows: 3, tooltip: reason }}>
+                {reason}
+              </Paragraph>
+            )
+          },
+          {
+            title: t('changeRequests.due'),
+            dataIndex: 'dueAt',
+            width: 110,
+            render: (dueAt?: string) => (dueAt ? <Text>{dueAt.slice(0, 10)}</Text> : <Text type='secondary'>-</Text>)
+          },
+          {
+            title: t('table.actions'),
+            key: 'decide',
+            width: 200,
+            render: (_, row) => (
+              <Space size={6}>
+                <Button size='small' type='primary' icon={<CheckOutlined />} onClick={() => open(row, true)}>
+                  {t('changeRequests.approve')}
+                </Button>
+                <Button size='small' danger icon={<CloseOutlined />} onClick={() => open(row, false)}>
+                  {t('changeRequests.reject')}
+                </Button>
+              </Space>
+            )
+          }
+        ]}
+      />
 
       <Modal
         open={target !== null}
@@ -194,6 +182,6 @@ export function ChangeRequestManager() {
           </Form>
         ) : null}
       </Modal>
-    </AdminPage>
+    </Modal>
   )
 }

@@ -21,15 +21,10 @@ export function useCmsLocale(): Locale {
   return useCmsLocaleStore((state) => state.locale)
 }
 
-/** Sau khi ghi: làm mới đúng bảng vừa đụng + số liệu Tổng quan. */
+/** Sau khi ghi: làm mới đúng bảng vừa đụng. */
 function useInvalidate(collection: CmsCollection) {
   const queryClient = useQueryClient()
-  return async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: adminKeys.collectionAllLocales(collection) }),
-      queryClient.invalidateQueries({ queryKey: adminKeys.stats() })
-    ])
-  }
+  return () => queryClient.invalidateQueries({ queryKey: adminKeys.collectionAllLocales(collection) })
 }
 
 export function useAdminCollection<K extends CmsCollection>(collection: K) {
@@ -81,22 +76,5 @@ export function useSaveAdminDocument<K extends CmsDocument>(document: K) {
   return useMutation({
     mutationFn: (value: CmsDocumentMap[K]) => adminApi.saveDocument(document, value, locale),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.documents() })
-  })
-}
-
-export function useAdminStats() {
-  const locale = useCmsLocale()
-  return useQuery({
-    queryKey: adminKeys.stats(),
-    queryFn: () => adminApi.stats(locale)
-  })
-}
-
-/** Xóa mọi thay đổi nội dung của MỌI ngôn ngữ, đưa site về bản seed gốc. */
-export function useResetAdminContent() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: () => adminApi.resetContent(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.all })
   })
 }

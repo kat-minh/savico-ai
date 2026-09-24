@@ -1,13 +1,15 @@
 'use client'
 
-import { PhoneOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
-import { App, Alert, Button, Form, Input, Modal, Switch, Tag, Typography } from 'antd'
+import { DiffOutlined, PhoneOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
+import { App, Alert, Badge, Button, Form, Input, Modal, Space, Switch, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import type { CmsProjectOwner, CmsStageEvent, CmsSupervisionProject, CmsSupervisionStage } from '@/shared/cms'
 import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
+import { pendingChangeRequests } from '../../services/ops.service'
 import { ResourceManager } from '../common/resource-manager'
+import { ChangeRequestModal } from '../ops/change-request-manager'
 
 const { Text } = Typography
 
@@ -45,7 +47,11 @@ function event(actor: CmsStageEvent['actor'], text: string, at: string, mileston
  */
 export function InspectionManager() {
   const t = useTranslations('admin')
-  const tStage = useTranslations('supervision.stages')
+  const tStageFallback = useTranslations('supervision.stages')
+  const { data: stageDefs = [] } = useAdminCollection('supervisionStages')
+  // Tên giai đoạn theo danh mục admin quản lý (spec admin #15), trống thì rơi về bản dịch.
+  const tStage = (key: CmsSupervisionStage['key']) =>
+    stageDefs.find((item) => item.id === key)?.name.trim() || tStageFallback(key)
   const tTier = useTranslations('supervision.tierAlias')
   const { message } = App.useApp()
   const save = useSaveAdminItem('supervisionProjects')
@@ -68,6 +74,10 @@ export function InspectionManager() {
     return (project: CmsSupervisionProject) => project.customer ?? buyers.get(project.id)
   }, [orders])
   const [target, setTarget] = useState<CmsSupervisionProject | null>(null)
+  /** Dự án đang mở danh sách yêu cầu sửa đổi — giữ id để luôn đọc bản mới nhất sau khi duyệt. */
+  const [crProjectId, setCrProjectId] = useState<string | null>(null)
+  const { data: projects = [] } = useAdminCollection('supervisionProjects')
+  const crProject = projects.find((item) => item.id === crProjectId) ?? null
 
   const stage = target ? activeStage(target) : null
 
@@ -80,7 +90,9 @@ export function InspectionManager() {
 
   async function confirm() {
     if (!target || !stage) return
-    const values = await form.validateFields()
+    // Form sai thì antd reject kèm lỗi từng ô — đã hiện dưới ô, không cần ném tiếp.
+    const values = await form.validateFields().catch(() => null)
+    if (!values) return
     const at = new Date().toISOString()
 
     const stages = target.stages.map<CmsSupervisionStage>((item) => {
@@ -211,29 +223,46 @@ export function InspectionManager() {
             key: 'visits',
             width: 110,
             render: (_, record) => (
-              <Text>
-                {record.inspectionsUsed}/{record.inspectionsTotal}
-              </Text>
+              <div>
+                <Text style={{ display: 'block' }}>
+                  {t('inspections.visitsUsed', { used: record.inspectionsUsed, total: record.inspectionsTotal })}
+                </Text>
+                <Text type='secondary' style={{ fontSize: 12 }}>
+                  {t('inspections.visitsLeft', {
+                    left: Math.max(0, record.inspectionsTotal - record.inspectionsUsed)
+                  })}
+                </Text>
+              </div>
             )
           },
           {
             title: t('table.actions'),
             key: 'confirm',
-            width: 200,
+            width: 360,
             // Nút luôn có mặt, cùng bề ngang — dự án đã xong 6 giai đoạn thì mờ đi
             // chứ không biến thành một dấu gạch làm cột nhảy.
-            render: (_, record) => (
-              <Button
-                size='small'
-                type='primary'
-                icon={<SafetyCertificateOutlined />}
-                disabled={!activeStage(record)}
-                style={{ width: 168 }}
-                onClick={() => open(record)}
-              >
-                {t('inspections.confirm')}
-              </Button>
-            )
+            render: (_, record) => {
+              const pending = pendingChangeRequests([record]).length
+              return (
+                <Space size={6}>
+                  <Button
+                    size='small'
+                    type='primary'
+                    icon={<SafetyCertificateOutlined />}
+                    disabled={!activeStage(record)}
+                    style={{ width: 168 }}
+                    onClick={() => open(record)}
+                  >
+                    {t('inspections.confirm')}
+                  </Button>
+                  <Badge count={pending} size='small'>
+                    <Button size='small' icon={<DiffOutlined />} onClick={() => setCrProjectId(record.id)}>
+                      {t('inspections.changeRequests')}
+                    </Button>
+                  </Badge>
+                </Space>
+              )
+            }
           }
         ]}
         renderForm={() => null}
@@ -290,6 +319,7 @@ export function InspectionManager() {
           {t('inspections.lockNote')}
         </Text>
       </Modal>
+      <ChangeRequestModal project={crProject} onClose={() => setCrProjectId(null)} />
     </>
   )
 }

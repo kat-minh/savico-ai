@@ -1,5 +1,13 @@
 import { BUILDING_IMAGE, TOPIC_IMAGE } from '@/shared/lib/imagery'
-import type { CmsQuotas, SubscriptionPlan, SupervisionPackage } from '../cms.types'
+import type {
+  CmsSupervisionStageDef,
+  CmsGift,
+  CmsPlanSettings,
+  CmsQuotas,
+  PlanBenefits,
+  SubscriptionPlan,
+  SupervisionPackage
+} from '../cms.types'
 
 /**
  * Ba gói thiết kế theo S01 — Bảng giá gói thiết kế.
@@ -25,75 +33,135 @@ import type { CmsQuotas, SubscriptionPlan, SupervisionPackage } from '../cms.typ
  * Tỉ lệ khung ảnh thẻ là 16:10; khung ảnh quà là ô vuông 56px.
  * ======================================================================== */
 
+const ON = { enabled: true }
+const OFF = { enabled: false }
+
+/** Bảng quyền lợi đầy đủ của một gói — mặc định bật hết nhóm thiết kế & dự toán. */
+function benefits(overrides: Partial<PlanBenefits['toggles']>, levels: Omit<PlanBenefits, 'toggles'>): PlanBenefits {
+  return {
+    toggles: {
+      uploadPhoto: ON,
+      siteInfo: ON,
+      buildingType: ON,
+      style: ON,
+      renderImages: ON,
+      structureEstimate: ON,
+      finishingEstimate: ON,
+      materialList: ON,
+      boq: ON,
+      exportDossier: ON,
+      contractorPack: ON,
+      compareOptions: OFF,
+      compareCost: OFF,
+      compareMaterial: OFF,
+      optimizeBudget: OFF,
+      costDelta: OFF,
+      materialAlternatives: OFF,
+      render3d: OFF,
+      ...overrides
+    },
+    ...levels
+  }
+}
+
 export const PLANS_SEED: SubscriptionPlan[] = [
   {
     id: 'basic',
     tier: 'basic',
+    code: 'BASIC',
+    name: 'BASIC',
+    shortLabel: 'Khởi đầu',
     price: 399_000,
-    periodDays: 0,
     designCredits: 3,
     libraryCredits: 20,
-    perk: 'Xuất hồ sơ thi công',
-    audience: 'chủ nhà đã khá rõ nhu cầu',
     fitLine: 'Phù hợp khi bạn đã khá rõ nhu cầu và muốn bắt đầu nhanh.',
     imageUrl: TOPIC_IMAGE.blueprint,
-    features: [
-      '3 phương án thiết kế',
-      '3 lượt chỉnh sửa phương án',
-      'Tra cứu thư viện mẫu',
-      'Dự toán nội thất sơ bộ',
-      'Xuất hồ sơ thi công',
-      'Hỗ trợ tư vấn online'
-    ]
+    ctaLabel: 'Chọn gói BASIC',
+    status: 'selling',
+    benefits: benefits(
+      {},
+      {
+        layout: { level: 'basic' },
+        interiorEstimate: { level: 'rough' },
+        advisory: { level: 'online' }
+      }
+    ),
+    highlights: ['designCredits', 'libraryCredits', 'interiorEstimate', 'exportDossier', 'advisory'],
+    giftId: null
   },
   {
     id: 'advanced',
     tier: 'advanced',
+    code: 'PLUS',
+    name: 'PLUS',
+    shortLabel: 'Phổ biến',
+    popular: true,
     price: 1_490_000,
-    periodDays: 0,
     designCredits: 10,
     libraryCredits: 50,
-    perk: 'Bố trí công năng 2D & 3D',
-    audience: 'chủ nhà muốn so sánh nhiều phương án',
-    popular: true,
     fitLine: 'Phù hợp khi bạn muốn thử và so sánh nhiều phương án trước khi chốt.',
     imageUrl: BUILDING_IMAGE.townhouse,
-    features: [
-      '10 phương án thiết kế',
-      '10 lượt chỉnh sửa phương án',
-      'Dự toán nội thất chi tiết',
-      'Bố trí công năng 2D & 3D',
-      'Xuất hồ sơ thi công',
-      'Hỗ trợ tư vấn ưu tiên'
-    ]
+    ctaLabel: 'Chọn gói PLUS',
+    status: 'selling',
+    benefits: benefits(
+      { compareOptions: ON, compareCost: ON, compareMaterial: ON },
+      {
+        layout: { level: '2d3d' },
+        interiorEstimate: { level: 'detailed' },
+        advisory: { level: 'priority' }
+      }
+    ),
+    highlights: ['designCredits', 'interiorEstimate', 'layout', 'exportDossier', 'advisory'],
+    giftId: null
   },
   {
     id: 'pro',
     tier: 'pro',
+    code: 'PRO',
+    name: 'PRO',
+    shortLabel: 'Toàn diện',
     price: 3_990_000,
-    periodDays: 0,
     designCredits: 20,
     libraryCredits: 100,
-    perk: 'Tư vấn 1:1 cùng chuyên gia',
-    audience: 'chủ nhà muốn tối ưu ngân sách và vật liệu',
     fitLine: 'Phù hợp khi bạn muốn tối ưu ngân sách và vật liệu trước khi thi công.',
     imageUrl: BUILDING_IMAGE.villa,
-    features: [
-      '20 phương án thiết kế',
-      '20 lượt chỉnh sửa phương án',
-      'Dự toán nội thất chi tiết & tối ưu',
-      'Phối cảnh 3D chân thực',
-      'Xuất hồ sơ thi công',
-      'Tư vấn 1:1 cùng chuyên gia'
-    ],
-    gift: {
-      title: 'Bộ thiết bị vệ sinh châu Âu',
-      value: 100_000_000,
-      extraTitle: '+ Ưu đãi thêm',
-      extraBody: 'Phí gói 3.990.000đ sẽ được khấu trừ vào giá trị hợp đồng khi ký hợp đồng thi công trọn gói cùng SVC.',
-      conditions: 'Áp dụng khi khách hàng ký hợp đồng thi công trọn gói cùng SVC và đáp ứng điều kiện chương trình.',
-      conditionsShort: 'Áp dụng khi khách chọn gói triển khai trọn gói cùng SVC.'
-    }
+    ctaLabel: 'Chọn gói PRO',
+    status: 'selling',
+    benefits: benefits(
+      {
+        compareOptions: ON,
+        compareCost: ON,
+        compareMaterial: ON,
+        optimizeBudget: ON,
+        costDelta: ON,
+        materialAlternatives: ON,
+        render3d: ON
+      },
+      {
+        layout: { level: '2d3dPlus' },
+        interiorEstimate: { level: 'optimized' },
+        advisory: { level: 'expert' }
+      }
+    ),
+    highlights: ['designCredits', 'interiorEstimate', 'render3d', 'exportDossier', 'advisory'],
+    giftId: 'gift-sanitary',
+    giftConditions: 'Áp dụng khi khách hàng ký hợp đồng thi công trọn gói cùng SVC và đáp ứng điều kiện chương trình.'
+  }
+]
+
+/** Chu kỳ sử dụng DÙNG CHUNG của mọi gói — hiện tại 90 ngày (§4). */
+export const PLAN_SETTINGS_SEED: CmsPlanSettings = { periodDays: 90 }
+
+/** Danh mục quà tặng (epic GiftManagement). */
+export const GIFTS_SEED: CmsGift[] = [
+  {
+    id: 'gift-sanitary',
+    title: 'Bộ thiết bị vệ sinh châu Âu',
+    description: 'Trọn bộ thiết bị vệ sinh nhập khẩu châu Âu cho một căn nhà.',
+    value: 100_000_000,
+    imageUrl: '',
+    extraOffer: 'Phí gói 3.990.000đ sẽ được khấu trừ vào giá trị hợp đồng khi ký hợp đồng thi công trọn gói cùng SVC.',
+    status: 'active'
   }
 ]
 
@@ -110,6 +178,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'self',
     tier: 'self',
+    name: 'Tự quản lý',
     price: 0,
     durationMonths: 6,
     inspections: null,
@@ -124,6 +193,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'check',
     tier: 'check',
+    name: 'SVC CHECK',
     price: 8_900_000,
     durationMonths: 6,
     inspections: 6,
@@ -140,6 +210,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'control',
     tier: 'control',
+    name: 'SVC CONTROL',
     price: 18_900_000,
     durationMonths: 6,
     inspections: 12,
@@ -171,3 +242,49 @@ export const QUOTAS_SEED: CmsQuotas = {
   handbookLookupPerDay: 3,
   handbookDetailPerDay: 3
 }
+
+/** Sáu giai đoạn giám sát mặc định (R5) — tên lấy đúng bản dịch hiện hành. */
+export const SUPERVISION_STAGES_SEED: CmsSupervisionStageDef[] = [
+  {
+    id: 'legal',
+    name: 'Hồ sơ pháp lý',
+    shortName: 'Hồ sơ pháp lý',
+    description: 'Giấy phép xây dựng, hồ sơ thiết kế, hợp đồng thi công.',
+    order: 1
+  },
+  {
+    id: 'foundation',
+    name: 'Móng & khởi công',
+    shortName: 'Móng & khởi công',
+    description: 'Định vị tim trục, hố móng, cốt thép móng, đổ bê tông móng.',
+    order: 2
+  },
+  {
+    id: 'structure',
+    name: 'Phần thô – kết cấu',
+    shortName: 'Phần thô – kết cấu',
+    description: 'Cột, dầm, sàn, tường xây và tô trát.',
+    order: 3
+  },
+  {
+    id: 'mep',
+    name: 'Hệ thống kỹ thuật & chống thấm',
+    shortName: 'Kỹ thuật & chống thấm',
+    description: 'Điện nước âm, chống thấm, thử áp lực đường ống.',
+    order: 4
+  },
+  {
+    id: 'finishing',
+    name: 'Hoàn thiện',
+    shortName: 'Hoàn thiện',
+    description: 'Trát, ốp lát, trần thạch cao, sơn nước, cửa, thiết bị vệ sinh.',
+    order: 5
+  },
+  {
+    id: 'handover',
+    name: 'Nghiệm thu & bàn giao',
+    shortName: 'Nghiệm thu & bàn giao',
+    description: 'Kiểm tra tổng thể, khắc phục lỗi, bàn giao hồ sơ hoàn công.',
+    order: 6
+  }
+]

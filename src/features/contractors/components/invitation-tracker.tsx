@@ -32,12 +32,8 @@ import { contractorBriefRoute, contractorMatchesRoute, supervisionPlansRoute } f
 import { siteConfig } from '@/shared/config'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
-import {
-  INVITATION_STEPS,
-  INVITATIONS_ARRIVE_FORWARD_KEY,
-  MAX_INVITATIONS,
-  SURVEY_SLOTS
-} from '../constants/contractors.constants'
+import { surveySlotLabel } from '@/shared/cms'
+import { INVITATION_STEPS, INVITATIONS_ARRIVE_FORWARD_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractors } from '../hooks/use-contractors'
 import { useContractorReviews, useInvitations } from '../hooks/use-invitations'
@@ -416,8 +412,9 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
 const strong = (chunks: React.ReactNode) => <b className='text-foreground font-medium'>{chunks}</b>
 
 const slotLabel = (slotId: string) => {
-  const index = Number(slotId.replace('slot-', ''))
-  if (SURVEY_SLOTS[index]) return SURVEY_SLOTS[index]
+  // Khung giờ lấy theo Lịch khảo sát do admin cấu hình; mã giờ dạng `slot-HHmm` của bản cũ tự dựng nhãn.
+  const configured = surveySlotLabel(slotId)
+  if (configured !== slotId) return configured
   const clock = /^slot-(\d{2})(\d{2})$/.exec(slotId)
   if (!clock) return slotId
   const hour = Number(clock[1])
@@ -532,17 +529,23 @@ function InvitationCard({
             transition={{ duration: 0.35, ease: revealEase }}
             className={cn(
               'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium',
-              invitation.status === 'received'
-                ? 'bg-warning/15 text-warning-strong'
-                : 'bg-primary/10 text-primary-strong'
+              invitation.status === 'rejected'
+                ? 'bg-destructive/10 text-destructive'
+                : invitation.status === 'received'
+                  ? 'bg-warning/15 text-warning-strong'
+                  : 'bg-primary/10 text-primary-strong'
             )}
           >
             <span
               aria-hidden
               className={cn(
                 'size-1.5 rounded-full',
-                invitation.status === 'received' ? 'bg-warning-strong' : 'bg-primary',
-                !isDone && 'animate-pulse'
+                invitation.status === 'rejected'
+                  ? 'bg-destructive'
+                  : invitation.status === 'received'
+                    ? 'bg-warning-strong'
+                    : 'bg-primary',
+                !isDone && invitation.status !== 'rejected' && 'animate-pulse'
               )}
             />
             {invitation.status === 'received' ? tStatus('receivedWaiting') : tStatus(invitation.status)}
@@ -629,6 +632,9 @@ function InvitationCard({
           slot: slotLabel(invitation.survey.slotId)
         })}
       </p>
+      {invitation.status === 'rejected' ? (
+        <p className='text-destructive text-sm'>{t('rejectedLine', { reason: invitation.rejectReason ?? '-' })}</p>
+      ) : null}
 
       {/* Thanh 4 nấc: nấc đã qua tô đặc, nấc hiện tại viền đậm, nấc chưa tới mờ. */}
       {/* `overflow-x-auto` — cần để cuộn ngang trên màn hẹp — kéo theo overflow-y

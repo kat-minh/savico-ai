@@ -1,4 +1,4 @@
-import { cmsDb, evaluateDiscount, transferInfoFor, type CmsTransaction } from '@/shared/cms'
+import { cmsDb, evaluateDiscount, transferInfoFor, type CmsTransaction, resolvePlanGift } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import { QR_TTL_MINUTES } from '../constants/checkout.constants'
 import type { CreateOrderPayload, Order, OrderProduct } from '../types/checkout.types'
@@ -46,11 +46,13 @@ function nextOrderId(): string {
 function productSnapshot(payload: CreateOrderPayload): OrderProduct {
   if (payload.kind === 'design') {
     const plan = cmsDb.list('plans').find((item) => item.id === payload.productId)
-    if (!plan) throw new Error(`Mock: không tìm thấy gói thiết kế ${payload.productId}`)
+    // Gói Ẩn không được tạo đơn mới (DesignPackageManagement §1).
+    if (!plan || plan.status !== 'selling') throw new Error(`Mock: gói thiết kế ${payload.productId} không mở bán`)
+    const gift = resolvePlanGift(plan, cmsDb.list('gifts'))
     return {
       id: plan.id,
       kind: 'design',
-      name: plan.tier,
+      name: plan.name,
       price: plan.price,
       // Hình S03: ba dòng quyền lợi trong thẻ đơn hàng là SỐ LƯỢT của gói
       // (phương án · lượt chỉnh sửa · lượt tra thư viện), không phải ba tính
@@ -59,7 +61,13 @@ function productSnapshot(payload: CreateOrderPayload): OrderProduct {
         `${plan.designCredits} phương án thiết kế`,
         `${plan.designCredits} lượt chỉnh sửa phương án`,
         `${plan.libraryCredits} lượt tra cứu thư viện mẫu`
-      ]
+      ],
+      // Snapshot lúc tạo đơn: đổi cấu hình gói sau này không làm đơn cũ đổi theo.
+      // Chu kỳ dùng chung, snapshot vào đơn (§4).
+      periodDays: cmsDb.getDocument('planSettings').periodDays,
+      designCredits: plan.designCredits,
+      libraryCredits: plan.libraryCredits,
+      ...(gift ? { gift: { title: gift.title, conditions: gift.conditions } } : {})
     }
   }
 
@@ -70,8 +78,15 @@ function productSnapshot(payload: CreateOrderPayload): OrderProduct {
     kind: 'supervision',
     name: supervision.tier,
     price: supervision.price,
-    benefits: supervision.benefits.slice(0, 3)
+    benefits: supervision.benefits.slice(0, 3),
+    periodDays: supervision.durationMonths * 30
   }
+}
+
+/** Snapshot hình thức + giá trị cấu hình của mã lúc tạo đơn. */
+function snapshotOfCode(code: string): Pick<Order, 'discountType' | 'discountValue'> {
+  const config = cmsDb.list('discountCodes').find((item) => item.code === code)
+  return config ? { discountType: config.type, discountValue: config.value } : {}
 }
 
 function expiryFromNow(): string {
@@ -103,6 +118,7 @@ export const mockCheckoutApi = {
       buyer: payload.buyer,
       invoice: payload.invoice,
       discountCode: discount?.ok ? discount.code : '',
+      ...(discount?.ok ? snapshotOfCode(discount.code) : {}),
       subtotal: product.price,
       discountAmount,
       total,

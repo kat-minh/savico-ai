@@ -4,11 +4,9 @@ import {
   CalendarOutlined,
   CheckCircleTwoTone,
   DiffOutlined,
-  FlagOutlined,
   RightOutlined,
   SafetyCertificateOutlined,
   SendOutlined,
-  StarOutlined,
   TeamOutlined
 } from '@ant-design/icons'
 import { Badge, Card, Col, Empty, Row, Skeleton, Statistic, Typography } from 'antd'
@@ -27,7 +25,7 @@ import { AdminCharts } from './admin-charts'
 const { Text } = Typography
 
 /** Khóa dịch `admin.inbox.queues.<key>` — khai hẹp để next-intl kiểm được khóa. */
-type QueueKey = 'invitations' | 'inspections' | 'changeRequests' | 'bookings' | 'contractors' | 'reviews' | 'reports'
+type QueueKey = 'invitations' | 'inspections' | 'changeRequests' | 'bookings' | 'contractors'
 
 interface Queue {
   key: QueueKey
@@ -64,13 +62,9 @@ export function AdminInbox() {
   const invitations = useAdminCollection('contractorInvitations')
   const supervision = useAdminCollection('supervisionProjects')
   const bookings = useAdminCollection('bookings')
-  const reviews = useAdminCollection('packageReviews')
-  const reports = useAdminCollection('reports')
   const contractors = useAdminCollection('contractors')
 
-  const loading = [orders, invitations, supervision, bookings, reviews, reports, contractors].some(
-    (query) => query.isPending
-  )
+  const loading = [orders, invitations, supervision, bookings, contractors].some((query) => query.isPending)
 
   if (loading) {
     return (
@@ -90,8 +84,6 @@ export function AdminInbox() {
   )
   const changeRequests = pendingChangeRequests(supervisionRows)
   const pendingBookings = (bookings.data ?? []).filter((booking) => booking.status === 'pending')
-  const pendingReviews = (reviews.data ?? []).filter((review) => review.status === 'pending')
-  const openReports = (reports.data ?? []).filter((report) => report.status === 'open')
   const unverified = (contractors.data ?? []).filter((contractor) => !contractor.verified)
 
   const queues: Queue[] = [
@@ -112,7 +104,8 @@ export function AdminInbox() {
     {
       key: 'changeRequests',
       icon: DiffOutlined,
-      href: ADMIN_ROUTES.CHANGE_REQUESTS,
+      // Yêu cầu sửa đổi duyệt ngay trong màn Dự án giám sát.
+      href: ADMIN_ROUTES.INSPECTIONS,
       count: changeRequests.length,
       oldest: oldestOf(changeRequests.map((request) => request.proposedAt))
     },
@@ -127,20 +120,6 @@ export function AdminInbox() {
       icon: TeamOutlined,
       href: ADMIN_ROUTES.CONTRACTORS,
       count: unverified.length
-    },
-    {
-      key: 'reviews',
-      icon: StarOutlined,
-      href: ADMIN_ROUTES.REVIEWS,
-      count: pendingReviews.length,
-      oldest: oldestOf(pendingReviews.map((review) => review.createdAt))
-    },
-    {
-      key: 'reports',
-      icon: FlagOutlined,
-      href: ADMIN_ROUTES.REPORTS,
-      count: openReports.length,
-      oldest: oldestOf(openReports.map((report) => report.createdAt))
     }
   ]
 
@@ -162,7 +141,9 @@ export function AdminInbox() {
   const activeSupervision = supervisionRows.filter((project) =>
     project.stages.some((stage) => stage.status !== 'confirmed')
   ).length
-  const openInvitations = invitationRows.filter((invitation) => invitation.status !== 'done').length
+  const openInvitations = invitationRows.filter(
+    (invitation) => invitation.status !== 'done' && invitation.status !== 'rejected'
+  ).length
 
   return (
     <AdminPage title={t('nav.dashboard')} description={t('inbox.description')}>

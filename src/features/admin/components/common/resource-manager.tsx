@@ -1,6 +1,6 @@
 'use client'
 
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import {
   App,
   Button,
@@ -13,6 +13,7 @@ import {
   Popconfirm,
   Space,
   Table,
+  Tooltip,
   type FormInstance,
   type TableProps
 } from 'antd'
@@ -68,6 +69,33 @@ export interface ResourceManagerProps<K extends CmsCollection> {
   extraActions?: ReactNode
   /** Khối hiện phía trên bảng (thẻ số liệu, bộ lọc riêng…). */
   banner?: ReactNode
+  /**
+   * Chặn xóa một bản ghi cụ thể — trả về LÝ DO (hiện ở tooltip, nút mờ đi) khi
+   * bản ghi đã phát sinh ràng buộc, `null` khi xóa được.
+   */
+  deleteBlockedReason?: (item: CmsCollectionMap[K]) => string | null
+  /** Nội dung xác nhận xóa riêng cho từng bản ghi (tên, số liệu liên quan…). */
+  deleteConfirm?: (item: CmsCollectionMap[K]) => ReactNode
+  /** Nút riêng của từng dòng (chuyển trạng thái, xác minh…), đứng trước cây bút. */
+  rowActions?: (item: CmsCollectionMap[K]) => ReactNode
+  /** Ngăn kéo "Xem chi tiết" chỉ đọc — có thì dòng nào cũng có nút con mắt. */
+  renderView?: (item: CmsCollectionMap[K]) => ReactNode
+  /**
+   * Kiểm tra chéo trước khi lưu — trả về thông báo lỗi để chặn lưu, `null` khi
+   * hợp lệ. Dùng cho quy tắc không gắn với một ô (trùng tên, điều kiện kích hoạt…).
+   */
+  validate?: (next: CmsCollectionMap[K], current: CmsCollectionMap[K], isNew: boolean) => string | null
+  /**
+   * Đổi giá trị này (bộ lọc ngoài vừa đổi) là bảng quay về trang đầu — spec yêu
+   * cầu mọi danh sách về trang 1 khi đổi từ khóa hoặc bộ lọc.
+   */
+  filterKey?: string
+  /** Từ khóa điền sẵn vào ô tìm kiếm — mở từ đường dẫn `?q=` của màn khác. */
+  initialQuery?: string
+  /** Mở sẵn ngăn kéo "Xem chi tiết" của bản ghi này — đường dẫn `?id=` từ màn khác. */
+  initialViewId?: string | null
+  /** Chạy sau khi lưu thành công — giữ ràng buộc giữa các bản ghi (vd: tối đa một gói phổ biến). */
+  afterSave?: (saved: CmsCollectionMap[K], previous: CmsCollectionMap[K]) => Promise<unknown> | void
 }
 
 /**
@@ -93,7 +121,16 @@ export function ResourceManager<K extends CmsCollection>({
   renderDetail,
   drawerWidth = 560,
   extraActions,
-  banner
+  banner,
+  deleteBlockedReason,
+  deleteConfirm,
+  rowActions,
+  renderView,
+  validate,
+  filterKey,
+  initialQuery,
+  initialViewId,
+  afterSave
 }: ResourceManagerProps<K>) {
   type Item = CmsCollectionMap[K]
 
@@ -109,7 +146,25 @@ export function ResourceManager<K extends CmsCollection>({
   const [editing, setEditing] = useState<Item | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [dirty, setDirty] = useState(false)
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery ?? '')
+  const [viewing, setViewing] = useState<Item | null>(null)
+  // Mở sẵn bản ghi được chỉ định MỘT lần, ngay khi dữ liệu về.
+  const [openedInitial, setOpenedInitial] = useState(false)
+  if (!openedInitial && initialViewId && data) {
+    setOpenedInitial(true)
+    const target = (data as Item[]).find((item) => (item as WithId).id === initialViewId)
+    if (target) setViewing(target)
+  }
+  const [page, setPage] = useState(1)
+
+  // Đổi từ khóa hoặc bộ lọc ngoài → về trang đầu. Mẫu "điều chỉnh state khi
+  // giá trị đổi" của React: so với lần render trước ngay trong thân hàm.
+  const resetKey = `${query}|${filterKey ?? ''}`
+  const [seenResetKey, setSeenResetKey] = useState(resetKey)
+  if (resetKey !== seenResetKey) {
+    setSeenResetKey(resetKey)
+    setPage(1)
+  }
 
   useUnsavedGuard(dirty)
 
@@ -153,9 +208,17 @@ export function ResourceManager<K extends CmsCollection>({
 
   async function submit() {
     if (!editing) return
-    const values = (await form.validateFields()) as Record<string, unknown>
+    // Form sai thì antd reject kèm lỗi từng ô — đã hiện dưới ô, không cần ném tiếp.
+    const values = (await form.validateFields().catch(() => null)) as Record<string, unknown> | null
+    if (!values) return
     const next = fromFormValues ? fromFormValues(values, editing) : ({ ...editing, ...values } as Item)
+    const problem = validate?.(next, editing, isNew)
+    if (problem) {
+      message.error(problem)
+      return
+    }
     await save.mutateAsync(next)
+    await afterSave?.(next, editing)
     message.success(isNew ? t('feedback.created') : t('feedback.saved'))
     closeEditor()
   }
@@ -164,9 +227,20 @@ export function ResourceManager<K extends CmsCollection>({
     title: t('table.actions'),
     key: 'actions',
     fixed: 'right',
-    width: allowDelete && allowEdit ? 108 : 72,
     render: (_, record) => (
       <Space size={0}>
+        {rowActions ? rowActions(record) : null}
+        {renderView ? (
+          <Tooltip title={t('actions.view')}>
+            <Button
+              type='text'
+              size='small'
+              icon={<EyeOutlined />}
+              aria-label={t('actions.view')}
+              onClick={() => setViewing(record)}
+            />
+          </Tooltip>
+        ) : null}
         {allowEdit ? (
           <Button
             type='text'
@@ -176,10 +250,21 @@ export function ResourceManager<K extends CmsCollection>({
             onClick={() => openEditor(record, false)}
           />
         ) : null}
-        {allowDelete ? (
+        {allowDelete && deleteBlockedReason?.(record) ? (
+          <Tooltip title={deleteBlockedReason(record)}>
+            <Button
+              type='text'
+              size='small'
+              danger
+              disabled
+              icon={<DeleteOutlined />}
+              aria-label={t('actions.delete')}
+            />
+          </Tooltip>
+        ) : allowDelete ? (
           <Popconfirm
             title={t('actions.deleteConfirmTitle')}
-            description={t('actions.deleteConfirmBody')}
+            description={deleteConfirm ? deleteConfirm(record) : t('actions.deleteConfirmBody')}
             okText={t('actions.delete')}
             okButtonProps={{ danger: true }}
             cancelText={t('actions.cancel')}
@@ -256,10 +341,12 @@ export function ResourceManager<K extends CmsCollection>({
           loading={isPending}
           dataSource={items}
           // Không sửa, không xóa thì đừng bày cột Thao tác trống.
-          columns={allowEdit || allowDelete ? [...columns, actionColumn] : [...columns]}
+          columns={allowEdit || allowDelete || rowActions || renderView ? [...columns, actionColumn] : [...columns]}
           locale={{ emptyText: isPending ? ' ' : emptyState }}
           scroll={{ x: 'max-content' }}
           pagination={{
+            current: page,
+            onChange: setPage,
             pageSize: 10,
             showSizeChanger: true,
             hideOnSinglePage: false,
@@ -296,6 +383,32 @@ export function ResourceManager<K extends CmsCollection>({
           {renderForm(form)}
         </Form>
       </Drawer>
+
+      {renderView ? (
+        <Drawer
+          open={viewing !== null}
+          onClose={() => setViewing(null)}
+          size={screens.md ? drawerWidth : '100%'}
+          destroyOnHidden
+          title={t('actions.view')}
+          extra={
+            allowEdit && viewing ? (
+              <Button
+                icon={<EditOutlined />}
+                onClick={() => {
+                  const target = viewing
+                  setViewing(null)
+                  openEditor(target, false)
+                }}
+              >
+                {t('actions.edit')}
+              </Button>
+            ) : null
+          }
+        >
+          {viewing ? renderView(viewing) : null}
+        </Drawer>
+      ) : null}
     </AdminPage>
   )
 }

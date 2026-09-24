@@ -49,7 +49,8 @@ export type BriefStatus = 'ready' | 'inviting' | 'contracted'
 export type ContractorSort = 'match' | 'distance' | 'rating' | 'survey'
 
 /** Bán kính tìm kiếm — 4 nấc ở header dự án (S12). */
-export type SearchRadiusKm = 5 | 10 | 20 | 50
+/** Bán kính tìm kiếm (km) — các nấc do admin cấu hình ở Quy tắc đề xuất nhà thầu. */
+export type SearchRadiusKm = number
 
 /** Vùng phục vụ — tab Bắc / Trung / Nam (S12). */
 export type ServiceRegion = CmsServiceRegion

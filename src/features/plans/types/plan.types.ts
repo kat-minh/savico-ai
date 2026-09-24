@@ -1,7 +1,11 @@
+import type { PlanGift, SubscriptionPlan } from '@/shared/cms'
+
 /**
  * Kiểu dữ liệu của trang Gói đăng ký (mục VII).
  *
- * Giá và hạn mức do admin cập nhật không cần deploy (mục X, #4) nên type nằm ở
- * `shared/cms`; đây chỉ re-export để barrel của feature không đổi.
+ * Gói do admin cấu hình nằm ở `shared/cms`; trang công khai đọc một VIEW của
+ * gói — quà tặng đã tra từ Danh mục quà tặng — để component không phải tự ghép.
  */
 export type { PlanTier, SubscriptionPlan } from '@/shared/cms'
+
+export type PlanView = SubscriptionPlan & { gift?: PlanGift }
