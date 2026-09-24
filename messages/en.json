@@ -3072,6 +3072,9 @@
       },
       "intro": "Introduction",
       "strengths": "Strengths",
+      "buildingTypes": "Building types handled",
+      "buildingTypesHint": "Read by the \"Building type\" filter on the contractor search page. Empty = not declared, so the contractor is never filtered out.",
+      "maxUpperFloors": "Max upper floors (excluding ground)",
       "foundedYear": "Founded",
       "teamSize": "Team size",
       "warranty": "Warranty",
@@ -3261,7 +3264,7 @@
         "title": "Match on the criteria that matter",
         "area": "Area & radius",
         "type": "Building type",
-        "typeHint": "new build / repair / renovation / interior",
+        "typeHint": "townhouse / villa / roofed house / garden house / apartment",
         "scale": "Project scale",
         "experience": "Experience on similar projects",
         "rating": "Rating & completed projects",
@@ -3290,7 +3293,8 @@
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "bestMatch": "Best match"
+        "bestMatch": "Best match",
+        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
       },
       "compare": {
         "title": "Transparent comparison",
@@ -3464,7 +3468,6 @@
           "finishing": "e.g. Need a contractor for finishing — plastering, tiling, painting, fixtures — on a shell already built.",
           "interior": "e.g. Need a contractor for interior fit-out — furniture, loose items, decor — in a modern style."
         },
-        "noteHint": "The clearer your description, the better SAVICO can match contractors.",
         "counter": "{current} / {max}"
       },
       "documents": {
@@ -3638,6 +3641,10 @@
         "partnership": "SAVICO partnership"
       },
       "introTitle": "About the company",
+      "introTags": {
+        "buildingType": "Building type",
+        "scope": "Scope of work"
+      },
       "founded": "Founded in {year}",
       "team": "{count} architects & engineers",
       "office": "Office in {address}",

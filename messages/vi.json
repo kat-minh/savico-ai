@@ -3072,6 +3072,9 @@
       },
       "intro": "Giới thiệu",
       "strengths": "Thế mạnh",
+      "buildingTypes": "Loại công trình nhận thi công",
+      "buildingTypesHint": "Bộ lọc \"Loại công trình\" ở trang Tìm nhà thầu đọc mục này. Để trống = chưa khai báo, không bị loại khỏi kết quả lọc.",
+      "maxUpperFloors": "Số lầu tối đa (không tính trệt)",
       "foundedYear": "Năm thành lập",
       "teamSize": "Quy mô nhân sự",
       "warranty": "Bảo hành",
@@ -3261,7 +3264,7 @@
         "title": "Tìm đúng người theo đúng tiêu chí",
         "area": "Khu vực & bán kính",
         "type": "Loại công trình",
-        "typeHint": "xây mới / sửa chữa / cải tạo / nội thất",
+        "typeHint": "nhà phố / villa / nhà mái / nhà vườn / căn hộ",
         "scale": "Quy mô công trình",
         "experience": "Kinh nghiệm dự án tương tự",
         "rating": "Đánh giá & số dự án hoàn thành",
@@ -3290,7 +3293,8 @@
           "survey": "Khảo sát sớm nhất"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
-        "bestMatch": "Phù hợp nhất"
+        "bestMatch": "Phù hợp nhất",
+        "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
       },
       "compare": {
         "title": "So sánh minh bạch",
@@ -3464,7 +3468,6 @@
           "finishing": "VD: Cần nhà thầu hoàn thiện — trát, ốp lát, sơn, lắp thiết bị — cho nhà đã có phần thô.",
           "interior": "VD: Cần nhà thầu thi công nội thất — đồ gỗ, đồ rời, trang trí — theo phong cách hiện đại."
         },
-        "noteHint": "Mô tả càng rõ, SAVICO càng dễ đề xuất đúng nhà thầu.",
         "counter": "{current} / {max}"
       },
       "documents": {
@@ -3638,6 +3641,10 @@
         "partnership": "Hợp tác SAVICO"
       },
       "introTitle": "Giới thiệu doanh nghiệp",
+      "introTags": {
+        "buildingType": "Loại công trình",
+        "scope": "Phạm vi thi công"
+      },
       "founded": "Thành lập năm {year}",
       "team": "{count} kiến trúc sư & kỹ sư",
       "office": "Văn phòng tại {address}",
