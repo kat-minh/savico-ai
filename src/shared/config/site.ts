@@ -10,24 +10,22 @@ export const siteConfig = {
   // Default theme handed to next-themes.
   defaultTheme: 'system' as const,
   /**
-   * Contact & social channels. Placeholders until SAVICO provides the real
-   * Fanpage / Zalo OA links and hotline (see stakeholder Q&A §3.3.1).
+   * Contact & social channels — hotline, địa chỉ và mạng xã hội thật (sheet góp ý
+   * BuildX, PC11/PC12). Zalo đi theo số hotline.
    */
   contact: {
-    hotline: '1900 0000',
+    hotline: '0934 888 881',
     email: 'hello@savico.ai',
-    zaloUrl: 'https://zalo.me/0000000000',
+    zaloUrl: 'https://zalo.me/0934888881',
     messengerUrl: 'https://m.me/savico'
   },
-  /**
-   * Mạng xã hội hiện ở cột 4 của footer (mục II.2). Placeholder cho tới khi
-   * Bên A gửi link Fanpage / Zalo OA / YouTube / TikTok thật.
-   */
+  /** Mạng xã hội ở cột thương hiệu của footer (sheet góp ý BuildX, PC12). */
   social: {
-    facebookUrl: 'https://facebook.com/savico',
-    zaloOaUrl: 'https://zalo.me/0000000000',
-    youtubeUrl: 'https://youtube.com/@savico',
-    tiktokUrl: 'https://tiktok.com/@savico'
+    facebookUrl: 'https://www.facebook.com/share/19SsMDmzW9/?mibextid=wwXIfr',
+    zaloOaUrl: 'https://zalo.me/0934888881',
+    youtubeUrl: 'https://www.youtube.com/@Savico.construction',
+    tiktokUrl: 'https://www.tiktok.com/@ai.construction_?is_from_webapp=1&sender_device=pc',
+    instagramUrl: 'https://www.instagram.com/aiconstruction01/?utm_source=ig_web_button_share_sheet'
   },
   /**
    * Thông tin pháp lý ở hàng đáy footer (mục II.2). Placeholder — Bên A chốt

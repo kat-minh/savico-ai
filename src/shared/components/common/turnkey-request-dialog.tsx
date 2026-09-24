@@ -7,12 +7,13 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { useAuthStore } from '@/shared/auth'
-import { FieldLabel } from '@/shared/components/common'
+import { ComboboxField, FieldLabel } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { useGetProvinces } from '@/shared/hooks'
 import {
   TURNKEY_NOTE_MAX_LENGTH,
   createTurnkeyRequestSchema,
@@ -44,6 +45,7 @@ export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialo
   const tv = useTranslations('validation')
 
   const user = useAuthStore((s) => s.user)
+  const { provinces, isLoadingProvinces } = useGetProvinces()
 
   const schema = useMemo(
     () =>
@@ -52,6 +54,7 @@ export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialo
         phoneRequired: tv('required'),
         phoneInvalid: tv('phone'),
         emailInvalid: tv('email'),
+        provinceRequired: tv('required'),
         noteMaxLength: tv('maxLength', { max: TURNKEY_NOTE_MAX_LENGTH })
       }),
     [tv]
@@ -59,14 +62,15 @@ export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialo
 
   const form = useForm<TurnkeyRequestFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', phone: '', email: '', note: '' }
+    defaultValues: { name: '', phone: '', email: '', province: '', note: '' }
   })
 
   // Hồ sơ tài khoản về sau lần render đầu (store hydrate từ localStorage), và
   // mỗi lần mở lại phải sạch ghi chú của lần trước.
   const { reset } = form
   useEffect(() => {
-    if (open) reset({ name: user?.name ?? '', phone: user?.phone ?? '', email: user?.email ?? '', note: '' })
+    if (open)
+      reset({ name: user?.name ?? '', phone: user?.phone ?? '', email: user?.email ?? '', province: '', note: '' })
   }, [open, user, reset])
 
   function onSubmit() {
@@ -122,7 +126,7 @@ export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialo
                 name='email'
                 render={({ field }) => (
                   <FormItem>
-                    <FieldLabel htmlFor='turnkey-email' hint={t('turnkeyForm.emailHint')} required>
+                    <FieldLabel htmlFor='turnkey-email' hint={t('turnkeyForm.emailHint')}>
                       {t('turnkeyForm.email')}
                     </FieldLabel>
                     <FormControl>
@@ -133,6 +137,18 @@ export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialo
                 )}
               />
             </div>
+
+            <ComboboxField<TurnkeyRequestFormValues>
+              control={form.control}
+              name='province'
+              label={t('turnkeyForm.province')}
+              placeholder={t('turnkeyForm.provincePlaceholder')}
+              options={provinces.map((province) => ({ value: province.name, label: province.name }))}
+              disabled={isLoadingProvinces}
+              modal
+              isRequired
+              displayError
+            />
 
             <FormField
               control={form.control}

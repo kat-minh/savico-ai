@@ -1,7 +1,7 @@
 'use client'
 
 import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, Blocks, BookOpenCheck, Brush, Clock, Plus, Sofa, X } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, Clock, Plus, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
@@ -15,13 +15,6 @@ import { handbookTopicIcon } from '@/shared/lib/handbook-icons'
 import { useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, countArticlesByTopic } from '../services/handbook.service'
 import type { HandbookStage, HandbookStageId } from '../types/handbook.types'
-
-/** Biểu tượng tròn của từng giai đoạn trên thẻ (Hình 9). */
-const STAGE_ICON: Record<HandbookStageId, typeof Blocks> = {
-  structure: Blocks,
-  finishing: Brush,
-  interior: Sofa
-}
 
 /** Biểu tượng của một Nhóm cẩm nang — admin chọn trong bộ icon dùng chung (HandbookStepManagement §4). */
 function TopicIcon({ icon }: { icon?: string }) {
@@ -1085,7 +1078,6 @@ export function FoundationBlock() {
         <div ref={stepsRef} className='grid gap-4 lg:grid-cols-3' style={{ marginBlockEnd: 0 }}>
           {stages?.map((stage) => {
             const open = stage.id === openStage
-            const Icon = STAGE_ICON[stage.id]
             const stageArticle =
               articles?.find((article) => article.stage === stage.id) ??
               articles?.find((article) => stage.topics.some((topic) => topic.id === article.topicId))
@@ -1108,13 +1100,8 @@ export function FoundationBlock() {
                   sizes='160px'
                 />
 
+                {/* Góp ý BuildX: bỏ cột biểu tượng tròn — chữ bắt đầu ngay cạnh ảnh. */}
                 <div className='flex min-w-0 flex-1 items-start gap-3 p-3 pr-12'>
-                  <span
-                    data-step-icon
-                    className='bg-primary/10 text-primary mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full transition-[filter] duration-200'
-                  >
-                    <Icon className='size-5' />
-                  </span>
                   <div className='min-w-0 space-y-1'>
                     <p data-step-reveal='label' className='text-muted-foreground text-xs'>
                       {t('stepLabel', { order: stage.order })}

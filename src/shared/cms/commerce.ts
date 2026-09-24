@@ -17,7 +17,7 @@ export const RECEIVING_ACCOUNT = {
   bankName: 'Vietcombank',
   bankCode: 'VCB',
   accountNumber: '1028 6688 999',
-  accountName: 'CÔNG TY CỔ PHẦN SAVICO'
+  accountName: 'CÔNG TY CỔ PHẦN BUILDX'
 } as const
 
 /** Nội dung chuyển khoản = mã đơn bỏ gạch ngang (`SVC-26001` → `SVC26001`). */
@@ -34,7 +34,7 @@ export function transferInfoFor(orderId: string, amount: number): CmsTransferInf
     content,
     // Chuỗi QR mô phỏng: đủ thông tin để quét ra nội dung đúng khi soi bằng mắt,
     // không phải chuẩn VietQR thật.
-    qrPayload: `SAVICO|${RECEIVING_ACCOUNT.bankCode}|${RECEIVING_ACCOUNT.accountNumber.replace(/\s/g, '')}|${amount}|${content}`
+    qrPayload: `BuildX|${RECEIVING_ACCOUNT.bankCode}|${RECEIVING_ACCOUNT.accountNumber.replace(/\s/g, '')}|${amount}|${content}`
   }
 }
 

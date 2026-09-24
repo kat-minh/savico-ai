@@ -210,7 +210,7 @@ export function DossierReady({
       data-files-entering={filesEntering}
       data-m09-leaving={leaving}
       style={entranceStyle}
-      className='mx-auto w-full max-w-6xl space-y-5 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-8 lg:px-8'
     >
       <header className='space-y-3 text-center'>
         <motion.span

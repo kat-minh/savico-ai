@@ -9,8 +9,11 @@ import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 
 interface ConsultButtonProps {
-  /** `solid` là nút chính ở trang chi tiết mẫu; `link` là liên kết ở trang bài viết. */
-  variant?: 'solid' | 'link'
+  /**
+   * `solid` là nút chính ở trang chi tiết mẫu; `link` là liên kết chữ; `pill` là
+   * nút tròn ở cột phải trang bài viết (góp ý BuildX).
+   */
+  variant?: 'solid' | 'link' | 'pill'
   className?: string
   templateId?: string
   pulse?: boolean
@@ -33,6 +36,17 @@ export function ConsultButton({
 }: ConsultButtonProps) {
   const t = useTranslations('handbook.consult')
   const href = templateId ? `${ROUTES.CONSULT}?template=${encodeURIComponent(templateId)}` : ROUTES.CONSULT
+
+  if (variant === 'pill') {
+    return (
+      <Button asChild size='lg' data-consult-cta className={cn('rounded-full px-6', className)}>
+        <Link href={href}>
+          <CalendarClock className='size-4' />
+          {t('cta')}
+        </Link>
+      </Button>
+    )
+  }
 
   if (variant === 'link') {
     return (

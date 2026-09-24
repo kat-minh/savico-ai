@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/shared/components/ui/button'
+import { ResumeProjectLabel } from './resume-project-label'
 
 export interface HomeCtaResumeProject {
   id: string
@@ -78,8 +79,8 @@ export function HomeCta({ onCreateProject, resumeProject, skipShine }: HomeCtaPr
               asChild
               className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8 max-sm:h-9 max-sm:px-3 max-sm:text-xs max-sm:has-[>svg]:px-3'
             >
-              <Link href={resumeProject.href}>
-                {t('resumeAction')}
+              <Link href={resumeProject.href} title={`${t('resumeAction')} ${resumeProject.name}`}>
+                <ResumeProjectLabel label={t('resumeAction')} name={resumeProject.name} />
                 <ArrowRight className='size-4' />
               </Link>
             </Button>

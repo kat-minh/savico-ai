@@ -31,7 +31,7 @@ export function CheckoutHeader() {
         </Link>
 
         {/* Hình S03: "Bạn cần hỗ trợ?" là CHỮ THƯỜNG (không bấm được), nút viền
-            "Liên hệ SAVI" đứng ngay sau mới là chỗ bấm gọi hotline. */}
+            "Liên hệ BuildX" đứng ngay sau mới là chỗ bấm gọi hotline. */}
         <div className='flex items-center gap-3'>
           <span className='text-muted-foreground flex items-center gap-2 text-sm'>
             <Headphones className='text-primary size-5' />

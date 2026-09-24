@@ -62,7 +62,7 @@ export function TemplateLookupExhaustedDialog({
       <DialogContent
         showCloseButton={false}
         data-lookup-exhausted-dialog
-        className='h-[min(590px,calc(100dvh-24px))] max-h-[calc(100dvh-24px)] w-[min(1080px,calc(100vw-24px))] max-w-[1080px] gap-0 overflow-hidden rounded-[24px] border-0 bg-[#075230] p-0 text-white shadow-2xl sm:max-w-[1080px] max-[899px]:inset-x-0 max-[899px]:bottom-0 max-[899px]:top-auto max-[899px]:flex max-[899px]:h-[90dvh] max-[899px]:max-h-[90dvh] max-[899px]:w-full max-[899px]:max-w-full max-[899px]:translate-x-0 max-[899px]:translate-y-0 max-[899px]:flex-col max-[899px]:rounded-b-none max-[899px]:rounded-t-[22px]'
+        className='h-[min(590px,calc(100dvh-24px))] max-h-[calc(100dvh-24px)] w-[min(1080px,calc(100vw-24px))] max-w-[1080px] gap-0 overflow-hidden rounded-[24px] border-0 bg-primary-strong p-0 text-white shadow-2xl sm:max-w-[1080px] max-[899px]:inset-x-0 max-[899px]:bottom-0 max-[899px]:top-auto max-[899px]:flex max-[899px]:h-[90dvh] max-[899px]:max-h-[90dvh] max-[899px]:w-full max-[899px]:max-w-full max-[899px]:translate-x-0 max-[899px]:translate-y-0 max-[899px]:flex-col max-[899px]:rounded-b-none max-[899px]:rounded-t-[22px]'
       >
         <div className='relative isolate h-full min-h-0 overflow-hidden max-[899px]:flex max-[899px]:flex-1 max-[899px]:flex-col'>
           {image ? (
@@ -77,7 +77,7 @@ export function TemplateLookupExhaustedDialog({
           ) : null}
           <div
             aria-hidden
-            className='absolute inset-0 -z-10 bg-[linear-gradient(90deg,#075230_0%,#075230_37%,rgba(7,82,48,.97)_48%,rgba(7,82,48,.74)_60%,rgba(7,82,48,.34)_76%,rgba(7,82,48,.10)_100%)] max-[899px]:bg-[linear-gradient(180deg,rgba(7,82,48,.08)_0%,rgba(7,82,48,.72)_140px,#075230_220px,#075230_100%)]'
+            className='absolute inset-0 -z-10 bg-[linear-gradient(90deg,var(--primary-strong)_0%,var(--primary-strong)_37%,rgba(42,117,63,.97)_48%,rgba(42,117,63,.74)_60%,rgba(42,117,63,.34)_76%,rgba(42,117,63,.10)_100%)] max-[899px]:bg-[linear-gradient(180deg,rgba(42,117,63,.08)_0%,rgba(42,117,63,.72)_140px,var(--primary-strong)_220px,var(--primary-strong)_100%)]'
           />
 
           <div className='relative flex h-full min-h-0 flex-col px-12 py-10 max-[899px]:flex-1 max-[899px]:overflow-y-auto max-[899px]:px-5 max-[899px]:pt-[178px] max-[899px]:pb-5'>
@@ -146,7 +146,7 @@ export function TemplateLookupExhaustedDialog({
               <Link
                 href={ROUTES.PLANS}
                 onClick={openPlans}
-                className='group/button inline-flex h-[58px] items-center justify-center gap-2.5 rounded-[14px] bg-[#169b53] px-5 text-[15px] font-bold text-white shadow-[0_8px_20px_rgba(0,0,0,.14)] transition-[background-color,filter] duration-150 hover:bg-[#179f56] hover:brightness-[1.015] active:bg-[#158f4d] max-[899px]:h-[56px] max-[899px]:rounded-[12px] max-[899px]:text-[14px]'
+                className='group/button inline-flex h-[58px] items-center justify-center gap-2.5 rounded-[14px] bg-primary-strong px-5 text-[15px] font-bold text-white shadow-[0_8px_20px_rgba(0,0,0,.14)] transition-[background-color,filter] duration-150 hover:bg-primary-strong hover:brightness-[1.015] active:bg-primary-strong max-[899px]:h-[56px] max-[899px]:rounded-[12px] max-[899px]:text-[14px]'
               >
                 <Crown className='size-5 shrink-0 max-[899px]:size-4.5' />
                 <span>{t('more')}</span>
@@ -178,7 +178,7 @@ export function TemplateLookupExhaustedDialog({
               initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: reduceMotion ? 0 : 0.24, delay: reduceMotion ? 0 : 0.2 }}
-              className='mt-4 flex items-center justify-between gap-5 text-[11.5px] leading-relaxed text-white/68 max-[899px]:sticky max-[899px]:bottom-0 max-[899px]:z-20 max-[899px]:-mx-5 max-[899px]:bg-[#075230] max-[899px]:px-5 max-[899px]:pt-3 max-[899px]:pb-1'
+              className='mt-4 flex items-center justify-between gap-5 text-[11.5px] leading-relaxed text-white/68 max-[899px]:sticky max-[899px]:bottom-0 max-[899px]:z-20 max-[899px]:-mx-5 max-[899px]:bg-primary-strong max-[899px]:px-5 max-[899px]:pt-3 max-[899px]:pb-1'
             >
               <p className='max-w-[820px]'>{period === 'month' ? t('footnoteMonth') : t('footnoteDay')}</p>
               <button

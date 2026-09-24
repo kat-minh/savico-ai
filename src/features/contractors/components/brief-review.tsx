@@ -139,7 +139,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
 
   if (isPending || !brief) {
     return (
-      <div className='mx-auto w-full max-w-6xl px-4 py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-8 lg:px-8'>
         <Skeleton className='h-[32rem] rounded-2xl' />
       </div>
     )
@@ -163,7 +163,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
       initial={reduceMotion ? false : { opacity: 0, x: 32 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-      className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'
     >
       {/* Hình S11: link quay lại màu XANH, và ngay cạnh nó là viên nhãn
           "HỒ SƠ TỰ TẠO" — bản trước không có viên nhãn này. */}

@@ -1,4 +1,3 @@
-import { BUILDING_IMAGE, TOPIC_IMAGE } from '@/shared/lib/imagery'
 import type {
   CmsSupervisionStageDef,
   CmsGift,
@@ -17,19 +16,10 @@ import type {
  * không hết hạn, nên `periodDays` là 0 — không có chu kỳ gia hạn.
  */
 /* ===========================================================================
- * CHỖ CHỜ ASSET CỦA KHÁCH — Hình S01 / S02
+ * ẢNH BA THẺ GÓI — theo sheet góp ý BuildX (tab "Hình ảnh website", hình 01–03),
+ * đặt ở `public/images/plans/`: basic.webp · plus.webp · pro.webp. Ảnh quà tặng
+ * (`gift.imageUrl`) vẫn chờ khách gửi.
  *
- * Bản mô tả dùng 3 HÌNH MINH HOẠ 3D nền trắng cho ba thẻ gói (BASIC: bản vẽ
- * trên tablet · PLUS: cụm nhà so sánh · PRO: biệt thự kèm khiên) và 1 ảnh hộp
- * quà cho khối quà tặng. Ảnh trong file mô tả chỉ ~200px nên không dùng lại
- * được — đang tạm dùng ảnh chụp.
- *
- * Khi khách gửi file: bỏ vào `public/images/plans/` rồi thay đúng 4 dòng dưới
- * đây, KHÔNG cần sửa component:
- *   basic.imageUrl   → '/images/plans/basic.png'
- *   advanced.imageUrl→ '/images/plans/plus.png'
- *   pro.imageUrl     → '/images/plans/pro.png'
- *   pro.gift.imageUrl→ '/images/plans/gift.png'   (thêm dòng này vào khối `gift`)
  * Tỉ lệ khung ảnh thẻ là 16:10; khung ảnh quà là ô vuông 56px.
  * ======================================================================== */
 
@@ -75,7 +65,7 @@ export const PLANS_SEED: SubscriptionPlan[] = [
     designCredits: 3,
     libraryCredits: 20,
     fitLine: 'Phù hợp khi bạn đã khá rõ nhu cầu và muốn bắt đầu nhanh.',
-    imageUrl: TOPIC_IMAGE.blueprint,
+    imageUrl: '/images/plans/basic.webp',
     ctaLabel: 'Chọn gói BASIC',
     status: 'selling',
     benefits: benefits(
@@ -100,7 +90,7 @@ export const PLANS_SEED: SubscriptionPlan[] = [
     designCredits: 10,
     libraryCredits: 50,
     fitLine: 'Phù hợp khi bạn muốn thử và so sánh nhiều phương án trước khi chốt.',
-    imageUrl: BUILDING_IMAGE.townhouse,
+    imageUrl: '/images/plans/plus.webp',
     ctaLabel: 'Chọn gói PLUS',
     status: 'selling',
     benefits: benefits(
@@ -124,7 +114,7 @@ export const PLANS_SEED: SubscriptionPlan[] = [
     designCredits: 20,
     libraryCredits: 100,
     fitLine: 'Phù hợp khi bạn muốn tối ưu ngân sách và vật liệu trước khi thi công.',
-    imageUrl: BUILDING_IMAGE.villa,
+    imageUrl: '/images/plans/pro.webp',
     ctaLabel: 'Chọn gói PRO',
     status: 'selling',
     benefits: benefits(
@@ -145,7 +135,8 @@ export const PLANS_SEED: SubscriptionPlan[] = [
     ),
     highlights: ['designCredits', 'interiorEstimate', 'render3d', 'exportDossier', 'advisory'],
     giftId: 'gift-sanitary',
-    giftConditions: 'Áp dụng khi khách hàng ký hợp đồng thi công trọn gói cùng SVC và đáp ứng điều kiện chương trình.'
+    giftConditions:
+      'Áp dụng khi khách hàng ký hợp đồng thi công trọn gói cùng BuildX và đáp ứng điều kiện chương trình.'
   }
 ]
 
@@ -160,7 +151,8 @@ export const GIFTS_SEED: CmsGift[] = [
     description: 'Trọn bộ thiết bị vệ sinh nhập khẩu châu Âu cho một căn nhà.',
     value: 100_000_000,
     imageUrl: '',
-    extraOffer: 'Phí gói 3.990.000đ sẽ được khấu trừ vào giá trị hợp đồng khi ký hợp đồng thi công trọn gói cùng SVC.',
+    extraOffer:
+      'Phí gói 3.990.000đ sẽ được khấu trừ vào giá trị hợp đồng khi ký hợp đồng thi công trọn gói cùng BuildX.',
     status: 'active'
   }
 ]
@@ -178,13 +170,13 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'self',
     tier: 'self',
-    name: 'Tự quản lý',
+    name: 'TỰ QUẢN LÝ',
     price: 0,
     durationMonths: 6,
     inspections: null,
     fitLine: 'Phù hợp khi bạn có kinh nghiệm hoặc có người nhà theo sát công trình.',
     benefits: [
-      'Lưu toàn bộ hồ sơ dự án trên SAVICO',
+      'Lưu toàn bộ hồ sơ dự án trên BuildX',
       'Xem lại thiết kế và dự toán đã lập',
       'Tự cập nhật tiến độ 6 giai đoạn',
       'Nâng cấp lên gói giám sát bất kỳ lúc nào'
@@ -193,7 +185,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'check',
     tier: 'check',
-    name: 'SVC CHECK',
+    name: 'AN TÂM',
     price: 8_900_000,
     durationMonths: 6,
     inspections: 6,
@@ -201,7 +193,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
     benefits: [
       'Bảng điều khiển 6 giai đoạn, timeline và % tiến độ',
       'Kỹ sư kiểm tra thực tế tại các mốc chính',
-      'Kiểm tra đấm mốc ẩm, móng thấm, hoàn thiện',
+      'Kiểm tra chống ẩm, chống thấm móng và hoàn thiện',
       'Đối chiếu vật liệu theo từng lần kiểm tra',
       'Báo cáo sau mỗi lần kiểm tra',
       'Nghiệm thu và bàn giao theo mốc chính'
@@ -210,14 +202,14 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'control',
     tier: 'control',
-    name: 'SVC CONTROL',
+    name: 'TOÀN DIỆN',
     price: 18_900_000,
     durationMonths: 6,
     inspections: 12,
     recommended: true,
-    fitLine: 'Phù hợp khi bạn ít thời gian hoặc muốn SAVICO theo sát cả quá trình thi công.',
+    fitLine: 'Phù hợp khi bạn ít thời gian hoặc muốn BuildX theo sát cả quá trình thi công.',
     benefits: [
-      'Bao gồm toàn bộ quyền lợi gói SVC CHECK',
+      'Bao gồm toàn bộ quyền lợi gói AN TÂM',
       'Kiểm tra phần thô theo tất cả các mốc',
       'Đối chiếu vật liệu thực tế ở mọi lần kiểm tra',
       'Nghiệm thu theo từng giai đoạn',

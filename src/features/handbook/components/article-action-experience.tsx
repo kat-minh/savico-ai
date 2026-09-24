@@ -90,10 +90,10 @@ export function ArticleCompactCta({ article, onCreateProject }: ArticleActionPro
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.35 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className='border-primary/15 bg-[#f4faf6] rounded-[14px] border px-5 py-5 sm:px-6'
+      className='border-primary/15 bg-accent rounded-[14px] border px-5 py-5 sm:px-6'
     >
       <div>
-        <h3 className='text-[#0b663f] text-[18px] font-extrabold tracking-[-0.015em]'>{t('title')}</h3>
+        <h3 className='text-primary-strong text-[18px] font-extrabold tracking-[-0.015em]'>{t('title')}</h3>
         <p className='mt-1 text-[13px] leading-relaxed text-[#737c77]'>{t('subtitle')}</p>
       </div>
       <div className='mt-3'>
@@ -183,11 +183,11 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.18 }}
         transition={{ duration: reduceMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
-        className='border-primary/20 overflow-hidden border-t bg-[#eef8f2]'
+        className='border-primary/20 overflow-hidden border-t bg-accent'
       >
         <div className='grid min-h-[262px] min-[900px]:grid-cols-[minmax(0,1fr)_330px]'>
           <div className='flex flex-col justify-center px-7 py-7 sm:px-8'>
-            <h2 className='text-[#0b663f] text-[clamp(1.35rem,2.1vw,1.72rem)] font-extrabold tracking-[-0.025em]'>
+            <h2 className='text-primary-strong text-[clamp(1.35rem,2.1vw,1.72rem)] font-extrabold tracking-[-0.025em]'>
               {t('end.title')}
             </h2>
             <p className='mt-2 text-[14px] leading-relaxed text-[#737c77]'>{t('end.subtitle')}</p>
@@ -195,7 +195,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
             <ul className='mt-4 space-y-2.5'>
               {[t('end.p1'), t('end.p2'), t('end.p3')].map((item) => (
                 <li key={item} className='flex items-center gap-2.5 text-[14px] text-[#465049]'>
-                  <span className='flex size-[22px] items-center justify-center rounded-full bg-[#0b663f] text-white'>
+                  <span className='flex size-[22px] items-center justify-center rounded-full bg-primary-strong text-white'>
                     <Check className='size-3' strokeWidth={3} />
                   </span>
                   {item}
@@ -216,15 +216,15 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               className='absolute right-0 top-[86px] bottom-0 h-auto w-[82%] rounded-none'
               imageClassName='object-cover object-center'
             />
-            <div className='absolute top-[86px] right-0 bottom-0 w-[82%] bg-gradient-to-r from-[#eef8f2] via-transparent to-transparent' />
+            <div className='absolute top-[86px] right-0 bottom-0 w-[82%] bg-gradient-to-r from-accent via-transparent to-transparent' />
 
             <div className='absolute top-7 left-0 z-10 flex flex-col gap-2.5'>
               {[t('end.tag1'), t('end.tag2'), t('end.tag3')].map((tag) => (
                 <span
                   key={tag}
-                  className='flex min-w-[142px] items-center gap-2 rounded-full border border-[#b8dec8] bg-white/96 px-3 py-2 text-[12px] font-bold text-[#465049] shadow-[0_7px_18px_rgba(8,82,51,.1)] backdrop-blur'
+                  className='flex min-w-[142px] items-center gap-2 rounded-full border border-accent bg-white/96 px-3 py-2 text-[12px] font-bold text-[#465049] shadow-[0_7px_18px_rgba(42,117,63,.1)] backdrop-blur'
                 >
-                  <span className='flex size-[20px] shrink-0 items-center justify-center rounded-full bg-[#159453] text-white'>
+                  <span className='flex size-[20px] shrink-0 items-center justify-center rounded-full bg-primary-strong text-white'>
                     <Check className='size-3' strokeWidth={3} />
                   </span>
                   {tag}
@@ -232,7 +232,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               ))}
             </div>
 
-            <div className='absolute left-0 bottom-5 z-10 flex max-w-[205px] items-start gap-1 text-[#0b663f]'>
+            <div className='absolute left-0 bottom-5 z-10 flex max-w-[205px] items-start gap-1 text-primary-strong'>
               <span className='font-[cursive] text-[20px] leading-[1.05] italic'>{t('end.handwritten')}</span>
               <MoveUpRight className='mt-[-10px] size-7 shrink-0' strokeWidth={2} />
             </div>
@@ -252,7 +252,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               transition={{ duration: reduceMotion ? 0 : 0.26, ease: [0.22, 1, 0.36, 1] }}
               className='absolute top-5 left-6 hidden origin-top-left min-[900px]:block'
             >
-              <Logo className='origin-top-left scale-[0.92]' tagline={t('popup.brandTagline')} />
+              <Logo className='origin-top-left scale-[0.92]' />
             </motion.div>
 
             <motion.div
@@ -393,10 +393,10 @@ function ActionButtons({ article, onCreateProject, compact = false }: ArticleAct
         whileTap={reduceMotion ? undefined : { y: 0, scale: 0.995 }}
         transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          'inline-flex min-w-0 items-center justify-center gap-2 bg-[#07643e] font-bold whitespace-nowrap text-white transition-[background-color,box-shadow] duration-200 ease-out will-change-transform hover:bg-[#0a6d45]',
+          'inline-flex min-w-0 items-center justify-center gap-2 bg-primary-strong font-bold whitespace-nowrap text-white transition-[background-color,box-shadow] duration-200 ease-out will-change-transform hover:bg-primary-strong',
           compact
-            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] shadow-[0_5px_12px_rgba(7,100,62,.14)] hover:shadow-[0_8px_16px_rgba(7,100,62,.18)] max-[899px]:w-full'
-            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px] shadow-[0_8px_18px_rgba(7,100,62,.18)] hover:shadow-[0_11px_22px_rgba(7,100,62,.2)]'
+            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] shadow-[0_5px_12px_rgba(42,117,63,.14)] hover:shadow-[0_8px_16px_rgba(42,117,63,.18)] max-[899px]:w-full'
+            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px] shadow-[0_8px_18px_rgba(42,117,63,.18)] hover:shadow-[0_11px_22px_rgba(42,117,63,.2)]'
         )}
       >
         {t('create')}
@@ -406,7 +406,7 @@ function ActionButtons({ article, onCreateProject, compact = false }: ArticleAct
         href={ROUTES.CONSULT}
         onClick={completeFromPage}
         className={cn(
-          'inline-flex min-w-0 items-center justify-center border border-[#c8d8ce] bg-white font-semibold whitespace-nowrap text-[#28583e] transition-[background-color,border-color,box-shadow] duration-180 ease-out hover:border-[#b6ccbe] hover:bg-[#f4f8f5] hover:shadow-[0_5px_14px_rgba(8,82,51,.065)]',
+          'inline-flex min-w-0 items-center justify-center border border-primary/25 bg-white font-semibold whitespace-nowrap text-primary-strong transition-[background-color,border-color,box-shadow] duration-180 ease-out hover:border-primary/40 hover:bg-accent hover:shadow-[0_5px_14px_rgba(42,117,63,.065)]',
           compact
             ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] max-[899px]:w-full'
             : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px]'
@@ -418,7 +418,7 @@ function ActionButtons({ article, onCreateProject, compact = false }: ArticleAct
         href={`${ROUTES.CONSULT}?type=legal`}
         onClick={completeFromPage}
         className={cn(
-          'inline-flex min-w-0 items-center justify-center border border-[#c8d8ce] bg-white font-semibold whitespace-nowrap text-[#28583e] transition-[background-color,border-color,box-shadow] duration-180 ease-out hover:border-[#b6ccbe] hover:bg-[#f4f8f5] hover:shadow-[0_5px_14px_rgba(8,82,51,.065)]',
+          'inline-flex min-w-0 items-center justify-center border border-primary/25 bg-white font-semibold whitespace-nowrap text-primary-strong transition-[background-color,border-color,box-shadow] duration-180 ease-out hover:border-primary/40 hover:bg-accent hover:shadow-[0_5px_14px_rgba(42,117,63,.065)]',
           compact
             ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] max-[899px]:w-full'
             : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px]'

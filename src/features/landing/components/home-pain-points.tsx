@@ -1,14 +1,12 @@
 'use client'
 
-import { ArrowRight, Clock, Coins, FileSearch, PencilRuler, UserRoundSearch, type LucideIcon } from 'lucide-react'
+import { Clock, Coins, FileSearch, PencilRuler, UserRoundSearch, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { revealEase, ScribbleArrow } from '@/shared/components/common'
-import { scrollToAndFlash } from '@/shared/lib'
 import { cn } from '@/shared/lib/utils'
-import type { HomeJourneyStep } from '../constants/landing.constants'
 import { HOME_PAIN_POINTS, type HomePainPoint } from '../constants/landing.constants'
 
 /** Biểu tượng theo ảnh mockup: tiền · thước-bút · kính lúp tìm người · hồ sơ · đồng hồ. */
@@ -18,19 +16,6 @@ const PAIN_ICON: Record<HomePainPoint, LucideIcon> = {
   contractor: UserRoundSearch,
   dossier: FileSearch,
   supervision: Clock
-}
-
-/**
- * Bấm thẻ → cuộn tới bước giải quyết tương ứng ở dải 5 bước (vùng 05, mục
- * II.2): chi phí & thiết kế đều giải quyết ở bước 02 (Thiết kế & Dự toán),
- * nhà thầu ở bước 04, hồ sơ ở bước 03, giám sát ở bước 05.
- */
-const PAIN_TARGET_STEP: Record<HomePainPoint, HomeJourneyStep> = {
-  budget: 'design',
-  design: 'design',
-  contractor: 'contractor',
-  dossier: 'dossier',
-  supervision: 'build'
 }
 
 const DIM_DELAY = ['delay-0', 'delay-75', 'delay-150', 'delay-200'] as const
@@ -43,8 +28,8 @@ const DIM_DELAY = ['delay-0', 'delay-75', 'delay-150', 'delay-200'] as const
  * phần giới thiệu sản phẩm (hero) và phần bán hàng bên dưới.
  *
  * ★ Thẻ hiện lần lượt trái→phải, icon nhún 1 lần lúc hiện; rê thẻ thì 4 thẻ
- * còn lại mờ đi và lộ dòng "Xem cách SAVICO giải quyết →"; bấm thẻ cuộn tới
- * đúng bước giải quyết ở dải 5 bước. Mobile: cuộn ngang có chấm chỉ vị trí.
+ * còn lại mờ đi. Theo góp ý BuildX: bỏ dòng nhãn đầu khối, bỏ dòng "Xem cách
+ * … giải quyết" và bỏ bấm thẻ cuộn xuống dải 5 bước.
  */
 export function HomePainPoints() {
   const t = useTranslations('landing.painPoints')
@@ -60,16 +45,6 @@ export function HomePainPoints() {
       <div className='mx-auto w-full max-w-[90rem] px-4 pt-12.5 pb-12.5 lg:px-8 lg:py-12'>
         <div className='flex flex-wrap items-end justify-between gap-x-10 gap-y-4'>
           <div className='space-y-2'>
-            {/* Dòng nhãn chỉ hiện từ `lg`: trên mobile khối đầu chỉ còn tiêu đề + mô tả. */}
-            <motion.p
-              initial={{ opacity: 0, y: '35%' }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{ duration: 0.7, ease: revealEase }}
-              className='text-primary-foreground/70 hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'
-            >
-              {t('eyebrow')}
-            </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: '35%' }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -96,7 +71,9 @@ export function HomePainPoints() {
           <motion.div
             initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
             whileInView={{ opacity: 1, clipPath: 'inset(0 0% 0 0)' }}
-            viewport={{ once: true, amount: 0.6 }}
+            // Ngưỡng thấp: nét chữ bị ẩn bằng clip-path, chờ 60% khối lọt màn hình
+            // thì có lúc không bao giờ chạy và ghi chú tàng hình luôn (góp ý BuildX).
+            viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.6, delay: 0.9, ease: revealEase }}
             className='hidden flex-col items-end lg:flex lg:translate-y-2'
           >
@@ -128,8 +105,7 @@ export function HomePainPoints() {
                 transition={{ duration: 0.65, delay: index * 0.12, ease: revealEase }}
                 onMouseEnter={() => setHovered(point)}
                 onMouseLeave={() => setHovered(null)}
-                onClick={() => scrollToAndFlash(`home-journey-step-${PAIN_TARGET_STEP[point]}`)}
-                className='flex cursor-pointer'
+                className='flex'
               >
                 <div
                   className={cn(
@@ -154,17 +130,6 @@ export function HomePainPoints() {
                     <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
                       {t(`items.${point}.description`)}
                     </p>
-                  </div>
-                  <div className='mt-auto hidden min-h-8 items-end justify-center pt-2 sm:flex'>
-                    <span
-                      className={cn(
-                        'text-primary inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
-                        isHovered ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
-                      )}
-                    >
-                      {t('solveHint')}
-                      <ArrowRight className='size-3.5 shrink-0' />
-                    </span>
                   </div>
                 </div>
               </motion.li>

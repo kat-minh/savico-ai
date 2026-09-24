@@ -1,10 +1,14 @@
 'use client'
 
-import { Check } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import type { CSSProperties } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { ArrowLeft, Check } from 'lucide-react'
+import type { CSSProperties, ReactNode } from 'react'
+
+import type { Locale } from '@/i18n/routing'
+import { Link } from '@/i18n/navigation'
 
 import { cn } from '@/shared/lib/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { usePageEntrance } from '@/shared/hooks'
 import { DESIGN_STEPS, STEP_HELP_TOPIC } from '../constants/design.constants'
 import type { DesignStep } from '../types/design.types'
@@ -20,6 +24,15 @@ interface StepProgressProps {
   current: DesignStep
   /** Tiêu đề màn hình hiện phía trên thanh (Hình 04, 07, 08). */
   title?: string
+  /** Dòng phụ dưới tiêu đề — ví dụ địa chỉ · loại nhà · quy mô ở màn kết quả dự toán. */
+  subtitle?: ReactNode
+  /** Liên kết quay lại (ví dụ danh sách dự án) hiện phía trên tiêu đề. */
+  back?: { href: string; label: string }
+  /**
+   * Ngày nấc hiện tại xong (ISO). Có thì dòng trạng thái ghi "Hoàn thành ngày …"
+   * thay cho "Vừa hoàn thành" (góp ý BuildX: dự toán làm từ nhiều ngày trước).
+   */
+  currentDoneAt?: string
   /**
    * Nấc đang đứng đã xong việc — nấc đó chuyển sang tích xanh kèm dòng "Vừa
    * hoàn thành" (mục IV.5: màn kết quả dự toán, Hình 08).
@@ -37,11 +50,15 @@ interface StepProgressProps {
 export function StepProgress({
   current,
   title,
+  subtitle,
+  back,
+  currentDoneAt,
   currentDone = false,
   entranceKey,
   animateEntrance = true
 }: StepProgressProps) {
   const t = useTranslations('design.steps')
+  const locale = useLocale() as Locale
   const { rootRef, entranceState, entranceStyle } = usePageEntrance<HTMLElement>(
     entranceKey ?? `design.step.${current}`,
     { enabled: animateEntrance }
@@ -57,11 +74,29 @@ export function StepProgress({
           style={entranceStyle}
           // Dưới `lg`: ba khoảng hở của màn Bước 1 bằng nhau = 24px (khoảng phía trên tiêu đề, `pt-6`):
           // header → tiêu đề 24 · tiêu đề → stepper 24 (`pb-2` + `py-4` của nav) · stepper → nội dung 24.
-          className='mx-auto w-full max-w-6xl px-4 pt-6 pb-2 lg:px-8 lg:pb-0'
+          className='mx-auto w-full max-w-[90rem] px-4 pt-6 pb-2 lg:px-8 lg:pb-0'
         >
+          {back ? (
+            <Link
+              href={back.href}
+              className='text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1.5 text-sm transition-colors'
+            >
+              <ArrowLeft className='size-4' />
+              {back.label}
+            </Link>
+          ) : null}
           <h1 data-entrance-step='0' data-entrance-order='1' className='text-2xl font-semibold tracking-tight'>
             {title}
           </h1>
+          {subtitle ? (
+            <p
+              data-entrance-step='0'
+              data-entrance-order='1'
+              className='text-muted-foreground mt-1 text-sm text-pretty'
+            >
+              {subtitle}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
@@ -76,7 +111,7 @@ export function StepProgress({
         aria-label={t('label')}
         className='bg-background/85 backdrop-blur-xl'
       >
-        <div className='mx-auto w-full max-w-6xl px-4 py-4 lg:px-8'>
+        <div className='mx-auto w-full max-w-[90rem] px-4 py-4 lg:px-8'>
           {/*
            * Bố cục theo thanh tiến trình trong bản mô tả (Hình S03/S04): vòng
            * tròn nằm TRÊN, nhãn nằm DƯỚI và canh giữa theo vòng tròn, đường nối
@@ -150,7 +185,11 @@ export function StepProgress({
                       </span>
                       <span className='text-muted-foreground block truncate text-xs'>
                         {step === current && currentDone
-                          ? t('status.justDone')
+                          ? currentDoneAt
+                            ? t('status.doneOn', {
+                                date: formatDisplayDate(currentDoneAt, locale)
+                              })
+                            : t('status.justDone')
                           : t(done ? 'status.done' : active ? 'status.current' : 'status.pending')}
                       </span>
                     </span>

@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { XIcon } from 'lucide-react'
 import { Dialog as SheetPrimitive } from 'radix-ui'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/shared/lib/utils'
 
@@ -68,7 +69,7 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close className='ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none'>
             <XIcon className='size-4' />
-            <span className='sr-only'>Close</span>
+            <CloseLabel />
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>
@@ -105,3 +106,9 @@ function SheetDescription({ className, ...props }: React.ComponentProps<typeof S
 }
 
 export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription }
+
+/** Nhãn đọc màn hình của nút đóng — theo ngôn ngữ trang (trước đây cứng chữ "Close"). */
+function CloseLabel() {
+  const t = useTranslations('common')
+  return <span className='sr-only'>{t('close')}</span>
+}

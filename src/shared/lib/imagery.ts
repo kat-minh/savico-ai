@@ -226,10 +226,15 @@ export const INTERIOR_RENDER = {
 export const HOME_IMAGE = {
   hero: '/images/placeholder-hero.svg',
   /**
-   * Ảnh minh hoạ cạnh khối "Gói dịch vụ" — ảnh TẠM, nền trong suốt vì nó nằm
-   * trên dải xanh đậm: một khung ảnh xám đặc đặt ở đó nhìn như lỗi giao diện.
+   * Ảnh đại diện sáu thẻ "Khách hàng nói về BuildX". Để TRỐNG có chủ đích: chưa
+   * có ảnh thật thì thẻ hiện chữ cái đầu, admin dán URL là ảnh thay vào.
    */
-  services: '/images/placeholder-illustration.svg',
+  testimonialTuan: '',
+  testimonialHang: '',
+  testimonialBao: '',
+  testimonialNgocAnh: '',
+  testimonialNam: '',
+  testimonialVy: '',
   /** Bốn thẻ "Hồ sơ mẫu" — mỗi thẻ một khóa để admin thay từng ảnh. */
   dossierTownhouse: '/images/placeholder-hero.svg',
   dossierVilla: '/images/placeholder-hero.svg',

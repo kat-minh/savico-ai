@@ -8,7 +8,6 @@ import {
   LoaderCircle,
   CheckCircle2,
   Building2,
-  CalendarClock,
   Check,
   Clock,
   FileText,
@@ -108,7 +107,7 @@ function PlanPricingContent() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[80rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
     >
       {/* Hình S01: tiêu đề IN HOA cỡ lớn, chữ cuối (tên thương hiệu) tô cam,
           hai bên có hai chiếc lá. Tách chữ cuối ngay tại đây để admin đổi tiêu
@@ -158,7 +157,8 @@ function PlanPricingContent() {
       {plans ? <ComparisonTable plans={plans} /> : null}
       {plans ? <ValueTable /> : null}
 
-      {/* Hình S01: bốn ghi chú nằm trong khối nền nhạt, còn dòng phạm vi hồ sơ
+      {/* Góp ý BuildX: bỏ ghi chú "Lượt không hết hạn", còn ĐÚNG 3 ghi chú trên một hàng.
+          Hình S01: các ghi chú nằm trong khối nền nhạt, còn dòng phạm vi hồ sơ
           đứng riêng bên dưới khối và căn giữa.
 
           Mỗi ghi chú có ICON RIÊNG trong một vòng tròn nền xanh nhạt, đường kính
@@ -171,11 +171,10 @@ function PlanPricingContent() {
         }}
         viewport={{ once: true, amount: 0.18 }}
       >
-        <ul className='bg-accent/30 text-muted-foreground grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-xs sm:grid-cols-2 lg:grid-cols-3'>
+        <ul className='bg-accent/30 text-muted-foreground grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-xs md:grid-cols-3'>
           {(
             [
               { key: 'payment', icon: QrCode },
-              { key: 'credits', icon: CalendarClock },
               { key: 'estimate', icon: ShieldCheck },
               { key: 'gift', icon: Building2 }
             ] as const

@@ -140,7 +140,7 @@ export const CUSTOMERS_SEED: CmsCustomer[] = [
   },
   {
     id: 'usr-0010',
-    name: 'Quản trị SAVICO',
+    name: 'Quản trị BuildX',
     email: 'admin@savico.ai',
     phone: '1900 0000',
     role: 'admin',

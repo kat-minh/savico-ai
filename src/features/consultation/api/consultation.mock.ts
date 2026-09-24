@@ -1,4 +1,4 @@
-import { cmsDb, consultSlotState } from '@/shared/cms'
+import { cmsDb, isSlotClosed } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import { AVAILABILITY_DAYS, SESSION_TIMES } from '../constants/consultation.constants'
 import type {
@@ -25,18 +25,19 @@ function toDateKey(date: Date): string {
 }
 
 /**
- * Lịch 7 ngày kể từ hôm nay của một KTS (mục VIII.2). Khung "Kín" là khung đã
- * có lịch đặt; khung admin đánh dấu Không tư vấn không cho chọn (ArchitectManagement §5).
+ * Lịch 7 ngày của một KTS (mục VIII.2), BẮT ĐẦU TỪ NGÀY MAI — hôm nay thì các
+ * khung sáng có thể đã qua. Khung đã có người đặt vẫn chọn được (góp ý BuildX: tư
+ * vấn viên gọi lại xác nhận giờ); chỉ khung admin đánh dấu Không tư vấn là khóa
+ * (ArchitectManagement §5).
  */
 function buildAvailability(consultantId: string): ConsultationDay[] {
   const closures = cmsDb.find('consultants', consultantId)?.closures ?? []
-  const bookings = cmsDb.list('bookings')
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
   return Array.from({ length: AVAILABILITY_DAYS }, (_, dayOffset) => {
     const date = new Date(today)
-    date.setDate(today.getDate() + dayOffset)
+    date.setDate(today.getDate() + dayOffset + 1)
     const dateKey = toDateKey(date)
 
     const slots: ConsultationSlot[] = (['morning', 'afternoon'] as const).flatMap((session) =>
@@ -44,7 +45,7 @@ function buildAvailability(consultantId: string): ConsultationDay[] {
         id: `${dateKey}-${time}`,
         time,
         session,
-        full: consultSlotState(closures, bookings, consultantId, dateKey, time) !== 'open'
+        full: isSlotClosed(closures, dateKey, time)
       }))
     )
 
@@ -52,7 +53,7 @@ function buildAvailability(consultantId: string): ConsultationDay[] {
   })
 }
 
-/** Lịch đã sinh, giữ trong bộ nhớ tab để slot vừa đặt chuyển "Kín" (mục VIII.3). */
+/** Lịch đã sinh, giữ trong bộ nhớ tab. */
 const availabilityByConsultant = new Map<string, ConsultationDay[]>()
 
 function dateTimeFromNow(hours: number): { date: string; time: string } {
@@ -92,6 +93,59 @@ function historyBooking(
 }
 
 let myHistory: ConsultationHistory | null = null
+
+/**
+ * Mã các lịch hẹn CHÍNH khách này đặt (kho `bookings` chứa cả lịch của khách
+ * khác). Lưu localStorage để tải lại trang vẫn còn — backend thật lọc theo phiên.
+ */
+const MY_BOOKING_IDS_KEY = 'savico.mock.myBookingIds'
+
+function readMyBookingIds(): string[] {
+  try {
+    const raw = window.localStorage.getItem(MY_BOOKING_IDS_KEY)
+    const parsed: unknown = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function rememberMyBooking(id: string) {
+  try {
+    window.localStorage.setItem(MY_BOOKING_IDS_KEY, JSON.stringify([id, ...readMyBookingIds()]))
+  } catch {
+    // Trình duyệt chặn lưu trữ: lịch vẫn nằm trong kho, chỉ không hiện ở lịch sử của khách.
+  }
+}
+
+/** Lịch khách vừa đặt, đọc từ kho nên trạng thái admin đổi (xác nhận/từ chối) hiện ngay. */
+function myStoredBookings(): ConsultationHistoryBooking[] {
+  const ids = new Set(readMyBookingIds())
+
+  return cmsDb
+    .list('bookings')
+    .filter((booking) => ids.has(booking.id))
+    .map((booking) => {
+      const consultant = cmsDb.find('consultants', booking.consultantId)
+      return {
+        id: booking.id,
+        consultantId: booking.consultantId,
+        consultantName: booking.consultantName,
+        specialtyLabel: consultant?.specialties[0]?.label ?? '',
+        yearsExperience: consultant?.yearsExperience ?? 0,
+        date: booking.date,
+        time: booking.time,
+        durationMinutes: 30,
+        ...(booking.note ? { note: booking.note } : {}),
+        status: booking.status === 'rejected' ? 'cancelled' : booking.status
+      }
+    })
+}
+
+function myHistoryWithStored(): ConsultationHistory {
+  const history = structuredClone(myConsultationHistory())
+  return { ...history, bookings: [...myStoredBookings(), ...history.bookings] }
+}
 
 function myConsultationHistory(): ConsultationHistory {
   if (myHistory) return myHistory
@@ -156,9 +210,6 @@ export const mockConsultationApi = {
     await mockDelay(500)
 
     const consultant = cmsDb.find('consultants', payload.consultantId)
-    const day = availabilityOf(payload.consultantId).find((item) => item.date === payload.date)
-    const slot = day?.slots.find((item) => item.time === payload.time)
-    if (slot) slot.full = true
 
     // Mã lịch hẹn nối tiếp số đang có trong kho để không đụng seed.
     const nextNumber = cmsDb.list('bookings').length + 1
@@ -179,25 +230,30 @@ export const mockConsultationApi = {
       // Backend thật lấy tên từ phiên đăng nhập; mock chỉ có số điện thoại.
       customerName: `Khách ${payload.phone.slice(-4)}`
     })
+    rememberMyBooking(booking.id)
 
     return booking
   },
 
   getMyBookings: async (): Promise<ConsultationHistory> => {
     await mockDelay(220)
-    return structuredClone(myConsultationHistory())
+    return myHistoryWithStored()
   },
 
   cancelMyBooking: async (bookingId: string): Promise<ConsultationHistory> => {
     await mockDelay(260)
-    const history = myConsultationHistory()
-    const booking = history.bookings.find((item) => item.id === bookingId)
+    const stored = cmsDb.find('bookings', bookingId)
 
-    if (booking) {
-      booking.status = 'cancelled'
-      booking.cancelledAt = toDateKey(new Date())
+    if (stored && readMyBookingIds().includes(bookingId)) {
+      cmsDb.upsert('bookings', { ...stored, status: 'cancelled' })
+    } else {
+      const booking = myConsultationHistory().bookings.find((item) => item.id === bookingId)
+      if (booking) {
+        booking.status = 'cancelled'
+        booking.cancelledAt = toDateKey(new Date())
+      }
     }
 
-    return structuredClone(history)
+    return myHistoryWithStored()
   }
 }

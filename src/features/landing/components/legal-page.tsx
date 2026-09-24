@@ -11,16 +11,19 @@ interface LegalSection {
 }
 
 /**
- * Renders a legal document (Terms / Privacy).
+ * Renders a legal document (Terms / Privacy / Payment & refund).
  *
  * Nội dung ưu tiên bản admin soạn trong kho `shared/cms` — Bên A gửi bản chính
  * thức trước go-live (Q&A §8.2) nên trang này phải sửa được không cần deploy.
  * Kho rỗng thì rơi về `messages/*.json` như trước, nên bản tiếng Anh vẫn nguyên.
  */
-export function LegalPage({ namespace }: { namespace: 'terms' | 'privacy' }) {
+export function LegalPage({ namespace }: { namespace: 'terms' | 'privacy' | 'payment' }) {
   const t = useTranslations(`legal.${namespace}`)
   const fallbackSections = t.raw('sections') as LegalSection[]
-  const page = useCmsDocument(namespace === 'terms' ? 'termsPage' : 'privacyPage')
+  // "Chính sách thanh toán và hoàn tiền" chưa có tài liệu riêng trong kho CMS — đọc
+  // `messages` (bản chính thức do Bên A gửi sẽ thay trước go-live).
+  const cmsPage = useCmsDocument(namespace === 'terms' ? 'termsPage' : 'privacyPage')
+  const page = namespace === 'payment' ? { title: '', updatedNote: '', intro: '', sections: [] } : cmsPage
 
   const sections = page.sections.length
     ? page.sections.map((section) => ({ title: section.heading, body: section.body }))

@@ -1,6 +1,6 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import {
   useCallback,
@@ -1039,6 +1039,16 @@ export function TemplateLibrary() {
                   className='inset-x-0 flex items-center justify-center gap-2 sm:absolute'
                   aria-label={t('pagination')}
                 >
+                  {/* Góp ý BuildX: số trang + mũi tên trước/sau thay cho chấm tròn không có số. */}
+                  <button
+                    type='button'
+                    onClick={() => changePage(safePage - 1)}
+                    disabled={safePage <= 1}
+                    aria-label={t('prevPage')}
+                    className='hover:bg-accent flex size-8 items-center justify-center rounded-full border transition-colors disabled:pointer-events-none disabled:opacity-40'
+                  >
+                    <ChevronLeft className='size-4' />
+                  </button>
                   {Array.from({ length: totalPages }).map((_, index) => {
                     const target = index + 1
                     const active = target === safePage
@@ -1052,14 +1062,23 @@ export function TemplateLibrary() {
                         aria-current={active ? 'page' : undefined}
                         aria-label={t('goToPage', { page: target })}
                         className={cn(
-                          'h-2.5 cursor-pointer rounded-full transition-[width,background-color,transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
-                          active
-                            ? 'bg-primary w-7 shadow-sm'
-                            : 'bg-muted-foreground/30 hover:bg-muted-foreground/60 w-2.5 hover:scale-110'
+                          'flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none',
+                          active ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-accent text-foreground'
                         )}
-                      />
+                      >
+                        {target}
+                      </button>
                     )
                   })}
+                  <button
+                    type='button'
+                    onClick={() => changePage(safePage + 1)}
+                    disabled={safePage >= totalPages}
+                    aria-label={t('nextPage')}
+                    className='hover:bg-accent flex size-8 items-center justify-center rounded-full border transition-colors disabled:pointer-events-none disabled:opacity-40'
+                  >
+                    <ChevronRight className='size-4' />
+                  </button>
                 </nav>
               ) : null}
             </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeftRight, CircleCheck, Clock, Info, MapPin, Scale, Sparkles, Star, X } from 'lucide-react'
+import { CircleCheck, Clock, Info, MapPin, Scale, Sparkles, Star, X } from 'lucide-react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
@@ -10,7 +10,7 @@ import { useCmsDocument } from '@/shared/cms'
 import { EmptyState, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { CONTRACTOR_PREVIEW_ID, contractorCompareRoute, contractorInvitationsRoute } from '@/shared/constants/routes'
+import { CONTRACTOR_PREVIEW_ID, contractorCompareRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import {
   CONTRACTOR_SORTS,
@@ -364,7 +364,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='mx-auto flex w-[94%] max-w-[88rem] flex-col gap-6 py-8'>
+    <div className='mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-8 lg:px-8'>
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
         initial='hidden'
@@ -419,7 +419,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
             transition={{ duration: reduceMotion ? 0 : 0.4, ease: revealEase }}
             className={cn(
               'sticky top-14 z-30 order-1 transition-shadow duration-300',
-              projectBarStuck && 'shadow-[0_10px_30px_-20px_rgba(24,80,42,0.5)]'
+              projectBarStuck && 'shadow-[0_10px_30px_-20px_rgba(42,117,63,0.5)]'
             )}
           >
             <AnimatePresence mode='wait'>
@@ -432,61 +432,46 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                 <ProjectContextBar
                   brief={brief}
                   condensed={projectBarStuck}
-                  label={t('projectLabel')}
-                  aside={
-                    <div className='flex flex-wrap items-center gap-3'>
-                      <motion.span
-                        title={pillLocked ? t('inviteLimitReached', { max: MAX_INVITATIONS }) : undefined}
-                        initial={reduceMotion ? false : { scale: 0.85, opacity: 0 }}
-                        animate={{
-                          scale: reduceMotion ? 1 : lockShake ? [1, 1.06, 1] : 1,
-                          opacity: 1,
-                          x: reduceMotion ? 0 : lockShake ? [0, -6, 6, -4, 4, 0] : 0
-                        }}
-                        transition={{
-                          // Rung dùng ba keyframe — spring chỉ nhận hai, đưa vào là motion ném
-                          // lỗi và vòng lặp khung hình chết cho cả trang (quay lại sau lời mời thứ 3).
-                          scale:
-                            lockShake && !reduceMotion
-                              ? { duration: 0.45 }
-                              : { type: 'spring', bounce: reduceMotion ? 0 : 0.5, duration: reduceMotion ? 0 : 0.4 },
-                          opacity: { duration: reduceMotion ? 0 : 0.4 },
-                          x: { duration: reduceMotion ? 0 : 0.45 }
-                        }}
-                        className={cn(
-                          'overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                          pillLocked ? 'bg-brand-orange-soft text-brand-orange' : 'bg-accent text-primary-strong'
-                        )}
-                      >
-                        {/* Vừa mời xong quay lại → chỉ CON SỐ lật, từ số cũ sang số
+                  invitedPill={
+                    <motion.span
+                      title={pillLocked ? t('inviteLimitReached', { max: MAX_INVITATIONS }) : undefined}
+                      initial={reduceMotion ? false : { scale: 0.85, opacity: 0 }}
+                      animate={{
+                        scale: reduceMotion ? 1 : lockShake ? [1, 1.06, 1] : 1,
+                        opacity: 1,
+                        x: reduceMotion ? 0 : lockShake ? [0, -6, 6, -4, 4, 0] : 0
+                      }}
+                      transition={{
+                        // Rung dùng ba keyframe — spring chỉ nhận hai, đưa vào là motion ném
+                        // lỗi và vòng lặp khung hình chết cho cả trang (quay lại sau lời mời thứ 3).
+                        scale:
+                          lockShake && !reduceMotion
+                            ? { duration: 0.45 }
+                            : { type: 'spring', bounce: reduceMotion ? 0 : 0.5, duration: reduceMotion ? 0 : 0.4 },
+                        opacity: { duration: reduceMotion ? 0 : 0.4 },
+                        x: { duration: reduceMotion ? 0 : 0.45 }
+                      }}
+                      className={cn(
+                        'overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                        pillLocked ? 'bg-brand-orange-soft text-brand-orange' : 'bg-accent text-primary-strong'
+                      )}
+                    >
+                      {/* Vừa mời xong quay lại → chỉ CON SỐ lật, từ số cũ sang số
                             mới (mục 2; mục 5 của M09) — bản dịch bọc số trong thẻ
                             <n>. Đổi key khi vừa quay lại để nhãn gắn lại ngay ở số
                             cũ, không lật ngược 1→0 trước. Hết lượt 3/3 → đổi cam +
                             rung một lần (mục 8). */}
-                        <span className='whitespace-nowrap'>
-                          <Fragment key={inviteReturned ? 'invite-return' : 'steady'}>
-                            {t.rich('invitedPill', {
-                              used: shownUsed,
-                              max: MAX_INVITATIONS,
-                              left: MAX_INVITATIONS - shownUsed,
-                              n: (chunks) => <FlipValue value={chunksText(chunks)} />
-                            })}
-                          </Fragment>
-                        </span>
-                      </motion.span>
-                      <Link
-                        href={contractorInvitationsRoute(projectId)}
-                        className='text-primary-strong text-sm font-medium underline underline-offset-4'
-                      >
-                        {t('viewInvites')}
-                      </Link>
-                      {/* "Đổi dự án" mở hộp thoại chọn dự án ngay tại chỗ; trước đây nó
-                          ném khách về trang Tài khoản rồi bắt tự tìm đường quay lại. */}
-                      <Button variant='outline' size='sm' onClick={openPicker}>
-                        <ArrowLeftRight className='size-4' />
-                        {t('switchProject')}
-                      </Button>
-                    </div>
+                      <span className='whitespace-nowrap'>
+                        <Fragment key={inviteReturned ? 'invite-return' : 'steady'}>
+                          {t.rich('invitedPill', {
+                            used: shownUsed,
+                            max: MAX_INVITATIONS,
+                            left: MAX_INVITATIONS - shownUsed,
+                            n: (chunks) => <FlipValue value={chunksText(chunks)} />
+                          })}
+                        </Fragment>
+                      </span>
+                    </motion.span>
                   }
                 />
               </motion.div>
@@ -751,7 +736,8 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         </motion.aside>
       </div>
 
-      <ProjectPickerDialog currentProjectId={preview ? undefined : projectId} />
+      {/* Có dự án thì hộp thoại đi kèm thanh dự án; xem thử (chưa có thanh) mới gắn ở đây. */}
+      {preview ? <ProjectPickerDialog /> : null}
     </div>
   )
 }

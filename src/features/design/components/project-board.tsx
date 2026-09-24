@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, FolderPlus, Plus, SearchX } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FolderPlus, SearchX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -13,32 +13,11 @@ import { cn } from '@/shared/lib/utils'
 import { DEFAULT_PROJECT_SORT } from '../constants/design.constants'
 import { useProjects } from '../hooks/use-projects'
 import { countProjects, selectProjects } from '../services/project-list.service'
-import { useDesignStore } from '../store/design.store'
 import type { Project, ProjectSort, ProjectStatus } from '../types/design.types'
 import { ProjectCard } from './project-card'
 import { ProjectFilters } from './project-filters'
 import { DeleteProjectDialog, RenameProjectDialog } from './project-menu-dialogs'
 import { ProjectStatCards } from './project-stat-cards'
-
-/** Ô viền đứt cuối lưới — lối tạo dự án ngay tại chỗ (mục IV.1, Hình 02). */
-function CreateProjectTile({ onClick }: { onClick: () => void }) {
-  const t = useTranslations('design.projects.createTile')
-
-  return (
-    <button
-      type='button'
-      data-create-project-tile
-      onClick={onClick}
-      className='border-primary/35 hover:border-primary hover:bg-accent/30 flex h-full min-h-52 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-6 text-center transition-[background-color,border-color,box-shadow]'
-    >
-      <span className='border-primary/40 text-primary flex size-11 items-center justify-center rounded-full border'>
-        <Plus data-create-tile-plus className='size-5' />
-      </span>
-      <span className='mt-1 text-[15px] font-semibold'>{t('title')}</span>
-      <span className='text-muted-foreground max-w-56 text-xs'>{t('description')}</span>
-    </button>
-  )
-}
 
 /** Phân trang góc phải dưới khối. Dựng bằng Button thay vì primitive
  *  `Pagination` (primitive đó là link-based và hardcode chữ tiếng Anh). */
@@ -107,7 +86,6 @@ function ProjectPagination({
  */
 export function ProjectBoard() {
   const t = useTranslations('design.projects')
-  const openCreateDialog = useDesignStore((s) => s.openCreateDialog)
   const { data: projects, isPending } = useProjects()
 
   const [query, setQuery] = useState('')
@@ -151,21 +129,10 @@ export function ProjectBoard() {
     )
   }
 
-  // Chưa có dự án nào: bỏ hẳn thẻ đếm và bộ lọc, chỉ còn lời mời tạo dự án.
+  // Chưa có dự án nào: bỏ hẳn thẻ đếm và bộ lọc. Không kèm nút — nút "Tạo dự án
+  // mới" duy nhất của trang nằm giữa đầu trang (góp ý BuildX).
   if (list.length === 0) {
-    return (
-      <EmptyState
-        icon={FolderPlus}
-        title={t('empty.title')}
-        description={t('empty.description')}
-        action={
-          <Button onClick={openCreateDialog}>
-            <Plus className='size-4' />
-            {t('empty.action')}
-          </Button>
-        }
-      />
-    )
+    return <EmptyState icon={FolderPlus} title={t('empty.title')} description={t('empty.description')} />
   }
 
   return (
@@ -209,18 +176,6 @@ export function ProjectBoard() {
                       </motion.li>
                     ))}
                   </AnimatePresence>
-                  {/* Ô tạo dự án chỉ đứng cuối trang cuối, không lặp ở mọi trang. */}
-                  {page === pageCount ? (
-                    <motion.li
-                      data-entrance-step='4'
-                      data-entrance-order={items.length}
-                      layout='position'
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                    >
-                      <CreateProjectTile onClick={openCreateDialog} />
-                    </motion.li>
-                  ) : null}
                 </ul>
 
                 <div className='flex flex-wrap items-center justify-between gap-3 pt-1'>

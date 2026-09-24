@@ -34,7 +34,7 @@ export const CUSTOMER_PACKAGES_SEED: CmsCustomerPackage[] = [
     libraryQuota: { granted: 100, held: 0, used: 18 },
     gift: {
       title: 'Bộ thiết bị vệ sinh châu Âu',
-      conditions: 'Áp dụng khi ký hợp đồng thi công trọn gói cùng SAVICO trong thời hạn gói.'
+      conditions: 'Áp dụng khi ký hợp đồng thi công trọn gói cùng BuildX trong thời hạn gói.'
     }
   },
   {

@@ -1,14 +1,17 @@
 'use client'
 
-import { HardHat, PencilRuler } from 'lucide-react'
+import { ArrowRight, HardHat, PencilRuler } from 'lucide-react'
 import { useReducedMotion } from 'motion/react'
-import { useTranslations } from 'next-intl'
-import { useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
 
 import { Link, useRouter } from '@/i18n/navigation'
+import type { Locale } from '@/i18n/routing'
+import { useCmsCollection } from '@/shared/cms'
 import { ROUTES } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
+import { formatPriceTag } from '@/shared/utils'
 
 interface PlanTabsProps {
   active: 'design' | 'supervision'
@@ -21,38 +24,27 @@ interface PlanTabsProps {
  * quản lý thi công" ở khu dự án phải link thẳng vào tab Gói giám sát (R8), mà
  * link thẳng chỉ làm được khi tab có địa chỉ riêng.
  *
- * Bản demo gắn nhãn "Sắp ra mắt" cho tab Gói giám sát; bản mô tả v1.1 thì tab
- * này mở trang S19 thật, nên ở đây không có nhãn đó.
+ * Góp ý BuildX (phương án "Hai thẻ lớn" đã chốt 23/09): thay hai nút viên thuốc
+ * nhỏ bằng HAI THẺ LỚN — icon, mô tả ngắn, giá "từ …" và số gói lấy thẳng từ kho
+ * gói (admin đổi giá là thẻ đổi theo); thẻ đang xem nền xanh đậm. Bên dưới là dòng
+ * "Đang xem … · Chuyển sang … →".
  */
 export function PlanTabs({ active }: PlanTabsProps) {
   const t = useTranslations('plans.tabs')
+  const locale = useLocale() as Locale
+  const plans = useCmsCollection('plans')
+  const supervisionPackages = useCmsCollection('supervisionPackages')
   const router = useRouter()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.tabs')
   const busy = useRef(false)
   const [isChanging, setIsChanging] = useState(false)
   const [visualActive, setVisualActive] = useState(active)
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false })
   const reduceMotion = Boolean(useReducedMotion())
   const displayedActive = isChanging ? visualActive : active
 
   useLayoutEffect(() => {
     document.dispatchEvent(new Event('plan-content-ready'))
   }, [])
-
-  useLayoutEffect(() => {
-    const root = rootRef.current
-    if (!root) return
-    const nav = root.querySelector<HTMLElement>('[data-plan-tabs]')
-    const update = () => {
-      const button = nav?.querySelector<HTMLElement>(`[data-plan-tab="${displayedActive}"]`)
-      if (!nav || !button) return
-      setIndicator({ left: button.offsetLeft, width: button.offsetWidth, ready: true })
-    }
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(root)
-    return () => observer.disconnect()
-  }, [displayedActive, rootRef])
 
   async function changeTab(event: MouseEvent<HTMLAnchorElement>, key: string, href: string) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
@@ -97,10 +89,34 @@ export function PlanTabs({ active }: PlanTabsProps) {
     setIsChanging(false)
   }
 
+  const sellingPlans = plans.filter((plan) => plan.status === 'selling')
+  const paidSupervision = supervisionPackages.filter((item) => item.price > 0)
+  const minPrice = (prices: number[]) => (prices.length ? Math.min(...prices) : 0)
+
   const tabs = [
-    { key: 'design' as const, href: ROUTES.PLANS, icon: PencilRuler, label: t('design') },
-    { key: 'supervision' as const, href: ROUTES.PLANS_SUPERVISION, icon: HardHat, label: t('supervision') }
+    {
+      key: 'design' as const,
+      href: ROUTES.PLANS,
+      icon: PencilRuler,
+      label: t('design'),
+      description: t('designDescription'),
+      price: minPrice(sellingPlans.map((plan) => plan.price)),
+      count: t('designCount', { count: sellingPlans.length }),
+      isNew: false
+    },
+    {
+      key: 'supervision' as const,
+      href: ROUTES.PLANS_SUPERVISION,
+      icon: HardHat,
+      label: t('supervisionLong'),
+      description: t('supervisionDescription'),
+      price: minPrice(paidSupervision.map((item) => item.price)),
+      count: t('supervisionCount', { count: paidSupervision.length }),
+      isNew: true
+    }
   ]
+  const current = tabs.find((tab) => tab.key === displayedActive) ?? tabs[0]!
+  const other = tabs.find((tab) => tab.key !== displayedActive) ?? tabs[1]!
 
   return (
     <div
@@ -113,21 +129,8 @@ export function PlanTabs({ active }: PlanTabsProps) {
         data-plan-tabs
         data-entrance-step='0'
         data-entrance-from='soft-scale'
-        className='bg-muted/60 relative mx-auto flex w-fit gap-1 rounded-xl p-1'
+        className='mx-auto grid w-full max-w-3xl gap-3 sm:grid-cols-2'
       >
-        <span
-          aria-hidden
-          data-plan-tab-indicator
-          className='bg-primary absolute top-1 bottom-1 rounded-lg shadow-sm'
-          style={
-            {
-              left: indicator.left,
-              width: indicator.width,
-              opacity: indicator.ready ? 1 : 0,
-              '--tab-duration': reduceMotion ? '0ms' : '240ms'
-            } as CSSProperties
-          }
-        />
         {tabs.map((tab) => {
           const isActive = tab.key === displayedActive
           return (
@@ -138,16 +141,73 @@ export function PlanTabs({ active }: PlanTabsProps) {
               aria-current={isActive ? 'page' : undefined}
               onClick={(event) => void changeTab(event, tab.key, tab.href)}
               className={cn(
-                'relative inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200',
-                isActive ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
+                'relative flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-[background-color,border-color,box-shadow,transform] duration-200',
+                isActive
+                  ? 'bg-primary-strong border-primary-strong text-primary-foreground shadow-md'
+                  : 'bg-card border-primary/40 hover:border-primary hover:-translate-y-0.5 hover:shadow-md'
               )}
             >
-              <tab.icon className='relative z-10 size-4' />
-              <span className='relative z-10'>{tab.label}</span>
+              <span
+                className={cn(
+                  'absolute -top-2.5 right-3 rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                  isActive ? 'bg-card text-primary-strong' : 'bg-accent text-primary-strong'
+                )}
+              >
+                {isActive ? t('viewing') : t('view')}
+              </span>
+              {tab.isNew ? (
+                <span className='bg-brand-orange absolute -top-2.5 left-3 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white'>
+                  {t('new')}
+                </span>
+              ) : null}
+              <span
+                className={cn(
+                  'flex size-11 shrink-0 items-center justify-center rounded-xl',
+                  isActive ? 'bg-primary-foreground/15' : 'bg-accent text-primary-strong'
+                )}
+              >
+                <tab.icon className='size-5' />
+              </span>
+              <span className='min-w-0 flex-1'>
+                <span className='block font-semibold'>{tab.label}</span>
+                <span
+                  className={cn(
+                    'block text-xs text-pretty',
+                    isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                  )}
+                >
+                  {tab.description}
+                </span>
+              </span>
+              <span className='shrink-0 text-right'>
+                <span className='block text-sm font-bold whitespace-nowrap'>
+                  {t('from', { price: formatPriceTag(tab.price, locale) })}
+                </span>
+                <span
+                  className={cn(
+                    'block text-[11px] whitespace-nowrap',
+                    isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </span>
             </Link>
           )
         })}
       </nav>
+      <p className='text-muted-foreground mt-3 text-center text-sm'>
+        {t('viewingLine')} <span className='text-foreground font-semibold'>{current.label}</span>
+        <span aria-hidden> · </span>
+        <Link
+          href={other.href}
+          onClick={(event) => void changeTab(event, other.key, other.href)}
+          className='text-primary-strong inline-flex items-center gap-1 font-medium underline underline-offset-4'
+        >
+          {t('switchTo', { name: other.label })}
+          <ArrowRight className='size-3.5' />
+        </Link>
+      </p>
     </div>
   )
 }

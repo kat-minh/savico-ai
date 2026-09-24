@@ -17,7 +17,7 @@ import { ProactiveChatStream } from '@/features/chatbot'
 import { PersonalizedPanel, useHandbookPanelStore, type HandbookFilter } from '@/features/handbook'
 import { useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
-import { designDossierRoute } from '@/shared/constants/routes'
+import { designDossierRoute, ROUTES } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
 /**
@@ -33,6 +33,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   const tWaiting = useTranslations('design.progress.estimate')
   const tInput = useTranslations('design.input')
   const tPanel = useTranslations('handbook.panel')
+  const tEntry = useTranslations('design.entry')
   const router = useRouter()
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
@@ -67,6 +68,20 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     })
   }, [draft, tInput, tPanel])
 
+  // Đầu màn kết quả (góp ý BuildX): tiêu đề kèm tên + mã dự án, dòng phụ ghi
+  // địa chỉ · loại nhà · quy mô, và đường quay lại danh sách dự án.
+  const resultSubtitle = useMemo(() => {
+    const scale = [
+      draft?.floorCount ? tInput(`floorCount.options.${draft.floorCount}`) : '',
+      result ? `${result.estimatedFloorArea} m²` : ''
+    ]
+      .filter(Boolean)
+      .join(', ')
+    return [draft?.address, draft?.buildingType ? tInput(`buildingType.options.${draft.buildingType}`) : '', scale]
+      .filter(Boolean)
+      .join(' · ')
+  }, [draft, result, tInput])
+
   // Chatbox AI nói theo dữ liệu thật của dự án; tự trò chuyện trong lúc chờ.
   useProjectChatContext(project?.name ?? '', draft, result ? null : 'estimate')
 
@@ -95,7 +110,16 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
       <StepProgress
         current={2}
         currentDone={Boolean(result) && resultVisible}
-        title={result && resultVisible ? t('pageTitle') : tWaiting('pageTitle')}
+        currentDoneAt={result?.completedAt}
+        title={
+          result && resultVisible
+            ? project
+              ? t('pageTitleWithProject', { name: project.name, id: project.id })
+              : t('pageTitle')
+            : tWaiting('pageTitle')
+        }
+        subtitle={result && resultVisible ? resultSubtitle || undefined : undefined}
+        back={result && resultVisible ? { href: ROUTES.DESIGN, label: tEntry('backToList') } : undefined}
         entranceKey={`design.${projectId}.step2`}
       />
       <DesignStepLayout

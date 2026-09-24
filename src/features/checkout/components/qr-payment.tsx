@@ -188,7 +188,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-5xl space-y-6 px-4 py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'>
         <CheckoutSteps current='payment' clickableCompletedSteps={[]} />
 
         <section className='relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border p-4 pb-7'>
@@ -300,7 +300,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
       data-page-entrance={entranceState}
       data-checkout-payment-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-5xl space-y-6 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'
     >
       <CheckoutSteps
         current='payment'

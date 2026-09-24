@@ -39,28 +39,21 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.164 0.007 270.998);
 
-  /* Brand roles: xanh lá SAVICO.
+  /* Brand roles: màu logo BuildX.
    *
-   * Đo lại bằng pixel trên Hình S09 của bản mô tả v1.1 (vùng đặc lớn nên đáng
-   * tin): nền nút "Tạo hồ sơ" và dải CTA cuối trang đều ra (0,91,48) = #005B30,
-   * tiêu đề H1 hero ra (3,60,14). Tức bảng màu của khách là XANH RÊU ĐẬM, không
-   * phải xanh lá tươi #16A34A / #15803D mà bản dựng đang dùng — đặt cạnh ảnh là
-   * thấy chênh ngay.
-   *
-   * `--primary-strong` bám đúng #005B30 (nền đặc, tiêu đề, dải CTA);
-   * `--primary` nhạt hơn một nấc cho icon và nét mảnh, vì ở cỡ 16px mà dùng
-   * thẳng #005B30 thì icon chìm vào chữ đen. -------- */
-  --primary: oklch(0.47 0.115 154);
+   * Theo sheet góp ý BuildX (tab "Hình ảnh website"):
+   * `--primary-strong` = xanh đậm của logo #2A753F (nền đặc, tiêu đề, dải CTA);
+   * `--primary` sáng hơn một nấc cho icon và nét mảnh để không chìm vào chữ đen. -------- */
+  --primary: oklch(0.56 0.13 146);
   --primary-foreground: oklch(1 0 0);
-  --primary-strong: oklch(0.4 0.105 155);
-  /* Dải gradient thương hiệu (giống bản deploy SAVICO): xanh lá đậm → xanh chanh.
-   * Dùng cho nút chính, vòng icon 3 bước, nút chatbot, nút play video, chữ accent. */
-  --brand-gradient-from: #006400;
-  --brand-gradient-to: #9acd32;
-  /* Cam thương hiệu — màu nhấn của gói PLUS, nhóm "Đặc quyền gói PRO" và các
-   * điểm nhấn phụ trên bảng giá (Hình S01). Bảng giá trước đây mượn `--warning`
-   * (vàng hổ phách) nên thẻ PLUS ra vàng thay vì cam như ảnh. */
-  --brand-orange: oklch(0.655 0.19 41);
+  --primary-strong: oklch(0.502 0.112 149.7);
+  /* Dải gradient thương hiệu theo logo BuildX: xanh đậm #2A753F → xanh lá nhạt
+   * #8CC63F. Dùng cho nút chính, vòng icon 3 bước, nút chatbot, nút play video, chữ accent. */
+  --brand-gradient-from: #2a753f;
+  --brand-gradient-to: #8cc63f;
+  /* Cam thương hiệu = cam của logo BuildX #EC7830 — màu nhấn của gói PLUS, nhóm
+   * "Đặc quyền gói PRO" và các điểm nhấn phụ trên bảng giá. */
+  --brand-orange: oklch(0.695 0.165 48.5);
   --brand-orange-foreground: oklch(1 0 0);
   --brand-orange-soft: oklch(0.97 0.022 58);
   --secondary: oklch(0.97 0.012 150);
@@ -78,7 +71,7 @@
   /* Status roles -------------------------------------------------------- */
   --destructive: oklch(0.637 0.208 25.331);
   --destructive-foreground: oklch(1 0 0);
-  --success: oklch(0.627 0.133 159.564);
+  --success: var(--primary);
   --success-foreground: oklch(1 0 0);
   --warning: oklch(0.812 0.141 80.97);
   --warning-foreground: oklch(0.164 0.007 270.998);
@@ -96,24 +89,24 @@
   /* Borders, inputs, focus rings --------------------------------------- */
   --border: oklch(0.912 0.012 150);
   --input: oklch(0.912 0.012 150);
-  --ring: oklch(0.63 0.17 149);
+  --ring: var(--primary);
 
   /* Charts -------------------------------------------------------------- */
-  --chart-1: oklch(0.55 0.155 150);
-  --chart-2: oklch(0.72 0.15 148);
+  --chart-1: var(--primary-strong);
+  --chart-2: var(--brand-gradient-to);
   --chart-3: oklch(0.85 0.02 150);
-  --chart-4: oklch(0.63 0.17 149);
+  --chart-4: var(--primary);
   --chart-5: oklch(0.45 0.11 152);
 
   /* Sidebar (dashboard shell) ------------------------------------------ */
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.164 0.007 270.998);
-  --sidebar-primary: oklch(0.63 0.17 149);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.955 0.035 152);
   --sidebar-accent-foreground: oklch(0.38 0.09 150);
   --sidebar-border: oklch(0.912 0.012 150);
-  --sidebar-ring: oklch(0.63 0.17 149);
+  --sidebar-ring: var(--primary);
 }
 
 .dark {
@@ -413,12 +406,12 @@
   --radius-glass-sm: 1.125rem;
 
   /* Cinematic canvas orbs. */
-  --orb-1: oklch(0.7 0.15 149 / 0.6); /* amber */
+  --orb-1: color-mix(in oklch, var(--primary) 60%, transparent); /* amber */
   --orb-2: oklch(0.72 0.13 46 / 0.58); /* terracotta */
   --orb-3: oklch(0.8 0.08 165 / 0.5); /* sage */
   --orb-4: oklch(0.76 0.08 240 / 0.46); /* cool sky (depth contrast) */
   --grid-line: oklch(0.45 0.03 150 / 0.12); /* visible enough to blur through glass */
-  --grid-hot: oklch(0.63 0.17 149 / 0.5); /* brighter lines near the cursor */
+  --grid-hot: color-mix(in oklch, var(--primary) 50%, transparent); /* brighter lines near the cursor */
   --vignette: oklch(0.28 0.03 150 / 0.14);
   /* gentle warm haze so frosted glass has something to refract (no loud wash) */
   --warm-1: oklch(0.9 0.07 152 / 0.3);
@@ -431,10 +424,10 @@
   --header-bg-scrolled: oklch(1 0 0 / 0.8);
   --header-shadow: 0 1px 2px -1px oklch(0.3 0.03 60 / 0.1), 0 10px 30px -22px oklch(0.3 0.03 60 / 0.35);
   --header-shadow-scrolled: 0 1px 3px -1px oklch(0.3 0.03 60 / 0.16), 0 18px 42px -24px oklch(0.3 0.03 60 / 0.5);
-  --header-aurora-1: oklch(0.78 0.13 150 / 0.32);
+  --header-aurora-1: color-mix(in oklch, var(--brand-gradient-to) 32%, transparent);
   --header-aurora-2: oklch(0.85 0.09 96 / 0.26);
-  --header-rim: oklch(0.63 0.17 149 / 0.14);
-  --header-rim-hot: oklch(0.63 0.17 149 / 0.42);
+  --header-rim: color-mix(in oklch, var(--primary) 14%, transparent);
+  --header-rim-hot: color-mix(in oklch, var(--primary) 42%, transparent);
 }
 
 .dark {
@@ -796,10 +789,6 @@
   [data-foundation-step]:hover .foundation-step-image-motion,
   [data-foundation-step]:focus-within .foundation-step-image-motion {
     transform: scale(1.035);
-  }
-  [data-foundation-step]:hover [data-step-icon],
-  [data-foundation-step]:focus-within [data-step-icon] {
-    filter: brightness(0.75);
   }
   [data-stage-guide-link]:hover,
   [data-stage-guide-link]:focus-visible {
@@ -2125,7 +2114,11 @@
     content: '';
     position: absolute;
     inset: -20%;
-    background: radial-gradient(26rem 26rem at 50% 50%, oklch(0.63 0.17 149 / 0.12), transparent 62%);
+    background: radial-gradient(
+      26rem 26rem at 50% 50%,
+      color-mix(in oklch, var(--primary) 12%, transparent),
+      transparent 62%
+    );
     animation: grid-sweep 16s var(--ease-out-soft) infinite;
   }
 
@@ -3688,27 +3681,6 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   transform: none;
 }
 
-[data-article-project-card][data-article-cta-nudge='true'] {
-  animation: handbook-article-cta-breathe 620ms cubic-bezier(0.22, 1, 0.36, 1) 1;
-}
-
-[data-article-project-button] {
-  transition:
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 180ms ease-out,
-    filter 180ms ease-out;
-}
-
-[data-article-project-button]:hover {
-  filter: brightness(1.04);
-  transform: translateY(-2px);
-  box-shadow: 0 0.55rem 1.25rem color-mix(in oklch, var(--primary) 22%, transparent);
-}
-
-[data-article-project-button]:active {
-  transform: translateY(0) scale(0.98);
-}
-
 [data-article-consult-card] {
   transition: border-color 180ms ease-out;
 }
@@ -3790,16 +3762,6 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes handbook-article-cta-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  48% {
-    transform: scale(1.025);
   }
 }
 
@@ -4293,12 +4255,6 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
 }
 .plans-tabs-enter + * {
   view-transition-name: plan-content;
-}
-[data-plan-tab-indicator] {
-  transition:
-    left var(--tab-duration, 330ms) cubic-bezier(0.22, 0.75, 0.28, 1),
-    width var(--tab-duration, 330ms) cubic-bezier(0.22, 0.75, 0.28, 1),
-    opacity 120ms ease;
 }
 .plan-title {
   display: inline-block;

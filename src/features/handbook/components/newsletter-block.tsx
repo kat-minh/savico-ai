@@ -2,13 +2,15 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { ArrowRight, Clock } from 'lucide-react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import type { Locale } from '@/i18n/routing'
 import { Link } from '@/i18n/navigation'
 import { Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
+import { formatDisplayDate } from '@/shared/utils'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { HANDBOOK_ARTICLE_LIST_HISTORY_KEY, HANDBOOK_CATEGORY_SELECT_EVENT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
@@ -25,7 +27,7 @@ import type { HandbookArticle } from '../types/handbook.types'
 export function NewsletterBlock() {
   const t = useTranslations('handbook.newsletter')
   const { nameOf: labelName } = useArticleLabels()
-  const format = useFormatter()
+  const locale = useLocale() as Locale
   const sectionRef = useRef<HTMLElement>(null)
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [previewArticleId, setPreviewArticleId] = useState<string | null>(null)
@@ -60,21 +62,19 @@ export function NewsletterBlock() {
     const rule = section.querySelector<HTMLElement>('[data-newsletter-rule]')
     const title = section.querySelector<HTMLElement>('[data-newsletter-title]')
     const date = section.querySelector<HTMLElement>('[data-newsletter-date]')
-    const topics = section.querySelector<HTMLElement>('[data-newsletter-topics]')
     const leadImage = section.querySelector<HTMLElement>('[data-newsletter-lead-image]')
     const leadNumber = section.querySelector<HTMLElement>('[data-newsletter-lead-number]')
     const leadParts = Array.from(section.querySelectorAll<HTMLElement>('[data-newsletter-lead-part]'))
     const supportingCards = Array.from(section.querySelectorAll<HTMLElement>('[data-newsletter-supporting]'))
     const relatedRows = Array.from(section.querySelectorAll<HTMLElement>('[data-newsletter-related]'))
-    if (!rule || !title || !topics) return
+    if (!rule || !title) return
 
-    const nodes = [title, date, topics].filter((node): node is HTMLElement => Boolean(node))
+    const nodes = [title, date].filter((node): node is HTMLElement => Boolean(node))
     nodes.forEach((node) => {
       node.style.opacity = '0'
     })
     title.style.transform = 'translateX(-12px)'
     if (date) date.style.transform = 'translateY(5px)'
-    topics.style.transform = 'translateX(10px)'
     rule.style.transform = 'scaleX(0)'
     rule.style.transformOrigin = 'left center'
     if (leadImage) {
@@ -196,16 +196,6 @@ export function NewsletterBlock() {
           () => settleNode(date)
         )
       }
-      remember(
-        topics.animate(
-          [
-            { opacity: 0, transform: 'translateX(10px)' },
-            { opacity: 1, transform: 'translateX(0)' }
-          ],
-          { duration: 240, delay: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' }
-        ),
-        () => settleNode(topics)
-      )
       if (leadImage) {
         remember(
           leadImage.animate(
@@ -356,20 +346,16 @@ export function NewsletterBlock() {
 
   return (
     <section ref={sectionRef} data-newsletter-block className='border-primary/30 bg-card rounded-2xl border p-5'>
-      <header className='relative grid gap-2 pb-3 lg:grid-cols-3 lg:items-center'>
+      {/* Góp ý BuildX: bỏ dòng phân loại, ngày dời về góc phải cùng hàng tiêu đề. */}
+      <header className='relative flex flex-wrap items-baseline justify-between gap-2 pb-3'>
         <h2 data-newsletter-title className='text-xl font-semibold tracking-tight uppercase'>
           {t('title')}
         </h2>
         {lead ? (
-          <p data-newsletter-date className='text-muted-foreground text-sm lg:text-center'>
-            {format.dateTime(new Date(lead.publishedAt), { dateStyle: 'full' })}
+          <p data-newsletter-date className='text-muted-foreground text-sm'>
+            {formatDisplayDate(lead.publishedAt, locale)}
           </p>
-        ) : (
-          <span />
-        )}
-        <p data-newsletter-topics className='text-muted-foreground text-sm lg:text-right'>
-          {t('topics')}
-        </p>
+        ) : null}
         <span
           data-newsletter-rule
           aria-hidden
@@ -414,7 +400,7 @@ export function NewsletterBlock() {
                   {displayedLead.excerpt}
                 </p>
                 <p data-newsletter-lead-part className='text-muted-foreground flex items-center gap-2 text-xs'>
-                  {format.dateTime(new Date(displayedLead.publishedAt), { dateStyle: 'short' })}
+                  {formatDisplayDate(displayedLead.publishedAt, locale)}
                   <span aria-hidden>·</span>
                   <Clock className='size-3.5' />
                   {t('readingTime', { minutes: displayedLead.readingMinutes })}

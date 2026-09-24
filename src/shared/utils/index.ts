@@ -3,6 +3,7 @@ export {
   formatCurrency,
   formatDate,
   formatDigitGroups,
+  formatDisplayDate,
   formatDayMonth,
   formatNumber,
   formatPriceTag

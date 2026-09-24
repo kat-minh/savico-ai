@@ -569,7 +569,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
 
   if (isPending) {
     return (
-      <div className='mx-auto w-full max-w-6xl px-4 py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-8 lg:px-8'>
         <Skeleton className='h-[36rem] rounded-2xl' />
       </div>
     )
@@ -583,7 +583,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
       initial={reduceMotion ? false : returningToGroup ? { opacity: 0, x: -32 } : { opacity: 0, y: 22 }}
       animate={pageTransition === 'back' ? { opacity: 0, x: reduceMotion ? 0 : 36 } : { opacity: 1, x: 0, y: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-      className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'
     >
       <motion.div
         initial={{ opacity: 0 }}

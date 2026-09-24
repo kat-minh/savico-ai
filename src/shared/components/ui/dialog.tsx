@@ -3,6 +3,7 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/shared/lib/utils'
 
@@ -112,7 +113,7 @@ function DialogContent({
             className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
-            <span className='sr-only'>Close</span>
+            <CloseLabel />
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -171,4 +172,10 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger
+}
+
+/** Nhãn đọc màn hình của nút đóng — theo ngôn ngữ trang (trước đây cứng chữ "Close"). */
+function CloseLabel() {
+  const t = useTranslations('common')
+  return <span className='sr-only'>{t('close')}</span>
 }

@@ -2,6 +2,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { ConsultationHistory } from '@/features/consultation'
 import type { Locale } from '@/i18n/routing'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('accountConsultations')
 
 interface PageProps {
   params: Promise<{ locale: string }>

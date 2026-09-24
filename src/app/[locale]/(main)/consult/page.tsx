@@ -2,6 +2,9 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { ConsultantDirectory } from '@/features/consultation'
 import type { Locale } from '@/i18n/routing'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('consult')
 
 interface PageProps {
   params: Promise<{ locale: Locale }>

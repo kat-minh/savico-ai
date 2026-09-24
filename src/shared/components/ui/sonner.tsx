@@ -17,12 +17,12 @@ function Toaster({ ...props }: ToasterProps) {
     <Sonner
       theme={theme as ToasterProps['theme']}
       className='toaster group'
-      // Góc phải TRÊN theo Hình 16 (mục VIII.3) — cũng tránh che nút chatbox nổi
-      // và các nút hành động chính nằm ở đáy màn hình.
+      // Góc phải TRÊN theo Hình 16 (mục VIII.3), nhưng hạ xuống DƯỚI thanh menu (cao
+      // 64px) để không che menu/avatar (góp ý BuildX, PC21); tự tắt sau 4 giây, có nút đóng.
       position={inHandbook ? 'bottom-left' : 'top-right'}
-      duration={inHandbook ? 4200 : undefined}
-      offset={inHandbook ? { bottom: 24, left: 24 } : undefined}
-      mobileOffset={inHandbook ? { bottom: 112, left: 16, right: 16 } : undefined}
+      duration={inHandbook ? 4200 : 4000}
+      offset={inHandbook ? { bottom: 24, left: 24 } : { top: 80, right: 24 }}
+      mobileOffset={inHandbook ? { bottom: 112, left: 16, right: 16 } : { top: 76, left: 16, right: 16 }}
       toastOptions={inHandbook ? { className: 'handbook-toast' } : undefined}
       richColors
       closeButton

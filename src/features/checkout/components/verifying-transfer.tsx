@@ -239,7 +239,7 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-lg space-y-6 px-4 py-8'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
         <CheckoutSteps current='payment' animateEntrance={false} />
 
         <div className='space-y-3 text-center'>
@@ -280,7 +280,7 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
       data-checkout-verifying-root
       data-confirmed={confirmed ? 'true' : 'false'}
       style={entranceStyle}
-      className='mx-auto w-full max-w-lg space-y-6 px-4 py-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'
     >
       <CheckoutSteps
         current='payment'

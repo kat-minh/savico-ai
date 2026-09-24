@@ -66,7 +66,7 @@ export function ConsultantDirectory({ preferredSpecialtyId }: ConsultantDirector
   )
 
   return (
-    <div className='mx-auto w-full max-w-[80rem] space-y-6 px-4 py-10 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-10 lg:px-8'>
       {/*
         AnimatePresence riêng để CHẮN không cho `initial={false}` của
         <ConsultTransition> (chuyển cảnh route bọc ngoài) lan xuống context và

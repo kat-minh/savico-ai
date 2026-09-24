@@ -18,6 +18,47 @@ export function formatDate(
   return new Intl.DateTimeFormat(locale, options).format(date)
 }
 
+/** Múi giờ hiển thị chung của toàn website — ngày/giờ luôn theo giờ Việt Nam. */
+const DISPLAY_TIME_ZONE = 'Asia/Ho_Chi_Minh'
+
+function displayParts(value: Date | string | number, locale: Locale) {
+  const date = value instanceof Date ? value : new Date(value)
+  const parts = new Intl.DateTimeFormat(locale === 'vi' ? 'vi-VN' : 'en-GB', {
+    timeZone: DISPLAY_TIME_ZONE,
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(date)
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? ''
+  const weekday = get('weekday')
+  return {
+    date: `${get('day')}/${get('month')}/${get('year')}`,
+    time: `${get('hour')}:${get('minute')}`,
+    weekday: weekday.charAt(0).toLocaleUpperCase(locale) + weekday.slice(1)
+  }
+}
+
+/**
+ * MỘT kiểu ghi ngày cho toàn website (góp ý BuildX, mục 38), theo giờ Việt Nam:
+ * - `formatDisplayDate` → "24/09/2026"
+ * - `formatDisplayDate(…, { weekday: true })` → "Thứ Năm, 24/09/2026"
+ * - `formatDisplayDate(…, { time: true })` → "14:45 - 23/09/2026"
+ */
+export function formatDisplayDate(
+  value: Date | string | number,
+  locale: Locale,
+  options: { weekday?: boolean; time?: boolean } = {}
+): string {
+  const parts = displayParts(value, locale)
+  if (options.time) return `${parts.time} - ${parts.date}`
+  if (options.weekday) return `${parts.weekday}, ${parts.date}`
+  return parts.date
+}
+
 export function formatNumber(value: number, locale: Locale, options?: Intl.NumberFormatOptions): string {
   return new Intl.NumberFormat(locale, options).format(value)
 }

@@ -40,7 +40,7 @@ export function ConsultantDetail({ consultantId }: ConsultantDetailProps) {
   const visibleConsultant = consultant ?? consultants?.find((item) => item.id === consultantId)
 
   return (
-    <div className='mx-auto w-full max-w-[80rem] space-y-6 px-4 py-10 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-10 lg:px-8'>
       <header className='space-y-2 text-center'>
         <h2 className='text-2xl font-semibold tracking-tight text-balance sm:text-3xl'>{t('title')}</h2>
         <p className='text-muted-foreground'>{t('subtitle')}</p>

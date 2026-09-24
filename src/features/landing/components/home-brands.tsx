@@ -7,14 +7,10 @@ import { useState } from 'react'
 import { revealEase } from '@/shared/components/common'
 import { useMediaQuery } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { HOME_BRANDS } from '../constants/landing.constants'
+import { HOME_BRAND_LOGOS, HOME_BRANDS } from '../constants/landing.constants'
 
 /**
- * Dải "SAVICO được tin tưởng bởi" — bảy thương hiệu vật liệu.
- *
- * Hiện dựng bằng CHỮ (wordmark) chứ không nhúng logo: file logo là tài sản của
- * bên thứ ba, phải do khách cung cấp bản được phép dùng. Tên nằm trong i18n nên
- * đổi danh sách không cần deploy; khi có file logo thì thay `<span>` bằng ảnh.
+ * Dải "được tin tưởng bởi" — logo sáu thương hiệu vật liệu do khách cung cấp.
  *
  * ★ Desktop đứng yên (logo hiện lần lượt, rê thì có màu + to nhẹ); mobile —
  * hoặc khi danh sách dài hơn 7 — đổi sang dải chạy ngang chậm, chạm/rê là dừng.
@@ -39,12 +35,12 @@ export function HomeBrands() {
         >
           <div className={cn('animate-marquee flex w-max gap-10 px-6', paused && 'paused')}>
             {[...HOME_BRANDS, ...HOME_BRANDS].map((brand, index) => (
-              <BrandItem key={`${brand}-${index}`} label={t(`items.${brand}`)} />
+              <BrandItem key={`${brand}-${index}`} src={HOME_BRAND_LOGOS[brand]} label={t(`items.${brand}`)} />
             ))}
           </div>
         </div>
       ) : (
-        <ul className='bg-card mt-3 grid grid-cols-2 items-center gap-x-6 gap-y-4 rounded-2xl border px-6 py-5 sm:grid-cols-4 lg:grid-cols-7'>
+        <ul className='bg-card mt-3 grid grid-cols-2 items-center gap-x-6 gap-y-4 rounded-2xl border px-6 py-5 sm:grid-cols-3 lg:grid-cols-6'>
           {HOME_BRANDS.map((brand, index) => (
             <motion.li
               key={brand}
@@ -53,7 +49,7 @@ export function HomeBrands() {
               viewport={{ once: true, amount: 0.6 }}
               transition={{ duration: 0.4, delay: index * 0.06, ease: revealEase }}
             >
-              <BrandItem label={t(`items.${brand}`)} />
+              <BrandItem src={HOME_BRAND_LOGOS[brand]} label={t(`items.${brand}`)} />
             </motion.li>
           ))}
         </ul>
@@ -62,10 +58,18 @@ export function HomeBrands() {
   )
 }
 
-function BrandItem({ label }: { label: string }) {
+function BrandItem({ src, label }: { src: string; label: string }) {
   return (
-    <span className='text-muted-foreground hover:text-foreground inline-block text-center text-sm font-bold tracking-wide whitespace-nowrap uppercase transition-[color,transform] hover:scale-105'>
-      {label}
+    // Khung cố định 8rem × 3rem, logo co vừa khung: logo vuông (Viglacera, Hòa
+    // Phát) cao hết khung, logo ngang (CADIVI) rộng hết khung — nhìn cân nhau.
+    <span className='flex h-12 w-32 items-center justify-center'>
+      {/* eslint-disable-next-line @next/next/no-img-element -- logo nhỏ, tỉ lệ khác nhau; `h` cố định, bề ngang tự theo ảnh */}
+      <img
+        src={src}
+        alt={label}
+        loading='lazy'
+        className='max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105'
+      />
     </span>
   )
 }

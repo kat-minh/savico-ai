@@ -9,9 +9,10 @@ import {
   useRef,
   useState
 } from 'react'
-import { ArrowUp, Clock, FileText, Plus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { ArrowUp, Clock } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 
+import type { Locale } from '@/i18n/routing'
 import { Link, useRouter } from '@/i18n/navigation'
 import { ErrorState, Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
@@ -28,9 +29,10 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { useHandbookArticle, useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
-import { articlesOfTopic, selectRelatedArticles } from '../services/handbook.service'
+import { selectRelatedArticles } from '../services/handbook.service'
 import { ArticleCompactCta, ArticleEndExperience } from './article-action-experience'
 import { ConsultButton } from './consult-button'
 
@@ -48,6 +50,7 @@ interface ArticleDetailProps {
  */
 export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   const t = useTranslations('handbook.article')
+  const locale = useLocale() as Locale
   const { nameOf: labelName } = useArticleLabels()
   const router = useRouter()
 
@@ -63,21 +66,14 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   const stage = stages?.find((item) => item.id === article?.stage)
   const topic = stage?.topics.find((item) => item.id === article?.topicId)
 
-  const siblings = useMemo(
-    () => (article?.topicId ? articlesOfTopic(articles ?? [], article.topicId) : []),
-    [articles, article]
-  )
   const related = useMemo(() => (article ? selectRelatedArticles(articles ?? [], article) : []), [articles, article])
   const articleRef = useRef<HTMLElement>(null)
   const navigationLockedRef = useRef(false)
   const exitAnimationRef = useRef<Animation | null>(null)
-  const ctaNudgedRef = useRef(false)
   const scrollVelocityRef = useRef(0)
   const [heroLoadedSlug, setHeroLoadedSlug] = useState<string | null>(null)
   const [backToTopSlug, setBackToTopSlug] = useState<string | null>(null)
-  const [ctaNudgeSlug, setCtaNudgeSlug] = useState<string | null>(null)
   const showBackToTop = backToTopSlug === slug
-  const ctaNudge = ctaNudgeSlug === slug
 
   const stageHref = stage ? `${ROUTES.HANDBOOK}?stage=${encodeURIComponent(stage.id)}` : ROUTES.HANDBOOK
   const topicHref =
@@ -139,7 +135,6 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
 
   useLayoutEffect(() => {
     navigationLockedRef.current = false
-    ctaNudgedRef.current = false
     exitAnimationRef.current?.cancel()
     exitAnimationRef.current = null
 
@@ -181,7 +176,6 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
     let lastY = window.scrollY
     let lastAt = performance.now()
     let backToTopVisible = false
-    let ctaNudgeTimer = 0
     const revealTimers: number[] = []
     const revealFrames: number[] = []
     const revealCycleStartedAt = performance.now()
@@ -200,14 +194,6 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
       const articleEnd = articleTop + articleElement.offsetHeight - window.innerHeight
       const progress = Math.max(0, Math.min(1, (currentY - articleTop) / Math.max(1, articleEnd - articleTop)))
       document.documentElement.style.setProperty('--handbook-reading-progress', String(progress))
-
-      if (progress >= 0.75 && !ctaNudgedRef.current) {
-        ctaNudgedRef.current = true
-        if (!reduced) {
-          setCtaNudgeSlug(slug)
-          ctaNudgeTimer = window.setTimeout(() => setCtaNudgeSlug(null), 720)
-        }
-      }
 
       const body = root.querySelector<HTMLElement>('[data-article-body]')
       const headerOffset =
@@ -287,7 +273,6 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame)
-      if (ctaNudgeTimer) window.clearTimeout(ctaNudgeTimer)
       revealFrames.forEach((revealFrame) => window.cancelAnimationFrame(revealFrame))
       revealTimers.forEach((timer) => window.clearTimeout(timer))
       observer?.disconnect()
@@ -300,7 +285,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   if (isPending) return <ArticleDetailSkeleton />
   if (isError) {
     return (
-      <div className='mx-auto w-full max-w-[88rem] px-4 py-10 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8'>
         <ErrorState
           title={t('loadError')}
           description={t('loadErrorHint')}
@@ -317,7 +302,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
     >
       <Breadcrumb data-entrance-step='0' data-article-breadcrumb>
         <BreadcrumbList>
@@ -334,7 +319,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
           </BreadcrumbItem>
           {stage ? (
             <>
-              <BreadcrumbSeparator />
+              <BreadcrumbSeparator>{'>'}</BreadcrumbSeparator>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link
@@ -350,7 +335,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
           ) : null}
           {topic ? (
             <>
-              <BreadcrumbSeparator />
+              <BreadcrumbSeparator>{'>'}</BreadcrumbSeparator>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link
@@ -364,7 +349,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
               </BreadcrumbItem>
             </>
           ) : null}
-          <BreadcrumbSeparator />
+          <BreadcrumbSeparator>{'>'}</BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbPage>{article.title}</BreadcrumbPage>
           </BreadcrumbItem>
@@ -389,9 +374,8 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
               <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>
 
               <p className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
-                {/* Hình 12 ghi "Cập nhật 08/2026" — dựng chuỗi MM/YYYY thay vì để
-                  Intl tự chọn ("tháng 08, 2026" ở locale vi). */}
-                {t('updatedAt', { date: formatMonthYear(article.publishedAt) })}
+                {/* Một định dạng ngày cho cả Cẩm nang: dd/mm/yyyy (góp ý BuildX). */}
+                {t('updatedAt', { date: formatDisplayDate(article.publishedAt, locale) })}
                 <span aria-hidden>·</span>
                 <Clock className='size-4' />
                 {t('readingTime', { minutes: article.readingMinutes })}
@@ -479,28 +463,44 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
             transition: 'top var(--public-header-duration, 180ms) ease-out'
           }}
         >
-          {siblings.length > 0 && topic ? (
-            <section data-entrance-step='2' data-entrance-from='right' className='bg-card rounded-2xl border p-5'>
-              <h2 className='text-base font-semibold'>{t('inTopic', { topic: topic.title })}</h2>
-              <ul className='mt-3 divide-y'>
-                {siblings.map((item) => (
+          {/* Góp ý BuildX: cột phải cố định khi cuộn, chỉ còn bài viết liên quan xếp
+              dọc + nút tròn "Đặt lịch tư vấn 1:1" ngay dưới. */}
+          {related.length > 0 ? (
+            <section
+              data-article-related
+              data-entrance-step='2'
+              data-entrance-from='right'
+              className='bg-card space-y-3 rounded-2xl border p-5'
+            >
+              <h2 className='text-base font-semibold'>{t('related')}</h2>
+              <ul className='divide-y'>
+                {related.map((item) => (
                   <li key={item.id}>
                     <Link
                       href={handbookArticleRoute(item.slug)}
-                      aria-current={item.id === article.id ? 'page' : undefined}
-                      onClick={(event) => {
-                        if (item.id === article.id) {
-                          event.preventDefault()
-                          return
-                        }
-                        navigateArticle(event, handbookArticleRoute(item.slug), 'forward')
-                      }}
-                      className={cn(
-                        'hover:text-primary hover:bg-primary/5 block rounded-lg py-2.5 text-sm transition-colors',
-                        item.id === article.id && 'text-primary bg-primary/5 -mx-2 rounded-lg px-2 font-medium'
-                      )}
+                      onClick={(event) => navigateArticle(event, handbookArticleRoute(item.slug), 'forward')}
+                      className='group flex gap-3 py-3'
                     >
-                      {item.title}
+                      <Photo
+                        className='size-16 shrink-0 rounded-lg'
+                        imageClassName='transition-transform duration-300 ease-out motion-reduce:transition-none'
+                        src={item.imageUrl}
+                        alt={item.title}
+                        sizes='64px'
+                      />
+                      <span className='min-w-0 space-y-1'>
+                        <span className='group-hover:text-primary line-clamp-2 block text-sm font-medium transition-colors'>
+                          {item.title}
+                        </span>
+                        <span className='text-muted-foreground block text-xs'>
+                          {[
+                            stages?.find((s) => s.id === item.stage)?.title,
+                            t('readingTime', { minutes: item.readingMinutes })
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
+                      </span>
                     </Link>
                   </li>
                 ))}
@@ -508,83 +508,16 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
             </section>
           ) : null}
 
-          <section
-            data-article-project-card
-            data-article-cta-nudge={ctaNudge ? 'true' : 'false'}
+          <div
+            data-article-consult-card
             data-entrance-step='3'
             data-entrance-from='right'
-            className='bg-primary/5 border-primary/30 space-y-3 rounded-2xl border p-5'
+            className='flex justify-center'
           >
-            <FileText className='text-primary size-8' />
-            <p className='font-semibold text-balance'>
-              {topic ? t('ctaTitleTopic', { topic: topic.title.toLocaleLowerCase('vi') }) : t('ctaTitle')}
-            </p>
-            <Button data-article-project-button className='w-full' onClick={onCreateProject}>
-              <Plus className='size-4' />
-              {t('ctaButton')}
-            </Button>
-          </section>
-
-          <section
-            data-article-consult-card
-            data-entrance-step='4'
-            data-entrance-from='right'
-            className='bg-card rounded-2xl border p-5'
-          >
-            <ConsultButton variant='link' />
-          </section>
+            <ConsultButton variant='pill' />
+          </div>
         </aside>
       </div>
-
-      {related.length > 0 ? (
-        <section
-          key={`related:${article.id}`}
-          data-article-related
-          data-article-scroll-reveal='true'
-          data-article-reveal='pending'
-          className='bg-card space-y-4 rounded-2xl border p-5'
-        >
-          <h2 className='text-lg font-semibold'>{t('related')}</h2>
-          <ul className='grid gap-4 sm:grid-cols-3'>
-            {related.map((item) => (
-              <li key={item.id}>
-                <Link
-                  data-article-related-card
-                  href={handbookArticleRoute(item.slug)}
-                  onClick={(event) => navigateArticle(event, handbookArticleRoute(item.slug), 'forward')}
-                  className='flex h-full gap-3 rounded-xl border p-3'
-                >
-                  <Photo
-                    className='size-16 shrink-0 rounded-lg'
-                    imageClassName='transition-transform duration-300 ease-out motion-reduce:transition-none'
-                    src={item.imageUrl}
-                    alt={item.title}
-                    sizes='64px'
-                  />
-                  <span className='min-w-0 space-y-1'>
-                    <span className='line-clamp-2 block text-sm font-medium'>{item.title}</span>
-                    {/* Hình 12: "Phần thô · 5 phút đọc" rồi tới liên kết "Đọc thêm". */}
-                    <span className='text-muted-foreground block text-xs'>
-                      {[
-                        stages?.find((s) => s.id === item.stage)?.title,
-                        t('readingTime', { minutes: item.readingMinutes })
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                    <span className='text-primary block text-xs font-medium'>
-                      {t('readMore')}{' '}
-                      <span data-article-related-arrow aria-hidden className='inline-block'>
-                        →
-                      </span>
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       <Button
         type='button'
@@ -605,17 +538,11 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   )
 }
 
-/** "2026-08-06" → "08/2026" (Hình 12). */
-function formatMonthYear(iso: string): string {
-  const date = new Date(iso)
-  return `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`
-}
-
 function ArticleDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
       aria-hidden='true'
     >
       <Skeleton className='handbook-skeleton animate-none h-4 w-72 max-w-[78%]' />

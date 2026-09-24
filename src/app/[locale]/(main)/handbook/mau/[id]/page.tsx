@@ -2,6 +2,9 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { TemplateDetail } from '@/features/handbook'
 import type { Locale } from '@/i18n/routing'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('handbookTemplate')
 
 interface PageProps {
   params: Promise<{ locale: Locale; id: string }>

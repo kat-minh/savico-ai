@@ -8,6 +8,7 @@ export interface TurnkeyRequestSchemaMessages {
   phoneRequired: string
   phoneInvalid: string
   emailInvalid: string
+  provinceRequired: string
   noteMaxLength: string
 }
 
@@ -25,7 +26,9 @@ export function createTurnkeyRequestSchema(m: TurnkeyRequestSchemaMessages) {
   return z.object({
     name: z.string().trim().min(1, { message: m.nameRequired }),
     phone: z.string().trim().min(1, { message: m.phoneRequired }).refine(isValidPhone, { message: m.phoneInvalid }),
-    email: z.email({ message: m.emailInvalid }),
+    // Góp ý BuildX: email không bắt buộc; thêm khu vực (tỉnh / thành) để Ops chia người gọi.
+    email: z.union([z.literal(''), z.email({ message: m.emailInvalid })]),
+    province: z.string().trim().min(1, { message: m.provinceRequired }),
     note: z.string().trim().max(TURNKEY_NOTE_MAX_LENGTH, { message: m.noteMaxLength })
   })
 }

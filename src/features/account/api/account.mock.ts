@@ -62,7 +62,7 @@ export const mockAccountApi = {
           method: 'bank-qr',
           status: 'pending',
           createdAt: '2026-09-18T14:02:00',
-          note: 'Đang chờ SAVICO xác nhận chuyển khoản.'
+          note: 'Đang chờ BuildX xác nhận chuyển khoản.'
         },
         {
           id: 'SVC-26003',

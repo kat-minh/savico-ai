@@ -35,7 +35,9 @@ export function HomeHeroSection() {
       <HomeHero
         onCreateProject={startCreateProject}
         onWatchIntro={introVideo ? () => setIntroVideoOpen(true) : undefined}
-        resumeHref={activeProject ? resumeProjectRoute(activeProject) : undefined}
+        resumeProject={
+          activeProject ? { name: activeProject.name, href: resumeProjectRoute(activeProject) } : undefined
+        }
       />
       <VideoLightbox
         video={introVideoOpen ? (introVideo ?? null) : null}

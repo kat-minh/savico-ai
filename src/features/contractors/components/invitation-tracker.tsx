@@ -10,9 +10,9 @@ import {
   Info,
   Lock,
   Mail,
-  Pencil,
   Phone,
   Star,
+  UserPlus,
   UsersRound
 } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
@@ -28,7 +28,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
-import { contractorBriefRoute, contractorMatchesRoute } from '@/shared/constants/routes'
+import { contractorMatchesRoute } from '@/shared/constants/routes'
 import { siteConfig } from '@/shared/config'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
@@ -60,7 +60,6 @@ interface InvitationTrackerProps {
  */
 export function InvitationTracker({ projectId }: InvitationTrackerProps) {
   const t = useTranslations('contractors.invitations')
-  const tCommon = useTranslations('contractors.common')
   const tStatus = useTranslations('contractors.status')
   const router = useRouter()
   const { data: brief } = useBrief(projectId)
@@ -201,27 +200,9 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
             ? { duration: 0.35, ease: revealEase }
             : { duration: 0 }
       }
-      className='mx-auto w-[91%] max-w-[84rem] space-y-5 py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-8'
     >
-      <ProjectContextBar
-        brief={brief}
-        aside={
-          brief ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href={contractorBriefRoute(brief.id)}
-                  className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
-                >
-                  <Pencil className='size-3.5' />
-                  {tCommon('editBrief')}
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>{t('editBriefWarning')}</TooltipContent>
-            </Tooltip>
-          ) : undefined
-        }
-      />
+      <ProjectContextBar brief={brief} />
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
         <button
@@ -244,32 +225,48 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
       >
         <div className='min-w-0'>
           <h1 className='text-2xl font-semibold tracking-tight'>{t('title')}</h1>
-          <p className='text-muted-foreground mt-1 text-sm text-pretty'>{t('subtitle', { count: sent.length })}</p>
+          {/* Chưa mời ai thì chỉ còn khối trống bên dưới — không ghi "đã gửi đến 0 nhà thầu". */}
+          {sent.length > 0 ? (
+            <p className='text-muted-foreground mt-1 text-sm text-pretty'>{t('subtitle', { count: sent.length })}</p>
+          ) : null}
         </div>
-        <motion.span
-          initial={{ scale: 0.85, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
-          className='bg-card inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm'
-        >
-          <UsersRound className='text-primary size-4' />
-          <AnimatePresence mode='popLayout' initial={false}>
+        {sent.length > 0 ? (
+          <div className='flex flex-wrap items-center gap-3'>
             <motion.span
-              key={sent.length}
-              initial={{ opacity: 0, y: -6, rotateX: -75 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              exit={{ opacity: 0, y: 6, rotateX: 75 }}
-              transition={{ duration: 0.25 }}
-              className='inline-block'
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', bounce: 0.5, duration: 0.4 }}
+              className='bg-card inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm'
             >
-              {t.rich('counter', {
-                used: sent.length,
-                max: MAX_INVITATIONS,
-                b: (chunks) => <b className='font-semibold'>{chunks}</b>
-              })}
+              <UsersRound className='text-primary size-4' />
+              <AnimatePresence mode='popLayout' initial={false}>
+                <motion.span
+                  key={sent.length}
+                  initial={{ opacity: 0, y: -6, rotateX: -75 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  exit={{ opacity: 0, y: 6, rotateX: 75 }}
+                  transition={{ duration: 0.25 }}
+                  className='inline-block'
+                >
+                  {t.rich('counter', {
+                    used: sent.length,
+                    max: MAX_INVITATIONS,
+                    b: (chunks) => <b className='font-semibold'>{chunks}</b>
+                  })}
+                </motion.span>
+              </AnimatePresence>
             </motion.span>
-          </AnimatePresence>
-        </motion.span>
+            {/* Còn lượt → mời thêm ngay tại đây, về đúng trang Đề xuất của dự án này. */}
+            {sent.length < MAX_INVITATIONS ? (
+              <Button asChild>
+                <Link href={contractorMatchesRoute(projectId)}>
+                  <UserPlus className='size-4' />
+                  {t('inviteMore', { left: MAX_INVITATIONS - sent.length })}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
       </motion.header>
 
       {isPending ? (
@@ -345,7 +342,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
 
             {/* Khối cuối của cột phải — hiện SAU "Ý nghĩa trạng thái" (bốn dòng
                 đến lượt lúc ~1.07s) và "Hồ sơ đã gửi", không phải cùng lúc với
-                cả cột như trước (mục "Đội hỗ trợ SAVICO" của S18). */}
+                cả cột như trước (mục "Đội hỗ trợ BuildX" của S18). */}
             <motion.section
               initial={reduceMotion ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}

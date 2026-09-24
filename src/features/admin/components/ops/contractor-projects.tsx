@@ -338,7 +338,7 @@ export function ContractorProjects({ contractor }: { contractor: CmsContractor }
                         type='text'
                         size='small'
                         disabled={isPending}
-                        icon={<CheckCircleOutlined style={{ color: '#16a34a' }} />}
+                        icon={<CheckCircleOutlined style={{ color: '#2a753f' }} />}
                       />
                     </Tooltip>
                   </Popconfirm>

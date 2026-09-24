@@ -509,7 +509,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
   if (isPending) return <TemplateDetailSkeleton />
   if (isError) {
     return (
-      <div className='mx-auto w-full max-w-[88rem] px-4 py-10 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8'>
         <ErrorState
           title={t('loadError')}
           description={t('loadErrorHint')}
@@ -544,7 +544,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
       data-template-detail
       data-template-detail-id={template.id}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
     >
       <div className='space-y-3'>
         <Breadcrumb data-entrance-step='0' data-detail-breadcrumb>
@@ -556,7 +556,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator>/</BreadcrumbSeparator>
+            <BreadcrumbSeparator>{'>'}</BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link data-detail-breadcrumb-link href={libraryHref}>
@@ -564,7 +564,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator>/</BreadcrumbSeparator>
+            <BreadcrumbSeparator>{'>'}</BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbPage
                 style={inPlaceTransitionActive ? { viewTransitionName: 'handbook-detail-breadcrumb-name' } : undefined}
@@ -1115,7 +1115,7 @@ function TemplateFloorViewer({
           aria-hidden
           className='text-primary/45 pointer-events-none absolute right-3 bottom-2 text-lg font-bold tracking-widest drop-shadow-sm'
         >
-          SAVICO
+          BUILDX
         </span>
         <button
           type='button'
@@ -1199,7 +1199,7 @@ function TemplateDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[88rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
       aria-hidden='true'
     >
       <div className='space-y-3'>

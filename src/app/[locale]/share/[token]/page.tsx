@@ -3,6 +3,9 @@ import { setRequestLocale } from 'next-intl/server'
 import { SharedDossierView } from '@/features/design'
 import type { Locale } from '@/i18n/routing'
 import { SiteFooter } from '@/shared/layouts'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('share')
 
 interface PageProps {
   params: Promise<{ locale: Locale; token: string }>

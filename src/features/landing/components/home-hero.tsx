@@ -15,23 +15,27 @@ import { useTranslations } from 'next-intl'
 import { type MouseEvent, useEffect, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
-import { useSiteImage } from '@/shared/cms'
 import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { useSessionOnce } from '@/shared/hooks'
-import { scrollToAndFlash } from '@/shared/lib'
-import { HERO_CARD_ROWS } from '../constants/landing.constants'
+import { cn } from '@/shared/lib'
+import { HERO_CARD_ROWS, HERO_SLIDE_INTERVAL_MS, HERO_SLIDES } from '../constants/landing.constants'
+import { ResumeProjectLabel } from './resume-project-label'
 
 interface HomeHeroProps {
   onCreateProject?: () => void
   /** "▷ Xem hướng dẫn 1 phút" — mở hộp video của vùng 09 ngay tại chỗ. */
   onWatchIntro?: () => void
   /** Có dự án dở → nút chính đổi thành "Mở tiếp dự án →" trỏ thẳng route này. */
-  resumeHref?: string
+  /** Dự án dở gần nhất — có thì nút chính thành "Tiếp tục dự án <tên>". */
+  resumeProject?: { name: string; href: string }
 }
 
 /** Khoá `sessionStorage` — chuỗi mở màn chỉ chạy một lần mỗi phiên (mục II.2). */
 const INTRO_SESSION_KEY = 'savico.hero-intro-played'
+
+/** Hệ số tăng tốc chuỗi mở màn hero (sheet góp ý BuildX). */
+const INTRO_SPEED = { delay: 0.45, duration: 0.65 } as const
 
 /**
  * Khối hero trang chủ (mục II.2, dựng theo ảnh mockup khách gửi).
@@ -49,12 +53,22 @@ const INTRO_SESSION_KEY = 'savico.hero-intro-played'
  * mọi phần còn lại nhảy thẳng tới trạng thái hoàn chỉnh (transition còn 0s).
  * `#home-hero-end` là mốc để `SiteHeader` biết đã cuộn qua hero hay chưa.
  */
-export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHeroProps) {
+export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeHeroProps) {
   const t = useTranslations('landing.hero')
   // Chữ hero admin sửa được qua kho `uiStrings` (phủ thẳng lên i18n), nên ở đây
   // chỉ cần `t` — không còn tài liệu `home` song song để lệch nhau nữa.
-  const background = useSiteImage('home.hero')
   const reduceMotion = useReducedMotion()
+  // Ảnh nền chạy slide tự động; giảm chuyển động thì đứng yên ở ảnh đầu.
+  const [slide, setSlide] = useState(0)
+
+  useEffect(() => {
+    if (reduceMotion) return
+    const timer = window.setInterval(
+      () => setSlide((current) => (current + 1) % HERO_SLIDES.length),
+      HERO_SLIDE_INTERVAL_MS
+    )
+    return () => window.clearInterval(timer)
+  }, [reduceMotion])
 
   const seenBefore = useSessionOnce(INTRO_SESSION_KEY)
   // Cuộn hay bấm giữa chừng cũng nhảy thẳng tới trạng thái hoàn chỉnh — gộp
@@ -77,41 +91,49 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
   }, [skip])
 
   /** Từng mốc thời gian của chuỗi mở màn — 0s hết khi `skip`. */
+  // Góp ý BuildX: mở màn đang chậm, đầu trang trống quá lâu — mọi mốc chạy
+  // nhanh gấp đôi (độ trễ × 0,45, thời lượng × 0,65), thứ tự giữ nguyên.
   const seq = (delay: number, duration = 0.7): Transition => ({
-    duration: skip ? 0 : duration,
-    delay: skip ? 0 : delay,
+    duration: skip ? 0 : duration * INTRO_SPEED.duration,
+    delay: skip ? 0 : delay * INTRO_SPEED.delay,
     ease: revealEase
   })
 
   return (
     <section id='home-hero' className='relative isolate overflow-hidden'>
       <div aria-hidden className='absolute inset-0 -z-10'>
+        {/* Dưới `lg`: ảnh phủ kín nền sau khối chữ. Từ `lg`: banner đứng bên phải,
+            giữ đúng tỉ lệ 16:9 để thấy trọn khung hình (ảnh mẫu trong sheet góp ý),
+            mép trái mờ dần vào nền trang. */}
         <motion.div
-          className='hero-photo-drift absolute inset-0'
+          className='hero-photo-drift absolute inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:aspect-[16/9] lg:h-full'
           initial={{ opacity: skip ? 1 : 0, scale: 1.03 }}
           animate={{ opacity: 1 }}
           transition={seq(1.05, 0.9)}
         >
-          <Image src={background} alt='' fill priority sizes='100vw' className='object-cover object-center' />
+          {/* Các ảnh chồng lên nhau, chỉ ảnh đang chiếu đậm — chuyển ảnh là mờ dần
+              chéo nhau, ảnh sau đã tải sẵn nên không nháy trắng. */}
+          {HERO_SLIDES.map((src, index) => (
+            <Image
+              key={src}
+              src={src}
+              alt=''
+              fill
+              priority={index === 0}
+              sizes='(min-width: 1024px) 60vw, 100vw'
+              className={cn(
+                'object-cover object-center transition-opacity duration-1000 ease-in-out',
+                index === slide ? 'opacity-100' : 'opacity-0'
+              )}
+            />
+          ))}
+          {/* Mép trái banner tan vào nền trang (chỉ từ `lg`). */}
+          <div className='from-background absolute inset-y-0 left-0 hidden w-1/3 bg-gradient-to-r to-transparent lg:block' />
         </motion.div>
-        {/* CHỈ phủ theo chiều ngang — đặc bên trái cho cột chữ, tan dần sang
-            phải. Trước đây có thêm lớp phủ dọc làm mép dưới ảnh chìm vào nền
-            trang; mất mép thì thẻ số liệu chẳng còn đường viền nào để nằm đè
-            lên, nên bỏ. */}
-        <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r to-transparent' />
+        {/* Dưới `lg` ảnh nằm sau chữ nên phủ ngang cả khung: đặc bên trái cho cột
+            chữ, tan dần sang phải. */}
+        <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r to-transparent lg:hidden' />
       </div>
-
-      {/* Dòng ghi chú viết tay góc phải trên (ảnh mockup) — "vẽ nét" bằng
-          clip-path quét trái→phải, chạy SAU CÙNG trong chuỗi mở màn. Ẩn dưới
-          lg: chỗ đó không còn ảnh để chú thích, chen vào chỉ làm chật cột chữ. */}
-      <motion.p
-        initial={{ clipPath: skip ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
-        animate={{ clipPath: 'inset(0 0% 0 0)' }}
-        transition={seq(1.55, 1.2)}
-        className='font-hand text-primary pointer-events-none absolute top-10 right-10 hidden max-w-[17rem] -rotate-4 text-center text-xl leading-snug text-balance lg:block xl:right-20 xl:text-[1.375rem]'
-      >
-        {t('note')}
-      </motion.p>
 
       {/* Dưới `lg` mọi khối xếp dọc: khoảng cách nút "Xem hướng dẫn" → thẻ "Hồ sơ dự án"
           (`gap-y-4.5` = 18px) phải BẰNG khoảng cách thẻ → dải số liệu bên dưới. Dải
@@ -129,32 +151,18 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
             {t('eyebrow')}
           </motion.p>
 
-          {/* Tiêu đề có HAI bản dựng theo cỡ màn, chỉ một bản hiện (`hidden` gỡ
-              bản kia khỏi cây trợ năng nên trình đọc màn hình không đọc đôi):
-
-              · DƯỚI `lg` (mobile/tablet) — chữ chảy liền: phần đầu + phần nhấn là
-                một đoạn văn duy nhất, từ cuối phần đầu và từ đầu phần nhấn nằm
-                chung một dòng, không còn "ngay" đứng một mình. Không `text-balance`
-                (nó co dòng cho đều nên ngắt sớm dù còn chỗ). Tối đa 3 dòng bằng
-                `max-h` 3 × 1.15em (dư 0.05em) chứ KHÔNG `line-clamp-3` — cái đó
-                biến khối thành `-webkit-box` xếp dọc các phần con, mất chuyện chữ
-                chảy liền; chữ dư bị cắt nên CMS có nhắc giới hạn này.
-                Phần nhấn KHÔNG dùng lớp phủ `absolute` (vỡ khi xuống dòng) mà tô
-                màu bằng `background-clip: text` + dải chuyển sắc trượt từ trái;
-                span `inline` nên xuống dòng theo từng từ, dải trượt qua lần lượt
-                từng đoạn dòng.
-              · Từ `lg` (desktop) — giữ NGUYÊN bản cũ: hai khối `inline-block` cách
-                nhau bằng `<br />`, tô xanh bằng lớp phủ clip-path.
-
-              Chỗ ngắt dòng do admin tự đặt: ký tự xuống dòng trong
-              `messages/*.json` / ô nhập của CMS, `whitespace-pre-line` giữ nó —
-              để tránh trình duyệt tự ngắt giữa một cụm từ. */}
-          <h1 className='text-3xl leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.4rem] lg:text-balance'>
+          {/* Tiêu đề chỉ có MỘT bản trong HTML (sheet góp ý BuildX: bản cũ dựng hai
+              bản + một lớp chữ chồng cho hiệu ứng nên mã trang lặp câu). Phần nhấn
+              tô màu bằng `background-clip: text` + dải chuyển sắc trượt từ trái —
+              span `inline` nên xuống dòng theo từng từ; từ `lg` phần nhấn xuống
+              dòng riêng. Dưới `lg` tối đa 3 dòng (`max-h` 3 × 1.15em). Chỗ ngắt
+              dòng admin đặt bằng ký tự xuống dòng được `whitespace-pre-line` giữ. */}
+          <h1 className='text-3xl leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
             <motion.span
               initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={seq(0.1, 0.75)}
-              className='block max-h-[3.5em] overflow-hidden whitespace-pre-line lg:hidden'
+              className='block max-h-[3.5em] overflow-hidden whitespace-pre-line lg:max-h-none'
             >
               {t('titleLead')}{' '}
               <motion.span
@@ -166,43 +174,11 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
                     'linear-gradient(to right, var(--color-primary-strong) 50%, color-mix(in oklab, var(--color-foreground) 35%, transparent) 50%)',
                   backgroundSize: '200% 100%'
                 }}
-                className='bg-clip-text text-transparent'
+                className='bg-clip-text text-transparent lg:block lg:whitespace-nowrap'
               >
                 {t('titleAccent')}
               </motion.span>
             </motion.span>
-
-            <span className='hidden whitespace-pre-line lg:contents'>
-              <motion.span
-                initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={seq(0.1, 0.75)}
-                className='inline-block'
-              >
-                {t('titleLead')}
-              </motion.span>
-              <br />
-              {/* "tô xanh từ trái": chữ nền mờ luôn đọc được (kể cả tắt JS), lớp
-                  xanh nằm đè lên quét trái→phải bằng clip-path — hai lớp cùng
-                  chữ nên khớp pixel-perfect, không lệch glyph. */}
-              <motion.span
-                initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={seq(0.1, 0.75)}
-                className='relative inline-block'
-              >
-                <span className='text-foreground/35'>{t('titleAccent')}</span>
-                <motion.span
-                  aria-hidden
-                  initial={{ clipPath: skip ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
-                  animate={{ clipPath: 'inset(0 0% 0 0)' }}
-                  transition={seq(0.9, 0.9)}
-                  className='text-primary-strong absolute inset-0 whitespace-nowrap'
-                >
-                  {t('titleAccent')}
-                </motion.span>
-              </motion.span>
-            </span>
           </h1>
 
           {/* Chỗ xuống dòng nằm TRONG câu chữ (ký tự xuống dòng trong
@@ -224,10 +200,10 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
             transition={seq(0.72, 0.75)}
             className='flex flex-col gap-3 pt-1 sm:flex-row'
           >
-            {resumeHref ? (
+            {resumeProject ? (
               <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>
-                <Link href={resumeHref}>
-                  {t('resumeCta')}
+                <Link href={resumeProject.href} title={`${t('resumeCta')} ${resumeProject.name}`}>
+                  <ResumeProjectLabel label={t('resumeCta')} name={resumeProject.name} />
                   <ArrowRight className='size-4' />
                 </Link>
               </Button>
@@ -252,7 +228,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeHref }: HomeHero
           </motion.div>
         </div>
 
-        <HeroDossierCard skip={skip} skipStar={skipStar} seq={seq} />
+        <HeroDossierCard skip={skip} skipStar={skipStar} seq={seq} onCreateProject={onCreateProject} />
       </div>
     </section>
   )
@@ -262,6 +238,8 @@ interface HeroDossierCardProps {
   skip: boolean
   skipStar: boolean
   seq: (delay: number, duration?: number) => Transition
+  /** "Xem hồ sơ mẫu" mở hộp thoại Tạo dự án mới (sheet góp ý BuildX). */
+  onCreateProject?: () => void
 }
 
 /**
@@ -272,7 +250,7 @@ interface HeroDossierCardProps {
  * Rê chuột: nhấc + nghiêng nhẹ THEO CHUỘT (tilt 3D bám vị trí con trỏ trong
  * thẻ) — khác `whileHover` tĩnh, cần theo dõi `onMouseMove` để tính góc.
  */
-function HeroDossierCard({ skip, skipStar, seq }: HeroDossierCardProps) {
+function HeroDossierCard({ skip, skipStar, seq, onCreateProject }: HeroDossierCardProps) {
   const t = useTranslations('landing.hero.card')
 
   const rotateX = useMotionValue(0)
@@ -317,8 +295,8 @@ function HeroDossierCard({ skip, skipStar, seq }: HeroDossierCardProps) {
                 }
           }
           transition={{
-            duration: skipStar ? 0 : 1.05,
-            delay: skipStar ? 0 : 1.35,
+            duration: skipStar ? 0 : 1.05 * INTRO_SPEED.duration,
+            delay: skipStar ? 0 : 1.35 * INTRO_SPEED.delay,
             times: [0, 0.18, 0.55, 1],
             ease: 'easeInOut'
           }}
@@ -329,8 +307,8 @@ function HeroDossierCard({ skip, skipStar, seq }: HeroDossierCardProps) {
             initial={{ opacity: 0, scale: 0.6 }}
             animate={skipStar ? { opacity: 0, scale: 1 } : { opacity: [0, 0, 0.9, 0], scale: [0.6, 0.8, 1.8, 2.1] }}
             transition={{
-              duration: skipStar ? 0 : 1.05,
-              delay: skipStar ? 0 : 1.35,
+              duration: skipStar ? 0 : 1.05 * INTRO_SPEED.duration,
+              delay: skipStar ? 0 : 1.35 * INTRO_SPEED.delay,
               times: [0, 0.18, 0.55, 1],
               ease: 'easeInOut'
             }}
@@ -360,19 +338,16 @@ function HeroDossierCard({ skip, skipStar, seq }: HeroDossierCardProps) {
         initial={{ opacity: skip ? 1 : 0 }}
         animate={{ opacity: 1 }}
         transition={seq(1.2, 0.45)}
-        className='flex items-center justify-between gap-4 border-t pt-2 text-xs'
+        className='flex flex-col gap-0.5 border-t pt-2 text-xs'
       >
+        {/* Nhãn trên, số dưới: "Tổng dự toán (mẫu)" + "Khoảng 2,1 tỷ đồng" không vừa một hàng thẻ 14rem. */}
         <span className='font-semibold'>{t('totalLabel')}</span>
-        <span className='text-primary font-semibold'>{t('totalValue')}</span>
+        <span className='text-primary text-sm font-semibold'>{t('totalValue')}</span>
       </motion.div>
 
-      {/* "Xem hồ sơ mẫu": cuộn mượt TỚI vùng 07 trên cùng trang thay vì điều
-          hướng sang /handbook — thẻ đầu của khối "Hồ sơ mẫu" sáng viền 1 nhịp. */}
-      <Button
-        type='button'
-        className='brand-green-button h-8.5 w-full rounded-lg text-xs'
-        onClick={() => scrollToAndFlash('home-dossier-0')}
-      >
+      {/* "Xem hồ sơ mẫu": mở hộp thoại Tạo dự án mới (sheet góp ý BuildX) —
+          trước đây chỉ cuộn xuống khối "Hồ sơ mẫu" bên dưới. */}
+      <Button type='button' className='brand-green-button h-8.5 w-full rounded-lg text-xs' onClick={onCreateProject}>
         {t('cta')}
       </Button>
     </motion.div>

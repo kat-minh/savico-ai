@@ -2,6 +2,7 @@
 
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
 import {
+  ArrowLeft,
   CheckCircle2,
   FileText,
   Info,
@@ -314,8 +315,18 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
       data-page-entrance={entranceState}
       data-checkout-confirm-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'
     >
+      {/* Góp ý BuildX: màn này chỉ có logo để về trang chủ — thêm lối lùi về bảng giá. */}
+      <button
+        type='button'
+        onClick={backToPlan}
+        className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium transition-colors'
+      >
+        <ArrowLeft className='size-4' />
+        {t('backToPlans')}
+      </button>
+
       <CheckoutSteps
         current='confirm'
         onCompletedStep={(step) => {
@@ -509,7 +520,7 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
                 ),
                 payment: (chunks) => (
                   <Link
-                    href={ROUTES.PRIVACY}
+                    href={ROUTES.PAYMENT_POLICY}
                     target='_blank'
                     rel='noopener noreferrer'
                     onClick={(event) => event.stopPropagation()}

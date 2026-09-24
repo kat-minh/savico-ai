@@ -7,7 +7,6 @@ import {
   FilePen,
   FileText,
   House,
-  Sparkles,
   Users,
   type LucideIcon
 } from 'lucide-react'
@@ -20,6 +19,7 @@ import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { HOME_JOURNEY_STEPS, type HomeJourneyStep } from '../constants/landing.constants'
+import { ResumeProjectLabel } from './resume-project-label'
 
 const STEP_ICON: Record<HomeJourneyStep, LucideIcon> = {
   project: FilePen,
@@ -34,7 +34,7 @@ const DETAIL_FIELDS = ['youDo', 'savicoDoes', 'youGet'] as const
 interface HomeJourneyProps {
   onCreateProject?: () => void
   /** Dự án dở gần nhất — bước hiện tại tự sáng, các bước trước có dấu ✓. */
-  activeProject?: { id: string; href: string; currentStep: HomeJourneyStep } | null
+  activeProject?: { name: string; href: string; currentStep: HomeJourneyStep } | null
 }
 
 /**
@@ -100,14 +100,10 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
     <section id='home-journey' className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-14 lg:px-8 lg:py-16'>
       <header className='flex flex-wrap items-end justify-between gap-x-10 gap-y-3'>
         <div className='space-y-2'>
-          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
-            {t('eyebrow')}
-          </p>
+          {/* Góp ý BuildX: bỏ dòng nhãn, chỉ còn tiêu đề + một câu mô tả. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+          <p className='text-muted-foreground max-w-5xl text-sm text-pretty'>{t('subtitle')}</p>
         </div>
-        <p className='text-muted-foreground text-sm text-pretty lg:max-w-xs lg:text-right lg:whitespace-pre-line'>
-          {t('note')}
-        </p>
       </header>
 
       <ol
@@ -251,7 +247,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
       </ol>
 
       {/* Từ `sm`: bấm 1 thẻ thì khung chi tiết NÀY (chung, nằm dưới hàng thẻ) trượt mở
-          ra 3 cột "bạn làm gì / SAVICO làm gì / bạn nhận được" cho bước đó —
+          ra 3 cột "bạn làm gì / BuildX làm gì / bạn nhận được" cho bước đó —
           giống ảnh mockup; bấm lại chính thẻ đang mở thì khung đóng lại. */}
       <AnimatePresence initial={false}>
         {expanded ? (
@@ -282,14 +278,14 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.4, delay: 0.85, ease: revealEase }}
         // Dưới `sm`: nút ở TRÊN, dòng gợi ý "Chỉ cần 1 tấm ảnh lô đất" ở DƯỚI (xếp dọc). Trước đây `flex-wrap`
-        // chỉ xuống dòng khi nhãn nút dài ("Mở tiếp dự án SVC-…"); nhãn ngắn "Tạo dự án mới" thì hai phần lọt
+        // chỉ xuống dòng khi nhãn nút dài ("Tiếp tục dự án <tên>"); nhãn ngắn "Tạo dự án mới" thì hai phần lọt
         // chung một hàng.
         className='mt-8 flex flex-col items-center gap-y-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6'
       >
         {activeProject ? (
           <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>
-            <Link href={activeProject.href}>
-              {t('resumeCta', { id: activeProject.id })}
+            <Link href={activeProject.href} title={`${t('resumeCta')} ${activeProject.name}`}>
+              <ResumeProjectLabel label={t('resumeCta')} name={activeProject.name} />
               <ArrowRight className='size-4' />
             </Link>
           </Button>
@@ -302,17 +298,6 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
             <ArrowRight className='size-4' />
           </Button>
         )}
-        <p className='text-muted-foreground flex items-center gap-2 text-sm'>
-          <motion.span
-            initial={{ opacity: 0, scale: 0.5, rotate: -30 }}
-            whileInView={{ opacity: 1, scale: [0.5, 1.3, 1], rotate: 0 }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 0.5, delay: 1.05 }}
-          >
-            <Sparkles className='text-primary size-4' />
-          </motion.span>
-          {t('ctaHint')}
-        </p>
       </motion.div>
     </section>
   )

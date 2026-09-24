@@ -66,7 +66,6 @@ export function SupervisionSummary({ projectId }: SupervisionSummaryProps) {
             {tAlias(project.packageTier)}
           </span>
           <p className='mt-1.5 font-semibold text-pretty'>{project.projectName}</p>
-          <p className='text-muted-foreground font-mono text-xs'>{project.packageCode}</p>
         </div>
       </div>
 

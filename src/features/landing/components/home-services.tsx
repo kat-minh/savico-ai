@@ -2,12 +2,10 @@
 
 import { useState } from 'react'
 import { ArrowRight, ChevronRight, HardHat, PencilRuler, ShieldCheck, Users, type LucideIcon } from 'lucide-react'
-import Image from 'next/image'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
-import { useSiteImage } from '@/shared/cms'
 import { revealEase, TurnkeyRequestDialog } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { ROUTES } from '@/shared/constants/routes'
@@ -36,23 +34,21 @@ const SERVICE_HREF: Record<Exclude<HomeService, 'turnkey'>, string> = {
 /**
  * Dải xanh "Gói dịch vụ SAVICO" — bốn gói, mỗi gói một việc rõ ràng.
  *
- * Bố cục hai cột: bốn thẻ bên trái, bên phải là mẩu giấy nhớ viết tay + ảnh minh
- * hoạ (đang là ảnh TẠM, chờ ảnh khách gửi).
+ * Bốn thẻ dàn một hàng (góp ý BuildX: bỏ ảnh minh hoạ + giấy nhớ bên phải).
  *
- * ★ Thẻ hiện lần lượt; giấy nhớ "dán" vào (xoay + nảy) rồi chữ tay vẽ nét; ảnh
- * hiện dần. Rê thẻ: nhấc, viền sáng, nút đầy màu, lộ dòng "Dùng ở bước…" trong
- * khoảng đã chừa sẵn (thẻ không đổi kích thước). Rê giấy nhớ: lắc nhẹ.
+ * ★ Thẻ hiện lần lượt. Rê thẻ: nhấc, viền sáng, nút đầy màu, lộ dòng "Dùng ở
+ * bước…" trong khoảng đã chừa sẵn (thẻ không đổi kích thước).
  */
 interface HomeServicesProps {
   ownedDesignRemaining?: number
+  /** Đã mua gói giám sát → nút thẻ Giám sát là "Mở gói" tới Tài khoản của tôi (góp ý BuildX). */
+  ownsSupervision?: boolean
 }
 
-export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
+export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: HomeServicesProps) {
   const t = useTranslations('landing.services')
-  const illustration = useSiteImage('home.services')
   const [turnkeyOpen, setTurnkeyOpen] = useState(false)
   const [hovered, setHovered] = useState<HomeService | null>(null)
-  const [noteReady, setNoteReady] = useState(false)
   // Mobile cuộn ngang: thẻ kế tiếp chỉ LÓ một mép nên không đạt 40% diện tích → kẹt ở opacity 0
   // (thẻ trống) cho tới khi vuốt. `some` = chỉ cần thấy 1 pixel là hiện.
   const isMobile = useMediaQuery('(max-width: 639px)')
@@ -60,56 +56,11 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
 
   return (
     <section id='home-services' className='bg-primary-strong text-primary-foreground relative isolate overflow-hidden'>
-      {/* Ảnh minh hoạ TRÀN mép phải và cao hết dải (ảnh mockup), giấy nhớ ghim
-          đè lên đầu ảnh. Đặt tuyệt đối chứ không phải một cột của lưới: trong
-          ảnh nó vượt lên trên hàng thẻ và bị mép phải dải cắt ngang. */}
-      <div aria-hidden className='pointer-events-none absolute inset-y-0 right-0 hidden w-[17rem] lg:block'>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.6, ease: revealEase }}
-          className='absolute inset-0'
-        >
-          <Image src={illustration} alt='' fill sizes='272px' className='object-contain object-right-bottom' />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6, rotate: 18 }}
-          whileInView={{ opacity: 1, scale: 1, rotate: -6 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: revealEase }}
-          onAnimationComplete={() => setNoteReady(true)}
-          className='absolute top-36 left-0'
-        >
-          <motion.div
-            whileHover={{ rotate: [0, 2, -2, 1, 0] }}
-            transition={{ duration: 0.55, ease: 'easeInOut' }}
-            className='bg-brand-orange-soft text-foreground font-hand pointer-events-auto relative rounded-sm px-4 py-2 text-base leading-tight whitespace-pre-line shadow-lg'
-          >
-            <span className='bg-foreground/25 absolute top-1.5 left-2.5 size-1.5 rounded-full' />
-            <span className='bg-foreground/25 absolute top-1.5 right-2.5 size-1.5 rounded-full' />
-            {t('note')
-              .split('\n')
-              .map((line, index) => (
-                <motion.span
-                  key={line}
-                  initial={{ clipPath: 'inset(0 100% 0 0)' }}
-                  animate={{ clipPath: noteReady ? 'inset(0 0% 0 0)' : 'inset(0 100% 0 0)' }}
-                  transition={{ duration: 0.75, delay: 0.12 + index * 0.78, ease: revealEase }}
-                  className='block'
-                >
-                  {line}
-                </motion.span>
-              ))}
-          </motion.div>
-        </motion.div>
-      </div>
-
       <div className='relative mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-12'>
         <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
           <div className='space-y-2'>
             {/* Dưới `lg` khối đầu chỉ còn tiêu đề + mô tả: dòng nhãn ẩn, tiêu đề đổi thành
-                "Gói dịch vụ SAVICO" (`titleMobile`) thay cho nhãn. Từ `lg` giữ nguyên cả hai. */}
+                "Gói dịch vụ BuildX" (`titleMobile`) thay cho nhãn. Từ `lg` giữ nguyên cả hai. */}
             <p className='text-primary-foreground/70 hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
               {t('eyebrow')}
             </p>
@@ -130,13 +81,9 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
           </Link>
         </header>
 
-        {/* Chừa chỗ HẸP hơn bề ngang ảnh: thẻ cuối cố ý đè lên mép trái ảnh
-            minh hoạ một chút, đúng như ảnh mockup. */}
-        <div className='mt-8 lg:pr-[13rem]'>
-          {/* Dưới `sm`: 4 thẻ thành MỘT HÀNG NGANG cuộn được (như hàng 4 cột của desktop), cuối hàng
-              chừa một ô cho ảnh + giấy nhớ — chỗ mà desktop dành ở cột phải (`lg:pr-[13rem]`). Từ `sm`
-              giữ lưới cũ (2 cột, 4 cột ở `xl`). */}
-          <ul className='-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4'>
+        <div className='mt-8'>
+          {/* Dưới `sm`: 4 thẻ thành MỘT HÀNG NGANG cuộn được. Từ `sm` lưới 2 cột, `lg` đủ 4 thẻ một hàng. */}
+          <ul className='-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4'>
             {HOME_SERVICES.map((service, index) => {
               const Icon = SERVICE_ICON[service]
               const isHovered = hovered === service
@@ -193,8 +140,20 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
                         variant={isHovered ? 'default' : 'outline'}
                         className='h-9 w-full rounded-lg text-xs transition-colors'
                       >
-                        <Link href={ROUTES.DESIGN}>
+                        {/* Góp ý BuildX: nút đúng với nơi đến — "Xem gói thiết kế" mở Bảng giá. */}
+                        <Link href={ROUTES.PLANS}>
                           {t('openPackage')}
+                          <ArrowRight className='size-3.5' />
+                        </Link>
+                      </Button>
+                    ) : service === 'supervision' && ownsSupervision ? (
+                      <Button
+                        asChild
+                        variant={isHovered ? 'default' : 'outline'}
+                        className='h-9 w-full rounded-lg text-xs transition-colors'
+                      >
+                        <Link href={ROUTES.ACCOUNT}>
+                          {t('openSupervision')}
                           <ArrowRight className='size-3.5' />
                         </Link>
                       </Button>
@@ -223,19 +182,6 @@ export function HomeServices({ ownedDesignRemaining }: HomeServicesProps) {
                 </motion.li>
               )
             })}
-
-            {/* Ô cuối hàng (chỉ mobile): ảnh minh hoạ + giấy nhớ như cột phải của desktop. Tĩnh — không
-                chạy hoạt ảnh vẽ chữ của bản desktop. */}
-            <li aria-hidden className='relative min-h-56 w-[62%] shrink-0 snap-start sm:hidden'>
-              <Image src={illustration} alt='' fill sizes='240px' className='object-contain object-right-bottom' />
-              <div className='absolute top-6 left-0 -rotate-6'>
-                <div className='bg-brand-orange-soft text-foreground font-hand relative rounded-sm px-4 py-2 text-base leading-tight whitespace-pre-line shadow-lg'>
-                  <span className='bg-foreground/25 absolute top-1.5 left-2.5 size-1.5 rounded-full' />
-                  <span className='bg-foreground/25 absolute top-1.5 right-2.5 size-1.5 rounded-full' />
-                  {t('note')}
-                </div>
-              </div>
-            </li>
           </ul>
         </div>
       </div>

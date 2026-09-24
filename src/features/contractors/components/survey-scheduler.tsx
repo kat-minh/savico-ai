@@ -324,7 +324,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
 
   if (!contractor) {
     return (
-      <div className='mx-auto w-[94%] max-w-[80rem] space-y-5 py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-8'>
         <Skeleton className='h-20 rounded-2xl' />
         <Skeleton className='h-96 rounded-2xl' />
       </div>
@@ -378,9 +378,9 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
           x: leavingBack ? 20 : 0
         }}
         transition={{ duration: leavingBack ? 0.18 : 0.45, ease: revealEase }}
-        className='mx-auto w-[94%] max-w-[80rem] space-y-5 py-8'
+        className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-8'
       >
-        <ProjectContextBar brief={brief} compact />
+        <ProjectContextBar brief={brief} />
 
         {/* Liên kết quay lại sát mép trái, tiêu đề canh giữa TRANG. */}
         <div className='relative space-y-3 lg:space-y-0'>

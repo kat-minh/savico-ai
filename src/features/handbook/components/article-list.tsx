@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { ArrowRight, LoaderCircle, RotateCcw, Search } from 'lucide-react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import type { Locale } from '@/i18n/routing'
 import { Link } from '@/i18n/navigation'
 import { EmptyState, Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
@@ -13,6 +14,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
 import { useDebouncedValue } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import {
   ARTICLE_PAGE_SIZE,
   HANDBOOK_ARTICLE_LIST_HISTORY_KEY,
@@ -107,7 +109,7 @@ function readArticleListRestoreState(): ArticleListRestoreState | null {
 export function ArticleList() {
   const t = useTranslations('handbook.articles')
   const { nameOf: labelName, options: labelOptions } = useArticleLabels()
-  const format = useFormatter()
+  const locale = useLocale() as Locale
   const [restoreState] = useState(readArticleListRestoreState)
   const initialCategory = restoreState?.category ?? ALL
   const initialTerm = restoreState?.term ?? ''
@@ -563,92 +565,40 @@ export function ArticleList() {
           </div>
         ) : (
           <ul ref={rowsRef} data-article-rows className='divide-y'>
-            {visible.map((article) => {
-              const expanded = openId === article.id
-              return (
-                <li key={article.id} data-article-row-item={article.id} className='origin-top overflow-hidden'>
-                  <button
-                    data-article-row
-                    type='button'
-                    onClick={() => setOpenId(expanded ? null : article.id)}
-                    aria-expanded={expanded}
-                    className='group/row flex w-full flex-wrap items-center gap-4 rounded-lg px-1 py-3 text-left transition-colors duration-200 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
-                  >
-                    <div data-article-row-image className='shrink-0'>
-                      <Photo className='size-16 rounded-lg' src={article.imageUrl} alt={article.title} sizes='64px' />
-                    </div>
-                    <div className='min-w-0 flex-1 space-y-1'>
-                      <Badge variant='secondary'>{labelName(article.category)}</Badge>
-                      <h3 data-article-row-title className='text-sm font-semibold transition-colors duration-200'>
-                        <HighlightText text={article.title} query={appliedQuery} />
-                      </h3>
-                    </div>
-                    <p className='text-muted-foreground shrink-0 text-xs'>
-                      {format.dateTime(new Date(article.publishedAt), { dateStyle: 'short' })}
-                      <span aria-hidden> · </span>
-                      {t('readingTime', { minutes: article.readingMinutes })}
-                    </p>
-                    <span
-                      data-row-plus
-                      data-open={expanded ? 'true' : 'false'}
-                      aria-label={expanded ? t('collapse') : t('expand')}
-                      className={cn(
-                        'flex size-7 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-200',
-                        expanded ? 'bg-primary text-primary-foreground' : 'bg-accent text-primary-strong'
-                      )}
-                    >
-                      <span aria-hidden className='relative block size-4'>
-                        <span
-                          data-plus-horizontal
-                          className='bg-current absolute top-1/2 left-1/2 h-0.5 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full'
-                        />
-                        <span
-                          data-plus-vertical
-                          className='bg-current absolute top-1/2 left-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full'
-                        />
-                      </span>
-                    </span>
-                  </button>
-
-                  <div
-                    data-article-detail
-                    className={cn(
-                      'grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none',
-                      expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                    )}
-                  >
-                    <div className='overflow-hidden'>
-                      <div className='px-1 pb-3 sm:pl-20'>
-                        <p className='text-muted-foreground text-sm text-pretty'>{article.excerpt}</p>
-                        <Link
-                          data-stage-guide-link
-                          data-article-detail-link
-                          href={handbookArticleRoute(article.slug)}
-                          onClick={saveReturnState}
-                          className='text-primary mt-2 inline-flex items-center gap-1.5 text-sm font-medium'
-                        >
-                          <span className='relative grid'>
-                            <span aria-hidden className='invisible col-start-1 row-start-1 font-bold'>
-                              {t('viewDetail')}
-                            </span>
-                            <span className='col-start-1 row-start-1'>{t('viewDetail')}</span>
-                            <span
-                              data-stage-guide-underline
-                              aria-hidden
-                              className='bg-primary absolute right-0 -bottom-0.5 left-0 h-px motion-reduce:transition-none'
-                            />
-                          </span>
-                          <ArrowRight
-                            data-step-link-arrow
-                            className='size-4 transition-transform duration-200 motion-reduce:transition-none'
-                          />
-                        </Link>
-                      </div>
-                    </div>
+            {visible.map((article) => (
+              <li key={article.id} data-article-row-item={article.id} className='origin-top overflow-hidden'>
+                {/* Góp ý BuildX: bấm cả thẻ là vào bài — không còn bước mở rộng mô tả rồi mới
+                    bấm "Xem chi tiết". */}
+                <Link
+                  data-article-row
+                  href={handbookArticleRoute(article.slug)}
+                  onClick={saveReturnState}
+                  className='group/row flex w-full flex-wrap items-center gap-4 rounded-lg px-1 py-3 text-left transition-colors duration-200 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
+                >
+                  <div data-article-row-image className='shrink-0'>
+                    <Photo className='size-16 rounded-lg' src={article.imageUrl} alt={article.title} sizes='64px' />
                   </div>
-                </li>
-              )
-            })}
+                  <div className='min-w-0 flex-1 space-y-1'>
+                    <Badge variant='secondary'>{labelName(article.category)}</Badge>
+                    <h3 data-article-row-title className='text-sm font-semibold transition-colors duration-200'>
+                      <HighlightText text={article.title} query={appliedQuery} />
+                    </h3>
+                  </div>
+                  <p className='text-muted-foreground shrink-0 text-xs'>
+                    {formatDisplayDate(article.publishedAt, locale)}
+                    <span aria-hidden> · </span>
+                    {t('readingTime', { minutes: article.readingMinutes })}
+                  </p>
+                  <span className='text-primary inline-flex shrink-0 items-center gap-1.5 text-sm font-medium'>
+                    {t('readArticle')}
+                    <ArrowRight
+                      data-step-link-arrow
+                      className='size-4 transition-transform duration-200 group-hover/row:translate-x-1 motion-reduce:transition-none'
+                    />
+                  </span>
+                </Link>
+              </li>
+            ))}
           </ul>
         )}
 

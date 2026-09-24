@@ -57,10 +57,11 @@ export function useBookConsultation() {
 }
 
 /** Lịch sử tư vấn của người dùng đang đăng nhập. */
-export function useMyConsultations() {
+export function useMyConsultations(enabled = true) {
   return useQuery({
     queryKey: consultationKeys.myBookings(),
-    queryFn: () => consultationApi.getMyBookings()
+    queryFn: () => consultationApi.getMyBookings(),
+    enabled
   })
 }
 

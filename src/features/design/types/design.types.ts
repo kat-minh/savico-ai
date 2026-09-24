@@ -160,6 +160,8 @@ export interface EstimateResult {
   /** Diện tích sàn do AI ước tính (m²). */
   estimatedFloorArea: number
   xlsxUrl: string
+  /** Lúc dự toán dựng xong (ISO) — thanh tiến trình ghi "Hoàn thành ngày …". */
+  completedAt?: string
 }
 
 /** Trạng thái màn hình Bước 3 (mục III.4). */

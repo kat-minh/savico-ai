@@ -200,7 +200,6 @@ export function ProjectReadyOptionsDialog({
 
 function ReadyDialogHeader({ title, subtitle, closeLabel }: { title: string; subtitle: string; closeLabel: string }) {
   const reduceMotion = useReducedMotion()
-  const tCommon = useTranslations('common.journey')
 
   return (
     <div className='relative shrink-0 bg-background px-5 pt-5 sm:px-6 max-[899px]:pb-3'>
@@ -210,7 +209,7 @@ function ReadyDialogHeader({ title, subtitle, closeLabel }: { title: string; sub
         transition={{ duration: reduceMotion ? 0 : 0.26, ease: [0.22, 1, 0.36, 1] }}
         className='absolute top-5 left-6 hidden origin-top-left min-[900px]:block'
       >
-        <Logo className='origin-top-left scale-[0.92]' tagline={tCommon('brandTagline')} />
+        <Logo className='origin-top-left scale-[0.92]' />
       </motion.div>
 
       <DialogClose

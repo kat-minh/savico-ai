@@ -19,7 +19,7 @@ import { formatPhoneDisplay, normalizePhone } from '@/shared/utils'
 import { useBookConsultation } from '../hooks/use-consultation'
 import { BOOKING_NOTE_MAX_LENGTH, createBookingSchema, type BookingFormValues } from '../schemas/booking.schema'
 import { parseDateKey, slotEndTime } from '../services/consultation.service'
-import type { Consultant } from '../types/consultation.types'
+import type { Consultant, ConsultationBooking } from '../types/consultation.types'
 
 /**
  * Độ lệch tâm giữa nút "Đặt lịch tư vấn" và tâm màn hình lúc bấm — hộp thoại
@@ -40,7 +40,7 @@ interface BookingDialogProps {
   date: string
   time: string
   /** Chạy sau khi đặt lịch xong — màn hồ sơ dùng để bỏ chọn slot vừa đặt. */
-  onBooked?: () => void
+  onBooked?: (booking: ConsultationBooking) => void
   origin: BookingDialogOrigin | null
 }
 
@@ -130,9 +130,9 @@ export function BookingDialog({ open, onOpenChange, consultant, date, time, onBo
         ...(values.note ? { note: values.note } : {})
       },
       {
-        onSuccess: () => {
+        onSuccess: (booking) => {
           onOpenChange(false)
-          onBooked?.()
+          onBooked?.(booking)
         }
       }
     )

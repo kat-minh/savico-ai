@@ -1,6 +1,6 @@
 'use client'
 
-import { useAccountPlan } from '@/features/account'
+import { useAccountPlan, usePurchaseHistory } from '@/features/account'
 import { HomeServices } from '@/features/landing'
 import { useAuth } from '@/shared/auth'
 
@@ -8,6 +8,12 @@ import { useAuth } from '@/shared/auth'
 export function HomeServicesSection() {
   const { isAuthenticated } = useAuth()
   const { data: accountPlan } = useAccountPlan(isAuthenticated)
+  const { data: purchases } = usePurchaseHistory(isAuthenticated)
 
-  return <HomeServices ownedDesignRemaining={accountPlan?.design.remaining} />
+  return (
+    <HomeServices
+      ownedDesignRemaining={accountPlan?.design.remaining}
+      ownsSupervision={isAuthenticated && Boolean(purchases?.supervisionOrderId)}
+    />
+  )
 }

@@ -179,7 +179,7 @@ export function AdminInbox() {
       >
         {totalOpen === 0 ? (
           <Empty
-            image={<CheckCircleTwoTone twoToneColor='#16a34a' style={{ fontSize: 48 }} />}
+            image={<CheckCircleTwoTone twoToneColor='#2a753f' style={{ fontSize: 48 }} />}
             description={t('inbox.allClear')}
             style={{ padding: 32 }}
           />
@@ -193,7 +193,7 @@ export function AdminInbox() {
               >
                 <span
                   className='grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--admin-tint)] text-base'
-                  style={{ color: '#16a34a' }}
+                  style={{ color: '#2a753f' }}
                 >
                   {createElement(queue.icon)}
                 </span>
@@ -211,7 +211,7 @@ export function AdminInbox() {
                   count={queue.count}
                   showZero
                   overflowCount={99}
-                  color={queue.count === 0 ? '#d4d4d8' : queue.urgent ? '#dc2626' : '#16a34a'}
+                  color={queue.count === 0 ? '#d4d4d8' : queue.urgent ? '#dc2626' : '#2a753f'}
                 />
                 <RightOutlined style={{ color: 'var(--admin-muted, #a1a1aa)' }} />
               </div>

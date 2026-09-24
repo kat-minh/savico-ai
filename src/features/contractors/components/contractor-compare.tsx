@@ -190,9 +190,9 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
     <motion.div
       animate={leavingBack ? { opacity: 0, x: 20 } : { opacity: 1, x: 0 }}
       transition={{ duration: 0.18, ease: revealEase }}
-      className='mx-auto w-[94%] max-w-[88rem] space-y-5 py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-8'
     >
-      {preview ? null : <ProjectContextBar brief={brief} compact />}
+      {preview ? null : <ProjectContextBar brief={brief} />}
 
       {/* Liên kết quay lại nằm sát mép trái, tiêu đề canh giữa TRANG chứ không
           canh giữa phần còn lại — nên nó được nhấc ra khỏi luồng ở màn rộng. */}
@@ -654,7 +654,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
         </SheetContent>
       </Sheet>
 
-      <ProjectPickerDialog />
+      {preview ? <ProjectPickerDialog /> : null}
     </motion.div>
   )
 }

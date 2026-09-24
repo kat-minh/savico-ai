@@ -1,45 +1,71 @@
 'use client'
 
-import { House, Pencil } from 'lucide-react'
+import { ArrowLeftRight, House, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import type { ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { contractorBriefRoute } from '@/shared/constants/routes'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
+import { contractorBriefRoute, contractorInvitationsRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { MAX_INVITATIONS } from '../constants/contractors.constants'
+import { useInvitations } from '../hooks/use-invitations'
 import { shortAddress } from '../services/brief.service'
+import { useProjectPickerStore } from '../store/project-picker.store'
 import type { ProjectBrief } from '../types/contractor.types'
+import { ProjectPickerDialog } from './project-picker-dialog'
 
 interface ProjectContextBarProps {
   brief?: ProjectBrief
-  /** Ẩn nhãn phía trên tên dự án ở những màn đã có tiêu đề riêng. */
-  compact?: boolean
   /** Thu thanh về một hàng khi M05 dính dưới navigation trong lúc cuộn. */
   condensed?: boolean
-  /** Đè nhãn mặc định — S12 gọi khối này là "Dự án đang chọn". */
-  label?: string
   /**
-   * Khối hành động dồn về mép phải (S12: viên nhãn số lượt mời, link "Xem lời
-   * mời", nút "Đổi dự án"). Bỏ trống thì chỉ có link "Chỉnh sửa hồ sơ" như cũ.
+   * Thay viên nhãn "Đã mời x/3" mặc định — trang Đề xuất dùng bản có hoạt ảnh lật
+   * số và rung khi hết lượt. Nội dung vẫn phải là "Đã mời x/3".
    */
-  aside?: React.ReactNode
+  invitedPill?: ReactNode
+  /** Hành động riêng của một màn, đứng trước bộ hành động chung (ví dụ "So sánh x/3" ở hồ sơ nhà thầu). */
+  extra?: ReactNode
 }
 
 /**
- * Thanh ngữ cảnh dự án — khối đầu trang DÙNG CHUNG cho S12, S13, S14, S15, S16
- * và S18.
+ * Thanh dự án — MỘT khối dùng chung cho cả luồng tìm nhà thầu (Đề xuất, Hồ sơ
+ * nhà thầu, So sánh, Đặt lịch khảo sát, Đã gửi, Lời mời).
  *
- * Bản mô tả tả lại khối này ở từng màn với chữ hơi khác nhau (và các hình AI vẽ
- * mỗi hình một kiểu). Dựng MỘT component để mọi màn trong luồng có cùng một mốc
- * neo: đang làm việc trên dự án nào, hồ sơ loại gì, sửa hồ sơ ở đâu.
+ * Góp ý BuildX: trước đây mỗi màn một kiểu (nhãn khác nhau, màn có "Đổi dự án",
+ * màn chỉ có "Chỉnh sửa hồ sơ"). Nay màn nào cũng giống nhau: nhãn "Dự án đang
+ * chọn", tên · loại · quy mô · địa chỉ, rồi "Đã mời x/3" + Xem lời mời + Đổi dự
+ * án + Chỉnh sửa hồ sơ. Hộp thoại chọn dự án đi kèm thanh nên không màn nào
+ * phải tự gắn.
+ *
+ * Sửa hồ sơ sau khi đã gửi lời mời tạo phiên bản mới (v2…) — lời mời đã gửi giữ
+ * bản cũ; nhãn "Hồ sơ v2" và chú thích trên nút sửa nói rõ điều đó.
  */
-export function ProjectContextBar({ brief, compact = false, condensed = false, label, aside }: ProjectContextBarProps) {
+export function ProjectContextBar({ brief, condensed = false, invitedPill, extra }: ProjectContextBarProps) {
   const t = useTranslations('contractors.common')
+  const tBar = useTranslations('contractors.projectBar')
   const tScale = useTranslations('contractors.scale')
+  const openPicker = useProjectPickerStore((s) => s.openPicker)
+  const { data: invitations } = useInvitations(brief?.id ?? '')
 
   if (!brief) {
     return <Skeleton className='h-20 w-full rounded-2xl' />
   }
+
+  const invitedCount = invitations?.length ?? 0
+  const version = brief.version ?? 1
+
+  const editLink = (
+    <Link
+      href={contractorBriefRoute(brief.id)}
+      className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
+    >
+      <Pencil className='size-3.5' />
+      {t('editBrief')}
+    </Link>
+  )
 
   return (
     <section
@@ -58,17 +84,15 @@ export function ProjectContextBar({ brief, compact = false, condensed = false, l
       </span>
 
       <div className='min-w-0 flex-1'>
-        {!compact ? (
-          <p
-            aria-hidden={condensed}
-            className={cn(
-              'text-muted-foreground overflow-hidden text-[11px] font-medium tracking-wide uppercase transition-[max-height,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-              condensed ? 'max-h-0 -translate-y-1 opacity-0' : 'max-h-5 translate-y-0 opacity-100'
-            )}
-          >
-            {label ?? t('seekingContractor')}
-          </p>
-        ) : null}
+        <p
+          aria-hidden={condensed}
+          className={cn(
+            'text-muted-foreground overflow-hidden text-[11px] font-medium tracking-wide uppercase transition-[max-height,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+            condensed ? 'max-h-0 -translate-y-1 opacity-0' : 'max-h-5 translate-y-0 opacity-100'
+          )}
+        >
+          {tBar('label')}
+        </p>
 
         <div className='flex flex-wrap items-center gap-2'>
           <h2
@@ -84,10 +108,14 @@ export function ProjectContextBar({ brief, compact = false, condensed = false, l
               {t('selfCreated')}
             </span>
           ) : null}
+          {version > 1 ? (
+            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
+              {tBar('version', { version })}
+            </span>
+          ) : null}
         </div>
 
-        {/* Bản mô tả: "Nhà phố · Trệt + 1 lầu · 120 m² · P. Tân Lợi, Đắk Lắk" —
-            quy mô đứng ngay sau loại công trình. */}
+        {/* "Nhà phố · Trệt + 1 lầu · 120 m² · P. Tân Lợi, Đắk Lắk" — quy mô đứng ngay sau loại công trình. */}
         <p
           aria-hidden={condensed}
           className={cn(
@@ -101,15 +129,41 @@ export function ProjectContextBar({ brief, compact = false, condensed = false, l
         </p>
       </div>
 
-      {aside ?? (
+      <div className='flex flex-wrap items-center gap-3'>
+        {extra}
+        {invitedPill ?? (
+          <span
+            className={cn(
+              'rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap',
+              invitedCount >= MAX_INVITATIONS
+                ? 'bg-brand-orange-soft text-brand-orange'
+                : 'bg-accent text-primary-strong'
+            )}
+          >
+            {tBar('invited', { used: invitedCount, max: MAX_INVITATIONS })}
+          </span>
+        )}
         <Link
-          href={contractorBriefRoute(brief.id)}
-          className='text-primary hover:text-primary/80 inline-flex shrink-0 items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
+          href={contractorInvitationsRoute(brief.id)}
+          className='text-primary-strong text-sm font-medium underline underline-offset-4'
         >
-          <Pencil className='size-3.5' />
-          {t('editBrief')}
+          {tBar('viewInvites')}
         </Link>
-      )}
+        <Button variant='outline' size='sm' onClick={openPicker}>
+          <ArrowLeftRight className='size-4' />
+          {tBar('switchProject')}
+        </Button>
+        {invitedCount > 0 ? (
+          <Tooltip>
+            <TooltipTrigger asChild>{editLink}</TooltipTrigger>
+            <TooltipContent>{tBar('editWarning', { next: `v${version + 1}`, current: `v${version}` })}</TooltipContent>
+          </Tooltip>
+        ) : (
+          editLink
+        )}
+      </div>
+
+      <ProjectPickerDialog currentProjectId={brief.id} />
     </section>
   )
 }

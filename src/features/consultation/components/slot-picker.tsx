@@ -19,6 +19,8 @@ interface SlotPickerProps {
   /** Đổi giá trị (bằng cách tăng dần) là tín hiệu "nhấp sáng một nhịp" ô ngày +
    * giờ đang chọn — CC-04, ngay trước khi hộp thoại xác nhận mở ra. */
   pulseKey?: number
+  /** Khung giờ CHÍNH khách đã đặt (`yyyy-mm-dd|HH:mm`) — hiện "Lịch của bạn" thay vì như khung trống. */
+  myBookings?: ReadonlySet<string>
 }
 
 /** Khóa dịch của nhãn thứ, đánh theo `Date.getDay()` (0 = Chủ nhật). */
@@ -62,7 +64,8 @@ export function SlotPicker({
   onSelectDate,
   selectedTime,
   onSelectTime,
-  pulseKey
+  pulseKey,
+  myBookings
 }: SlotPickerProps) {
   const t = useTranslations('consult.slots')
 
@@ -70,7 +73,10 @@ export function SlotPicker({
 
   return (
     <section className='space-y-4'>
-      <h3 className='text-sm font-semibold tracking-wide uppercase'>{t('title')}</h3>
+      <div className='space-y-1'>
+        <h3 className='text-sm font-semibold tracking-wide uppercase'>{t('title')}</h3>
+        <p className='text-muted-foreground text-xs text-pretty'>{t('sessionInfo')}</p>
+      </div>
 
       <LayoutGroup id='consultation-day-selection'>
         <motion.div
@@ -151,6 +157,8 @@ export function SlotPicker({
                   fullLabel={t('full')}
                   fullHint={t('fullHint')}
                   pulseKey={pulseKey}
+                  mineLabel={t('mine')}
+                  isMine={(time) => Boolean(myBookings?.has(`${selectedDate}|${time}`))}
                 />
               </motion.div>
             ))}
@@ -169,16 +177,36 @@ interface SessionRowProps {
   fullLabel: string
   fullHint: string
   pulseKey?: number
+  mineLabel: string
+  isMine: (time: string) => boolean
 }
 
-function SessionRow({ label, slots, selectedTime, onSelectTime, fullLabel, fullHint, pulseKey }: SessionRowProps) {
+function SessionRow({
+  label,
+  slots,
+  selectedTime,
+  onSelectTime,
+  fullLabel,
+  fullHint,
+  pulseKey,
+  mineLabel,
+  isMine
+}: SessionRowProps) {
   return (
     <div className='flex flex-wrap items-center gap-2 sm:flex-nowrap'>
       <span className='text-muted-foreground w-14 shrink-0 text-sm'>{label}</span>
 
       <div className='grid flex-1 grid-cols-3 gap-2 sm:grid-cols-6'>
         {slots.map((slot) =>
-          slot.full ? (
+          isMine(slot.time) ? (
+            <span
+              key={slot.id}
+              className='border-primary bg-primary/10 text-primary-strong rounded-lg border py-1.5 text-center text-sm font-medium'
+            >
+              <span className='block leading-tight'>{slot.time}</span>
+              <span className='block text-[10px] leading-tight'>{mineLabel}</span>
+            </span>
+          ) : slot.full ? (
             <FullSlotButton key={slot.id} time={slot.time} fullLabel={fullLabel} fullHint={fullHint} />
           ) : (
             <SlotButton

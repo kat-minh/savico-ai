@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "SAVICO AI",
+    "appName": "BuildX",
     "loading": "Đang tải…",
     "save": "Lưu",
     "cancel": "Hủy",
@@ -26,7 +26,7 @@
       "close": "Đóng popup",
       "stepOne": {
         "title": "Bạn đang ở bước nào trong kế hoạch xây nhà?",
-        "subtitle": "Chọn tình trạng hiện tại để SAVICO đưa bạn đến đúng bước tiếp theo.",
+        "subtitle": "Chọn tình trạng hiện tại để BuildX đưa bạn đến đúng bước tiếp theo.",
         "later": "Để sau, tôi tự xem",
         "withoutDrawing": {
           "imageAlt": "Phối cảnh nhà ở và bản vẽ thiết kế",
@@ -75,7 +75,6 @@
     "title": "Trợ lý AI",
     "subtitle": "Hỏi bất cứ điều gì về dự án của bạn",
     "close": "Đóng",
-    "fab": "SAVICO AI Assistant",
     "topicSuggestion": "Hỏi AI về {topic}",
     "nudge": {
       "painPoints": "Đang phân vân chỗ nào? Hỏi tôi thử xem 👋",
@@ -112,7 +111,7 @@
     },
     "register": {
       "title": "Tạo tài khoản",
-      "subtitle": "Đăng ký để bắt đầu thiết kế cùng SAVICO AI",
+      "subtitle": "Đăng ký để bắt đầu thiết kế cùng BuildX AI",
       "nameLabel": "Họ và tên",
       "namePlaceholder": "Nguyễn Văn A",
       "emailLabel": "Email",
@@ -172,8 +171,8 @@
   "legal": {
     "terms": {
       "title": "Điều khoản sử dụng",
-      "updated": "Cập nhật lần cuối: nội dung mẫu — SAVICO cung cấp nội dung chính thức trước khi go-live.",
-      "intro": "Các điều khoản này điều chỉnh việc bạn sử dụng nền tảng SAVICO AI. Khi tạo tài khoản hoặc sử dụng dịch vụ, bạn đồng ý với các điều khoản dưới đây.",
+      "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
+      "intro": "Các điều khoản này điều chỉnh việc bạn sử dụng nền tảng BuildX AI. Khi tạo tài khoản hoặc sử dụng dịch vụ, bạn đồng ý với các điều khoản dưới đây.",
       "sections": [
         {
           "title": "1. Chấp nhận điều khoản",
@@ -189,11 +188,11 @@
         },
         {
           "title": "4. Sở hữu trí tuệ",
-          "body": "Nội dung, thương hiệu và tài liệu trên nền tảng thuộc về SAVICO trừ khi có ghi chú khác."
+          "body": "Nội dung, thương hiệu và tài liệu trên nền tảng thuộc về BuildX trừ khi có ghi chú khác."
         },
         {
           "title": "5. Giới hạn trách nhiệm",
-          "body": "Dự toán chỉ mang tính tham khảo. SAVICO không chịu trách nhiệm cho các quyết định chỉ dựa trên kết quả do AI tạo ra."
+          "body": "Dự toán chỉ mang tính tham khảo. BuildX không chịu trách nhiệm cho các quyết định chỉ dựa trên kết quả do AI tạo ra."
         },
         {
           "title": "6. Liên hệ",
@@ -203,7 +202,7 @@
     },
     "privacy": {
       "title": "Chính sách bảo mật",
-      "updated": "Cập nhật lần cuối: nội dung mẫu — SAVICO cung cấp nội dung chính thức trước khi go-live.",
+      "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
       "intro": "Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn theo Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.",
       "sections": [
         {
@@ -231,6 +230,41 @@
           "body": "Mọi yêu cầu về bảo mật, vui lòng liên hệ qua các kênh ở mục liên hệ."
         }
       ]
+    },
+    "payment": {
+      "title": "Chính sách thanh toán và hoàn tiền",
+      "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
+      "intro": "Chính sách này mô tả cách bạn thanh toán các gói dịch vụ trên nền tảng, cách chúng tôi xác nhận thanh toán và các trường hợp được hoàn tiền.",
+      "sections": [
+        {
+          "title": "1. Phương thức thanh toán",
+          "body": "Các gói thiết kế và gói giám sát được thanh toán qua mã QR chuyển khoản ngân hàng hiển thị ở bước Thanh toán. Vui lòng giữ nguyên nội dung chuyển khoản (mã đơn hàng) để hệ thống đối soát tự động."
+        },
+        {
+          "title": "2. Xác nhận thanh toán",
+          "body": "Sau khi chuyển khoản, đơn hàng chuyển sang trạng thái chờ xác nhận. Thông thường gói được kích hoạt trong vài phút; nếu quá 24 giờ làm việc chưa được kích hoạt, vui lòng liên hệ hỗ trợ kèm mã đơn hàng."
+        },
+        {
+          "title": "3. Hóa đơn",
+          "body": "Hóa đơn điện tử được xuất theo thông tin người mua bạn nhập ở bước Xác nhận đơn hàng. Bạn có thể xem lại đơn hàng và hóa đơn trong mục Tài khoản của tôi."
+        },
+        {
+          "title": "4. Trường hợp được hoàn tiền",
+          "body": "Bạn được hoàn tiền khi: chuyển khoản trùng hoặc thừa so với giá trị đơn hàng; đơn hàng không được kích hoạt do lỗi từ phía nền tảng; hoặc yêu cầu hủy gói trong vòng 7 ngày kể từ ngày thanh toán khi chưa sử dụng lượt nào của gói."
+        },
+        {
+          "title": "5. Trường hợp không hoàn tiền",
+          "body": "Gói đã sử dụng một phần lượt (phương án thiết kế, lượt tra cứu, lượt kiểm tra đã thực hiện) không được hoàn lại phần đã dùng. Quà tặng kèm gói không quy đổi thành tiền."
+        },
+        {
+          "title": "6. Quy trình hoàn tiền",
+          "body": "Gửi yêu cầu qua kênh hỗ trợ kèm mã đơn hàng và lý do. Chúng tôi phản hồi trong 2 ngày làm việc và hoàn tiền về tài khoản đã chuyển trong 7–10 ngày làm việc sau khi yêu cầu được chấp thuận."
+        },
+        {
+          "title": "7. Liên hệ",
+          "body": "Mọi thắc mắc về thanh toán và hoàn tiền, vui lòng liên hệ qua các kênh ở mục liên hệ cuối trang."
+        }
+      ]
     }
   },
   "chatbot": {
@@ -238,7 +272,7 @@
     "send": "Gửi",
     "remaining": "Còn {remaining}/{limit} tin nhắn hôm nay",
     "limitReached": "Bạn đã đạt giới hạn {limit} tin nhắn hôm nay. Vui lòng quay lại vào ngày mai.",
-    "greeting": "Xin chào! Tôi là trợ lý AI của SAVICO. Tôi có thể giải thích bảng dự toán, gợi ý phương án tối ưu chi phí và hướng dẫn bạn qua từng bước. Bạn cần hỗ trợ gì?",
+    "greeting": "Xin chào! Tôi là trợ lý AI của BuildX. Tôi có thể giải thích bảng dự toán, gợi ý phương án tối ưu chi phí và hướng dẫn bạn qua từng bước. Bạn cần hỗ trợ gì?",
     "waitingHint": "AI đang trao đổi với bạn trong lúc xử lý",
     "renderStages": {
       "drawings": "Bộ hồ sơ đang ở công đoạn xử lý bản vẽ. Bạn có thể xem các mẫu bố trí trong cẩm nang trong lúc chờ.",
@@ -272,13 +306,13 @@
     "handbook": "Cẩm nang",
     "guide": "Hướng dẫn",
     "createProject": "Tạo dự án mới",
-    "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
+    "brandTagline": "Kết nối hành trình xây dựng",
     "account": "Tài khoản của tôi",
     "logout": "Đăng xuất",
     "menu": "Menu",
     "guest": "Khách",
     "guestHint": "Đăng nhập để lưu và xem lại dự án của bạn",
-    "plans": "Gói đăng ký",
+    "plans": "Bảng giá",
     "plansGuest": "Bảng giá",
     "consult": "Tư vấn 1:1",
     "admin": "Khu quản trị",
@@ -289,33 +323,35 @@
     "tagline": "Nền tảng thiết kế & dự toán AI, kết nối nhà thầu đã xác minh và giám sát thi công.",
     "contactTitle": "Liên hệ",
     "hotline": "Hotline",
-    "address": "123 Nguyễn Văn Cừ, Phường Tân Lợi, TP. Buôn Ma Thuột, Đắk Lắk",
+    "address": "54 Trần Minh Quyền, phường Vườn Lài, TP. HCM",
     "comingSoon": "Sắp ra mắt",
     "links": {
       "design": "Thiết kế & Dự toán",
-      "services": "Gói dịch vụ",
+      "services": "Bảng giá",
       "contractors": "Tìm nhà thầu",
       "supervision": "Giám sát thi công",
       "turnkey": "Thi công trọn gói",
-      "guide": "Hướng dẫn sử dụng",
+      "guide": "Hướng dẫn",
       "handbook": "Cẩm nang",
       "consult": "Tư vấn 1:1",
       "faq": "Câu hỏi thường gặp",
       "about": "Giới thiệu",
       "privacy": "Chính sách bảo mật",
-      "terms": "Điều khoản sử dụng"
+      "terms": "Điều khoản sử dụng",
+      "paymentPolicy": "Chính sách thanh toán"
     },
     "social": {
-      "facebook": "Facebook SAVICO",
-      "zaloOa": "Zalo OA SAVICO",
-      "youtube": "YouTube SAVICO",
-      "tiktok": "TikTok SAVICO"
+      "facebook": "Facebook BuildX",
+      "zaloOa": "Zalo OA BuildX",
+      "youtube": "YouTube BuildX",
+      "tiktok": "TikTok BuildX",
+      "instagram": "Instagram BuildX"
     },
     "rights": "Tất cả quyền được bảo lưu.",
     "brandTagline": "Kết nối hành trình xây dựng",
     "productTitle": "Sản phẩm",
     "supportTitle": "Hỗ trợ",
-    "aboutTitle": "Về SAVICO",
+    "aboutTitle": "Về BuildX",
     "emailLabel": "Email",
     "addressLabel": "Địa chỉ"
   },
@@ -330,13 +366,13 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "SAVICO — NỀN TẢNG THIẾT KẾ & DỰ TOÁN AI",
+      "eyebrow": "BUILDX — NỀN TẢNG HỖ TRỢ LẬP KẾ HOẠCH & TRIỂN KHAI CÔNG TRÌNH",
       "note": "Từ ảnh lô đất đến ngôi nhà hoàn thiện",
-      "titleLead": "Chụp 1 tấm ảnh lô đất, nhận ngay",
-      "titleAccent": "thiết kế & dự toán",
-      "subtitle": "AI tạo mặt bằng, phối cảnh 3D và dự toán khối lượng từ ảnh lô đất.\nMời nhà thầu đã xác minh và giám sát thi công trên cùng một nền tảng.",
+      "titleLead": "Từ 1 tấm ảnh hiện trạng đến",
+      "titleAccent": "phương án thiết kế và dự toán nhà ở",
+      "subtitle": "Tạo phương án thiết kế và dự toán, so sánh lựa chọn, tìm nhà thầu phù hợp và theo dõi quá trình triển khai trên cùng một nền tảng.",
       "primaryCta": "Tạo dự án ngay",
-      "resumeCta": "Mở tiếp dự án →",
+      "resumeCta": "Tiếp tục dự án",
       "secondaryCta": "Xem hướng dẫn 1 phút",
       "card": {
         "title": "Hồ sơ dự án",
@@ -358,8 +394,8 @@
             "value": "5 bản"
           }
         },
-        "totalLabel": "Tổng cộng",
-        "totalValue": "Xem trong hồ sơ",
+        "totalLabel": "Tổng dự toán (mẫu)",
+        "totalValue": "Khoảng 2,1 tỷ đồng",
         "cta": "Xem hồ sơ mẫu"
       }
     },
@@ -386,11 +422,9 @@
       }
     },
     "painPoints": {
-      "eyebrow": "XÂY NHÀ KHÔNG KHÓ",
-      "title": "Khó là kiểm soát mọi thứ cùng lúc",
-      "subtitle": "Từ ngân sách, thiết kế đến chọn nhà thầu và giám sát thi công — SAVICO giúp bạn chủ động và dễ dàng hơn ở từng bước.",
+      "title": "BUILDX giúp bạn kiểm soát từng bước",
+      "subtitle": "Từ ngân sách, thiết kế đến lựa chọn nhà thầu và giám sát thi công.",
       "note": "Bạn cũng đang\ngặp những vấn đề này?",
-      "solveHint": "Xem cách SAVICO giải quyết",
       "items": {
         "budget": {
           "title": "Không biết chi phí thực tế sẽ bao nhiêu?",
@@ -405,8 +439,8 @@
           "description": "Khó tìm nhà thầu uy tín, đã được xác minh."
         },
         "dossier": {
-          "title": "Hồ sơ thiết kế không đủ để thi công?",
-          "description": "Thiếu bản vẽ, khối lượng chi tiết, dễ phát sinh khi làm."
+          "title": "Thiếu khối lượng và dự toán để làm việc với nhà thầu?",
+          "description": "Không có bảng khối lượng rõ ràng, khó so sánh báo giá và dễ phát sinh chi phí."
         },
         "supervision": {
           "title": "Không có thời gian giám sát tiến độ và chất lượng?",
@@ -415,23 +449,21 @@
       }
     },
     "journey": {
-      "eyebrow": "SAVICO ĐỒNG HÀNH CÙNG BẠN",
-      "title": "Từ ý tưởng đến ngôi nhà hoàn thiện chỉ trong 5 bước",
-      "note": "Bạn luôn biết mình đang ở đâu,\nvà trạng thái từng bước.",
+      "title": "Một hành trình rõ ràng cho dự án của bạn",
+      "subtitle": "BUILDX đồng hành và giúp bạn theo dõi tiến trình dự án trong suốt quá trình thực hiện.",
       "cta": "Tạo dự án mới",
-      "ctaHint": "Chỉ cần 1 tấm ảnh lô đất",
-      "resumeCta": "Mở tiếp dự án {id}",
+      "resumeCta": "Tiếp tục dự án",
       "currentStepBadge": "Bạn đang ở bước này",
       "detailLabels": {
         "youDo": "Bạn làm gì",
-        "savicoDoes": "SAVICO làm gì",
+        "savicoDoes": "BuildX làm gì",
         "youGet": "Bạn nhận được gì"
       },
       "items": {
         "project": {
           "title": "Tạo dự án",
-          "description": "Chụp ảnh lô đất, nhập nhu cầu và phong cách.",
-          "youDo": "Chụp ảnh lô đất, chọn loại công trình và phong cách mong muốn.",
+          "description": "Tải ảnh hiện trạng, mô tả nhu cầu và chọn phong cách thiết kế.",
+          "youDo": "Tải ảnh hiện trạng, chọn loại công trình và phong cách mong muốn.",
           "savicoDoes": "Tạo mã dự án và mở ngay Bước 1 để bạn nhập thông tin.",
           "youGet": "Một dự án sẵn sàng, quay lại tiếp tục bất cứ lúc nào."
         },
@@ -444,7 +476,7 @@
         },
         "dossier": {
           "title": "Hồ sơ thi công",
-          "description": "Render và nhận đầy đủ hồ sơ thiết kế, dự toán.",
+          "description": "Nhận bộ hồ sơ thiết kế và dự toán đầy đủ để làm việc với nhà thầu.",
           "youDo": "Xem lại và tải về bộ hồ sơ khi đã hài lòng với dự toán.",
           "savicoDoes": "Render đầy đủ bản vẽ mặt bằng, phối cảnh và dự toán thành hồ sơ hoàn chỉnh.",
           "youGet": "Bộ hồ sơ đủ để đưa cho bất kỳ nhà thầu nào thi công."
@@ -458,21 +490,21 @@
         },
         "build": {
           "title": "Thi công & Giám sát",
-          "description": "Kỹ sư SAVICO kiểm tra theo mốc, đảm bảo đúng thiết kế và tiến độ.",
+          "description": "Kỹ sư BuildX kiểm tra tại các mốc quan trọng, ghi nhận và báo cáo sai lệch so với thiết kế.",
           "youDo": "Theo dõi tiến độ và duyệt kết quả kiểm tra tại mỗi mốc.",
-          "savicoDoes": "Kỹ sư SAVICO đến tận công trình kiểm tra theo mốc đã hẹn.",
+          "savicoDoes": "Kỹ sư BuildX đến tận công trình kiểm tra theo mốc đã hẹn.",
           "youGet": "Yên tâm công trình đúng thiết kế, đúng tiến độ."
         }
       }
     },
     "services": {
-      "eyebrow": "GÓI DỊCH VỤ SAVICO",
+      "eyebrow": "BẢNG GIÁ BUILDX",
       "title": "Chọn gói phù hợp với giai đoạn của bạn",
       "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
       "viewAll": "Xem tất cả gói",
-      "note": "Đúng gói,\nđúng giai đoạn!",
       "ownedLabel": "Gói của bạn - còn {count} lượt",
-      "openPackage": "Mở gói",
+      "openPackage": "Xem gói thiết kế",
+      "openSupervision": "Mở gói",
       "items": {
         "design": {
           "title": "Gói thiết kế",
@@ -482,24 +514,24 @@
         },
         "contractors": {
           "title": "Tìm nhà thầu",
-          "description": "SAVICO đề xuất nhà thầu đã xác minh, mời tối đa 3 nhà thầu.",
+          "description": "BuildX đề xuất nhà thầu đã xác minh, mời tối đa 3 nhà thầu.",
           "action": "Tìm nhà thầu",
           "usedAtStep": "Dùng ở bước 04"
         },
         "supervision": {
           "title": "Giám sát thi công",
-          "description": "An Tâm (6 lượt) · Toàn Diện (12 lượt) kỹ sư kiểm tra thực tế.",
+          "description": "Gói An Tâm (6 lượt kiểm tra) · Gói Toàn Diện (12 lượt kiểm tra)",
           "action": "Xem gói giám sát",
           "usedAtStep": "Dùng ở bước 05"
         },
         "turnkey": {
           "title": "Thi công trọn gói",
-          "description": "SAVICO khảo sát, ký hợp đồng và thi công đến bàn giao.",
+          "description": "BuildX khảo sát, ký hợp đồng và thi công đến bàn giao.",
           "action": "Đăng ký triển khai",
           "usedAtStep": "Dùng ở bước 04–05"
         }
       },
-      "titleMobile": "Gói dịch vụ SAVICO"
+      "titleMobile": "Bảng giá BuildX"
     },
     "dossiers": {
       "eyebrow": "HỒ SƠ MẪU",
@@ -568,44 +600,58 @@
       "currency": "đ"
     },
     "brands": {
-      "label": "SAVICO ĐƯỢC TIN TƯỞNG BỞI",
+      "label": "BUILDX ĐƯỢC TIN TƯỞNG BỞI",
       "items": {
         "hoaphat": "Hòa Phát",
         "inax": "INAX",
         "viglacera": "Viglacera",
         "dulux": "Dulux",
-        "ancuong": "An Cường",
         "cadivi": "CADIVI",
         "scg": "SCG"
       }
     },
     "testimonials": {
-      "label": "KHÁCH HÀNG NÓI VỀ SAVICO",
+      "label": "KHÁCH HÀNG NÓI VỀ BUILDX",
       "items": {
         "tuan": {
-          "quote": "“Tôi rất hài lòng vì SAVICO giúp tôi có thiết kế đẹp, chi phí rõ ràng và tìm được nhà thầu uy tín.”",
+          "quote": "“Tôi không rành xây dựng nên ban đầu cũng khá mơ hồ. Có BUILDX thì tôi dễ hình dung hơn mình sẽ làm gì và ngân sách khoảng bao nhiêu.”",
           "name": "Anh Minh Tuấn",
-          "meta": "Nhà phố · Buôn Ma Thuột"
+          "meta": "Nhà phố · 120m² · Buôn Ma Thuột"
         },
         "hang": {
-          "quote": "“Quy trình đơn giản, dễ sử dụng. Mọi thông tin minh bạch đã giúp tôi yên tâm hơn rất nhiều.”",
+          "quote": "“Tôi thích nhất là quy trình khá rõ ràng, dễ theo dõi. Có thông tin để so sánh nên tôi cảm thấy chủ động và yên tâm hơn.”",
           "name": "Chị Thu Hằng",
-          "meta": "Biệt thự · Đắk Lắk"
+          "meta": "Biệt thự · 280m² · Đắk Lắk"
         },
         "bao": {
-          "quote": "“SAVICO giúp tôi tiết kiệm rất nhiều thời gian và kiểm soát tốt chi phí xây dựng.”",
+          "quote": "“Trước đây tôi phải tự tìm hiểu khá nhiều thứ nên mất nhiều thời gian. BUILDX giúp tôi tập trung thông tin lại một chỗ, dễ theo dõi và kiểm soát chi phí hơn.”",
           "name": "Anh Quốc Bảo",
-          "meta": "Villa · Đà Lạt"
+          "meta": "Biệt thự · 320m² · Đà Lạt"
+        },
+        "ngocanh": {
+          "quote": "“Tôi có thể xem khá rõ từng bước, từ phương án đến chi phí dự kiến. Nhờ vậy khi trao đổi với nhà thầu cũng thuận tiện hơn.”",
+          "name": "Chị Ngọc Anh",
+          "meta": "Nhà phố · 95m² · TP. Hồ Chí Minh"
+        },
+        "nam": {
+          "quote": "“Điều tôi quan tâm nhất là chi phí có rõ ràng hay không. BUILDX giúp tôi có cái nhìn tổng thể hơn nên khi ra quyết định cũng đỡ mông lung.”",
+          "name": "Anh Hoàng Nam",
+          "meta": "Nhà phố · 140m² · Bình Dương"
+        },
+        "vy": {
+          "quote": "“Tôi không có nhiều thời gian theo sát từ đầu nên rất cần một nền tảng dễ hiểu. BUILDX giúp tôi nắm được tiến độ và biết dự án đang ở giai đoạn nào.”",
+          "name": "Chị Thanh Vy",
+          "meta": "Biệt thự · 250m² · Cần Thơ"
         }
       },
-      "titleMobile": "Khách hàng nói về SAVICO"
+      "titleMobile": "Khách hàng nói về BuildX"
     },
     "cta": {
       "title": "Sẵn sàng bắt đầu dự án của bạn?",
       "subtitle": "Chụp 1 tấm ảnh lô đất — nhận thiết kế & dự toán ngay hôm nay.",
       "action": "Tạo dự án mới",
       "resumeTitle": "Tiếp tục dự án {name} của bạn?",
-      "resumeAction": "Mở tiếp dự án →",
+      "resumeAction": "Tiếp tục dự án",
       "byStatus": {
         "input": "Bạn đang ở bước Nhập liệu — chỉ mất khoảng 2 phút để hoàn tất.",
         "designing": "Thiết kế & dự toán của bạn đang được xử lý — xem tiến độ ngay.",
@@ -668,7 +714,7 @@
       "title": "Kiến thức thực tế cho hành trình xây nhà",
       "viewAll": "Xem tất cả bài viết",
       "newBadge": "Mới",
-      "readTime": "Đọc ~{minutes} phút →",
+      "readTime": "{minutes} phút đọc",
       "titleMobile": "Cẩm nang xây nhà"
     },
     "card": {
@@ -695,15 +741,17 @@
       },
       "optionAll": "Tất cả",
       "scalePrefix": "Quy mô: {value}",
-      "stylePrefix": "Phong cách: {value}"
+      "stylePrefix": "Phong cách: {value}",
+      "prevPage": "Trang trước",
+      "nextPage": "Trang sau"
     },
     "quota": {
-      "lookupRemaining": "Lượt tra hôm nay: {remaining}/{total}",
+      "lookupRemaining": "Còn {remaining}/{total} lượt tra cứu",
       "detailRemaining": "Bạn còn {remaining}/{total} lượt xem chi tiết hôm nay",
       "detailSeen": "Mẫu đã xem - không trừ lượt",
       "exhausted": "Hết lượt hôm nay — nâng cấp gói",
       "tooltip": "Mỗi ngày xem chi tiết {total} mẫu — Làm mới lúc 0h · còn {hours} giờ",
-      "lookupRemainingMonthly": "Lượt tra tháng này: {remaining}/{total}",
+      "lookupRemainingMonthly": "Còn {remaining}/{total} lượt tra cứu",
       "tooltipMonthly": "Gói của bạn có {total} lượt tra cứu thư viện mỗi tháng — tự làm mới vào đầu tháng."
     },
     "info": {
@@ -740,8 +788,8 @@
       "retry": "Thử lại",
       "notFound": "Không tìm thấy mẫu",
       "notFoundHint": "Mẫu có thể đã bị gỡ. Quay lại thư viện để chọn mẫu khác.",
-      "note": "Mẫu tham khảo do SAVICO biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn.",
-      "articleNote": "Bài viết mang tính tham khảo. Liên hệ SAVICO để được tư vấn theo đúng công trình của bạn."
+      "note": "Mẫu tham khảo do BuildX biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn.",
+      "articleNote": "Bài viết mang tính tham khảo. Liên hệ BuildX để được tư vấn theo đúng công trình của bạn."
     },
     "foundation": {
       "eyebrow": "Cẩm nang nền tảng",
@@ -758,7 +806,7 @@
       "openStage": "Xem cẩm nang"
     },
     "newsletter": {
-      "title": "Bản tin SAVICO",
+      "title": "Bản tin BuildX",
       "featured": "Bài viết nổi bật",
       "related": "Bài viết liên quan",
       "seeAllRelated": "Xem tất cả bài liên quan",
@@ -768,8 +816,7 @@
         "material": "Vật liệu",
         "interior": "Nội thất",
         "legal": "Pháp lý"
-      },
-      "topics": "Kiến thức xây dựng · Kiến trúc · Nội thất"
+      }
     },
     "articles": {
       "title": "Tất cả bài viết",
@@ -794,20 +841,16 @@
       },
       "previousPage": "Trang trước",
       "nextPage": "Trang sau",
+      "readArticle": "Đọc bài",
+      "viewDetail": "Xem chi tiết",
       "expand": "Mở nhanh bài viết",
-      "collapse": "Thu gọn",
-      "viewDetail": "Xem chi tiết"
+      "collapse": "Thu gọn"
     },
     "article": {
       "breadcrumbRoot": "Cẩm nang",
       "updatedAt": "Cập nhật {date}",
       "readingTime": "{minutes} phút đọc",
-      "inTopic": "Trong chủ đề {topic}",
-      "ctaTitle": "Chưa chắc nên chọn phương án nào? Tạo dự án để AI dự toán theo lô đất của bạn",
-      "ctaTitleTopic": "Chưa chắc nên chọn {topic} nào? Tạo dự án để AI dự toán theo lô đất của bạn",
-      "ctaButton": "Tạo dự án mới",
       "related": "Bài viết liên quan",
-      "readMore": "Đọc thêm",
       "backToTop": "Lên đầu trang",
       "loadError": "Không thể tải bài viết",
       "loadErrorHint": "Kết nối có thể đang gián đoạn. Vui lòng thử tải lại nội dung.",
@@ -853,13 +896,13 @@
         "alreadySaved": "Mẫu này đã nằm trong Mẫu đã lưu"
       },
       "consult": {
-        "imageAlt": "Kiến trúc sư SAVICO đang tư vấn bản vẽ",
+        "imageAlt": "Kiến trúc sư BuildX đang tư vấn bản vẽ",
         "title": "Hỏi KTS 1:1",
-        "subtitle": "Kiến trúc sư SAVICO tư vấn mẫu này có phù hợp với bạn không.",
+        "subtitle": "Kiến trúc sư BuildX tư vấn mẫu này có phù hợp với bạn không.",
         "p1": "Mẫu có phù hợp lô đất & nhu cầu?",
         "p2": "Cần điều chỉnh gì · ước tính chi phí, công năng",
         "p3": "Sau tư vấn: dùng mẫu hoặc đổi mẫu khác",
-        "value": "Miễn phí · kiến trúc sư SAVICO",
+        "value": "Miễn phí · kiến trúc sư BuildX",
         "action": "Hỏi KTS 1:1"
       }
     },
@@ -883,18 +926,6 @@
     },
     "read": {
       "badge": "Đã đọc"
-    },
-    "latest": {
-      "title": "Tin tức mới nhất",
-      "seeAll": "Xem tất cả",
-      "new": "Mới",
-      "readingTime": "{minutes} phút đọc",
-      "categories": {
-        "experience": "Kinh nghiệm xây nhà",
-        "material": "Vật liệu",
-        "interior": "Nội thất",
-        "legal": "Pháp lý"
-      }
     },
     "lookupExhausted": {
       "badge": "Đã chạm giới hạn quyền lợi",
@@ -925,7 +956,7 @@
       },
       "end": {
         "title": "Sẵn sàng áp dụng cho dự án của bạn?",
-        "subtitle": "Tạo checklist và nhận hỗ trợ từ chuyên gia SAVICO.",
+        "subtitle": "Tạo checklist và nhận hỗ trợ từ chuyên gia BuildX.",
         "p1": "Áp dụng checklist cho công trình thực tế",
         "p2": "Kết nối đúng chuyên gia",
         "p3": "Đi tiếp đến bước triển khai",
@@ -954,13 +985,13 @@
           "action": "Tạo dự án ngay"
         },
         "architect": {
-          "imageAlt": "Kiến trúc sư SAVICO đang rà soát bản vẽ",
+          "imageAlt": "Kiến trúc sư BuildX đang rà soát bản vẽ",
           "title": "Hỏi KTS 1:1",
-          "subtitle": "Kiến trúc sư SAVICO rà soát hồ sơ và bản vẽ của bạn.",
+          "subtitle": "Kiến trúc sư BuildX rà soát hồ sơ và bản vẽ của bạn.",
           "p1": "Form tư vấn kiến trúc",
           "p2": "Để lại nhu cầu / đặt lịch",
           "p3": "Hồ sơ ổn → quay lại dự án sẵn sàng",
-          "value": "Miễn phí · kiến trúc sư SAVICO",
+          "value": "Miễn phí · kiến trúc sư BuildX",
           "action": "Hỏi KTS 1:1"
         },
         "legal": {
@@ -970,7 +1001,7 @@
           "p1": "Form tư vấn pháp lý",
           "p2": "Để lại nhu cầu / đặt lịch",
           "p3": "Hồ sơ pháp lý ổn → tiếp tục triển khai",
-          "value": "Chuyên gia pháp lý SAVICO",
+          "value": "Chuyên gia pháp lý BuildX",
           "action": "Tư vấn pháp lý"
         }
       }
@@ -1049,8 +1080,8 @@
       "section": {
         "landPhotoTitle": "Bạn đã nắm được cách chụp ảnh lô đất!",
         "genericTitle": "Bạn đã nắm được “{title}”!",
-        "landPhotoDescription": "Giờ bạn có thể chụp ảnh thực tế khu đất của mình để bắt đầu tạo phương án thiết kế cho ngôi nhà. SAVICO sẽ giúp bạn phân tích hiện trạng và gợi ý thiết kế phù hợp chỉ trong vài phút.",
-        "genericDescription": "Áp dụng ngay những gì vừa xem, học tiếp, hoặc hỏi kiến trúc sư SAVICO.",
+        "landPhotoDescription": "Giờ bạn có thể chụp ảnh thực tế khu đất của mình để bắt đầu tạo phương án thiết kế cho ngôi nhà. BuildX sẽ giúp bạn phân tích hiện trạng và gợi ý thiết kế phù hợp chỉ trong vài phút.",
+        "genericDescription": "Áp dụng ngay những gì vừa xem, học tiếp, hoặc hỏi kiến trúc sư BuildX.",
         "create": "Chụp ảnh & tạo dự án",
         "browse": "Xem thêm hướng dẫn",
         "consult": "Hỏi KTS 1:1",
@@ -1084,17 +1115,19 @@
           "action": "Xem video tiếp theo"
         },
         "consult": {
-          "imageAlt": "Kiến trúc sư SAVICO đang tư vấn bản vẽ",
+          "imageAlt": "Kiến trúc sư BuildX đang tư vấn bản vẽ",
           "title": "Hỏi KTS 1:1",
-          "subtitle": "Chưa rõ chỗ nào? Kiến trúc sư SAVICO giải đáp trực tiếp.",
+          "subtitle": "Chưa rõ chỗ nào? Kiến trúc sư BuildX giải đáp trực tiếp.",
           "p1": "Form tư vấn kiến trúc",
           "p2": "Đặt lịch / mô tả nhu cầu",
           "p3": "KTS liên hệ tư vấn",
-          "value": "Miễn phí · kiến trúc sư SAVICO",
+          "value": "Miễn phí · kiến trúc sư BuildX",
           "action": "Hỏi KTS 1:1"
         }
       }
-    }
+    },
+    "pageTitle": "Hướng dẫn sử dụng BuildX",
+    "pageSubtitle": "Video 1 phút cho từng bước."
   },
   "design": {
     "steps": {
@@ -1106,13 +1139,15 @@
         "done": "Hoàn thành",
         "current": "Đang thực hiện",
         "pending": "Chưa bắt đầu",
-        "justDone": "Vừa hoàn thành"
+        "justDone": "Vừa hoàn thành",
+        "doneOn": "Hoàn thành ngày {date}"
       }
     },
     "entry": {
       "title": "Thiết kế & Dự toán",
       "subtitle": "Quản lý thiết kế, dự toán và hồ sơ thi công của bạn tại một nơi.",
-      "create": "Tạo dự án mới"
+      "create": "Tạo dự án mới",
+      "backToList": "Dự án của tôi"
     },
     "createProject": {
       "title": "Tạo dự án mới",
@@ -1285,12 +1320,12 @@
       "viewDetail": "XEM CHI TIẾT",
       "downloadXlsx": "Tải bảng dự toán Excel (.xlsx)",
       "breakdownTitle": "Tỷ trọng chi phí",
-      "advisoryTitle": "Tư vấn từ SAVICO",
+      "advisoryTitle": "Tư vấn từ BuildX",
       "advisory": {
         "defaultName": "Quý khách",
         "unknownBuilding": "công trình",
         "unknownAddress": "khu vực đã chọn",
-        "intro": "Chào {name}, dựa trên thông tin bạn cung cấp — {building} tại {address}, tổng diện tích sàn AI ước tính khoảng {area} m² — SAVICO AI đã lập bảng dự toán sơ bộ với tổng chi phí {total}.",
+        "intro": "Chào {name}, dựa trên thông tin bạn cung cấp — {building} tại {address}, tổng diện tích sàn AI ước tính khoảng {area} m² — BuildX AI đã lập bảng dự toán sơ bộ với tổng chi phí {total}.",
         "unitCost": "Suất đầu tư bình quân của phương án này khoảng {unitCost}/m² sàn, tương ứng gói {package} bạn đã chọn.",
         "unitCostWithScale": "Suất đầu tư bình quân của phương án này khoảng {unitCost}/m² sàn cho quy mô {scale}, tương ứng gói {package} bạn đã chọn.",
         "breakdown": "Cơ cấu chi phí: phần thô chiếm {structure}%, phần hoàn thiện {finishing}% và phần nội thất {interior}%.",
@@ -1300,11 +1335,11 @@
           "interior": "Phần nội thất đang chiếm tỷ trọng lớn nhất — bạn có thể chia làm hai giai đoạn: làm trước nhóm nội thất gỗ cố định, nhóm nội thất rời bổ sung sau khi vào ở."
         },
         "style": "Phong cách {style} bạn chọn phù hợp với phương án bố trí trong Cẩm nang — bạn có thể mở mục Cẩm nang để xem các mẫu cùng phong cách và lưu lại mẫu ưng ý.",
-        "disclaimer": "Dự toán mang tính tham khảo, được lập tự động theo đơn giá thị trường khu vực tại thời điểm lập. Chi phí thực tế có thể chênh lệch tùy hiện trạng công trình, biến động vật tư và thời điểm thi công. Để có báo giá chính xác, vui lòng liên hệ kiến trúc sư SAVICO."
+        "disclaimer": "Dự toán mang tính tham khảo, được lập tự động theo đơn giá thị trường khu vực tại thời điểm lập. Chi phí thực tế có thể chênh lệch tùy hiện trạng công trình, biến động vật tư và thời điểm thi công. Để có báo giá chính xác, vui lòng liên hệ kiến trúc sư BuildX."
       },
       "xlsx": {
         "fileName": "Du-toan-{project}.xlsx",
-        "untitledProject": "SAVICO",
+        "untitledProject": "BUILDX",
         "sheet": "Dự toán chi tiết",
         "title": "BẢNG DỰ TOÁN CHI TIẾT",
         "project": "Dự án",
@@ -1318,7 +1353,7 @@
           "unitPrice": "Đơn giá (VND)",
           "amount": "Thành tiền (VND)"
         },
-        "note": "Bảng dự toán do SAVICO AI lập tự động, mang tính tham khảo. Chi phí thực tế có thể thay đổi theo hiện trạng công trình và biến động giá vật tư."
+        "note": "Bảng dự toán do BuildX AI lập tự động, mang tính tham khảo. Chi phí thực tế có thể thay đổi theo hiện trạng công trình và biến động giá vật tư."
       },
       "continue": "Nhận hồ sơ thi công",
       "readyToast": "Dự toán đã sẵn sàng",
@@ -1326,7 +1361,8 @@
       "columns": {
         "item": "Hạng mục",
         "amount": "Thành tiền"
-      }
+      },
+      "pageTitleWithProject": "Dự toán: {name} ({id})"
     },
     "dossier": {
       "infoTitle": "Thông tin dự án",
@@ -1359,10 +1395,10 @@
       },
       "lockedHint": "Bấm Render hồ sơ trước",
       "readyTitle": "Bộ hồ sơ thi công của bạn đã sẵn sàng",
-      "readyThanks": "Cảm ơn bạn đã tin tưởng SAVICO AI. Hồ sơ chi tiết, đầy đủ đã được chuẩn bị sẵn sàng.",
+      "readyThanks": "Cảm ơn bạn đã tin tưởng BuildX AI. Hồ sơ chi tiết, đầy đủ đã được chuẩn bị sẵn sàng.",
       "readyToast": "Bộ hồ sơ đã sẵn sàng",
       "privacyNote": "Hồ sơ được bảo mật tuyệt đối. Chỉ bạn và người được chia sẻ mới có thể xem.",
-      "ctaTitle": "Liên hệ SAVICO để được kiến trúc sư tư vấn trực tiếp, miễn phí",
+      "ctaTitle": "Liên hệ BuildX để được kiến trúc sư tư vấn trực tiếp, miễn phí",
       "ctaCall": "Gọi ngay",
       "ctaZalo": "Chat Zalo",
       "pdfSize": "~{size} MB",
@@ -1505,10 +1541,6 @@
         "rename": "Đổi tên",
         "delete": "Xóa"
       },
-      "createTile": {
-        "title": "Tạo dự án mới",
-        "description": "Bắt đầu từ ảnh lô đất và nhu cầu của bạn"
-      },
       "count": "Hiển thị {count} dự án",
       "pagination": {
         "label": "Phân trang danh sách dự án",
@@ -1518,8 +1550,7 @@
       },
       "empty": {
         "title": "Bạn chưa có dự án nào",
-        "description": "Tạo dự án mới để bắt đầu từ ảnh lô đất và nhu cầu của bạn.",
-        "action": "Tạo dự án mới"
+        "description": "Tạo dự án mới để bắt đầu từ ảnh lô đất và nhu cầu của bạn."
       },
       "noMatch": {
         "title": "Không có dự án nào khớp",
@@ -1542,7 +1573,7 @@
     },
     "phonePrompt": {
       "title": "Bổ sung số điện thoại",
-      "description": "Để nhận hồ sơ và được kiến trúc sư hỗ trợ miễn phí, vui lòng cho SAVICO số điện thoại của bạn.",
+      "description": "Để nhận hồ sơ và được kiến trúc sư hỗ trợ miễn phí, vui lòng cho BuildX số điện thoại của bạn.",
       "placeholder": "VD: 0905 123 456",
       "error": "Số điện thoại chưa đúng định dạng (10 số bắt đầu bằng 0 hoặc +84)",
       "submit": "Xác nhận & tiếp tục"
@@ -1550,7 +1581,6 @@
   },
   "account": {
     "title": "Tài khoản của tôi",
-    "new": "mới",
     "info": {
       "title": "Thông tin tài khoản",
       "name": "Họ và tên",
@@ -1638,7 +1668,7 @@
         "create": "Tạo hồ sơ dự án — miễn phí",
         "viewDesignPlans": "Xem gói thiết kế"
       },
-      "note": "Trạng thái do đội hỗ trợ SAVICO cập nhật. Bấm “Xem chi tiết” để mở trang theo dõi lời mời, lịch khảo sát và tiến độ xử lý."
+      "note": "Trạng thái do đội hỗ trợ BuildX cập nhật. Bấm “Xem chi tiết” để mở trang theo dõi lời mời, lịch khảo sát và tiến độ xử lý."
     },
     "purchaseHistory": {
       "title": "Lịch sử mua gói",
@@ -1679,12 +1709,12 @@
         "receipt": "Biên nhận"
       },
       "tier": {
-        "basic": "Gói Cơ bản",
-        "advanced": "Gói Nâng cao",
-        "pro": "Gói Chuyên nghiệp",
-        "control": "SVC CONTROL",
-        "check": "SVC CHECK",
-        "self": "Tự quản lý"
+        "basic": "Gói BASIC",
+        "advanced": "Gói PLUS",
+        "pro": "Gói PRO",
+        "control": "Gói TOÀN DIỆN",
+        "check": "Gói AN TÂM",
+        "self": "TỰ QUẢN LÝ"
       },
       "status": {
         "paid": "Đã thanh toán",
@@ -1699,11 +1729,11 @@
         "card": "Thẻ",
         "manual": "Ghi nhận thủ công"
       },
-      "paymentNote": "Thanh toán trực tuyến hiện được SAVICO xác nhận qua QR chuyển khoản. Biên nhận hiển thị theo dữ liệu giao dịch đã ghi nhận trong hệ thống.",
+      "paymentNote": "Thanh toán trực tuyến hiện được BuildX xác nhận qua QR chuyển khoản. Biên nhận hiển thị theo dữ liệu giao dịch đã ghi nhận trong hệ thống.",
       "receiptDialog": {
         "title": "Biên nhận thanh toán",
         "titleWithCode": "Biên nhận #{code}",
-        "description": "Thông tin giao dịch đã được SAVICO ghi nhận.",
+        "description": "Thông tin giao dịch đã được BuildX ghi nhận.",
         "receiptHeading": "Biên nhận thanh toán · #{code}",
         "time": "Thời gian",
         "buyer": "Người mua",
@@ -1716,14 +1746,14 @@
         "vatIssued": "Đã xuất · gửi email",
         "vatNotRequested": "Chưa yêu cầu",
         "planDetail": {
-          "basic": "Gói thiết kế · 3 lượt thiết kế - dự toán · 20 lượt tra thư viện",
-          "advanced": "Gói thiết kế · 7 lượt thiết kế - dự toán · 100 lượt tra thư viện",
-          "pro": "Gói thiết kế cao cấp · đầy đủ quyền lợi tư vấn 1:1",
-          "control": "Gói giám sát · SVC CONTROL",
-          "check": "Gói giám sát · SVC CHECK",
-          "self": "Gói giám sát · Tự quản lý"
+          "basic": "Gói thiết kế BASIC · 3 lượt thiết kế - dự toán · 20 lượt tra thư viện",
+          "advanced": "Gói thiết kế PLUS · 7 lượt thiết kế - dự toán · 100 lượt tra thư viện",
+          "pro": "Gói thiết kế PRO · đầy đủ quyền lợi tư vấn 1:1",
+          "control": "Gói giám sát · TOÀN DIỆN",
+          "check": "Gói giám sát · AN TÂM",
+          "self": "Gói giám sát · TỰ QUẢN LÝ"
         },
-        "note": "Cần đổi thông tin hóa đơn hoặc hoàn tiền? Liên hệ đội hỗ trợ SAVICO và kèm mã đơn #{code}.",
+        "note": "Cần đổi thông tin hóa đơn hoặc hoàn tiền? Liên hệ đội hỗ trợ BuildX và kèm mã đơn #{code}.",
         "resendEmail": "Gửi lại email",
         "sendingEmail": "Đang gửi...",
         "downloadPdf": "Tải PDF",
@@ -1742,9 +1772,9 @@
       "description": "Buổi sắp tới, ghi chú của kiến trúc sư và các buổi đã qua.",
       "quota": "Lượt tư vấn 1:1: {count} lượt còn lại trong {plan} · buổi đầu tiên luôn miễn phí · đổi hoặc hủy lịch trước 24 giờ để được hoàn lượt.",
       "planTier": {
-        "basic": "gói Cơ bản",
-        "advanced": "gói Nâng cao",
-        "pro": "gói Chuyên nghiệp"
+        "basic": "gói BASIC",
+        "advanced": "gói PLUS",
+        "pro": "gói PRO"
       },
       "bookNew": "Đặt lịch mới",
       "yearsExperience": "{count} năm kinh nghiệm",
@@ -1777,7 +1807,7 @@
         "missed": "Không tham gia"
       },
       "meta": {
-        "withinPlan": "Trong gói Nâng cao",
+        "withinPlan": "Trong gói PLUS",
         "cancelled": "Bạn hủy ngày {date} · đủ điều kiện hoàn lượt",
         "missed": "KTS đã gọi {count} lần, không liên lạc được"
       },
@@ -1785,10 +1815,10 @@
       "hideSessionNote": "Ẩn ghi chú",
       "bookAgain": "Đặt lại",
       "support": "Hỗ trợ",
-      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn trong thời gian sớm nhất.",
+      "supportToast": "Đội hỗ trợ BuildX sẽ liên hệ với bạn trong thời gian sớm nhất.",
       "supportDialog": {
         "title": "Hỗ trợ buổi tư vấn",
-        "description": "SAVICO đã ghi nhận yêu cầu hỗ trợ cho {consultant} · {code}. Đội hỗ trợ sẽ liên hệ với bạn trong thời gian sớm nhất.",
+        "description": "BuildX đã ghi nhận yêu cầu hỗ trợ cho {consultant} · {code}. Đội hỗ trợ sẽ liên hệ với bạn trong thời gian sớm nhất.",
         "close": "Đã hiểu"
       },
       "rating": {
@@ -1816,11 +1846,22 @@
     }
   },
   "plans": {
-    "title": "Bảng gói thiết kế SVC",
+    "title": "Bảng giá BuildX",
     "subtitle": "Tạo phương án – So sánh lựa chọn – Tối ưu ngân sách trước khi thi công",
     "tabs": {
       "design": "Gói thiết kế",
-      "supervision": "Gói giám sát"
+      "supervision": "Gói giám sát",
+      "supervisionLong": "Gói giám sát thi công",
+      "designDescription": "Thiết kế · dự toán · hồ sơ thi công",
+      "supervisionDescription": "Kỹ sư BuildX kiểm tra theo từng giai đoạn",
+      "designCount": "{count} gói",
+      "supervisionCount": "{count} gói · tự quản lý miễn phí",
+      "from": "từ {price}",
+      "viewing": "Đang xem",
+      "view": "Xem gói",
+      "new": "MỚI",
+      "viewingLine": "Đang xem:",
+      "switchTo": "Chuyển sang {name}"
     },
     "tiers": {
       "basic": "BASIC",
@@ -1851,7 +1892,7 @@
     },
     "ctaBand": {
       "title": "Bắt đầu hành trình thiết kế ngôi nhà của bạn ngay hôm nay!",
-      "subtitle": "Lựa chọn gói phù hợp và nhận tư vấn từ đội ngũ chuyên gia của SVC.",
+      "subtitle": "Lựa chọn gói phù hợp và nhận tư vấn từ đội ngũ chuyên gia của BuildX.",
       "action": "Đăng ký ngay"
     },
     "gift": {
@@ -1955,8 +1996,8 @@
     "notes": {
       "payment": "Thanh toán qua QR chuyển khoản ngân hàng.",
       "credits": "Lượt không hết hạn. Dữ liệu dự án lưu theo tài khoản.",
-      "estimate": "Dự toán chi tiết xem trực tiếp trên nền tảng SVC.",
-      "gift": "(*) Quà tặng gói PRO áp dụng khi khách hàng chọn gói triển khai trọn gói cùng SVC; chi tiết theo điều khoản chương trình.",
+      "estimate": "Dự toán chi tiết xem trực tiếp trên nền tảng BuildX.",
+      "gift": "(*) Quà tặng gói PRO áp dụng khi khách hàng chọn gói triển khai trọn gói cùng BuildX; chi tiết theo điều khoản chương trình.",
       "scope": "Hồ sơ xuất ra phục vụ trao đổi và làm việc với nhà thầu, không thay thế hồ sơ thiết kế kỹ thuật hoặc hồ sơ xin phép xây dựng."
     },
     "highlights": {
@@ -1966,7 +2007,7 @@
   },
   "consult": {
     "directory": {
-      "title": "Tư vấn 1:1 cùng kiến trúc sư SAVICO",
+      "title": "Tư vấn 1:1 cùng kiến trúc sư BuildX",
       "subtitle": "Đặt lịch miễn phí - kiến trúc sư gọi tư vấn trực tiếp cho bạn.",
       "searchPlaceholder": "Tìm kiến trúc sư theo tên hoặc chuyên môn...",
       "specialty": "Chuyên môn",
@@ -1993,7 +2034,9 @@
       "experience": "{years}+ năm kinh nghiệm",
       "specialtyPrefix": "Chuyên: {value}",
       "bookCta": "Đặt lịch tư vấn",
-      "notFound": "Không tìm thấy kiến trúc sư này"
+      "notFound": "Không tìm thấy kiến trúc sư này",
+      "bookCtaWithTime": "Đặt lịch tư vấn lúc {time} · {date}",
+      "chooseSlotHint": "Chọn 1 khung giờ để đặt lịch"
     },
     "slots": {
       "title": "Chọn khung giờ tư vấn",
@@ -2001,8 +2044,8 @@
         "morning": "Sáng",
         "afternoon": "Chiều"
       },
-      "full": "Kín",
-      "fullHint": "Khung giờ này đã kín",
+      "full": "Nghỉ",
+      "fullHint": "Kiến trúc sư không tư vấn khung giờ này",
       "weekday": {
         "mon": "T2",
         "tue": "T3",
@@ -2011,7 +2054,9 @@
         "fri": "T6",
         "sat": "T7",
         "sun": "CN"
-      }
+      },
+      "sessionInfo": "Buổi tư vấn 30 phút qua điện thoại · giờ Việt Nam (GMT+7). Tư vấn viên sẽ gọi xác nhận lại giờ với bạn.",
+      "mine": "Lịch của bạn"
     },
     "booking": {
       "title": "Xác nhận đặt lịch tư vấn",
@@ -2023,17 +2068,27 @@
       "noteHint": "Nói trước nhu cầu để kiến trúc sư chuẩn bị: loại công trình, diện tích, ngân sách dự kiến.",
       "notePlaceholder": "VD: cần tư vấn nhà phố 5×20m, ngân sách 1,8 tỷ",
       "submit": "Xác nhận đặt lịch",
-      "successToast": "Đặt lịch thành công - SAVICO sẽ gọi xác nhận trong 24h làm việc."
+      "successToast": "Đặt lịch thành công - BuildX sẽ gọi xác nhận trong 24h làm việc."
     },
     "home": {
-      "title": "Đặt lịch tư vấn cùng kiến trúc sư SAVICO",
+      "title": "Đặt lịch tư vấn cùng kiến trúc sư BuildX",
       "subtitle": "Kiến trúc sư gợi ý giải pháp phù hợp với nhu cầu của bạn.",
       "eyebrow": "TƯ VẤN 1:1",
       "viewAll": "Xem tất cả chuyên gia",
       "book": "Đặt lịch",
-      "booking": "Đang đặt lịch…",
       "booked": "Đã đặt lịch",
       "titleMobile": "Tư vấn 1:1"
+    },
+    "booked": {
+      "title": "Đã đặt lịch",
+      "pending": "Chờ xác nhận",
+      "architect": "Kiến trúc sư",
+      "when": "Thời gian",
+      "format": "Hình thức",
+      "formatValue": "Gọi điện · 30 phút",
+      "policy": "Tư vấn viên sẽ gọi xác nhận lại giờ với bạn. Đổi hoặc hủy lịch trước 24 giờ để được hoàn lượt.",
+      "viewMine": "Xem lịch hẹn của tôi",
+      "close": "Đóng"
     }
   },
   "admin": {
@@ -2658,7 +2713,7 @@
       "modalListTitle": "Yêu cầu sửa đổi · {project}"
     },
     "contractors": {
-      "description": "Nhà thầu mới tạo mặc định Ẩn và Tạm ngừng nhận dự án. Số dự án và trạng thái hồ sơ pháp lý do hệ thống tính. Dự án, pháp lý và hợp tác SAVICO quản lý trong trang chi tiết.",
+      "description": "Nhà thầu mới tạo mặc định Ẩn và Tạm ngừng nhận dự án. Số dự án và trạng thái hồ sơ pháp lý do hệ thống tính. Dự án, pháp lý và hợp tác BuildX quản lý trong trang chi tiết.",
       "unnamed": "(chưa đặt tên)",
       "name": "Tên nhà thầu",
       "kind": "Loại nhà thầu",
@@ -2751,7 +2806,7 @@
       "projectTotal": "{count} dự án",
       "projectVerified": "{count} đã xác minh",
       "legalStatus": "Hồ sơ pháp lý",
-      "partnershipStatus": "Hợp tác SAVICO",
+      "partnershipStatus": "Hợp tác BuildX",
       "viewDetail": "Xem chi tiết",
       "visibleNeedsCapability": "Cần ít nhất một chuyên môn, một Loại công trình và một Phạm vi thi công trước khi hiển thị hồ sơ.",
       "deleteBlocked": "Nhà thầu đã phát sinh dự án, xác minh, lời mời hoặc hợp tác — dùng trạng thái Ẩn thay vì xóa.",
@@ -2782,7 +2837,7 @@
         "overview": "Tổng quan",
         "projects": "Dự án đã thực hiện",
         "legal": "Năng lực pháp lý",
-        "partnership": "Hợp tác SAVICO",
+        "partnership": "Hợp tác BuildX",
         "history": "Lịch sử thay đổi"
       },
       "noHistory": "Chưa có thay đổi nào.",
@@ -3094,7 +3149,7 @@
       "licenseVerified": "Xác minh giấy phép",
       "licenseRejected": "Từ chối giấy phép",
       "licenseExpired": "Đánh dấu giấy phép Hết hiệu lực",
-      "partnershipUpdated": "Cập nhật hợp tác SAVICO"
+      "partnershipUpdated": "Cập nhật hợp tác BuildX"
     },
     "contractorLegal": {
       "none": "Chưa có hồ sơ",
@@ -3140,7 +3195,7 @@
       "rejectReasonShown": "Lý do từ chối: {reason}",
       "commitments": "Cam kết và bảo hành",
       "warrantyValue": "{months} tháng",
-      "usesSavicoContract": "Dùng hợp đồng mẫu SAVICO",
+      "usesSavicoContract": "Dùng hợp đồng mẫu BuildX",
       "insurance": "Bảo hiểm công trình",
       "yes": "Có",
       "noData": "Chưa có thông tin",
@@ -3151,15 +3206,15 @@
       "numberMismatch": "Mã số doanh nghiệp phải khớp mã số thuế của pháp nhân."
     },
     "contractorPartnershipTab": {
-      "title": "Hợp tác SAVICO",
-      "edit": "Quản lý hợp tác SAVICO",
+      "title": "Hợp tác BuildX",
+      "edit": "Quản lý hợp tác BuildX",
       "badgeOn": "Nhãn Đối tác đã xác minh đang bật",
       "period": "Thời gian hợp tác",
       "since": "Bắt đầu hợp tác",
       "endedAt": "Kết thúc hợp tác",
       "endRule": "Ngày kết thúc không được trước ngày bắt đầu.",
       "responseRate": "Tỷ lệ phản hồi lời mời",
-      "complaints": "Số khiếu nại trên SAVICO",
+      "complaints": "Số khiếu nại trên BuildX",
       "code": "Mã hồ sơ hợp tác",
       "docStatus": "Trạng thái xác minh tài liệu",
       "doc": {
@@ -3174,7 +3229,7 @@
       "editVerifiedWarning": "Tài liệu đang Đã xác minh — thay bản scan, mã hồ sơ, ngày ký hoặc số trang sẽ đưa về Chờ xác minh."
     },
     "contractorProjects": {
-      "summary": "{total} dự án · {verified} được SAVICO xác minh qua ảnh thực tế và biên bản nghiệm thu",
+      "summary": "{total} dự án · {verified} được BuildX xác minh qua ảnh thực tế và biên bản nghiệm thu",
       "add": "Thêm dự án",
       "editTitle": "Cập nhật dự án · {name}",
       "verifiedOnly": "Chỉ dự án đã xác minh",
@@ -3231,11 +3286,11 @@
       "acceptanceDoc": "Biên bản nghiệm thu / bàn giao có chữ ký chủ nhà",
       "noSitePhotos": "Chưa có ảnh thực tế.",
       "noAcceptanceDoc": "Chưa có biên bản nghiệm thu.",
-      "verification": "Xác minh SAVICO",
+      "verification": "Xác minh BuildX",
       "verifiedAtBy": "Xác minh lúc {at} · {by}",
-      "verifyExplain": "SAVICO đã đối chiếu ảnh thực tế tại công trình và biên bản nghiệm thu có chữ ký chủ nhà.",
+      "verifyExplain": "BuildX đã đối chiếu ảnh thực tế tại công trình và biên bản nghiệm thu có chữ ký chủ nhà.",
       "unverifyHistory": "Lịch sử hủy xác minh",
-      "noPriceNote": "Không hiển thị giá trị hợp đồng hay đơn giá - SAVICO không lưu và không công bố thông tin giá.",
+      "noPriceNote": "Không hiển thị giá trị hợp đồng hay đơn giá - BuildX không lưu và không công bố thông tin giá.",
       "scopeRequired": "Chọn một phạm vi thi công.",
       "order": "Thứ tự hiển thị"
     },
@@ -3532,7 +3587,7 @@
       "tierOrder": "Giá phải tăng dần: Cơ bản ≤ Tiêu chuẩn ≤ VIP."
     },
     "estimateAdvice": {
-      "description": "Nội dung tư vấn SAVICO hiển thị dưới bảng dự toán và trong hồ sơ PDF.",
+      "description": "Nội dung tư vấn BuildX hiển thị dưới bảng dự toán và trong hồ sơ PDF.",
       "autoNote": "Đoạn chào, suất đầu tư và cơ cấu chi phí được hệ thống tự điền số theo từng dự án nên không soạn ở đây.",
       "dominant": {
         "structure": "Nhận xét khi Phần thô chiếm tỷ trọng lớn nhất",
@@ -3575,7 +3630,7 @@
       "accepting": "Đang nhận dự án",
       "notAccepting": "Tạm ngưng nhận dự án",
       "reviewCount": "({count} đánh giá)",
-      "noPriceNote": "SAVICO không hiển thị báo giá của nhà thầu trên nền tảng.",
+      "noPriceNote": "BuildX không hiển thị báo giá của nhà thầu trên nền tảng.",
       "fromDesignPackage": "Hồ sơ từ gói thiết kế",
       "similarShort": "{count} dự án",
       "similarSuffix": "đã thực hiện",
@@ -3620,8 +3675,8 @@
     },
     "sort": {
       "match": "Phù hợp nhất",
-      "distance": "Gần công trình",
-      "rating": "Đánh giá tốt",
+      "distance": "Gần nhất",
+      "rating": "Đánh giá cao",
       "survey": "Khảo sát sớm"
     },
     "region": {
@@ -3639,7 +3694,7 @@
     },
     "statusMeaning": {
       "sent": "Lời mời và hồ sơ đã được gửi đi.",
-      "received": "Đội hỗ trợ SAVICO đã tiếp nhận và chuyển cho nhà thầu.",
+      "received": "Đội hỗ trợ BuildX đã tiếp nhận và chuyển cho nhà thầu.",
       "accepted": "Nhà thầu xác nhận và sẽ liên hệ trực tiếp với bạn.",
       "done": "Đã chốt hợp tác hoặc kết thúc lời mời.",
       "rejected": "Lời mời đã bị từ chối và kết thúc."
@@ -3649,10 +3704,10 @@
         "title": "Tìm đúng nhà thầu cho công trình của bạn",
         "titleLine1": "Tìm đúng nhà thầu",
         "titleLine2": "cho công trình của bạn",
-        "subtitle": "Kết nối với mạng lưới nhà thầu uy tín trên SAVICO, giúp bạn dễ dàng tìm kiếm, so sánh năng lực và lựa chọn đối tác phù hợp, minh bạch và đáng tin cậy.",
+        "subtitle": "Kết nối với mạng lưới nhà thầu uy tín trên BuildX, giúp bạn dễ dàng tìm kiếm, so sánh năng lực và lựa chọn đối tác phù hợp, minh bạch và đáng tin cậy.",
         "createBrief": "Tạo hồ sơ",
         "bestMatch": "Phù hợp nhất với dự án của bạn",
-        "viewContractors": "Xem nhà thầu",
+        "viewContractors": "Xem danh sách nhà thầu",
         "card": {
           "distance": "Khoảng cách",
           "rating": "Đánh giá",
@@ -3664,7 +3719,7 @@
           "completedValue": "{count} dự án",
           "similarValue": "{count} dự án tương tự",
           "surveyValue": "trong {hours}h",
-          "locked": "Tạo hồ sơ để SAVICO ghép nhà thầu phù hợp"
+          "locked": "Tạo hồ sơ để BuildX ghép nhà thầu phù hợp"
         }
       },
       "promises": {
@@ -3695,123 +3750,55 @@
         }
       },
       "ranking": {
-        "note": "Xếp hạng = mức độ phù hợp dự án + khoảng cách + kinh nghiệm + đánh giá + lịch nhận việc + mức độ khảo sát",
-        "detail": "Xem chi tiết",
-        "choose": "Chọn & gửi hồ sơ",
         "stickyNudge": "Tạo hồ sơ dự án - miễn phí",
         "tabs": {
           "match": "Phù hợp nhất",
           "distance": "Gần nhất",
-          "rating": "Đánh giá tốt nhất",
-          "survey": "Khảo sát sớm nhất"
+          "rating": "Đánh giá cao",
+          "survey": "Khảo sát sớm"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
         "bestMatch": "Phù hợp nhất",
         "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
-      },
-      "compare": {
-        "title": "So sánh minh bạch",
-        "criterion": "Tiêu chí",
-        "note": "Mọi thông tin được tổng hợp từ hồ sơ nhà thầu và thông tin do nhà thầu cung cấp.",
-        "betterBadge": "Tốt hơn",
-        "swipeHint": "Vuốt ngang để xem đủ 3 cột",
-        "columns": {
-          "a": "Nhà thầu A",
-          "b": "Nhà thầu B",
-          "c": "Nhà thầu C"
-        },
-        "rows": {
-          "duration": {
-            "label": "Thời gian thi công",
-            "a": "120 ngày",
-            "b": "130 ngày",
-            "c": "115 ngày"
-          },
-          "scope": {
-            "label": "Phạm vi bao gồm/không bao gồm",
-            "a": "Xem chi tiết",
-            "b": "Xem chi tiết",
-            "c": "Xem chi tiết"
-          },
-          "material": {
-            "label": "Cấp vật liệu đề xuất",
-            "a": "Trung bình – Khá",
-            "b": "Trung bình",
-            "c": "Khá – Cao cấp"
-          },
-          "warranty": {
-            "label": "Bảo hành",
-            "a": "24 tháng",
-            "b": "24 tháng",
-            "c": "36 tháng"
-          },
-          "remark": {
-            "label": "Ghi chú",
-            "a": "–",
-            "b": "–",
-            "c": "–"
-          }
-        },
-        "scopeDetail": {
-          "includedLabel": "Bao gồm",
-          "excludedLabel": "Không bao gồm",
-          "a": {
-            "included": ["Phá dỡ hiện trạng", "Thi công phần thô", "Hoàn thiện cơ bản"],
-            "excluded": ["Nội thất rời", "Thiết bị bếp"]
-          },
-          "b": {
-            "included": ["Phá dỡ hiện trạng", "Thi công phần thô", "Sơn nước hoàn thiện"],
-            "excluded": ["Nội thất rời", "Thiết bị vệ sinh cao cấp"]
-          },
-          "c": {
-            "included": ["Phá dỡ hiện trạng", "Thi công phần thô", "Hoàn thiện + nội thất cơ bản"],
-            "excluded": ["Thiết bị bếp cao cấp"]
-          }
-        }
       },
       "safety": {
         "title": "An toàn & minh bạch",
         "privacyTitle": "Thông tin liên hệ được bảo vệ",
         "privacyBody": "Số điện thoại và email của bạn chỉ hiển thị khi bạn xác nhận lịch khảo sát.",
         "recordTitle": "Báo cáo lưu trên nền tảng",
-        "recordBody": "Mọi báo cáo có mã riêng, không lo tam sao thất bản.",
+        "recordBody": "Mọi trao đổi và báo cáo khảo sát được lưu với mã riêng, dễ đối chiếu khi cần.",
         "reviewTitle": "Đánh giá từ dự án thật",
-        "reviewBody": "Chỉ khách đã làm việc qua SAVICO mới được đánh giá nhà thầu."
-      },
-      "boundary": {
-        "title": "Ranh giới dịch vụ",
-        "designTitle": "Gói thiết kế",
-        "designBody": "Thiết kế + khối lượng dự kiến + dự toán",
-        "designReadyBadge": "✓ Bạn đã có gói PRO · hồ sơ sẵn sàng",
-        "arrow": "Hoàn thành thiết kế\n→ Tìm nhà thầu",
-        "findTitle": "Tìm nhà thầu",
-        "findBody": "Tìm người thực hiện + khảo sát + đánh giá thực tế + so sánh",
-        "createFromPlan": "Tạo hồ sơ từ gói"
+        "reviewBody": "Chỉ khách đã làm việc qua BuildX mới được đánh giá nhà thầu."
       },
       "faq": {
         "title": "Câu hỏi thường gặp",
         "q1": "Tôi có mất phí không?",
-        "a1": "Không. SAVICO hỗ trợ bạn tìm kiếm và kết nối với nhà thầu uy tín hoàn toàn miễn phí.",
+        "a1": "Không. BuildX hỗ trợ bạn tìm kiếm và kết nối với nhà thầu uy tín hoàn toàn miễn phí.",
         "q2": "Cần gì để bắt đầu?",
         "a2": "Chỉ cần thông tin cơ bản về công trình và nhu cầu thi công. Bạn có thể tự tạo hồ sơ miễn phí, không cần mua gói.",
         "q3": "Tôi được mời bao nhiêu nhà thầu?",
         "a3": "Tối đa <mark>3 nhà thầu</mark> cho mỗi dự án. Giới hạn này giúp bạn theo dõi được từng buổi khảo sát thay vì nhận quá nhiều liên hệ cùng lúc.",
         "q4": "Tôi có xem được báo giá trên web không?",
-        "a4": "Không. Sau buổi khảo sát, nhà thầu gửi báo giá trực tiếp cho bạn; SAVICO không lưu và không hiển thị số tiền trên nền tảng.",
-        "q5": "SAVICO có nhận thi công không?",
-        "a5": "Không. SAVICO là nền tảng kết nối trung lập, không thi công và không bán vật tư.",
+        "a4": "Có. BuildX hiển thị khoảng giá dự đoán để bạn chủ động ngân sách. Con số này chỉ mang tính tham khảo, chi phí thực tế sẽ được nhà thầu báo giá sau khảo sát.",
+        "q5": "BuildX có nhận thi công không?",
+        "a5": "Có. BuildX giúp kết nối bạn với các đơn vị thi công và nhà cung cấp vật tư uy tín, phù hợp với nhu cầu và ngân sách của bạn.",
         "copyLink": "Sao chép liên kết",
-        "linkCopied": "Đã sao chép"
+        "linkCopied": "Đã sao chép",
+        "q6": "Có theo dõi tiến độ trên app được không?",
+        "a6": "Có. Bạn theo dõi tiến độ, hình ảnh và cập nhật từ nhà thầu ngay trên app, mọi lúc mọi nơi.",
+        "q7": "Nhà thầu trên app có được xác minh không?",
+        "a7": "Có. Mọi nhà thầu đều được BuildX kiểm duyệt hồ sơ và năng lực trước khi hoạt động trên app."
       },
       "cta": {
         "title": "Đã có hồ sơ thiết kế? Tạo hồ sơ để kết nối với nhà thầu phù hợp ngay.",
-        "action": "Tạo hồ sơ"
+        "action": "Tạo hồ sơ",
+        "resumeTitle": "Tiếp tục tìm nhà thầu cho hồ sơ {name}."
       },
       "partner": {
         "text": "Bạn là nhà thầu? Nhận dự án chất lượng, minh bạch và phù hợp.",
         "action": "Trở thành đối tác",
         "dialogTitle": "Đăng ký trở thành đối tác",
-        "dialogDescription": "Để lại thông tin, đội ngũ SAVICO sẽ liên hệ và hướng dẫn hoàn thiện hồ sơ nhà thầu.",
+        "dialogDescription": "Để lại thông tin, đội ngũ BuildX sẽ liên hệ và hướng dẫn hoàn thiện hồ sơ nhà thầu.",
         "name": "Tên nhà thầu",
         "namePlaceholder": "VD: Công ty Xây dựng An Phát",
         "phone": "Số điện thoại",
@@ -3822,9 +3809,13 @@
         "cancel": "Đóng",
         "submit": "Gửi đăng ký",
         "successTitle": "Đã nhận thông tin đăng ký",
-        "successBody": "SAVICO sẽ gửi thông báo và hướng dẫn tiếp theo tới {email}.",
+        "successBody": "BuildX sẽ gửi thông báo và hướng dẫn tiếp theo tới {email}.",
         "close": "Hoàn tất"
-      }
+      },
+      "continueWith": "Tiếp tục với {name}",
+      "continueShort": "Tiếp tục",
+      "continueHint": "Tiếp tục với {name}",
+      "switchBrief": "Đổi hồ sơ"
     },
     "brief": {
       "badge": "Miễn phí · Không cần đăng ký gói",
@@ -3832,12 +3823,12 @@
       "leaveConfirm": "Rời trang sẽ bỏ dở phần đang nhập. Tiếp tục?",
       "close": "Đóng và quay lại lựa chọn",
       "leaveTitle": "Lưu hồ sơ nháp trước khi rời đi?",
-      "leaveDescription": "Bạn đã nhập một số thông tin. SAVICO có thể lưu lại để bạn tiếp tục sau.",
+      "leaveDescription": "Bạn đã nhập một số thông tin. BuildX có thể lưu lại để bạn tiếp tục sau.",
       "saveDraftAndLeave": "Lưu nháp và quay lại",
       "leaveWithoutSaving": "Không lưu",
       "keepEditing": "Tiếp tục nhập",
       "title": "Tự tạo hồ sơ dự án",
-      "subtitle": "Hoàn tất thông tin công trình và nhu cầu thi công, SAVICO đề xuất nhà thầu phù hợp.",
+      "subtitle": "Hoàn tất thông tin công trình và nhu cầu thi công, BuildX đề xuất nhà thầu phù hợp.",
       "draftSaved": "Đã lưu nháp - {time}",
       "steps": {
         "one": "Thông tin & nhu cầu",
@@ -3871,7 +3862,7 @@
       },
       "needs": {
         "title": "Nhu cầu thi công",
-        "subtitle": "Cho SAVICO biết phạm vi và yêu cầu chính của dự án.",
+        "subtitle": "Cho BuildX biết phạm vi và yêu cầu chính của dự án.",
         "scope": "Phạm vi thi công",
         "note": "Mô tả nhu cầu",
         "notePlaceholder": "VD: Cần nhà thầu thi công trọn gói nhà phố 2 tầng, có kinh nghiệm và có thể khảo sát hiện trạng vào cuối tuần.",
@@ -3893,21 +3884,21 @@
         "tooLarge": "Tệp {name} vượt quá 10 MB.",
         "wrongType": "Tệp {name} không thuộc định dạng được hỗ trợ."
       },
-      "notice": "Lưu ý: Hồ sơ tự tạo không bao gồm bản vẽ và dự toán do SAVICO phát hành.",
+      "notice": "Lưu ý: Hồ sơ tự tạo không bao gồm bản vẽ và dự toán do BuildX phát hành.",
       "noticeAction": "Xem gói Thiết kế & Dự toán",
       "continue": "Tiếp tục: Kiểm tra hồ sơ"
     },
     "review": {
       "back": "Quay lại thông tin & nhu cầu",
       "title": "Kiểm tra hồ sơ dự án",
-      "subtitle": "Xác nhận thông tin trước khi SAVICO bắt đầu đề xuất nhà thầu.",
+      "subtitle": "Xác nhận thông tin trước khi BuildX bắt đầu đề xuất nhà thầu.",
       "projectCard": {
         "title": "Dự án",
         "type": "Loại công trình",
         "scale": "Quy mô",
         "address": "Địa chỉ",
         "budget": "Ngân sách dự kiến",
-        "budgetHidden": "Chỉ SAVICO xem",
+        "budgetHidden": "Chỉ BuildX xem",
         "budgetLabel": "Ngân sách"
       },
       "siteTitle": "Thông tin công trình",
@@ -3942,7 +3933,7 @@
     "rating": {
       "action": "Đánh giá nhà thầu",
       "title": "Đánh giá {name}",
-      "subtitle": "Chỉ khách đã làm việc qua SAVICO mới đánh giá được, và mỗi lời mời đánh giá một lần.",
+      "subtitle": "Chỉ khách đã làm việc qua BuildX mới đánh giá được, và mỗi lời mời đánh giá một lần.",
       "ratingLabel": "Mức độ hài lòng",
       "ratingHint": "Chấm từ 1 đến 5 sao cho toàn bộ quá trình làm việc với nhà thầu này.",
       "ratingRequired": "Hãy chọn số sao.",
@@ -3965,17 +3956,17 @@
       "find": {
         "title": "Tìm nhà thầu phù hợp",
         "subtitle": "Chủ động lựa chọn, so sánh và chọn nhà thầu ưng ý",
-        "p1": "SAVICO đề xuất 3–5 nhà thầu phù hợp",
+        "p1": "BuildX đề xuất 3–5 nhà thầu phù hợp",
         "p2": "Xem hồ sơ năng lực & dự án thực tế",
         "p3": "Chọn 2–3 nhà thầu khảo sát",
         "p4": "Nhận báo giá và so sánh chi tiết",
-        "p5": "Nhận khuyến nghị từ SAVICO",
+        "p5": "Nhận khuyến nghị từ BuildX",
         "action": "Tìm nhà thầu",
         "p6": "Tự chọn nhà thầu cuối cùng"
       },
       "turnkey": {
-        "title": "Triển khai trọn gói cùng SAVICO",
-        "subtitle": "Để SAVICO đồng hành từ khảo sát đến bàn giao",
+        "title": "Triển khai trọn gói cùng BuildX",
+        "subtitle": "Để BuildX đồng hành từ khảo sát đến bàn giao",
         "p1": "Khảo sát & tư vấn chuyên sâu",
         "p2": "Thi công & quản lý tiến độ",
         "p3": "Cung ứng vật liệu, nội thất",
@@ -3996,21 +3987,23 @@
       },
       "turnkeyForm": {
         "title": "Đăng ký triển khai trọn gói",
-        "subtitle": "Để lại thông tin liên hệ, đội ngũ SAVICO sẽ gọi lại để khảo sát và tư vấn.",
+        "subtitle": "Để lại thông tin liên hệ, đội ngũ BuildX sẽ gọi lại để khảo sát và tư vấn.",
         "name": "Họ và tên",
         "phone": "Số điện thoại",
         "email": "Email",
         "note": "Nhu cầu của bạn",
         "notePlaceholder": "VD: Nhà phố 2 tầng ở Tân Lợi, muốn khởi công trong quý sau.",
-        "contactNote": "Thông tin chỉ dùng để đội ngũ SAVICO liên hệ về dự án của bạn.",
+        "contactNote": "Thông tin chỉ dùng để đội ngũ BuildX liên hệ về dự án của bạn.",
         "cancel": "Hủy",
-        "nameHint": "Tên người SAVICO sẽ liên hệ về dự án này.",
-        "phoneHint": "Số điện thoại đội ngũ SAVICO gọi lại để hẹn khảo sát.",
-        "emailHint": "Email nhận xác nhận và tài liệu liên quan.",
-        "noteHint": "Mô tả càng rõ, SAVICO càng chuẩn bị đúng nội dung buổi khảo sát. Không bắt buộc.",
-        "submit": "Gửi đăng ký"
+        "nameHint": "Tên người BuildX sẽ liên hệ về dự án này.",
+        "phoneHint": "Số điện thoại đội ngũ BuildX gọi lại để hẹn khảo sát.",
+        "emailHint": "Email nhận xác nhận và tài liệu liên quan. Không bắt buộc.",
+        "noteHint": "Mô tả càng rõ, BuildX càng chuẩn bị đúng nội dung buổi khảo sát. Không bắt buộc.",
+        "submit": "Gửi đăng ký",
+        "province": "Khu vực",
+        "provincePlaceholder": "Chọn tỉnh / thành phố"
       },
-      "turnkeyRegistered": "Đã ghi nhận. Đội ngũ SAVICO sẽ liên hệ với bạn trong giờ làm việc gần nhất.",
+      "turnkeyRegistered": "Đã ghi nhận. Đội ngũ BuildX sẽ liên hệ với bạn trong giờ làm việc gần nhất.",
       "exclusive": "Đặc quyền dành riêng",
       "popup2": {
         "title": "Dự án đã sẵn sàng — bạn muốn tiếp tục thế nào?",
@@ -4020,7 +4013,7 @@
         "find": {
           "imageAlt": "Ngôi nhà hoàn thiện và danh sách nhà thầu",
           "title": "Tìm nhà thầu",
-          "subtitle": "SAVICO đề xuất và hỗ trợ bạn so sánh nhà thầu phù hợp.",
+          "subtitle": "BuildX đề xuất và hỗ trợ bạn so sánh nhà thầu phù hợp.",
           "p1": "Đề xuất 3–5 nhà thầu",
           "p2": "Mời báo giá & so sánh",
           "p3": "Chốt nhà thầu phù hợp",
@@ -4028,11 +4021,11 @@
           "action": "Tìm nhà thầu"
         },
         "turnkey": {
-          "imageAlt": "SAVICO triển khai thi công tại công trường",
-          "badge": "Dịch vụ SAVICO",
-          "titlePro": "Thi công trọn gói cùng SAVICO",
-          "titleDefault": "Triển khai trọn gói cùng SAVICO",
-          "subtitle": "SAVICO tiếp nhận triển khai từ khảo sát đến bàn giao.",
+          "imageAlt": "BuildX triển khai thi công tại công trường",
+          "badge": "Dịch vụ BuildX",
+          "titlePro": "Thi công trọn gói cùng BuildX",
+          "titleDefault": "Triển khai trọn gói cùng BuildX",
+          "subtitle": "BuildX tiếp nhận triển khai từ khảo sát đến bàn giao.",
           "p1": "Flow dịch vụ: khảo sát & đề xuất",
           "p2": "Ký hợp đồng & thanh toán",
           "p3": "Triển khai đến bàn giao",
@@ -4068,14 +4061,11 @@
       "compareCheckbox": "So sánh",
       "maxCompare": "Tối đa {max} nhà thầu",
       "inviteLimitReached": "Đã dùng hết {max} lượt mời",
-      "whyTitle": "Vì sao SAVICO đề xuất?",
+      "whyTitle": "Vì sao BuildX đề xuất?",
       "why1": "Phù hợp loại công trình",
       "why2": "{count} dự án đã thực hiện",
       "why3": "Có thể khảo sát trong {hours}h",
-      "projectLabel": "Dự án đang chọn",
       "invitedPill": "Đã mời <n>{used}</n>/{max} · còn <n>{left}</n> lượt",
-      "viewInvites": "Xem lời mời",
-      "switchProject": "Đổi dự án",
       "regionLabel": "Khu vực",
       "radiusShort": "Bán kính",
       "regions": {
@@ -4085,14 +4075,15 @@
       },
       "previewTitle": "Bạn đang xem thử — tạo hồ sơ dự án để mời nhà thầu",
       "previewDescription": "Tạo hồ sơ để lưu lựa chọn và gửi lời mời.",
-      "previewAction": "Tạo hồ sơ dự án"
+      "previewAction": "Tạo hồ sơ dự án",
+      "viewInvites": "Xem lời mời"
     },
     "firm": {
       "tabs": {
         "overview": "Tổng quan",
         "projects": "Dự án đã thực hiện",
         "legal": "Năng lực pháp lý",
-        "partnership": "Hợp tác SAVICO"
+        "partnership": "Hợp tác BuildX"
       },
       "introTitle": "Giới thiệu doanh nghiệp",
       "founded": "Thành lập năm {year}",
@@ -4106,7 +4097,7 @@
       "legal": {
         "updating": "Đang cập nhật",
         "verification": {
-          "title": "SAVICO đã xác minh giấy phép kinh doanh của nhà thầu này",
+          "title": "BuildX đã xác minh giấy phép kinh doanh của nhà thầu này",
           "body": "Đối chiếu bản gốc tại buổi thẩm định {date}. Giấy phép thay đổi hoặc bị thu hồi, nhà thầu tạm ẩn khỏi đề xuất tới khi cập nhật.",
           "updated": "Cập nhật"
         },
@@ -4138,9 +4129,9 @@
           "view": "Xem",
           "privacy": "Mã số doanh nghiệp được che một phần. Bản scan đầy đủ chỉ mở sau khi bạn gửi lời mời báo giá tới nhà thầu này.",
           "dialogTitle": "Thông tin giấy phép đã xác minh",
-          "dialogBody": "SAVICO hiển thị bản tóm tắt và che dữ liệu nhạy cảm trước khi hai bên kết nối.",
+          "dialogBody": "BuildX hiển thị bản tóm tắt và che dữ liệu nhạy cảm trước khi hai bên kết nối.",
           "lockedTitle": "Bản scan mở khóa sau khi mời báo giá",
-          "lockedBody": "SAVICO đã đối chiếu bản gốc ngày {date}. Sau khi bạn gửi lời mời báo giá, bản scan đầy đủ hiển thị tại đây và trong màn Lời mời báo giá.",
+          "lockedBody": "BuildX đã đối chiếu bản gốc ngày {date}. Sau khi bạn gửi lời mời báo giá, bản scan đầy đủ hiển thị tại đây và trong màn Lời mời báo giá.",
           "scanUnlocked": "Bản scan giấy phép đã mở khóa",
           "status": "Trạng thái",
           "close": "Đóng"
@@ -4149,27 +4140,27 @@
           "title": "Cam kết & bảo hành",
           "warrantyTitle": "Bảo hành kết cấu {months} tháng",
           "warrantyBody": "Hoàn thiện 12 tháng · thiết bị theo hãng",
-          "contractTitle": "Hợp đồng theo mẫu SAVICO",
+          "contractTitle": "Hợp đồng theo mẫu BuildX",
           "contractBody": "Nghiệm thu từng giai đoạn có biên bản, ảnh hiện trạng",
           "insuranceTitle": "Bảo hiểm công trình",
           "insuranceBody": "Áp dụng mỗi hợp đồng thi công trọn gói",
-          "updating": "Thông tin đang được SAVICO cập nhật"
+          "updating": "Thông tin đang được BuildX cập nhật"
         },
         "cooperation": {
-          "title": "Hợp tác với SAVICO",
+          "title": "Hợp tác với BuildX",
           "verified": "Đối tác đã xác minh",
           "since": "Hợp tác từ {since}",
           "rank": "Phản hồi tốt mỗi vòng {rank}h (đạt {percent}%)",
-          "complaints": "{count} khiếu nại trên SAVICO"
+          "complaints": "{count} khiếu nại trên BuildX"
         }
       },
       "activity": "Thông tin hoạt động",
       "warranty": "Bảo hành {months} tháng",
       "contactLocked": "Thông tin liên hệ được mở sau khi lịch khảo sát được xác nhận.",
       "report": "Báo cáo hồ sơ",
-      "reportSent": "Đã ghi nhận báo cáo. Đội hỗ trợ SAVICO sẽ kiểm tra hồ sơ này.",
+      "reportSent": "Đã ghi nhận báo cáo. Đội hỗ trợ BuildX sẽ kiểm tra hồ sơ này.",
       "reportConfirmTitle": "Báo cáo hồ sơ này?",
-      "reportConfirmBody": "SAVICO sẽ kiểm tra lại thông tin và hoạt động của nhà thầu này.",
+      "reportConfirmBody": "BuildX sẽ kiểm tra lại thông tin và hoạt động của nhà thầu này.",
       "reportConfirmAction": "Gửi báo cáo",
       "addToCompare": "Thêm vào so sánh",
       "inCompare": "Đã thêm vào so sánh",
@@ -4181,7 +4172,7 @@
       "viewSimilar": "Xem nhà thầu tương tự",
       "projects": {
         "projectCount": "{count} dự án",
-        "verifiedSummary": "{count} được SAVICO xác minh qua ảnh thực tế & biên bản nghiệm thu",
+        "verifiedSummary": "{count} được BuildX xác minh qua ảnh thực tế & biên bản nghiệm thu",
         "verifiedOnly": "Chỉ dự án đã xác minh",
         "sortLabel": "Sắp xếp dự án",
         "sortLatest": "Mới nhất",
@@ -4234,18 +4225,18 @@
             "general-contractor": "Tổng thầu",
             "contractor": "Nhà thầu thi công"
           },
-          "verifiedTitle": "SAVICO đã xác minh ngày {date}",
+          "verifiedTitle": "BuildX đã xác minh ngày {date}",
           "verifiedDateFallback": "đang cập nhật",
           "verifiedBody": "Đối chiếu ảnh thực tế tại công trình và biên bản nghiệm thu có chữ ký chủ nhà.",
           "selfReportedTitle": "Thông tin do nhà thầu tự khai",
-          "selfReportedBody": "SAVICO chưa đối chiếu dự án này với ảnh hiện trường và biên bản nghiệm thu.",
-          "priceNotice": "Không hiển thị giá trị hợp đồng hay đơn giá - SAVICO không lưu và không công bố thông tin giá.",
+          "selfReportedBody": "BuildX chưa đối chiếu dự án này với ảnh hiện trường và biên bản nghiệm thu.",
+          "priceNotice": "Không hiển thị giá trị hợp đồng hay đơn giá - BuildX không lưu và không công bố thông tin giá.",
           "close": "Đóng"
         }
       },
       "partnership": {
-        "title": "Đối tác hợp tác cùng SAVICO",
-        "body": "{name} đã ký thỏa thuận hợp tác và được SAVICO xác minh hồ sơ doanh nghiệp.",
+        "title": "Đối tác hợp tác cùng BuildX",
+        "body": "{name} đã ký thỏa thuận hợp tác và được BuildX xác minh hồ sơ doanh nghiệp.",
         "verified": "Đối tác đã xác minh",
         "since": "Hợp tác từ {since}",
         "scanTitle": "Bản scan hợp đồng hợp tác",
@@ -4255,13 +4246,13 @@
         "pages": "Số trang:",
         "state": "Trạng thái:",
         "stateVerified": "Đã xác minh",
-        "checked": "Bản scan được SAVICO đối chiếu với hồ sơ doanh nghiệp.",
+        "checked": "Bản scan được BuildX đối chiếu với hồ sơ doanh nghiệp.",
         "page": "Trang {current} / {total}",
         "fullscreen": "Xem toàn màn hình",
         "download": "Tải bản PDF",
         "unavailable": "Bản scan đang được đội vận hành cập nhật.",
         "privacyNote": "Chỉ hiển thị trang thông tin đã che các nội dung bảo mật của hai bên.",
-        "parties": "SAVICO × {name}",
+        "parties": "BuildX × {name}",
         "zoomOut": "Thu nhỏ",
         "zoomIn": "Phóng to",
         "zoomFit": "Vừa khung",
@@ -4304,12 +4295,12 @@
       "removeColumn": "Bỏ so sánh",
       "exceedRoom": "Bạn chỉ còn {count} lượt mời",
       "criteriaHint": {
-        "rating": "Điểm đánh giá trung bình từ khách hàng đã làm việc qua SAVICO.",
+        "rating": "Điểm đánh giá trung bình từ khách hàng đã làm việc qua BuildX.",
         "similarProjects": "Số dự án cùng loại hình nhà thầu đã thực hiện.",
         "distance": "Khoảng cách từ nhà thầu tới công trình của bạn.",
         "surveyTime": "Thời gian nhà thầu có thể tới khảo sát sau khi nhận lời mời.",
         "serviceAreas": "Các khu vực nhà thầu nhận thi công.",
-        "legal": "Hồ sơ pháp lý đã được SAVICO đối chiếu.",
+        "legal": "Hồ sơ pháp lý đã được BuildX đối chiếu.",
         "warranty": "Thời gian bảo hành sau khi bàn giao công trình.",
         "accepting": "Nhà thầu có đang nhận dự án mới hay không."
       }
@@ -4364,13 +4355,13 @@
     "sent": {
       "title": "Đã gửi lời mời & đăng ký khảo sát",
       "subtitle": "Yêu cầu khảo sát của bạn đã được gửi đến {names}.",
-      "requestCode": "Mã yêu cầu: <accent>{code}</accent>",
+      "requestCode": "Mã lời mời: <accent>{code}</accent>",
       "sentAt": "Gửi lúc {time}",
       "detailTitle": "Chi tiết yêu cầu",
       "location": "Địa điểm khảo sát",
       "note": "Ghi chú cho buổi khảo sát",
       "noNote": "Không có ghi chú",
-      "supportTitle": "Đội ngũ hỗ trợ SAVICO sẽ liên hệ với bạn",
+      "supportTitle": "Đội ngũ hỗ trợ BuildX sẽ liên hệ với bạn",
       "supportBody": "Chúng tôi sẽ chủ động gọi điện để xác nhận lịch khảo sát, làm rõ nhu cầu và phối hợp chi tiết với nhà thầu.",
       "supportTime": "Thời gian dự kiến: Trong giờ làm việc gần nhất.",
       "track": "Theo dõi yêu cầu",
@@ -4384,7 +4375,7 @@
     },
     "invitations": {
       "title": "Lời mời báo giá",
-      "subtitle": "Bạn đã gửi lời mời báo giá đến {count} nhà thầu. Trạng thái do đội hỗ trợ SAVICO cập nhật.",
+      "subtitle": "Bạn đã gửi lời mời báo giá đến {count} nhà thầu. Trạng thái do đội hỗ trợ BuildX cập nhật.",
       "counter": "Đã mời <b>{used} / {max}</b> nhà thầu tối đa",
       "empty": "Chưa gửi lời mời nào cho dự án này.",
       "back": "Quay lại danh sách nhà thầu",
@@ -4392,7 +4383,7 @@
       "code": "Mã lời mời <b>{code}</b>",
       "sentAt": "Gửi lúc <b>{time}</b>",
       "dossier": "Hồ sơ <b>{version} · {count} tệp</b>",
-      "updatedBy": "Cập nhật {time} · đội hỗ trợ SAVICO",
+      "updatedBy": "Cập nhật {time} · đội hỗ trợ BuildX",
       "surveyAt": "Khảo sát {date}, {slot}",
       "meaningTitle": "Ý nghĩa trạng thái",
       "dossierTitle": "Hồ sơ đã gửi",
@@ -4403,14 +4394,13 @@
       "dossierFileCount": "{count} tệp",
       "dossierView": "Xem hồ sơ đã gửi",
       "dossierNoBudget": "Hồ sơ gửi đi không chứa ngân sách hay bất kỳ thông tin giá nào.",
-      "supportTitle": "Đội hỗ trợ SAVICO",
+      "supportTitle": "Đội hỗ trợ BuildX",
       "supportBody": "Cập nhật trạng thái từng lời mời và hỗ trợ khi bạn muốn ngưng lời mời hoặc đổi nhà thầu.",
       "supportAction": "Liên hệ đội hỗ trợ",
-      "footerNote": "Sau khi nhà thầu nhận lời mời, hai bên trao đổi trực tiếp về khảo sát, báo giá và hợp đồng. SAVICO không lưu báo giá hay số tiền. Muốn ngưng một lời mời hoặc đổi nhà thầu, hãy liên hệ đội hỗ trợ.",
-      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
+      "footerNote": "Sau khi nhà thầu nhận lời mời, hai bên trao đổi trực tiếp về khảo sát, báo giá và hợp đồng. BuildX không lưu báo giá hay số tiền. Muốn ngưng một lời mời hoặc đổi nhà thầu, hãy liên hệ đội hỗ trợ.",
+      "supportToast": "Đội hỗ trợ BuildX sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
       "newUpdateBadge": "Mới",
-      "editBriefWarning": "Sửa hồ sơ sẽ tạo phiên bản v2 - lời mời đã gửi vẫn dùng v1",
-      "contactDialogTitle": "Liên hệ đội hỗ trợ SAVICO",
+      "contactDialogTitle": "Liên hệ đội hỗ trợ BuildX",
       "contactDialogCall": "Gọi ngay",
       "supervisionSuggestion": "Đã có nhà thầu — chọn cách quản lý thi công?",
       "supervisionAction": "Xem gói giám sát",
@@ -4421,7 +4411,8 @@
       "profileSimilar": "Dự án tương tự",
       "dossierPanelDescription": "Phiên bản hồ sơ đã gửi · Chỉ đọc",
       "noPriceBadge": "Không chứa giá",
-      "rejectedLine": "Lời mời đã bị từ chối. Lý do: {reason}"
+      "rejectedLine": "Lời mời đã bị từ chối. Lý do: {reason}",
+      "inviteMore": "Mời thêm nhà thầu (còn {left})"
     },
     "picker": {
       "title": "Chọn dự án để tìm nhà thầu",
@@ -4445,11 +4436,19 @@
       "buyPlan": "Mua gói thiết kế để có bản vẽ & khối lượng kèm hồ sơ",
       "contracted": "Đã chốt thầu",
       "untitled": "Hồ sơ chưa đặt tên"
+    },
+    "projectBar": {
+      "label": "Dự án đang chọn",
+      "version": "Hồ sơ v{version}",
+      "invited": "Đã mời {used}/{max}",
+      "viewInvites": "Xem lời mời",
+      "switchProject": "Đổi dự án",
+      "editWarning": "Sửa hồ sơ sẽ tạo phiên bản {next} — lời mời đã gửi vẫn dùng {current}."
     }
   },
   "checkout": {
     "headerSupport": "Bạn cần hỗ trợ?",
-    "headerSupportAction": "Liên hệ SAVI",
+    "headerSupportAction": "Liên hệ BuildX",
     "steps": {
       "plan": "Chọn gói",
       "confirm": "Xác nhận đơn hàng",
@@ -4457,16 +4456,16 @@
       "done": "Hoàn tất"
     },
     "stepState": {
-      "done": "Đã xong",
-      "current": "Đang làm",
-      "pending": "Chưa tới",
+      "done": "Hoàn tất",
+      "current": "Đang thực hiện",
+      "pending": "Tiếp theo",
       "error": "Cần xử lý"
     },
     "confirm": {
       "title": "Xác nhận đơn hàng",
       "subtitle": "Kiểm tra thông tin trước khi tiến hành thanh toán.",
       "buyerTitle": "Thông tin người mua",
-      "buyerEditable": "Có thể chỉnh sửa",
+      "buyerEditable": "Sửa thông tin",
       "name": "Họ và tên",
       "phone": "Số điện thoại",
       "email": "Email",
@@ -4475,7 +4474,7 @@
       "qrTitle": "QR chuyển khoản ngân hàng",
       "qrBody": "Quét mã bằng app ngân hàng. Hệ thống tự xác nhận trong 1–5 phút.",
       "qrFree": "Không mất phí",
-      "qrOnly": "SAVICO chỉ nhận thanh toán qua QR chuyển khoản.",
+      "qrOnly": "BuildX chỉ nhận thanh toán qua QR chuyển khoản.",
       "invoiceTitle": "Xuất hóa đơn",
       "invoiceHint": "Bật nếu bạn cần hóa đơn giá trị gia tăng.",
       "company": "Tên công ty",
@@ -4504,8 +4503,8 @@
       "processing": "Đang tạo đơn...",
       "readyHint": "Bạn sẽ được chuyển tới trang thanh toán bằng mã QR.",
       "refund": "Hoàn 100% trong {hours} giờ nếu bạn chưa dùng lượt nào.",
-      "noCardNote": "SAVICO không thu và không lưu thông tin thanh toán của bạn.",
-      "terms": "Tôi đã đọc và đồng ý với <terms>Điều khoản sử dụng</terms> và <payment>Chính sách thanh toán</payment> của SAVICO.",
+      "noCardNote": "BuildX không thu và không lưu thông tin thanh toán của bạn.",
+      "terms": "Tôi đã đọc và đồng ý với <terms>Điều khoản sử dụng</terms> và <payment>Chính sách thanh toán</payment> của BuildX.",
       "termsRequired": "Bạn cần đồng ý với điều khoản trước khi thanh toán.",
       "termsRequiredToast": "Vui lòng tích đồng ý điều khoản trước.",
       "missingProduct": "Không tìm thấy gói bạn chọn. Quay lại bảng giá để chọn lại.",
@@ -4545,7 +4544,7 @@
       "recording": "Đang ghi nhận…",
       "verifying": "Đang xác nhận…",
       "support": "Cần hỗ trợ?",
-      "supportToast": "Đội hỗ trợ SAVICO sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
+      "supportToast": "Đội hỗ trợ BuildX sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
       "supportSubject": "Hỗ trợ đơn hàng {code}",
       "supportBody": "Tôi cần hỗ trợ với đơn hàng {code}."
     },
@@ -4598,18 +4597,18 @@
       "receiptAmount": "Số tiền",
       "receiptStatus": "Trạng thái",
       "receiptPaid": "Đã thanh toán",
-      "turnkeyContactConfirmation": "Đã ghi nhận — đội ngũ SAVICO sẽ liên hệ với bạn.",
+      "turnkeyContactConfirmation": "Đã ghi nhận — đội ngũ BuildX sẽ liên hệ với bạn.",
       "myProjects": "Vào dự án của tôi",
       "dashboard": "Bảng điều khiển giám sát",
-      "dataNote": "Dữ liệu dự án của bạn được lưu riêng và bảo mật trên hệ thống SAVICO.",
+      "dataNote": "Dữ liệu dự án của bạn được lưu riêng và bảo mật trên hệ thống BuildX.",
       "assignNote": "Đội hỗ trợ sẽ phân công kỹ sư và mở 6 giai đoạn giám sát cho dự án của bạn."
     }
   },
   "supervision": {
     "tiers": {
-      "self": "Tự quản lý",
-      "check": "SVC CHECK",
-      "control": "SVC CONTROL"
+      "self": "TỰ QUẢN LÝ",
+      "check": "AN TÂM",
+      "control": "TOÀN DIỆN"
     },
     "tierAlias": {
       "self": "Tự quản lý",
@@ -4639,13 +4638,13 @@
     },
     "managementPopup": {
       "title": "Bạn muốn quản lý quá trình thi công như thế nào?",
-      "subtitle": "Sau khi đã chốt nhà thầu, hãy chọn cách SAVICO sẽ đồng hành cùng bạn.",
+      "subtitle": "Sau khi đã chốt nhà thầu, hãy chọn cách BuildX sẽ đồng hành cùng bạn.",
       "close": "Đóng",
       "later": "Để sau",
       "self": {
         "imageAlt": "Bản vẽ thi công và dụng cụ quản lý công trình",
         "title": "Tự quản lý",
-        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; SAVICO lưu hồ sơ và tiến độ cơ bản.",
+        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; BuildX lưu hồ sơ và tiến độ cơ bản.",
         "p1": "Dashboard tự quản lý",
         "p2": "Theo dõi hồ sơ & tiến độ",
         "p3": "Thi công",
@@ -4656,28 +4655,28 @@
         "imageAlt": "Kỹ sư kiểm tra các mốc quan trọng của công trình",
         "badge": "Gói An Tâm",
         "title": "Giám sát theo mốc",
-        "subtitle": "SAVICO kiểm tra các giai đoạn quan trọng của công trình.",
+        "subtitle": "BuildX kiểm tra các giai đoạn quan trọng của công trình.",
         "p1": "Kiểm tra theo từng mốc",
         "p2": "Báo cáo sau mỗi lần kiểm tra",
         "p3": "{count} lượt giám sát dự kiến",
-        "value": "SVC CHECK · từ {price}",
+        "value": "AN TÂM · từ {price}",
         "action": "Chọn giám sát theo mốc"
       },
       "control": {
-        "imageAlt": "Kỹ sư SAVICO theo dõi thi công xuyên suốt tại công trường",
+        "imageAlt": "Kỹ sư BuildX theo dõi thi công xuyên suốt tại công trường",
         "badge": "Khuyên dùng · Gói Toàn Diện",
         "title": "Giám sát xuyên suốt",
-        "subtitle": "SAVICO đồng hành từ khởi công đến hoàn tất và bàn giao.",
+        "subtitle": "BuildX đồng hành từ khởi công đến hoàn tất và bàn giao.",
         "p1": "Theo dõi xuyên suốt",
         "p2": "Kiểm soát chất lượng & phát sinh",
         "p3": "{count} lượt giám sát dự kiến",
-        "value": "SVC CONTROL · {price}",
+        "value": "TOÀN DIỆN · {price}",
         "action": "Chọn giám sát xuyên suốt"
       }
     },
     "pricing": {
-      "title": "Gói giám sát thi công SVC",
-      "subtitle": "Giám sát theo mốc quan trọng, kết hợp theo dõi số hóa trên nền tảng SVC",
+      "title": "Gói giám sát thi công BuildX",
+      "subtitle": "Giám sát theo mốc quan trọng, kết hợp theo dõi số hóa trên nền tảng BuildX",
       "recommended": "Khuyến nghị cho nhà ở",
       "perProject": "/ dự án",
       "duration": "tối đa {months} tháng",
@@ -4700,7 +4699,7 @@
           "inspectionCount": "Số lần kỹ sư kiểm tra thực tế",
           "duration": "Thời gian áp dụng",
           "price": "Chi phí",
-          "dossier": "Lưu hồ sơ dự án trên SAVICO",
+          "dossier": "Lưu hồ sơ dự án trên BuildX",
           "dashboard": "Bảng điều khiển 6 giai đoạn",
           "timeline": "Timeline thi công",
           "progress": "Theo dõi % tiến độ",
@@ -4710,8 +4709,8 @@
           "extras": "Ghi nhận phát sinh",
           "followUp": "Theo dõi vấn đề cần xử lý",
           "structureCheck": "Kiểm tra phần thô",
-          "dampCheck": "Kiểm tra đấm mốc ẩm",
-          "waterproofCheck": "Kiểm tra móng thấm",
+          "dampCheck": "Kiểm tra chống ẩm",
+          "waterproofCheck": "Kiểm tra chống thấm móng",
           "finishingCheck": "Kiểm tra hoàn thiện",
           "materialCheck": "Đối chiếu vật liệu thực tế",
           "reportAfter": "Báo cáo sau mỗi lần kiểm tra",
@@ -4733,7 +4732,7 @@
         }
       },
       "addons": {
-        "title": "Add-on & phụ phí",
+        "title": "Dịch vụ thêm và phụ phí",
         "item": "Hạng mục",
         "price": "Giá đề xuất",
         "note": "Ghi chú",
@@ -4742,7 +4741,7 @@
         "extraVisitNote": "Khi cần thêm mốc ngoài gói",
         "urgent": "Kiểm tra khẩn / ngoài kế hoạch",
         "urgentPrice": "1.490.000đ",
-        "urgentNote": "Tùy khối lượng bố trí sự việc",
+        "urgentNote": "Tùy mức độ khẩn và việc bố trí kỹ sư",
         "outOfArea": "Ngoài khu vực phục vụ chuẩn",
         "outOfAreaPrice": "Theo thực tế",
         "outOfAreaNote": "Tính thêm phí di chuyển nếu có",
@@ -4752,30 +4751,20 @@
       },
       "scope": {
         "title": "Nguyên tắc phạm vi dịch vụ",
-        "r1": "SAVICO kiểm tra, ghi nhận, cảnh báo, báo cáo và theo dõi xử lý trong phạm vi gói đã chọn.",
+        "r1": "BuildX kiểm tra, ghi nhận, cảnh báo, báo cáo và theo dõi xử lý trong phạm vi gói đã chọn.",
         "r2": "Nhà thầu vẫn chịu trách nhiệm tổ chức thi công, chất lượng phần việc, an toàn lao động và bảo hành.",
         "r3": "Gói không bao gồm kỹ sư thường trực tại công trình."
       },
       "journey": {
-        "title": "Hành trình khách hàng",
-        "s1": "Thiết kế & dự toán",
-        "s1Body": "Khách mua và sử dụng gói thiết kế trên SAVICO.",
-        "s2": "Tìm nhà thầu",
-        "s2Body": "Khách tìm, so sánh và chọn nhà thầu.",
-        "s3": "Chọn cách quản lý thi công",
-        "s3Body": "Khách chọn \"Tự quản lý\" hoặc gói giám sát.",
-        "s4a": "Tự quản lý",
-        "s4aBody": "Khách làm việc trực tiếp với nhà thầu.",
-        "s4b": "SAVICO giám sát",
-        "s4bBody": "Khách chọn gói CHECK hoặc CONTROL.",
-        "s5": "Thi công",
-        "s5Body": "Kỹ sư kiểm tra theo các mốc đã cam kết.",
-        "s6": "Kiểm soát",
-        "s6Body": "Theo dõi tiến độ, vật liệu, phát sinh, sai lệch.",
-        "s7": "Nghiệm thu",
-        "s7Body": "Kiểm tra theo giai đoạn và nhận kết quả.",
-        "s8": "Bàn giao",
-        "s8Body": "Kiểm tra tổng thể, biên bản bàn giao, báo cáo tổng kết."
+        "title": "Hành trình giám sát",
+        "choose": "Bạn chọn gói giám sát",
+        "chooseBody": "Chọn gói An Tâm hoặc Toàn Diện cho công trình của bạn.",
+        "inspect": "Kỹ sư kiểm tra theo mốc",
+        "inspectBody": "Kỹ sư đến công trình tại các mốc đã cam kết.",
+        "report": "Bạn nhận báo cáo",
+        "reportBody": "Nhận báo cáo sau mỗi lần kiểm tra, kèm ảnh hiện trường.",
+        "handover": "Nghiệm thu và bàn giao",
+        "handoverBody": "Nghiệm thu theo giai đoạn và nhận biên bản bàn giao."
       },
       "value": {
         "title": "Giá trị khách hàng nhận được",
@@ -4798,7 +4787,7 @@
           },
           "quality": {
             "self": "Tự đối chiếu với hồ sơ",
-            "check": "Kiểm tra đấm mốc ẩm, móng thấm, hoàn thiện",
+            "check": "Kiểm tra chống ẩm, chống thấm móng và hoàn thiện",
             "control": "Kiểm soát cả phần thô và vật liệu thực tế"
           },
           "handover": {
@@ -4829,7 +4818,7 @@
         "approve": "Xem & duyệt yêu cầu sửa đổi"
       },
       "project": {
-        "service": "Dịch vụ SAVICO",
+        "service": "Dịch vụ BuildX",
         "code": "Mã dự án",
         "engineer": "Kỹ sư",
         "packageCode": "Mã gói",
@@ -4993,5 +4982,42 @@
       "finishing": "Hoàn thiện",
       "handover": "Nghiệm thu & bàn giao"
     }
+  },
+  "meta": {
+    "home": "Thiết kế và dự toán xây nhà bằng AI từ ảnh lô đất | BUILDX",
+    "design": "Thiết kế & Dự toán",
+    "designInput": "Nhập thông tin dự án",
+    "designEstimate": "Kết quả dự toán",
+    "designDossier": "Hồ sơ thi công",
+    "contractors": "Tìm nhà thầu",
+    "contractorMatches": "Nhà thầu đề xuất",
+    "contractorFirm": "Hồ sơ nhà thầu",
+    "contractorCompare": "So sánh nhà thầu",
+    "contractorInvite": "Đặt lịch khảo sát",
+    "contractorSent": "Đã gửi lời mời",
+    "contractorInvitations": "Lời mời báo giá",
+    "contractorBrief": "Hồ sơ dự án",
+    "contractorReview": "Kiểm tra hồ sơ dự án",
+    "handbook": "Cẩm nang xây nhà",
+    "handbookArticle": "Bài viết cẩm nang",
+    "handbookTemplate": "Mẫu thiết kế",
+    "guide": "Hướng dẫn sử dụng",
+    "plans": "Bảng giá",
+    "plansSupervision": "Gói giám sát thi công",
+    "consult": "Tư vấn 1:1",
+    "consultDetail": "Hồ sơ kiến trúc sư",
+    "account": "Tài khoản của tôi",
+    "accountProjects": "Dự án của tôi",
+    "accountFavorites": "Mẫu đã lưu",
+    "accountDossiers": "Hồ sơ của tôi",
+    "accountPurchases": "Lịch sử mua hàng",
+    "accountConsultations": "Lịch sử tư vấn 1:1",
+    "supervision": "Giám sát thi công",
+    "checkoutConfirm": "Xác nhận đơn hàng",
+    "checkoutPayment": "Thanh toán",
+    "checkoutVerifying": "Đang xác nhận thanh toán",
+    "checkoutDone": "Hoàn tất đơn hàng",
+    "checkoutFailed": "Thanh toán chưa thành công",
+    "share": "Hồ sơ dự án được chia sẻ"
   }
 }

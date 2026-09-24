@@ -41,7 +41,7 @@ export function JourneyDialogShell({
             transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
             className='absolute top-5 left-6 hidden origin-top-left min-[900px]:block'
           >
-            <Logo className='origin-top-left scale-[0.92]' tagline={t('brandTagline')} />
+            <Logo className='origin-top-left scale-[0.92]' />
           </motion.div>
 
           <DialogClose

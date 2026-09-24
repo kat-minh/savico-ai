@@ -1,14 +1,16 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowRight, ChevronRight, CalendarDays, Tag } from 'lucide-react'
+import { ArrowRight, ChevronRight, CalendarDays, Clock, Tag } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import type { Locale } from '@/i18n/routing'
 import { Link } from '@/i18n/navigation'
 import { revealEase, RevealPhoto } from '@/shared/components/common'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
+import { formatDisplayDate } from '@/shared/utils'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { HOME_HANDBOOK_COUNT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
@@ -30,7 +32,7 @@ const NEW_BADGE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000
 export function HandbookHighlights() {
   const t = useTranslations('handbook.home')
   const { nameOf: labelName } = useArticleLabels()
-  const format = useFormatter()
+  const locale = useLocale() as Locale
 
   const { data: articles, isPending } = useHandbookArticles()
   const latest = useMemo(() => sortByNewest(articles ?? []).slice(0, HOME_HANDBOOK_COUNT), [articles])
@@ -113,20 +115,13 @@ export function HandbookHighlights() {
                         </span>
                         <span className='flex items-center gap-1.5 border-l pl-4'>
                           <CalendarDays className='text-primary/70 size-3.5' />
-                          {format.dateTime(new Date(article.publishedAt), {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })}
+                          {formatDisplayDate(article.publishedAt, locale)}
                         </span>
-                      </span>
-                      {/* Khoảng này LUÔN chiếm chỗ sẵn (chiều cao cố định
-                          theo dòng chữ) — rê chuột chỉ đổi opacity, không
-                          đổi chiều cao, nên thẻ không bao giờ bị giãn ra.
-                          Dưới `sm` (cảm ứng, không có rê chuột) bỏ hẳn để đáy thẻ không trống,
-                          giống thẻ của khối Hướng dẫn. */}
-                      <span className='text-primary mt-auto pt-1 text-xs font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100 max-sm:hidden'>
-                        {t('readTime', { minutes: article.readingMinutes })}
+                        {/* Thời gian đọc nằm cùng hàng ngày đăng (góp ý BuildX) — bớt một dòng dưới thẻ. */}
+                        <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <Clock className='text-primary/70 size-3.5' />
+                          {t('readTime', { minutes: article.readingMinutes })}
+                        </span>
                       </span>
                     </span>
                   </Link>

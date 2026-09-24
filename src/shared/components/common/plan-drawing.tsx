@@ -416,7 +416,7 @@ export function PlanDrawing({
             className='fill-primary/45'
             style={{ fontSize: 6, fontWeight: 700, letterSpacing: 1 }}
           >
-            SAVICO
+            BUILDX
           </text>
         ) : null}
       </svg>

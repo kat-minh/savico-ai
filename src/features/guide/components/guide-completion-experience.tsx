@@ -82,7 +82,7 @@ function GuideCompletionSection({ video, onCreateProject, onBrowseGuides }: EndC
       initial={reduceMotion ? false : { opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] }}
-      className='mb-8 overflow-hidden rounded-[20px] border bg-card shadow-[0_16px_44px_-34px_rgba(16,82,51,.28)]'
+      className='mb-8 overflow-hidden rounded-[20px] border bg-card shadow-[0_16px_44px_-34px_rgba(42,117,63,.28)]'
     >
       <div className='grid min-h-[250px] items-center gap-8 px-7 py-7 min-[900px]:grid-cols-[56px_minmax(0,1fr)_320px] lg:px-10 max-[899px]:px-5 max-[899px]:py-6'>
         <motion.div
@@ -144,7 +144,7 @@ function GuideCompletionSection({ video, onCreateProject, onBrowseGuides }: EndC
               initial={reduceMotion ? false : { opacity: 0, y: 10, rotate: 1.1 }}
               animate={{ opacity: 1, y: 0, rotate: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : 0.12 }}
-              className='absolute top-0 right-[10px] h-[254px] w-[153px] overflow-hidden rounded-[30px] border-[9px] border-[#14231d] bg-[#14231d] shadow-[0_24px_42px_-18px_rgba(0,0,0,.5)]'
+              className='absolute top-0 right-[10px] h-[254px] w-[153px] overflow-hidden rounded-[30px] border-[9px] border-primary-strong bg-primary-strong shadow-[0_24px_42px_-18px_rgba(0,0,0,.5)]'
             >
               <Photo
                 src={video.thumbnailUrl || TOPIC_IMAGE.site}
@@ -202,7 +202,6 @@ function GuideEndCardDialog({
   onBrowseGuides
 }: EndCardProps & { open: boolean; onOpenChange: (open: boolean) => void }) {
   const t = useTranslations('guide.endCard.popup')
-  const common = useTranslations('common.journey')
   const reduceMotion = useReducedMotion()
 
   const closeAndCreate = () => {
@@ -228,7 +227,7 @@ function GuideEndCardDialog({
             transition={{ duration: reduceMotion ? 0 : 0.26, ease: [0.22, 1, 0.36, 1] }}
             className='absolute top-5 left-6 hidden origin-top-left min-[900px]:block'
           >
-            <Logo className='origin-top-left scale-[0.92]' tagline={common('brandTagline')} />
+            <Logo className='origin-top-left scale-[0.92]' />
           </motion.div>
 
           <motion.div

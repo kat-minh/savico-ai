@@ -64,7 +64,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import {
   CONTRACTOR_PREVIEW_ID,
-  contractorBriefRoute,
   contractorCompareRoute,
   contractorFirmRoute,
   contractorInvitationsRoute,
@@ -95,7 +94,7 @@ interface ContractorProfileProps {
 }
 
 /** Bề ngang trang, đo từ ảnh S13: khối nội dung chiếm 90% bề ngang màn. */
-const PAGE_CONTAINER = 'mx-auto w-[90%] max-w-[80rem]'
+const PAGE_CONTAINER = 'mx-auto w-full max-w-[90rem] px-4 lg:px-8'
 
 /** Mốc để bật thanh hồ sơ thu gọn sau khi phần nhận diện rời khỏi viewport. */
 const HEADER_ANCHOR_ID = 'firm-header-anchor'
@@ -411,27 +410,21 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
       {preview ? null : (
         <ProjectContextBar
           brief={brief}
-          compact
-          aside={
-            <div className='flex items-center gap-2'>
-              <motion.div
-                id='firm-compare-target'
-                key={compareIds.length}
-                initial={reduceMotion ? false : { scale: 0.82, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-              >
-                <Button asChild size='sm' variant='outline' className='border-primary/40 text-primary-strong'>
-                  <Link href={contractorCompareRoute(projectId)}>
-                    <Scale className='size-3.5' />
-                    {t('compareChip', { count: compareIds.length, max: MAX_INVITATIONS })}
-                  </Link>
-                </Button>
-              </motion.div>
-              <Button asChild size='sm' variant='ghost' className='hidden sm:inline-flex'>
-                <Link href={contractorBriefRoute(projectId)}>{tCommon('editBrief')}</Link>
+          extra={
+            <motion.div
+              id='firm-compare-target'
+              key={compareIds.length}
+              initial={reduceMotion ? false : { scale: 0.82, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+            >
+              <Button asChild size='sm' variant='outline' className='border-primary/40 text-primary-strong'>
+                <Link href={contractorCompareRoute(projectId)}>
+                  <Scale className='size-3.5' />
+                  {t('compareChip', { count: compareIds.length, max: MAX_INVITATIONS })}
+                </Link>
               </Button>
-            </div>
+            </motion.div>
           }
         />
       )}
@@ -715,7 +708,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               animate={{ y: 0, opacity: 1 }}
               exit={reduceMotion ? undefined : { y: -18, opacity: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.3, ease: revealEase }}
-              className='bg-card/95 pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-2 shadow-[0_10px_30px_-20px_rgba(24,80,42,0.5)] backdrop-blur-sm'
+              className='bg-card/95 pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-2 shadow-[0_10px_30px_-20px_rgba(42,117,63,0.5)] backdrop-blur-sm'
             >
               <ContractorLogo contractor={contractor} className='size-8 shrink-0 rounded-md text-xs' />
               <span className='truncate text-sm font-semibold'>{contractor.name}</span>
@@ -798,7 +791,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
         onNavigate={setActivePhotoIndex}
       />
 
-      <ProjectPickerDialog />
+      {preview ? <ProjectPickerDialog /> : null}
     </div>
   )
 }
@@ -1230,7 +1223,7 @@ function FeaturedProjects({
                       ease: revealEase
                     }}
                     key={project.id}
-                    className='overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-[0_14px_28px_-22px_rgba(24,80,42,0.62)]'
+                    className='overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-[0_14px_28px_-22px_rgba(42,117,63,0.62)]'
                   >
                     <button
                       type='button'
@@ -1875,7 +1868,7 @@ function LegalChecks({
                 key={item.key}
                 whileHover={reduceMotion ? undefined : { y: -3 }}
                 transition={{ duration: 0.18, ease: revealEase }}
-                className='bg-card flex items-start gap-3 rounded-2xl border p-4 hover:shadow-[0_10px_24px_-20px_rgba(24,80,42,0.55)]'
+                className='bg-card flex items-start gap-3 rounded-2xl border p-4 hover:shadow-[0_10px_24px_-20px_rgba(42,117,63,0.55)]'
               >
                 <item.icon className='text-primary mt-0.5 size-4 shrink-0' />
                 <div>
@@ -1978,7 +1971,7 @@ function LegalChecks({
                       initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: reduceMotion ? 0 : 0.22, delay: reduceMotion ? 0 : 0.08 }}
-                      className='bg-background w-full max-w-xs rounded-xl border p-5 text-center shadow-[0_14px_36px_-18px_rgba(20,72,40,0.45)]'
+                      className='bg-background w-full max-w-xs rounded-xl border p-5 text-center shadow-[0_14px_36px_-18px_rgba(42,117,63,0.45)]'
                     >
                       <Lock className='text-primary mx-auto size-5' />
                       <h3 className='mt-3 text-sm font-semibold'>{tLegal('license.lockedTitle')}</h3>

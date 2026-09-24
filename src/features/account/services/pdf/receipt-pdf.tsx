@@ -124,7 +124,7 @@ function PdfRow({
 
 export function ReceiptPdf({ data, labels }: { data: ReceiptPdfData; labels: ReceiptPdfLabels }) {
   return (
-    <Document title={`${labels.documentTitle} #${data.code}`} author='SAVICO'>
+    <Document title={`${labels.documentTitle} #${data.code}`} author='BUILDX'>
       <Page size='A4' style={styles.page}>
         <Text style={styles.title}>
           {labels.documentTitle} #{data.code}

@@ -143,9 +143,9 @@ export type SupervisionValueRowKey = 'calm' | 'transparent' | 'quality' | 'hando
 export const SUPERVISION_VALUE_ROWS: readonly SupervisionValueRowKey[] = ['calm', 'transparent', 'quality', 'handover']
 
 /** Tám bước của khối "Hành trình khách hàng" (S19). */
-export type JourneyStepKey = 's1' | 's2' | 's3' | 's4a' | 's4b' | 's5' | 's6' | 's7' | 's8'
+export type JourneyStepKey = 'choose' | 'inspect' | 'report' | 'handover'
 
-export const JOURNEY_STEPS: readonly JourneyStepKey[] = ['s1', 's2', 's3', 's4a', 's4b', 's5', 's6', 's7', 's8']
+export const JOURNEY_STEPS: readonly JourneyStepKey[] = ['choose', 'inspect', 'report', 'handover']
 
 /** Bốn dòng bảng "Add-on & phụ phí" (S19). */
 export type AddonKey = 'extraVisit' | 'urgent' | 'outOfArea' | 'extend'

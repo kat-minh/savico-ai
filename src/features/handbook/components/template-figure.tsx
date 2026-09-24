@@ -76,7 +76,7 @@ export function TemplateFigure({
           aria-hidden
           className='absolute right-3 bottom-2 text-lg font-bold tracking-widest text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]'
         >
-          SAVICO
+          BUILDX
         </span>
       </div>
     )

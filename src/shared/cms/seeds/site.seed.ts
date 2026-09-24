@@ -1,12 +1,12 @@
 import type { CmsSiteSettings, CmsStaticPage } from '../cms.types'
 
-const LEGAL_UPDATED_NOTE = 'Cập nhật lần cuối: nội dung mẫu — SAVICO cung cấp nội dung chính thức trước khi go-live.'
+const LEGAL_UPDATED_NOTE = 'Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.'
 
 export const TERMS_PAGE_SEED: CmsStaticPage = {
   title: 'Điều khoản sử dụng',
   updatedNote: LEGAL_UPDATED_NOTE,
   intro:
-    'Các điều khoản này điều chỉnh việc bạn sử dụng nền tảng SAVICO AI. Khi tạo tài khoản hoặc sử dụng dịch vụ, bạn đồng ý với các điều khoản dưới đây.',
+    'Các điều khoản này điều chỉnh việc bạn sử dụng nền tảng BuildX AI. Khi tạo tài khoản hoặc sử dụng dịch vụ, bạn đồng ý với các điều khoản dưới đây.',
   sections: [
     {
       heading: '1. Chấp nhận điều khoản',
@@ -22,11 +22,11 @@ export const TERMS_PAGE_SEED: CmsStaticPage = {
     },
     {
       heading: '4. Sở hữu trí tuệ',
-      body: 'Nội dung, thương hiệu và tài liệu trên nền tảng thuộc về SAVICO trừ khi có ghi chú khác.'
+      body: 'Nội dung, thương hiệu và tài liệu trên nền tảng thuộc về BuildX trừ khi có ghi chú khác.'
     },
     {
       heading: '5. Giới hạn trách nhiệm',
-      body: 'Dự toán chỉ mang tính tham khảo. SAVICO không chịu trách nhiệm cho các quyết định chỉ dựa trên kết quả do AI tạo ra.'
+      body: 'Dự toán chỉ mang tính tham khảo. BuildX không chịu trách nhiệm cho các quyết định chỉ dựa trên kết quả do AI tạo ra.'
     },
     {
       heading: '6. Liên hệ',
@@ -73,19 +73,19 @@ export const PRIVACY_PAGE_SEED: CmsStaticPage = {
  * pháp lý thật (Q&A §3.3.1) — cùng bộ giá trị với `shared/config/site.ts`.
  */
 export const SITE_SETTINGS_SEED: CmsSiteSettings = {
-  brandName: 'SAVICO AI',
+  brandName: 'BuildX',
   tagline: 'Thiết kế & dự toán xây nhà bằng AI',
-  hotline: '1900 0000',
+  hotline: '0934 888 881',
   email: 'hello@savico.ai',
-  address: 'TP. Hồ Chí Minh, Việt Nam',
-  zaloUrl: 'https://zalo.me/0000000000',
+  address: '54 Trần Minh Quyền, phường Vườn Lài, TP. HCM',
+  zaloUrl: 'https://zalo.me/0934888881',
   messengerUrl: 'https://m.me/savico',
-  facebookUrl: 'https://facebook.com/savico',
-  youtubeUrl: 'https://youtube.com/@savico',
-  tiktokUrl: 'https://tiktok.com/@savico',
-  companyName: 'Công ty Cổ phần SAVICO',
+  facebookUrl: 'https://www.facebook.com/share/19SsMDmzW9/?mibextid=wwXIfr',
+  youtubeUrl: 'https://www.youtube.com/@Savico.construction',
+  tiktokUrl: 'https://www.tiktok.com/@ai.construction_?is_from_webapp=1&sender_device=pc',
+  companyName: 'Công ty Cổ phần BuildX',
   taxCode: '0000000000',
-  seoTitle: 'SAVICO AI — Thiết kế & dự toán xây nhà bằng AI',
+  seoTitle: 'BuildX AI — Thiết kế & dự toán xây nhà bằng AI',
   seoDescription: 'Chụp một tấm ảnh lô đất, nhận bản vẽ, phối cảnh 3D và dự toán chi phí chi tiết trong vài phút.',
   maintenanceNotice: ''
 }

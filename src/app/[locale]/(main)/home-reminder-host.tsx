@@ -501,7 +501,7 @@ export function HomeReminderHost() {
                 setCollapseCycle((value) => value + 1)
               }}
               style={{ '--home-reminder-right': `${assistantInset}px` } as React.CSSProperties}
-              className='fixed right-[var(--home-reminder-right)] bottom-6 z-[55] inline-flex h-[48px] items-center gap-2.5 rounded-full bg-[#075b39] px-4 pr-5 text-[14px] font-bold text-white shadow-[0_14px_32px_-14px_rgba(4,69,42,.55)] transition-[right,background-color,box-shadow] duration-200 ease-out hover:bg-[#086641] hover:shadow-[0_16px_36px_-14px_rgba(4,69,42,.62)] max-[899px]:!right-0 max-[899px]:left-0 max-[899px]:mx-auto max-[899px]:w-fit'
+              className='fixed right-[var(--home-reminder-right)] bottom-6 z-[55] inline-flex h-[48px] items-center gap-2.5 rounded-full bg-primary-strong px-4 pr-5 text-[14px] font-bold text-white shadow-[0_14px_32px_-14px_rgba(42,117,63,.55)] transition-[right,background-color,box-shadow] duration-200 ease-out hover:bg-primary-strong hover:shadow-[0_16px_36px_-14px_rgba(42,117,63,.62)] max-[899px]:!right-0 max-[899px]:left-0 max-[899px]:mx-auto max-[899px]:w-fit'
             >
               <span className='flex size-6 items-center justify-center rounded-full bg-[#f36a16] text-xs font-extrabold text-white'>
                 1
@@ -516,7 +516,7 @@ export function HomeReminderHost() {
               animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: 10, y: 8, scale: 0.99 }}
               transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className='fixed right-3 bottom-3 z-[55] w-[calc(100vw-24px)] max-w-[570px] overflow-hidden rounded-[22px] border border-[#a9d8bb] bg-white text-[#202623] shadow-[0_22px_55px_-25px_rgba(0,50,30,.36)] sm:right-6 sm:bottom-6'
+              className='fixed right-3 bottom-3 z-[55] w-[calc(100vw-24px)] max-w-[570px] overflow-hidden rounded-[22px] border border-accent bg-white text-[#202623] shadow-[0_22px_55px_-25px_rgba(42,117,63,.36)] sm:right-6 sm:bottom-6'
             >
               <div className='relative px-7 pt-5 pb-5 max-sm:px-5'>
                 <button
@@ -529,8 +529,8 @@ export function HomeReminderHost() {
                 </button>
 
                 <div className='pr-14'>
-                  <p className='flex items-center gap-2 text-[11px] font-extrabold tracking-[0.18em] text-[#087044] uppercase'>
-                    <span className='size-2 rounded-full bg-[#0b8c51]' />
+                  <p className='flex items-center gap-2 text-[11px] font-extrabold tracking-[0.18em] text-primary-strong uppercase'>
+                    <span className='size-2 rounded-full bg-primary-strong' />
                     {t('eyebrow')}
                   </p>
                   <h3 className='mt-2 max-w-[440px] text-[20px] leading-[1.18] font-extrabold tracking-[-0.02em]'>
@@ -545,7 +545,7 @@ export function HomeReminderHost() {
                   whileHover={reduceMotion ? undefined : { y: -1 }}
                   whileTap={reduceMotion ? undefined : { scale: 0.995 }}
                   transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}
-                  className='mt-6 inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(90deg,#8dcb3a_0%,#2ea548_100%)] px-4 text-[15px] font-extrabold text-white shadow-[0_8px_18px_-10px_rgba(32,139,66,.42)] transition-[filter,box-shadow] duration-180 hover:brightness-[1.015] hover:shadow-[0_10px_20px_-10px_rgba(32,139,66,.46)]'
+                  className='mt-6 inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(90deg,var(--brand-gradient-to)_0%,var(--brand-gradient-from)_100%)] px-4 text-[15px] font-extrabold text-white shadow-[0_8px_18px_-10px_rgba(42,117,63,.42)] transition-[filter,box-shadow] duration-180 hover:brightness-[1.015] hover:shadow-[0_10px_20px_-10px_rgba(42,117,63,.46)]'
                 >
                   {snapshot.state === 'S1' ? <Crown className='size-4' /> : <Lightbulb className='size-4' />}
                   {primaryLabel}
@@ -556,21 +556,21 @@ export function HomeReminderHost() {
                   <button
                     type='button'
                     onClick={handleSecondary}
-                    className='mx-auto mt-4 block text-[13px] font-bold text-[#0b7a4c] transition-colors duration-150 hover:text-[#07653d]'
+                    className='mx-auto mt-4 block text-[13px] font-bold text-primary-strong transition-colors duration-150 hover:text-primary-strong'
                   >
                     {secondaryLabel}
                   </button>
                 ) : null}
               </div>
 
-              <span aria-hidden className='absolute right-0 bottom-0 left-0 h-[4px] bg-[#e4efe8]' />
+              <span aria-hidden className='absolute right-0 bottom-0 left-0 h-[4px] bg-accent' />
               <motion.span
                 key={collapseCycle}
                 aria-hidden
                 initial={{ scaleX: 1 }}
                 animate={{ scaleX: 0 }}
                 transition={{ duration: AUTO_COLLAPSE_MS / 1000, ease: 'linear' }}
-                className='absolute right-0 bottom-0 left-0 h-[4px] origin-left bg-[#078246]'
+                className='absolute right-0 bottom-0 left-0 h-[4px] origin-left bg-primary-strong'
               />
             </motion.aside>
           )

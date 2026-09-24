@@ -303,7 +303,16 @@ export const mockContractorsApi = {
     await mockDelay(250)
     const store = loadStore()
     const current = store.briefs[projectId] ?? notFound(`hồ sơ dự án ${projectId}`)
-    const updated: ProjectBrief = { ...current, ...payload, updatedAt: new Date().toISOString() }
+    // Phiên bản hiện tại đã nằm trong một lời mời → lần sửa này mở phiên bản mới;
+    // lời mời cũ giữ nguyên bản chụp của bản cũ. Sửa tiếp khi chưa gửi thì vẫn ở bản mới đó.
+    const version = current.version ?? 1
+    const sentVersion = invitationsOf(projectId).some((invitation) => invitation.dossierVersion === `v${version}`)
+    const updated: ProjectBrief = {
+      ...current,
+      ...payload,
+      version: sentVersion ? version + 1 : version,
+      updatedAt: new Date().toISOString()
+    }
     store.briefs[projectId] = updated
     saveStore(store)
     return updated
@@ -377,7 +386,7 @@ export const mockContractorsApi = {
       status: 'sent',
       updatedAt: sentAt,
       steps: initialSteps(sentAt),
-      dossierVersion: 'v1',
+      dossierVersion: `v${brief?.version ?? 1}`,
       fileCount: brief?.documents.length ?? 0,
       survey: booking,
       customerName: useAuthStore.getState().user?.name,

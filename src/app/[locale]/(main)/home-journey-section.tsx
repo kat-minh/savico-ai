@@ -31,7 +31,7 @@ export function HomeJourneySection() {
       activeProject={
         activeProject
           ? {
-              id: activeProject.id,
+              name: activeProject.name,
               href: resumeProjectRoute(activeProject),
               currentStep: journeyStepOf(activeProject.currentStep)
             }

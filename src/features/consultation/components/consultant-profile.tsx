@@ -1,16 +1,20 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Award, Briefcase, Star } from 'lucide-react'
+import { Award, Briefcase, CalendarCheck, Star, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useFormatter, useTranslations } from 'next-intl'
 
+import { Link } from '@/i18n/navigation'
+import { useAuth } from '@/shared/auth'
 import { Photo, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { useMyConsultations } from '../hooks/use-consultation'
 import { firstOpenDay } from '../services/consultation.service'
-import type { Consultant, ConsultationDay } from '../types/consultation.types'
+import type { Consultant, ConsultationBooking, ConsultationDay } from '../types/consultation.types'
 import { BookingDialog, type BookingDialogOrigin } from './booking-dialog'
 import { SlotPicker } from './slot-picker'
 
@@ -50,7 +54,20 @@ export function ConsultantProfile({
   onTimeChoiceChange
 }: ConsultantProfileProps) {
   const t = useTranslations('consult.profile')
+  const format = useFormatter()
   const reduceMotion = useReducedMotion()
+  const { isAuthenticated } = useAuth()
+  const { data: history } = useMyConsultations(isAuthenticated)
+  // Khung giờ khách đã đặt với KTS này — hiện "Lịch của bạn" chứ không như bị người khác lấy.
+  const myBookings = new Set(
+    (history?.bookings ?? [])
+      .filter(
+        (item) => item.consultantId === consultant.id && (item.status === 'pending' || item.status === 'confirmed')
+      )
+      .map((item) => `${item.date}|${item.time}`)
+  )
+  // Lịch vừa đặt — khung "Đã đặt lịch" ở lại tới khi khách tự đóng.
+  const [justBooked, setJustBooked] = useState<ConsultationBooking | null>(null)
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [hoveredWork, setHoveredWork] = useState<number | null>(null)
@@ -226,17 +243,22 @@ export function ConsultantProfile({
             selectedTime={selectedTime}
             onSelectTime={onTimeChoiceChange}
             pulseKey={bookPulse}
+            myBookings={myBookings}
           />
         )}
 
         <div ref={ctaRef}>
+          {/* Góp ý BuildX: khóa thì nền xám chữ xám đậm (đọc được) + dòng nhắc; chọn giờ
+              xong thì nút màu chính và ghi rõ giờ đã chọn. */}
           <Button
             size='lg'
-            className='relative w-full transition-[opacity,transform,filter] duration-300 hover:-translate-y-0.5 hover:brightness-110'
+            className='disabled:bg-muted disabled:text-foreground/70 relative w-full transition-[opacity,transform,filter] duration-300 hover:-translate-y-0.5 hover:brightness-110 disabled:bg-none disabled:opacity-100'
             disabled={!selectedTime}
             onClick={openBookingDialog}
           >
-            {t('bookCta')}
+            {selectedTime
+              ? t('bookCtaWithTime', { time: selectedTime, date: formatShortDate(selectedDate) })
+              : t('bookCta')}
             {hasTime && sweepKey > 0 && !reduceMotion ? (
               <motion.span
                 key={sweepKey}
@@ -248,7 +270,22 @@ export function ConsultantProfile({
               />
             ) : null}
           </Button>
+          {!selectedTime ? (
+            <p className='text-muted-foreground mt-2 text-center text-xs'>{t('chooseSlotHint')}</p>
+          ) : null}
         </div>
+
+        {justBooked ? (
+          <BookedPanel
+            booking={justBooked}
+            dateLabel={
+              format.dateTime(parseKey(justBooked.date), { weekday: 'long' }) +
+              ', ' +
+              formatShortDate(justBooked.date, true)
+            }
+            onClose={() => setJustBooked(null)}
+          />
+        ) : null}
 
         {selectedDate && selectedTime ? (
           <BookingDialog
@@ -257,7 +294,10 @@ export function ConsultantProfile({
             consultant={consultant}
             date={selectedDate}
             time={selectedTime}
-            onBooked={() => onTimeChoiceChange('')}
+            onBooked={(booking) => {
+              onTimeChoiceChange('')
+              setJustBooked(booking)
+            }}
             origin={bookOrigin}
           />
         ) : null}
@@ -286,5 +326,74 @@ function SparkleStar() {
         <Star className='fill-amber-400 text-amber-400 size-3.5' />
       </motion.span>
     </span>
+  )
+}
+
+/** "2026-09-24" → Date theo giờ địa phương. */
+function parseKey(key: string): Date {
+  const [year, month, day] = key.split('-').map(Number)
+  return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1)
+}
+
+/** "2026-09-24" → "24/09" (hoặc "24/09/2026"). */
+function formatShortDate(key: string, withYear = false): string {
+  const [year, month, day] = key.split('-')
+  return withYear ? `${day}/${month}/${year}` : `${day}/${month}`
+}
+
+/**
+ * Khung "Đã đặt lịch" sau khi xác nhận (góp ý BuildX): ở lại tới khi khách đóng,
+ * ghi đủ KTS, thứ/ngày/giờ, 30 phút, gọi điện, trạng thái "Chờ xác nhận", quy định
+ * đổi/hủy và lối sang Tài khoản → Lịch sử tư vấn 1:1.
+ */
+function BookedPanel({
+  booking,
+  dateLabel,
+  onClose
+}: {
+  booking: ConsultationBooking
+  dateLabel: string
+  onClose: () => void
+}) {
+  const t = useTranslations('consult.booked')
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: revealEase }}
+      className='border-primary/40 bg-primary/5 relative space-y-3 rounded-2xl border p-5'
+      role='status'
+    >
+      <button
+        type='button'
+        onClick={onClose}
+        aria-label={t('close')}
+        className='text-muted-foreground hover:text-foreground absolute top-3 right-3 rounded-full p-1'
+      >
+        <X className='size-4' />
+      </button>
+      <div className='flex items-center gap-2'>
+        <CalendarCheck className='text-primary size-5' />
+        <h3 className='font-semibold'>{t('title')}</h3>
+        <span className='bg-brand-orange-soft text-brand-orange rounded-full px-2 py-0.5 text-[11px] font-semibold'>
+          {t('pending')}
+        </span>
+      </div>
+      <dl className='grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4'>
+        <dt className='text-muted-foreground'>{t('architect')}</dt>
+        <dd className='font-medium'>{booking.consultantName}</dd>
+        <dt className='text-muted-foreground'>{t('when')}</dt>
+        <dd className='font-medium'>
+          {dateLabel} · {booking.time}
+        </dd>
+        <dt className='text-muted-foreground'>{t('format')}</dt>
+        <dd className='font-medium'>{t('formatValue')}</dd>
+      </dl>
+      <p className='text-muted-foreground text-xs text-pretty'>{t('policy')}</p>
+      <Button asChild size='sm' variant='outline'>
+        <Link href={ROUTES.ACCOUNT_CONSULTATIONS}>{t('viewMine')}</Link>
+      </Button>
+    </motion.section>
   )
 }

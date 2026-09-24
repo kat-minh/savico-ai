@@ -3,6 +3,9 @@ import { setRequestLocale } from 'next-intl/server'
 import { SupervisionDashboard } from '@/features/supervision'
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('supervision')
 
 interface PageProps {
   params: Promise<{ locale: Locale; projectId: string }>

@@ -2,7 +2,10 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { SupervisionPricing } from '@/features/supervision'
 import type { Locale } from '@/i18n/routing'
+import { pageMetadata } from '@/shared/lib/page-metadata'
 import { PlanTabs } from '../plan-tabs'
+
+export const generateMetadata = pageMetadata('plansSupervision')
 
 interface PageProps {
   params: Promise<{ locale: Locale }>

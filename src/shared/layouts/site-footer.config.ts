@@ -22,11 +22,14 @@ export type FooterLinkKey =
   | 'faq'
   | 'about'
   | 'privacy'
+  | 'paymentPolicy'
   | 'terms'
 
 export interface FooterLink {
   labelKey: FooterLinkKey
   href: string | null
+  /** Mục không phải trang mà mở hộp thoại (Thi công trọn gói → form Đăng ký triển khai). */
+  action?: 'turnkey'
 }
 
 /** Cot "San pham". */
@@ -35,7 +38,7 @@ export const FOOTER_PRODUCT_LINKS: readonly FooterLink[] = [
   { labelKey: 'services', href: ROUTES.PLANS },
   { labelKey: 'contractors', href: ROUTES.CONTRACTORS },
   { labelKey: 'supervision', href: ROUTES.PLANS_SUPERVISION },
-  { labelKey: 'turnkey', href: null }
+  { labelKey: 'turnkey', href: null, action: 'turnkey' }
 ] as const
 
 /** Cot "Ho tro". */
@@ -43,12 +46,13 @@ export const FOOTER_SUPPORT_LINKS: readonly FooterLink[] = [
   { labelKey: 'guide', href: ROUTES.GUIDE },
   { labelKey: 'handbook', href: ROUTES.HANDBOOK },
   { labelKey: 'consult', href: ROUTES.CONSULT },
-  { labelKey: 'faq', href: null }
+  { labelKey: 'faq', href: ROUTES.GUIDE }
 ] as const
 
 /** Cot "Ve SAVICO". */
 export const FOOTER_ABOUT_LINKS: readonly FooterLink[] = [
-  { labelKey: 'about', href: null },
+  { labelKey: 'about', href: ROUTES.PLANS },
   { labelKey: 'privacy', href: ROUTES.PRIVACY },
+  { labelKey: 'paymentPolicy', href: ROUTES.PAYMENT_POLICY },
   { labelKey: 'terms', href: ROUTES.TERMS }
 ] as const

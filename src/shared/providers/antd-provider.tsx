@@ -26,10 +26,10 @@ import type { ReactNode } from 'react'
  * restated here — keep the two in sync when the brand colour changes.
  */
 const BRAND = {
-  primary: '#16a34a',
-  primaryHover: '#22b356',
-  primaryActive: '#15803d',
-  success: '#16a34a',
+  primary: '#2a753f',
+  primaryHover: '#3a8a4f',
+  primaryActive: '#1f5c30',
+  success: '#2a753f',
   warning: '#d99a0b',
   error: '#dc2626',
   info: '#0ea5e9'
@@ -76,13 +76,13 @@ export function AntdProvider({ children }: { children: ReactNode }) {
               itemMarginInline: 8,
               itemHeight: 38,
               activeBarWidth: 0,
-              itemSelectedBg: isDark ? 'rgba(22,163,74,0.22)' : '#ecfdf3',
-              itemSelectedColor: isDark ? '#4ade80' : BRAND.primaryActive
+              itemSelectedBg: isDark ? 'rgba(42,117,63,0.28)' : '#eaf3ec',
+              itemSelectedColor: isDark ? '#8cc63f' : BRAND.primaryActive
             },
             Card: { borderRadiusLG: 14 },
             Table: { headerBg: isDark ? '#1a1d1f' : '#f3f6f3', borderRadius: 12, cellPaddingBlock: 12 },
             Button: { primaryShadow: 'none', defaultShadow: 'none', controlHeight: 36 },
-            Segmented: { itemSelectedBg: isDark ? 'rgba(22,163,74,0.28)' : '#ecfdf3' },
+            Segmented: { itemSelectedBg: isDark ? 'rgba(42,117,63,0.32)' : '#eaf3ec' },
             Statistic: { contentFontSize: 26 }
           }
         }}

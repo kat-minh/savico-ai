@@ -1,19 +1,18 @@
 'use client'
 
-import { ArrowRight, ChevronRight, Check, Loader2 } from 'lucide-react'
+import { ArrowRight, ChevronRight, Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import { useAuth } from '@/shared/auth'
 import { revealEase } from '@/shared/components/common'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { consultantRoute, ROUTES } from '@/shared/constants/routes'
-import { cn } from '@/shared/lib/utils'
 import { HOME_CONSULTANT_COUNT } from '../constants/consultation.constants'
-import { useConsultants } from '../hooks/use-consultation'
+import { useConsultants, useMyConsultations } from '../hooks/use-consultation'
 import { sortConsultants } from '../services/consultation.service'
 import type { Consultant } from '../types/consultation.types'
 
@@ -26,7 +25,8 @@ interface ConsultantHighlightsProps {
   preferredSpecialtyId?: string
 }
 
-type BookingState = 'idle' | 'loading' | 'done'
+/** Lịch còn hiệu lực (chưa diễn ra / chưa hủy) — chỉ những lịch này mới tính là "Đã đặt lịch". */
+const ACTIVE_BOOKING_STATUSES = new Set(['pending', 'confirmed'])
 
 /**
  * ★ Section "Tư vấn 1:1" trên trang chủ (mục III.2).
@@ -40,23 +40,22 @@ type BookingState = 'idle' | 'loading' | 'done'
  * công trình đó trượt lên đầu danh sách (`layout` của motion tự animate vị trí
  * khi thứ tự mảng đổi, không cần tự tính transform).
  *
- * Bấm "Đặt lịch" ở ĐÂY chỉ là xem trước nhanh: chưa chọn ngày/giờ nào cả, nên
- * đổi sang "Đã đặt lịch ✓" và khoá lại là hiệu ứng tại chỗ, không tạo lịch hẹn
- * thật — muốn đặt lịch thật phải mở hồ sơ KTS để chọn khung giờ (mục VIII.2).
+ * "Đặt lịch" dẫn tới hồ sơ KTS để chọn khung giờ (mục VIII.2). Nút chỉ thành
+ * "Đã đặt lịch" khi hệ thống CÓ lịch hẹn còn hiệu lực với KTS đó (góp ý BuildX:
+ * trước đây bấm là đổi ngay, tải lại thì mất, không tạo lịch nào).
  */
 export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlightsProps) {
   const t = useTranslations('consult.home')
   const { data: consultants, isPending } = useConsultants()
-  const [bookingByConsultant, setBookingByConsultant] = useState<Record<string, BookingState>>({})
+  const { isAuthenticated } = useAuth()
+  const { data: history } = useMyConsultations(isAuthenticated)
+  const bookedConsultantIds = new Set(
+    (history?.bookings ?? [])
+      .filter((booking) => ACTIVE_BOOKING_STATUSES.has(booking.status))
+      .map((booking) => booking.consultantId)
+  )
 
   const ordered = sortConsultants(consultants ?? [], preferredSpecialtyId).slice(0, HOME_CONSULTANT_COUNT)
-
-  const startBooking = (consultantId: string) => {
-    setBookingByConsultant((current) => ({ ...current, [consultantId]: 'loading' }))
-    window.setTimeout(() => {
-      setBookingByConsultant((current) => ({ ...current, [consultantId]: 'done' }))
-    }, 700)
-  }
 
   return (
     <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-14 lg:px-8 lg:py-16'>
@@ -99,8 +98,7 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
                 key={consultant.id}
                 consultant={consultant}
                 index={index}
-                bookingState={bookingByConsultant[consultant.id] ?? 'idle'}
-                onBook={() => startBooking(consultant.id)}
+                isBooked={isAuthenticated && bookedConsultantIds.has(consultant.id)}
               />
             ))}
       </ul>
@@ -111,13 +109,11 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
 function ConsultantHighlightCard({
   consultant,
   index,
-  bookingState,
-  onBook
+  isBooked
 }: {
   consultant: Consultant
   index: number
-  bookingState: BookingState
-  onBook: () => void
+  isBooked: boolean
 }) {
   const t = useTranslations('consult.home')
 
@@ -132,9 +128,8 @@ function ConsultantHighlightCard({
       whileHover={{ y: -4 }}
       className='group/card bg-card flex items-center gap-4 rounded-2xl border p-4 transition-shadow hover:shadow-lg'
     >
-      {/* Ảnh + tên dẫn sang hồ sơ KTS thật (hai liên kết riêng, cùng đích) —
-          nút "Đặt lịch" bên dưới chỉ là xem trước tại chỗ (chưa chọn giờ nào)
-          nên không thể lồng chung một thẻ <a> với nó. */}
+      {/* Ảnh, tên và nút đều dẫn sang hồ sơ KTS (nơi chọn khung giờ) — ba liên
+          kết riêng vì cột phải xếp dọc, không bọc chung được một thẻ <a>. */}
       <Link href={consultantRoute(consultant.id)} className='contents'>
         {/* Rê cả thẻ (không riêng ảnh) mới phóng ảnh nhẹ — `group-hover/card`. */}
         <Avatar className='group-hover/card:scale-105 size-18 shrink-0 transition-transform duration-300'>
@@ -152,30 +147,24 @@ function ConsultantHighlightCard({
           <p className='text-muted-foreground truncate text-xs'>{consultant.specialties[0]?.label}</p>
         </Link>
 
-        {bookingState === 'idle' ? (
+        {isBooked ? (
           <Button
+            asChild
             variant='outline'
-            className='text-primary group-hover/card:bg-primary group-hover/card:bg-none group-hover/card:text-primary-foreground h-8 w-full rounded-lg text-xs transition-colors'
-            onClick={onBook}
+            className='border-primary/40 text-primary-strong bg-primary/5 h-8 w-full rounded-lg text-xs'
           >
-            {t('book')}
+            <Link href={consultantRoute(consultant.id)}>
+              <Check className='size-3.5' />
+              {t('booked')}
+            </Link>
           </Button>
         ) : (
           <Button
-            disabled
+            asChild
             variant='outline'
-            className={cn(
-              'h-8 w-full rounded-lg text-xs',
-              bookingState === 'loading' && 'bg-primary bg-none text-primary-foreground',
-              bookingState === 'done' && 'border-primary/40 text-primary-strong bg-primary/5'
-            )}
+            className='text-primary group-hover/card:bg-primary group-hover/card:bg-none group-hover/card:text-primary-foreground h-8 w-full rounded-lg text-xs transition-colors'
           >
-            {bookingState === 'loading' ? (
-              <Loader2 className='size-3.5 animate-spin' />
-            ) : (
-              <Check className='size-3.5' />
-            )}
-            {bookingState === 'loading' ? t('booking') : t('booked')}
+            <Link href={consultantRoute(consultant.id)}>{t('book')}</Link>
           </Button>
         )}
       </div>

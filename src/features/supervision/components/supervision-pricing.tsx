@@ -2,27 +2,21 @@
 
 import {
   ArrowRight,
-  ChartColumn,
   Check,
-  ChevronRight,
   CircleCheck,
   ClipboardCheck,
-  ClipboardList,
   Construction,
   FileText,
-  Handshake,
   House,
   ImageIcon,
   Info,
   MapPin,
   Leaf,
   Minus,
-  Monitor,
   QrCode,
   Ruler,
   ShieldCheck,
-  Star,
-  UserSearch
+  Star
 } from 'lucide-react'
 import { animate, AnimatePresence, motion, useInView } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -43,6 +37,7 @@ import {
   SUPERVISION_COMPARISON,
   SUPERVISION_TIERS,
   SUPERVISION_VALUE_ROWS,
+  JOURNEY_STEPS,
   type JourneyStepKey,
   type SupervisionCell,
   type SupervisionValueKey,
@@ -177,19 +172,8 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
       </ul>
 
       <p className='supervision-cost-note text-muted-foreground mx-auto flex max-w-3xl items-start justify-center gap-2 text-center text-sm'>
-        <motion.span
-          className='supervision-cost-info relative mt-0.5 inline-flex shrink-0'
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.38 }}
-          tabIndex={0}
-        >
-          <Info className='size-4' />
-          <span role='tooltip' className='supervision-cost-tooltip'>
-            {t('costNote')}
-          </span>
-        </motion.span>
+        {/* Góp ý BuildX: đoạn này từng lặp 2 lần (thêm một bản trong tooltip) — nay chỉ còn một. */}
+        <Info className='mt-0.5 size-4 shrink-0' />
         <motion.span
           className='text-pretty'
           initial={{ opacity: 0 }}
@@ -871,40 +855,26 @@ function ScopeRules() {
 }
 
 /**
- * Sơ đồ "Hành trình khách hàng" (Hình S19).
+ * "Hành trình giám sát" — 4 bước viết ở ngôi "bạn", chỉ những bước thuộc về
+ * giám sát (góp ý BuildX: bản cũ 8 bước, có nhánh 4A/4B, đọc như tài liệu nội bộ
+ * và khác hẳn dải 5 bước của trang chủ).
  *
- * Đây là một DÒNG CHẢY NGANG có nhánh, không phải lưới 9 thẻ: bước 1→3 chạy
- * thẳng, tới bước 3 thì rẽ đôi (4A tự quản lý / 4B SVC giám sát) rồi nhập lại
- * vào bước 5. Vẽ thành lưới đều nhau thì mất đúng cái thông tin quan trọng
- * nhất của sơ đồ — chỗ khách phải chọn.
- *
- * Dấu `+` nối các bước liền mạch, mũi tên `→` đánh dấu chỗ rẽ và chỗ nhập lại.
- * Cả dải cuộn ngang trên màn hẹp thay vì xuống dòng — bẻ dòng một sơ đồ luồng
- * là làm hỏng mạch đọc.
+ * Mũi tên nối các bước; cả dải cuộn ngang trên màn hẹp thay vì xuống dòng.
  */
-const JOURNEY_ICONS: Record<JourneyStepKey, typeof Monitor> = {
-  s1: Monitor,
-  s2: UserSearch,
-  s3: ClipboardList,
-  s4a: Handshake,
-  s4b: ShieldCheck,
-  s5: Construction,
-  s6: ChartColumn,
-  s7: ClipboardCheck,
-  s8: House
+const JOURNEY_ICONS: Record<JourneyStepKey, typeof ShieldCheck> = {
+  choose: ShieldCheck,
+  inspect: Construction,
+  report: FileText,
+  handover: House
 }
 const MotionArrowRight = motion.create(ArrowRight)
 
 function Journey() {
   const t = useTranslations('supervision.pricing.journey')
-  const [hoveredBranch, setHoveredBranch] = useState<JourneyStepKey | null>(null)
   const ref = useRef<HTMLElement>(null)
   const visible = useInView(ref, { amount: 0.15 })
   const { isScrolling } = usePricingMotion()
   const dotActive = visible && !isScrolling
-
-  const before: JourneyStepKey[] = ['s1', 's2', 's3']
-  const after: JourneyStepKey[] = ['s5', 's6', 's7', 's8']
 
   return (
     <section
@@ -922,44 +892,11 @@ function Journey() {
         {t('title')}
       </motion.h2>
 
-      <div className='supervision-journey-track mt-6 flex items-stretch gap-1.5 overflow-x-auto overflow-y-hidden pt-4 pb-2'>
-        {before.map((step, index) => (
+      <div className='supervision-journey-track mt-6 flex items-stretch gap-1.5 overflow-x-auto overflow-y-hidden pt-4 pb-2 lg:justify-center'>
+        {JOURNEY_STEPS.map((step, index) => (
           <Fragment key={step}>
             {index > 0 ? <FlowJoin delay={0.06 + index * 0.2} active={dotActive} /> : null}
             <JourneyCard step={step} number={index + 1} delay={0.16 + index * 0.2} />
-          </Fragment>
-        ))}
-
-        <BranchSplit />
-
-        <div className='flex w-52 shrink-0 flex-col justify-between gap-2'>
-          <BranchCard
-            step='s4a'
-            badge='4A'
-            delay={0.82}
-            active={hoveredBranch === 's4a'}
-            muted={Boolean(hoveredBranch && hoveredBranch !== 's4a')}
-            onHover={() => setHoveredBranch('s4a')}
-            onLeave={() => setHoveredBranch(null)}
-          />
-          <BranchCard
-            step='s4b'
-            badge='4B'
-            highlighted
-            delay={1.05}
-            active={hoveredBranch === 's4b'}
-            muted={Boolean(hoveredBranch && hoveredBranch !== 's4b')}
-            onHover={() => setHoveredBranch('s4b')}
-            onLeave={() => setHoveredBranch(null)}
-          />
-        </div>
-
-        <BranchMerge />
-
-        {after.map((step, index) => (
-          <Fragment key={step}>
-            {index > 0 ? <FlowJoin delay={1.26 + index * 0.2} active={dotActive} /> : null}
-            <JourneyCard step={step} number={index + 5} delay={1.36 + index * 0.2} />
           </Fragment>
         ))}
       </div>
@@ -992,52 +929,6 @@ function FlowJoin({ delay, active }: { delay: number; active: boolean }) {
   )
 }
 
-/**
- * Nét rẽ nhánh sau bước 3: một đoạn ngang tách thành hai ngạnh chạy lên 4A và
- * xuống 4B. Vẽ bằng các đoạn định vị theo PHẦN TRĂM chiều cao hàng chứ không
- * bằng SVG tỉ lệ cố định — chiều cao dải phụ thuộc nội dung thẻ, ngạnh phải tự
- * bám theo tâm hai thẻ nhánh (≈25% và ≈75%).
- */
-function BranchSplit() {
-  return (
-    <motion.div
-      aria-hidden
-      className='supervision-journey-split relative w-8 shrink-0 self-stretch'
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.24, delay: 0.72, ease: pricingEase }}
-    >
-      <span className='bg-border absolute top-1/2 left-0 h-px w-1/2' />
-      <span className='bg-border absolute top-1/4 bottom-1/4 left-1/2 w-px' />
-      <span className='bg-border absolute top-1/4 right-2 left-1/2 h-px' />
-      <span className='bg-border absolute right-2 bottom-1/4 left-1/2 h-px' />
-      <ChevronRight className='text-muted-foreground absolute top-1/4 right-0 size-3.5 -translate-y-1/2' />
-      <ChevronRight className='text-muted-foreground absolute right-0 bottom-1/4 size-3.5 translate-y-1/2' />
-    </motion.div>
-  )
-}
-
-/** Nét nhập lại: hai ngạnh từ 4A và 4B gộp về một mũi tên vào bước 5. */
-function BranchMerge() {
-  return (
-    <motion.div
-      aria-hidden
-      className='supervision-journey-merge relative w-8 shrink-0 self-stretch'
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.24, delay: 1.26, ease: pricingEase }}
-    >
-      <span className='bg-border absolute top-1/4 left-0 h-px w-1/2' />
-      <span className='bg-border absolute bottom-1/4 left-0 h-px w-1/2' />
-      <span className='bg-border absolute top-1/4 bottom-1/4 left-1/2 w-px' />
-      <span className='bg-border absolute top-1/2 right-2 left-1/2 h-px' />
-      <ChevronRight className='text-muted-foreground absolute top-1/2 right-0 size-3.5 -translate-y-1/2' />
-    </motion.div>
-  )
-}
-
 /** Một bước trên dòng chính: số ở mép trên, tên, icon, rồi mô tả. */
 function JourneyCard({ step, number, delay }: { step: JourneyStepKey; number: number; delay: number }) {
   const t = useTranslations('supervision.pricing.journey')
@@ -1046,7 +937,7 @@ function JourneyCard({ step, number, delay }: { step: JourneyStepKey; number: nu
   return (
     <motion.div
       style={{ '--journey-delay': `${delay}s` } as CSSProperties}
-      className='supervision-journey-card bg-card relative flex w-32 shrink-0 flex-col items-center rounded-xl border px-2.5 pt-5 pb-4 text-center'
+      className='supervision-journey-card bg-card relative flex w-44 shrink-0 flex-col items-center rounded-xl border px-2.5 pt-5 pb-4 text-center'
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -1071,69 +962,6 @@ function JourneyCard({ step, number, delay }: { step: JourneyStepKey; number: nu
   )
 }
 
-/** Một nhánh của bước 4 — rộng hơn, số và tên nằm cùng một dòng. */
-function BranchCard({
-  step,
-  badge,
-  highlighted,
-  delay,
-  active,
-  muted,
-  onHover,
-  onLeave
-}: {
-  step: JourneyStepKey
-  badge: string
-  highlighted?: boolean
-  delay: number
-  active: boolean
-  muted: boolean
-  onHover: () => void
-  onLeave: () => void
-}) {
-  const t = useTranslations('supervision.pricing.journey')
-  const Icon = JOURNEY_ICONS[step]
-
-  return (
-    <motion.div
-      data-highlighted={highlighted || undefined}
-      data-active={active || undefined}
-      data-muted={muted || undefined}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-      className={cn(
-        'w-full shrink-0 rounded-xl border p-3',
-        highlighted ? 'border-brand-orange bg-brand-orange-soft/50' : 'bg-card'
-      )}
-      initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.45, delay, ease: pricingEase }}
-    >
-      <p className='flex items-center gap-2'>
-        <span
-          className={cn(
-            'flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
-            highlighted ? 'bg-brand-orange text-brand-orange-foreground' : 'bg-primary text-primary-foreground'
-          )}
-        >
-          {badge}
-        </span>
-        <span className={cn('text-sm font-medium', highlighted && 'text-brand-orange')}>{t(step)}</span>
-      </p>
-      <div className='mt-2.5 flex items-start gap-2.5'>
-        <Icon
-          aria-hidden
-          className={cn('size-8 shrink-0', highlighted ? 'text-brand-orange' : 'text-primary')}
-          strokeWidth={1.5}
-        />
-        <p className='text-muted-foreground text-[11px] leading-snug text-pretty'>{t(`${step}Body`)}</p>
-      </div>
-    </motion.div>
-  )
-}
-
-/** Bảng "Giá trị khách hàng nhận được". */
 /** Icon đứng trước tên từng hàng giá trị (Hình S19). */
 const VALUE_ICONS: Record<SupervisionValueRowKey, typeof ShieldCheck> = {
   calm: ShieldCheck,

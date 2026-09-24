@@ -2,7 +2,10 @@ import { setRequestLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
+import { pageMetadata } from '@/shared/lib/page-metadata'
 import { StepInputView } from './step-input-view'
+
+export const generateMetadata = pageMetadata('designInput')
 
 interface PageProps {
   params: Promise<{ locale: Locale; projectId: string }>

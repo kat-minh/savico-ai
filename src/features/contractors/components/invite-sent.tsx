@@ -197,7 +197,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
   // khung hình với phần còn lại, không nhú ra sau một nhịp (mục 1, mục 4).
   if (isPending || !data || intro === 'checking' || invitationsPending) {
     return (
-      <div className='mx-auto w-[94%] max-w-[88rem] py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 py-8'>
         <Skeleton className='mx-auto h-96 max-w-[54rem] rounded-2xl' />
       </div>
     )
@@ -231,10 +231,10 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
     <motion.div
       animate={leaving ? { opacity: 0, x: leaving === 'forward' ? -20 : 20 } : { opacity: 1, x: 0 }}
       transition={{ duration: 0.18, ease: revealEase }}
-      className='mx-auto w-[94%] max-w-[88rem] py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 py-8'
     >
       {/* Bản mô tả S17 vẫn giữ thanh ngữ cảnh dự án ở đầu trang như S15–S18. */}
-      <ProjectContextBar brief={brief} compact />
+      <ProjectContextBar brief={brief} />
 
       <div className='mx-auto mt-8 w-full max-w-[54rem] space-y-6'>
         <header className='space-y-3 text-center'>
@@ -343,8 +343,10 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
                 như bản cũ, không bị `gap` của flex chen vào. */}
             <span>
               <span className='group/code'>
+                {/* Một lần mời dùng một mã (góp ý BuildX): hiện mã lời mời INV-… — đúng mã
+                    trang Lời mời hiển thị — chứ không phải mã yêu cầu nội bộ. */}
                 {t.rich('requestCode', {
-                  code: data.request.id,
+                  code: data.invitations.map((invitation) => invitation.id).join(', ') || data.request.id,
                   accent: (chunks) => <span className='text-primary-strong'>{chunks}</span>
                 })}{' '}
                 {/* Rê mã → nút sao chép hiện chéo ĐÚNG chỗ dấu "·" ngay sau mã, nên
@@ -361,7 +363,9 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
                   </span>
                   <button
                     type='button'
-                    onClick={() => copyCode(data.request.id)}
+                    onClick={() =>
+                      copyCode(data.invitations.map((invitation) => invitation.id).join(', ') || data.request.id)
+                    }
                     aria-label={t('copyCode')}
                     className={cn(
                       'text-muted-foreground hover:text-foreground absolute top-1/2 left-1/2 grid -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/code:opacity-100 focus-visible:opacity-100',

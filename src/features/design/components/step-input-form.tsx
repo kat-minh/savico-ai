@@ -150,7 +150,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
       data-validation-run={validationRun}
       data-flow-leaving={leaving}
       style={entranceStyle}
-      className='mx-auto w-full max-w-6xl px-4 pt-2 pb-6 lg:px-8 lg:pt-6'
+      className='mx-auto w-full max-w-[90rem] px-4 pt-2 pb-6 lg:px-8 lg:pt-6'
     >
       <div className='grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]'>
         {/* ── Cột TRÁI — 3 nhóm đánh số ─────────────────────────────── */}

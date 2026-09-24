@@ -3,6 +3,9 @@ import { setRequestLocale } from 'next-intl/server'
 import { OrderConfirm } from '@/features/checkout'
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('checkoutConfirm')
 
 interface PageProps {
   params: Promise<{ locale: Locale }>

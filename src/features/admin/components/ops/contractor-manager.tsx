@@ -253,7 +253,7 @@ export function ContractorManager() {
                   <Text strong>
                     {record.name || t('contractors.unnamed')}{' '}
                     {record.verified ? (
-                      <SafetyCertificateFilled style={{ color: '#16a34a' }} aria-label={t('contractors.verified')} />
+                      <SafetyCertificateFilled style={{ color: '#2a753f' }} aria-label={t('contractors.verified')} />
                     ) : null}
                   </Text>
                 </Link>

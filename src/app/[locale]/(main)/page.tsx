@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { HomeBrands, HomePainPoints, HomeStats, HomeTestimonials } from '@/features/landing'
 import { HandbookHighlights } from '@/features/handbook'
+import { pageMetadata } from '@/shared/lib/page-metadata'
 import { ConsultantHighlightsSection } from './consultant-highlights-section'
 import { GuideHighlightsSection } from './guide-highlights-section'
 import { HomeCtaSection } from './home-cta-section'
@@ -11,6 +12,8 @@ import { HomeHeroSection } from './home-hero-section'
 import { HomeJourneySection } from './home-journey-section'
 import { HomeReminderHost } from './home-reminder-host'
 import { HomeServicesSection } from './home-services-section'
+
+export const generateMetadata = pageMetadata('home')
 
 interface PageProps {
   params: Promise<{ locale: Locale }>

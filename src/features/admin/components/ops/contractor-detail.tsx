@@ -423,7 +423,7 @@ export function ContractorDetail({ id }: { id: string }) {
             <Text strong style={{ fontSize: 18 }}>
               {contractor.name}{' '}
               {contractor.verified ? (
-                <SafetyCertificateFilled style={{ color: '#16a34a' }} aria-label={t('contractors.verified')} />
+                <SafetyCertificateFilled style={{ color: '#2a753f' }} aria-label={t('contractors.verified')} />
               ) : null}
             </Text>
             {contractor.shortDescription ? (
@@ -513,7 +513,7 @@ export function ContractorDetail({ id }: { id: string }) {
                 {gaps.includes(gap) ? (
                   <CloseCircleFilled style={{ color: '#dc2626' }} />
                 ) : (
-                  <CheckCircleFilled style={{ color: '#16a34a' }} />
+                  <CheckCircleFilled style={{ color: '#2a753f' }} />
                 )}
                 <Text>{t(`contractors.gaps.${gap}`)}</Text>
                 <Text type='secondary'>

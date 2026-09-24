@@ -3,6 +3,9 @@ import { setRequestLocale } from 'next-intl/server'
 import { CONTRACTOR_TABS, ContractorProfile, type ContractorTab } from '@/features/contractors'
 import type { Locale } from '@/i18n/routing'
 import { ProtectedRoute } from '@/shared/auth'
+import { pageMetadata } from '@/shared/lib/page-metadata'
+
+export const generateMetadata = pageMetadata('contractorFirm')
 
 interface PageProps {
   params: Promise<{ locale: Locale; projectId: string; contractorId: string }>

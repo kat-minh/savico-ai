@@ -1,7 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
+import { pageMetadata } from '@/shared/lib/page-metadata'
 import { AccountProjects } from '../account-projects'
+
+export const generateMetadata = pageMetadata('accountProjects')
 
 interface PageProps {
   params: Promise<{ locale: string }>

@@ -18,6 +18,7 @@ export const ROUTES = {
   CONSULT: '/consult', // Tư vấn 1:1 (mục VIII)
   TERMS: '/terms',
   PRIVACY: '/privacy',
+  PAYMENT_POLICY: '/payment-policy', // Chính sách thanh toán và hoàn tiền
 
   // Auth
   LOGIN: '/login',

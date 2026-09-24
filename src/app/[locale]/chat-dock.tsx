@@ -33,11 +33,9 @@ export function ChatDock() {
   const setOpen = useChatContextStore((s) => s.setPanelOpen)
   const suppressed = useChatContextStore((s) => s.dockSuppressed)
   const [ready, setReady] = useState(false)
-  const [scrolling, setScrolling] = useState(false)
   const [mobileDialogOpen, setMobileDialogOpen] = useState(false)
   const [openedOnce, setOpenedOnce] = useState(false)
   const [suggestion, setSuggestion] = useState<TopicSuggestion | null>(null)
-  const scrollStopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const readyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const suggestionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -107,20 +105,6 @@ export function ChatDock() {
   }, [open])
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolling(true)
-      if (scrollStopTimerRef.current) clearTimeout(scrollStopTimerRef.current)
-      scrollStopTimerRef.current = setTimeout(() => setScrolling(false), 180)
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      if (scrollStopTimerRef.current) clearTimeout(scrollStopTimerRef.current)
-    }
-  }, [])
-
-  useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 899px)')
 
     const syncDialogState = () => {
@@ -171,7 +155,6 @@ export function ChatDock() {
   }, [open])
 
   const dockHidden = suppressed || mobileDialogOpen
-  const labelAvailable = ready && !scrolling && !open && !dockHidden
 
   function toggleAssistant() {
     if (!open) {
@@ -246,18 +229,6 @@ export function ChatDock() {
               style={{ transform: open ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.75)' }}
             />
           </span>
-        </span>
-
-        <span
-          data-assistant-label
-          aria-hidden='true'
-          className={cn(
-            'brand-gradient text-primary-foreground -mt-3 max-h-0 -translate-y-2 overflow-hidden rounded-full px-3 pt-0 pb-0 text-[0.7rem] font-semibold whitespace-nowrap opacity-0 transition-[max-height,opacity,padding,transform] duration-250 ease-out motion-reduce:transition-none',
-            labelAvailable &&
-              'group-hover:max-h-10 group-hover:translate-y-0 group-hover:pt-3.5 group-hover:pb-1 group-hover:opacity-100 group-focus-visible:max-h-10 group-focus-visible:translate-y-0 group-focus-visible:pt-3.5 group-focus-visible:pb-1 group-focus-visible:opacity-100'
-          )}
-        >
-          {t('fab')}
         </span>
       </button>
 

@@ -1,13 +1,13 @@
 'use client'
 
-import { Facebook, Youtube } from 'lucide-react'
+import { Facebook, Instagram, Youtube } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { type CSSProperties, type ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { cmsText, useCmsDocument } from '@/shared/cms'
-import { TikTokIcon, Logo, ZaloIcon } from '@/shared/components/common'
+import { TikTokIcon, Logo, TurnkeyRequestDialog, ZaloIcon } from '@/shared/components/common'
 import { siteConfig } from '@/shared/config/site'
 import { cn } from '@/shared/lib/utils'
 import { FOOTER_ABOUT_LINKS, FOOTER_PRODUCT_LINKS, FOOTER_SUPPORT_LINKS, type FooterLink } from './site-footer.config'
@@ -20,13 +20,35 @@ function FooterNavLink({
   link,
   label,
   pendingLabel,
-  index
+  index,
+  onAction
 }: {
   link: FooterLink
   label: string
   pendingLabel: string
   index: number
+  onAction?: (action: NonNullable<FooterLink['action']>) => void
 }) {
+  if (link.action && onAction) {
+    const action = link.action
+    return (
+      <motion.li
+        initial={{ opacity: 0, y: 6 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.44, delay: 0.18 + index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <button
+          type='button'
+          onClick={() => onAction(action)}
+          className='footer-animated-link text-footer-foreground/75 hover:text-footer-foreground relative inline-block text-left text-sm transition-colors'
+        >
+          {label}
+        </button>
+      </motion.li>
+    )
+  }
+
   if (!link.href) {
     return (
       <motion.li
@@ -72,11 +94,13 @@ function ColumnTitle({ children }: { children: ReactNode }) {
 function LinkColumn({
   title,
   links,
-  pendingLabel
+  pendingLabel,
+  onAction
 }: {
   title: string
   links: readonly FooterLink[]
   pendingLabel: string
+  onAction?: (action: NonNullable<FooterLink['action']>) => void
 }) {
   const t = useTranslations('footer')
   return (
@@ -90,6 +114,7 @@ function LinkColumn({
             label={t(`links.${link.labelKey}`)}
             pendingLabel={pendingLabel}
             index={index}
+            onAction={onAction}
           />
         ))}
       </ul>
@@ -115,6 +140,7 @@ export function SiteFooter() {
   // Noi dung lien he / mang xa hoi do admin sua (muc X). Chua sua thi roi ve
   // hang so trong `shared/config/site.ts` va ban dich i18n.
   const settings = useCmsDocument('settings')
+  const [turnkeyOpen, setTurnkeyOpen] = useState(false)
 
   const hotline = cmsText(settings.hotline, contact.hotline)
   const email = cmsText(settings.email, contact.email)
@@ -131,7 +157,8 @@ export function SiteFooter() {
       icon: <Youtube className='size-4' />
     },
     { href: cmsText(settings.tiktokUrl, social.tiktokUrl), label: t('social.tiktok'), icon: <TikTokIcon /> },
-    { href: cmsText(settings.zaloUrl, social.zaloOaUrl), label: t('social.zaloOa'), icon: <ZaloIcon /> }
+    { href: cmsText(settings.zaloUrl, social.zaloOaUrl), label: t('social.zaloOa'), icon: <ZaloIcon /> },
+    { href: social.instagramUrl, label: t('social.instagram'), icon: <Instagram className='size-4' /> }
   ]
 
   const pendingLabel = t('comingSoon')
@@ -150,7 +177,7 @@ export function SiteFooter() {
           {/* Dưới `lg` logo phóng 1.4 lần (`zoom` ăn vào bố cục, khác `scale`) để chiếm hơn nửa bề ngang
               hàng thay vì ~40% như trước; từ `lg` giữ cỡ cũ. */}
           <div className='max-lg:[zoom:1.4]'>
-            <Logo onDark tagline={t('brandTagline')} />
+            <Logo onDark />
           </div>
           <p className='text-footer-foreground/70 mt-4 max-w-xs text-sm leading-relaxed'>
             {cmsText(settings.tagline, t('tagline'))}
@@ -166,8 +193,8 @@ export function SiteFooter() {
                   aria-label={item.label}
                   className={cn(
                     'footer-social-link',
-                    'bg-footer-foreground/10 text-primary flex size-9 items-center justify-center rounded-full',
-                    'hover:bg-footer-foreground/20 transition-colors'
+                    'bg-brand-orange/15 text-brand-orange flex size-9 items-center justify-center rounded-full',
+                    'hover:bg-brand-orange hover:text-white transition-colors'
                   )}
                 >
                   {item.icon}
@@ -189,7 +216,12 @@ export function SiteFooter() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.58, delay: (index + 1) * 0.14, ease: [0.22, 1, 0.36, 1] }}
           >
-            <LinkColumn title={column.title} links={column.links} pendingLabel={pendingLabel} />
+            <LinkColumn
+              onAction={() => setTurnkeyOpen(true)}
+              title={column.title}
+              links={column.links}
+              pendingLabel={pendingLabel}
+            />
           </motion.div>
         ))}
 
@@ -252,6 +284,7 @@ export function SiteFooter() {
           </p>
         </div>
       </div>
+      <TurnkeyRequestDialog open={turnkeyOpen} onOpenChange={setTurnkeyOpen} />
     </footer>
   )
 }

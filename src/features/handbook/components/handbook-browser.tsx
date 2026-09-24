@@ -11,7 +11,6 @@ import { cn } from '@/shared/lib/utils'
 import type { HandbookPageTab } from '../types/handbook.types'
 import { ArticleList } from './article-list'
 import { FoundationBlock } from './foundation-block'
-import { LatestNews } from './latest-news'
 import { NewsletterBlock } from './newsletter-block'
 import { TemplateLibrary } from './template-library'
 
@@ -251,7 +250,6 @@ export function HandbookBrowser() {
         ) : (
           <>
             <FoundationBlock />
-            <LatestNews />
             <NewsletterBlock />
             <ArticleList />
           </>
@@ -265,7 +263,7 @@ export function HandbookBrowser() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[88rem] space-y-4 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-4 px-4 py-8 lg:px-8'
     >
       <h1 data-entrance-step='0' className='text-3xl font-semibold tracking-tight'>
         {t('title')}

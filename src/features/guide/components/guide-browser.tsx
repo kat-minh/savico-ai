@@ -308,10 +308,17 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const searching = query.length > 0
 
   return (
-    <div className='mx-auto w-full max-w-6xl px-4 py-10 lg:px-8'>
-      {/* Hình 12 không có tiêu đề trang — ô tìm là thứ đầu tiên. Giữ h1 ẩn để
-          trang vẫn có tiêu đề cho trình đọc màn hình và SEO. */}
-      <h1 className='sr-only'>{t('title')}</h1>
+    <div className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8'>
+      {/* Góp ý BuildX: tiêu đề + một dòng mô tả hiện rõ phía trên ô tìm kiếm. */}
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: revealEase }}
+        className='mb-6 text-center'
+      >
+        <h1 className='text-3xl font-bold tracking-tight text-balance'>{t('pageTitle')}</h1>
+        <p className='text-muted-foreground mt-2 text-pretty'>{t('pageSubtitle')}</p>
+      </motion.header>
 
       <motion.div
         ref={searchWrapperRef}

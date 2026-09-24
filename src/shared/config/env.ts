@@ -10,7 +10,7 @@ import { z } from 'zod'
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_API_BASE_URL: z.string().url(),
   NEXT_PUBLIC_API_TIMEOUT: z.coerce.number().int().positive().default(30000),
-  NEXT_PUBLIC_APP_NAME: z.string().min(1).default('SAVICO AI'),
+  NEXT_PUBLIC_APP_NAME: z.string().min(1).default('BUILDX AI'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
   // Dev-only: route auth through an in-browser mock while the .NET API is WIP.
   NEXT_PUBLIC_USE_MOCK_AUTH: z

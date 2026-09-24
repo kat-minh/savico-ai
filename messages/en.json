@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "SAVICO AI",
+    "appName": "BuildX",
     "loading": "Loading…",
     "save": "Save",
     "cancel": "Cancel",
@@ -26,7 +26,7 @@
       "close": "Close popup",
       "stepOne": {
         "title": "Where are you in your home-building plan?",
-        "subtitle": "Choose your current situation so SAVICO can guide you to the right next step.",
+        "subtitle": "Choose your current situation so BuildX can guide you to the right next step.",
         "later": "Maybe later, I'll explore myself",
         "withoutDrawing": {
           "imageAlt": "Home rendering with architectural drawings",
@@ -75,7 +75,6 @@
     "title": "AI Assistant",
     "subtitle": "Ask anything about your project",
     "close": "Close",
-    "fab": "SAVICO AI Assistant",
     "topicSuggestion": "Ask AI about {topic}",
     "nudge": {
       "painPoints": "Not sure which one fits? Ask me 👋",
@@ -112,7 +111,7 @@
     },
     "register": {
       "title": "Create account",
-      "subtitle": "Sign up to start designing with SAVICO AI",
+      "subtitle": "Sign up to start designing with BuildX AI",
       "nameLabel": "Full name",
       "namePlaceholder": "John Doe",
       "emailLabel": "Email",
@@ -172,8 +171,8 @@
   "legal": {
     "terms": {
       "title": "Terms of Service",
-      "updated": "Last updated: placeholder — final copy provided by SAVICO before go-live.",
-      "intro": "These terms govern your use of the SAVICO AI platform. By creating an account or using the service, you agree to the terms below.",
+      "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
+      "intro": "These terms govern your use of the BuildX AI platform. By creating an account or using the service, you agree to the terms below.",
       "sections": [
         {
           "title": "1. Acceptance of terms",
@@ -189,11 +188,11 @@
         },
         {
           "title": "4. Intellectual property",
-          "body": "Content, branding and materials on the platform belong to SAVICO unless stated otherwise."
+          "body": "Content, branding and materials on the platform belong to BuildX unless stated otherwise."
         },
         {
           "title": "5. Limitation of liability",
-          "body": "Estimates are indicative. SAVICO is not liable for decisions made solely based on AI-generated outputs."
+          "body": "Estimates are indicative. BuildX is not liable for decisions made solely based on AI-generated outputs."
         },
         {
           "title": "6. Contact",
@@ -203,7 +202,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "updated": "Last updated: placeholder — final copy provided by SAVICO before go-live.",
+      "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
       "intro": "This policy explains how we collect, use and protect your personal data in accordance with Vietnam's Decree 13/2023/ND-CP on personal data protection.",
       "sections": [
         {
@@ -231,6 +230,41 @@
           "body": "For privacy requests, please contact us via the channels listed on the contact section."
         }
       ]
+    },
+    "payment": {
+      "title": "Payment and refund policy",
+      "updated": "Last updated: sample content — BuildX will provide the official text before go-live.",
+      "intro": "This policy explains how you pay for packages on the platform, how we confirm payments and when you are entitled to a refund.",
+      "sections": [
+        {
+          "title": "1. Payment method",
+          "body": "Design and supervision packages are paid by bank transfer using the QR code shown at the Payment step. Keep the transfer note (your order code) unchanged so the system can reconcile it automatically."
+        },
+        {
+          "title": "2. Payment confirmation",
+          "body": "After you transfer, the order waits for confirmation. Packages are usually activated within minutes; if it is not activated within 24 working hours, contact support with your order code."
+        },
+        {
+          "title": "3. Invoices",
+          "body": "E-invoices are issued with the buyer details you entered at the Order confirmation step. You can review orders and invoices under My account."
+        },
+        {
+          "title": "4. When you get a refund",
+          "body": "You are refunded when: you transferred twice or more than the order value; the order was not activated because of a platform error; or you cancel within 7 days of payment without using any of the package's credits."
+        },
+        {
+          "title": "5. When refunds do not apply",
+          "body": "Credits already used (design options, lookups, completed inspections) are not refunded. Gifts bundled with a package cannot be exchanged for cash."
+        },
+        {
+          "title": "6. Refund process",
+          "body": "Send a request through support with your order code and reason. We reply within 2 working days and refund to the paying account within 7–10 working days after approval."
+        },
+        {
+          "title": "7. Contact",
+          "body": "For any payment or refund question, use the contact channels at the bottom of the page."
+        }
+      ]
     }
   },
   "chatbot": {
@@ -238,7 +272,7 @@
     "send": "Send",
     "remaining": "{remaining}/{limit} messages left today",
     "limitReached": "You've reached today's limit of {limit} messages. Please come back tomorrow.",
-    "greeting": "Hi! I'm the SAVICO AI assistant. I can walk you through the estimate, suggest ways to optimise cost and guide you step by step. What do you need?",
+    "greeting": "Hi! I'm the BuildX AI assistant. I can walk you through the estimate, suggest ways to optimise cost and guide you step by step. What do you need?",
     "waitingHint": "The assistant is talking you through it while it works",
     "renderStages": {
       "drawings": "The dossier is in the drawing stage. You can browse layout ideas in the handbook while you wait.",
@@ -272,7 +306,7 @@
     "handbook": "Handbook",
     "guide": "Guide",
     "createProject": "New project",
-    "brandTagline": "AI platform for architecture & construction",
+    "brandTagline": "Connecting your build",
     "account": "My account",
     "logout": "Sign out",
     "menu": "Menu",
@@ -289,33 +323,35 @@
     "tagline": "An AI design & estimate platform that connects verified contractors and supervises the build.",
     "contactTitle": "Contact",
     "hotline": "Hotline",
-    "address": "123 Nguyen Van Cu, Tan Loi Ward, Buon Ma Thuot, Dak Lak",
+    "address": "54 Tran Minh Quyen, Vuon Lai Ward, Ho Chi Minh City",
     "comingSoon": "Coming soon",
     "links": {
       "design": "Design & estimate",
-      "services": "Service packages",
+      "services": "Pricing",
       "contractors": "Find a contractor",
       "supervision": "Site supervision",
       "turnkey": "Turnkey construction",
-      "guide": "How to use",
+      "guide": "Guide",
       "handbook": "Handbook",
       "consult": "1:1 consultation",
       "faq": "FAQ",
       "about": "About us",
       "privacy": "Privacy policy",
-      "terms": "Terms of use"
+      "terms": "Terms of use",
+      "paymentPolicy": "Payment policy"
     },
     "social": {
-      "facebook": "SAVICO on Facebook",
-      "zaloOa": "SAVICO Zalo OA",
-      "youtube": "SAVICO on YouTube",
-      "tiktok": "SAVICO on TikTok"
+      "facebook": "BuildX on Facebook",
+      "zaloOa": "BuildX Zalo OA",
+      "youtube": "BuildX on YouTube",
+      "tiktok": "BuildX on TikTok",
+      "instagram": "BuildX on Instagram"
     },
     "rights": "All rights reserved.",
     "brandTagline": "Connecting your build",
     "productTitle": "Product",
     "supportTitle": "Support",
-    "aboutTitle": "About SAVICO",
+    "aboutTitle": "About BuildX",
     "emailLabel": "Email",
     "addressLabel": "Address"
   },
@@ -330,13 +366,13 @@
   },
   "landing": {
     "hero": {
-      "eyebrow": "SAVICO — AI DESIGN & COST ESTIMATE PLATFORM",
+      "eyebrow": "BUILDX — THE PLATFORM FOR PLANNING & DELIVERING YOUR BUILD",
       "note": "From a photo of your lot to a finished home",
-      "titleLead": "One photo of your lot,",
-      "titleAccent": "design & estimate in minutes",
-      "subtitle": "AI turns a photo of your lot into floor plans, 3D renders and a quantity-based estimate.\nInvite verified contractors and supervise the build on the same platform.",
+      "titleLead": "From one photo of your site",
+      "titleAccent": "to a home design and cost estimate",
+      "subtitle": "Create design options and estimates, compare choices, find the right contractor and track delivery on one platform.",
       "primaryCta": "Start a project",
-      "resumeCta": "Resume your project →",
+      "resumeCta": "Continue project",
       "secondaryCta": "Watch the 1-minute tour",
       "card": {
         "title": "Project dossier",
@@ -358,8 +394,8 @@
             "value": "5 sets"
           }
         },
-        "totalLabel": "Total",
-        "totalValue": "See in the dossier",
+        "totalLabel": "Estimated total (sample)",
+        "totalValue": "About 2.1 billion VND",
         "cta": "View a sample dossier"
       }
     },
@@ -386,11 +422,9 @@
       }
     },
     "painPoints": {
-      "eyebrow": "BUILDING A HOME ISN'T THE HARD PART",
-      "title": "The hard part is keeping it all under control",
-      "subtitle": "From budget and design to picking a contractor and supervising the build — SAVICO puts you in control at every step.",
+      "title": "BUILDX helps you stay in control at every step",
+      "subtitle": "From budget and design to choosing a contractor and supervising construction.",
       "note": "Sound familiar?",
-      "solveHint": "See how SAVICO solves this",
       "items": {
         "budget": {
           "title": "No idea what it will actually cost?",
@@ -405,8 +439,8 @@
           "description": "Reputable, verified contractors are hard to find."
         },
         "dossier": {
-          "title": "A design package too thin to build from?",
-          "description": "Missing drawings and quantities mean surprises on site."
+          "title": "No quantities or estimate to work with contractors?",
+          "description": "Without a clear bill of quantities, quotes are hard to compare and costs creep up."
         },
         "supervision": {
           "title": "No time to supervise progress and quality?",
@@ -415,23 +449,21 @@
       }
     },
     "journey": {
-      "eyebrow": "SAVICO IS WITH YOU ALL THE WAY",
-      "title": "From idea to finished home in five steps",
-      "note": "You always know where you are\nand what each step is doing.",
+      "title": "A clear journey for your project",
+      "subtitle": "BUILDX stays with you and helps you track your project from start to finish.",
       "cta": "Start a project",
-      "ctaHint": "One photo of your lot is all it takes",
-      "resumeCta": "Resume project {id}",
+      "resumeCta": "Continue project",
       "currentStepBadge": "You're on this step",
       "detailLabels": {
         "youDo": "What you do",
-        "savicoDoes": "What SAVICO does",
+        "savicoDoes": "What BuildX does",
         "youGet": "What you get"
       },
       "items": {
         "project": {
           "title": "Create a project",
-          "description": "Photograph the lot, tell us your needs and style.",
-          "youDo": "Photograph the lot and pick a building type and style.",
+          "description": "Upload a photo of the current site, describe your needs and pick a design style.",
+          "youDo": "Upload a photo of the current site and pick a building type and style.",
           "savicoDoes": "Generates a project code and opens Step 1 for you right away.",
           "youGet": "A project you can pick back up any time."
         },
@@ -444,7 +476,7 @@
         },
         "dossier": {
           "title": "Construction dossier",
-          "description": "Render and receive the full design and estimate package.",
+          "description": "Get a complete design and estimate package to work with contractors.",
           "youDo": "Review and download the dossier once you're happy with the estimate.",
           "savicoDoes": "Renders the floor plans, exterior view and estimate into a complete dossier.",
           "youGet": "A dossier ready to hand to any contractor for construction."
@@ -458,21 +490,21 @@
         },
         "build": {
           "title": "Build & supervise",
-          "description": "SAVICO engineers inspect at each milestone, keeping design and schedule on track.",
+          "description": "BuildX engineers inspect at key milestones, record findings and report deviations from the design.",
           "youDo": "Track progress and review inspection results at each milestone.",
-          "savicoDoes": "SAVICO engineers visit the site to inspect at each scheduled milestone.",
+          "savicoDoes": "BuildX engineers visit the site to inspect at each scheduled milestone.",
           "youGet": "Peace of mind that the build matches the design and schedule."
         }
       }
     },
     "services": {
-      "eyebrow": "SAVICO SERVICE PACKAGES",
+      "eyebrow": "BUILDX PRICING",
       "title": "Pick the package that fits where you are",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
       "viewAll": "See all packages",
-      "note": "Right package,\nright stage!",
       "ownedLabel": "Your package - {count} uses left",
-      "openPackage": "Open package",
+      "openPackage": "View design plans",
+      "openSupervision": "Open my plan",
       "items": {
         "design": {
           "title": "Design package",
@@ -482,24 +514,24 @@
         },
         "contractors": {
           "title": "Find a contractor",
-          "description": "SAVICO suggests verified contractors; invite up to three.",
+          "description": "BuildX suggests verified contractors; invite up to three.",
           "action": "Find contractors",
           "usedAtStep": "Used in step 04"
         },
         "supervision": {
           "title": "Site supervision",
-          "description": "SVC CHECK (6 visits) · SVC CONTROL (12 visits) by our engineers.",
+          "description": "Peace of Mind plan (6 inspections) · Full Control plan (12 inspections)",
           "action": "See supervision plans",
           "usedAtStep": "Used in step 05"
         },
         "turnkey": {
           "title": "Turnkey construction",
-          "description": "SAVICO surveys, signs the contract and builds through to handover.",
+          "description": "BuildX surveys, signs the contract and builds through to handover.",
           "action": "Request a call",
           "usedAtStep": "Used in steps 04–05"
         }
       },
-      "titleMobile": "SAVICO service packages"
+      "titleMobile": "BuildX pricing"
     },
     "dossiers": {
       "eyebrow": "SAMPLE DOSSIERS",
@@ -574,38 +606,52 @@
         "inax": "INAX",
         "viglacera": "Viglacera",
         "dulux": "Dulux",
-        "ancuong": "An Cường",
         "cadivi": "CADIVI",
         "scg": "SCG"
       }
     },
     "testimonials": {
-      "label": "WHAT CUSTOMERS SAY",
+      "label": "WHAT CUSTOMERS SAY ABOUT BUILDX",
       "items": {
         "tuan": {
-          "quote": "“I got a design I love, costs I understand and a contractor I trust.”",
+          "quote": "“I don't know much about construction, so at first it all felt vague. BUILDX made it easier to picture what I'd do and roughly what it would cost.”",
           "name": "Minh Tuan",
-          "meta": "Townhouse · Buon Ma Thuot"
+          "meta": "Townhouse · 120m² · Buon Ma Thuot"
         },
         "hang": {
-          "quote": "“The process is simple and everything is transparent — that put my mind at ease.”",
+          "quote": "“What I liked most is how clear and easy to follow the process is. Having information to compare made me feel in control and more at ease.”",
           "name": "Thu Hang",
-          "meta": "Villa · Dak Lak"
+          "meta": "Villa · 280m² · Dak Lak"
         },
         "bao": {
-          "quote": "“SAVICO saved me a lot of time and kept construction costs under control.”",
+          "quote": "“I used to research everything myself, which took a lot of time. BUILDX puts it all in one place, easier to follow and to keep costs in check.”",
           "name": "Quoc Bao",
-          "meta": "Villa · Da Lat"
+          "meta": "Villa · 320m² · Da Lat"
+        },
+        "ngocanh": {
+          "quote": "“I can see each step clearly, from the design option to the expected cost. That made talking to contractors much easier.”",
+          "name": "Ngoc Anh",
+          "meta": "Townhouse · 95m² · Ho Chi Minh City"
+        },
+        "nam": {
+          "quote": "“My main concern was whether the costs were clear. BUILDX gave me the bigger picture, so decisions felt far less uncertain.”",
+          "name": "Hoang Nam",
+          "meta": "Townhouse · 140m² · Binh Duong"
+        },
+        "vy": {
+          "quote": "“I don't have much time to follow things from the start, so I needed an easy platform. BUILDX keeps me on top of progress and the current stage.”",
+          "name": "Thanh Vy",
+          "meta": "Villa · 250m² · Can Tho"
         }
       },
-      "titleMobile": "What customers say about SAVICO"
+      "titleMobile": "What customers say about BuildX"
     },
     "cta": {
       "title": "Ready to start your project?",
       "subtitle": "One photo of your lot — get the design and estimate today.",
       "action": "Start a project",
       "resumeTitle": "Continue your project {name}?",
-      "resumeAction": "Resume project →",
+      "resumeAction": "Continue project",
       "byStatus": {
         "input": "You're on the Input step — it only takes about 2 minutes to finish.",
         "designing": "Your design & estimate is being generated — check the progress now.",
@@ -668,7 +714,7 @@
       "title": "Practical knowledge for your build",
       "viewAll": "See all articles",
       "newBadge": "New",
-      "readTime": "~{minutes} min read →",
+      "readTime": "{minutes} min read",
       "titleMobile": "Home-building handbook"
     },
     "card": {
@@ -695,15 +741,17 @@
       },
       "optionAll": "All",
       "scalePrefix": "Scale: {value}",
-      "stylePrefix": "Style: {value}"
+      "stylePrefix": "Style: {value}",
+      "prevPage": "Previous page",
+      "nextPage": "Next page"
     },
     "quota": {
-      "lookupRemaining": "Lookups today: {remaining}/{total}",
+      "lookupRemaining": "{remaining}/{total} lookups left",
       "detailRemaining": "You have {remaining}/{total} detail views left today",
       "detailSeen": "Already viewed — no credit used",
       "exhausted": "No lookups left today — upgrade your plan",
       "tooltip": "View {total} template details each day — resets at midnight · {hours}h remaining",
-      "lookupRemainingMonthly": "Lookups this month: {remaining}/{total}",
+      "lookupRemainingMonthly": "{remaining}/{total} lookups left",
       "tooltipMonthly": "Your plan includes {total} template lookups each month — resets at the start of the month."
     },
     "info": {
@@ -740,8 +788,8 @@
       "retry": "Try again",
       "notFound": "Template not found",
       "notFoundHint": "It may have been removed. Go back to the library to pick another one.",
-      "note": "Reference template curated by SAVICO. Actual results depend on your project details.",
-      "articleNote": "This article is for reference. Contact SAVICO for advice on your specific project."
+      "note": "Reference template curated by BuildX. Actual results depend on your project details.",
+      "articleNote": "This article is for reference. Contact BuildX for advice on your specific project."
     },
     "foundation": {
       "eyebrow": "Core handbook",
@@ -758,7 +806,7 @@
       "openStage": "Open handbook"
     },
     "newsletter": {
-      "title": "SAVICO newsletter",
+      "title": "BuildX newsletter",
       "featured": "Featured article",
       "related": "Related articles",
       "seeAllRelated": "See all related articles",
@@ -768,8 +816,7 @@
         "material": "Materials",
         "interior": "Interior",
         "legal": "Legal"
-      },
-      "topics": "Building knowledge · Architecture · Interior"
+      }
     },
     "articles": {
       "title": "All articles",
@@ -794,20 +841,16 @@
       },
       "previousPage": "Previous page",
       "nextPage": "Next page",
+      "readArticle": "Read article",
+      "viewDetail": "View details",
       "expand": "Quick preview",
-      "collapse": "Collapse",
-      "viewDetail": "View details"
+      "collapse": "Collapse"
     },
     "article": {
       "breadcrumbRoot": "Handbook",
       "updatedAt": "Updated {date}",
       "readingTime": "{minutes} min read",
-      "inTopic": "In topic {topic}",
-      "ctaTitle": "Not sure which option to pick? Create a project and let AI estimate for your lot",
-      "ctaTitleTopic": "Not sure which {topic} to pick? Create a project and let AI estimate for your lot",
-      "ctaButton": "New project",
       "related": "Related articles",
-      "readMore": "Read more",
       "backToTop": "Back to top",
       "loadError": "Unable to load this article",
       "loadErrorHint": "The connection may have been interrupted. Please try loading the content again.",
@@ -853,13 +896,13 @@
         "alreadySaved": "This template is already in Saved templates"
       },
       "consult": {
-        "imageAlt": "SAVICO architect reviewing drawings",
+        "imageAlt": "BuildX architect reviewing drawings",
         "title": "Ask an architect 1:1",
-        "subtitle": "A SAVICO architect can advise whether this template suits you.",
+        "subtitle": "A BuildX architect can advise whether this template suits you.",
         "p1": "Does it fit your lot & needs?",
         "p2": "What should change · cost & layout guidance",
         "p3": "After consulting: use this template or choose another",
-        "value": "Free · SAVICO architect",
+        "value": "Free · BuildX architect",
         "action": "Ask an architect 1:1"
       }
     },
@@ -883,18 +926,6 @@
     },
     "read": {
       "badge": "Read"
-    },
-    "latest": {
-      "title": "Latest news",
-      "seeAll": "See all",
-      "new": "New",
-      "readingTime": "{minutes} min read",
-      "categories": {
-        "experience": "Building experience",
-        "material": "Materials",
-        "interior": "Interior",
-        "legal": "Legal"
-      }
     },
     "lookupExhausted": {
       "badge": "Benefit limit reached",
@@ -925,7 +956,7 @@
       },
       "end": {
         "title": "Ready to apply this to your project?",
-        "subtitle": "Create a checklist and get support from SAVICO experts.",
+        "subtitle": "Create a checklist and get support from BuildX experts.",
         "p1": "Apply the checklist to your real project",
         "p2": "Connect with the right expert",
         "p3": "Continue to implementation",
@@ -954,13 +985,13 @@
           "action": "Create project now"
         },
         "architect": {
-          "imageAlt": "SAVICO architect reviewing drawings",
+          "imageAlt": "BuildX architect reviewing drawings",
           "title": "Ask an architect 1:1",
-          "subtitle": "A SAVICO architect reviews your drawings and dossier.",
+          "subtitle": "A BuildX architect reviews your drawings and dossier.",
           "p1": "Architecture consultation form",
           "p2": "Leave your needs / book a time",
           "p3": "Dossier ready → return to project ready",
-          "value": "Free · SAVICO architect",
+          "value": "Free · BuildX architect",
           "action": "Ask an architect 1:1"
         },
         "legal": {
@@ -970,7 +1001,7 @@
           "p1": "Legal consultation form",
           "p2": "Leave your needs / book a time",
           "p3": "Legal dossier ready → continue implementation",
-          "value": "SAVICO legal expert",
+          "value": "BuildX legal expert",
           "action": "Legal consultation"
         }
       }
@@ -1049,8 +1080,8 @@
       "section": {
         "landPhotoTitle": "You now know how to photograph your lot!",
         "genericTitle": "You’ve learned “{title}”!",
-        "landPhotoDescription": "You can now photograph your actual lot and start a design option for your home. SAVICO will analyze the current site and suggest a suitable design in just a few minutes.",
-        "genericDescription": "Apply what you just learned, keep learning, or ask a SAVICO architect.",
+        "landPhotoDescription": "You can now photograph your actual lot and start a design option for your home. BuildX will analyze the current site and suggest a suitable design in just a few minutes.",
+        "genericDescription": "Apply what you just learned, keep learning, or ask a BuildX architect.",
         "create": "Photograph & create project",
         "browse": "More guides",
         "consult": "Ask an architect 1:1",
@@ -1068,7 +1099,7 @@
           "title": "Photograph & create project",
           "subtitle": "Start with just one lot or existing-site photo.",
           "p1": "Upload a lot / existing-site photo",
-          "p2": "SAVICO analyzes the current site",
+          "p2": "BuildX analyzes the current site",
           "p3": "Design & estimate → receive drawings",
           "value": "Start from your site photo",
           "action": "Photograph & create project"
@@ -1084,17 +1115,19 @@
           "action": "Watch the next video"
         },
         "consult": {
-          "imageAlt": "SAVICO architect reviewing drawings",
+          "imageAlt": "BuildX architect reviewing drawings",
           "title": "Ask an architect 1:1",
-          "subtitle": "Still unsure? A SAVICO architect can answer directly.",
+          "subtitle": "Still unsure? A BuildX architect can answer directly.",
           "p1": "Architecture consultation form",
           "p2": "Book a time / describe your needs",
           "p3": "An architect contacts you",
-          "value": "Free · SAVICO architect",
+          "value": "Free · BuildX architect",
           "action": "Ask an architect 1:1"
         }
       }
-    }
+    },
+    "pageTitle": "How to use BuildX",
+    "pageSubtitle": "A 1-minute video for every step."
   },
   "design": {
     "steps": {
@@ -1106,13 +1139,15 @@
         "done": "Completed",
         "current": "In progress",
         "pending": "Not started",
-        "justDone": "Just completed"
+        "justDone": "Just completed",
+        "doneOn": "Completed on {date}"
       }
     },
     "entry": {
       "title": "Design & Estimate",
       "subtitle": "Manage your designs, cost estimates and construction dossiers in one place.",
-      "create": "New project"
+      "create": "New project",
+      "backToList": "My projects"
     },
     "createProject": {
       "title": "New project",
@@ -1285,12 +1320,12 @@
       "viewDetail": "VIEW DETAILS",
       "downloadXlsx": "Download the estimate (.xlsx)",
       "breakdownTitle": "Cost breakdown",
-      "advisoryTitle": "Advice from SAVICO",
+      "advisoryTitle": "Advice from BuildX",
       "advisory": {
         "defaultName": "there",
         "unknownBuilding": "your building",
         "unknownAddress": "the selected area",
-        "intro": "Hi {name}, based on what you shared — {building} at {address}, with an AI-estimated floor area of about {area} m² — SAVICO AI has prepared a preliminary estimate totalling {total}.",
+        "intro": "Hi {name}, based on what you shared — {building} at {address}, with an AI-estimated floor area of about {area} m² — BuildX AI has prepared a preliminary estimate totalling {total}.",
         "unitCost": "The average investment rate for this option is around {unitCost}/m² of floor area, in line with the {package} package you picked.",
         "unitCostWithScale": "The average investment rate for this option is around {unitCost}/m² of floor area for a {scale} layout, in line with the {package} package you picked.",
         "breakdown": "Cost split: structure {structure}%, finishing {finishing}% and interior {interior}%.",
@@ -1300,11 +1335,11 @@
           "interior": "Interior carries the largest share — you can split it in two phases: built-in joinery first, loose furniture added after you move in."
         },
         "style": "The {style} style you chose matches the layouts in the Handbook — open the Handbook to browse samples in the same style and save the ones you like.",
-        "disclaimer": "This estimate is indicative and generated automatically from regional market rates at the time of writing. Actual costs may vary with site conditions, material prices and the construction schedule. For a firm quote, please contact a SAVICO architect."
+        "disclaimer": "This estimate is indicative and generated automatically from regional market rates at the time of writing. Actual costs may vary with site conditions, material prices and the construction schedule. For a firm quote, please contact a BuildX architect."
       },
       "xlsx": {
-        "fileName": "SAVICO-estimate-{project}.xlsx",
-        "untitledProject": "SAVICO",
+        "fileName": "BuildX-estimate-{project}.xlsx",
+        "untitledProject": "BUILDX",
         "sheet": "Detailed estimate",
         "title": "DETAILED COST ESTIMATE",
         "project": "Project",
@@ -1318,7 +1353,7 @@
           "unitPrice": "Unit price (VND)",
           "amount": "Amount (VND)"
         },
-        "note": "Prepared automatically by SAVICO AI and indicative only. Actual costs may change with site conditions and material prices."
+        "note": "Prepared automatically by BuildX AI and indicative only. Actual costs may change with site conditions and material prices."
       },
       "continue": "Get the construction dossier",
       "readyToast": "Your estimate is ready",
@@ -1326,7 +1361,8 @@
       "columns": {
         "item": "Item",
         "amount": "Amount"
-      }
+      },
+      "pageTitleWithProject": "Estimate: {name} ({id})"
     },
     "dossier": {
       "infoTitle": "Project details",
@@ -1359,15 +1395,15 @@
       },
       "lockedHint": "Render the dossier first",
       "readyTitle": "Your construction dossier is ready",
-      "readyThanks": "Thank you for trusting SAVICO AI. Your complete, detailed dossier is ready.",
+      "readyThanks": "Thank you for trusting BuildX AI. Your complete, detailed dossier is ready.",
       "readyToast": "Your dossier is ready",
       "privacyNote": "Your dossier is fully private. Only you and the people you share it with can view it.",
-      "ctaTitle": "Talk to a SAVICO architect — free consultation",
+      "ctaTitle": "Talk to a BuildX architect — free consultation",
       "ctaCall": "Call now",
       "ctaZalo": "Chat on Zalo",
       "pdfSize": "~{size} MB",
       "pdf": {
-        "fileName": "SAVICO-dossier-{project}.pdf",
+        "fileName": "BuildX-dossier-{project}.pdf",
         "documentTitle": "DESIGN & COST DOSSIER",
         "coverEyebrow": "Construction dossier",
         "coverIssued": "Issued on",
@@ -1505,10 +1541,6 @@
         "rename": "Rename",
         "delete": "Delete"
       },
-      "createTile": {
-        "title": "New project",
-        "description": "Start from a photo of your lot and what you need"
-      },
       "count": "Showing {count} projects",
       "pagination": {
         "label": "Project list pagination",
@@ -1518,8 +1550,7 @@
       },
       "empty": {
         "title": "You have no projects yet",
-        "description": "Create a project to start from a photo of your lot and what you need.",
-        "action": "New project"
+        "description": "Create a project to start from a photo of your lot and what you need."
       },
       "noMatch": {
         "title": "No matching projects",
@@ -1542,7 +1573,7 @@
     },
     "phonePrompt": {
       "title": "Add your phone number",
-      "description": "So we can send your dossier and have an architect support you for free, please share your phone number with SAVICO.",
+      "description": "So we can send your dossier and have an architect support you for free, please share your phone number with BuildX.",
       "placeholder": "e.g. 0905 123 456",
       "error": "That phone number looks wrong (10 digits starting with 0, or +84)",
       "submit": "Confirm & continue"
@@ -1550,7 +1581,6 @@
   },
   "account": {
     "title": "My account",
-    "new": "new",
     "info": {
       "title": "Account information",
       "name": "Full name",
@@ -1638,7 +1668,7 @@
         "create": "Create project dossier — free",
         "viewDesignPlans": "View design plans"
       },
-      "note": "Statuses are updated by the SAVICO support team. Select “View details” to track invitations, surveys and processing progress."
+      "note": "Statuses are updated by the BuildX support team. Select “View details” to track invitations, surveys and processing progress."
     },
     "purchaseHistory": {
       "title": "Purchase history",
@@ -1679,11 +1709,11 @@
         "receipt": "Receipt"
       },
       "tier": {
-        "basic": "Basic plan",
-        "advanced": "Advanced plan",
-        "pro": "Professional plan",
-        "control": "SVC CONTROL",
-        "check": "SVC CHECK",
+        "basic": "BASIC plan",
+        "advanced": "PLUS plan",
+        "pro": "PRO plan",
+        "control": "TOÀN DIỆN plan",
+        "check": "AN TÂM plan",
         "self": "Self-managed"
       },
       "status": {
@@ -1699,11 +1729,11 @@
         "card": "Card",
         "manual": "Manual entry"
       },
-      "paymentNote": "Online payments are currently confirmed by SAVICO via bank QR transfer. Receipts reflect the transaction data recorded in the system.",
+      "paymentNote": "Online payments are currently confirmed by BuildX via bank QR transfer. Receipts reflect the transaction data recorded in the system.",
       "receiptDialog": {
         "title": "Payment receipt",
         "titleWithCode": "Receipt #{code}",
-        "description": "Transaction information recorded by SAVICO.",
+        "description": "Transaction information recorded by BuildX.",
         "receiptHeading": "Payment receipt · #{code}",
         "time": "Time",
         "buyer": "Buyer",
@@ -1716,14 +1746,14 @@
         "vatIssued": "Issued · sent by email",
         "vatNotRequested": "Not requested",
         "planDetail": {
-          "basic": "Design plan · 3 design & estimate credits · 20 library lookups",
-          "advanced": "Design plan · 7 design & estimate credits · 100 library lookups",
-          "pro": "Premium design plan · includes 1:1 consultation benefits",
-          "control": "Supervision plan · SVC CONTROL",
-          "check": "Supervision plan · SVC CHECK",
+          "basic": "BASIC design plan · 3 design-estimate runs · 20 library lookups",
+          "advanced": "PLUS design plan · 7 design-estimate runs · 100 library lookups",
+          "pro": "PRO design plan · full 1:1 consultation benefits",
+          "control": "Supervision plan · TOÀN DIỆN",
+          "check": "Supervision plan · AN TÂM",
           "self": "Supervision plan · Self-managed"
         },
-        "note": "Need to change invoice details or request a refund? Contact SAVICO support and include order #{code}.",
+        "note": "Need to change invoice details or request a refund? Contact BuildX support and include order #{code}.",
         "resendEmail": "Resend email",
         "sendingEmail": "Sending...",
         "downloadPdf": "Download PDF",
@@ -1742,9 +1772,9 @@
       "description": "Your upcoming session, architect notes and previous consultations.",
       "quota": "1:1 consultations: {count} credit remaining in your {plan} · the first session is always free · reschedule or cancel at least 24 hours ahead to restore the credit.",
       "planTier": {
-        "basic": "Basic plan",
-        "advanced": "Advanced plan",
-        "pro": "Professional plan"
+        "basic": "the BASIC plan",
+        "advanced": "the PLUS plan",
+        "pro": "the PRO plan"
       },
       "bookNew": "Book a new session",
       "yearsExperience": "{count} years experience",
@@ -1777,7 +1807,7 @@
         "missed": "Missed"
       },
       "meta": {
-        "withinPlan": "Included in Advanced plan",
+        "withinPlan": "Within the PLUS plan",
         "cancelled": "Cancelled on {date} · credit eligible for restoration",
         "missed": "Architect called {count} times but could not reach you"
       },
@@ -1785,10 +1815,10 @@
       "hideSessionNote": "Hide notes",
       "bookAgain": "Book again",
       "support": "Support",
-      "supportToast": "The SAVICO support team will contact you as soon as possible.",
+      "supportToast": "The BuildX support team will contact you as soon as possible.",
       "supportDialog": {
         "title": "Consultation support",
-        "description": "SAVICO has received your support request for {consultant} · {code}. Our support team will contact you as soon as possible.",
+        "description": "BuildX has received your support request for {consultant} · {code}. Our support team will contact you as soon as possible.",
         "close": "Got it"
       },
       "rating": {
@@ -1816,11 +1846,22 @@
     }
   },
   "plans": {
-    "title": "SVC design packages",
+    "title": "BuildX pricing",
     "subtitle": "Create options – Compare choices – Optimise the budget before you build",
     "tabs": {
       "design": "Design packages",
-      "supervision": "Supervision packages"
+      "supervision": "Supervision packages",
+      "supervisionLong": "Construction supervision",
+      "designDescription": "Design · estimate · construction dossier",
+      "supervisionDescription": "BuildX engineers inspect every stage",
+      "designCount": "{count} packages",
+      "supervisionCount": "{count} packages · self-managed is free",
+      "from": "from {price}",
+      "viewing": "Viewing",
+      "view": "View",
+      "new": "NEW",
+      "viewingLine": "Viewing:",
+      "switchTo": "Switch to {name}"
     },
     "tiers": {
       "basic": "BASIC",
@@ -1851,7 +1892,7 @@
     },
     "ctaBand": {
       "title": "Start designing your home today",
-      "subtitle": "Pick the package that fits and get advice from the SVC team.",
+      "subtitle": "Pick the package that fits and get advice from the BuildX team.",
       "action": "Sign up now"
     },
     "gift": {
@@ -1955,8 +1996,8 @@
     "notes": {
       "payment": "Payment by bank-transfer QR.",
       "credits": "Credits never expire. Project data stays with your account.",
-      "estimate": "Detailed estimates are viewed on the SVC platform.",
-      "gift": "(*) The PRO gift applies when the customer takes full delivery with SVC; see the programme terms.",
+      "estimate": "Detailed estimates are viewed on the BuildX platform.",
+      "gift": "(*) The PRO gift applies when the customer takes full delivery with BuildX; see the programme terms.",
       "scope": "The exported dossier is for working with contractors. It does not replace technical design documents or building-permit paperwork."
     },
     "highlights": {
@@ -1966,7 +2007,7 @@
   },
   "consult": {
     "directory": {
-      "title": "1:1 consulting with SAVICO architects",
+      "title": "1:1 consulting with BuildX architects",
       "subtitle": "Book for free - an architect calls to advise you directly.",
       "searchPlaceholder": "Search architects by name or expertise...",
       "specialty": "Expertise",
@@ -1993,7 +2034,9 @@
       "experience": "{years}+ years of experience",
       "specialtyPrefix": "Expertise: {value}",
       "bookCta": "Book a consultation",
-      "notFound": "Architect not found"
+      "notFound": "Architect not found",
+      "bookCtaWithTime": "Book a consultation at {time} · {date}",
+      "chooseSlotHint": "Pick a time slot to book"
     },
     "slots": {
       "title": "Choose a consultation slot",
@@ -2001,8 +2044,8 @@
         "morning": "Morning",
         "afternoon": "Afternoon"
       },
-      "full": "Full",
-      "fullHint": "This slot is already full",
+      "full": "Off",
+      "fullHint": "The architect is not available at this time",
       "weekday": {
         "mon": "Mon",
         "tue": "Tue",
@@ -2011,7 +2054,9 @@
         "fri": "Fri",
         "sat": "Sat",
         "sun": "Sun"
-      }
+      },
+      "sessionInfo": "30-minute phone consultation · Vietnam time (GMT+7). A consultant will call to confirm the time with you.",
+      "mine": "Your booking"
     },
     "booking": {
       "title": "Confirm your consultation",
@@ -2023,17 +2068,27 @@
       "noteHint": "Tell the architect what you need up front: building type, floor area, expected budget.",
       "notePlaceholder": "e.g. townhouse 5×20m, budget 1.8 billion VND",
       "submit": "Confirm booking",
-      "successToast": "Booked - SAVICO will call to confirm within 24 working hours."
+      "successToast": "Booked - BuildX will call to confirm within 24 working hours."
     },
     "home": {
-      "title": "Book a session with a SAVICO architect",
+      "title": "Book a session with a BuildX architect",
       "subtitle": "An architect suggests the solution that fits your needs.",
       "eyebrow": "1:1 CONSULTATION",
       "viewAll": "See all experts",
       "book": "Book",
-      "booking": "Booking…",
       "booked": "Booked",
       "titleMobile": "1:1 consultation"
+    },
+    "booked": {
+      "title": "Booked",
+      "pending": "Awaiting confirmation",
+      "architect": "Architect",
+      "when": "Time",
+      "format": "Format",
+      "formatValue": "Phone call · 30 minutes",
+      "policy": "A consultant will call to confirm the time. Reschedule or cancel at least 24 hours ahead to get your credit back.",
+      "viewMine": "View my appointments",
+      "close": "Close"
     }
   },
   "admin": {
@@ -2658,7 +2713,7 @@
       "modalListTitle": "Change requests · {project}"
     },
     "contractors": {
-      "description": "New contractors start Hidden and Not accepting projects. Project counts and legal status are computed by the system. Projects, legal documents and SAVICO partnership are managed on the detail page.",
+      "description": "New contractors start Hidden and Not accepting projects. Project counts and legal status are computed by the system. Projects, legal documents and BuildX partnership are managed on the detail page.",
       "unnamed": "(unnamed)",
       "name": "Contractor name",
       "kind": "Contractor type",
@@ -2751,7 +2806,7 @@
       "projectTotal": "{count} projects",
       "projectVerified": "{count} verified",
       "legalStatus": "Legal status",
-      "partnershipStatus": "SAVICO partnership",
+      "partnershipStatus": "BuildX partnership",
       "viewDetail": "View details",
       "visibleNeedsCapability": "Add at least one specialty, building type and construction scope before making the profile visible.",
       "deleteBlocked": "This contractor has projects, verification, invitations or a partnership — hide it instead of deleting.",
@@ -2782,7 +2837,7 @@
         "overview": "Overview",
         "projects": "Projects",
         "legal": "Legal capability",
-        "partnership": "SAVICO partnership",
+        "partnership": "BuildX partnership",
         "history": "Change history"
       },
       "noHistory": "No changes yet.",
@@ -3140,7 +3195,7 @@
       "rejectReasonShown": "Rejection reason: {reason}",
       "commitments": "Commitments & warranty",
       "warrantyValue": "{months} months",
-      "usesSavicoContract": "Uses the SAVICO contract template",
+      "usesSavicoContract": "Uses the BuildX contract template",
       "insurance": "Construction insurance",
       "yes": "Yes",
       "noData": "No information",
@@ -3151,7 +3206,7 @@
       "numberMismatch": "The enterprise number must match the entity tax code."
     },
     "contractorPartnershipTab": {
-      "title": "SAVICO partnership",
+      "title": "BuildX partnership",
       "edit": "Manage partnership",
       "badgeOn": "Verified partner badge on",
       "period": "Partnership period",
@@ -3159,7 +3214,7 @@
       "endedAt": "Ended",
       "endRule": "The end date cannot be before the start.",
       "responseRate": "Invitation response rate",
-      "complaints": "Complaints on SAVICO",
+      "complaints": "Complaints on BuildX",
       "code": "Partnership file code",
       "docStatus": "Document verification",
       "doc": {
@@ -3174,7 +3229,7 @@
       "editVerifiedWarning": "Documents are Verified — changing the scan, file code, signing date or page count returns them to Pending."
     },
     "contractorProjects": {
-      "summary": "{total} projects · {verified} verified by SAVICO via site photos and signed acceptance records",
+      "summary": "{total} projects · {verified} verified by BuildX via site photos and signed acceptance records",
       "add": "Add project",
       "editTitle": "Edit project · {name}",
       "verifiedOnly": "Verified only",
@@ -3231,11 +3286,11 @@
       "acceptanceDoc": "Acceptance / handover record signed by the owner",
       "noSitePhotos": "No site photos yet.",
       "noAcceptanceDoc": "No acceptance record yet.",
-      "verification": "SAVICO verification",
+      "verification": "BuildX verification",
       "verifiedAtBy": "Verified at {at} · {by}",
-      "verifyExplain": "SAVICO checked site photos and the owner-signed acceptance record.",
+      "verifyExplain": "BuildX checked site photos and the owner-signed acceptance record.",
       "unverifyHistory": "Revocation history",
-      "noPriceNote": "Contract values and unit prices are not shown - SAVICO neither stores nor publishes prices.",
+      "noPriceNote": "Contract values and unit prices are not shown - BuildX neither stores nor publishes prices.",
       "scopeRequired": "Choose one construction scope.",
       "order": "Display order"
     },
@@ -3532,7 +3587,7 @@
       "tierOrder": "Prices must increase: Basic ≤ Standard ≤ VIP."
     },
     "estimateAdvice": {
-      "description": "SAVICO advisory content shown below the estimate table and in the PDF dossier.",
+      "description": "BuildX advisory content shown below the estimate table and in the PDF dossier.",
       "autoNote": "The greeting, cost per m² and cost breakdown are filled in automatically per project, so they are not edited here.",
       "dominant": {
         "structure": "Remark when Structure has the largest share",
@@ -3575,7 +3630,7 @@
       "accepting": "Accepting projects",
       "notAccepting": "Not accepting projects",
       "reviewCount": "({count} reviews)",
-      "noPriceNote": "SAVICO does not display contractor quotes on the platform.",
+      "noPriceNote": "BuildX does not display contractor quotes on the platform.",
       "fromDesignPackage": "Brief from a design package",
       "similarShort": "{count} projects",
       "similarSuffix": "completed",
@@ -3620,8 +3675,8 @@
     },
     "sort": {
       "match": "Best match",
-      "distance": "Closest to site",
-      "rating": "Best rated",
+      "distance": "Nearest",
+      "rating": "Top rated",
       "survey": "Earliest survey"
     },
     "region": {
@@ -3639,7 +3694,7 @@
     },
     "statusMeaning": {
       "sent": "The invitation and brief have been sent.",
-      "received": "The SAVICO support team received it and passed it to the contractor.",
+      "received": "The BuildX support team received it and passed it to the contractor.",
       "accepted": "The contractor confirmed and will contact you directly.",
       "done": "Cooperation agreed, or the invitation was closed.",
       "rejected": "The invitation was rejected and closed."
@@ -3649,10 +3704,10 @@
         "title": "Find the right contractor for your build",
         "titleLine1": "Find the right contractor",
         "titleLine2": "for your build",
-        "subtitle": "Connect with SAVICO's network of trusted contractors — search, compare capability and pick the right partner, transparently and with confidence.",
+        "subtitle": "Connect with BuildX's network of trusted contractors — search, compare capability and pick the right partner, transparently and with confidence.",
         "createBrief": "Create a brief",
         "bestMatch": "Best match for your project",
-        "viewContractors": "Browse contractors",
+        "viewContractors": "View contractor list",
         "card": {
           "distance": "Distance",
           "rating": "Rating",
@@ -3664,7 +3719,7 @@
           "completedValue": "{count} projects",
           "similarValue": "{count} similar projects",
           "surveyValue": "within {hours}h",
-          "locked": "Create a project brief for SAVICO to match contractors"
+          "locked": "Create a project brief for BuildX to match contractors"
         }
       },
       "promises": {
@@ -3695,123 +3750,55 @@
         }
       },
       "ranking": {
-        "note": "Ranking = project fit + distance + experience + rating + availability + survey readiness",
-        "detail": "View details",
-        "choose": "Select & send brief",
         "stickyNudge": "Create a project brief - free",
         "tabs": {
           "match": "Best match",
           "distance": "Nearest",
-          "rating": "Best rated",
+          "rating": "Top rated",
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
         "bestMatch": "Best match",
         "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
       },
-      "compare": {
-        "title": "Transparent comparison",
-        "criterion": "Criterion",
-        "note": "All information is compiled from contractor records and details supplied by the contractor.",
-        "betterBadge": "Better",
-        "swipeHint": "Swipe sideways to see all 3 columns",
-        "columns": {
-          "a": "Contractor A",
-          "b": "Contractor B",
-          "c": "Contractor C"
-        },
-        "rows": {
-          "duration": {
-            "label": "Build time",
-            "a": "120 days",
-            "b": "130 days",
-            "c": "115 days"
-          },
-          "scope": {
-            "label": "What the quote covers",
-            "a": "See detail",
-            "b": "See detail",
-            "c": "See detail"
-          },
-          "material": {
-            "label": "Suggested material grade",
-            "a": "Mid – Good",
-            "b": "Mid",
-            "c": "Good – Premium"
-          },
-          "warranty": {
-            "label": "Warranty",
-            "a": "24 months",
-            "b": "24 months",
-            "c": "36 months"
-          },
-          "remark": {
-            "label": "Notes",
-            "a": "–",
-            "b": "–",
-            "c": "–"
-          }
-        },
-        "scopeDetail": {
-          "includedLabel": "Included",
-          "excludedLabel": "Not included",
-          "a": {
-            "included": ["Demolition of existing structure", "Structural work", "Basic finishing"],
-            "excluded": ["Loose furniture", "Kitchen appliances"]
-          },
-          "b": {
-            "included": ["Demolition of existing structure", "Structural work", "Paint finishing"],
-            "excluded": ["Loose furniture", "Premium bathroom fixtures"]
-          },
-          "c": {
-            "included": ["Demolition of existing structure", "Structural work", "Finishing + basic furniture"],
-            "excluded": ["Premium kitchen appliances"]
-          }
-        }
-      },
       "safety": {
         "title": "Safe & transparent",
         "privacyTitle": "Contact details protected",
         "privacyBody": "Your phone and email are only shared once you confirm a survey appointment.",
         "recordTitle": "Reports kept on the platform",
-        "recordBody": "Every report has its own code — nothing gets garbled in retelling.",
+        "recordBody": "Every conversation and survey report is stored under its own code, easy to cross-check when needed.",
         "reviewTitle": "Reviews from real projects",
-        "reviewBody": "Only customers who worked through SAVICO can review a contractor."
-      },
-      "boundary": {
-        "title": "Where each service stops",
-        "designTitle": "Design package",
-        "designBody": "Design + estimated quantities + cost estimate",
-        "designReadyBadge": "✓ You already have a PRO plan · brief ready",
-        "arrow": "Design finished\n→ Find a contractor",
-        "findTitle": "Find a contractor",
-        "findBody": "Find who builds it + site visit + real reviews + comparison",
-        "createFromPlan": "Create a brief from your plan"
+        "reviewBody": "Only customers who worked through BuildX can review a contractor."
       },
       "faq": {
         "title": "Frequently asked questions",
         "q1": "Does it cost me anything?",
-        "a1": "No. SAVICO helps you find and connect with vetted contractors free of charge.",
+        "a1": "No. BuildX helps you find and connect with vetted contractors free of charge.",
         "q2": "What do I need to start?",
         "a2": "Just basic details about the build and what you need done. You can create a brief for free without buying a package.",
         "q3": "How many contractors can I invite?",
         "a3": "Up to <mark>3 contractors</mark> per project. The cap keeps every survey trackable instead of flooding you with calls.",
         "q4": "Can I see quotes on the website?",
-        "a4": "No. After the survey the contractor sends the quote to you directly; SAVICO neither stores nor displays any amounts.",
-        "q5": "Does SAVICO do the building work?",
-        "a5": "No. SAVICO is a neutral connection platform — we neither build nor sell materials.",
+        "a4": "Yes. BuildX shows a predicted price range so you can plan your budget. It is for reference only; the actual cost is quoted by the contractor after the survey.",
+        "q5": "Does BuildX do the building work?",
+        "a5": "Yes. BuildX connects you with reputable builders and material suppliers that fit your needs and budget.",
         "copyLink": "Copy link",
-        "linkCopied": "Copied"
+        "linkCopied": "Copied",
+        "q6": "Can I track progress in the app?",
+        "a6": "Yes. Follow progress, photos and contractor updates right in the app, anytime, anywhere.",
+        "q7": "Are contractors in the app verified?",
+        "a7": "Yes. Every contractor's profile and capability is reviewed by BuildX before they can operate in the app."
       },
       "cta": {
         "title": "Already have a design? Create a brief and get matched with the right contractors.",
-        "action": "Create a brief"
+        "action": "Create a brief",
+        "resumeTitle": "Keep finding contractors for {name}."
       },
       "partner": {
         "text": "Are you a contractor? Get quality, transparent, well-matched projects.",
         "action": "Become a partner",
         "dialogTitle": "Register as a partner",
-        "dialogDescription": "Leave your details and the SAVICO team will contact you with guidance for completing your contractor profile.",
+        "dialogDescription": "Leave your details and the BuildX team will contact you with guidance for completing your contractor profile.",
         "name": "Contractor name",
         "namePlaceholder": "e.g. An Phat Construction",
         "phone": "Phone number",
@@ -3822,9 +3809,13 @@
         "cancel": "Close",
         "submit": "Submit registration",
         "successTitle": "Registration received",
-        "successBody": "SAVICO will send updates and next steps to {email}.",
+        "successBody": "BuildX will send updates and next steps to {email}.",
         "close": "Done"
-      }
+      },
+      "continueWith": "Continue with {name}",
+      "continueShort": "Continue",
+      "continueHint": "Continue with {name}",
+      "switchBrief": "Switch profile"
     },
     "brief": {
       "badge": "Free · No package required",
@@ -3832,12 +3823,12 @@
       "leaveConfirm": "Leaving will discard what you're entering. Continue?",
       "close": "Close and return to options",
       "leaveTitle": "Save this draft before leaving?",
-      "leaveDescription": "You've entered some information. SAVICO can save it so you can continue later.",
+      "leaveDescription": "You've entered some information. BuildX can save it so you can continue later.",
       "saveDraftAndLeave": "Save draft and return",
       "leaveWithoutSaving": "Don't save",
       "keepEditing": "Keep editing",
       "title": "Create your project brief",
-      "subtitle": "Complete the build details and what you need done, and SAVICO will suggest matching contractors.",
+      "subtitle": "Complete the build details and what you need done, and BuildX will suggest matching contractors.",
       "draftSaved": "Draft saved - {time}",
       "steps": {
         "one": "Details & needs",
@@ -3871,7 +3862,7 @@
       },
       "needs": {
         "title": "What you need built",
-        "subtitle": "Tell SAVICO the scope and the main requirements of the project.",
+        "subtitle": "Tell BuildX the scope and the main requirements of the project.",
         "scope": "Scope of work",
         "note": "Describe your needs",
         "notePlaceholder": "e.g. Need a turnkey contractor for a two-storey townhouse, experienced, able to survey the site at the weekend.",
@@ -3893,21 +3884,21 @@
         "tooLarge": "{name} is larger than 10 MB.",
         "wrongType": "{name} is not a supported file type."
       },
-      "notice": "Note: a self-made brief does not include drawings or cost estimates issued by SAVICO.",
+      "notice": "Note: a self-made brief does not include drawings or cost estimates issued by BuildX.",
       "noticeAction": "See the Design & Estimate package",
       "continue": "Continue: review brief"
     },
     "review": {
       "back": "Back to details & needs",
       "title": "Review your project brief",
-      "subtitle": "Confirm the details before SAVICO starts matching contractors.",
+      "subtitle": "Confirm the details before BuildX starts matching contractors.",
       "projectCard": {
         "title": "Project",
         "type": "Building type",
         "scale": "Scale",
         "address": "Address",
         "budget": "Expected budget",
-        "budgetHidden": "Visible to SAVICO only",
+        "budgetHidden": "Visible to BuildX only",
         "budgetLabel": "Budget"
       },
       "siteTitle": "Build details",
@@ -3942,7 +3933,7 @@
     "rating": {
       "action": "Rate this contractor",
       "title": "Rate {name}",
-      "subtitle": "Only customers who worked through SAVICO can rate, once per invitation.",
+      "subtitle": "Only customers who worked through BuildX can rate, once per invitation.",
       "ratingLabel": "How satisfied were you",
       "ratingHint": "Score the whole experience with this contractor from 1 to 5 stars.",
       "ratingRequired": "Please pick a star rating.",
@@ -3965,17 +3956,17 @@
       "find": {
         "title": "Find the right contractor",
         "subtitle": "Choose, compare and pick a contractor yourself",
-        "p1": "SAVICO suggests 3–5 matching contractors",
+        "p1": "BuildX suggests 3–5 matching contractors",
         "p2": "See credentials & real projects",
         "p3": "Pick 2–3 contractors for a site visit",
         "p4": "Receive quotes and compare in detail",
-        "p5": "Get a recommendation from SAVICO",
+        "p5": "Get a recommendation from BuildX",
         "action": "Find contractors",
         "p6": "Make the final choice yourself"
       },
       "turnkey": {
-        "title": "Full delivery with SAVICO",
-        "subtitle": "Let SAVICO walk with you from survey to handover",
+        "title": "Full delivery with BuildX",
+        "subtitle": "Let BuildX walk with you from survey to handover",
         "p1": "In-depth survey & consultation",
         "p2": "Construction & schedule management",
         "p3": "Material and furniture supply",
@@ -3996,21 +3987,23 @@
       },
       "turnkeyForm": {
         "title": "Register for turnkey delivery",
-        "subtitle": "Leave your contact details and the SAVICO team will call you back to survey and advise.",
+        "subtitle": "Leave your contact details and the BuildX team will call you back to survey and advise.",
         "name": "Full name",
         "phone": "Phone number",
         "email": "Email",
         "note": "What you need",
         "notePlaceholder": "e.g. Two-storey townhouse in Tan Loi, aiming to break ground next quarter.",
-        "contactNote": "Used only so the SAVICO team can contact you about your project.",
+        "contactNote": "Used only so the BuildX team can contact you about your project.",
         "cancel": "Cancel",
-        "nameHint": "The person SAVICO will contact about this project.",
-        "phoneHint": "The number the SAVICO team calls back to book the survey.",
-        "emailHint": "Where the confirmation and related documents are sent.",
-        "noteHint": "The clearer the description, the better SAVICO can prepare the survey. Optional.",
-        "submit": "Send request"
+        "nameHint": "The person BuildX will contact about this project.",
+        "phoneHint": "The number the BuildX team calls back to book the survey.",
+        "emailHint": "Email for the confirmation and related documents. Optional.",
+        "noteHint": "The clearer the description, the better BuildX can prepare the survey. Optional.",
+        "submit": "Send request",
+        "province": "Area",
+        "provincePlaceholder": "Choose a province / city"
       },
-      "turnkeyRegistered": "Noted. The SAVICO team will contact you during the next working hours.",
+      "turnkeyRegistered": "Noted. The BuildX team will contact you during the next working hours.",
       "exclusive": "Exclusive perk",
       "popup2": {
         "title": "Your project is ready — how would you like to continue?",
@@ -4020,7 +4013,7 @@
         "find": {
           "imageAlt": "Completed house and contractor shortlist",
           "title": "Find a contractor",
-          "subtitle": "SAVICO suggests suitable contractors and helps you compare them.",
+          "subtitle": "BuildX suggests suitable contractors and helps you compare them.",
           "p1": "Suggest 3–5 contractors",
           "p2": "Invite quotes & compare",
           "p3": "Choose the right contractor",
@@ -4028,11 +4021,11 @@
           "action": "Find contractors"
         },
         "turnkey": {
-          "imageAlt": "SAVICO managing construction on site",
-          "badge": "SAVICO service",
-          "titlePro": "Turnkey construction with SAVICO",
-          "titleDefault": "Full delivery with SAVICO",
-          "subtitle": "SAVICO takes the project from survey through handover.",
+          "imageAlt": "BuildX managing construction on site",
+          "badge": "BuildX service",
+          "titlePro": "Turnkey construction with BuildX",
+          "titleDefault": "Full delivery with BuildX",
+          "subtitle": "BuildX takes the project from survey through handover.",
           "p1": "Service flow: survey & proposal",
           "p2": "Contract & payment",
           "p3": "Implementation through handover",
@@ -4068,14 +4061,11 @@
       "compareCheckbox": "Compare",
       "maxCompare": "Up to {max} contractors",
       "inviteLimitReached": "All {max} invitation slots have been used",
-      "whyTitle": "Why SAVICO suggests these",
+      "whyTitle": "Why BuildX suggests these",
       "why1": "Matches your building type",
       "why2": "{count} completed projects",
       "why3": "Can survey within {hours}h",
-      "projectLabel": "Selected project",
       "invitedPill": "Invited <n>{used}</n>/{max} · <n>{left}</n> left",
-      "viewInvites": "View invitations",
-      "switchProject": "Switch project",
       "regionLabel": "Region",
       "radiusShort": "Radius",
       "regions": {
@@ -4085,14 +4075,15 @@
       },
       "previewTitle": "Preview mode — create a project brief to invite contractors",
       "previewDescription": "A brief lets you keep your shortlist and send invitations.",
-      "previewAction": "Create a project brief"
+      "previewAction": "Create a project brief",
+      "viewInvites": "View invitations"
     },
     "firm": {
       "tabs": {
         "overview": "Overview",
         "projects": "Completed projects",
         "legal": "Legal capability",
-        "partnership": "SAVICO partnership"
+        "partnership": "BuildX partnership"
       },
       "introTitle": "About the company",
       "founded": "Founded in {year}",
@@ -4106,7 +4097,7 @@
       "legal": {
         "updating": "Being updated",
         "verification": {
-          "title": "SAVICO has verified this contractor's business licence",
+          "title": "BuildX has verified this contractor's business licence",
           "body": "Checked against the original during the assessment on {date}. If the licence changes or is revoked, the contractor is hidden from recommendations until it is updated.",
           "updated": "Updated"
         },
@@ -4138,9 +4129,9 @@
           "view": "View",
           "privacy": "The enterprise number is partially hidden. The full scan is unlocked after you send this contractor an invitation to quote.",
           "dialogTitle": "Verified licence information",
-          "dialogBody": "SAVICO shows a summary and redacts sensitive data before both parties connect.",
+          "dialogBody": "BuildX shows a summary and redacts sensitive data before both parties connect.",
           "lockedTitle": "The scan unlocks after an invitation to quote",
-          "lockedBody": "SAVICO checked the original on {date}. After you send an invitation to quote, the full scan appears here and in the invitation screen.",
+          "lockedBody": "BuildX checked the original on {date}. After you send an invitation to quote, the full scan appears here and in the invitation screen.",
           "scanUnlocked": "The licence scan is unlocked",
           "status": "Status",
           "close": "Close"
@@ -4149,27 +4140,27 @@
           "title": "Commitments & warranty",
           "warrantyTitle": "{months}-month structural warranty",
           "warrantyBody": "12-month finishing warranty · equipment covered by manufacturers",
-          "contractTitle": "SAVICO contract template",
+          "contractTitle": "BuildX contract template",
           "contractBody": "Each stage is accepted with records and site photos",
           "insuranceTitle": "Construction insurance",
           "insuranceBody": "Applied to every turnkey construction contract",
-          "updating": "SAVICO is updating this information"
+          "updating": "BuildX is updating this information"
         },
         "cooperation": {
-          "title": "SAVICO cooperation",
+          "title": "BuildX cooperation",
           "verified": "Verified partner",
           "since": "Partner since {since}",
           "rank": "Good response within {rank}h ({percent}%)",
-          "complaints": "{count} complaints on SAVICO"
+          "complaints": "{count} complaints on BuildX"
         }
       },
       "activity": "Activity",
       "warranty": "{months}-month warranty",
       "contactLocked": "Contact details unlock once a survey appointment is confirmed.",
       "report": "Report this record",
-      "reportSent": "Report noted. The SAVICO support team will review this record.",
+      "reportSent": "Report noted. The BuildX support team will review this record.",
       "reportConfirmTitle": "Report this record?",
-      "reportConfirmBody": "SAVICO will review this contractor's information and activity.",
+      "reportConfirmBody": "BuildX will review this contractor's information and activity.",
       "reportConfirmAction": "Send report",
       "addToCompare": "Add to comparison",
       "inCompare": "Added to comparison",
@@ -4181,7 +4172,7 @@
       "viewSimilar": "View similar contractors",
       "projects": {
         "projectCount": "{count} projects",
-        "verifiedSummary": "{count} verified by SAVICO using site photos and acceptance records",
+        "verifiedSummary": "{count} verified by BuildX using site photos and acceptance records",
         "verifiedOnly": "Verified projects only",
         "sortLabel": "Sort projects",
         "sortLatest": "Newest",
@@ -4234,18 +4225,18 @@
             "general-contractor": "General contractor",
             "contractor": "Construction contractor"
           },
-          "verifiedTitle": "Verified by SAVICO on {date}",
+          "verifiedTitle": "Verified by BuildX on {date}",
           "verifiedDateFallback": "date being updated",
           "verifiedBody": "Checked against on-site photos and the acceptance record signed by the homeowner.",
           "selfReportedTitle": "Contractor-supplied information",
-          "selfReportedBody": "SAVICO has not checked this project against site photos and acceptance records.",
-          "priceNotice": "Contract values and unit prices are not shown - SAVICO does not store or publish pricing information.",
+          "selfReportedBody": "BuildX has not checked this project against site photos and acceptance records.",
+          "priceNotice": "Contract values and unit prices are not shown - BuildX does not store or publish pricing information.",
           "close": "Close"
         }
       },
       "partnership": {
-        "title": "SAVICO partner",
-        "body": "{name} has signed a partnership agreement and had its company records verified by SAVICO.",
+        "title": "BuildX partner",
+        "body": "{name} has signed a partnership agreement and had its company records verified by BuildX.",
         "verified": "Verified partner",
         "since": "Partner since {since}",
         "scanTitle": "Scanned partnership agreement",
@@ -4255,13 +4246,13 @@
         "pages": "Pages:",
         "state": "Status:",
         "stateVerified": "Verified",
-        "checked": "SAVICO checked the scan against the company records.",
+        "checked": "BuildX checked the scan against the company records.",
         "page": "Page {current} of {total}",
         "fullscreen": "View full screen",
         "download": "Download PDF",
         "unavailable": "The scan is being updated by the operations team.",
         "privacyNote": "Only the information page is shown, with both parties' confidential content redacted.",
-        "parties": "SAVICO × {name}",
+        "parties": "BuildX × {name}",
         "zoomOut": "Zoom out",
         "zoomIn": "Zoom in",
         "zoomFit": "Fit to frame",
@@ -4304,12 +4295,12 @@
       "removeColumn": "Remove from comparison",
       "exceedRoom": "You only have {count} invitation left",
       "criteriaHint": {
-        "rating": "Average rating from customers who worked with this contractor through SAVICO.",
+        "rating": "Average rating from customers who worked with this contractor through BuildX.",
         "similarProjects": "Number of projects of this type the contractor has completed.",
         "distance": "Distance from the contractor to your site.",
         "surveyTime": "How soon the contractor can survey the site after accepting the invitation.",
         "serviceAreas": "Areas the contractor takes on projects in.",
-        "legal": "Legal records SAVICO has verified.",
+        "legal": "Legal records BuildX has verified.",
         "warranty": "Warranty period after handover.",
         "accepting": "Whether the contractor is currently taking on new projects."
       }
@@ -4364,13 +4355,13 @@
     "sent": {
       "title": "Invitation sent & survey booked",
       "subtitle": "Your survey request has been sent to {names}.",
-      "requestCode": "Request code: <accent>{code}</accent>",
+      "requestCode": "Invitation code: <accent>{code}</accent>",
       "sentAt": "Sent at {time}",
       "detailTitle": "Request details",
       "location": "Survey location",
       "note": "Note for the survey",
       "noNote": "No note",
-      "supportTitle": "The SAVICO support team will contact you",
+      "supportTitle": "The BuildX support team will contact you",
       "supportBody": "We will call to confirm the survey appointment, clarify your needs and coordinate the details with the contractor.",
       "supportTime": "Expected: during the next working hours.",
       "track": "Track this request",
@@ -4384,7 +4375,7 @@
     },
     "invitations": {
       "title": "Invitations to quote",
-      "subtitle": "You have invited {count} contractors to quote. Statuses are updated by the SAVICO support team.",
+      "subtitle": "You have invited {count} contractors to quote. Statuses are updated by the BuildX support team.",
       "counter": "Invited <b>{used} / {max}</b> contractors max",
       "empty": "No invitations sent for this project yet.",
       "back": "Back to the contractor list",
@@ -4392,7 +4383,7 @@
       "code": "Invitation code <b>{code}</b>",
       "sentAt": "Sent at <b>{time}</b>",
       "dossier": "Dossier <b>{version} · {count} files</b>",
-      "updatedBy": "Updated {time} · SAVICO support team",
+      "updatedBy": "Updated {time} · BuildX support team",
       "surveyAt": "Survey {date}, {slot}",
       "meaningTitle": "What each status means",
       "dossierTitle": "Brief that was sent",
@@ -4403,14 +4394,13 @@
       "dossierFileCount": "{count} files",
       "dossierView": "View the brief that was sent",
       "dossierNoBudget": "The brief carries no budget or pricing information of any kind.",
-      "supportTitle": "SAVICO support team",
+      "supportTitle": "BuildX support team",
       "supportBody": "They update each invitation status and help when you want to stop an invitation or switch contractor.",
       "supportAction": "Contact the support team",
-      "footerNote": "Once a contractor accepts, the two of you deal directly on the survey, the quote and the contract. SAVICO stores no quotes or amounts. To stop an invitation or change contractor, contact the support team.",
-      "supportToast": "The SAVICO support team will contact you on your registered phone number.",
+      "footerNote": "Once a contractor accepts, the two of you deal directly on the survey, the quote and the contract. BuildX stores no quotes or amounts. To stop an invitation or change contractor, contact the support team.",
+      "supportToast": "The BuildX support team will contact you on your registered phone number.",
       "newUpdateBadge": "New",
-      "editBriefWarning": "Editing the brief creates a v2 - invitations already sent still use v1",
-      "contactDialogTitle": "Contact the SAVICO support team",
+      "contactDialogTitle": "Contact the BuildX support team",
       "contactDialogCall": "Call now",
       "supervisionSuggestion": "Contractor confirmed — decide how to manage construction?",
       "supervisionAction": "See supervision plans",
@@ -4421,7 +4411,8 @@
       "profileSimilar": "Similar projects",
       "dossierPanelDescription": "Sent dossier version · Read only",
       "noPriceBadge": "No pricing included",
-      "rejectedLine": "This invitation was rejected. Reason: {reason}"
+      "rejectedLine": "This invitation was rejected. Reason: {reason}",
+      "inviteMore": "Invite more contractors ({left} left)"
     },
     "picker": {
       "title": "Pick a project to find contractors",
@@ -4445,11 +4436,19 @@
       "buyPlan": "Buy a design package for drawings & quantities",
       "contracted": "Contractor settled",
       "untitled": "Untitled brief"
+    },
+    "projectBar": {
+      "label": "Selected project",
+      "version": "Profile v{version}",
+      "invited": "Invited {used}/{max}",
+      "viewInvites": "View invitations",
+      "switchProject": "Switch project",
+      "editWarning": "Editing creates version {next} — invitations already sent keep {current}."
     }
   },
   "checkout": {
     "headerSupport": "Need help?",
-    "headerSupportAction": "Contact SAVI",
+    "headerSupportAction": "Contact BuildX",
     "steps": {
       "plan": "Choose plan",
       "confirm": "Confirm order",
@@ -4457,16 +4456,16 @@
       "done": "Done"
     },
     "stepState": {
-      "done": "Done",
+      "done": "Completed",
       "current": "In progress",
-      "pending": "Upcoming",
+      "pending": "Up next",
       "error": "Needs attention"
     },
     "confirm": {
       "title": "Confirm your order",
       "subtitle": "Check the details before you pay.",
       "buyerTitle": "Buyer details",
-      "buyerEditable": "Editable",
+      "buyerEditable": "Edit details",
       "name": "Full name",
       "phone": "Phone number",
       "email": "Email",
@@ -4475,7 +4474,7 @@
       "qrTitle": "Bank transfer QR",
       "qrBody": "Scan with your banking app. The system confirms within 1–5 minutes.",
       "qrFree": "No fee",
-      "qrOnly": "SAVICO accepts bank-transfer QR payments only.",
+      "qrOnly": "BuildX accepts bank-transfer QR payments only.",
       "invoiceTitle": "VAT invoice",
       "invoiceHint": "Turn on if you need a VAT invoice.",
       "company": "Company name",
@@ -4504,8 +4503,8 @@
       "processing": "Creating order...",
       "readyHint": "You will be taken to the QR payment page.",
       "refund": "Full refund within {hours} hours if you have not used any credits.",
-      "noCardNote": "SAVICO never collects or stores your payment details.",
-      "terms": "I have read and agree to the <terms>Terms of Use</terms> and <payment>Payment Policy</payment> of SAVICO.",
+      "noCardNote": "BuildX never collects or stores your payment details.",
+      "terms": "I have read and agree to the <terms>Terms of Use</terms> and <payment>Payment Policy</payment> of BuildX.",
       "termsRequired": "Please accept the terms before paying.",
       "termsRequiredToast": "Please tick the terms agreement before continuing.",
       "missingProduct": "We could not find the plan you picked. Go back to pricing and choose again.",
@@ -4545,7 +4544,7 @@
       "recording": "Recording…",
       "verifying": "Confirming…",
       "support": "Need help?",
-      "supportToast": "The SAVICO support team will contact you on your registered phone number.",
+      "supportToast": "The BuildX support team will contact you on your registered phone number.",
       "supportSubject": "Support for order {code}",
       "supportBody": "I need support with order {code}."
     },
@@ -4598,18 +4597,18 @@
       "receiptAmount": "Amount",
       "receiptStatus": "Status",
       "receiptPaid": "Paid",
-      "turnkeyContactConfirmation": "Request received — the SAVICO team will contact you.",
+      "turnkeyContactConfirmation": "Request received — the BuildX team will contact you.",
       "myProjects": "Go to my projects",
       "dashboard": "Supervision dashboard",
-      "dataNote": "Your project data is stored privately and securely on SAVICO.",
+      "dataNote": "Your project data is stored privately and securely on BuildX.",
       "assignNote": "The support team will assign an engineer and open the six supervision stages for your project."
     }
   },
   "supervision": {
     "tiers": {
-      "self": "Self-managed",
-      "check": "SVC CHECK",
-      "control": "SVC CONTROL"
+      "self": "SELF-MANAGED",
+      "check": "AN TÂM",
+      "control": "TOÀN DIỆN"
     },
     "tierAlias": {
       "self": "Self-managed",
@@ -4639,13 +4638,13 @@
     },
     "managementPopup": {
       "title": "How would you like to manage the construction process?",
-      "subtitle": "Now that your contractor is confirmed, choose how SAVICO should support you.",
+      "subtitle": "Now that your contractor is confirmed, choose how BuildX should support you.",
       "close": "Close",
       "later": "Maybe later",
       "self": {
         "imageAlt": "Construction drawings and project management tools",
         "title": "Self-managed",
-        "subtitle": "Work directly with your contractor while SAVICO keeps your records and basic progress tracking.",
+        "subtitle": "Work directly with your contractor while BuildX keeps your records and basic progress tracking.",
         "p1": "Self-managed dashboard",
         "p2": "Track records & progress",
         "p3": "Construction",
@@ -4656,28 +4655,28 @@
         "imageAlt": "Engineer checking key construction milestones",
         "badge": "Peace-of-Mind plan",
         "title": "Milestone supervision",
-        "subtitle": "SAVICO inspects the key stages of your construction project.",
+        "subtitle": "BuildX inspects the key stages of your construction project.",
         "p1": "Checks at key milestones",
         "p2": "Report after every inspection",
         "p3": "{count} planned supervision visits",
-        "value": "SVC CHECK · from {price}",
+        "value": "AN TÂM · from {price}",
         "action": "Choose milestone supervision"
       },
       "control": {
-        "imageAlt": "SAVICO engineers supervising construction throughout the project",
+        "imageAlt": "BuildX engineers supervising construction throughout the project",
         "badge": "Recommended · Complete plan",
         "title": "End-to-end supervision",
-        "subtitle": "SAVICO stays with you from groundbreaking through completion and handover.",
+        "subtitle": "BuildX stays with you from groundbreaking through completion and handover.",
         "p1": "Continuous tracking",
         "p2": "Quality & variation control",
         "p3": "{count} planned supervision visits",
-        "value": "SVC CONTROL · {price}",
+        "value": "TOÀN DIỆN · {price}",
         "action": "Choose end-to-end supervision"
       }
     },
     "pricing": {
-      "title": "SVC construction supervision",
-      "subtitle": "Milestone inspections combined with digital tracking on the SVC platform",
+      "title": "BuildX construction supervision",
+      "subtitle": "Milestone inspections combined with digital tracking on the BuildX platform",
       "recommended": "Recommended for homes",
       "perProject": "/ project",
       "duration": "up to {months} months",
@@ -4700,7 +4699,7 @@
           "inspectionCount": "On-site engineer visits",
           "duration": "Coverage period",
           "price": "Price",
-          "dossier": "Project records kept on SAVICO",
+          "dossier": "Project records kept on BuildX",
           "dashboard": "Six-stage dashboard",
           "timeline": "Construction timeline",
           "progress": "Progress tracking",
@@ -4710,8 +4709,8 @@
           "extras": "Variations logged",
           "followUp": "Open issues followed up",
           "structureCheck": "Structural shell checks",
-          "dampCheck": "Damp-proofing checks",
-          "waterproofCheck": "Waterproofing checks",
+          "dampCheck": "Damp-proofing check",
+          "waterproofCheck": "Foundation waterproofing check",
           "finishingCheck": "Finishing checks",
           "materialCheck": "Actual materials verified",
           "reportAfter": "Report after each visit",
@@ -4733,7 +4732,7 @@
         }
       },
       "addons": {
-        "title": "Add-ons & extra fees",
+        "title": "Extra services and surcharges",
         "item": "Item",
         "price": "Indicative price",
         "note": "Note",
@@ -4742,7 +4741,7 @@
         "extraVisitNote": "For milestones beyond the plan",
         "urgent": "Urgent / unplanned visit",
         "urgentPrice": "1,490,000₫",
-        "urgentNote": "Depends on the scope arranged",
+        "urgentNote": "Depends on urgency and engineer availability",
         "outOfArea": "Outside the standard service area",
         "outOfAreaPrice": "At cost",
         "outOfAreaNote": "Travel costs added where applicable",
@@ -4752,30 +4751,20 @@
       },
       "scope": {
         "title": "What the service covers",
-        "r1": "SAVICO inspects, records, flags, reports and follows up within the plan you choose.",
+        "r1": "BuildX inspects, records, flags, reports and follows up within the plan you choose.",
         "r2": "The contractor remains responsible for the works, quality, site safety and warranty.",
         "r3": "The plan does not include a full-time engineer on site."
       },
       "journey": {
-        "title": "Customer journey",
-        "s1": "Design & estimate",
-        "s1Body": "The customer buys and uses a design package on SAVICO.",
-        "s2": "Find a contractor",
-        "s2Body": "The customer searches, compares and picks a contractor.",
-        "s3": "Choose how to manage the build",
-        "s3Body": "Self-managed, or a SAVICO supervision plan.",
-        "s4a": "Self-managed",
-        "s4aBody": "The customer deals with the contractor directly.",
-        "s4b": "SAVICO supervision",
-        "s4bBody": "The customer picks CHECK or CONTROL.",
-        "s5": "Construction",
-        "s5Body": "Engineers check at the agreed milestones.",
-        "s6": "Control",
-        "s6Body": "Progress, materials, variations and deviations tracked.",
-        "s7": "Acceptance",
-        "s7Body": "Stage-by-stage checks and recorded results.",
-        "s8": "Handover",
-        "s8Body": "Final inspection, handover record, closing report."
+        "title": "Supervision journey",
+        "choose": "You choose a plan",
+        "chooseBody": "Pick An Tâm or Toàn Diện for your build.",
+        "inspect": "Engineer inspects at milestones",
+        "inspectBody": "An engineer visits the site at each committed milestone.",
+        "report": "You get a report",
+        "reportBody": "Receive a report with site photos after every inspection.",
+        "handover": "Acceptance and handover",
+        "handoverBody": "Stage-by-stage acceptance and a signed handover record."
       },
       "value": {
         "title": "What you get",
@@ -4798,7 +4787,7 @@
           },
           "quality": {
             "self": "You compare against the documents",
-            "check": "Damp-proofing, waterproofing and finishing checks",
+            "check": "Damp-proofing, foundation waterproofing and finishing checks",
             "control": "Shell and actual materials both controlled"
           },
           "handover": {
@@ -4829,7 +4818,7 @@
         "approve": "Review the change request"
       },
       "project": {
-        "service": "SAVICO service",
+        "service": "BuildX service",
         "code": "Project code",
         "engineer": "Engineer",
         "packageCode": "Plan code",
@@ -4993,5 +4982,42 @@
       "finishing": "Finishing",
       "handover": "Acceptance"
     }
+  },
+  "meta": {
+    "home": "AI house design and cost estimates from a photo of your plot | BUILDX",
+    "design": "Design & Estimate",
+    "designInput": "Project details",
+    "designEstimate": "Estimate result",
+    "designDossier": "Construction dossier",
+    "contractors": "Find a contractor",
+    "contractorMatches": "Recommended contractors",
+    "contractorFirm": "Contractor profile",
+    "contractorCompare": "Compare contractors",
+    "contractorInvite": "Book a site survey",
+    "contractorSent": "Invitation sent",
+    "contractorInvitations": "Quote invitations",
+    "contractorBrief": "Project profile",
+    "contractorReview": "Review project profile",
+    "handbook": "Building handbook",
+    "handbookArticle": "Handbook article",
+    "handbookTemplate": "Design template",
+    "guide": "User guide",
+    "plans": "Pricing",
+    "plansSupervision": "Construction supervision",
+    "consult": "1:1 consultation",
+    "consultDetail": "Architect profile",
+    "account": "My account",
+    "accountProjects": "My projects",
+    "accountFavorites": "Saved templates",
+    "accountDossiers": "My dossiers",
+    "accountPurchases": "Purchase history",
+    "accountConsultations": "Consultation history",
+    "supervision": "Construction supervision",
+    "checkoutConfirm": "Confirm order",
+    "checkoutPayment": "Payment",
+    "checkoutVerifying": "Confirming payment",
+    "checkoutDone": "Order complete",
+    "checkoutFailed": "Payment unsuccessful",
+    "share": "Shared project dossier"
   }
 }

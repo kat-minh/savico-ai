@@ -146,6 +146,11 @@ export interface ProjectBrief {
   coverUrl?: string | null
   selfCreated: boolean
   status: BriefStatus
+  /**
+   * Phiên bản hồ sơ (mặc định 1). Sửa hồ sơ SAU khi phiên bản hiện tại đã gửi
+   * cho nhà thầu thì tạo bản mới (v2…); lời mời đã gửi vẫn giữ bản cũ.
+   */
+  version?: number
   createdAt: string
   updatedAt: string
 }

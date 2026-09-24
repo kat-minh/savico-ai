@@ -11,7 +11,7 @@ const { Text } = Typography
 
 /**
  * Nhãn thương hiệu trên đầu menu trái. Dùng dải gradient thương hiệu
- * (#006400 → #9ACD32) giống nút chính của site để hai khu vẫn là một sản phẩm,
+ * (#2A753F → #8CC63F, màu logo BuildX) giống nút chính của site để hai khu vẫn là một sản phẩm,
  * dù khu quản trị chạy trên Ant Design còn site chạy Tailwind.
  */
 export function AdminBrand({ collapsed }: { collapsed: boolean }) {
@@ -41,7 +41,7 @@ export function AdminBrand({ collapsed }: { collapsed: boolean }) {
           color: '#fff',
           fontWeight: 700,
           fontSize: 13,
-          background: 'linear-gradient(135deg, #006400, #9acd32)'
+          background: 'linear-gradient(135deg, var(--brand-gradient-from), var(--brand-gradient-to))'
         }}
       >
         SV

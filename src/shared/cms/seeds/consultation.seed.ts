@@ -9,7 +9,7 @@ const CONSULTANTS: Consultant[] = [
   {
     id: 'ktsvc-01',
     name: 'KTS. Nguyễn Minh Trí',
-    title: 'Kiến trúc sư trưởng SAVICO',
+    title: 'Kiến trúc sư trưởng BuildX',
     avatarUrl: PORTRAIT_IMAGE.man1,
     specialties: [
       { id: 'townhouse', label: 'Nhà phố' },
@@ -36,7 +36,7 @@ const CONSULTANTS: Consultant[] = [
   {
     id: 'ktsvc-02',
     name: 'KTS. Trần Thu Hà',
-    title: 'Kiến trúc sư SAVICO',
+    title: 'Kiến trúc sư BuildX',
     avatarUrl: PORTRAIT_IMAGE.woman1,
     specialties: [
       { id: 'apartment', label: 'Căn hộ' },
@@ -63,7 +63,7 @@ const CONSULTANTS: Consultant[] = [
   {
     id: 'ktsvc-03',
     name: 'KTS. Lê Quang Vinh',
-    title: 'Kiến trúc sư SAVICO',
+    title: 'Kiến trúc sư BuildX',
     avatarUrl: PORTRAIT_IMAGE.man2,
     specialties: [
       { id: 'garden', label: 'Nhà vườn' },
@@ -90,7 +90,7 @@ const CONSULTANTS: Consultant[] = [
   {
     id: 'ktsvc-04',
     name: 'KTS. Phạm Ngọc Anh',
-    title: 'Kiến trúc sư SAVICO',
+    title: 'Kiến trúc sư BuildX',
     avatarUrl: PORTRAIT_IMAGE.woman2,
     specialties: [
       { id: 'townhouse', label: 'Nhà phố' },
@@ -117,7 +117,7 @@ const CONSULTANTS: Consultant[] = [
   {
     id: 'ktsvc-05',
     name: 'KTS. Vũ Đình Long',
-    title: 'Kiến trúc sư SAVICO',
+    title: 'Kiến trúc sư BuildX',
     avatarUrl: PORTRAIT_IMAGE.man3,
     specialties: [
       { id: 'villa', label: 'Villa' },
@@ -144,7 +144,7 @@ const CONSULTANTS: Consultant[] = [
   {
     id: 'ktsvc-06',
     name: 'KTS. Đỗ Hải Yến',
-    title: 'Kiến trúc sư SAVICO',
+    title: 'Kiến trúc sư BuildX',
     avatarUrl: PORTRAIT_IMAGE.woman3,
     specialties: [
       { id: 'apartment', label: 'Căn hộ' },

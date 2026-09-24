@@ -23,14 +23,9 @@ export function AccountNav() {
   const tabs: Array<{ href: string; icon: LucideIcon; label: string; badge?: string }> = [
     { href: ROUTES.ACCOUNT_PROJECTS, icon: LayoutGrid, label: t('projects.title') },
     { href: ROUTES.ACCOUNT_FAVORITES, icon: Heart, label: t('favorites.title') },
-    { href: ROUTES.ACCOUNT_DOSSIERS, icon: FolderOpen, label: t('dossiers.title'), badge: t('new') },
-    { href: ROUTES.ACCOUNT_PURCHASES, icon: CreditCard, label: t('purchaseHistory.title'), badge: t('new') },
-    {
-      href: ROUTES.ACCOUNT_CONSULTATIONS,
-      icon: CalendarDays,
-      label: t('consultationHistory.title'),
-      badge: t('new')
-    }
+    { href: ROUTES.ACCOUNT_DOSSIERS, icon: FolderOpen, label: t('dossiers.title') },
+    { href: ROUTES.ACCOUNT_PURCHASES, icon: CreditCard, label: t('purchaseHistory.title') },
+    { href: ROUTES.ACCOUNT_CONSULTATIONS, icon: CalendarDays, label: t('consultationHistory.title') }
   ] as const
 
   return (

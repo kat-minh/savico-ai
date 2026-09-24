@@ -34,7 +34,7 @@ function generateReply(text: string, context: ProjectChatContext | null): string
   }
   if (q.includes('khu vực') || q.includes('đơn giá') || q.includes('vật tư')) {
     return context?.area
-      ? `Đơn giá đang áp theo mặt bằng giá vật tư và nhân công khu vực ${context.area} tại thời điểm lập. Giá thép, xi măng biến động theo quý nên con số cuối có thể lệch — báo giá chính xác cần kiến trúc sư SAVICO khảo sát thực tế.`
+      ? `Đơn giá đang áp theo mặt bằng giá vật tư và nhân công khu vực ${context.area} tại thời điểm lập. Giá thép, xi măng biến động theo quý nên con số cuối có thể lệch — báo giá chính xác cần kiến trúc sư BuildX khảo sát thực tế.`
       : 'Đơn giá được áp theo mặt bằng giá khu vực công trình tại thời điểm lập dự toán. Bạn nhập địa chỉ ở Bước 1 để tôi áp đúng khung giá địa phương.'
   }
   return 'Tôi đã ghi nhận câu hỏi của bạn. (Đây là phản hồi mẫu — khi kết nối backend AI thật, câu trả lời sẽ dựa trên dữ liệu dự án và đơn giá thực tế.)'

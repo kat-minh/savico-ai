@@ -45,6 +45,8 @@ interface MockStore {
   projects: Record<string, Project>
   inputs: Record<string, DesignInput>
   dossiers: Record<string, Dossier>
+  /** Lúc dự toán của từng dự án dựng xong (ISO). */
+  estimatedAt?: Record<string, string>
   /** Số lượt thiết kế miễn phí đã dùng — phục vụ hạn mức ở mục IV.3.c. */
   designsUsed: number
 }
@@ -368,10 +370,12 @@ export const mockDesignApi = {
 
   generateEstimate: async (projectId: string): Promise<EstimateResult> => {
     await mockDelay(ESTIMATE_DELAY_MS)
-    updateStore((store) => {
+    const completedAt = updateStore((store) => {
       // Dự toán đã dựng xong → dự án chuyển sang "Chờ duyệt" (Hình 02), khách
       // xem rồi mới bấm sang Bước 3.
       touchProject(store, projectId, { currentStep: 2, status: 'review' })
+      store.estimatedAt = { ...store.estimatedAt, [projectId]: new Date().toISOString() }
+      return store.estimatedAt[projectId]
     })
     return {
       projectId,
@@ -379,19 +383,24 @@ export const mockDesignApi = {
       grandTotal: grandTotal(SAMPLE_SECTIONS),
       advisory: '',
       estimatedFloorArea: ESTIMATED_FLOOR_AREA,
-      xlsxUrl: '#'
+      xlsxUrl: '#',
+      completedAt
     }
   },
 
   getEstimate: async (projectId: string): Promise<EstimateResult> => {
     await mockDelay(150)
+    const store = loadStore()
+    // Dự án dựng từ trước khi có mốc này: lấy lần cập nhật gần nhất làm ngày hoàn thành.
+    const completedAt = store.estimatedAt?.[projectId] ?? store.projects[projectId]?.updatedAt
     return {
       projectId,
       sections: SAMPLE_SECTIONS,
       grandTotal: grandTotal(SAMPLE_SECTIONS),
       advisory: '',
       estimatedFloorArea: ESTIMATED_FLOOR_AREA,
-      xlsxUrl: '#'
+      xlsxUrl: '#',
+      ...(completedAt ? { completedAt } : {})
     }
   },
 
