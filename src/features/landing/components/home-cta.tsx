@@ -37,27 +37,31 @@ export function HomeCta({ onCreateProject, resumeProject, skipShine }: HomeCtaPr
   const t = useTranslations('landing.cta')
 
   return (
-    <section id='home-cta' className='mx-auto w-full max-w-[90rem] px-4 pb-14 lg:px-8 lg:pb-16'>
+    <section id='home-cta' className='mx-auto w-full max-w-[90rem] px-4 pb-5 lg:px-8 lg:pb-16'>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.5 }}
-        className='bg-primary/8 border-primary/15 flex flex-wrap items-center gap-x-6 gap-y-4 rounded-2xl border px-6 py-5'
+        // Dưới `sm` (theo ảnh tham chiếu): MỘT HÀNG — icon nhỏ, chữ ở giữa, nút gọn bên phải; trước đây
+        // `flex-wrap` + icon 48px + nút `px-8` ép cột chữ còn vài chục px. Từ `sm` giữ bố cục cũ.
+        className='bg-primary/8 border-primary/15 flex flex-nowrap items-center gap-3 rounded-2xl border px-4 py-4 sm:flex-wrap sm:gap-x-6 sm:gap-y-4 sm:px-6 sm:py-5'
       >
         <motion.span
           initial={{ scale: 1 }}
           whileInView={{ scale: [1, 1.15, 1] }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className='bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl'
+          className='bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl max-sm:size-9 max-sm:rounded-lg'
         >
-          <House className='size-6' strokeWidth={1.75} />
+          <House className='size-6 max-sm:size-5' strokeWidth={1.75} />
         </motion.span>
 
         <div className='min-w-0 flex-1'>
-          <p className='font-bold'>{resumeProject ? t('resumeTitle', { name: resumeProject.name }) : t('title')}</p>
-          <p className='text-muted-foreground text-sm text-pretty'>
+          <p className='text-sm font-bold text-pretty sm:text-base'>
+            {resumeProject ? t('resumeTitle', { name: resumeProject.name }) : t('title')}
+          </p>
+          <p className='text-muted-foreground mt-0.5 text-xs text-pretty sm:mt-0 sm:text-sm'>
             {resumeProject ? t(`byStatus.${resumeProject.status}`) : t('subtitle')}
           </p>
         </div>
@@ -70,7 +74,10 @@ export function HomeCta({ onCreateProject, resumeProject, skipShine }: HomeCtaPr
           className='relative shrink-0 overflow-hidden rounded-full'
         >
           {resumeProject ? (
-            <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>
+            <Button
+              asChild
+              className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8 max-sm:h-9 max-sm:px-3 max-sm:text-xs max-sm:has-[>svg]:px-3'
+            >
               <Link href={resumeProject.href}>
                 {t('resumeAction')}
                 <ArrowRight className='size-4' />
@@ -78,7 +85,7 @@ export function HomeCta({ onCreateProject, resumeProject, skipShine }: HomeCtaPr
             </Button>
           ) : (
             <Button
-              className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'
+              className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8 max-sm:h-9 max-sm:px-3 max-sm:text-xs max-sm:has-[>svg]:px-3'
               onClick={onCreateProject}
             >
               {t('action')}
@@ -86,11 +93,13 @@ export function HomeCta({ onCreateProject, resumeProject, skipShine }: HomeCtaPr
             </Button>
           )}
 
+          {/* Vệt sáng rộng 1/4 nút: phải đi 4 lần bề rộng của chính nó (400%) mới ra khỏi nút — 230% cũ
+              dừng ngay GIỮA nút nên để lại một vạch trắng mờ đứng yên sau khi quét xong. */}
           {skipShine ? null : (
             <motion.span
               aria-hidden
               initial={{ x: '-130%' }}
-              whileInView={{ x: '230%' }}
+              whileInView={{ x: '480%' }}
               viewport={{ once: true, amount: 0.8 }}
               transition={{ duration: 0.85, delay: 0.55, ease: 'easeInOut' }}
               className='pointer-events-none absolute inset-y-0 left-0 w-1/4 -skew-x-12 bg-white/30'

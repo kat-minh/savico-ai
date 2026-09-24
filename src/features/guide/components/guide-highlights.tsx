@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -38,7 +38,7 @@ export function GuideHighlights({ onCreateProject }: GuideHighlightsProps) {
   const highlights = videos?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT) ?? []
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 py-14 lg:px-8 lg:py-16'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-16'>
       <header className='mb-8 flex flex-wrap items-start justify-between gap-4'>
         <div className='space-y-2'>
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
@@ -49,7 +49,8 @@ export function GuideHighlights({ onCreateProject }: GuideHighlightsProps) {
           className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
         >
           {t('viewAll')}
-          <ArrowRight className='size-4' />
+          <ChevronRight className='size-4 lg:hidden' />
+          <ArrowRight className='hidden size-4 lg:block' />
         </Link>
       </header>
 

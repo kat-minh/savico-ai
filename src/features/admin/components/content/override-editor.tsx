@@ -28,6 +28,8 @@ export interface OverrideRow {
   defaultValue: string
   /** Nhiều dòng (mô tả, đoạn giới thiệu) thay vì một dòng. */
   multiline?: boolean
+  /** Dòng nhắc nhỏ dưới nhãn — ví dụ cách ngắt dòng, giới hạn số dòng hiển thị. */
+  hint?: string
 }
 
 /** Một khối trong màn — tương ứng một trang của site, hoặc một nhóm ảnh. */
@@ -399,15 +401,29 @@ function OverrideField({
         ) : null}
       </div>
 
+      {row.hint ? (
+        <Text type='secondary' style={{ fontSize: 12 }}>
+          {row.hint}
+        </Text>
+      ) : null}
+
       {variant === 'image' ? (
         <div className='flex items-center gap-3'>
-          <Image
-            src={effective}
-            alt=''
-            width={96}
-            height={64}
-            style={{ objectFit: 'cover', borderRadius: 8, background: 'var(--admin-placeholder)' }}
-          />
+          {/* Khóa ảnh không có ảnh mặc định (logo) thì chưa có gì để xem trước. */}
+          {effective ? (
+            <Image
+              src={effective}
+              alt=''
+              width={96}
+              height={64}
+              style={{ objectFit: 'cover', borderRadius: 8, background: 'var(--admin-placeholder)' }}
+            />
+          ) : (
+            <div
+              aria-hidden
+              style={{ width: 96, height: 64, borderRadius: 8, border: '1px dashed var(--admin-placeholder)' }}
+            />
+          )}
           <Input
             value={value}
             placeholder={row.defaultValue}

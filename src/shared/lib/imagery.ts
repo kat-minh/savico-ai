@@ -246,6 +246,20 @@ export const MAP_IMAGE = {
   contractors: photo('photo-1449824913935-59a10b8d2000', 1200)
 } as const
 
+/**
+ * Logo hệ thống ở thanh menu, chân trang, các màn checkout và đăng nhập.
+ *
+ * CHỖ CHỜ ASSET: để TRỐNG có chủ đích — chưa có file logo thật thì `Logo` dựng
+ * bản vẽ bằng code (chữ "SAVI" + biểu tượng + dòng định vị). Admin dán URL ảnh
+ * vào là ảnh thay hẳn cụm đó; ảnh logo đã mang sẵn slogan nên không có dòng chữ
+ * riêng. `logoOnDark` là bản cho nền tối của chân trang — bỏ trống thì chân
+ * trang vẫn dùng bản vẽ bằng code, vì ảnh logo nền sáng đặt lên nền tối sẽ mất chữ.
+ */
+export const BRAND_IMAGE = {
+  logo: '',
+  logoOnDark: ''
+} as const
+
 /* ===========================================================================
  * SỔ ẢNH PHẲNG — nguồn cho màn "Hình ảnh site" của khu quản trị.
  * ======================================================================== */
@@ -279,7 +293,8 @@ export const SITE_IMAGE = {
   ...prefixed('plan', PLAN_IMAGE),
   ...prefixed('interior3d', INTERIOR_RENDER),
   ...prefixed('map', MAP_IMAGE),
-  ...prefixed('home', HOME_IMAGE)
+  ...prefixed('home', HOME_IMAGE),
+  ...prefixed('brand', BRAND_IMAGE)
 } as Prefixed<'style', typeof STYLE_IMAGE> &
   Prefixed<'interior', typeof INTERIOR_IMAGE> &
   Prefixed<'building', typeof BUILDING_IMAGE> &
@@ -292,6 +307,7 @@ export const SITE_IMAGE = {
   Prefixed<'plan', typeof PLAN_IMAGE> &
   Prefixed<'interior3d', typeof INTERIOR_RENDER> &
   Prefixed<'map', typeof MAP_IMAGE> &
-  Prefixed<'home', typeof HOME_IMAGE>
+  Prefixed<'home', typeof HOME_IMAGE> &
+  Prefixed<'brand', typeof BRAND_IMAGE>
 
 export type SiteImageKey = keyof typeof SITE_IMAGE

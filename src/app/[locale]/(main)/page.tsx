@@ -1,11 +1,12 @@
 import { setRequestLocale } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
-import { HomeBrands, HomeDossiers, HomePainPoints, HomeStats, HomeTestimonials } from '@/features/landing'
+import { HomeBrands, HomePainPoints, HomeStats, HomeTestimonials } from '@/features/landing'
 import { HandbookHighlights } from '@/features/handbook'
 import { ConsultantHighlightsSection } from './consultant-highlights-section'
 import { GuideHighlightsSection } from './guide-highlights-section'
 import { HomeCtaSection } from './home-cta-section'
+import { HomeDossiersSection } from './home-dossiers-section'
 import { HomeHeroSection } from './home-hero-section'
 import { HomeJourneySection } from './home-journey-section'
 import { HomeServicesSection } from './home-services-section'
@@ -26,7 +27,7 @@ export default async function HomePage({ params }: PageProps) {
       <HomePainPoints />
       <HomeJourneySection />
       <HomeServicesSection />
-      <HomeDossiers />
+      <HomeDossiersSection />
       <HandbookHighlights />
       <GuideHighlightsSection />
       {/* ★ Section Tư vấn 1:1 (mục III.2) — khối chuyển đổi cuối trang chủ. */}

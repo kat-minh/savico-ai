@@ -3,7 +3,7 @@
 import { Eye, FileDown, FileText, Info, Link2, Mail, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { LucideIcon } from 'lucide-react'
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 import type { Locale } from '@/i18n/routing'
 import { DossierCover, EstimateSheet, Photo, type CoverRow } from '@/shared/components/common'
@@ -120,6 +120,7 @@ export function DossierOverview({
   const [previewOrigin, setPreviewOrigin] = useState({ x: 0, y: 0 })
   const [launching, setLaunching] = useState(false)
   const [waitingPanelVisible, setWaitingPanelVisible] = useState(false)
+  const exportPanelRef = useRef<HTMLElement>(null)
 
   const showRenderProgress = renderActive && Boolean(renderContent)
   const showWaitingPanel = waitingPanelVisible && Boolean(waitingPanel) && !waitingPanelCollapsed
@@ -136,6 +137,17 @@ export function DossierOverview({
     // chuyển trạng thái M07 → màn chờ có chủ đích, không swap toàn trang ngay.
     const timer = window.setTimeout(() => setWaitingPanelVisible(true), 900)
     return () => window.clearTimeout(timer)
+  }, [showRenderProgress])
+
+  // Dưới `lg` thẻ tiến độ nhảy lên đầu khi bấm render (xem `aside` bên dưới) — cuộn tới đó để người
+  // dùng đang đứng ở nút "Render" cuối trang không bị bỏ lại giữa hai khối.
+  useEffect(() => {
+    if (!showRenderProgress) return
+    if (!window.matchMedia('(max-width: 1023px)').matches) return
+    const frame = window.requestAnimationFrame(() => {
+      exportPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+    return () => window.cancelAnimationFrame(frame)
   }, [showRenderProgress])
 
   /** Message keys under `design.dossier.info`. */
@@ -213,7 +225,9 @@ export function DossierOverview({
       data-waiting-panel-visible={showWaitingPanel}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto grid w-full max-w-6xl gap-5 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8'
+      // Dưới `lg`: một cột co được (`minmax(0,1fr)`), đệm trên 8px cộng `py-4` của stepper = 24px như
+      // Bước 1/2 (trước đây `py-6` → 40px).
+      className='mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)] gap-5 px-4 pt-2 pb-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8 lg:pt-6'
     >
       <div className='grid min-w-0'>
         <div data-dossier-overview-left className='col-start-1 row-start-1 space-y-5'>
@@ -295,12 +309,16 @@ export function DossierOverview({
       </div>
 
       {/* Cột PHẢI — thẻ "Xuất hồ sơ" */}
+      {/* Dưới `lg` khi ĐANG render: thẻ tiến độ lên ĐẦU, trước cẩm nang — cùng khuôn với Bước 2 (tiến độ
+          rồi mới tới cẩm nang tham khảo). Trước đây nó nằm dưới cột trái; cột trái mờ đi nhưng vẫn giữ
+          nguyên chiều cao nên tiến độ bị đẩy xuống sau một khoảng trống lớn. */}
       <aside
+        ref={exportPanelRef}
         data-entrance-step='3'
         data-entrance-from='right'
         data-dossier-export-panel
         data-rendering={showRenderProgress}
-        className='bg-card h-fit rounded-2xl border p-5 lg:sticky lg:top-32'
+        className={`bg-card h-fit rounded-2xl border p-5 lg:sticky lg:top-32${showRenderProgress ? ' max-lg:order-first max-lg:scroll-mt-36' : ''}`}
       >
         {showRenderProgress ? (
           <div data-dossier-inline-progress>{renderContent}</div>

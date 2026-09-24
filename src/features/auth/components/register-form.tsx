@@ -139,17 +139,20 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
             name='agreeTerms'
             render={({ field }) => (
               <FormItem className='space-y-1'>
-                <div className='flex flex-row items-center gap-2'>
+                <div className='flex flex-row items-start gap-2'>
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox className='mt-0.5' checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
-                  <FormLabel className='font-normal'>
+                  {/* `block`: FormLabel mặc định là `flex`, biến câu chữ và hai đường link thành các ô rời nhau nên
+                      "Tôi đồng ý với" bị tách khỏi "Điều khoản…". Để chữ chảy liền như một đoạn văn, hết bề
+                      ngang mới xuống dòng. */}
+                  <FormLabel className='block leading-snug font-normal'>
                     {t.rich('agree', {
                       terms: (chunks) => (
                         <Link
                           href={ROUTES.TERMS}
                           target='_blank'
-                          className='text-foreground font-medium hover:underline'
+                          className='text-foreground font-medium underline underline-offset-2'
                         >
                           {chunks}
                         </Link>
@@ -158,7 +161,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
                         <Link
                           href={ROUTES.PRIVACY}
                           target='_blank'
-                          className='text-foreground font-medium hover:underline'
+                          className='text-foreground font-medium underline underline-offset-2'
                         >
                           {chunks}
                         </Link>
