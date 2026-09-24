@@ -474,7 +474,7 @@
      nút play video. Chéo 135deg: xanh chanh nhạt góc trên-trái → xanh lá đậm
      dần xuống dưới-phải. */
   .brand-gradient {
-    background-image: linear-gradient(135deg, var(--brand-gradient-to), var(--brand-gradient-from));
+    background-image: linear-gradient(90deg, var(--brand-gradient-to), var(--brand-gradient-from));
   }
   /*
    * Nút chính tô CAM — gói PLUS ở bảng giá (Hình S01) và lựa chọn nổi bật ở
@@ -490,15 +490,17 @@
    * một màu, nên phải tắt lớp bóng đó tại chỗ thay vì đổi nút toàn site.
    */
   .brand-green-button {
-    background-image: none;
+    /* Cùng dải màu của logo BuildX (xanh lá #8CC63F → xanh đậm #2A753F) — tô đặc
+       #2A753F trông đậm hơn hẳn logo (góp ý BuildX). */
     background-color: var(--primary-strong);
+    background-image: linear-gradient(90deg, var(--brand-gradient-to), var(--brand-gradient-from));
     color: var(--primary-foreground);
     box-shadow:
       0 1px oklch(1 0 0 / 0.12) inset,
       0 2px 6px color-mix(in oklch, var(--primary-strong) 30%, transparent);
   }
   .brand-green-button:hover {
-    background-color: color-mix(in oklch, var(--primary-strong) 92%, black);
+    filter: brightness(1.06);
   }
 
   .brand-orange-button {

@@ -501,7 +501,7 @@ export function HomeReminderHost() {
                 setCollapseCycle((value) => value + 1)
               }}
               style={{ '--home-reminder-right': `${assistantInset}px` } as React.CSSProperties}
-              className='fixed right-[var(--home-reminder-right)] bottom-6 z-[55] inline-flex h-[48px] items-center gap-2.5 rounded-full bg-primary-strong px-4 pr-5 text-[14px] font-bold text-white shadow-[0_14px_32px_-14px_rgba(42,117,63,.55)] transition-[right,background-color,box-shadow] duration-200 ease-out hover:bg-primary-strong hover:shadow-[0_16px_36px_-14px_rgba(42,117,63,.62)] max-[899px]:!right-0 max-[899px]:left-0 max-[899px]:mx-auto max-[899px]:w-fit'
+              className='fixed right-[var(--home-reminder-right)] bottom-6 z-[55] inline-flex h-[48px] items-center gap-2.5 rounded-full brand-green-button px-4 pr-5 text-[14px] font-bold text-white shadow-[0_14px_32px_-14px_rgba(42,117,63,.55)] transition-[right,background-color,box-shadow] duration-200 ease-out hover:shadow-[0_16px_36px_-14px_rgba(42,117,63,.62)] max-[899px]:!right-0 max-[899px]:left-0 max-[899px]:mx-auto max-[899px]:w-fit'
             >
               <span className='flex size-6 items-center justify-center rounded-full bg-[#f36a16] text-xs font-extrabold text-white'>
                 1
