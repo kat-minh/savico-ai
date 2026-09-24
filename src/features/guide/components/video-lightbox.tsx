@@ -24,6 +24,8 @@ interface VideoLightboxProps {
   onSelect?: (video: GuideVideo) => void
   /** "Tạo dự án ngay" sau khi xem xong — lớp app nối tới `features/design`. */
   onCreateProject?: () => void
+  /** Báo cho trang cha khi video đã đạt 80% hoặc kết thúc để mở end-card. */
+  onQualified?: (video: GuideVideo, reason: 'threshold' | 'ended') => void
   /** Rect của thẻ vừa bấm — hộp "bung" ra đúng từ đó (mục 7). */
   origin?: VideoCardOrigin | null
   /** Bài hướng dẫn thay thế khi video còn đang biên tập, nếu có. */
@@ -45,6 +47,7 @@ export function VideoLightbox({
   related = [],
   onSelect,
   onCreateProject,
+  onQualified,
   origin,
   getArticleHref
 }: VideoLightboxProps) {
@@ -223,6 +226,7 @@ export function VideoLightbox({
                                 onAdvance={(next) => goTo(next, 1)}
                                 onReplay={() => onSelect?.(video)}
                                 onCreateProject={onCreateProject ? startProject : undefined}
+                                onQualified={onQualified}
                               />
                             )}
                           </motion.div>

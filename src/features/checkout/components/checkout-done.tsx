@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorMatchesRoute, ROUTES, supervisionRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
+import { clearHandbookQuotaReturn, readHandbookQuotaReturn } from '@/shared/lib'
 import { formatCurrency } from '@/shared/utils'
 import { routeForStatus, useOrder } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
@@ -73,11 +74,13 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
   const tSupervisionTags = useTranslations('supervision.tierTags')
   const tSupervision = useTranslations('supervision.tierAlias')
   const tStart = useTranslations('contractors.start')
+  const tLookup = useTranslations('handbook.lookupExhausted')
   const locale = useLocale() as Locale
   const router = useRouter()
 
   const { data: order, isPending } = useOrder(orderId)
   const [receiptOpen, setReceiptOpen] = useState(false)
+  const [hasHandbookReturn, setHasHandbookReturn] = useState(false)
   const { rootRef, entranceState, entranceStyle } = usePageEntrance(`checkout.done.${orderId}`, {
     enabled: !isPending && order?.status === 'paid',
     replayOnMount: false,
@@ -91,6 +94,8 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
       return
     }
     sessionStorage.removeItem('savico.checkout.forward')
+    const syncReturnTimer = window.setTimeout(() => setHasHandbookReturn(Boolean(readHandbookQuotaReturn())), 0)
+    return () => window.clearTimeout(syncReturnTimer)
   }, [order, router])
 
   if (isPending || !order || order.status !== 'paid') {
@@ -295,6 +300,22 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
               <Receipt className='size-4' />
               {t('receipt')}
             </Button>
+            {!isSupervision && hasHandbookReturn ? (
+              <Button
+                asChild
+                className='h-13 flex-1 transition-[transform,filter] active:scale-[0.98] motion-reduce:transform-none'
+              >
+                <Link
+                  href={`${ROUTES.HANDBOOK}?tab=library`}
+                  onClick={() => {
+                    clearHandbookQuotaReturn()
+                    setHasHandbookReturn(false)
+                  }}
+                >
+                  {tLookup('returnToLibrary')}
+                </Link>
+              </Button>
+            ) : null}
             {isSupervision && order.projectId ? (
               <Button
                 asChild

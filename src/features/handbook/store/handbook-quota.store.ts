@@ -7,10 +7,12 @@ const HANDBOOK_QUOTA_LEDGER_KEY = 'savico.handbook.quota-ledger'
 
 interface HandbookQuotaLedger {
   dayKey: string
+  lookupPeriodKey: string
   lookupUsed: number
   detailViewedIds: Record<string, true>
   resetForToday: () => void
-  consumeLookup: (available: number) => boolean
+  syncLookupPeriod: (periodKey: string) => void
+  consumeLookup: (available: number, periodKey: string) => boolean
   consumeDetail: (templateId: string, available: number) => 'consumed' | 'seen' | 'blocked'
 }
 
@@ -33,25 +35,36 @@ export const useHandbookQuotaLedger = create<HandbookQuotaLedger>()(
   persist(
     (set, get) => ({
       dayKey: localDayKey(),
+      lookupPeriodKey: `day:${localDayKey()}`,
       lookupUsed: 0,
       detailViewedIds: {},
 
       resetForToday: () => {
         const today = localDayKey()
         if (get().dayKey === today) return
-        set({ dayKey: today, lookupUsed: 0, detailViewedIds: {} })
+        const current = get()
+        set({
+          dayKey: today,
+          detailViewedIds: {},
+          ...(current.lookupPeriodKey.startsWith('day:') ? { lookupPeriodKey: `day:${today}`, lookupUsed: 0 } : {})
+        })
       },
 
-      consumeLookup: (available) => {
-        const today = localDayKey()
+      syncLookupPeriod: (periodKey) => {
         const current = get()
-        const used = current.dayKey === today ? current.lookupUsed : 0
+        if (current.lookupPeriodKey === periodKey) return
+        set({ lookupPeriodKey: periodKey, lookupUsed: 0 })
+      },
+
+      consumeLookup: (available, periodKey) => {
+        const current = get()
+        const used = current.lookupPeriodKey === periodKey ? current.lookupUsed : 0
         if (used >= Math.max(available, 0)) {
-          if (current.dayKey !== today) set({ dayKey: today, lookupUsed: 0 })
+          if (current.lookupPeriodKey !== periodKey) set({ lookupPeriodKey: periodKey, lookupUsed: 0 })
           return false
         }
 
-        set({ dayKey: today, lookupUsed: used + 1 })
+        set({ lookupPeriodKey: periodKey, lookupUsed: used + 1 })
         return true
       },
 
@@ -60,19 +73,18 @@ export const useHandbookQuotaLedger = create<HandbookQuotaLedger>()(
         const current = get()
         const viewed = current.dayKey === today ? current.detailViewedIds : {}
         if (viewed[templateId]) {
-          if (current.dayKey !== today) set({ dayKey: today, lookupUsed: 0, detailViewedIds: {} })
+          if (current.dayKey !== today) set({ dayKey: today, detailViewedIds: {} })
           return 'seen'
         }
 
         const used = Object.keys(viewed).length
         if (used >= Math.max(available, 0)) {
-          if (current.dayKey !== today) set({ dayKey: today, lookupUsed: 0, detailViewedIds: {} })
+          if (current.dayKey !== today) set({ dayKey: today, detailViewedIds: {} })
           return 'blocked'
         }
 
         set({
           dayKey: today,
-          ...(current.dayKey === today ? {} : { lookupUsed: 0 }),
           detailViewedIds: { ...viewed, [templateId]: true }
         })
         return 'consumed'

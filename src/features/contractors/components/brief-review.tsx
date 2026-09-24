@@ -19,12 +19,17 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { revealContainerVariants, revealEase, revealItemVariants, StartOptionsDialog } from '@/shared/components/common'
+import {
+  ProjectReadyOptionsDialog,
+  revealContainerVariants,
+  revealEase,
+  revealItemVariants
+} from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorBriefRoute, contractorMatchesRoute } from '@/shared/constants/routes'
-import { cn } from '@/shared/lib/utils'
+import { canShowReadyProjectPopup, cn } from '@/shared/lib'
 import { formatBudgetShort, formatCurrency } from '@/shared/utils'
 import { useBrief, useCompleteBrief } from '../hooks/use-brief'
 import { briefReadiness, formatFileSize, fullAddress, isBriefComplete } from '../services/brief.service'
@@ -396,7 +401,12 @@ export function BriefReview({ projectId }: BriefReviewProps) {
                   window.setTimeout(() => setConfirmShake(false), 450)
                   return
                 }
-                complete.mutate(undefined, { onSuccess: () => setOptionsOpen(true) })
+                complete.mutate(undefined, {
+                  onSuccess: () => {
+                    if (!canShowReadyProjectPopup(projectId)) return
+                    setOptionsOpen(true)
+                  }
+                })
               }}
             >
               {complete.isPending ? <Loader2 className='size-4 animate-spin' /> : null}
@@ -426,9 +436,10 @@ export function BriefReview({ projectId }: BriefReviewProps) {
         ) : null}
       </AnimatePresence>
 
-      <StartOptionsDialog
+      <ProjectReadyOptionsDialog
         open={optionsOpen}
         onOpenChange={setOptionsOpen}
+        projectId={projectId}
         findHref={contractorMatchesRoute(projectId)}
         // S12 dùng cờ này để biết vừa từ đây sang: thẻ đầu viền loé, tick "Vì
         // sao đề xuất" chạy chậm hơn (mục 6/10 của M05).

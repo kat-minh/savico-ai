@@ -47,7 +47,11 @@ export function useBriefs(enabled = true) {
  * Hồ sơ được tạo TRƯỚC khi khách nhập gì, giống luồng thiết kế: có mã dự án thì
  * mới lưu nháp được, và mọi màn sau (S12–S18) đều gắn theo mã đó.
  */
-export function useCreateBrief() {
+interface CreateBriefOptions {
+  focus?: 'site' | 'needs' | 'documents'
+}
+
+export function useCreateBrief(options: CreateBriefOptions = {}) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const t = useTranslations('errors')
@@ -56,7 +60,8 @@ export function useCreateBrief() {
     mutationFn: () => contractorsApi.createBrief(),
     onSuccess: (brief) => {
       queryClient.setQueryData(contractorKeys.brief(brief.id), brief)
-      router.push(contractorBriefRoute(brief.id))
+      const route = contractorBriefRoute(brief.id)
+      router.push(options.focus ? route + '?focus=' + options.focus : route)
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))

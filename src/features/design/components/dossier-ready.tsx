@@ -8,14 +8,14 @@ import { useLocale, useTranslations } from 'next-intl'
 import type { Locale } from '@/i18n/routing'
 import { useRouter } from '@/i18n/navigation'
 import { siteConfig } from '@/shared/config/site'
-import { EstimateSheet, Photo, PlanDrawing } from '@/shared/components/common'
+import { EstimateSheet, Photo, PlanDrawing, ProjectReadyOptionsDialog } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { useSiteImage } from '@/shared/cms'
 import { useMounted, usePageEntrance } from '@/shared/hooks'
-import { cn } from '@/shared/lib/utils'
+import { canShowReadyProjectPopup, cn } from '@/shared/lib'
 import { formatNumber } from '@/shared/utils'
-import { ROUTES, shareRoute } from '@/shared/constants/routes'
+import { ROUTES, contractorMatchesRoute, shareRoute } from '@/shared/constants/routes'
 import { useDownloadDossier } from '../hooks/use-download-dossier'
 import { costShares } from '../services/estimate.service'
 import type { Dossier, EstimateResult } from '../types/design.types'
@@ -87,6 +87,7 @@ export function DossierReady({
   const [copied, setCopied] = useState(false)
   const [downloaded, setDownloaded] = useState(false)
   const [leaving, setLeaving] = useState(false)
+  const [optionsOpen, setOptionsOpen] = useState(false)
   const [celebrate] = useState(() => animateCompletion || fromRender || filesEntering)
   const [dialogOrigin, setDialogOrigin] = useState({ x: 0, y: 0 })
   const pdf = useDownloadDossier({ dossier, result, info, advisory })
@@ -108,6 +109,14 @@ export function DossierReady({
   useEffect(() => {
     if (animateCompletion) sessionStorage.setItem('savico.just-completed-project', info.projectId)
   }, [animateCompletion, info.projectId])
+
+  // Popup 2/3: nhánh A gặp nhánh B tại mốc "Dự án sẵn sàng".
+  // QA mode ở shared/constants bỏ suppression để có thể F5 và test lặp lại.
+  useEffect(() => {
+    if (shareMode || !canShowReadyProjectPopup(info.projectId)) return
+    const timer = window.setTimeout(() => setOptionsOpen(true), 1_500)
+    return () => window.clearTimeout(timer)
+  }, [info.projectId, shareMode])
 
   // Header/account menu nằm ngoài feature này. Chặn riêng link quay về /design
   // để M09 có một exit slide-right ngắn trước khi route bị unmount; các link
@@ -418,6 +427,13 @@ export function DossierReady({
         token={dossier.shareToken}
         origin={dialogOrigin}
         onSendEmail={onSendEmail}
+      />
+
+      <ProjectReadyOptionsDialog
+        open={optionsOpen}
+        onOpenChange={setOptionsOpen}
+        projectId={info.projectId}
+        findHref={contractorMatchesRoute(info.projectId)}
       />
 
       {/* Dải chuyển đổi cuối trang. */}

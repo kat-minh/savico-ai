@@ -9,6 +9,7 @@ import { usePathname, useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
 import { AccountMenu } from '@/shared/components/account-menu'
 import { SiteHeader } from '@/shared/layouts'
+import { JourneyPopupHost } from './journey-popup-host'
 import { useActiveProject } from './use-active-project'
 
 /**
@@ -63,8 +64,8 @@ function CreateProjectQueryBridge() {
  * App-layer glue for the shared toolbar (mục II.1).
  *
  * Lives in `app/` because only this layer may import `features/auth` and
- * `features/design` at the same time. Also mounts the two global dialogs:
- * the guest auth popup and the "Tạo dự án" modal.
+ * `features/design` at the same time. Also mounts the global auth, create-project
+ * and customer-journey dialogs.
  */
 export function MainChrome() {
   const openCreateDialog = useDesignStore((s) => s.openCreateDialog)
@@ -82,6 +83,7 @@ export function MainChrome() {
         <CreateProjectQueryBridge />
       </Suspense>
       <CreateProjectDialog />
+      <JourneyPopupHost />
     </>
   )
 }

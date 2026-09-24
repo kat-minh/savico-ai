@@ -19,10 +19,11 @@ import { type MouseEvent, useEffect, useRef, useState } from 'react'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { revealEase } from '@/shared/components/common'
+import { ProjectManagementOptionsDialog, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorInvitationsRoute, contractorMatchesRoute } from '@/shared/constants/routes'
+import { canShowManagementPopup } from '@/shared/lib'
 import { cn } from '@/shared/lib/utils'
 import { formatDate } from '@/shared/utils'
 import {
@@ -119,6 +120,8 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
    */
   const [intro, setIntro] = useState<'checking' | 'play' | 'skip'>('checking')
   const introResolvedFor = useRef<string | null>(null)
+  const managementShownRef = useRef(false)
+  const [managementOpen, setManagementOpen] = useState(false)
   useEffect(() => {
     if (introResolvedFor.current === requestId) return
     introResolvedFor.current = requestId
@@ -134,6 +137,25 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
   }, [requestId])
   const instant = intro === 'skip' || Boolean(reduceMotion)
   const ready = intro !== 'checking' && Boolean(data)
+
+  /**
+   * Journey Popup 3/3 thuộc đúng milestone S17 trong sơ đồ:
+   * màn "Đã gửi lời mời & đăng ký khảo sát" hiện thành công → chờ 1,5 giây.
+   *
+   * Ref chỉ được đánh dấu KHI timer thực sự chạy để React StrictMode có thể
+   * cleanup/setup effect mà không vô tình nuốt lần mở popup ở development.
+   */
+  useEffect(() => {
+    if (!ready || invitationsPending || managementShownRef.current) return
+    if (!canShowManagementPopup(projectId)) return
+
+    const timer = window.setTimeout(() => {
+      managementShownRef.current = true
+      setManagementOpen(true)
+    }, 1_500)
+
+    return () => window.clearTimeout(timer)
+  }, [invitationsPending, projectId, ready, requestId])
 
   /** Sao chép mã → "Đã sao chép" hiện chéo chỗ nút rồi tự tắt; bấm lại thì đếm lại từ đầu (mục 2). */
   const [copiedAt, setCopiedAt] = useState(0)
@@ -551,6 +573,8 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
           {t('privacy')}
         </motion.p>
       </div>
+
+      <ProjectManagementOptionsDialog open={managementOpen} onOpenChange={setManagementOpen} projectId={projectId} />
     </motion.div>
   )
 }

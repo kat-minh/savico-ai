@@ -43,6 +43,7 @@ export function QuotaBadge({
 
   const remaining = scope === 'lookup' ? lookupQuota.remaining : detailQuota.remaining
   const total = scope === 'lookup' ? lookupQuota.total : detailQuota.total
+  const lookupMonthly = scope === 'lookup' && lookupQuota.period === 'month'
   const viewedToday = scope === 'detail' && Boolean(templateId && detailQuota.hasViewed(templateId))
 
   useEffect(() => {
@@ -158,12 +159,14 @@ export function QuotaBadge({
         >
           {exhausted ? <Lock className='size-3.5' /> : <Icon className='size-3.5' />}
           <span key={remaining} data-quota-number>
-            {t('lookupRemaining', { remaining, total })}
+            {lookupMonthly
+              ? t('lookupRemainingMonthly', { remaining, total })
+              : t('lookupRemaining', { remaining, total })}
           </span>
         </span>
       </TooltipTrigger>
       <TooltipContent side='bottom' sideOffset={8}>
-        {t('tooltip', { total, hours })}
+        {lookupMonthly ? t('tooltipMonthly', { total }) : t('tooltip', { total, hours })}
       </TooltipContent>
     </Tooltip>
   )
