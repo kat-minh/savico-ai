@@ -59,22 +59,21 @@ function writeMemory(articleId: string, memory: PopupMemory) {
 
 function useIsS5() {
   const userEmail = useAuthStore((state) => state.user?.email)
-  const supervisionProjects = useCmsCollection('supervisionProjects')
   const transactions = useCmsCollection('transactions')
 
   return useMemo(() => {
     if (!userEmail) return false
     const email = userEmail.toLowerCase()
-    return (
-      supervisionProjects.some((project) => project.customer?.email?.toLowerCase() === email) ||
-      transactions.some(
-        (transaction) =>
-          transaction.customerEmail.toLowerCase() === email &&
-          transaction.status === 'paid' &&
-          (transaction.tier === 'check' || transaction.tier === 'control')
-      )
+    // Chỉ tính S5 theo đơn giám sát ĐÃ THANH TOÁN. Không dựa vào chủ dự án giám
+    // sát: bản mock gán chủ cho bất kỳ ai mở bảng điều khiển giám sát, làm popup
+    // biến mất với tài khoản chỉ ghé xem thử.
+    return transactions.some(
+      (transaction) =>
+        transaction.customerEmail.toLowerCase() === email &&
+        transaction.status === 'paid' &&
+        (transaction.tier === 'check' || transaction.tier === 'control')
     )
-  }, [supervisionProjects, transactions, userEmail])
+  }, [transactions, userEmail])
 }
 
 export function ArticleCompactCta({ article, onCreateProject }: ArticleActionProps) {

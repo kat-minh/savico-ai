@@ -46,7 +46,6 @@ interface GuideBrowserProps {
 export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const t = useTranslations('guide')
   const user = useAuthStore((state) => state.user)
-  const supervisionProjects = useCmsCollection('supervisionProjects')
   const transactions = useCmsCollection('transactions')
   const [term, setTerm] = useState('')
   const [page, setPage] = useState(0)
@@ -79,15 +78,16 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const { data: videos, isPending: videosPending } = useGuideVideos()
   const { data: articles, isPending: articlesPending } = useGuideArticles()
   const [carouselWidth, setCarouselWidth] = useState(0)
+  // S5 = đã thanh toán gói giám sát. Không dựa vào chủ dự án giám sát: bản mock gán
+  // chủ cho bất kỳ ai mở bảng điều khiển giám sát, làm mất popup sau khi xem video.
   const isS5 = Boolean(
     user?.email &&
-    (supervisionProjects.some((project) => project.customer?.email?.toLowerCase() === user.email.toLowerCase()) ||
-      transactions.some(
-        (transaction) =>
-          transaction.customerEmail.toLowerCase() === user.email.toLowerCase() &&
-          transaction.status === 'paid' &&
-          (transaction.tier === 'check' || transaction.tier === 'control')
-      ))
+    transactions.some(
+      (transaction) =>
+        transaction.customerEmail.toLowerCase() === user.email.toLowerCase() &&
+        transaction.status === 'paid' &&
+        (transaction.tier === 'check' || transaction.tier === 'control')
+    )
   )
 
   useEffect(() => {
