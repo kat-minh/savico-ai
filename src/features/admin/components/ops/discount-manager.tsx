@@ -4,6 +4,7 @@ import {
   App,
   Col,
   DatePicker,
+  type FormInstance,
   Descriptions,
   Form,
   Input,
@@ -91,6 +92,16 @@ export function DiscountManager() {
 
   /** Lượt đã dùng — chỉ đếm đơn đã thanh toán thành công. */
   const usedOf = (item: CmsDiscountCode) => discountUsage(item.code, orders).total
+
+  /**
+   * Lượt đã dùng của mã ĐANG SỬA, tính theo bản đã lưu (tìm bằng `id`) — không theo
+   * ô đang gõ. Form được dựng trước khi có giá trị, lúc đó `code` còn `undefined`
+   * và `discountUsage` sập cả trang.
+   */
+  const storedUsage = (form: FormInstance) => {
+    const stored = codes.find((item) => item.id === form.getFieldValue('id'))
+    return stored ? usedOf(stored) : 0
+  }
 
   function validityOf(item: CmsDiscountCode): Validity {
     if (!item.enabled) return 'disabled'
@@ -351,17 +362,13 @@ export function DiscountManager() {
                 name='code'
                 label={t('discounts.code')}
                 normalize={(value: string) => value.toUpperCase().replace(/\s/g, '')}
-                extra={usedOf(form.getFieldsValue(true) as CmsDiscountCode) > 0 ? t('discounts.codeLocked') : undefined}
+                extra={storedUsage(form) > 0 ? t('discounts.codeLocked') : undefined}
                 rules={[
                   { required: true, message: t('fields.requiredMessage') },
                   { pattern: CODE_PATTERN, message: t('discounts.codeRule') }
                 ]}
               >
-                <Input
-                  placeholder='KHAITRUONG'
-                  maxLength={50}
-                  disabled={usedOf(form.getFieldsValue(true) as CmsDiscountCode) > 0}
-                />
+                <Input placeholder='KHAITRUONG' maxLength={50} disabled={storedUsage(form) > 0} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={10}>
