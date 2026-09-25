@@ -5,9 +5,10 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, X } from 'lucide-react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 
+import type { Locale } from '@/i18n/routing'
 import { useAuthStore } from '@/shared/auth'
 import { FieldLabel, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
@@ -15,10 +16,10 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/co
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/utils'
-import { formatPhoneDisplay, normalizePhone } from '@/shared/utils'
+import { formatDisplayDate, formatPhoneDisplay, normalizePhone } from '@/shared/utils'
 import { useBookConsultation } from '../hooks/use-consultation'
 import { BOOKING_NOTE_MAX_LENGTH, createBookingSchema, type BookingFormValues } from '../schemas/booking.schema'
-import { parseDateKey, slotEndTime } from '../services/consultation.service'
+import { slotEndTime } from '../services/consultation.service'
 import type { Consultant, ConsultationBooking } from '../types/consultation.types'
 
 /**
@@ -73,7 +74,7 @@ export function BookingDialog({ open, onOpenChange, consultant, date, time, onBo
   const t = useTranslations('consult.booking')
   const tCommon = useTranslations('common')
   const tv = useTranslations('validation')
-  const format = useFormatter()
+  const locale = useLocale() as Locale
 
   const accountPhone = useAuthStore((s) => s.user?.phone)
   const bookConsultation = useBookConsultation()
@@ -111,10 +112,8 @@ export function BookingDialog({ open, onOpenChange, consultant, date, time, onBo
     if (open) setValue('note', '')
   }, [open, setValue])
 
-  // "Thứ Năm 13/08" — ngày/tháng viết tay vì Intl trả "13-08" ở locale vi, lệch
-  // với dạng dd/mm dùng ở chip ngày và trong Hình 16.
-  const day = parseDateKey(date)
-  const dayLabel = `${format.dateTime(day, { weekday: 'long' })} ${`${day.getDate()}`.padStart(2, '0')}/${`${day.getMonth() + 1}`.padStart(2, '0')}`
+  // "Thứ Năm, 13/08/2026" — kiểu ghi ngày chung của toàn site (góp ý mục 38).
+  const dayLabel = formatDisplayDate(date, locale, { weekday: true })
   const summary = [consultant.name, dayLabel, `${time} - ${slotEndTime(time)}`].join(' · ')
 
   const dx = origin?.dx ?? 0

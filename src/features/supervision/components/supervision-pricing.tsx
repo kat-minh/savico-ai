@@ -116,6 +116,9 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
             transition={{ duration: 0.55, delay: 0.08, ease: pricingEase }}
           >
             {titleLead}
+            {/* Dấu cách phải nằm NGOÀI span inline-block — ở đầu span nó bị nuốt
+                ("THI CÔNGBUILDX"). */}
+            {titleAccent ? ' ' : null}
             {titleAccent ? (
               <motion.span
                 className='text-brand-orange inline-block'
@@ -123,7 +126,6 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.45, delay: 0.36 }}
               >
-                {' '}
                 {titleAccent}
               </motion.span>
             ) : null}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { ArrowRight, LoaderCircle, RotateCcw, Search } from 'lucide-react'
+import { ArrowRight, CalendarDays, Clock, LoaderCircle, RotateCcw, Search } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
@@ -99,12 +99,11 @@ function readArticleListRestoreState(): ArticleListRestoreState | null {
 }
 
 /**
- * Khá»‘i "Táº¥t cáº£ bÃ i viáº¿t" (Pháº§n 3.2, ná»­a dÆ°á»›i HÃ¬nh 11): danh sÃ¡ch Ä‘áº§y Ä‘á»§, lá»c
- * theo chuyÃªn má»¥c, tÃ¬m kiáº¿m debounce vÃ  má»Ÿ nhanh tá»«ng dÃ²ng.
+ * Khối "Tất cả bài viết" — góp ý BuildX CN04: tiêu đề "Khám phá kiến thức xây dựng",
+ * bài viết là thẻ ảnh (ảnh trên, chữ dưới) xếp lưới 3 cột, lọc theo nhãn và tìm kiếm.
  *
- * Filter/search dÃ¹ng WAAPI + FLIP native: dÃ²ng bá»‹ loáº¡i má»/co trÆ°á»›c, dÃ²ng cÃ²n láº¡i
- * trÆ°á»£t tá»›i vá»‹ trÃ­ má»›i, dÃ²ng má»›i vÃ o tá»« dÆ°á»›i. KhÃ´ng cáº§n thÃªm animation library vÃ
- * má»i animation Ä‘á»u Ä‘Æ°á»£c há»§y sáº¡ch khi filter bá»‹ Ä‘á»•i liÃªn tá»¥c.
+ * Filter/search dùng WAAPI + FLIP native: thẻ còn lại trượt tới vị trí mới, thẻ mới
+ * hiện lên từ dưới; mọi animation được hủy sạch khi filter bị đổi liên tục.
  */
 export function ArticleList() {
   const t = useTranslations('handbook.articles')
@@ -119,7 +118,6 @@ export function ArticleList() {
   const filterPillRef = useRef<HTMLSpanElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const rowsRef = useRef<HTMLUListElement>(null)
-  const resultCountRef = useRef<HTMLSpanElement>(null)
   const filterAnimationsRef = useRef<Animation[]>([])
   const previousRectsRef = useRef(new Map<string, DOMRect>())
   const previousContentHeightRef = useRef<number | null>(null)
@@ -320,18 +318,6 @@ export function ArticleList() {
     }
   }, [appliedCategory, appliedQuery, visibleCount])
 
-  useEffect(() => {
-    if (!resultCountRef.current || prefersReducedMotion()) return
-    const animation = resultCountRef.current.animate(
-      [
-        { opacity: 0, transform: 'translateY(5px)' },
-        { opacity: 1, transform: 'translateY(0)' }
-      ],
-      { duration: 190, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
-    )
-    return () => animation.cancel()
-  }, [results.length])
-
   useLayoutEffect(() => {
     const row = chipRowRef.current
     const pill = filterPillRef.current
@@ -465,8 +451,14 @@ export function ArticleList() {
       ref={sectionRef}
       id='all-articles'
       data-article-list
-      className='bg-card scroll-mt-[calc(var(--public-header-offset,64px)+0.75rem)] space-y-5 rounded-2xl border p-5'
+      className='bg-card scroll-mt-[calc(var(--public-header-offset,64px)+0.75rem)] space-y-5 rounded-2xl border p-5 sm:p-6'
     >
+      <header className='space-y-1.5'>
+        <p className='text-primary-strong text-xs font-semibold tracking-[0.14em] uppercase'>{t('eyebrow')}</p>
+        <h2 className='text-primary-strong text-3xl font-bold tracking-tight text-balance'>{t('title')}</h2>
+        <p className='text-muted-foreground text-sm'>{t('subtitle')}</p>
+      </header>
+
       <div
         ref={toolbarRef}
         data-article-toolbar
@@ -480,13 +472,6 @@ export function ArticleList() {
           transitionDuration: 'var(--public-header-duration, 180ms)'
         }}
       >
-        <div className='flex shrink-0 items-baseline gap-2'>
-          <h2 className='text-xl font-semibold tracking-tight'>{t('title')}</h2>
-          <span ref={resultCountRef} data-article-result-count className='text-muted-foreground text-xs tabular-nums'>
-            {t('resultCount', { count: results.length })}
-          </span>
-        </div>
-
         <div ref={chipRowRef} data-filter-chip-row className='relative flex flex-wrap gap-2'>
           <span
             ref={filterPillRef}
@@ -506,7 +491,7 @@ export function ArticleList() {
                 onClick={() => selectCategory(option)}
                 aria-pressed={active}
                 className={cn(
-                  'relative z-10 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-medium transition-[color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
+                  'relative z-10 overflow-hidden rounded-full border px-4 py-1.5 text-sm font-medium transition-[color,border-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35',
                   active
                     ? 'border-primary text-success-foreground'
                     : 'text-muted-foreground hover:border-primary/50 hover:text-primary focus-visible:border-primary/50 focus-visible:text-primary'
@@ -542,9 +527,9 @@ export function ArticleList() {
 
       <div ref={contentRef} data-article-list-content className='space-y-5'>
         {isPending ? (
-          <div className='space-y-3'>
+          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
             {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className='h-20 rounded-xl' />
+              <Skeleton key={index} className='h-72 rounded-xl' />
             ))}
           </div>
         ) : visible.length === 0 ? (
@@ -564,38 +549,45 @@ export function ArticleList() {
             />
           </div>
         ) : (
-          <ul ref={rowsRef} data-article-rows className='divide-y'>
+          <ul ref={rowsRef} data-article-rows className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
             {visible.map((article) => (
-              <li key={article.id} data-article-row-item={article.id} className='origin-top overflow-hidden'>
-                {/* Góp ý BuildX: bấm cả thẻ là vào bài — không còn bước mở rộng mô tả rồi mới
-                    bấm "Xem chi tiết". */}
+              <li key={article.id} data-article-row-item={article.id}>
+                {/* Góp ý BuildX: bấm cả thẻ là vào bài (TT08); thẻ ảnh, tiêu đề dưới ảnh (CN04). */}
                 <Link
-                  data-article-row
+                  data-article-card
                   href={handbookArticleRoute(article.slug)}
                   onClick={saveReturnState}
-                  className='group/row flex w-full flex-wrap items-center gap-4 rounded-lg px-1 py-3 text-left transition-colors duration-200 hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
+                  className='group/card bg-card flex h-full flex-col overflow-hidden rounded-xl border transition-[box-shadow,border-color] duration-200 hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none'
                 >
-                  <div data-article-row-image className='shrink-0'>
-                    <Photo className='size-16 rounded-lg' src={article.imageUrl} alt={article.title} sizes='64px' />
-                  </div>
-                  <div className='min-w-0 flex-1 space-y-1'>
-                    <Badge variant='secondary'>{labelName(article.category)}</Badge>
-                    <h3 data-article-row-title className='text-sm font-semibold transition-colors duration-200'>
+                  <Photo
+                    className='aspect-[16/10] w-full'
+                    imageClassName='transition-transform duration-300 ease-out group-hover/card:scale-[1.04] motion-reduce:transition-none'
+                    src={article.imageUrl}
+                    alt={article.title}
+                    sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px'
+                  />
+                  <div className='flex flex-1 flex-col gap-2 p-4'>
+                    <Badge variant='secondary' className='w-fit'>
+                      {labelName(article.category)}
+                    </Badge>
+                    <h3 className='group-hover/card:text-primary line-clamp-2 text-base leading-snug font-semibold transition-colors duration-200'>
                       <HighlightText text={article.title} query={appliedQuery} />
                     </h3>
+                    <div className='text-muted-foreground mt-auto flex items-center gap-4 pt-1 text-xs'>
+                      <span className='inline-flex items-center gap-1.5'>
+                        <CalendarDays className='size-3.5' aria-hidden />
+                        {formatDisplayDate(article.publishedAt, locale)}
+                      </span>
+                      <span className='inline-flex items-center gap-1.5'>
+                        <Clock className='size-3.5' aria-hidden />
+                        {t('readingTime', { minutes: article.readingMinutes })}
+                      </span>
+                      <span className='bg-accent text-primary-strong ml-auto flex size-8 items-center justify-center rounded-full transition-colors duration-200 group-hover/card:bg-primary-strong group-hover/card:text-white'>
+                        <ArrowRight className='size-4' aria-hidden />
+                        <span className='sr-only'>{t('readArticle')}</span>
+                      </span>
+                    </div>
                   </div>
-                  <p className='text-muted-foreground shrink-0 text-xs'>
-                    {formatDisplayDate(article.publishedAt, locale)}
-                    <span aria-hidden> · </span>
-                    {t('readingTime', { minutes: article.readingMinutes })}
-                  </p>
-                  <span className='text-primary inline-flex shrink-0 items-center gap-1.5 text-sm font-medium'>
-                    {t('readArticle')}
-                    <ArrowRight
-                      data-step-link-arrow
-                      className='size-4 transition-transform duration-200 group-hover/row:translate-x-1 motion-reduce:transition-none'
-                    />
-                  </span>
                 </Link>
               </li>
             ))}
@@ -610,7 +602,7 @@ export function ArticleList() {
               variant='outline'
               disabled={isLoadingMore}
               onClick={handleLoadMore}
-              className='min-w-32'
+              className='min-w-44 rounded-full'
             >
               {isLoadingMore ? (
                 <>
@@ -618,7 +610,10 @@ export function ArticleList() {
                   {t('loading')}
                 </>
               ) : (
-                t('showMore')
+                <>
+                  {t('showMore')}
+                  <ArrowRight className='size-4' />
+                </>
               )}
             </Button>
           </div>

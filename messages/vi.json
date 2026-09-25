@@ -793,10 +793,10 @@
     },
     "foundation": {
       "eyebrow": "Cẩm nang nền tảng",
-      "kicker": "Nội dung nên đọc trước khi xây nhà",
-      "title": "Cẩm nang bắt buộc cho xây nhà",
-      "description": "Tổng hợp kiến thức nền tảng giúp bạn kiểm soát chất lượng, chi phí và tiến độ từ lúc khởi công đến khi hoàn thiện.",
-      "start": "Bắt đầu xem cẩm nang",
+      "kicker": "Cẩm nang BuildX",
+      "title": "Hiểu rõ từng bước xây nhà",
+      "description": "Từ phần thô đến hoàn thiện, khám phá kiến thức giúp bạn chủ động hơn với công trình của mình.",
+      "start": "Khám phá cẩm nang",
       "stagesTitle": "3 nội dung quan trọng trong quá trình xây nhà",
       "stepLabel": "Bước {order}",
       "stageHeading": "Cẩm nang {stage}",
@@ -819,12 +819,14 @@
       }
     },
     "articles": {
-      "title": "Tất cả bài viết",
+      "eyebrow": "Cẩm nang BuildX",
+      "title": "Khám phá kiến thức xây dựng",
+      "subtitle": "Thông tin hữu ích để bạn chủ động hơn trong từng bước xây nhà.",
       "all": "Tất cả",
       "searchPlaceholder": "Tìm kiếm bài viết…",
       "resultCount": "{count} kết quả",
       "clearFilters": "Xoá bộ lọc",
-      "showMore": "Xem thêm",
+      "showMore": "Xem thêm bài viết",
       "loading": "Đang tải",
       "readMore": "Xem chi tiết",
       "readingTime": "{minutes} phút đọc",
@@ -1891,9 +1893,10 @@
       "pro": "Triển khai ngay"
     },
     "ctaBand": {
-      "title": "Bắt đầu hành trình thiết kế ngôi nhà của bạn ngay hôm nay!",
-      "subtitle": "Lựa chọn gói phù hợp và nhận tư vấn từ đội ngũ chuyên gia của BuildX.",
-      "action": "Đăng ký ngay"
+      "title": "Chưa chắc chọn gói nào? Tư vấn miễn phí",
+      "subtitle": "Gọi tổng đài hoặc hỏi trợ lý AI để được gợi ý gói phù hợp với công trình của bạn.",
+      "call": "Gọi tổng đài {hotline}",
+      "chat": "Chat với trợ lý AI"
     },
     "gift": {
       "badge": "Quà tặng đặc biệt",
@@ -2024,6 +2027,7 @@
     "card": {
       "experience": "{years} năm kinh nghiệm",
       "projects": "{count}+ công trình",
+      "company": "tại {company}",
       "viewProfile": "Xem hồ sơ"
     },
     "rail": {
@@ -2031,6 +2035,7 @@
     },
     "profile": {
       "reviews": "({count} đánh giá)",
+      "company": "tại {company}",
       "experience": "{years}+ năm kinh nghiệm",
       "specialtyPrefix": "Chuyên: {value}",
       "bookCta": "Đặt lịch tư vấn",

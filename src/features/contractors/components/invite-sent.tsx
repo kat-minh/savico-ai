@@ -25,7 +25,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorInvitationsRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { canShowManagementPopup } from '@/shared/lib'
 import { cn } from '@/shared/lib/utils'
-import { formatDate } from '@/shared/utils'
+import { formatDisplayDate, formatDisplayDateTime } from '@/shared/utils'
 import { surveySlotLabel } from '@/shared/cms'
 import {
   INVITATIONS_ARRIVE_FORWARD_KEY,
@@ -402,13 +402,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
                 </span>
               </span>{' '}
               {t('sentAt', {
-                time: formatDate(data.request.createdAt, locale, {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
+                time: formatDisplayDateTime(data.request.createdAt, locale)
               })}
             </span>
           </motion.p>
@@ -455,12 +449,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
 
                   <motion.span variants={crossFadeVariants} className='flex shrink-0 items-center gap-2 text-sm'>
                     <CalendarDays aria-hidden className='text-primary size-4' />
-                    {formatDate(invitation.survey.date, locale, {
-                      weekday: 'long',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    })}
+                    {formatDisplayDate(invitation.survey.date, locale, { weekday: true })}
                   </motion.span>
 
                   <motion.span variants={crossFadeVariants} className='flex shrink-0 items-center gap-2 text-sm'>

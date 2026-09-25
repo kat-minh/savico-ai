@@ -10,7 +10,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { useFavorites, type FavoriteEntry } from '@/shared/favorite'
-import { formatDate } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 
 /**
  * Tab "Dự án yêu thích" ở trang Tài khoản (mục IX, Hình 18).
@@ -61,7 +61,7 @@ export function FavoriteGrid() {
                   <Badge variant='outline'>{t(`kind.${entry.kind}`)}</Badge>
                 </div>
                 <span className='text-muted-foreground shrink-0 text-xs'>
-                  {t('savedAt', { date: formatDate(entry.savedAt, locale) })}
+                  {t('savedAt', { date: formatDisplayDate(entry.savedAt, locale) })}
                 </span>
               </div>
             </div>
@@ -94,7 +94,7 @@ export function FavoriteGrid() {
                 <Badge>{selected.tagLabel}</Badge>
                 <Badge variant='secondary'>{t(`kind.${selected.kind}`)}</Badge>
                 <span className='text-muted-foreground text-xs'>
-                  {t('savedAt', { date: formatDate(selected.savedAt, locale) })}
+                  {t('savedAt', { date: formatDisplayDate(selected.savedAt, locale) })}
                 </span>
               </div>
             </>

@@ -31,7 +31,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/
 import { contractorMatchesRoute } from '@/shared/constants/routes'
 import { siteConfig } from '@/shared/config'
 import { cn } from '@/shared/lib/utils'
-import { formatDate } from '@/shared/utils'
+import { formatDisplayDate, formatDisplayDateTime } from '@/shared/utils'
 import { surveySlotLabel } from '@/shared/cms'
 import { INVITATION_STEPS, INVITATIONS_ARRIVE_FORWARD_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
@@ -463,22 +463,9 @@ function InvitationCard({
   const stampOf = (status: string) => invitation.steps.find((step) => step.status === status)?.at
   const isDone = invitation.status === 'done'
 
-  /**
-   * Ảnh S18 ghi mốc thời gian dạng "10:42 · 26/08/2026" và "26/08 · 10:42" —
-   * `Intl` không có mẫu nào ra đúng thứ tự đó, nên giờ và ngày được định dạng
-   * rời rồi ghép lại.
-   */
-  const clock = { hour: '2-digit', minute: '2-digit' } as const
-  const fullDate = { day: '2-digit', month: '2-digit', year: 'numeric' } as const
-
-  const sentStamp = `${formatDate(invitation.sentAt, locale, clock)} · ${formatDate(invitation.sentAt, locale, fullDate)}`
-  // `Intl` tiếng Việt trả "08-09" cho cặp ngày/tháng, còn ảnh S18 in "26/08" —
-  // mốc trên thanh trạng thái ghép tay để đúng mẫu đó.
-  const stepStamp = (at: string) => {
-    const day = new Date(at)
-    const dayMonth = `${String(day.getDate()).padStart(2, '0')}/${String(day.getMonth() + 1).padStart(2, '0')}`
-    return `${dayMonth} · ${formatDate(at, locale, clock)}`
-  }
+  // Mốc thời gian theo MỘT kiểu chung của site (góp ý mục 38): "10:42 - 26/08/2026".
+  const sentStamp = formatDisplayDateTime(invitation.sentAt, locale)
+  const stepStamp = (at: string) => formatDisplayDateTime(at, locale)
 
   return (
     <motion.article
@@ -618,19 +605,14 @@ function InvitationCard({
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           className='sm:ml-auto'
         >
-          {t('updatedBy', { time: formatDate(invitation.updatedAt, locale, fullDate) })}
+          {t('updatedBy', { time: formatDisplayDate(invitation.updatedAt, locale) })}
         </motion.span>
       </motion.div>
 
       <p className='text-muted-foreground flex items-center gap-2 text-sm'>
         <CalendarDays className='text-primary size-4 shrink-0' />
         {t('surveyAt', {
-          date: formatDate(invitation.survey.date, locale, {
-            weekday: 'long',
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          }),
+          date: formatDisplayDate(invitation.survey.date, locale, { weekday: true }),
           slot: slotLabel(invitation.survey.slotId)
         })}
       </p>

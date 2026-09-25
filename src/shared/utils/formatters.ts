@@ -59,6 +59,26 @@ export function formatDisplayDate(
   return parts.date
 }
 
+/**
+ * Ngày + giờ (lịch hẹn tư vấn, lịch khảo sát, biên nhận…) — cùng kiểu với
+ * `formatDisplayDate(…, { time: true })`: "14:45 - 23/09/2026", giờ 24h, giờ Việt Nam.
+ *
+ * Nhận thêm cặp `{ date: 'yyyy-mm-dd', time: 'HH:mm' }` — dạng lịch hẹn đang lưu —
+ * và hiểu cặp đó là giờ Việt Nam, không phụ thuộc múi giờ của trình duyệt.
+ */
+export function formatDisplayDateTime(
+  value: Date | string | number | { date: string; time: string },
+  locale: Locale
+): string {
+  const instant = typeof value === 'object' && !(value instanceof Date) ? `${value.date}T${value.time}:00+07:00` : value
+  return formatDisplayDate(instant, locale, { time: true })
+}
+
+/** Chỉ giờ "14:45" (24h, giờ Việt Nam) — cho nhãn kiểu "Đã lưu nháp lúc …". */
+export function formatDisplayTime(value: Date | string | number, locale: Locale): string {
+  return displayParts(value, locale).time
+}
+
 export function formatNumber(value: number, locale: Locale, options?: Intl.NumberFormatOptions): string {
   return new Intl.NumberFormat(locale, options).format(value)
 }
@@ -82,14 +102,11 @@ export function formatDayMonth(
   value: Date | string | number,
   options: { year?: boolean; time?: boolean } = {}
 ): string {
-  const date = value instanceof Date ? value : new Date(value)
-  const pad = (input: number) => String(input).padStart(2, '0')
+  // Cùng múi giờ Việt Nam với `formatDisplayDate` — trước đây lấy giờ của trình duyệt.
+  const parts = displayParts(value, 'vi')
+  const base = options.year ? parts.date : parts.date.slice(0, 5)
 
-  const base = options.year
-    ? `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
-    : `${pad(date.getDate())}/${pad(date.getMonth() + 1)}`
-
-  return options.time ? `${base} ${pad(date.getHours())}:${pad(date.getMinutes())}` : base
+  return options.time ? `${base} ${parts.time}` : base
 }
 
 /**

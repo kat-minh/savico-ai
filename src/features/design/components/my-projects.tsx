@@ -2,10 +2,11 @@
 
 import { ArrowRight, Check, House, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Fragment } from 'react'
 
 import { Link } from '@/i18n/navigation'
+import type { Locale } from '@/i18n/routing'
 import { EmptyState, Photo } from '@/shared/components/common'
 import {
   DropdownMenu,
@@ -16,7 +17,7 @@ import {
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
 import { designDossierRoute, designEstimateRoute, designInputRoute } from '@/shared/constants/routes'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { DESIGN_STEPS } from '../constants/design.constants'
 import { useProjects } from '../hooks/use-projects'
 import type { DesignStep, Project } from '../types/design.types'
@@ -47,6 +48,7 @@ interface MyProjectsProps {
  */
 export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
   const t = useTranslations('account.projects')
+  const locale = useLocale() as Locale
   const tBuilding = useTranslations('design.input.buildingType.options')
   const { data: projects, isPending } = useProjects()
 
@@ -151,7 +153,7 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
                         dấu ngăn của vế đó. */}
                     <p className='text-muted-foreground text-sm'>
                       {[
-                        t('createdAt', { date: formatDayMonth(project.createdAt, { year: true }) }),
+                        t('createdAt', { date: formatDisplayDate(project.createdAt, locale) }),
                         project.buildingType ? tBuilding(project.buildingType) : null,
                         project.floorArea ? t('floorArea', { area: project.floorArea }) : null
                       ]

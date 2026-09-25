@@ -99,6 +99,11 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
               <HighlightedText text={consultant.name} query={query} />
             </h3>
             <p className='text-muted-foreground text-xs'>{consultant.title}</p>
+            {consultant.company && (
+              <p className='text-muted-foreground/80 truncate text-[11px]' title={consultant.company}>
+                {t('company', { company: consultant.company })}
+              </p>
+            )}
           </div>
 
           <div className='pointer-events-auto flex flex-wrap gap-1.5'>

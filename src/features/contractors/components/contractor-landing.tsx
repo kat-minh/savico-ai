@@ -17,7 +17,6 @@ import {
   House,
   Link2,
   Lock,
-  Map as MapIcon,
   MapPin,
   Shield,
   ShieldCheck,
@@ -40,7 +39,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth, useAuthDialogStore } from '@/shared/auth'
-import { isContractorEligible, useCmsCollection, useCmsDocument } from '@/shared/cms'
+import { isContractorEligible, useCmsCollection, useCmsDocument, useSiteImage } from '@/shared/cms'
 import { Photo, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -355,13 +354,8 @@ export function ContractorLanding() {
 
   const [sort, setSort] = useState<ContractorSort>('match')
 
-  /**
-   * CHỖ CHỜ ASSET: Hình S09 vẽ một BẢN ĐỒ minh hoạ (nền xanh nhạt, vòng sóng
-   * ra-đa, 5 ghim vị trí). Ảnh seed trong kho là ảnh chụp phố nên sai hẳn tinh
-   * thần, vì vậy chỉ hiện ảnh khi admin đã thay bằng ảnh thật ở màn "Hình ảnh
-   * site"; chưa thay thì để khung nét đứt như mọi chỗ chờ asset khác.
-   */
-  const mapImage = useCmsDocument('uiAssets')['map.contractors']?.trim()
+  // Banner hero theo sheet góp ý BuildX; admin vẫn thay được ở màn "Hình ảnh site".
+  const mapImage = useSiteImage('map.contractors')
   // Danh bạ do vận hành quản lý ở /admin/contractors; chỉ nhà thầu đạt Quy tắc đề
   // xuất (không Ẩn, đúng khu vực, đủ tiêu chí) mới lên landing.
   const matching = useCmsDocument('contractorMatching')
@@ -632,25 +626,16 @@ export function ContractorLanding() {
             ) : null}
           </motion.div>
 
-          {/* Hình S09: khối minh hoạ là BẢN ĐỒ vẽ (nền xanh nhạt, vòng sóng
-              ra-đa, 5 ghim vị trí) chứ không phải ảnh chụp; thẻ nhà thầu nổi
-              CHÍNH GIỮA khối, rộng 137/212 = 65% và cao 122/180 = 68% khối.
-              CHỖ CHỜ ASSET: chưa có hình bản đồ nên vẫn dùng ảnh trong kho
-              (`map.contractors`) — admin thay được ở màn "Hình ảnh site". */}
+          {/* Thẻ nhà thầu nổi CHÍNH GIỮA khối ảnh, rộng 137/212 = 65% và cao
+              122/180 = 68% khối (Hình S09). Ảnh là `map.contractors`. */}
           <div className='relative'>
-            {mapImage ? (
-              <Photo
-                src={mapImage}
-                alt=''
-                priority
-                sizes='(max-width: 1024px) 100vw, 700px'
-                className='aspect-[212/180] w-full rounded-3xl border'
-              />
-            ) : (
-              <div className='bg-muted/30 flex aspect-[212/180] w-full items-center justify-center rounded-3xl border border-dashed'>
-                <MapIcon className='text-muted-foreground/50 size-10' />
-              </div>
-            )}
+            <Photo
+              src={mapImage}
+              alt=''
+              priority
+              sizes='(max-width: 1024px) 100vw, 700px'
+              className='aspect-[212/180] w-full rounded-3xl border'
+            />
 
             {/* Thẻ CANH GIỮA khối minh hoạ, rộng 63.4% (số đo trên Hình
                 S09: thẻ 135px trên khối 213px).

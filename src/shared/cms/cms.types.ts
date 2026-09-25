@@ -409,6 +409,9 @@ export interface SupervisionPackage {
 /**
  * Chuyên môn của kiến trúc sư — danh mục do admin cấu hình (mục X, #5).
  */
+/** Miền Bắc / miền Nam — cột "Miền" trong sheet hồ sơ KTS. */
+export type ConsultantRegion = 'north' | 'south'
+
 export interface ConsultantSpecialty {
   id: string
   label: string
@@ -431,6 +434,10 @@ export interface Consultant {
   name: string
   /** Chức danh dưới tên: "Kiến trúc sư SAVICO", "Kiến trúc sư trưởng SAVICO". */
   title: string
+  /** Nơi công tác — dòng phụ nhỏ "tại {company}" dưới chức danh ở thẻ và hồ sơ. */
+  company?: string
+  /** Khu vực nhận tư vấn theo hồ sơ khách gửi — chưa lọc/hiển thị ở đâu. */
+  region?: ConsultantRegion
   avatarUrl: string
   /** Hai chip chuyên môn trên thẻ; phần tử đầu là chuyên môn chính. */
   specialties: ConsultantSpecialty[]

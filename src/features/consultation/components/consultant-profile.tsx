@@ -3,15 +3,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Award, Briefcase, CalendarCheck, Star, X } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useFormatter, useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
+import type { Locale } from '@/i18n/routing'
 import { useAuth } from '@/shared/auth'
 import { Photo, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { useMyConsultations } from '../hooks/use-consultation'
 import { firstOpenDay } from '../services/consultation.service'
 import type { Consultant, ConsultationBooking, ConsultationDay } from '../types/consultation.types'
@@ -54,7 +56,7 @@ export function ConsultantProfile({
   onTimeChoiceChange
 }: ConsultantProfileProps) {
   const t = useTranslations('consult.profile')
-  const format = useFormatter()
+  const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
   const { isAuthenticated } = useAuth()
   const { data: history } = useMyConsultations(isAuthenticated)
@@ -173,6 +175,9 @@ export function ConsultantProfile({
             <motion.div {...entrance(1)}>
               <h1 className='text-xl font-semibold tracking-tight sm:text-2xl'>{consultant.name}</h1>
               <p className='text-muted-foreground text-sm'>{consultant.title}</p>
+              {consultant.company && (
+                <p className='text-muted-foreground/80 text-xs'>{t('company', { company: consultant.company })}</p>
+              )}
             </motion.div>
 
             <ul className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
@@ -257,7 +262,7 @@ export function ConsultantProfile({
             onClick={openBookingDialog}
           >
             {selectedTime
-              ? t('bookCtaWithTime', { time: selectedTime, date: formatShortDate(selectedDate) })
+              ? t('bookCtaWithTime', { time: selectedTime, date: formatDisplayDate(selectedDate, locale) })
               : t('bookCta')}
             {hasTime && sweepKey > 0 && !reduceMotion ? (
               <motion.span
@@ -278,11 +283,7 @@ export function ConsultantProfile({
         {justBooked ? (
           <BookedPanel
             booking={justBooked}
-            dateLabel={
-              format.dateTime(parseKey(justBooked.date), { weekday: 'long' }) +
-              ', ' +
-              formatShortDate(justBooked.date, true)
-            }
+            dateLabel={formatDisplayDate(justBooked.date, locale, { weekday: true })}
             onClose={() => setJustBooked(null)}
           />
         ) : null}
@@ -327,18 +328,6 @@ function SparkleStar() {
       </motion.span>
     </span>
   )
-}
-
-/** "2026-09-24" → Date theo giờ địa phương. */
-function parseKey(key: string): Date {
-  const [year, month, day] = key.split('-').map(Number)
-  return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1)
-}
-
-/** "2026-09-24" → "24/09" (hoặc "24/09/2026"). */
-function formatShortDate(key: string, withYear = false): string {
-  const [year, month, day] = key.split('-')
-  return withYear ? `${day}/${month}/${year}` : `${day}/${month}`
 }
 
 /**

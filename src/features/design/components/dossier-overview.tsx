@@ -11,7 +11,7 @@ import { useSiteImage } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/components/ui/dialog'
 import { usePageEntrance } from '@/shared/hooks'
-import { formatDate } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { costShares } from '../services/estimate.service'
 import type { EstimateResult } from '../types/design.types'
 
@@ -172,7 +172,7 @@ export function DossierOverview({
     { labelKey: 'projectName', value: `${info.projectName} (${info.projectId})` },
     { labelKey: 'phone', value: info.phone },
     { labelKey: 'address', value: info.address },
-    { labelKey: 'createdAt', value: formatDate(info.createdAt, locale) }
+    { labelKey: 'createdAt', value: formatDisplayDate(info.createdAt, locale) }
   ]
   const rightRows: InfoRow[] = [
     { labelKey: 'buildingType', value: info.buildingTypeLabel },
@@ -213,7 +213,7 @@ export function DossierOverview({
     rows: [
       { label: t('info.scale'), value: info.scaleLabel },
       { label: t('info.package'), value: info.packageLabel },
-      { label: t('info.createdAt'), value: formatDate(info.createdAt, locale) }
+      { label: t('info.createdAt'), value: formatDisplayDate(info.createdAt, locale) }
     ].filter((row) => Boolean(row.value))
   }
 

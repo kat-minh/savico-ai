@@ -1,5 +1,6 @@
 import type { AuthUser } from '@/shared/auth'
 import { MOCK_SESSION_USER_KEY } from '@/shared/auth'
+import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import type { ApiError } from '@/shared/types'
 import { normalizePhone } from '@/shared/utils'
@@ -25,8 +26,11 @@ function currentMockIdentity(): Pick<AuthUser, 'name' | 'email'> {
 export const mockAccountApi = {
   getPlan: async (): Promise<AccountPlan | null> => {
     await mockDelay(150)
+    // Góp ý BuildX (BG31): cùng một tên gói với đơn hàng và biên nhận ("Gói PLUS"),
+    // lấy từ bảng gói admin cấu hình thay vì chữ cứng "Gói Nâng cao".
+    const planName = cmsDb.list('plans').find((plan) => plan.id === 'advanced')?.name ?? 'PLUS'
     return {
-      name: 'Gói Nâng cao',
+      name: `Gói ${planName}`,
       expiresAt: '2026-08-30T00:00:00.000Z',
       design: { remaining: 5, total: 7 },
       library: { remaining: 86, total: 100 },

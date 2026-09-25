@@ -1,16 +1,17 @@
 'use client'
 
 import { AlertTriangle, ArrowRight, CalendarClock, Check, Clock, Upload } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
+import type { Locale } from '@/i18n/routing'
 import { Link } from '@/i18n/navigation'
 import { EmptyState } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, supervisionRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDayMonth, formatDisplayDate } from '@/shared/utils'
 import { useStageLabel } from '../hooks/use-stage-label'
 import { STAGE_COUNT, STANDARD_SCHEDULE_DAYS } from '../constants/supervision.constants'
 import { useSupervisionProject } from '../hooks/use-supervision'
@@ -277,6 +278,7 @@ function DashboardBanner({
 /** Thẻ dự án + 5 ô số của bản mô tả. */
 function ProjectCard({ project }: { project: SupervisionProject }) {
   const t = useTranslations('supervision.dashboard.project')
+  const locale = useLocale() as Locale
   const tStages = useStageLabel()
   const tAlias = useTranslations('supervision.tierAlias')
   const tTiers = useTranslations('supervision.tiers')
@@ -330,7 +332,7 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
 
         <div>
           <dt className='text-muted-foreground text-[11px] font-medium tracking-wide uppercase'>{t('due')}</dt>
-          <dd className='mt-1 text-sm font-semibold'>{formatDayMonth(stage.plannedEnd, { year: true })}</dd>
+          <dd className='mt-1 text-sm font-semibold'>{formatDisplayDate(stage.plannedEnd, locale)}</dd>
           <dd className={cn('text-xs', remaining < 0 ? 'text-destructive' : 'text-primary')}>
             {t('daysLeft', { days: remaining })}
           </dd>
@@ -338,7 +340,7 @@ function ProjectCard({ project }: { project: SupervisionProject }) {
 
         <div>
           <dt className='text-muted-foreground text-[11px] font-medium tracking-wide uppercase'>{t('handover')}</dt>
-          <dd className='mt-1 text-sm font-semibold'>{formatDayMonth(project.handoverDate, { year: true })}</dd>
+          <dd className='mt-1 text-sm font-semibold'>{formatDisplayDate(project.handoverDate, locale)}</dd>
           <dd className='text-muted-foreground text-xs'>{drift.early ? t('handoverEarly') : t('handoverLate')}</dd>
         </div>
 

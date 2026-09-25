@@ -4,6 +4,8 @@ export {
   formatDate,
   formatDigitGroups,
   formatDisplayDate,
+  formatDisplayDateTime,
+  formatDisplayTime,
   formatDayMonth,
   formatNumber,
   formatPriceTag

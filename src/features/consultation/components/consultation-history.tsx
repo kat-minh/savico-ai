@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, consultantRoute, designCreateRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { useCancelConsultation, useMyConsultations } from '../hooks/use-consultation'
 import { slotEndTime } from '../services/consultation.service'
 import type { ConsultationHistoryBooking, ConsultationHistoryStatus } from '../types/consultation.types'
@@ -54,15 +55,9 @@ function sessionNoteItems(note?: string): string[] {
     .filter(Boolean)
 }
 
+/** Ngày của buổi tư vấn: "Thứ Năm, 24/09/2026" — kiểu ghi ngày chung (mục 38). */
 function formatBookingDate(booking: ConsultationHistoryBooking, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale, {
-    weekday: 'long',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-    .format(bookingStart(booking))
-    .replace(',', '')
+  return formatDisplayDate(booking.date, locale, { weekday: true })
 }
 
 function StatusPill({ booking }: { booking: ConsultationHistoryBooking }) {
@@ -337,13 +332,7 @@ export function ConsultationHistory() {
                         {booking.status === 'done' && booking.withinPlan ? t('meta.withinPlan') : null}
                         {booking.status === 'cancelled'
                           ? t('meta.cancelled', {
-                              date: booking.cancelledAt
-                                ? new Intl.DateTimeFormat(locale, {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                  }).format(new Date(`${booking.cancelledAt}T00:00:00`))
-                                : '—'
+                              date: booking.cancelledAt ? formatDisplayDate(booking.cancelledAt, locale) : '—'
                             })
                           : null}
                         {booking.status === 'missed' ? t('meta.missed', { count: booking.contactAttempts ?? 1 }) : null}

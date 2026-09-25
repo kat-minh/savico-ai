@@ -72,7 +72,7 @@ import {
 } from '@/shared/constants/routes'
 import { useCountUp, usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { formatDate, formatNumber } from '@/shared/utils'
+import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor } from '../hooks/use-contractors'
@@ -1575,11 +1575,7 @@ function ProjectDetailSheet({
                     <p className='text-sm font-semibold'>
                       {t('verifiedTitle', {
                         date: project.verifiedAt
-                          ? formatDate(project.verifiedAt, locale, {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric'
-                            })
+                          ? formatDisplayDate(project.verifiedAt, locale)
                           : t('verifiedDateFallback')
                       })}
                     </p>
@@ -1684,7 +1680,7 @@ function LegalChecks({
         label: tLegal('fields.establishedAt'),
         value: legal
           ? tLegal('establishedValue', {
-              date: formatDate(legal.establishedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' }),
+              date: formatDisplayDate(legal.establishedAt, locale),
               years: legal.operationYears
             })
           : tLegal('updating')
@@ -1747,9 +1743,7 @@ function LegalChecks({
               <h2 className='text-sm font-semibold'>{tLegal('verification.title')}</h2>
               <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>
                 {tLegal('verification.body', {
-                  date: legal
-                    ? formatDate(legal.verifiedUntil, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
-                    : tLegal('updating')
+                  date: legal ? formatDisplayDate(legal.verifiedUntil, locale) : tLegal('updating')
                 })}
               </p>
             </div>
@@ -1757,9 +1751,7 @@ function LegalChecks({
               <p className='text-muted-foreground flex items-center gap-1 text-[11px] sm:justify-end'>
                 <span>{tLegal('verification.updated')}</span>
                 <span className='font-medium text-foreground'>
-                  {legal
-                    ? formatDate(legal.verifiedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
-                    : tLegal('updating')}
+                  {legal ? formatDisplayDate(legal.verifiedAt, locale) : tLegal('updating')}
                 </span>
               </p>
               <span className='bg-primary mt-1.5 block h-[3px] w-32 rounded-full sm:ml-auto' aria-hidden />
@@ -1822,11 +1814,7 @@ function LegalChecks({
                 <dd className='mt-1 font-medium whitespace-nowrap'>
                   {legal
                     ? tLegal('license.effectiveValue', {
-                        date: formatDate(legal.registrationIssuedAt, locale, {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })
+                        date: formatDisplayDate(legal.registrationIssuedAt, locale)
                       })
                     : tLegal('updating')}
                 </dd>
@@ -1931,13 +1919,7 @@ function LegalChecks({
                     <dd className='font-medium'>{legal?.registrationNumberMasked ?? tLegal('updating')}</dd>
                     <dt className='text-muted-foreground'>{tLegal('license.issuedAt')}</dt>
                     <dd className='font-medium'>
-                      {legal
-                        ? formatDate(legal.registrationIssuedAt, locale, {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })
-                        : tLegal('updating')}
+                      {legal ? formatDisplayDate(legal.registrationIssuedAt, locale) : tLegal('updating')}
                     </dd>
                     <dt className='text-muted-foreground'>{tLegal('license.status')}</dt>
                     <dd className='text-primary-strong font-medium'>{tLegal('license.verified')}</dd>
@@ -1977,13 +1959,7 @@ function LegalChecks({
                       <h3 className='mt-3 text-sm font-semibold'>{tLegal('license.lockedTitle')}</h3>
                       <p className='text-muted-foreground mt-2 text-xs leading-relaxed'>
                         {tLegal('license.lockedBody', {
-                          date: legal
-                            ? formatDate(legal.verifiedUntil, locale, {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                              })
-                            : tLegal('updating')
+                          date: legal ? formatDisplayDate(legal.verifiedUntil, locale) : tLegal('updating')
                         })}
                       </p>
                     </motion.div>
@@ -2065,9 +2041,7 @@ function PartnershipTab({ contractor }: { contractor: Contractor }) {
       icon: CalendarDays,
       label: t('signedAt'),
       // Nhà thầu chưa ký hợp tác thì ngày ký rỗng — `Intl` ném RangeError nếu định dạng.
-      value: partnership.signedAt
-        ? formatDate(partnership.signedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : '—'
+      value: partnership.signedAt ? formatDisplayDate(partnership.signedAt, locale) : '—'
     },
     { key: 'pages', icon: FileText, label: t('pages'), value: String(partnership.pageCount) },
     { key: 'state', icon: CircleCheck, label: t('state'), value: t('stateVerified'), highlight: true }

@@ -793,10 +793,10 @@
     },
     "foundation": {
       "eyebrow": "Core handbook",
-      "kicker": "Read this before you build",
-      "title": "The essential handbook for building a house",
-      "description": "Foundational knowledge to help you control quality, cost and schedule from groundbreaking to handover.",
-      "start": "Start reading",
+      "kicker": "BuildX handbook",
+      "title": "Understand every step of building a house",
+      "description": "From the structure to the finishing, explore the knowledge that puts you in control of your build.",
+      "start": "Explore the handbook",
       "stagesTitle": "3 key stages of building a house",
       "stepLabel": "Step {order}",
       "stageHeading": "{stage} handbook",
@@ -819,12 +819,14 @@
       }
     },
     "articles": {
-      "title": "All articles",
+      "eyebrow": "BuildX handbook",
+      "title": "Explore building knowledge",
+      "subtitle": "Useful insights to stay in control at every step of building your home.",
       "all": "All",
       "searchPlaceholder": "Search articles…",
       "resultCount": "{count} results",
       "clearFilters": "Clear filters",
-      "showMore": "Show more",
+      "showMore": "Show more articles",
       "loading": "Loading",
       "readMore": "Read more",
       "readingTime": "{minutes} min read",
@@ -1891,9 +1893,10 @@
       "pro": "Go all in"
     },
     "ctaBand": {
-      "title": "Start designing your home today",
-      "subtitle": "Pick the package that fits and get advice from the BuildX team.",
-      "action": "Sign up now"
+      "title": "Not sure which plan to pick? Get free advice",
+      "subtitle": "Call our hotline or ask the AI assistant for the plan that fits your project.",
+      "call": "Call {hotline}",
+      "chat": "Chat with the AI assistant"
     },
     "gift": {
       "badge": "Special gift",
@@ -2024,6 +2027,7 @@
     "card": {
       "experience": "{years} years of experience",
       "projects": "{count}+ projects",
+      "company": "at {company}",
       "viewProfile": "View profile"
     },
     "rail": {
@@ -2031,6 +2035,7 @@
     },
     "profile": {
       "reviews": "({count} reviews)",
+      "company": "at {company}",
       "experience": "{years}+ years of experience",
       "specialtyPrefix": "Expertise: {value}",
       "bookCta": "Book a consultation",

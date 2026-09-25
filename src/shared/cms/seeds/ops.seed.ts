@@ -187,7 +187,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0001',
     consultantId: 'ktsvc-01',
-    consultantName: 'KTS. Nguyễn Minh Trí',
+    consultantName: 'KTS. Nguyễn Văn Tùng',
     customerName: 'Nguyễn Văn Hùng',
     phone: '0901234567',
     date: '2026-08-18',
@@ -199,7 +199,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0002',
     consultantId: 'ktsvc-02',
-    consultantName: 'KTS. Trần Thu Hà',
+    consultantName: 'KTS. Đặng Thị Lan Hương',
     customerName: 'Trần Thị Mai',
     phone: '0912345678',
     date: '2026-08-18',
@@ -211,7 +211,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0003',
     consultantId: 'ktsvc-03',
-    consultantName: 'KTS. Lê Quang Vinh',
+    consultantName: 'KTS. Phạm Đức Anh',
     customerName: 'Lê Hoàng Nam',
     phone: '0987654321',
     date: '2026-08-19',
@@ -222,7 +222,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0004',
     consultantId: 'ktsvc-01',
-    consultantName: 'KTS. Nguyễn Minh Trí',
+    consultantName: 'KTS. Nguyễn Văn Tùng',
     customerName: 'Bùi Quốc Đạt',
     phone: '0944112233',
     date: '2026-08-14',
@@ -234,7 +234,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0005',
     consultantId: 'ktsvc-04',
-    consultantName: 'KTS. Phạm Ngọc Anh',
+    consultantName: 'KTS. Vũ Thị Minh Châu',
     customerName: 'Đỗ Minh Khoa',
     phone: '0933221100',
     date: '2026-08-20',
@@ -245,7 +245,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0006',
     consultantId: 'ktsvc-05',
-    consultantName: 'KTS. Vũ Đình Long',
+    consultantName: 'KTS. Trần Quang Vinh',
     customerName: 'Hoàng Thị Lan',
     phone: '0966554433',
     date: '2026-08-13',
@@ -257,7 +257,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0007',
     consultantId: 'ktsvc-06',
-    consultantName: 'KTS. Đỗ Hải Yến',
+    consultantName: 'KTS. Trần Văn Hùng',
     customerName: 'Ngô Kim Chi',
     phone: '0955443322',
     date: '2026-08-21',
@@ -269,7 +269,7 @@ export const BOOKINGS_SEED: CmsBooking[] = [
   {
     id: 'BOOK-0008',
     consultantId: 'ktsvc-02',
-    consultantName: 'KTS. Trần Thu Hà',
+    consultantName: 'KTS. Đặng Thị Lan Hương',
     customerName: 'Phạm Thu Trang',
     phone: '0922334455',
     date: '2026-08-19',

@@ -10,9 +10,10 @@ import {
   Building2,
   Check,
   Clock,
-  FileText,
+  Headphones,
   HardHat,
   Info,
+  MessageCircle,
   Minus,
   MousePointerClick,
   QrCode,
@@ -29,9 +30,11 @@ import type { Locale } from '@/i18n/routing'
 import { formatPriceTag } from '@/shared/utils'
 import { giftValueInMillions } from '../services/plan-gift.service'
 import { PlanGiftDialog } from './plan-gift-dialog'
-import type { PlanTier } from '@/shared/cms'
+import { cmsText, useCmsDocument, type PlanTier } from '@/shared/cms'
+import { useChatContextStore } from '@/shared/chat-context'
 import { Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import { siteConfig } from '@/shared/config/site'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { checkoutConfirmRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
@@ -94,6 +97,10 @@ export function PlanPricing() {
 
 function PlanPricingContent() {
   const t = useTranslations('plans')
+  const settings = useCmsDocument('settings')
+  const hotline = cmsText(settings.hotline, siteConfig.contact.hotline)
+  const setAssistantOpen = useChatContextStore((s) => s.setPanelOpen)
+  const setAssistantSuppressed = useChatContextStore((s) => s.setDockSuppressed)
   const { data: plans, isPending } = usePlans()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.design', { offsetMs: 120 })
 
@@ -136,22 +143,37 @@ function PlanPricingContent() {
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: reduceMotion ? 0.01 : 0.6, delay: reduceMotion ? 0 : 0.55, ease: pricingEase }}
       >
+        {/* Góp ý BuildX (BG07): dải giữa trang không còn đẩy thẳng vào thanh toán gói
+            PLUS — mời tư vấn chọn gói qua tổng đài hoặc trợ lý AI. */}
         <div className='flex items-center gap-4'>
-          {/* Hình S01: dải CTA mở đầu bằng một icon hồ sơ trong ô bo góc. */}
           <span className='bg-card text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border'>
-            <FileText aria-hidden className='plan-document size-5' />
+            <Headphones aria-hidden className='plan-document size-5' />
           </span>
           <div>
             <p className='font-semibold text-pretty'>{t('ctaBand.title')}</p>
             <p className='text-muted-foreground text-sm text-pretty'>{t('ctaBand.subtitle')}</p>
           </div>
         </div>
-        <Button asChild size='lg' className='brand-green-button plan-cta-action'>
-          <Link href={checkoutConfirmRoute('advanced')} onClick={() => rememberCheckoutReturn('advanced')}>
-            {t('ctaBand.action')}
-            <ArrowRight className='plan-cta-arrow size-4' />
-          </Link>
-        </Button>
+        <div className='grid w-full gap-2 sm:flex sm:w-auto sm:gap-3'>
+          <Button asChild size='lg' className='brand-green-button plan-cta-action'>
+            <a href={`tel:${hotline.replace(/\s/g, '')}`}>
+              <Headphones className='size-4' />
+              {t('ctaBand.call', { hotline })}
+            </a>
+          </Button>
+          <Button
+            type='button'
+            size='lg'
+            variant='outline'
+            onClick={() => {
+              setAssistantSuppressed(false)
+              setAssistantOpen(true)
+            }}
+          >
+            <MessageCircle className='size-4' />
+            {t('ctaBand.chat')}
+          </Button>
+        </div>
       </motion.section>
 
       {plans ? <ComparisonTable plans={plans} /> : null}

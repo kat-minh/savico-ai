@@ -1,14 +1,15 @@
 'use client'
 
 import { CheckCircle2, FileText, History, ImageIcon, MessageSquare, Send, Upload } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import type { Locale } from '@/i18n/routing'
 import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/utils'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDayMonth, formatDisplayDate, formatDisplayDateTime } from '@/shared/utils'
 import { useStageLabel } from '../hooks/use-stage-label'
 import { useStageActions } from '../hooks/use-supervision'
 import { canUpload, daysUntil, isLocked, stageConfirmDrift, stageVersions } from '../services/supervision.service'
@@ -38,6 +39,7 @@ const ROLE_SUPERVISOR = 'GS'
 
 export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
   const t = useTranslations('supervision.dashboard.stage')
+  const locale = useLocale() as Locale
   const tStages = useStageLabel()
   const tChange = useTranslations('supervision.dashboard.change')
   const tStatus = useTranslations('supervision.dashboard.status')
@@ -124,8 +126,8 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
           ) : null}
           <span className='text-muted-foreground'>
             {t('planned', {
-              start: formatDayMonth(stage.plannedStart, { year: true }),
-              end: formatDayMonth(stage.plannedEnd, { year: true }),
+              start: formatDisplayDate(stage.plannedStart, locale),
+              end: formatDisplayDate(stage.plannedEnd, locale),
               days: plannedDays
             })}
           </span>
@@ -143,7 +145,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
           <p className='font-medium'>{t('upcomingTitle')}</p>
           <p className='text-muted-foreground mt-1 text-sm text-pretty'>
             {t('upcomingBody', {
-              date: formatDayMonth(stage.plannedStart, { year: true }),
+              date: formatDisplayDate(stage.plannedStart, locale),
               days: Math.max(0, daysUntil(stage.plannedStart)),
               previous: stage.index - 1
             })}
@@ -161,7 +163,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
           <p className='min-w-0 flex-1 text-sm text-pretty'>
             {tChange.rich('banner', {
               code: pendingForCustomer.id,
-              due: pendingForCustomer.dueAt ? formatDayMonth(pendingForCustomer.dueAt, { year: true }) : '—',
+              due: pendingForCustomer.dueAt ? formatDisplayDate(pendingForCustomer.dueAt, locale) : '—',
               version: stage.version,
               b: (chunks) => <b className='font-semibold'>{chunks}</b>
             })}
@@ -194,7 +196,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
           <section className='border-primary/30 bg-primary/5 rounded-xl border p-4'>
             <p className='text-sm text-pretty'>
               {t.rich('lockedNotice', {
-                date: formatDayMonth(stage.inspection.confirmedAt, { time: true }),
+                date: formatDisplayDateTime(stage.inspection.confirmedAt, locale),
                 version: stage.version,
                 b: (chunks) => <b className='font-semibold'>{chunks}</b>
               })}
@@ -268,7 +270,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
               <div className='min-w-0 flex-1'>
                 <p className='text-muted-foreground text-xs'>
                   <span className='text-foreground font-medium'>{item.author}</span> ·{' '}
-                  {formatDayMonth(item.at, { time: true })}
+                  {formatDisplayDateTime(item.at, locale)}
                   {item.changeRequestId ? (
                     <span className='bg-warning/20 text-warning-strong ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium'>
                       {item.changeRequestId}
@@ -319,7 +321,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
             </span>
             <div className='min-w-0 flex-1'>
               <p className='text-primary-strong text-xs font-medium'>
-                {tStatus('confirmed')} · {formatDayMonth(stage.inspection.confirmedAt, { time: true })} ·{' '}
+                {tStatus('confirmed')} · {formatDisplayDateTime(stage.inspection.confirmedAt, locale)} ·{' '}
                 {stage.inspection.engineer}
                 {stage.inspection.onSite ? ` · ${t('inspectionVisited')}` : ''}
               </p>
@@ -356,7 +358,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
                 key={item.version}
                 className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-xs font-medium'
               >
-                {item.version} · {formatDayMonth(item.at, { time: true })}
+                {item.version} · {formatDisplayDateTime(item.at, locale)}
               </li>
             ))}
           </ul>
@@ -374,7 +376,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
                     item.milestone ? 'bg-primary' : 'bg-muted-foreground/40'
                   )}
                 />
-                <span className='text-muted-foreground font-mono'>{formatDayMonth(item.at, { time: true })}</span>
+                <span className='text-muted-foreground font-mono'>{formatDisplayDateTime(item.at, locale)}</span>
                 <span className='bg-muted rounded px-1.5 py-0.5 font-medium'>{item.actor}</span>
                 <span className={cn('min-w-0 flex-1 text-pretty', item.milestone && 'font-medium')}>{item.text}</span>
               </li>
@@ -392,7 +394,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
                 <p className='flex flex-wrap items-center gap-2 text-xs'>
                   <span className='font-mono font-medium'>{request.id}</span>
                   <span className='bg-muted rounded px-1.5 py-0.5'>{request.by}</span>
-                  <span className='text-muted-foreground'>{formatDayMonth(request.proposedAt, { time: true })}</span>
+                  <span className='text-muted-foreground'>{formatDisplayDateTime(request.proposedAt, locale)}</span>
                   <span
                     className={cn(
                       'rounded px-1.5 py-0.5 font-medium',
@@ -438,6 +440,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
 /** Một ô ảnh/tài liệu trong khối "Ảnh & tài liệu". */
 function StageFileCard({ file }: { file: StageFile }) {
   const t = useTranslations('supervision.dashboard.stage')
+  const locale = useLocale() as Locale
 
   return (
     <li className='overflow-hidden rounded-xl border'>
@@ -460,7 +463,7 @@ function StageFileCard({ file }: { file: StageFile }) {
       <div className='space-y-1 p-3'>
         <p className='text-sm text-pretty'>{file.name}</p>
         <p className='text-muted-foreground text-[11px]'>
-          {formatDayMonth(file.capturedAt ?? file.uploadedAt, { time: true })}
+          {formatDisplayDateTime(file.capturedAt ?? file.uploadedAt, locale)}
         </p>
         <div className='flex flex-wrap gap-1.5'>
           {file.fromInspection ? (

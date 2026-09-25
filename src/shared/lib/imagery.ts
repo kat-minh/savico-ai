@@ -242,13 +242,17 @@ export const HOME_IMAGE = {
   dossierGarden: '/images/placeholder-hero.svg'
 } as const
 
+/** Banner đầu trang Cẩm nang "Hiểu rõ từng bước xây nhà" — ảnh khách gửi (góp ý CN02). */
+export const HANDBOOK_IMAGE = {
+  banner: '/images/handbook/banner.webp'
+} as const
+
 /**
- * Ảnh minh hoạ nền cho khối hero trang "Tìm nhà thầu" (Hình S09): một tấm bản
- * đồ / ảnh chụp khu dân cư từ trên cao, KHÔNG phải bản đồ tương tác — thẻ nhà
- * thầu được đặt nổi lên trên bằng CSS.
+ * Ảnh banner khối hero trang "Tìm nhà thầu" — ảnh khách gửi trong sheet góp ý
+ * BuildX. Thẻ nhà thầu được đặt nổi lên trên bằng CSS.
  */
 export const MAP_IMAGE = {
-  contractors: photo('photo-1449824913935-59a10b8d2000', 1200)
+  contractors: '/images/contractors/hero-banner.webp'
 } as const
 
 /**
@@ -298,6 +302,7 @@ export const SITE_IMAGE = {
   ...prefixed('plan', PLAN_IMAGE),
   ...prefixed('interior3d', INTERIOR_RENDER),
   ...prefixed('map', MAP_IMAGE),
+  ...prefixed('handbook', HANDBOOK_IMAGE),
   ...prefixed('home', HOME_IMAGE),
   ...prefixed('brand', BRAND_IMAGE)
 } as Prefixed<'style', typeof STYLE_IMAGE> &
@@ -312,6 +317,7 @@ export const SITE_IMAGE = {
   Prefixed<'plan', typeof PLAN_IMAGE> &
   Prefixed<'interior3d', typeof INTERIOR_RENDER> &
   Prefixed<'map', typeof MAP_IMAGE> &
+  Prefixed<'handbook', typeof HANDBOOK_IMAGE> &
   Prefixed<'home', typeof HOME_IMAGE> &
   Prefixed<'brand', typeof BRAND_IMAGE>
 

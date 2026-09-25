@@ -18,7 +18,7 @@ import type { CmsTransaction, CmsTransactionStatus } from '@/shared/cms'
 import { useCmsCollection } from '@/shared/cms'
 import { checkoutPaymentRoute, ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatCurrency, formatDayMonth } from '@/shared/utils'
+import { formatCurrency, formatDisplayDate, formatDisplayDateTime, formatDisplayTime } from '@/shared/utils'
 import { useAccountPlan } from '../hooks/use-account-plan'
 import { usePurchaseHistory } from '../hooks/use-purchase-history'
 
@@ -195,7 +195,7 @@ export function PurchaseHistory() {
         {
           code: receipt.id,
           receiptHeading: t('receiptDialog.receiptHeading', { code: receipt.id }),
-          issuedAt: formatDayMonth(receipt.createdAt, { year: true, time: true }).replace(' ', ' · '),
+          issuedAt: formatDisplayDateTime(receipt.createdAt, locale),
           buyerName: user?.name ?? receipt.customerName,
           ...(user?.phone ? { buyerPhone: user.phone } : {}),
           buyerEmail: user?.email ?? receipt.customerEmail,
@@ -282,7 +282,7 @@ export function PurchaseHistory() {
                 </div>
                 {history?.subscription ? (
                   <p className='text-muted-foreground mt-0.5 text-[11px]'>
-                    {formatDayMonth(history.subscription.startedAt, { year: true })}
+                    {formatDisplayDate(history.subscription.startedAt, locale)}
                   </p>
                 ) : null}
               </div>
@@ -320,7 +320,7 @@ export function PurchaseHistory() {
               <div className='flex flex-wrap items-center justify-between gap-2'>
                 <span className='text-muted-foreground text-[11px]'>
                   {t('designOrderMeta', {
-                    date: formatDayMonth(plan.expiresAt, { year: true }),
+                    date: formatDisplayDate(plan.expiresAt, locale),
                     order: history?.designOrderId ?? '—'
                   })}
                 </span>
@@ -396,7 +396,7 @@ export function PurchaseHistory() {
             <div className='mt-4 flex flex-1 items-end justify-between gap-3'>
               <p className='text-muted-foreground max-w-[72%] text-[11px] leading-relaxed text-pretty'>
                 {t('supervisionOrderMeta', {
-                  date: formatDayMonth(history?.supervisionExpiresAt ?? supervision.expiresAt, { year: true }),
+                  date: formatDisplayDate(history?.supervisionExpiresAt ?? supervision.expiresAt, locale),
                   order: history?.supervisionOrderId ?? '—',
                   pendingOrder: history?.pendingSupervisionOrderId ?? '—'
                 })}
@@ -474,12 +474,9 @@ export function PurchaseHistory() {
                     >
                       <td className='px-4 py-3 font-mono text-xs font-semibold'>#{transaction.id}</td>
                       <td className='px-4 py-3 text-xs'>
-                        <div>{formatDayMonth(transaction.createdAt, { year: true })}</div>
+                        <div>{formatDisplayDate(transaction.createdAt, locale)}</div>
                         <div className='text-muted-foreground mt-0.5'>
-                          {new Date(transaction.createdAt).toLocaleTimeString(locale, {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          {formatDisplayTime(transaction.createdAt, locale)}
                         </div>
                       </td>
                       <td className='px-4 py-3'>
@@ -543,7 +540,7 @@ export function PurchaseHistory() {
                   </div>
                   <div className='flex items-end justify-between gap-3'>
                     <div className='text-muted-foreground text-xs'>
-                      <p>{formatDayMonth(transaction.createdAt, { year: true, time: true })}</p>
+                      <p>{formatDisplayDateTime(transaction.createdAt, locale)}</p>
                       {transaction.note ? <p className='mt-1 text-pretty'>{transaction.note}</p> : null}
                     </div>
                     <p className='shrink-0 text-sm font-semibold'>{formatCurrency(transaction.amount, locale)}</p>
@@ -636,7 +633,7 @@ export function PurchaseHistory() {
 
                   <dl className='divide-y'>
                     <ReceiptRow label={t('receiptDialog.time')}>
-                      {formatDayMonth(receipt.createdAt, { year: true, time: true }).replace(' ', ' · ')}
+                      {formatDisplayDateTime(receipt.createdAt, locale)}
                     </ReceiptRow>
 
                     <ReceiptRow label={t('receiptDialog.buyer')}>

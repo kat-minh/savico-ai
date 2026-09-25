@@ -44,7 +44,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { contractorReviewRoute, ROUTES } from '@/shared/constants/routes'
 import { useGetProvinces, useGetWards } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { formatBudgetShort, formatDigitGroups } from '@/shared/utils'
+import { formatBudgetShort, formatDigitGroups, formatDisplayTime } from '@/shared/utils'
 import { formatFileSize } from '../services/brief.service'
 import {
   BRIEF_FILE_ACCEPT,
@@ -361,7 +361,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
     lastSavedPayload.current = signature
     save.mutate(payload, {
       onSuccess: () => {
-        setDraftSavedAt(new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date()))
+        setDraftSavedAt(formatDisplayTime(new Date(), locale))
         window.setTimeout(() => setDraftSavedAt(null), 2500)
       },
       onError: () => {
