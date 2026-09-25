@@ -1232,7 +1232,7 @@ export function ContractorLanding() {
             <div className='relative flex flex-wrap items-center gap-2'>
               <Button
                 variant='outline'
-                className='border-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent'
+                className='ring-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent bg-none shadow-none before:hidden after:hidden'
                 onClick={openPicker}
               >
                 {t('switchBrief')}
