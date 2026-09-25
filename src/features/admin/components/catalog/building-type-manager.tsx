@@ -3,13 +3,10 @@
 import {
   Alert,
   App,
-  Col,
   Descriptions,
   Form,
   Input,
-  InputNumber,
   Radio,
-  Row,
   Segmented,
   Select,
   Space,
@@ -28,6 +25,7 @@ import {
   buildingTypeProblem,
   buildingTypeUsage,
   floorOptionUsage,
+  removedFloorOptionImpact,
   sameName,
   type CatalogUsageSources
 } from '../../services/catalog.service'
@@ -37,6 +35,9 @@ import { ResourceManager } from '../common/resource-manager'
 const { Text } = Typography
 
 const ATTIC_MODES: CmsAtticMode[] = ['none', 'choice', 'fixed-yes', 'fixed-no']
+
+/** Đo độ dài sau khi bỏ khoảng trắng hai đầu — giá trị lưu cũng được cắt như vậy. */
+const trimmed = (value: unknown) => (typeof value === 'string' ? value.trim() : value)
 
 type Filter = 'all' | 'yes' | 'no'
 
@@ -204,6 +205,22 @@ export function BuildingTypeManager() {
           if (next.status === 'active') return problemText(next)
           return null
         }}
+        confirmSave={(next, current, isNew) => {
+          if (isNew) return null
+          // Bỏ phương án Số tầng mà hồ sơ cũ đang dùng → báo số hồ sơ bị ảnh hưởng trước khi lưu (§5).
+          const impact = removedFloorOptionImpact(current, next, sources.projects)
+          if (impact.length === 0) return null
+          return (
+            <Space orientation='vertical' size={4}>
+              {impact.map((item) => (
+                <Text key={item.optionId}>
+                  {t('buildingTypes.removedOptionImpact', { option: floorLabel(item.optionId), count: item.projects })}
+                </Text>
+              ))}
+              <Text type='secondary'>{t('buildingTypes.historyNote')}</Text>
+            </Space>
+          )
+        }}
         deleteBlockedReason={(item) => (buildingTypeUsage(item, sources) > 0 ? t('buildingTypes.deleteBlocked') : null)}
         deleteConfirm={(item) => t('buildingTypes.deleteConfirm', { name: item.label })}
         rowActions={(item) => {
@@ -300,40 +317,32 @@ function BuildingTypeFields({ form, floorOptions }: { form: FormInstance; floorO
 
   return (
     <>
+      {/* Độ dài tính SAU khi bỏ khoảng trắng hai đầu (§2) — `transform` cắt trước khi đo. */}
       <Form.Item
         name='label'
         label={t('buildingTypes.name')}
         rules={[
           { required: true, whitespace: true, message: t('fields.requiredMessage') },
-          { max: 100, message: t('fields.maxLength', { max: 100 }) }
+          { max: 100, transform: trimmed, message: t('fields.maxLength', { max: 100 }) }
         ]}
       >
-        <Input maxLength={100} showCount />
+        <Input />
       </Form.Item>
       <Form.Item
         name='description'
         label={t('buildingTypes.descriptionField')}
-        rules={[{ max: 500, message: t('fields.maxLength', { max: 500 }) }]}
+        rules={[{ max: 500, transform: trimmed, message: t('fields.maxLength', { max: 500 }) }]}
       >
-        <Input.TextArea rows={2} maxLength={500} showCount />
+        <Input.TextArea rows={2} />
       </Form.Item>
-      <Row gutter={16}>
-        <Col xs={12}>
-          <Form.Item name='status' label={t('buildingTypes.status')} extra={t('buildingTypes.statusHint')}>
-            <Select
-              options={(['active', 'inactive'] as const).map((value) => ({
-                value,
-                label: t(`catalogStatus.${value}`)
-              }))}
-            />
-          </Form.Item>
-        </Col>
-        <Col xs={12}>
-          <Form.Item name='order' label={t('buildingTypes.order')}>
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-        </Col>
-      </Row>
+      <Form.Item name='status' label={t('buildingTypes.status')} extra={t('buildingTypes.statusHint')}>
+        <Select
+          options={(['active', 'inactive'] as const).map((value) => ({
+            value,
+            label: t(`catalogStatus.${value}`)
+          }))}
+        />
+      </Form.Item>
 
       <Text strong style={{ display: 'block', margin: '8px 0 12px' }}>
         {t('buildingTypes.floors')}
@@ -349,11 +358,25 @@ function BuildingTypeFields({ form, floorOptions }: { form: FormInstance; floorO
           <Form.Item name={['floors', 'required']} valuePropName='checked' label={t('buildingTypes.floorsRequired')}>
             <Switch />
           </Form.Item>
+          {/* Loại Ngừng hoạt động được lưu cấu hình dở dang; chỉ khi kích hoạt mới
+              bắt buộc đủ phương án — lỗi hiện ngay tại khu vực Số tầng (§8). */}
           <Form.Item
             name={['floors', 'optionIds']}
             label={t('buildingTypes.floorOptions')}
             extra={t('buildingTypes.floorOptionsHint')}
-            rules={[{ required: true, type: 'array', min: 1, message: t('buildingTypes.problems.floorsEmpty') }]}
+            dependencies={['status']}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator: (_, value: string[] | undefined) => {
+                  if (getFieldValue('status') !== 'active') return Promise.resolve()
+                  const problem = buildingTypeProblem(
+                    { floors: { applies: true, required: false, optionIds: value ?? [] } },
+                    floorOptions
+                  )
+                  return problem ? Promise.reject(new Error(t(`buildingTypes.problems.${problem}`))) : Promise.resolve()
+                }
+              })
+            ]}
           >
             <Select mode='multiple' options={selectable} />
           </Form.Item>
@@ -415,7 +438,6 @@ function FloorOptionTable({
       title={t('floorOptions.title')}
       description={t('floorOptions.description')}
       drawerWidth={440}
-      searchText={(item) => item.label}
       createItem={(): CmsFloorOption => ({
         id: newAdminId('floor'),
         label: '',
@@ -473,13 +495,10 @@ function FloorOptionTable({
             label={t('floorOptions.label')}
             rules={[
               { required: true, whitespace: true, message: t('fields.requiredMessage') },
-              { max: 100, message: t('fields.maxLength', { max: 100 }) }
+              { max: 100, transform: trimmed, message: t('fields.maxLength', { max: 100 }) }
             ]}
           >
-            <Input maxLength={100} />
-          </Form.Item>
-          <Form.Item name='order' label={t('buildingTypes.order')}>
-            <InputNumber min={1} style={{ width: '100%' }} />
+            <Input />
           </Form.Item>
           <Text type='secondary' style={{ fontSize: 12 }}>
             {t('floorOptions.historyNote')}

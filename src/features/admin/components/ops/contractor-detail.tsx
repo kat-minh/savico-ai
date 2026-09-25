@@ -4,11 +4,13 @@ import {
   ArrowLeftOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
+  DeleteOutlined,
   EditOutlined,
   SafetyCertificateFilled,
   StopOutlined
 } from '@ant-design/icons'
 import {
+  Alert,
   App,
   Avatar,
   Button,
@@ -21,28 +23,32 @@ import {
   Input,
   List,
   Modal,
+  Popconfirm,
   Result,
   Skeleton,
   Space,
   Table,
   Tabs,
   Tag,
+  Tooltip,
   Typography
 } from 'antd'
 import dayjs from 'dayjs'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import type { CmsContractorHistoryEntry } from '@/shared/cms'
 import { ADMIN_ROUTES } from '@/shared/constants'
-import { useAdminCollection } from '../../hooks/use-admin-data'
+import { useAdminCollection, useDeleteAdminItem } from '../../hooks/use-admin-data'
 import { useContractorSave } from '../../hooks/use-contractor-save'
 import { todayKey } from '../../services/admin.service'
 import {
   CONTRACTOR_HISTORY_ACTIONS,
   composeLocation,
-  legalStatusOf,
+  hasRelatedData,
+  hasValidCoordinates,
+  licenseStatusOf,
   verificationGaps,
   visibilityProblem,
   type ContractorHistoryAction,
@@ -51,7 +57,7 @@ import {
 import { AdminPage } from '../common/admin-page'
 import { ContractorFields, PHOTO_SLOTS, useOpenInvitations } from './contractor-fields'
 import { ContractorLegal } from './contractor-legal'
-import { LEGAL_TAG, useProfileCommit } from './contractor-manager'
+import { useProfileCommit } from './contractor-manager'
 import { ContractorPartnership } from './contractor-partnership'
 import { ContractorProjects } from './contractor-projects'
 
@@ -78,6 +84,8 @@ export function ContractorDetail({ id }: { id: string }) {
   const openInvitations = useOpenInvitations()
   const { commit, isPending } = useContractorSave()
   const profileCommit = useProfileCommit()
+  const remove = useDeleteAdminItem('contractors')
+  const router = useRouter()
   const [form] = Form.useForm()
   const [reasonForm] = Form.useForm<{ reason: string }>()
   const [editing, setEditing] = useState(false)
@@ -104,7 +112,8 @@ export function ContractorDetail({ id }: { id: string }) {
 
   const today = todayKey()
   const gaps = verificationGaps(contractor, today)
-  const legalStatus = legalStatusOf(contractor, today)
+  const licenseExpired = licenseStatusOf(contractor.legalProfile, today) === 'expired'
+  const deleteBlocked = hasRelatedData(contractor, openInvitations.all.get(contractor.id) ?? 0)
   const typeLabel = (typeId: string) => {
     const type = buildingTypes.find((item) => item.id === typeId)
     if (!type) return typeId
@@ -132,6 +141,13 @@ export function ContractorDetail({ id }: { id: string }) {
     )
     message.success(t('contractors.verifiedToast'))
     setVerifying(false)
+  }
+
+  // Chỉ xóa khi chưa phát sinh dự án, xác minh, lời mời hay hợp tác; ngược lại dùng Ẩn (§11).
+  const deleteContractor = async () => {
+    await remove.mutateAsync(contractor.id)
+    message.success(t('contractors.deletedToast'))
+    router.push(ADMIN_ROUTES.CONTRACTORS)
   }
 
   const submitUnverify = async () => {
@@ -239,11 +255,6 @@ export function ContractorDetail({ id }: { id: string }) {
                   {contractor.acceptingProjects ? t('contractors.acceptingOn') : t('contractors.acceptingOff')}
                 </Tag>
               )
-            },
-            {
-              key: 'warranty',
-              label: t('contractors.warranty'),
-              children: t('contractorLegal.warrantyValue', { months: contractor.warrantyMonths })
             }
           ]}
         />
@@ -302,12 +313,21 @@ export function ContractorDetail({ id }: { id: string }) {
             {
               key: 'hq',
               label: t('contractors.headquarters'),
-              children: contractor.headquarters?.provinceCode
-                ? t('contractors.locationLine', {
-                    address: composeLocation(contractor.headquarters),
-                    radius: contractor.headquarters.radiusKm ?? '-'
-                  })
-                : '-'
+              children: contractor.headquarters?.provinceCode ? (
+                <Space size={6} wrap>
+                  <Text>
+                    {t('contractors.locationLine', {
+                      address: composeLocation(contractor.headquarters),
+                      radius: contractor.headquarters.radiusKm ?? '-'
+                    })}
+                  </Text>
+                  {hasValidCoordinates(contractor.headquarters) ? null : (
+                    <Tag color='orange'>{t('contractors.coordsInvalid')}</Tag>
+                  )}
+                </Space>
+              ) : (
+                '-'
+              )
             },
             ...(contractor.branches ?? []).map((branch) => ({
               key: branch.id,
@@ -321,6 +341,7 @@ export function ContractorDetail({ id }: { id: string }) {
                     })}
                   </Text>
                   {branch.active ? null : <Tag>{t('contractors.branchInactive')}</Tag>}
+                  {hasValidCoordinates(branch) ? null : <Tag color='orange'>{t('contractors.coordsInvalid')}</Tag>}
                 </Space>
               )
             }))
@@ -411,6 +432,25 @@ export function ContractorDetail({ id }: { id: string }) {
               {t('contractors.verify')}
             </Button>
           )}
+          {deleteBlocked ? (
+            <Tooltip title={t('contractors.deleteBlocked')}>
+              <Button danger icon={<DeleteOutlined />} disabled>
+                {t('contractors.delete')}
+              </Button>
+            </Tooltip>
+          ) : (
+            <Popconfirm
+              title={t('contractors.deleteConfirm', { name: contractor.name })}
+              okText={t('actions.confirm')}
+              okButtonProps={{ danger: true, loading: remove.isPending }}
+              cancelText={t('actions.cancel')}
+              onConfirm={deleteContractor}
+            >
+              <Button danger icon={<DeleteOutlined />}>
+                {t('contractors.delete')}
+              </Button>
+            </Popconfirm>
+          )}
         </>
       }
     >
@@ -435,12 +475,6 @@ export function ContractorDetail({ id }: { id: string }) {
               <Tag color={contractor.verified ? 'green' : 'gold'}>
                 {contractor.verified ? t('contractors.verified') : t('contractors.unverified')}
               </Tag>
-              <Tag color={LEGAL_TAG[legalStatus]}>
-                {t('contractors.legalStatus')}: {t(`contractorLegal.${legalStatus}`)}
-              </Tag>
-              <Tag color={contractor.acceptingProjects ? 'green' : 'default'}>
-                {contractor.acceptingProjects ? t('contractors.acceptingOn') : t('contractors.acceptingOff')}
-              </Tag>
               <Tag color={contractor.hidden ? 'default' : 'blue'}>
                 {contractor.hidden ? t('contractors.hiddenTag') : t('contractors.visible')}
               </Tag>
@@ -453,6 +487,8 @@ export function ContractorDetail({ id }: { id: string }) {
           </div>
         </div>
       </Card>
+
+      {licenseExpired ? <Alert type='warning' showIcon title={t('contractors.licenseExpiredWarning')} /> : null}
 
       <Tabs
         activeKey={tab}

@@ -28,6 +28,7 @@ import {
   Search,
   Send,
   ShieldCheck,
+  Star,
   Users,
   X
 } from 'lucide-react'
@@ -38,6 +39,7 @@ import { createPortal } from 'react-dom'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
+import { useCmsCollection } from '@/shared/cms'
 import { Photo, revealContainerVariants, revealEase, revealItemVariants, RevealPhoto } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
@@ -537,7 +539,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                       size='sm'
                     />
                   }
-                  detailed
                 />
               ) : null}
               {tab === 'legal' ? (
@@ -580,7 +581,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                     <>
                       <IntroCard contractor={contractor} onOpenPhoto={setActivePhotoIndex} />
                       <PartnershipSummary contractor={contractor} />
-                      <FeaturedProjects contractor={contractor} />
                       <LegalChecks contractor={contractor} />
                     </>
                   ) : null}
@@ -1084,328 +1084,257 @@ function PartnershipSummary({ contractor }: { contractor: Contractor }) {
   )
 }
 
-/** Khối "Dự án tiêu biểu": ảnh bên trái, tên + năm + liên kết bên phải. */
-function FeaturedProjects({
-  contractor,
-  filter,
-  onClearFilter,
-  inviteAction,
-  detailed = false
-}: {
-  contractor: Contractor
-  filter?: string | null
-  onClearFilter?: () => void
-  inviteAction?: React.ReactNode
-  detailed?: boolean
-}) {
+/**
+ * Tab "Dự án đã thực hiện" (epic ContractorManagement §2, §7, §12): tổng số và số
+ * đã xác minh đếm từ chính danh sách dự án đang hiển thị, lọc theo Loại công
+ * trình trong danh mục dùng chung, badge Đã xác minh / Nổi bật trên thẻ. Tab
+ * Tổng quan không có khối dự án riêng.
+ */
+function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor; inviteAction?: React.ReactNode }) {
   const t = useTranslations('contractors.firm')
   const reduceMotion = useReducedMotion()
+  const { typeLabel, scaleOf } = useProjectLabels()
   const [selectedProject, setSelectedProject] = useState<ContractorProject | null>(null)
   const [verifiedOnly, setVerifiedOnly] = useState(false)
-  const [category, setCategory] = useState<'all' | NonNullable<ContractorProject['category']>>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
   const [projectSort, setProjectSort] = useState<'latest' | 'oldest'>('latest')
   const [showAllProjects, setShowAllProjects] = useState(false)
-  /* Giữ nguyên toàn bộ nội dung. Khi có tag, dự án khớp được đưa lên đầu để người dùng
-     vẫn nhìn thấy hồ sơ đầy đủ và thấy rõ chuyển động sắp xếp của các thẻ. */
-  const projects = [...contractor.featuredProjects]
+  const allProjects = contractor.featuredProjects
+  const projects = [...allProjects]
     .filter((project) => !verifiedOnly || project.verified)
-    .filter((project) => category === 'all' || project.category === category)
-    .sort((left, right) => {
-      const filterPriority = filter
-        ? Number(Boolean(right.tags?.includes(filter))) - Number(Boolean(left.tags?.includes(filter)))
-        : 0
-      return filterPriority || (projectSort === 'latest' ? right.year - left.year : left.year - right.year)
-    })
+    .filter((project) => typeFilter === 'all' || project.buildingTypeId === typeFilter)
+    .sort((left, right) => (projectSort === 'latest' ? right.year - left.year : left.year - right.year))
 
+  const typeCounts = new Map<string, number>()
+  for (const project of allProjects) {
+    if (project.buildingTypeId)
+      typeCounts.set(project.buildingTypeId, (typeCounts.get(project.buildingTypeId) ?? 0) + 1)
+  }
   const projectFilters = [
-    { key: 'all' as const, count: contractor.similarProjects },
-    ...(['house', 'villa', 'renovation', 'factory'] as const).map((key) => ({
+    { key: 'all', label: t('projects.filters.all', { count: allProjects.length }) },
+    ...[...typeCounts].map(([key, count]) => ({
       key,
-      count: contractor.featuredProjects.filter((project) => project.category === key).length
+      label: t('projects.filters.type', { label: typeLabel(key), count })
     }))
   ]
   const visibleProjects = showAllProjects ? projects : projects.slice(0, 6)
   const moreCount = Math.max(0, projects.length - visibleProjects.length)
-  const resultsKey = `${verifiedOnly}-${category}-${projectSort}-${filter ?? 'all'}`
-
-  if (detailed) {
-    return (
-      <>
-        <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-          className='border-t px-4 py-5 sm:px-5 sm:py-6'
-        >
-          <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
-            <p className='text-sm'>
-              <strong className='font-semibold'>
-                {t('projects.projectCount', { count: contractor.similarProjects })}
-              </strong>
-              <span className='text-muted-foreground'>
-                {' '}
-                · {t('projects.verifiedSummary', { count: contractor.verifiedProjects })}
-              </span>
-            </p>
-
-            <div className='flex flex-wrap items-center gap-3'>
-              <label className='hover:bg-muted/40 flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors'>
-                <Checkbox
-                  checked={verifiedOnly}
-                  onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
-                  aria-label={t('projects.verifiedOnly')}
-                />
-                <span>{t('projects.verifiedOnly')}</span>
-              </label>
-              <Select value={projectSort} onValueChange={(value) => setProjectSort(value as 'latest' | 'oldest')}>
-                <SelectTrigger className='w-36' aria-label={t('projects.sortLabel')}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='latest'>{t('projects.sortLatest')}</SelectItem>
-                  <SelectItem value='oldest'>{t('projects.sortOldest')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className='mt-4 flex gap-2 overflow-x-auto pb-1' role='group' aria-label={t('projects.filterLabel')}>
-            {projectFilters.map((item) => (
-              <button
-                key={item.key}
-                type='button'
-                aria-pressed={category === item.key}
-                onClick={() => setCategory(item.key)}
-                className={cn(
-                  'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-[0.98]',
-                  category === item.key
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'hover:border-primary/40 hover:text-primary-strong bg-background'
-                )}
-              >
-                {t(`projects.filters.${item.key}`, { count: item.count })}
-              </button>
-            ))}
-          </div>
-
-          {filter ? (
-            <button
-              type='button'
-              onClick={onClearFilter}
-              className='bg-primary/10 text-primary-strong mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'
-            >
-              {filter}
-              <X className='size-3' />
-              <span className='sr-only'>{t('clearProjectFilter')}</span>
-            </button>
-          ) : null}
-
-          {projects.length ? (
-            <motion.ul
-              key={resultsKey}
-              layout
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
-              className='mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3'
-            >
-              <AnimatePresence mode='popLayout'>
-                {visibleProjects.map((project, index) => (
-                  <motion.li
-                    layout
-                    initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    whileHover={reduceMotion ? undefined : { y: -3 }}
-                    transition={{
-                      duration: reduceMotion ? 0 : 0.26,
-                      delay: reduceMotion ? 0 : Math.min(index % 6, 5) * 0.045,
-                      ease: revealEase
-                    }}
-                    key={project.id}
-                    className='overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-[0_14px_28px_-22px_rgba(42,117,63,0.62)]'
-                  >
-                    <button
-                      type='button'
-                      onClick={() => setSelectedProject(project)}
-                      className='group block size-full text-left active:scale-[0.995]'
-                    >
-                      <div className='bg-muted/30 relative aspect-[16/9] overflow-hidden'>
-                        {project.imageUrl ? (
-                          <RevealPhoto
-                            src={project.imageUrl}
-                            alt={project.name}
-                            className='size-full transition-transform duration-300 group-hover:scale-[1.02]'
-                            sizes='(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 260px'
-                          />
-                        ) : (
-                          <div className='flex size-full items-center justify-center'>
-                            <ImageIcon className='text-muted-foreground/45 size-8' />
-                          </div>
-                        )}
-                        {project.verified ? (
-                          <span className='bg-background/95 text-primary-strong absolute top-2 left-2 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
-                            <CircleCheck className='size-3.5' />
-                            {t('projects.verifiedBadge')}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className='p-3'>
-                        <h3 className='group-hover:text-primary-strong text-sm font-semibold transition-colors'>
-                          {project.name}
-                        </h3>
-                        {project.tags?.length ? (
-                          <div className='mt-2 flex flex-wrap gap-1.5'>
-                            {project.tags.slice(0, 2).map((tag) => (
-                              <span
-                                key={tag}
-                                className='bg-muted rounded-md px-2 py-1 text-[11px] text-muted-foreground'
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                        <div className='text-muted-foreground mt-3 flex flex-wrap items-center gap-y-1 text-xs'>
-                          {project.dimensions ? <span className='pr-2'>{project.dimensions}</span> : null}
-                          {project.areaM2 ? (
-                            <span className='border-l px-2'>{t('projects.area', { area: project.areaM2 })}</span>
-                          ) : null}
-                          {project.scale ? <span className='border-l px-2'>{project.scale}</span> : null}
-                        </div>
-                        <p className='text-muted-foreground mt-2 text-xs'>
-                          {t('projects.completed', { year: project.year })}
-                        </p>
-                        {project.location ? (
-                          <p className='text-muted-foreground mt-2 flex items-start gap-1.5 text-xs'>
-                            <MapPin className='mt-0.5 size-3.5 shrink-0' />
-                            <span>{project.location}</span>
-                          </p>
-                        ) : null}
-                        <span className='text-primary-strong mt-3 inline-flex items-center gap-1 text-xs font-medium'>
-                          {t('projects.viewDetail')}
-                          <span className='transition-transform group-hover:translate-x-0.5'>→</span>
-                        </span>
-                      </div>
-                    </button>
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </motion.ul>
-          ) : (
-            <motion.div
-              key={resultsKey}
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='bg-muted/30 mt-4 rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground'
-            >
-              {t('projects.empty')}
-            </motion.div>
-          )}
-
-          {moreCount > 0 ? (
-            <div className='mt-5 text-center'>
-              <Button type='button' variant='outline' size='sm' onClick={() => setShowAllProjects(true)}>
-                {t('projects.showMore', { count: moreCount })}
-              </Button>
-            </div>
-          ) : null}
-
-          <p className='text-muted-foreground mt-5 flex items-start gap-1.5 text-xs'>
-            <CircleCheck className='mt-0.5 size-3.5 shrink-0' />
-            <span>{t('projects.disclaimer')}</span>
-          </p>
-        </motion.section>
-
-        <ProjectDetailSheet
-          contractor={contractor}
-          project={selectedProject}
-          inviteAction={inviteAction}
-          onClose={() => setSelectedProject(null)}
-        />
-      </>
-    )
-  }
+  const resultsKey = `${verifiedOnly}-${typeFilter}-${projectSort}`
 
   return (
     <>
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.4, ease: revealEase }}
-        className='bg-card rounded-2xl border p-4'
+        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
+        className='border-t px-4 py-5 sm:px-5 sm:py-6'
       >
-        <div className='flex flex-wrap items-center justify-between gap-2'>
-          <h2 className='text-base font-semibold'>{t('featured')}</h2>
-          <AnimatePresence>
-            {filter ? (
-              <motion.button
-                type='button'
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                onClick={onClearFilter}
-                className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'
-              >
-                {filter}
-                <X className='size-3' />
-                <span className='sr-only'>{t('clearProjectFilter')}</span>
-              </motion.button>
-            ) : null}
-          </AnimatePresence>
+        <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+          <p className='text-sm'>
+            <strong className='font-semibold'>{t('projects.projectCount', { count: allProjects.length })}</strong>
+            <span className='text-muted-foreground'>
+              {' '}
+              · {t('projects.verifiedSummary', { count: allProjects.filter((project) => project.verified).length })}
+            </span>
+          </p>
+
+          <div className='flex flex-wrap items-center gap-3'>
+            <label className='hover:bg-muted/40 flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors'>
+              <Checkbox
+                checked={verifiedOnly}
+                onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
+                aria-label={t('projects.verifiedOnly')}
+              />
+              <span>{t('projects.verifiedOnly')}</span>
+            </label>
+            <Select value={projectSort} onValueChange={(value) => setProjectSort(value as 'latest' | 'oldest')}>
+              <SelectTrigger className='w-36' aria-label={t('projects.sortLabel')}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='latest'>{t('projects.sortLatest')}</SelectItem>
+                <SelectItem value='oldest'>{t('projects.sortOldest')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <motion.ul layout className='mt-3 grid gap-x-[3%] gap-y-4 sm:grid-cols-3'>
-          <AnimatePresence mode='popLayout'>
-            {projects.map((project) => (
-              <motion.li
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                key={project.id}
-              >
-                <button
-                  type='button'
-                  onClick={() => setSelectedProject(project)}
-                  className='group flex w-full min-w-0 gap-3 text-left active:scale-[0.99]'
+        <div className='mt-4 flex gap-2 overflow-x-auto pb-1' role='group' aria-label={t('projects.filterLabel')}>
+          {projectFilters.map((item) => (
+            <button
+              key={item.key}
+              type='button'
+              aria-pressed={typeFilter === item.key}
+              onClick={() => setTypeFilter(item.key)}
+              className={cn(
+                'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-[0.98]',
+                typeFilter === item.key
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'hover:border-primary/40 hover:text-primary-strong bg-background'
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {projects.length ? (
+          <motion.ul
+            key={resultsKey}
+            layout
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
+            className='mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3'
+          >
+            <AnimatePresence mode='popLayout'>
+              {visibleProjects.map((project, index) => (
+                <motion.li
+                  layout
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  whileHover={reduceMotion ? undefined : { y: -3 }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.26,
+                    delay: reduceMotion ? 0 : Math.min(index % 6, 5) * 0.045,
+                    ease: revealEase
+                  }}
+                  key={project.id}
+                  className='overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-[0_14px_28px_-22px_rgba(42,117,63,0.62)]'
                 >
-                  {project.imageUrl ? (
-                    <div className='w-1/2 shrink-0 overflow-hidden rounded-lg'>
-                      <RevealPhoto
-                        src={project.imageUrl}
-                        alt={project.name}
-                        className='aspect-video size-full'
-                        sizes='(max-width: 768px) 40vw, 160px'
-                      />
+                  <button
+                    type='button'
+                    onClick={() => setSelectedProject(project)}
+                    className='group block size-full text-left active:scale-[0.995]'
+                  >
+                    <div className='bg-muted/30 relative aspect-[16/9] overflow-hidden'>
+                      {project.imageUrl ? (
+                        <RevealPhoto
+                          src={project.imageUrl}
+                          alt={project.name}
+                          className='size-full transition-transform duration-300 group-hover:scale-[1.02]'
+                          sizes='(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 260px'
+                        />
+                      ) : (
+                        <div className='flex size-full items-center justify-center'>
+                          <ImageIcon className='text-muted-foreground/45 size-8' />
+                        </div>
+                      )}
+                      <div className='absolute top-2 left-2 flex flex-wrap gap-1.5'>
+                        {project.verified ? (
+                          <span className='bg-background/95 text-primary-strong inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
+                            <CircleCheck className='size-3.5' />
+                            {t('projects.verifiedBadge')}
+                          </span>
+                        ) : null}
+                        {project.featured ? (
+                          <span className='bg-background/95 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
+                            <Star className='size-3.5' />
+                            {t('projects.featuredBadge')}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
-                  ) : (
-                    <div className='bg-muted/30 flex aspect-video w-1/2 shrink-0 items-center justify-center rounded-lg border border-dashed'>
-                      <ImageIcon className='text-muted-foreground/50 size-5' />
+
+                    <div className='p-3'>
+                      <h3 className='group-hover:text-primary-strong text-sm font-semibold transition-colors'>
+                        {project.name}
+                      </h3>
+                      {project.buildingTypeId || project.scope ? (
+                        <div className='mt-2 flex flex-wrap gap-1.5'>
+                          {[
+                            project.buildingTypeId ? typeLabel(project.buildingTypeId) : null,
+                            project.scope ? t(`projects.detail.constructionScopes.${project.scope}`) : null
+                          ]
+                            .filter(Boolean)
+                            .map((label) => (
+                              <span
+                                key={label}
+                                className='bg-muted rounded-md px-2 py-1 text-[11px] text-muted-foreground'
+                              >
+                                {label}
+                              </span>
+                            ))}
+                        </div>
+                      ) : null}
+                      <div className='text-muted-foreground mt-3 flex flex-wrap items-center gap-y-1 text-xs'>
+                        {project.dimensions ? <span className='pr-2'>{project.dimensions}</span> : null}
+                        {project.areaM2 ? (
+                          <span className='border-l px-2'>{t('projects.area', { area: project.areaM2 })}</span>
+                        ) : null}
+                        {scaleOf(project) ? <span className='border-l px-2'>{scaleOf(project)}</span> : null}
+                      </div>
+                      <p className='text-muted-foreground mt-2 text-xs'>
+                        {t('projects.completed', { year: project.year })}
+                      </p>
+                      {project.location ? (
+                        <p className='text-muted-foreground mt-2 flex items-start gap-1.5 text-xs'>
+                          <MapPin className='mt-0.5 size-3.5 shrink-0' />
+                          <span>{project.location}</span>
+                        </p>
+                      ) : null}
+                      <span className='text-primary-strong mt-3 inline-flex items-center gap-1 text-xs font-medium'>
+                        {t('projects.viewDetail')}
+                        <span className='transition-transform group-hover:translate-x-0.5'>→</span>
+                      </span>
                     </div>
-                  )}
-                  <div className='min-w-0'>
-                    <p className='group-hover:text-primary text-sm leading-snug font-medium text-pretty transition-colors'>
-                      {project.name}
-                    </p>
-                    <p className='text-muted-foreground mt-1 text-xs'>{project.year}</p>
-                    <span className='text-primary-strong mt-2 inline-flex items-center gap-1.5 text-xs font-medium'>
-                      {t('viewProject')}
-                      <span className='inline-block transition-transform group-hover:translate-x-1'>→</span>
-                    </span>
-                  </div>
-                </button>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </motion.ul>
+                  </button>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </motion.ul>
+        ) : (
+          <motion.div
+            key={resultsKey}
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className='bg-muted/30 mt-4 rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground'
+          >
+            {t('projects.empty')}
+          </motion.div>
+        )}
+
+        {moreCount > 0 ? (
+          <div className='mt-5 text-center'>
+            <Button type='button' variant='outline' size='sm' onClick={() => setShowAllProjects(true)}>
+              {t('projects.showMore', { count: moreCount })}
+            </Button>
+          </div>
+        ) : null}
+
+        <p className='text-muted-foreground mt-5 flex items-start gap-1.5 text-xs'>
+          <CircleCheck className='mt-0.5 size-3.5 shrink-0' />
+          <span>{t('projects.disclaimer')}</span>
+        </p>
       </motion.section>
 
-      <ProjectDetailSheet contractor={contractor} project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <ProjectDetailSheet
+        contractor={contractor}
+        project={selectedProject}
+        inviteAction={inviteAction}
+        onClose={() => setSelectedProject(null)}
+      />
     </>
   )
+}
+
+/**
+ * Nhãn Loại công trình theo danh mục dùng chung và Quy mô (Số tầng, Tum) theo
+ * phương án đã lưu (ContractorManagement §7). Dự án nhập trước khi có danh mục
+ * chỉ có dòng quy mô dạng chữ — dùng tạm dòng đó.
+ */
+function useProjectLabels() {
+  const t = useTranslations('contractors.firm.projects.detail')
+  const buildingTypes = useCmsCollection('buildingTypes')
+  const floorOptions = useCmsCollection('floorOptions')
+  const typeLabel = (id: string) => buildingTypes.find((type) => type.id === id)?.label ?? id
+  const scaleOf = (project: ContractorProject) => {
+    const floors = floorOptions.find((option) => option.id === project.floorOptionId)?.label
+    const attic = project.hasAttic === undefined ? null : project.hasAttic ? t('attic') : t('noAttic')
+    return [floors ?? (project.floorOptionId ? null : project.scale), attic].filter(Boolean).join(' · ')
+  }
+  return { typeLabel, scaleOf }
 }
 
 function ProjectDetailSheet({
@@ -1424,12 +1353,15 @@ function ProjectDetailSheet({
   const reduceMotion = useReducedMotion()
   const [activeGalleryImage, setActiveGalleryImage] = useState<string | undefined>()
 
-  const projectType = project?.category ? t(`projectTypes.${project.category}`) : t('notUpdated')
-  const constructionScope = project?.constructionScope
-    ? t(`constructionScopes.${project.constructionScope}`)
-    : (project?.tags?.[1] ?? t('notUpdated'))
+  const { typeLabel, scaleOf } = useProjectLabels()
+  const projectType = project?.buildingTypeId ? typeLabel(project.buildingTypeId) : t('notUpdated')
+  const constructionScope = project?.scope ? t(`constructionScopes.${project.scope}`) : t('notUpdated')
   const contractorRole = project?.contractorRole ? t(`roles.${project.contractorRole}`) : t('roles.contractor')
-  const dimensions = [project?.dimensions, project?.areaM2 ? t('area', { area: project.areaM2 }) : null, project?.scale]
+  const dimensions = [
+    project?.dimensions,
+    project?.areaM2 ? t('area', { area: project.areaM2 }) : null,
+    project ? scaleOf(project) : null
+  ]
     .filter(Boolean)
     .join(' · ')
   const constructionPeriod =

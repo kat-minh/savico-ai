@@ -3,7 +3,7 @@ import type {
   CostSection,
   DesignStep,
   DesignStyle,
-  FloorCount,
+  KnownFloorCount,
   PackageTier,
   ProjectSort,
   ProjectStatus
@@ -19,7 +19,14 @@ export const WISHES_MAX_LENGTH = 500
 /** 5 nhóm loại công trình theo Phụ lục A, trường 3 — thứ tự cố định. */
 export const BUILDING_TYPES: readonly BuildingType[] = ['townhouse', 'villa', 'roofed', 'garden', 'apartment'] as const
 
-export const FLOOR_COUNTS: readonly FloorCount[] = ['ground', 'ground+1', 'ground+2', 'ground+3', 'ground+4'] as const
+/** Phương án Số tầng có sẵn bản dịch — cũng là danh sách dự phòng khi kho chưa có cấu hình. */
+export const FLOOR_COUNTS: readonly KnownFloorCount[] = [
+  'ground',
+  'ground+1',
+  'ground+2',
+  'ground+3',
+  'ground+4'
+] as const
 
 /** Slider 3 nấc, mặc định Tiêu chuẩn. */
 export const PACKAGE_TIERS: readonly PackageTier[] = ['basic', 'standard', 'vip'] as const
@@ -102,4 +109,11 @@ export const FIELDS_BY_BUILDING_TYPE: Record<BuildingType, { floorCount: boolean
 }
 
 /** Autosave nháp Bước 1 — thoát ra vào lại vẫn còn nguyên (mục III.2). */
+/**
+ * Mã lỗi khi lưu Bước 1 mà giá trị mâu thuẫn cấu hình loại công trình hiện tại
+ * (loại / phương án vừa bị ngừng, trường không áp dụng) — epic
+ * ConstructionTypeManagement §8.
+ */
+export const DESIGN_INPUT_CONFIG_ERROR = 'DESIGN_INPUT_CONFIG_INVALID'
+
 export const DESIGN_DRAFT_STORAGE_KEY = 'savico.design-draft'

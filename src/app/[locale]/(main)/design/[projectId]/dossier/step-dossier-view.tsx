@@ -17,6 +17,7 @@ import {
   useDesignStore,
   useDossier,
   useEstimate,
+  useFloorCountLabel,
   useProject,
   useRenderDossier,
   useSendDossierEmail,
@@ -37,6 +38,7 @@ export function StepDossierView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.dossier')
   const tWaiting = useTranslations('design.progress.dossier')
   const tInput = useTranslations('design.input')
+  const floorLabel = useFloorCountLabel()
   const tPanel = useTranslations('handbook.panel')
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -100,8 +102,14 @@ export function StepDossierView({ projectId }: { projectId: string }) {
     address: draft?.address ?? '',
     createdAt: project?.createdAt ?? new Date().toISOString(),
     buildingTypeLabel: draft?.buildingType ? tInput(`buildingType.options.${draft.buildingType}`) : '',
+    // Tum chỉ ghi khi loại công trình có áp dụng (hồ sơ lưu `null` khi không áp dụng).
     scaleLabel: draft?.floorCount
-      ? `${tInput(`floorCount.options.${draft.floorCount}`)} · ${tInput(draft.hasAttic ? 'attic.options.yes' : 'attic.options.no')}`
+      ? [
+          floorLabel(draft.floorCount),
+          draft.hasAttic === null ? '' : tInput(draft.hasAttic ? 'attic.options.yes' : 'attic.options.no')
+        ]
+          .filter(Boolean)
+          .join(' · ')
       : '',
     floorArea: estimate?.estimatedFloorArea ?? 0,
     packageLabel: draft ? tInput(`packageTier.options.${draft.packageTier}`) : '',

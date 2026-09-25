@@ -29,6 +29,11 @@ import type { BuildingType, DesignStyle, FloorCount } from '../types/design.type
 export interface CatalogBuildingType {
   value: BuildingType
   label?: string
+  /**
+   * Loại đã Ngừng hoạt động nhưng hồ sơ này đã lưu từ trước — vẫn hiện để hồ sơ
+   * cũ giữ nguyên, nhưng không chọn lại được (epic ConstructionTypeManagement §8).
+   */
+  inactive?: boolean
 }
 
 export interface CatalogStyle {
@@ -45,16 +50,33 @@ function isDesignStyle(id: string): id is DesignStyle {
   return (DESIGN_STYLES as readonly string[]).includes(id)
 }
 
-/** Loại công trình hiện trong ô chọn, theo thứ tự admin xếp. */
-export function catalogBuildingTypes(options: readonly CmsBuildingTypeOption[]): readonly CatalogBuildingType[] {
+/**
+ * Loại công trình hiện trong ô chọn, theo thứ tự admin xếp. Chỉ loại Hoạt động;
+ * riêng `savedType` — loại hồ sơ đã lưu — vẫn hiện kèm cờ `inactive` khi admin
+ * đã ngừng nó, để hồ sơ cũ không mất loại đã chọn (§1, §8).
+ */
+export function catalogBuildingTypes(
+  options: readonly CmsBuildingTypeOption[],
+  savedType: BuildingType | null = null
+): readonly CatalogBuildingType[] {
   const fromCms = options
-    .filter((option) => option.status === 'active')
+    .filter((option) => option.status === 'active' || option.id === savedType)
     .sort((a, b) => a.order - b.order)
     .flatMap<CatalogBuildingType>((option) =>
-      isBuildingType(option.id) ? [{ value: option.id, label: option.label }] : []
+      isBuildingType(option.id)
+        ? [{ value: option.id, label: option.label, inactive: option.status !== 'active' || undefined }]
+        : []
     )
 
-  return fromCms.length > 0 ? fromCms : BUILDING_TYPES.map((value) => ({ value }))
+  return fromCms.some((option) => !option.inactive) ? fromCms : BUILDING_TYPES.map((value) => ({ value }))
+}
+
+/** Loại công trình đang Hoạt động (loại chưa có trong kho coi như hoạt động — bảng mặc định). */
+export function isBuildingTypeActive(
+  buildingType: BuildingType,
+  options: readonly CmsBuildingTypeOption[] = cmsDb.list('buildingTypes')
+): boolean {
+  return options.find((item) => item.id === buildingType)?.status !== 'inactive'
 }
 
 /** Thẻ phong cách của loại công trình đang chọn (Phụ lục A, bảng cuối). */
@@ -85,17 +107,15 @@ export function catalogStyles(
 export interface BuildingTypeFieldConfig {
   floorCount: boolean
   floorRequired: boolean
-  /** Phương án Số tầng được phép, theo thứ tự admin xếp. */
+  /** Phương án Số tầng được phép VÀ đang Hoạt động, theo thứ tự admin xếp. */
   floorOptions: readonly FloorCount[]
+  /** Phương án chọn sẵn do admin đặt; `null` khi không có hoặc không còn hợp lệ. */
+  floorDefault: FloorCount | null
   /** Chỉ `true` khi Tum ở chế độ "cho phép lựa chọn". */
   attic: boolean
   atticRequired: boolean
   /** Giá trị Tum cố định (không hỏi người dùng); `null` khi không cố định. */
   atticFixed: boolean | null
-}
-
-function isFloorCount(id: string): id is FloorCount {
-  return (FLOOR_COUNTS as readonly string[]).includes(id)
 }
 
 export function buildingTypeFieldConfig(
@@ -110,22 +130,25 @@ export function buildingTypeFieldConfig(
       floorCount: fallback.floorCount,
       floorRequired: fallback.floorCount,
       floorOptions: fallback.floorCount ? FLOOR_COUNTS : [],
+      floorDefault: null,
       attic: fallback.attic,
       atticRequired: fallback.attic,
       atticFixed: null
     }
   }
 
+  // Phương án admin thêm mới cũng hiện — nhãn lấy từ danh mục (`useFloorCountLabel`).
   const allowed = floorOptions
     .filter((floor) => floor.status === 'active' && option.floors.optionIds.includes(floor.id))
     .sort((a, b) => a.order - b.order)
     .map((floor) => floor.id)
-    .filter(isFloorCount)
+  const floorDefault = option.floors.defaultOptionId
 
   return {
     floorCount: option.floors.applies,
     floorRequired: option.floors.applies && option.floors.required,
     floorOptions: option.floors.applies ? allowed : [],
+    floorDefault: option.floors.applies && floorDefault && allowed.includes(floorDefault) ? floorDefault : null,
     attic: option.attic.mode === 'choice',
     atticRequired: option.attic.mode === 'choice' && option.attic.required,
     atticFixed: option.attic.mode === 'fixed-yes' ? true : option.attic.mode === 'fixed-no' ? false : null

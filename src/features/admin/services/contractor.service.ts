@@ -119,7 +119,7 @@ export function withHistory(
  * - địa chỉ văn phòng ghép từ trụ sở chính;
  * - mã số che cho người dùng, trạng thái đăng ký theo kiểm duyệt giấy phép;
  * - nhãn đối tác chỉ bật khi hợp tác VÀ tài liệu đều đã xác minh;
- * - số dự án đã xác minh đếm từ dự án; nhóm lọc & phạm vi của dự án theo dữ liệu mới.
+ * - số dự án đã xác minh đếm từ dự án; ẩn dự án là tự bỏ nổi bật.
  */
 export function derivePublicFields(contractor: CmsContractor, today: string): CmsContractor {
   const legal = contractor.legalProfile
@@ -128,21 +128,7 @@ export function derivePublicFields(contractor: CmsContractor, today: string): Cm
   const projects = contractor.featuredProjects.map((project) => ({
     ...project,
     // Ẩn dự án là tự bỏ nổi bật (§7).
-    featured: project.hidden ? false : project.featured,
-    category: project.buildingTypeId
-      ? project.scope === 'finishing' || project.scope === 'interior'
-        ? ('renovation' as const)
-        : project.buildingTypeId === 'villa' || project.buildingTypeId === 'garden'
-          ? ('villa' as const)
-          : ('house' as const)
-      : project.category,
-    constructionScope: project.scope
-      ? project.scope === 'turnkey'
-        ? ('turnkey' as const)
-        : project.scope === 'shell'
-          ? ('structural' as const)
-          : ('finishing' as const)
-      : project.constructionScope
+    featured: project.hidden ? false : project.featured
   }))
 
   return {

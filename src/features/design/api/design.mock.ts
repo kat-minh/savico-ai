@@ -1,5 +1,7 @@
 import { mockDelay } from '@/shared/lib/mock'
-import { emptyDesignInput } from '../services/design-input.service'
+import type { ApiError } from '@/shared/types'
+import { DESIGN_INPUT_CONFIG_ERROR } from '../constants/design.constants'
+import { designInputConfigErrors, emptyDesignInput } from '../services/design-input.service'
 import { grandTotal, rollUpSections, subItemAmount, type DraftSection } from '../services/estimate.service'
 import { projectStatus } from '../services/project-list.service'
 import type {
@@ -359,6 +361,18 @@ export const mockDesignApi = {
 
   saveInput: async (projectId: string, input: DesignInput): Promise<DesignInput> => {
     await mockDelay(200)
+    // Kiểm tra lại cấu hình loại công trình tại thời điểm lưu — không tin vào việc
+    // form đã ẩn / hiện trường (epic ConstructionTypeManagement §7, §8).
+    const invalid = designInputConfigErrors(input, loadStore().inputs[projectId])
+    if (invalid.length > 0) {
+      const error: ApiError = {
+        status: 422,
+        code: DESIGN_INPUT_CONFIG_ERROR,
+        message: 'Building type configuration changed.',
+        errors: Object.fromEntries(invalid.map((field) => [field, ['invalid']]))
+      }
+      throw error
+    }
     return updateStore((store) => {
       // Chỉ trừ lượt ở lần chốt nhập liệu đầu tiên của dự án — sửa lại bản nháp
       // rồi gửi lại không được tính thành lượt mới.

@@ -38,14 +38,15 @@ export function buildingTypeUsage(type: CmsBuildingTypeOption, sources: CatalogU
 /** Số bản ghi đang dùng một phương án Số tầng — đã dùng thì không xóa cứng (§3). */
 export function floorOptionUsage(
   option: CmsFloorOption,
-  sources: Pick<CatalogUsageSources, 'contractors' | 'templates'> & { buildingTypes: readonly CmsBuildingTypeOption[] }
+  sources: CatalogUsageSources & { buildingTypes: readonly CmsBuildingTypeOption[] }
 ): number {
   const types = sources.buildingTypes.filter((type) => type.floors.optionIds.includes(option.id)).length
+  const dossiers = sources.projects.filter((project) => project.floorOptionId === option.id).length
   const projects = sources.contractors
     .flatMap((contractor) => contractor.featuredProjects)
     .filter((project) => project.floorOptionId === option.id).length
   const templates = sources.templates.filter((template) => template.tags.floorCount === option.id).length
-  return types + projects + templates
+  return types + dossiers + projects + templates
 }
 
 /** Lý do loại công trình CHƯA kích hoạt được (§2, §3) — `null` khi cấu hình hợp lệ. */
@@ -65,4 +66,33 @@ export function buildingTypeProblem(
     return 'defaultInvalid'
   }
   return null
+}
+
+/** Một phương án Số tầng bị bỏ khỏi loại công trình, kèm số hồ sơ cũ đang dùng nó (§5). */
+export interface RemovedFloorOptionImpact {
+  optionId: string
+  projects: number
+}
+
+/**
+ * Phương án Số tầng mà bản cập nhật BỎ khỏi loại công trình (bỏ khỏi danh sách,
+ * hoặc chuyển Số tầng sang Không áp dụng) mà hồ sơ cũ của loại đó đang dùng —
+ * admin phải thấy số hồ sơ bị ảnh hưởng trước khi xác nhận (§5). Hồ sơ cũ
+ * không bị sửa; con số chỉ để admin biết.
+ */
+export function removedFloorOptionImpact(
+  previous: CmsBuildingTypeOption,
+  next: CmsBuildingTypeOption,
+  projects: readonly CmsDesignProject[]
+): RemovedFloorOptionImpact[] {
+  const before = previous.floors.applies ? previous.floors.optionIds : []
+  const after = new Set(next.floors.applies ? next.floors.optionIds : [])
+  const ofType = projects.filter((project) => sameName(project.buildingTypeLabel, previous.label))
+  return before
+    .filter((id) => !after.has(id))
+    .map((optionId) => ({
+      optionId,
+      projects: ofType.filter((project) => project.floorOptionId === optionId).length
+    }))
+    .filter((impact) => impact.projects > 0)
 }

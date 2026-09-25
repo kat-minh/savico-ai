@@ -159,7 +159,6 @@ function withDerivedStatus(brief: ProjectBrief): ProjectBrief {
  */
 function publicProfile({
   contact: _contact,
-  opsNote: _opsNote,
   history: _history,
   unverifyReason: _unverifyReason,
   ...contractor
@@ -220,9 +219,12 @@ export const mockContractorsApi = {
     const rules = cmsDb.getDocument('contractorMatching')
     const brief = loadStore().briefs[projectId]
     // Hồ sơ lưu nhãn loại công trình — quy về mã trong danh mục dùng chung để so năng lực.
-    const buildingTypeId = brief
-      ? (cmsDb.list('buildingTypes').find((type) => type.label === brief.buildingType)?.id ?? null)
-      : null
+    const buildingType = brief
+      ? cmsDb.list('buildingTypes').find((type) => type.label === brief.buildingType)
+      : undefined
+    // Chỉ Loại công trình đang Hoạt động mới dùng để đề xuất nhà thầu (ContractorManagement §12).
+    if (buildingType && buildingType.status !== 'active') return []
+    const buildingTypeId = buildingType?.id ?? null
     const context = brief ? { buildingTypeId, scope: brief.scope } : undefined
     if (!isBriefSupported(rules, context)) return []
     const today = new Date().toISOString().slice(0, 10)

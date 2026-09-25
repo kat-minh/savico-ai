@@ -11,6 +11,7 @@ import {
   StepProgress,
   useDesignStore,
   useEstimate,
+  useFloorCountLabel,
   useProject
 } from '@/features/design'
 import { ProactiveChatStream } from '@/features/chatbot'
@@ -32,6 +33,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.estimate')
   const tWaiting = useTranslations('design.progress.estimate')
   const tInput = useTranslations('design.input')
+  const floorLabel = useFloorCountLabel()
   const tPanel = useTranslations('handbook.panel')
   const tEntry = useTranslations('design.entry')
   const router = useRouter()
@@ -64,15 +66,15 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     if (!draft?.buildingType) return undefined
     return tPanel('filterLabel2d', {
       building: tInput(`buildingType.options.${draft.buildingType}`),
-      scale: draft.floorCount ? tInput(`floorCount.options.${draft.floorCount}`) : ''
+      scale: draft.floorCount ? floorLabel(draft.floorCount) : ''
     })
-  }, [draft, tInput, tPanel])
+  }, [draft, tInput, tPanel, floorLabel])
 
   // Đầu màn kết quả (góp ý BuildX): tiêu đề kèm tên + mã dự án, dòng phụ ghi
   // địa chỉ · loại nhà · quy mô, và đường quay lại danh sách dự án.
   const resultSubtitle = useMemo(() => {
     const scale = [
-      draft?.floorCount ? tInput(`floorCount.options.${draft.floorCount}`) : '',
+      draft?.floorCount ? floorLabel(draft.floorCount) : '',
       result ? `${result.estimatedFloorArea} m²` : ''
     ]
       .filter(Boolean)
@@ -80,7 +82,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     return [draft?.address, draft?.buildingType ? tInput(`buildingType.options.${draft.buildingType}`) : '', scale]
       .filter(Boolean)
       .join(' · ')
-  }, [draft, result, tInput])
+  }, [draft, result, tInput, floorLabel])
 
   // Chatbox AI nói theo dữ liệu thật của dự án; tự trò chuyện trong lúc chờ.
   useProjectChatContext(project?.name ?? '', draft, result ? null : 'estimate')

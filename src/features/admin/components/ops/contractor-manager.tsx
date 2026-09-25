@@ -14,7 +14,6 @@ import { newAdminId, todayKey } from '../../services/admin.service'
 import {
   CONTRACTOR_SCOPES,
   derivePublicFields,
-  hasRelatedData,
   legalStatusOf,
   normalizeProfile,
   partnershipStatusOf,
@@ -187,9 +186,8 @@ export function ContractorManager() {
       filterKey={JSON.stringify(filters)}
       fromFormValues={(values, current) => commit(values, current, !contractors.some((item) => item.id === current.id))}
       validate={(next) => (visibilityProblem(next) ? t('contractors.visibleNeedsCapability') : null)}
-      deleteBlockedReason={(item) =>
-        hasRelatedData(item, openInvitations.all.get(item.id) ?? 0) ? t('contractors.deleteBlocked') : null
-      }
+      // Thao tác trên từng dòng chỉ gồm Xem chi tiết và Chỉnh sửa (§1); xóa nằm ở trang chi tiết (§11).
+      allowDelete={false}
       banner={
         <Space wrap size={8}>
           {select(

@@ -9,21 +9,34 @@ import { Link } from '@/i18n/navigation'
 import { useAuthStore } from '@/shared/auth'
 import { ROUTES } from '@/shared/constants/routes'
 import { Button } from '@/shared/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/shared/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { WISHES_MAX_LENGTH } from '../constants/design.constants'
 import {
+  buildingTypeChangeLosses,
   composeAddress,
   EMPTY_DESIGN_INPUT,
+  isSavedFloorCount,
   missingRequiredFields,
+  sanitizeDesignInput,
   visibleFields,
   type RequiredInputField
 } from '../services/design-input.service'
 import { useDesignCatalog } from '../hooks/use-design-catalog'
 import { useDesignQuota } from '../hooks/use-design-quota'
+import { useFloorCountLabel } from '../hooks/use-floor-count-label'
 import { useSaveInput } from '../hooks/use-save-input'
+import { useSavedInput } from '../hooks/use-saved-input'
 import { useDesignStore } from '../store/design.store'
 import type { BuildingType, DesignStyle } from '../types/design.types'
 import { AddressField } from './address-field'
@@ -64,8 +77,11 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
   const patchDraft = useDesignStore((s) => s.patchDraft)
   const setBuildingType = useDesignStore((s) => s.setBuildingType)
   const saveInput = useSaveInput(projectId)
+  // Bản đã lưu: loại / phương án admin đã ngừng vẫn giữ trên hồ sơ cũ (epic ConstructionTypeManagement §8).
+  const { data: saved = null } = useSavedInput(projectId)
   // Loại công trình + phong cách do admin cấu hình (mục X, #6).
-  const catalog = useDesignCatalog(draft.buildingType)
+  const catalog = useDesignCatalog(draft.buildingType, saved?.buildingType ?? null)
+  const floorLabel = useFloorCountLabel()
   const { data: quota } = useDesignQuota()
   const phone = useAuthStore((s) => s.user?.phone)
   // M03 opening choreography is intentionally staged rather than overlapped:
@@ -78,8 +94,13 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
   const [readySweep, setReadySweep] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [phoneOpen, setPhoneOpen] = useState(false)
+  // Loại công trình đang chờ xác nhận vì đổi sang nó sẽ xóa Số tầng / Tum đã chọn (§7).
+  const [pendingType, setPendingType] = useState<{
+    value: BuildingType
+    losses: Array<'floorCount' | 'hasAttic'>
+  } | null>(null)
   const wasReadyRef = useRef(false)
-  const missing = useMemo(() => missingRequiredFields(draft), [draft])
+  const missing = useMemo(() => missingRequiredFields(draft, saved), [draft, saved])
   const fields = visibleFields(draft.buildingType)
   const canSubmit = missing.length === 0
   const invalid = (field: RequiredInputField) => showErrors && missing.includes(field)
@@ -95,10 +116,15 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
     }
   }, [canSubmit])
 
-  const floorOptions: ChoiceOption[] = fields.floorOptions.map((value) => ({
-    value,
-    label: t(`floorCount.options.${value}`)
-  }))
+  const floorOptions: ChoiceOption[] = fields.floorOptions.map((value) => ({ value, label: floorLabel(value) }))
+  // Phương án đã ngừng nhưng là giá trị đã lưu của hồ sơ này → vẫn hiện, không chọn mới được (§3).
+  if (draft.floorCount && !fields.floorOptions.includes(draft.floorCount) && isSavedFloorCount(draft, saved)) {
+    floorOptions.push({
+      value: draft.floorCount,
+      label: `${floorLabel(draft.floorCount)} ${t('inactiveSuffix')}`,
+      disabled: true
+    })
+  }
   const atticOptions: ChoiceOption[] = [
     { value: 'yes', label: t('attic.options.yes') },
     { value: 'no', label: t('attic.options.no') }
@@ -108,11 +134,14 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
 
   /** Ghi Bước 1 lên server rồi mới sang màn chờ Bước 2. */
   function save() {
-    saveInput.mutate(draft, {
+    // Trường không áp dụng cho cấu hình hiện tại thì không gửi giá trị ngầm (§7).
+    saveInput.mutate(sanitizeDesignInput(draft), {
       onSuccess: () => {
         setLeaving(true)
         window.setTimeout(onSubmit, 460)
-      }
+      },
+      // Cấu hình vừa đổi phía admin → đánh dấu lại các trường phải chọn lại (§8).
+      onError: () => setShowErrors(true)
     })
   }
 
@@ -136,6 +165,16 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
   }
 
   function chooseBuildingType(buildingType: BuildingType) {
+    // Giá trị Số tầng / Tum không còn hợp lệ với loại mới → hỏi trước khi xóa (§7).
+    const losses = buildingTypeChangeLosses(draft, buildingType)
+    if (losses.length > 0) {
+      setPendingType({ value: buildingType, losses })
+      return
+    }
+    applyBuildingType(buildingType)
+  }
+
+  function applyBuildingType(buildingType: BuildingType) {
     setBuildingType(projectId, buildingType)
     window.setTimeout(() => {
       const target = document.getElementById('scope-options') ?? document.getElementById('field-style')
@@ -240,7 +279,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {catalog.buildingTypes.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
                       {option.label}
                     </SelectItem>
                   ))}
@@ -369,6 +408,34 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
       </div>
 
       <PhonePromptDialog open={phoneOpen} onOpenChange={setPhoneOpen} onConfirmed={save} />
+
+      <Dialog open={pendingType !== null} onOpenChange={(open) => (open ? undefined : setPendingType(null))}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle>{t('typeChange.title')}</DialogTitle>
+            <DialogDescription className='text-pretty'>
+              {t('typeChange.description', {
+                fields: (pendingType?.losses ?? [])
+                  .map((field) => (field === 'floorCount' ? t('floorCount.label') : t('attic.label')))
+                  .join(', ')
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setPendingType(null)}>
+              {t('typeChange.cancel')}
+            </Button>
+            <Button
+              onClick={() => {
+                if (pendingType) applyBuildingType(pendingType.value)
+                setPendingType(null)
+              }}
+            >
+              {t('typeChange.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

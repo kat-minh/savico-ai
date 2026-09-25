@@ -4,8 +4,16 @@
  */
 export type BuildingType = 'townhouse' | 'villa' | 'roofed' | 'garden' | 'apartment'
 
-/** Quy mô — số tầng (mục III.2, trường 4). Căn hộ bị khóa 1 mặt sàn. */
-export type FloorCount = 'ground' | 'ground+1' | 'ground+2' | 'ground+3' | 'ground+4'
+/** Năm phương án Số tầng có sẵn bản dịch (Trệt … Trệt + 4 lầu). */
+export type KnownFloorCount = 'ground' | 'ground+1' | 'ground+2' | 'ground+3' | 'ground+4'
+
+/**
+ * Số tầng (mục III.2, trường 4) — id một phương án trong danh mục `floorOptions`
+ * admin quản lý (epic ConstructionTypeManagement §3). Admin thêm được phương án
+ * mới nên đây là chuỗi mở, không phải union cố định; nhãn đọc qua
+ * `useFloorCountLabel`.
+ */
+export type FloorCount = string
 
 /** Gói hoàn thiện & nội thất — slider 3 nấc (mục III.2, trường 6). */
 export type PackageTier = 'basic' | 'standard' | 'vip'

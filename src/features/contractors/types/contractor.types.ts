@@ -187,7 +187,7 @@ export type ContractorLegalProfile = CmsContractorLegalProfile
 
 /**
  * Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. Trường
- * `contact` / `opsNote` chỉ dành cho vận hành, trang công khai không in ra.
+ * `contact` chỉ dành cho vận hành, trang công khai không in ra.
  */
 export type Contractor = CmsContractor
 

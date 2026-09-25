@@ -42,7 +42,7 @@ import dayjs, { type Dayjs } from 'dayjs'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import type { CmsContractor, CmsContractorProject } from '@/shared/cms'
+import type { CmsContractor, CmsContractorProject, CmsFloorOption } from '@/shared/cms'
 import { useAdminCollection } from '../../hooks/use-admin-data'
 import { useContractorSave } from '../../hooks/use-contractor-save'
 import { newAdminId } from '../../services/admin.service'
@@ -76,6 +76,23 @@ function stamp(value?: string): string {
   return value ? dayjs(value).format('DD/MM/YYYY HH:mm') : '-'
 }
 
+/** Quy mô trên thẻ và chi tiết dự án: kích thước, diện tích, Số tầng, Tum (§2). */
+function scaleText(
+  project: CmsContractorProject,
+  floorOptions: CmsFloorOption[],
+  labels: { attic: string; noAttic: string }
+): string {
+  return [
+    project.dimensions,
+    project.areaM2 ? `${project.areaM2} m²` : null,
+    floorOptions.find((option) => option.id === project.floorOptionId)?.label ??
+      (project.floorOptionId ? null : project.scale),
+    project.hasAttic === undefined ? null : project.hasAttic ? labels.attic : labels.noAttic
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 type Sort = 'newest' | 'oldest'
 
 /**
@@ -90,6 +107,8 @@ export function ContractorProjects({ contractor }: { contractor: CmsContractor }
   const { message } = App.useApp()
   const { commit, admin, isPending } = useContractorSave()
   const { data: buildingTypes = [] } = useAdminCollection('buildingTypes')
+  const { data: floorOptions = [] } = useAdminCollection('floorOptions')
+  const atticLabels = { attic: t('contractorProjects.attic'), noAttic: t('contractorProjects.noAttic') }
 
   const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [featuredOnly, setFeaturedOnly] = useState(false)
@@ -206,7 +225,7 @@ export function ContractorProjects({ contractor }: { contractor: CmsContractor }
         dataSource={rows}
         pagination={false}
         locale={{ emptyText: <Empty description={t('contractorProjects.empty')} /> }}
-        scroll={{ x: 900 }}
+        scroll={{ x: 1080 }}
         columns={[
           {
             title: t('contractorProjects.name'),
@@ -246,6 +265,12 @@ export function ContractorProjects({ contractor }: { contractor: CmsContractor }
             key: 'scope',
             width: 150,
             render: (_, project) => (project.scope ? t(`contractorScope.${project.scope}`) : '-')
+          },
+          {
+            title: t('contractorProjects.scale'),
+            key: 'scale',
+            width: 180,
+            render: (_, project) => scaleText(project, floorOptions, atticLabels) || '-'
           },
           { title: t('contractorProjects.year'), dataIndex: 'year', width: 90 },
           { title: t('contractorProjects.location'), dataIndex: 'location', width: 160, ellipsis: true },
@@ -422,18 +447,10 @@ function ProjectView({
   const { data: floorOptions = [] } = useAdminCollection('floorOptions')
   if (!project) return <Drawer open={false} onClose={onClose} />
 
-  const scale = [
-    project.dimensions,
-    project.areaM2 ? `${project.areaM2} m²` : null,
-    floorOptions.find((option) => option.id === project.floorOptionId)?.label,
-    project.hasAttic === undefined
-      ? null
-      : project.hasAttic
-        ? t('contractorProjects.attic')
-        : t('contractorProjects.noAttic')
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const scale = scaleText(project, floorOptions, {
+    attic: t('contractorProjects.attic'),
+    noAttic: t('contractorProjects.noAttic')
+  })
 
   return (
     <Drawer open title={project.name} size={640} onClose={onClose}>

@@ -306,7 +306,7 @@ const DOCUMENT_SEEDS: { [K in CmsDocument]: CmsDocumentMap[K] } = {
 
 /** Khóa localStorage. Đổi `VERSION` để bỏ bản ghi cũ khi cấu trúc thay đổi. */
 const STORAGE_KEY = 'savico.cms'
-const VERSION = 13
+const VERSION = 14
 
 interface CmsSnapshot {
   version: number

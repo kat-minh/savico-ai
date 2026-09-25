@@ -86,6 +86,11 @@ export interface ResourceManagerProps<K extends CmsCollection> {
    */
   validate?: (next: CmsCollectionMap[K], current: CmsCollectionMap[K], isNew: boolean) => string | null
   /**
+   * Hỏi lại trước khi lưu — trả về nội dung cảnh báo (ví dụ số hồ sơ bị ảnh
+   * hưởng) để hiện hộp xác nhận, `null` khi lưu thẳng.
+   */
+  confirmSave?: (next: CmsCollectionMap[K], current: CmsCollectionMap[K], isNew: boolean) => ReactNode | null
+  /**
    * Đổi giá trị này (bộ lọc ngoài vừa đổi) là bảng quay về trang đầu — spec yêu
    * cầu mọi danh sách về trang 1 khi đổi từ khóa hoặc bộ lọc.
    */
@@ -127,6 +132,7 @@ export function ResourceManager<K extends CmsCollection>({
   rowActions,
   renderView,
   validate,
+  confirmSave,
   filterKey,
   initialQuery,
   initialViewId,
@@ -217,6 +223,16 @@ export function ResourceManager<K extends CmsCollection>({
       message.error(problem)
       return
     }
+    const warning = confirmSave?.(next, editing, isNew)
+    if (warning) {
+      const confirmed = await modal.confirm({
+        title: t('actions.confirmSaveTitle'),
+        content: warning,
+        okText: t('actions.save'),
+        cancelText: t('actions.keepEditing')
+      })
+      if (!confirmed) return
+    }
     await save.mutateAsync(next)
     await afterSave?.(next, editing)
     message.success(isNew ? t('feedback.created') : t('feedback.saved'))
@@ -290,6 +306,9 @@ export function ResourceManager<K extends CmsCollection>({
       <Empty description={t('table.noSearchResult', { query: query.trim() })}>
         <Button onClick={() => setQuery('')}>{t('table.clearSearch')}</Button>
       </Empty>
+    ) : all.length > 0 ? (
+      // Có dữ liệu nhưng bộ lọc ngoài loại hết — không phải "chưa có bản ghi".
+      <Empty description={t('table.noFilterResult')} />
     ) : (
       <Empty description={t('table.empty')}>
         {createItem ? (

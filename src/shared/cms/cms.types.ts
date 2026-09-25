@@ -610,6 +610,12 @@ export interface CmsDesignProject {
   customerEmail: string
   address: string
   buildingTypeLabel: string
+  /**
+   * Phương án Số tầng hồ sơ đã lưu (`CmsFloorOption.id`); bỏ trống khi loại
+   * công trình không áp dụng Số tầng. Dùng để đếm hồ sơ bị ảnh hưởng khi admin
+   * bỏ một phương án khỏi loại công trình (epic ConstructionTypeManagement §5).
+   */
+  floorOptionId?: string
   styleLabel: string
   /** Bước đang dừng: 1 Nhập liệu · 2 Dự toán · 3 Hồ sơ. */
   currentStep: 1 | 2 | 3
@@ -1291,12 +1297,11 @@ export interface CmsContractorProject {
   imageUrl?: string
   /** Dữ liệu tóm tắt trên thẻ ở tab "Dự án đã thực hiện" (Hình S13 mở rộng). */
   verified?: boolean
-  category?: 'house' | 'villa' | 'renovation' | 'factory'
   areaM2?: number
   dimensions?: string
+  /** Dòng quy mô dạng chữ của dự án nhập trước khi có Số tầng / Tum theo danh mục — chỉ đọc. */
   scale?: string
   location?: string
-  constructionScope?: 'turnkey' | 'structural' | 'finishing'
   contractorRole?: 'general-contractor' | 'contractor'
   constructionMonths?: number
   constructionStartedAt?: string
@@ -1304,8 +1309,6 @@ export interface CmsContractorProject {
   mainItems?: string
   verifiedAt?: string
   galleryUrls?: string[]
-  /** Thế mạnh liên quan, dùng để lọc dự án khi bấm tag ở M06. */
-  tags?: string[]
 }
 
 /**
@@ -1485,6 +1488,8 @@ export interface CmsContractor {
   /**
    * Số lầu cao nhất nhà thầu nhận thi công, không tính trệt (0 = chỉ nhà trệt).
    * Bộ lọc "Quy mô công trình" ở S09 đọc trường này; bỏ trống thì không bị loại.
+   * Epic Quản lý nhà thầu không có trường này nên form quản trị không nhập — chỉ
+   * còn giá trị trong dữ liệu mẫu.
    */
   maxUpperFloors?: number
   photos: CmsContractorPhoto[]
@@ -1523,8 +1528,6 @@ export interface CmsContractor {
    * trỏ tới nhà thầu này, xóa đi thì thẻ lời mời của khách mất tên.
    */
   hidden?: boolean
-  /** Ghi chú nội bộ của vận hành. */
-  opsNote?: string
 }
 
 /* ===========================================================================

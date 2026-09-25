@@ -1167,6 +1167,14 @@
         "title": "Thông tin bổ sung",
         "empty": "Chọn loại công trình để hiển thị các lựa chọn phù hợp"
       },
+      "inactiveSuffix": "(Ngừng hoạt động)",
+      "configChanged": "Cấu hình loại công trình vừa thay đổi. Vui lòng chọn lại các trường đang được đánh dấu.",
+      "typeChange": {
+        "title": "Đổi loại công trình?",
+        "description": "Loại công trình mới có cấu hình khác, các giá trị sau không còn hợp lệ và sẽ bị xóa khỏi form: {fields}.",
+        "confirm": "Đổi loại và xóa giá trị",
+        "cancel": "Giữ loại hiện tại"
+      },
       "landPhoto": {
         "label": "Ảnh lô đất",
         "labelApartment": "Ảnh mặt bằng căn hộ hiện trạng",
@@ -2196,6 +2204,7 @@
       "discard": "Bỏ thay đổi",
       "keepEditing": "Soạn tiếp",
       "discardConfirmTitle": "Đóng mà chưa lưu?",
+      "confirmSaveTitle": "Xác nhận lưu thay đổi?",
       "discardConfirmBody": "Những gì bạn vừa nhập trong ngăn kéo này sẽ mất.",
       "view": "Xem chi tiết",
       "switchStatus": "Chuyển trạng thái",
@@ -2212,6 +2221,7 @@
       "searchPlaceholder": "Tìm trong bảng…",
       "empty": "Chưa có bản ghi nào.",
       "noSearchResult": "Không có bản ghi nào khớp \"{query}\".",
+      "noFilterResult": "Không có bản ghi nào phù hợp với bộ lọc đang chọn.",
       "clearSearch": "Xóa từ khóa",
       "total": "{total} bản ghi"
     },
@@ -2755,7 +2765,6 @@
       "scanUrl": "Bản scan hợp đồng / thỏa thuận",
       "person": "Người liên hệ",
       "phone": "Điện thoại",
-      "opsNote": "Ghi chú vận hành",
       "noReviews": "Chưa có đánh giá",
       "detailDescription": "Hồ sơ quản trị của nhà thầu. Trạng thái xác minh nhà thầu, dự án, pháp lý và hợp tác là các trạng thái độc lập.",
       "info": "Thông tin nhà thầu",
@@ -2850,7 +2859,14 @@
       "historyBy": "Người thực hiện",
       "historyGroup": "Nhóm dữ liệu",
       "historyAction": "Thao tác",
-      "maxUpperFloors": "Số lầu tối đa (không tính trệt)"
+      "provinceRequired": "Chọn tỉnh / thành phố.",
+      "wardRequired": "Chọn phường / xã.",
+      "openInvitations": "Mở danh sách lời mời",
+      "coordsInvalid": "Cần cập nhật tọa độ",
+      "licenseExpiredWarning": "Giấy phép kinh doanh không còn hiệu lực — hồ sơ pháp lý không còn được hiển thị là đã xác minh. Cần cập nhật thông tin hợp lệ và kiểm duyệt lại.",
+      "delete": "Xóa nhà thầu",
+      "deleteConfirm": "Xóa vĩnh viễn nhà thầu {name}?",
+      "deletedToast": "Đã xóa nhà thầu."
     },
     "discountValidity": {
       "active": "Đang chạy",
@@ -2927,7 +2943,6 @@
       "descriptionField": "Mô tả",
       "status": "Trạng thái",
       "statusHint": "Loại mới mặc định Ngừng hoạt động. Chỉ kích hoạt được khi cấu hình Số tầng và Tum hợp lệ.",
-      "order": "Thứ tự hiển thị",
       "allStatuses": "Tất cả trạng thái",
       "applyFilter": {
         "all": "Tất cả",
@@ -2956,6 +2971,7 @@
       "atticRequired": "Tum bắt buộc",
       "disableWarning": "Chuyển sang Không áp dụng: hồ sơ mới sẽ không còn nhập trường này. Hồ sơ cũ giữ nguyên giá trị đã lưu.",
       "historyNote": "Thay đổi cấu hình chỉ áp dụng cho lần tạo hoặc sửa hồ sơ tiếp theo, không ghi đè dữ liệu cũ.",
+      "removedOptionImpact": "Bỏ phương án “{option}”: {count} hồ sơ dự án đang dùng phương án này.",
       "usage": "Số bản ghi đang dùng",
       "duplicateName": "Tên loại công trình đã tồn tại.",
       "deleteBlocked": "Loại công trình đã được sử dụng — chỉ chuyển được sang Ngừng hoạt động.",
@@ -4185,12 +4201,10 @@
         "filterLabel": "Lọc theo loại dự án",
         "filters": {
           "all": "Tất cả {count}",
-          "house": "Nhà riêng {count}",
-          "villa": "Biệt thự {count}",
-          "renovation": "Cải tạo {count}",
-          "factory": "Nhà xưởng {count}"
+          "type": "{label} {count}"
         },
         "verifiedBadge": "Đã xác minh",
+        "featuredBadge": "Nổi bật",
         "area": "{area} m²",
         "completed": "Hoàn thành {year}",
         "viewDetail": "Xem chi tiết",
@@ -4215,17 +4229,14 @@
           "completedYear": "Hoàn thành {year}",
           "notUpdated": "Đang cập nhật",
           "mainItemsFallback": "Thi công các hạng mục theo hồ sơ công trình đã cung cấp.",
-          "projectTypes": {
-            "house": "Nhà phố",
-            "villa": "Biệt thự",
-            "renovation": "Cải tạo",
-            "factory": "Nhà xưởng"
-          },
           "constructionScopes": {
-            "turnkey": "Trọn gói",
-            "structural": "Phần thô",
-            "finishing": "Hoàn thiện"
+            "turnkey": "Thi công trọn gói",
+            "shell": "Phần thô",
+            "finishing": "Hoàn thiện",
+            "interior": "Nội thất"
           },
+          "attic": "Có tum",
+          "noAttic": "Không tum",
           "roles": {
             "general-contractor": "Tổng thầu",
             "contractor": "Nhà thầu thi công"

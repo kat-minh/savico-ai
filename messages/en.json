@@ -1167,6 +1167,14 @@
         "title": "Additional details",
         "empty": "Pick a building type to see the matching options"
       },
+      "inactiveSuffix": "(Inactive)",
+      "configChanged": "The building type settings just changed. Please choose the highlighted fields again.",
+      "typeChange": {
+        "title": "Change building type?",
+        "description": "The new building type is set up differently, so these values are no longer valid and will be cleared from the form: {fields}.",
+        "confirm": "Change and clear",
+        "cancel": "Keep current type"
+      },
       "landPhoto": {
         "label": "Plot photo",
         "labelApartment": "Current apartment floor plan",
@@ -2196,6 +2204,7 @@
       "discard": "Discard changes",
       "keepEditing": "Keep editing",
       "discardConfirmTitle": "Close without saving?",
+      "confirmSaveTitle": "Save these changes?",
       "discardConfirmBody": "Everything you just typed in this drawer will be lost.",
       "view": "View details",
       "switchStatus": "Change status",
@@ -2212,6 +2221,7 @@
       "searchPlaceholder": "Search this table…",
       "empty": "No records yet.",
       "noSearchResult": "No record matches \"{query}\".",
+      "noFilterResult": "No record matches the selected filters.",
       "clearSearch": "Clear search",
       "total": "{total} records"
     },
@@ -2755,7 +2765,6 @@
       "scanUrl": "Contract / agreement scan",
       "person": "Contact person",
       "phone": "Phone",
-      "opsNote": "Operations note",
       "noReviews": "No reviews yet",
       "detailDescription": "Admin profile of the contractor. Contractor, project, legal and partnership verification are independent statuses.",
       "info": "Contractor",
@@ -2850,7 +2859,14 @@
       "historyBy": "By",
       "historyGroup": "Area",
       "historyAction": "Action",
-      "maxUpperFloors": "Max upper floors (excluding ground)"
+      "provinceRequired": "Choose a province / city.",
+      "wardRequired": "Choose a ward / commune.",
+      "openInvitations": "Open the invitation list",
+      "coordsInvalid": "Coordinates need updating",
+      "licenseExpiredWarning": "The business licence is no longer valid — the legal profile is no longer shown as verified. Update it with valid details and review it again.",
+      "delete": "Delete contractor",
+      "deleteConfirm": "Permanently delete contractor {name}?",
+      "deletedToast": "Contractor deleted."
     },
     "discountValidity": {
       "active": "Running",
@@ -2927,7 +2943,6 @@
       "descriptionField": "Description",
       "status": "Status",
       "statusHint": "New types start Inactive. They can be activated only when the Floors and Attic settings are valid.",
-      "order": "Display order",
       "allStatuses": "All statuses",
       "applyFilter": {
         "all": "All",
@@ -2956,6 +2971,7 @@
       "atticRequired": "Attic is required",
       "disableWarning": "Switching to Does not apply: new projects will no longer ask for this field. Existing projects keep their saved value.",
       "historyNote": "Changes apply the next time a project is created or edited and never overwrite saved data.",
+      "removedOptionImpact": "Removing “{option}”: {count} projects currently use this option.",
       "usage": "Records using it",
       "duplicateName": "This building type already exists.",
       "deleteBlocked": "This building type is in use — it can only be set to Inactive.",
@@ -4185,12 +4201,10 @@
         "filterLabel": "Filter by project type",
         "filters": {
           "all": "All {count}",
-          "house": "Houses {count}",
-          "villa": "Villas {count}",
-          "renovation": "Renovations {count}",
-          "factory": "Factories {count}"
+          "type": "{label} {count}"
         },
         "verifiedBadge": "Verified",
+        "featuredBadge": "Featured",
         "area": "{area} m²",
         "completed": "Completed {year}",
         "viewDetail": "View details",
@@ -4215,17 +4229,14 @@
           "completedYear": "Completed {year}",
           "notUpdated": "Being updated",
           "mainItemsFallback": "Construction work based on the supplied project records.",
-          "projectTypes": {
-            "house": "Townhouse",
-            "villa": "Villa",
-            "renovation": "Renovation",
-            "factory": "Factory"
-          },
           "constructionScopes": {
-            "turnkey": "Turnkey",
-            "structural": "Structural work",
-            "finishing": "Finishing"
+            "turnkey": "Turnkey construction",
+            "shell": "Structural work",
+            "finishing": "Finishing",
+            "interior": "Interior"
           },
+          "attic": "With attic",
+          "noAttic": "No attic",
           "roles": {
             "general-contractor": "General contractor",
             "contractor": "Construction contractor"
