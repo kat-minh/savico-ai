@@ -1,9 +1,9 @@
 'use client'
 
 import { Clock, Coins, FileSearch, PencilRuler, UserRoundSearch, type LucideIcon } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, useInView } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { revealEase, ScribbleArrow } from '@/shared/components/common'
 import { cn } from '@/shared/lib/utils'
@@ -35,6 +35,11 @@ export function HomePainPoints() {
   const t = useTranslations('landing.painPoints')
   const [hovered, setHovered] = useState<HomePainPoint | null>(null)
   const hoveredIndex = hovered === null ? -1 : HOME_PAIN_POINTS.indexOf(hovered)
+  // Theo dõi KHUNG BỌC ghi chú, không theo dõi chính ghi chú: ghi chú bị `clip-path` che
+  // kín nên trình duyệt báo phần lọt màn hình = 0% và `whileInView` không bao giờ chạy —
+  // ghi chú tàng hình ở mọi khổ màn (góp ý #46). Khung bọc không bị che nên đo đúng.
+  const noteRef = useRef<HTMLDivElement>(null)
+  const noteInView = useInView(noteRef, { once: true, amount: 0.3 })
 
   return (
     <section id='home-pain-points' className='bg-primary-strong text-primary-foreground'>
@@ -68,23 +73,22 @@ export function HomePainPoints() {
 
           {/* Ghi chú viết tay + mũi tên vẽ tay chỉ xuống dải thẻ (ảnh mockup) —
               vẽ nét SAU CÙNG, đúng thứ tự mở màn của khối. */}
-          <motion.div
-            initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
-            whileInView={{ opacity: 1, clipPath: 'inset(0 0% 0 0)' }}
-            // Ngưỡng thấp: nét chữ bị ẩn bằng clip-path, chờ 60% khối lọt màn hình
-            // thì có lúc không bao giờ chạy và ghi chú tàng hình luôn (góp ý BuildX).
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.6, delay: 0.9, ease: revealEase }}
-            // Hiện ở MỌI khổ màn hình (góp ý #46): dưới `lg` nằm dưới tiêu đề, nghiêng nhẹ hơn.
-            className='flex flex-col items-end max-lg:ml-auto lg:translate-y-2'
-          >
-            <p className='font-hand mr-10 max-w-[15rem] -rotate-6 text-left text-lg leading-snug whitespace-pre-line lg:mr-14 lg:-rotate-9 lg:text-xl'>
-              {t('note')}
-            </p>
-            {/* Giữ đúng chiều ảnh mẫu: nét cong đi lên từ trái rồi đổ xuống,
+          {/* Hiện ở MỌI khổ màn hình (góp ý #46): dưới `lg` nằm dưới tiêu đề, nghiêng nhẹ hơn. */}
+          <div ref={noteRef} className='max-lg:ml-auto lg:translate-y-2'>
+            <motion.div
+              initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
+              animate={noteInView ? { opacity: 1, clipPath: 'inset(0 0% 0 0)' } : undefined}
+              transition={{ duration: 0.6, delay: 0.9, ease: revealEase }}
+              className='flex flex-col items-end'
+            >
+              <p className='font-hand mr-10 max-w-[15rem] -rotate-6 text-left text-lg leading-snug whitespace-pre-line lg:mr-14 lg:-rotate-9 lg:text-xl'>
+                {t('note')}
+              </p>
+              {/* Giữ đúng chiều ảnh mẫu: nét cong đi lên từ trái rồi đổ xuống,
                 đầu mũi chỉ xuống-phải về phía dải thẻ. */}
-            <ScribbleArrow className='text-primary-foreground/85 -mt-3 mr-5 h-8 w-20 rotate-120' />
-          </motion.div>
+              <ScribbleArrow className='text-primary-foreground/85 -mt-3 mr-5 h-8 w-20 rotate-120' />
+            </motion.div>
+          </div>
         </div>
 
         {/* Dưới `sm`: danh sách DỌC, thẻ ngang (icon trái · chữ phải, căn trái) như ảnh đề
