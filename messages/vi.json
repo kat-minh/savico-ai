@@ -42,7 +42,7 @@
           "bullet1": "Thiết kế & dự toán",
           "bullet2": "Nhận bản vẽ hoàn chỉnh",
           "bullet3": "Dự án sẵn sàng triển khai",
-          "info": "Gói thiết kế từ 399.000 ₫ · còn 1 lượt miễn phí",
+          "info": "Gói thiết kế từ 399.000 ₫",
           "cta": "Thiết kế & dự toán"
         },
         "withDrawing": {
@@ -880,19 +880,19 @@
       "badge": "Thư viện mẫu",
       "close": "Đóng",
       "title": "Bạn muốn làm gì với mẫu này?",
-      "subtitle": "“{name}” — tạo phương án từ mẫu, lưu lại để xem sau, hoặc hỏi kiến trúc sư trước.",
+      "subtitle": "“{name}” — xem để tham khảo, lưu lại cho lần sau, hoặc hỏi kiến trúc sư trước.",
       "later": "Để sau, xem tiếp",
       "create": {
         "imageAlt": "Mẫu thiết kế đang xem",
         "badge": "Lựa chọn chính",
-        "title": "Tạo phương án từ mẫu này",
-        "subtitle": "Dùng mẫu làm cảm hứng / đầu vào cho dự án của bạn.",
+        "title": "Thiết kế ngay",
+        "subtitle": "Bắt đầu một dự án thiết kế & dự toán mới, không dùng mẫu này làm dữ liệu đầu vào.",
         "p1": "Đi vào luồng tạo dự án",
         "p2": "Thiết kế & dự toán theo lô đất của bạn",
         "p3": "Nhận bản vẽ hoàn chỉnh → sẵn sàng triển khai",
         "valuePlan": "Dùng lượt trong gói {plan}",
-        "valueFree": "Còn 1 lượt thiết kế miễn phí",
-        "action": "Tạo phương án từ mẫu này"
+        "valueFree": "gói thiết kế từ 399.000đ",
+        "action": "Thiết kế ngay"
       },
       "save": {
         "imageAlt": "Mẫu thiết kế để lưu vào tài khoản",
@@ -900,7 +900,7 @@
         "subtitle": "Lưu vào tài khoản để quay lại sau.",
         "p1": "Nằm trong “Mẫu đã lưu” của bạn",
         "p2": "So sánh các mẫu đã lưu",
-        "p3": "Tạo phương án hoặc hỏi KTS từ danh sách",
+        "p3": "Bắt đầu thiết kế mới hoặc hỏi KTS từ danh sách",
         "value": "Miễn phí · không tốn lượt tra",
         "action": "Lưu mẫu",
         "savedAction": "Đã lưu",
@@ -912,7 +912,7 @@
         "subtitle": "Kiến trúc sư BuildX tư vấn mẫu này có phù hợp với bạn không.",
         "p1": "Mẫu có phù hợp lô đất & nhu cầu?",
         "p2": "Cần điều chỉnh gì · ước tính chi phí, công năng",
-        "p3": "Sau tư vấn: dùng mẫu hoặc đổi mẫu khác",
+        "p3": "Sau tư vấn: bắt đầu thiết kế mới hoặc chọn mẫu khác",
         "value": "Miễn phí · kiến trúc sư BuildX",
         "action": "Hỏi KTS 1:1"
       }
@@ -943,15 +943,15 @@
       "close": "Đóng",
       "titlePlan": "Bạn đã dùng hết {total} lượt tra cứu của gói {plan}",
       "titleFree": "Bạn đã dùng hết {total} lượt tra cứu hôm nay",
-      "description": "Nâng gói hoặc mua thêm lượt để xem tiếp, hoặc dùng ngay “{name}” để tạo phương án cho dự án của mình.",
+      "description": "Nâng gói hoặc mua thêm lượt để xem tiếp, hoặc bắt đầu một dự án thiết kế & dự toán mới.",
       "chip1": "Nhà phố hiện đại",
       "chip2": "Biệt thự sân vườn",
       "chip3": "Nhà cấp 4",
       "more": "Mở thêm lượt ngay",
-      "useSelected": "Dùng mẫu đã chọn",
+      "useSelected": "Thiết kế ngay",
       "consult": "Hỏi KTS tư vấn mẫu",
-      "footnoteDay": "Hết lượt hôm nay. Bạn vẫn có thể dùng mẫu đã chọn hoặc hỏi KTS; lượt tra cứu miễn phí được làm mới vào ngày mới.",
-      "footnoteMonth": "Hết lượt tra cứu của gói trong tháng này. Mở thêm quyền lợi để xem tiếp, hoặc dùng ngay mẫu đã chọn.",
+      "footnoteDay": "Hết lượt hôm nay. Bạn vẫn có thể bắt đầu thiết kế mới hoặc hỏi KTS; lượt tra cứu miễn phí được làm mới vào ngày mới.",
+      "footnoteMonth": "Hết lượt tra cứu của gói trong tháng này. Mở thêm quyền lợi để xem tiếp, hoặc bắt đầu một dự án thiết kế mới.",
       "later": "Để sau",
       "returnToLibrary": "Quay lại Thư viện mẫu"
     },
@@ -992,7 +992,7 @@
           "p1": "Chưa có bản vẽ → Thiết kế & dự toán",
           "p2": "Nhận bản vẽ / hồ sơ",
           "p3": "Dự án sẵn sàng triển khai",
-          "value": "Còn 1 lượt thiết kế miễn phí",
+          "value": "gói thiết kế từ 399.000đ",
           "action": "Tạo dự án ngay"
         },
         "architect": {
@@ -1112,7 +1112,7 @@
           "p1": "Tải ảnh lô đất / chụp ảnh hiện trạng",
           "p2": "Hệ thống phân tích hiện trạng",
           "p3": "Thiết kế & dự toán → nhận bản vẽ",
-          "value": "Bắt đầu từ ảnh hiện trạng",
+          "value": "gói thiết kế từ 399.000đ",
           "action": "Chụp ảnh & tạo dự án"
         },
         "browse": {
@@ -4675,11 +4675,11 @@
       "self": {
         "imageAlt": "Bản vẽ thi công và dụng cụ quản lý công trình",
         "title": "Tự quản lý",
-        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; BuildX lưu hồ sơ và tiến độ cơ bản.",
-        "p1": "Dashboard tự quản lý",
-        "p2": "Theo dõi hồ sơ & tiến độ",
-        "p3": "Thi công",
-        "value": "Miễn phí",
+        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; mục này chỉ dùng để so sánh với 2 gói giám sát của BuildX.",
+        "p1": "Bạn tự theo dõi công trình",
+        "p2": "Không đăng ký gói giám sát BuildX",
+        "p3": "Thông tin để so sánh lựa chọn",
+        "value": "Không dùng gói giám sát",
         "action": "Tự quản lý"
       },
       "check": {

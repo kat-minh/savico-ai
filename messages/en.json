@@ -42,7 +42,7 @@
           "bullet1": "Design & cost estimation",
           "bullet2": "Receive completed drawings",
           "bullet3": "Project ready to execute",
-          "info": "Design plans from ₫399,000 · 1 free design remaining",
+          "info": "Design plans from ₫399,000",
           "cta": "Design & estimate"
         },
         "withDrawing": {
@@ -880,19 +880,19 @@
       "badge": "Template library",
       "close": "Close",
       "title": "What would you like to do with this template?",
-      "subtitle": "“{name}” — create a project option from it, save it for later, or ask an architect first.",
+      "subtitle": "“{name}” — use it as a reference, save it for later, or ask an architect first.",
       "later": "Maybe later, keep browsing",
       "create": {
         "imageAlt": "The design template you are viewing",
         "badge": "Primary choice",
-        "title": "Create an option from this template",
-        "subtitle": "Use this template as inspiration and input for your project.",
+        "title": "Design now",
+        "subtitle": "Start a new design & estimate project without using this template as input data.",
         "p1": "Continue into project creation",
         "p2": "Design & estimate for your actual lot",
         "p3": "Receive completed drawings → ready to implement",
         "valuePlan": "Uses a credit from your {plan} plan",
-        "valueFree": "1 free design remaining",
-        "action": "Create from this template"
+        "valueFree": "Design plans from 399,000 VND",
+        "action": "Design now"
       },
       "save": {
         "imageAlt": "Design template saved to your account",
@@ -900,7 +900,7 @@
         "subtitle": "Save it to your account and come back later.",
         "p1": "Appears in your Saved templates",
         "p2": "Compare templates you have saved",
-        "p3": "Create an option or ask an architect later",
+        "p3": "Start a new design or ask an architect later",
         "value": "Free · does not use a lookup credit",
         "action": "Save template",
         "savedAction": "Saved",
@@ -912,7 +912,7 @@
         "subtitle": "A BuildX architect can advise whether this template suits you.",
         "p1": "Does it fit your lot & needs?",
         "p2": "What should change · cost & layout guidance",
-        "p3": "After consulting: use this template or choose another",
+        "p3": "After consulting: start a new design or choose another template",
         "value": "Free · BuildX architect",
         "action": "Ask an architect 1:1"
       }
@@ -943,15 +943,15 @@
       "close": "Close",
       "titlePlan": "You have used all {total} template lookups in your {plan} plan",
       "titleFree": "You have used all {total} template lookups today",
-      "description": "Upgrade or add more lookups to keep browsing, or use “{name}” now to create an option for your project.",
+      "description": "Upgrade or add more lookups to keep browsing, or start a new design & estimate project.",
       "chip1": "Modern townhouse",
       "chip2": "Garden villa",
       "chip3": "Single-storey house",
       "more": "Get more lookups",
-      "useSelected": "Use selected template",
+      "useSelected": "Design now",
       "consult": "Ask an architect",
-      "footnoteDay": "You are out of lookups today. You can still use the selected template or ask an architect; free lookups reset on the next day.",
-      "footnoteMonth": "You are out of lookups for this plan period. Add more benefits to continue, or use the selected template now.",
+      "footnoteDay": "You are out of lookups today. You can still start a new design or ask an architect; free lookups reset on the next day.",
+      "footnoteMonth": "You are out of lookups for this plan period. Add more benefits to continue, or start a new design project.",
       "later": "Maybe later",
       "returnToLibrary": "Back to Template library"
     },
@@ -992,7 +992,7 @@
           "p1": "No drawings → Design & estimate",
           "p2": "Receive drawings / dossier",
           "p3": "Project ready to implement",
-          "value": "1 free design remaining",
+          "value": "Design plans from 399,000 VND",
           "action": "Create project now"
         },
         "architect": {
@@ -1112,7 +1112,7 @@
           "p1": "Upload a lot / existing-site photo",
           "p2": "BuildX analyzes the current site",
           "p3": "Design & estimate → receive drawings",
-          "value": "Start from your site photo",
+          "value": "Design plans from 399,000 VND",
           "action": "Photograph & create project"
         },
         "browse": {
@@ -4675,12 +4675,12 @@
       "self": {
         "imageAlt": "Construction drawings and project management tools",
         "title": "Self-managed",
-        "subtitle": "Work directly with your contractor while BuildX keeps your records and basic progress tracking.",
-        "p1": "Self-managed dashboard",
-        "p2": "Track records & progress",
-        "p3": "Construction",
-        "value": "Free",
-        "action": "Self-manage"
+        "subtitle": "Work directly with your contractor; this option is informational and only compares against BuildX's two supervision plans.",
+        "p1": "You track the construction yourself",
+        "p2": "No BuildX supervision plan",
+        "p3": "Information for plan comparison",
+        "value": "No supervision plan",
+        "action": "Self-managed"
       },
       "check": {
         "imageAlt": "Engineer checking key construction milestones",

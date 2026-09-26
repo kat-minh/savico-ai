@@ -15,7 +15,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } fr
 import { JOURNEY_POPUP_TEST_MODE } from '@/shared/constants'
 import { designCreateRoute, ROUTES } from '@/shared/constants/routes'
 import { useFavoriteStore, useIsFavorite } from '@/shared/favorite'
-import { TOPIC_IMAGE, cn, rememberProjectTemplateSeed } from '@/shared/lib'
+import { TOPIC_IMAGE, cn } from '@/shared/lib'
 
 const TEMPLATE_POPUP_SESSION_KEY = 'savico.page-popup.template'
 const TRIGGER_DELAY_MS = 8_000
@@ -127,23 +127,6 @@ export function TemplateDetailCtaPopup({ template }: TemplateDetailCtaPopupProps
     }
   }, [template.id])
 
-  const rememberTemplate = () => {
-    const sourceStyle =
-      template.kind === '3d'
-        ? (template.tags.interiorStyle ?? template.tags.architectureStyle)
-        : (template.tags.architectureStyle ?? template.tags.interiorStyle)
-
-    rememberProjectTemplateSeed({
-      templateId: template.id,
-      templateName: template.name,
-      buildingType: template.tags.buildingType,
-      floorCount: template.tags.floorCount,
-      hasAttic: template.tags.hasAttic,
-      style: sourceStyle
-    })
-    setOpen(false)
-  }
-
   const saveTemplate = () => {
     if (!favorite) {
       toggleFavorite(favoriteItem)
@@ -222,7 +205,7 @@ export function TemplateDetailCtaPopup({ template }: TemplateDetailCtaPopupProps
             order={0}
             actions={
               <Button asChild className='brand-orange-button h-12 w-full rounded-xl text-[15px] font-bold'>
-                <Link href={designCreateRoute()} onClick={rememberTemplate} className='group/button relative'>
+                <Link href={designCreateRoute()} onClick={() => setOpen(false)} className='group/button relative'>
                   <span>{t('create.action')}</span>
                   <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
                 </Link>

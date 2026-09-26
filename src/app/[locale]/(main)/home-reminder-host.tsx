@@ -218,9 +218,13 @@ export function HomeReminderHost() {
     const ownedIds = new Set([...projectIds, ...briefIds])
 
     const email = user.email.toLowerCase()
-    const supervision = [...supervisionProjects]
+    const matchingSupervisionProjects = [...supervisionProjects]
       .filter((project) => project.customer?.email?.toLowerCase() === email || ownedIds.has(project.id))
-      .sort((a, b) => b.activatedAt.localeCompare(a.activatedAt))[0]
+      .sort((a, b) => b.activatedAt.localeCompare(a.activatedAt))
+
+    // Phase hiện tại chưa có rule chọn dự án khi khách có nhiều dự án giám sát.
+    // Khi đó chỉ bỏ qua reminder S5; các reminder hợp lệ khác vẫn được xét tiếp.
+    const supervision = matchingSupervisionProjects.length === 1 ? matchingSupervisionProjects[0] : undefined
 
     if (supervision) {
       const pendingStage =
@@ -244,7 +248,12 @@ export function HomeReminderHost() {
     }
 
     const relatedInvitations = [...invitations]
-      .filter((invitation) => briefIds.has(invitation.projectId) && invitation.status !== 'done')
+      .filter(
+        (invitation) =>
+          briefIds.has(invitation.projectId) &&
+          invitation.status === 'accepted' &&
+          invitation.survey.status === 'confirmed'
+      )
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 
     const latestInvitation = relatedInvitations[0]
