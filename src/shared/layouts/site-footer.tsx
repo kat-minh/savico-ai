@@ -7,7 +7,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { cmsText, useCmsDocument } from '@/shared/cms'
-import { TikTokIcon, Logo, TurnkeyRequestDialog, ZaloIcon } from '@/shared/components/common'
+import { HotlineLink, TikTokIcon, Logo, TurnkeyRequestDialog, ZaloIcon } from '@/shared/components/common'
 import { siteConfig } from '@/shared/config/site'
 import { cn } from '@/shared/lib/utils'
 import { FOOTER_ABOUT_LINKS, FOOTER_PRODUCT_LINKS, FOOTER_SUPPORT_LINKS, type FooterLink } from './site-footer.config'
@@ -242,12 +242,12 @@ export function SiteFooter() {
               transition={{ duration: 0.42, delay: 0.74, ease: [0.22, 1, 0.36, 1] }}
             >
               {t('hotline')}:{' '}
-              <a
-                href={`tel:${hotline.replace(/\s/g, '')}`}
+              <HotlineLink
+                hotline={hotline}
                 className='footer-animated-link hover:text-footer-foreground relative inline-block transition-colors'
               >
                 {hotline}
-              </a>
+              </HotlineLink>
             </motion.li>
             <motion.li
               initial={{ opacity: 0, y: 5 }}

@@ -155,14 +155,16 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
               bản + một lớp chữ chồng cho hiệu ứng nên mã trang lặp câu). Phần nhấn
               tô màu bằng `background-clip: text` + dải chuyển sắc trượt từ trái —
               span `inline` nên xuống dòng theo từng từ; từ `lg` phần nhấn xuống
-              dòng riêng. Dưới `lg` tối đa 3 dòng (`max-h` 3 × 1.15em). Chỗ ngắt
-              dòng admin đặt bằng ký tự xuống dòng được `whitespace-pre-line` giữ. */}
-          <h1 className='text-3xl leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
+              dòng riêng. Dưới `sm` cỡ chữ co theo bề ngang (`vw`) để vế đầu nằm
+              gọn một dòng và phần nhấn tách dòng riêng, cân hai dòng (`text-balance`)
+              — tổng 3 dòng, không ngắt giữa cụm kể cả máy màn nhỏ (Responsive case 3).
+              Chỗ ngắt dòng admin đặt bằng ký tự xuống dòng được `whitespace-pre-line` giữ. */}
+          <h1 className='text-[clamp(1.25rem,6vw,1.875rem)] leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
             <motion.span
               initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={seq(0.1, 0.75)}
-              className='block max-h-[3.5em] overflow-hidden whitespace-pre-line lg:max-h-none'
+              className='block whitespace-pre-line'
             >
               {t('titleLead')}{' '}
               <motion.span
@@ -174,7 +176,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
                     'linear-gradient(to right, var(--color-primary-strong) 50%, color-mix(in oklab, var(--color-foreground) 35%, transparent) 50%)',
                   backgroundSize: '200% 100%'
                 }}
-                className='bg-clip-text text-transparent lg:block lg:whitespace-nowrap'
+                className='block bg-clip-text text-balance text-transparent lg:text-wrap lg:whitespace-nowrap'
               >
                 {t('titleAccent')}
               </motion.span>

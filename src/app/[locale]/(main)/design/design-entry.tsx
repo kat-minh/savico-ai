@@ -41,7 +41,7 @@ export function DesignEntry({ openCreateProject = false }: { openCreateProject?:
         </div>
         <Button
           size='lg'
-          className='brand-green-button h-12 rounded-full px-10 text-base font-semibold tracking-wide uppercase has-[>svg]:px-10'
+          className='brand-green-button h-12 rounded-full px-10 text-base font-semibold has-[>svg]:px-10'
           onClick={openCreateDialog}
         >
           <Plus className='size-5' />

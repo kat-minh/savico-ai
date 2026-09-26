@@ -1221,7 +1221,7 @@ export interface CmsSupervisionProject {
   customer?: CmsProjectOwner
   /** Gói đang dùng: `check` hoặc `control`. */
   packageTier: 'check' | 'control'
-  /** Mã gói hiển thị trên thẻ dự án, ví dụ `SVG-2026-0001-AT`. */
+  /** Mã gói hiển thị trên thẻ dự án, ví dụ `SVC-2026-0001-AT`. */
   packageCode: string
   engineer: string
   /** Ngày kích hoạt gói — mốc tính lịch chuẩn. */

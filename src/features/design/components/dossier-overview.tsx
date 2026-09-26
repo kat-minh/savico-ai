@@ -227,7 +227,7 @@ export function DossierOverview({
       style={entranceStyle}
       // Dưới `lg`: một cột co được (`minmax(0,1fr)`), đệm trên 8px cộng `py-4` của stepper = 24px như
       // Bước 1/2 (trước đây `py-6` → 40px).
-      className='mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)] gap-5 px-4 pt-2 pb-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8 lg:pt-6'
+      className='mx-auto grid w-full max-w-[90rem] grid-cols-[minmax(0,1fr)] gap-5 px-4 pt-2 pb-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:px-8 lg:pt-6'
     >
       <div className='grid min-w-0'>
         <div data-dossier-overview-left className='col-start-1 row-start-1 space-y-5'>

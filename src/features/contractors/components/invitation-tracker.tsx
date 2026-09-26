@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { EmptyState, ProjectManagementOptionsDialog, revealEase } from '@/shared/components/common'
+import { EmptyState, HotlineLink, ProjectManagementOptionsDialog, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -382,13 +382,10 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
             <DialogTitle>{t('contactDialogTitle')}</DialogTitle>
           </DialogHeader>
           <div className='space-y-2.5 text-sm'>
-            <a
-              href={`tel:${siteConfig.contact.hotline.replace(/\s/g, '')}`}
-              className='hover:bg-accent flex items-center gap-2.5 rounded-lg border px-3 py-2.5 transition-colors'
-            >
+            <HotlineLink className='hover:bg-accent flex items-center gap-2.5 rounded-lg border px-3 py-2.5 transition-colors'>
               <Phone className='text-primary size-4 shrink-0' />
               {siteConfig.contact.hotline}
-            </a>
+            </HotlineLink>
             <a
               href={`mailto:${siteConfig.contact.email}`}
               className='hover:bg-accent flex items-center gap-2.5 rounded-lg border px-3 py-2.5 transition-colors'
@@ -399,7 +396,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
           </div>
           <DialogFooter>
             <Button asChild className='w-full'>
-              <a href={`tel:${siteConfig.contact.hotline.replace(/\s/g, '')}`}>{t('contactDialogCall')}</a>
+              <HotlineLink>{t('contactDialogCall')}</HotlineLink>
             </Button>
           </DialogFooter>
         </DialogContent>

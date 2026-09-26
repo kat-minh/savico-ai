@@ -101,9 +101,9 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
         <Link href={ROUTES.ACCOUNT_PROJECTS} className='hover:text-foreground'>
           {t('breadcrumbProjects')}
         </Link>
-        <span aria-hidden>›</span>
+        <span aria-hidden>&gt;</span>
         <span>{project.projectName}</span>
-        <span aria-hidden>›</span>
+        <span aria-hidden>&gt;</span>
         <span className='text-foreground'>{t('title')}</span>
       </nav>
 

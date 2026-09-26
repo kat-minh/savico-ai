@@ -55,6 +55,21 @@ export function briefReadiness(brief: ProjectBrief): BriefReadiness {
   }
 }
 
+/**
+ * Hồ sơ chưa có một dòng dữ liệu nào của khách — sinh ra khi mở form "Tạo hồ sơ"
+ * rồi thoát. Không phải "bản nháp" (khách chưa lưu gì) nên không hiện ở danh sách
+ * và bị dọn khi tạo hồ sơ mới (góp ý NT30).
+ */
+export function isBlankBrief(brief: ProjectBrief): boolean {
+  return (
+    !brief.name.trim() &&
+    !(brief.landArea > 0) &&
+    !brief.address.provinceName &&
+    !brief.scopeNote.trim() &&
+    brief.documents.length === 0
+  )
+}
+
 /** Hồ sơ đủ điều kiện bấm "Hoàn tất & tìm nhà thầu" (S11). */
 export function isBriefComplete(brief: ProjectBrief): boolean {
   const readiness = briefReadiness(brief)

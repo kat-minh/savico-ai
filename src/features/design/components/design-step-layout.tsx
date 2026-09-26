@@ -92,7 +92,7 @@ export function DesignStepLayout({
       style={entranceStyle}
       className={cn(
         // `grid-cols-[minmax(0,1fr)]`: cột duy nhất trên mobile phải co được, không thì nó tự nới theo nội dung.
-        'mx-auto grid w-full max-w-6xl grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-2 pb-6 lg:px-8 lg:pt-6',
+        'mx-auto grid w-full max-w-[90rem] grid-cols-[minmax(0,1fr)] gap-6 px-4 pt-2 pb-6 lg:px-8 lg:pt-6',
         twoColumn && (waiting ? 'lg:grid-cols-[minmax(0,1fr)_22rem]' : 'lg:grid-cols-[minmax(0,1fr)_360px]')
       )}
     >

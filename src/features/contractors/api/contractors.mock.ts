@@ -11,7 +11,7 @@ import {
 import { useAuthStore } from '@/shared/auth'
 import { mockDelay } from '@/shared/lib/mock'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import { emptyBrief, fullAddress } from '../services/brief.service'
+import { emptyBrief, fullAddress, isBlankBrief } from '../services/brief.service'
 import type {
   Contractor,
   ContractorReview,
@@ -244,6 +244,8 @@ export const mockContractorsApi = {
   createBrief: async (): Promise<ProjectBrief> => {
     await mockDelay(200)
     const store = loadStore()
+    // Hồ sơ mở form rồi thoát, chưa điền gì, thì bỏ đi — không để lại "Hồ sơ chưa đặt tên" (NT30).
+    for (const [id, brief] of Object.entries(store.briefs)) if (isBlankBrief(brief)) delete store.briefs[id]
     const now = new Date().toISOString()
     const brief: ProjectBrief = {
       ...emptyBrief(),
@@ -279,7 +281,9 @@ export const mockContractorsApi = {
 
   listBriefs: async (): Promise<ProjectBrief[]> => {
     await mockDelay(150)
-    return Object.values(loadStore().briefs).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    return Object.values(loadStore().briefs)
+      .filter((brief) => !isBlankBrief(brief))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   },
 
   listBriefSummaries: async (): Promise<ProjectBriefSummary[]> => {
@@ -291,6 +295,7 @@ export const mockContractorsApi = {
       counts.set(invitation.projectId, (counts.get(invitation.projectId) ?? 0) + 1)
     }
     return Object.values(loadStore().briefs)
+      .filter((brief) => !isBlankBrief(brief))
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .map((brief) => ({ brief: withDerivedStatus(brief), invitedCount: counts.get(brief.id) ?? 0 }))
   },

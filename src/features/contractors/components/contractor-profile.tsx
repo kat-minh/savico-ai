@@ -698,7 +698,10 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
         aria-hidden={!barCollapsed}
         className={cn(
           PAGE_CONTAINER,
-          'pointer-events-none fixed top-14 left-1/2 z-30 hidden -translate-x-1/2 md:block'
+          // Nằm NGAY DƯỚI menu (bám `--public-header-offset`, menu trang này cao 64px — `top-14`
+          // cũ đè 8px lên menu) và chỉ từ `lg`, khớp với thanh đáy `lg:hidden`: mọi khổ màn hình
+          // chỉ có MỘT thanh cố định (góp ý NT31).
+          'pointer-events-none fixed top-[calc(var(--public-header-offset,64px)+0.5rem)] left-1/2 z-30 hidden -translate-x-1/2 lg:block'
         )}
       >
         <AnimatePresence>

@@ -32,7 +32,7 @@ import { giftValueInMillions } from '../services/plan-gift.service'
 import { PlanGiftDialog } from './plan-gift-dialog'
 import { cmsText, useCmsDocument, type PlanTier } from '@/shared/cms'
 import { useChatContextStore } from '@/shared/chat-context'
-import { Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
+import { HotlineLink, Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { siteConfig } from '@/shared/config/site'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -156,10 +156,10 @@ function PlanPricingContent() {
         </div>
         <div className='grid w-full gap-2 sm:flex sm:w-auto sm:gap-3'>
           <Button asChild size='lg' className='brand-green-button plan-cta-action'>
-            <a href={`tel:${hotline.replace(/\s/g, '')}`}>
+            <HotlineLink hotline={hotline}>
               <Headphones className='size-4' />
               {t('ctaBand.call', { hotline })}
-            </a>
+            </HotlineLink>
           </Button>
           <Button
             type='button'
@@ -472,10 +472,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         asChild
                         size='sm'
                         variant={plan.popular ? 'default' : 'outline'}
-                        className={cn(
-                          'plan-table-buy text-xs font-bold tracking-wide uppercase',
-                          plan.popular && 'plan-table-buy-popular'
-                        )}
+                        className={cn('plan-table-buy text-xs font-bold', plan.popular && 'plan-table-buy-popular')}
                       >
                         <Link href={checkoutConfirmRoute(plan.id)} onClick={() => rememberCheckoutReturn(plan.id)}>
                           {plan.ctaLabel || t(`cta.${tier}`)}
@@ -1293,7 +1290,7 @@ function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled:
     if (alive.current) router.push(checkoutConfirmRoute(plan.id))
   }
   return (
-    <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold tracking-wide uppercase'>
+    <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold'>
       <Link
         href={checkoutConfirmRoute(plan.id)}
         aria-disabled={disabled || pending}

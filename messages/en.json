@@ -10,6 +10,13 @@
     "search": "Search",
     "submit": "Submit",
     "close": "Close",
+    "hotlinePopover": {
+      "title": "BuildX hotline",
+      "hint": "Call this number from your phone, or message BuildX on Zalo.",
+      "copy": "Copy number",
+      "copied": "Copied",
+      "zalo": "Zalo chat"
+    },
     "confirm": "Confirm",
     "back": "Back",
     "next": "Next",
@@ -502,6 +509,8 @@
       "title": "Pick the package that fits where you are",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
       "viewAll": "See all packages",
+      "referenceLabel": "See:",
+      "referenceLink": "Pricing",
       "ownedLabel": "Your package - {count} uses left",
       "openPackage": "View design plans",
       "openSupervision": "Open my plan",
@@ -1176,7 +1185,7 @@
         "cancel": "Keep current type"
       },
       "landPhoto": {
-        "label": "Plot photo",
+        "label": "Site photo",
         "labelApartment": "Current apartment floor plan",
         "hint": "Photograph or upload the plot (boundaries clearly visible, well lit). AI detects the shape and proportions — no dimensions needed.",
         "hintApartment": "Upload the apartment floor plan (developer drawing) so AI can detect the rooms.",
@@ -3834,6 +3843,7 @@
         "close": "Done"
       },
       "continueWith": "Continue with {name}",
+      "untitledBrief": "untitled brief",
       "continueShort": "Continue",
       "continueHint": "Continue with {name}",
       "switchBrief": "Switch profile"
@@ -3993,7 +4003,9 @@
         "p3": "Material and furniture supply",
         "p4": "Quality & cost control",
         "p5": "Acceptance & handover",
-        "action": "Register for full delivery"
+        "action": "Register for full delivery",
+        "titlePro": "Turnkey build with BuildX",
+        "needPro": "Requires the PRO plan to unlock this offer."
       },
       "expert": {
         "title": "Talk to an expert",
@@ -4002,6 +4014,7 @@
         "p2": "Design direction that fits your budget",
         "p3": "Answers on the process and the platform",
         "action": "Book a consultation",
+        "free": "Free",
         "included": "Already included in your plan",
         "priceFrom": "From {price}",
         "viewPricing": "View consultation plans"
@@ -4387,7 +4400,7 @@
       "copyCode": "Copy code",
       "copied": "Copied",
       "remainingInvites": "You have {count} invitations left - invite more contractors for more options",
-      "inviteMore": "Invite more contractors"
+      "inviteMore": "Invite more contractors ({left} left)"
     },
     "invitations": {
       "title": "Invitations to quote",
@@ -4451,7 +4464,9 @@
       "createMore": "New project brief (free)",
       "buyPlan": "Buy a design package for drawings & quantities",
       "contracted": "Contractor settled",
-      "untitled": "Untitled brief"
+      "untitled": "Untitled brief",
+      "draft": "Draft",
+      "completeBrief": "Complete brief"
     },
     "projectBar": {
       "label": "Selected project",

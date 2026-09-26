@@ -356,7 +356,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
             </div>
             <StartOptions
               findHref={order.projectId ? contractorMatchesRoute(order.projectId) : ROUTES.CONTRACTORS}
-              hasPlan
+              isPro={order.product.name === 'pro'}
               completionMode
               animateEntrance={entranceState === 'play'}
               onTurnkeySelect={() => toast.success(t('turnkeyContactConfirmation'))}

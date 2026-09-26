@@ -179,15 +179,19 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
         </nav>
 
         <div className='ml-auto flex items-center gap-2'>
-          <Button
-            data-create-project-trigger
-            size='sm'
-            className='rounded-xl transition-[transform,filter,box-shadow] duration-200'
-            onClick={onCreateProject}
-          >
-            <Plus data-create-project-plus className='size-4 transition-transform duration-300' />
-            <span className='hidden sm:inline'>{createLabel}</span>
-          </Button>
+          {/* Trang /design đã có MỘT nút "Tạo dự án mới" lớn ở giữa — ẩn nút trên menu để màn
+              hình chỉ còn một chỗ tạo dự án (góp ý Thiết kế & Dự toán). */}
+          {pathname === ROUTES.DESIGN ? null : (
+            <Button
+              data-create-project-trigger
+              size='sm'
+              className='rounded-xl transition-[transform,filter,box-shadow] duration-200'
+              onClick={onCreateProject}
+            >
+              <Plus data-create-project-plus className='size-4 transition-transform duration-300' />
+              <span className='hidden sm:inline'>{createLabel}</span>
+            </Button>
+          )}
 
           {/* Avatar luôn hiện — mục IV: bấm avatar mở Cửa sổ cá nhân. Khách chưa
               đăng nhập thấy cùng một biểu tượng, chỉ khác nội dung dropdown, để

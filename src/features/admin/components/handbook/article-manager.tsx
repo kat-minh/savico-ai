@@ -23,7 +23,7 @@ import { useMemo, useState } from 'react'
 
 import type { HandbookArticle, HandbookStageId } from '@/shared/cms'
 import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
-import { newAdminId, slugify, todayKey } from '../../services/admin.service'
+import { newAdminId, slugify } from '../../services/admin.service'
 import {
   articleContentLength,
   articleProblem,
@@ -113,7 +113,7 @@ export function ArticleManager() {
         excerpt: '',
         imageUrl: '',
         category: activeLabelIds[0] ?? '',
-        publishedAt: todayKey(),
+        publishedAt: new Date().toISOString(),
         readingMinutes: 5,
         body: [{ heading: '', paragraphs: [''] }],
         tags: {},
@@ -145,7 +145,7 @@ export function ArticleManager() {
           excerpt: first.length > 200 ? `${first.slice(0, 197)}…` : first,
           stage: next.stage || undefined,
           topicId: next.stage ? next.topicId || undefined : undefined,
-          publishedAt: todayKey()
+          publishedAt: new Date().toISOString()
         }
       }}
       validate={(next) => {

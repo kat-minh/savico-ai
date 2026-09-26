@@ -582,9 +582,10 @@ export function ArticleList() {
                         <Clock className='size-3.5' aria-hidden />
                         {t('readingTime', { minutes: article.readingMinutes })}
                       </span>
-                      <span className='bg-accent text-primary-strong ml-auto flex size-8 items-center justify-center rounded-full transition-colors duration-200 group-hover/card:bg-primary-strong group-hover/card:text-white'>
+                      {/* Chữ "Đọc bài" hiện hẳn trên thẻ (góp ý TT08), không chỉ mũi tên. */}
+                      <span className='bg-accent text-primary-strong group-hover/card:bg-primary-strong ml-auto inline-flex h-8 items-center gap-1.5 rounded-full px-3 font-semibold whitespace-nowrap transition-colors duration-200 group-hover/card:text-white'>
+                        {t('readArticle')}
                         <ArrowRight className='size-4' aria-hidden />
-                        <span className='sr-only'>{t('readArticle')}</span>
                       </span>
                     </div>
                   </div>

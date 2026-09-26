@@ -10,6 +10,13 @@
     "search": "Tìm kiếm",
     "submit": "Gửi",
     "close": "Đóng",
+    "hotlinePopover": {
+      "title": "Hotline BuildX",
+      "hint": "Gọi số này từ điện thoại của bạn, hoặc nhắn Zalo cho BuildX.",
+      "copy": "Sao chép số",
+      "copied": "Đã sao chép",
+      "zalo": "Nhắn Zalo"
+    },
     "confirm": "Xác nhận",
     "back": "Quay lại",
     "next": "Tiếp theo",
@@ -502,6 +509,8 @@
       "title": "Chọn gói phù hợp với giai đoạn của bạn",
       "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
       "viewAll": "Xem tất cả gói",
+      "referenceLabel": "Tham khảo:",
+      "referenceLink": "Bảng giá",
       "ownedLabel": "Gói của bạn - còn {count} lượt",
       "openPackage": "Xem gói thiết kế",
       "openSupervision": "Mở gói",
@@ -531,7 +540,7 @@
           "usedAtStep": "Dùng ở bước 04–05"
         }
       },
-      "titleMobile": "Bảng giá BuildX"
+      "titleMobile": "Gói dịch vụ BuildX"
     },
     "dossiers": {
       "eyebrow": "HỒ SƠ MẪU",
@@ -1176,9 +1185,9 @@
         "cancel": "Giữ loại hiện tại"
       },
       "landPhoto": {
-        "label": "Ảnh lô đất",
+        "label": "Ảnh hiện trạng",
         "labelApartment": "Ảnh mặt bằng căn hộ hiện trạng",
-        "hint": "Chụp hoặc tải ảnh mặt bằng khu đất (nhìn rõ ranh giới, đủ sáng). AI tự nhận diện hình dạng, tỷ lệ lô đất — không cần nhập kích thước.",
+        "hint": "Chụp hoặc tải ảnh hiện trạng khu đất (nhìn rõ ranh giới, đủ sáng). AI tự nhận diện hình dạng, tỷ lệ khu đất — không cần nhập kích thước.",
         "hintApartment": "Tải ảnh mặt bằng căn hộ (bản vẽ / sơ đồ từ chủ đầu tư) để AI nhận diện các phòng.",
         "cta": "Chụp ảnh hoặc kéo-thả vào đây",
         "constraints": "JPG, PNG, HEIC — tối đa 10MB",
@@ -1327,7 +1336,7 @@
         "interior": "Phần nội thất"
       },
       "sectionTotal": "Tổng {section}:",
-      "viewDetail": "XEM CHI TIẾT",
+      "viewDetail": "Xem chi tiết",
       "downloadXlsx": "Tải bảng dự toán Excel (.xlsx)",
       "breakdownTitle": "Tỷ trọng chi phí",
       "advisoryTitle": "Tư vấn từ BuildX",
@@ -3834,6 +3843,7 @@
         "close": "Hoàn tất"
       },
       "continueWith": "Tiếp tục với {name}",
+      "untitledBrief": "hồ sơ chưa đặt tên",
       "continueShort": "Tiếp tục",
       "continueHint": "Tiếp tục với {name}",
       "switchBrief": "Đổi hồ sơ"
@@ -3993,7 +4003,9 @@
         "p3": "Cung ứng vật liệu, nội thất",
         "p4": "Kiểm soát chất lượng & chi phí",
         "p5": "Nghiệm thu & bàn giao",
-        "action": "Đăng ký triển khai"
+        "action": "Đăng ký triển khai",
+        "titlePro": "Thi công trọn gói cùng BuildX",
+        "needPro": "Cần mua thêm gói PRO để nhận ưu đãi này."
       },
       "expert": {
         "title": "Nói chuyện với chuyên gia",
@@ -4002,6 +4014,7 @@
         "p2": "Gợi ý hướng thiết kế phù hợp ngân sách",
         "p3": "Giải đáp quy trình và cách dùng nền tảng",
         "action": "Đặt lịch tư vấn",
+        "free": "Miễn phí",
         "included": "Đã bao gồm trong gói của bạn",
         "priceFrom": "Từ {price}",
         "viewPricing": "Xem các gói tư vấn"
@@ -4387,7 +4400,7 @@
       "copyCode": "Sao chép mã",
       "copied": "Đã sao chép",
       "remainingInvites": "Bạn còn {count} lượt mời - mời thêm nhà thầu để có nhiều lựa chọn",
-      "inviteMore": "Mời thêm nhà thầu"
+      "inviteMore": "Mời thêm nhà thầu (còn {left})"
     },
     "invitations": {
       "title": "Lời mời báo giá",
@@ -4451,7 +4464,9 @@
       "createMore": "Tạo hồ sơ dự án mới (miễn phí)",
       "buyPlan": "Mua gói thiết kế để có bản vẽ & khối lượng kèm hồ sơ",
       "contracted": "Đã chốt thầu",
-      "untitled": "Hồ sơ chưa đặt tên"
+      "untitled": "Hồ sơ chưa đặt tên",
+      "draft": "Bản nháp",
+      "completeBrief": "Hoàn thiện hồ sơ"
     },
     "projectBar": {
       "label": "Dự án đang chọn",
@@ -4700,7 +4715,7 @@
       "noInspection": "Không có kỹ sư kiểm tra tại công trình",
       "free": "Miễn phí",
       "choose": "Chọn {tier}",
-      "costNote": "Chi phí giám sát thường chiếm khoảng 0,6–1,3% giá trị công trình. Với công trình 1,5 tỷ, gói CHECK tương đương 0,6% và gói CONTROL tương đương 1,3%.",
+      "costNote": "Chi phí giám sát thường chiếm khoảng 0,6–1,3% giá trị công trình. Với công trình 1,5 tỷ, gói AN TÂM tương đương 0,6% và gói TOÀN DIỆN tương đương 1,3%.",
       "comparison": {
         "title": "So sánh chi tiết 3 lựa chọn",
         "criterion": "Hạng mục",
@@ -4815,7 +4830,7 @@
       },
       "notes": {
         "payment": "Thanh toán qua QR chuyển khoản ngân hàng.",
-        "scope": "Gói tính theo dự án, áp dụng cho nhà ở đến 3 tầng và 300 m² sàn; ngoài phạm vi này tính theo add-on.",
+        "scope": "Gói tính theo dự án, áp dụng cho nhà ở đến 3 tầng và 300 m² sàn; ngoài phạm vi này tính theo dịch vụ thêm.",
         "area": "Khu vực phục vụ chuẩn trong bán kính 30 km từ điểm có kỹ sư; ngoài khu vực tính thêm chi phí di chuyển."
       }
     },

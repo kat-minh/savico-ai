@@ -75,9 +75,10 @@ export function HomePainPoints() {
             // thì có lúc không bao giờ chạy và ghi chú tàng hình luôn (góp ý BuildX).
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.6, delay: 0.9, ease: revealEase }}
-            className='hidden flex-col items-end lg:flex lg:translate-y-2'
+            // Hiện ở MỌI khổ màn hình (góp ý #46): dưới `lg` nằm dưới tiêu đề, nghiêng nhẹ hơn.
+            className='flex flex-col items-end max-lg:ml-auto lg:translate-y-2'
           >
-            <p className='font-hand mr-14 max-w-[15rem] -rotate-9 text-left text-xl leading-snug whitespace-pre-line'>
+            <p className='font-hand mr-10 max-w-[15rem] -rotate-6 text-left text-lg leading-snug whitespace-pre-line lg:mr-14 lg:-rotate-9 lg:text-xl'>
               {t('note')}
             </p>
             {/* Giữ đúng chiều ảnh mẫu: nét cong đi lên từ trái rồi đổ xuống,

@@ -152,7 +152,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
                         <Link
                           href={ROUTES.TERMS}
                           target='_blank'
-                          className='text-foreground font-medium underline underline-offset-2'
+                          className='text-foreground font-medium whitespace-nowrap underline underline-offset-2'
                         >
                           {chunks}
                         </Link>
@@ -161,7 +161,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
                         <Link
                           href={ROUTES.PRIVACY}
                           target='_blank'
-                          className='text-foreground font-medium underline underline-offset-2'
+                          className='text-foreground font-medium whitespace-nowrap underline underline-offset-2'
                         >
                           {chunks}
                         </Link>
@@ -192,7 +192,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
       {!embedded && (
         <p className='text-muted-foreground mt-6 text-center text-sm'>
           {t('haveAccount')}{' '}
-          <Link href={ROUTES.LOGIN} className='text-foreground font-medium hover:underline'>
+          <Link href={ROUTES.LOGIN} className='text-foreground font-medium underline underline-offset-4'>
             {t('signIn')}
           </Link>
         </p>

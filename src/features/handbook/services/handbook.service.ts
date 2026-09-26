@@ -245,7 +245,8 @@ export function pageCount(total: number, size: number): number {
 }
 
 function byNewest(a: HandbookArticle, b: HandbookArticle): number {
-  return b.publishedAt.localeCompare(a.publishedAt)
+  // So theo thời điểm, không so chuỗi: bài cũ có thể chỉ lưu ngày, bài mới lưu cả giờ.
+  return Date.parse(b.publishedAt) - Date.parse(a.publishedAt)
 }
 
 /** Danh sách bài mới nhất trước — dùng ở Bản tin và "Tất cả bài viết". */

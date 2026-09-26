@@ -375,7 +375,13 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
 
               <p className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
                 {/* Một định dạng ngày cho cả Cẩm nang: dd/mm/yyyy (góp ý BuildX). */}
-                {t('updatedAt', { date: formatDisplayDate(article.publishedAt, locale) })}
+                {t('updatedAt', {
+                  date: formatDisplayDate(article.publishedAt, locale, {
+                    weekday: true,
+                    // Bài cũ chỉ lưu ngày — không bịa ra giờ.
+                    time: article.publishedAt.includes('T')
+                  })
+                })}
                 <span aria-hidden>·</span>
                 <Clock className='size-4' />
                 {t('readingTime', { minutes: article.readingMinutes })}

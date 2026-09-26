@@ -47,6 +47,7 @@ function displayParts(value: Date | string | number, locale: Locale) {
  * - `formatDisplayDate` → "24/09/2026"
  * - `formatDisplayDate(…, { weekday: true })` → "Thứ Năm, 24/09/2026"
  * - `formatDisplayDate(…, { time: true })` → "14:45 - 23/09/2026"
+ * - cả hai → "Thứ Năm, 14:45 - 24/09/2026"
  */
 export function formatDisplayDate(
   value: Date | string | number,
@@ -54,9 +55,8 @@ export function formatDisplayDate(
   options: { weekday?: boolean; time?: boolean } = {}
 ): string {
   const parts = displayParts(value, locale)
-  if (options.time) return `${parts.time} - ${parts.date}`
-  if (options.weekday) return `${parts.weekday}, ${parts.date}`
-  return parts.date
+  const date = options.time ? `${parts.time} - ${parts.date}` : parts.date
+  return options.weekday ? `${parts.weekday}, ${date}` : date
 }
 
 /**

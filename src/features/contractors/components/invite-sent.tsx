@@ -208,7 +208,8 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
     .map((invitation) => contractorOf(invitation.contractorId)?.name ?? invitation.contractorId)
     .join(', ')
   // Chưa tải xong danh sách lời mời thì chưa biết còn lượt — không đoán là còn đủ 3.
-  const showMoreHint = invitations !== undefined && remainingInvites(invitations) > 0 && (instant || hintDelayDone)
+  const invitesLeft = invitations === undefined ? 0 : remainingInvites(invitations)
+  const showMoreHint = invitesLeft > 0 && (instant || hintDelayDone)
   const markInviteReturn = () =>
     window.sessionStorage.setItem(
       MATCHES_INVITE_RETURN_KEY,
@@ -547,9 +548,11 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
               </Link>
             </Button>
           </motion.span>
+          {/* Còn lượt mời → nút thứ hai là "Mời thêm nhà thầu (còn x)", hiện ngay cùng nút
+              chính (góp ý NT35: dòng gợi ý nhỏ bên trên dễ bị lỡ). Hết lượt → "Quay lại danh sách". */}
           <Button asChild variant='outline' className='border-primary/50 text-primary-strong min-w-52'>
             <Link href={contractorMatchesRoute(projectId)} onClick={backToList}>
-              {tCommon('backToList')}
+              {invitesLeft > 0 ? t('inviteMore', { left: invitesLeft }) : tCommon('backToList')}
             </Link>
           </Button>
         </motion.div>

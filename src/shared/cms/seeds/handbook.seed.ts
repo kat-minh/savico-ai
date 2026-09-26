@@ -674,7 +674,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'foundation',
-    publishedAt: '2026-08-06',
+    publishedAt: '2026-08-06T08:30:00+07:00',
     readingMinutes: 6,
     body: [
       {
@@ -712,7 +712,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'foundation',
-    publishedAt: '2026-08-04',
+    publishedAt: '2026-08-04T14:15:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -739,7 +739,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'foundation',
-    publishedAt: '2026-08-02',
+    publishedAt: '2026-08-02T09:45:00+07:00',
     readingMinutes: 6,
     body: [
       {
@@ -766,7 +766,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'foundation',
-    publishedAt: '2026-08-01',
+    publishedAt: '2026-08-01T16:00:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -793,7 +793,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'material',
     stage: 'structure',
     topicId: 'foundation',
-    publishedAt: '2026-07-30',
+    publishedAt: '2026-07-30T10:20:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -820,7 +820,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'foundation',
-    publishedAt: '2026-07-28',
+    publishedAt: '2026-07-28T19:30:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -847,7 +847,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'piling',
-    publishedAt: '2026-07-30',
+    publishedAt: '2026-07-30T07:50:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -874,7 +874,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'frame',
-    publishedAt: '2026-07-28',
+    publishedAt: '2026-07-28T11:10:00+07:00',
     readingMinutes: 6,
     body: [
       {
@@ -901,7 +901,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'masonry',
-    publishedAt: '2026-07-25',
+    publishedAt: '2026-07-25T15:40:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -928,7 +928,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'roofing',
-    publishedAt: '2026-08-05',
+    publishedAt: '2026-08-05T08:30:00+07:00',
     readingMinutes: 5,
     featuredRank: 3,
     body: [
@@ -956,7 +956,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'stairs',
-    publishedAt: '2026-07-22',
+    publishedAt: '2026-07-22T14:15:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -983,7 +983,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'mep',
-    publishedAt: '2026-07-20',
+    publishedAt: '2026-07-20T09:45:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -1010,7 +1010,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'structure',
     topicId: 'structure-handover',
-    publishedAt: '2026-08-07',
+    publishedAt: '2026-08-07T16:00:00+07:00',
     readingMinutes: 5,
     featuredRank: 2,
     body: [
@@ -1039,7 +1039,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'material',
     stage: 'finishing',
     topicId: 'tiling',
-    publishedAt: '2026-08-03',
+    publishedAt: '2026-08-03T10:20:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -1066,7 +1066,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'material',
     stage: 'finishing',
     topicId: 'painting',
-    publishedAt: '2026-07-27',
+    publishedAt: '2026-07-27T19:30:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -1093,7 +1093,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'material',
     stage: 'finishing',
     topicId: 'doors',
-    publishedAt: '2026-07-24',
+    publishedAt: '2026-07-24T07:50:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -1120,7 +1120,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'interior',
     stage: 'finishing',
     topicId: 'lighting',
-    publishedAt: '2026-08-01',
+    publishedAt: '2026-08-01T11:10:00+07:00',
     readingMinutes: 5,
     featuredRank: 4,
     body: [
@@ -1149,7 +1149,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'material',
     stage: 'finishing',
     topicId: 'sanitary',
-    publishedAt: '2026-07-18',
+    publishedAt: '2026-07-18T15:40:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -1174,7 +1174,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'experience',
     stage: 'finishing',
     topicId: 'finishing-handover',
-    publishedAt: '2026-07-15',
+    publishedAt: '2026-07-15T08:30:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -1201,7 +1201,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'interior',
     stage: 'interior',
     topicId: 'interior-design',
-    publishedAt: '2026-08-05',
+    publishedAt: '2026-08-05T14:15:00+07:00',
     readingMinutes: 6,
     body: [
       {
@@ -1229,7 +1229,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'interior',
     stage: 'interior',
     topicId: 'joinery',
-    publishedAt: '2026-07-29',
+    publishedAt: '2026-07-29T09:45:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -1255,7 +1255,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'interior',
     stage: 'interior',
     topicId: 'loose-furniture',
-    publishedAt: '2026-07-26',
+    publishedAt: '2026-07-26T16:00:00+07:00',
     readingMinutes: 4,
     body: [
       {
@@ -1281,7 +1281,7 @@ const ARTICLES: HandbookArticle[] = [
     category: 'interior',
     stage: 'interior',
     topicId: 'interior-budget',
-    publishedAt: '2026-07-21',
+    publishedAt: '2026-07-21T10:20:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -1307,7 +1307,7 @@ const ARTICLES: HandbookArticle[] = [
     excerpt: 'Cập nhật bảng giá xi măng, thép, gạch, cát, đá và dự báo xu hướng biến động thời gian tới.',
     imageUrl: TOPIC_IMAGE.site,
     category: 'material',
-    publishedAt: '2026-08-07',
+    publishedAt: '2026-08-07T19:30:00+07:00',
     readingMinutes: 5,
     featuredRank: 1,
     body: [
@@ -1333,7 +1333,7 @@ const ARTICLES: HandbookArticle[] = [
     excerpt: 'Tiêu chí đánh giá, cách kiểm tra năng lực và kinh nghiệm để chọn được nhà thầu chất lượng.',
     imageUrl: STYLE_IMAGE['japanese-roof'],
     category: 'experience',
-    publishedAt: '2026-08-07',
+    publishedAt: '2026-08-07T07:50:00+07:00',
     readingMinutes: 6,
     body: [
       {
@@ -1356,7 +1356,7 @@ const ARTICLES: HandbookArticle[] = [
     excerpt: 'Hướng dẫn chi tiết hồ sơ, thủ tục và thời gian xin giấy phép xây dựng theo quy định hiện hành.',
     imageUrl: BUILDING_IMAGE.roofed,
     category: 'legal',
-    publishedAt: '2026-08-06',
+    publishedAt: '2026-08-06T11:10:00+07:00',
     readingMinutes: 5,
     body: [
       {
@@ -1379,7 +1379,7 @@ const ARTICLES: HandbookArticle[] = [
     excerpt: 'Bóc tách theo ba phần thô - hoàn thiện - nội thất và những khoản hay bị quên.',
     imageUrl: STYLE_IMAGE['garden-villa'],
     category: 'experience',
-    publishedAt: '2026-08-04',
+    publishedAt: '2026-08-04T15:40:00+07:00',
     readingMinutes: 6,
     body: [
       {
