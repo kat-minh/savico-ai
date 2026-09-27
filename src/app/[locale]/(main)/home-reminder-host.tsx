@@ -33,6 +33,7 @@ interface ReminderSnapshot {
 
 interface ReminderMemory {
   lastShownAt: number
+  lastDismissedAt?: number
   count: number
 }
 
@@ -86,6 +87,7 @@ function readMemory(email: string, state: ReminderState): ReminderMemory {
     const parsed = JSON.parse(raw) as Partial<ReminderMemory>
     return {
       lastShownAt: typeof parsed.lastShownAt === 'number' ? parsed.lastShownAt : 0,
+      lastDismissedAt: typeof parsed.lastDismissedAt === 'number' ? parsed.lastDismissedAt : undefined,
       count: typeof parsed.count === 'number' ? parsed.count : 0
     }
   } catch {
@@ -98,7 +100,7 @@ function writeShown(email: string, state: ReminderState): void {
   const current = readMemory(email, state)
   window.localStorage.setItem(
     reminderStorageKey(email, state),
-    JSON.stringify({ lastShownAt: Date.now(), count: current.count + 1 } satisfies ReminderMemory)
+    JSON.stringify({ ...current, lastShownAt: Date.now(), count: current.count + 1 } satisfies ReminderMemory)
   )
   if (state !== 'S5') {
     window.localStorage.setItem(
@@ -108,10 +110,22 @@ function writeShown(email: string, state: ReminderState): void {
   }
 }
 
+function writeDismissed(email: string, state: ReminderState): void {
+  try {
+    window.localStorage.setItem(
+      reminderStorageKey(email, state),
+      JSON.stringify({ ...readMemory(email, state), lastDismissedAt: Date.now() } satisfies ReminderMemory)
+    )
+  } catch {
+    // The in-memory guard still prevents reopening during this visit.
+  }
+}
+
 function canShowByFrequency(email: string, state: ReminderState): boolean {
+  const memory = readMemory(email, state)
+  if (memory.lastDismissedAt !== undefined && Date.now() - memory.lastDismissedAt < DAY_MS) return false
   if (JOURNEY_POPUP_TEST_MODE) return true
   const policy = POLICY[state]
-  const memory = readMemory(email, state)
   if (policy.maxShows !== undefined && memory.count >= policy.maxShows) return false
   return Date.now() - memory.lastShownAt >= policy.cadenceMs
 }
@@ -339,7 +353,7 @@ export function HomeReminderHost() {
     let retryTimer: ReturnType<typeof setTimeout> | null = null
 
     const attemptShow = () => {
-      if (cancelled) return
+      if (cancelled || !canShowByFrequency(user.email, snapshot.state)) return
       if (interactionIsBusy(panelOpen)) {
         retryTimer = setTimeout(attemptShow, 450)
         return
@@ -407,6 +421,7 @@ export function HomeReminderHost() {
   }, [collapsed, visible])
 
   const closeReminder = () => {
+    if (snapshot && user?.email) writeDismissed(user.email, snapshot.state)
     dismissedRef.current = true
     setVisible(false)
   }
