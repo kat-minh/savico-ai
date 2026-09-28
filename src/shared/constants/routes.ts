@@ -96,6 +96,14 @@ export const ADMIN_ROUTES = {
   INSPECTIONS: '/admin/inspections',
   CUSTOMERS: '/admin/customers',
 
+  // Nhân sự & phân quyền — RBAC theo backend BMT (STORY-RBAC-001..004)
+  /** Vai trò và mã quyền (STORY-RBAC-001). */
+  ROLES: '/admin/roles',
+  /** Tài khoản nhân viên: tạo, gán vai trò, khóa, buộc đăng xuất (STORY-RBAC-002). */
+  STAFF: '/admin/staff',
+  /** Phân công nhân viên phụ trách gói giám sát (STORY-RBAC-003). */
+  ASSIGNMENTS: '/admin/assignments',
+
   // Danh mục nhập liệu công trình (spec admin #1, #17)
   BUILDING_TYPES: '/admin/building-types',
   ARCHITECTURE_STYLES: '/admin/architecture-styles',
