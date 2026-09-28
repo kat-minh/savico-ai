@@ -40,6 +40,9 @@ export { InvitationManager } from './components/business/invitation-manager'
 export { InspectionManager } from './components/business/inspection-manager'
 export { CustomerManager } from './components/business/customer-manager'
 export { CustomerDetail } from './components/business/customer-detail'
+export { RoleManager } from './components/access/role-manager'
+export { StaffManager } from './components/access/staff-manager'
+export { AssignmentManager } from './components/access/assignment-manager'
 
 export { BuildingTypeManager } from './components/catalog/building-type-manager'
 export { StyleManager } from './components/catalog/style-manager'
@@ -50,6 +53,12 @@ export { EstimateAdviceEditor } from './components/estimate/estimate-advice-edit
 
 export { ADMIN_NAV, ADMIN_NAV_ITEMS, type AdminNavGroup, type AdminNavItem } from './components/layout/admin-nav.config'
 export { adminApi } from './api/admin.api'
+export {
+  ApiResourceManager,
+  type ApiPageParams,
+  type ApiResourceManagerProps,
+  type ApiRowContext
+} from './components/common/api-resource-manager'
 export { adminKeys } from './api/admin.keys'
 export {
   useAdminCollection,

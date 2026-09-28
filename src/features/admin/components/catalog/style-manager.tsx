@@ -1,128 +1,158 @@
 'use client'
 
-import { Col, Form, Input, InputNumber, Row, Select, Switch, Tag, Typography } from 'antd'
+import { Alert, Descriptions, Form, Image, Input, Space, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 
-import type { CmsStyleOption } from '@/shared/cms'
-import { useAdminCollection } from '../../hooks/use-admin-data'
-import { newAdminId } from '../../services/admin.service'
-import { sameName } from '../../services/catalog.service'
-import { ImageUrlField } from '../common/field-kit'
-import { ResourceManager } from '../common/resource-manager'
+import {
+  createCatalogStyle,
+  updateCatalogStyle,
+  type AdminCatalog,
+  type CatalogStyleDto,
+  type CatalogStyleGroup
+} from '../../api/bmt/catalog.api'
+import { ESTIMATE_CATALOG_KEY, useEstimateCatalog, useFreshCatalog } from '../../hooks/use-estimate-catalog'
+import { matchesKeyword, pageLocally } from '../../services/local-page.service'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import { HttpsImageField } from '../common/https-image-field'
 
 const { Text } = Typography
 
+const NAME_MAX = 200
+
+const trimmed = (value: unknown) => (typeof value === 'string' ? value.trim() : value)
+
+/** Loại công trình đang gán phong cách này, kèm cờ nhóm có đang bật không. */
+function assignedTypes(catalog: AdminCatalog | undefined, kind: 'architecture' | 'interior', styleId: string) {
+  return (catalog?.buildingTypes ?? [])
+    .filter((type) => (kind === 'architecture' ? type.architectureStyleIds : type.interiorStyleIds).includes(styleId))
+    .map((type) => ({
+      id: type.buildingTypeId,
+      name: type.name,
+      enabled: kind === 'architecture' ? type.architectureEnabled : type.interiorEnabled
+    }))
+}
+
 /**
- * PHONG CÁCH KIẾN TRÚC / PHONG CÁCH NỘI THẤT (spec admin #1: hai danh mục CRUD).
+ * PHONG CÁCH KIẾN TRÚC / PHONG CÁCH NỘI THẤT (STORY-PROJ-005, BR-PROJ-004) —
+ * hai danh mục riêng trên BMT API, mỗi danh mục một mục menu.
  *
- * Người dùng chọn phong cách từ danh mục cấu hình sẵn ở form hồ sơ dự án
- * (STORY-004), danh mục hiển thị đổi theo loại công trình. Hai danh mục chung
- * một bảng, phân biệt bằng `kind` — mỗi danh mục là một mục menu riêng.
+ * Phong cách chỉ có tên và một ảnh minh họa (URL https thuộc kho presign). Việc
+ * gán phong cách cho loại công trình làm ở màn Loại công trình; màn này chỉ
+ * hiện lại để đối chiếu. API không có xóa, ẩn hay sắp xếp phong cách.
  */
-export function StyleManager({ kind }: { kind: CmsStyleOption['kind'] }) {
+export function StyleManager({ kind }: { kind: 'architecture' | 'interior' }) {
   const t = useTranslations('admin')
-  const { data: buildingTypes = [] } = useAdminCollection('buildingTypes')
-  const { data: styles = [] } = useAdminCollection('styleOptions')
-  const ofKind = styles.filter((style) => style.kind === kind)
-  const typeLabel = (id: string) => buildingTypes.find((type) => type.id === id)?.label ?? id
+  const c = useTranslations('admin.estimateCatalog')
+  const { data: catalog } = useEstimateCatalog()
+  const { fetchFresh, invalidate } = useFreshCatalog()
+  const group: CatalogStyleGroup = kind === 'architecture' ? 'Architecture' : 'Interior'
+  const pick = (source: AdminCatalog) => (kind === 'architecture' ? source.architectureStyles : source.interiorStyles)
+
+  const typeTags = (styleId: string) => (
+    <Space size={4} wrap style={{ maxWidth: 360 }}>
+      {assignedTypes(catalog, kind, styleId).map((type) => (
+        <Tag key={type.id} color={type.enabled ? 'blue' : undefined}>
+          {type.enabled ? type.name : c('typeGroupOff', { name: type.name })}
+        </Tag>
+      ))}
+    </Space>
+  )
 
   return (
-    <ResourceManager
-      collection='styleOptions'
+    <ApiResourceManager<CatalogStyleDto>
       title={t(kind === 'architecture' ? 'nav.architectureStyles' : 'nav.interiorStyles')}
-      description={t(kind === 'architecture' ? 'styles.architectureDescription' : 'styles.interiorDescription')}
-      drawerWidth={520}
-      filterItems={(item) => item.kind === kind}
-      searchText={(item) => item.label}
-      createItem={(): CmsStyleOption => ({
-        id: newAdminId('style'),
-        kind,
-        label: '',
-        imageUrl: '',
-        buildingTypeIds: [],
-        enabled: true,
-        order: ofKind.length + 1
-      })}
-      fromFormValues={(values, current) => ({ ...current, ...values, label: String(values.label ?? '').trim() })}
-      validate={(next) =>
-        ofKind.some((style) => style.id !== next.id && sameName(style.label, next.label))
-          ? t('styles.duplicateName')
-          : null
-      }
+      description={c(kind === 'architecture' ? 'architectureDescription' : 'interiorDescription')}
+      queryKey={[...ESTIMATE_CATALOG_KEY, 'styles', group]}
+      searchable
+      fetchPage={async ({ pageIndex, pageSize, keyword }) => {
+        const fresh = await fetchFresh()
+        return pageLocally(
+          pick(fresh).filter((style) => matchesKeyword(style.name, keyword)),
+          pageIndex,
+          pageSize
+        )
+      }}
+      rowKey={(item) => item.styleId}
+      drawerWidth={560}
+      createValues={() => ({ expectedCatalogVersion: catalog?.catalogVersion ?? 0, name: '', imageUrl: '' })}
+      onCreate={async (values) => {
+        await createCatalogStyle(Number(values.expectedCatalogVersion), group, {
+          name: String(values.name ?? '').trim(),
+          imageUrl: String(values.imageUrl ?? '').trim()
+        })
+        await invalidate()
+      }}
+      toFormValues={async (item) => {
+        const fresh = await fetchFresh()
+        const latest = pick(fresh).find((style) => style.styleId === item.styleId) ?? item
+        return { ...latest, expectedCatalogVersion: fresh.catalogVersion }
+      }}
+      onUpdate={async (values, item) => {
+        await updateCatalogStyle(item.styleId, Number(values.expectedCatalogVersion), {
+          name: String(values.name ?? '').trim(),
+          imageUrl: String(values.imageUrl ?? '').trim()
+        })
+        await invalidate()
+      }}
       columns={[
-        { title: t('styles.order'), dataIndex: 'order', width: 90, sorter: (a, b) => a.order - b.order },
         {
-          title: t('styles.name'),
-          dataIndex: 'label',
+          title: c('styleName'),
+          dataIndex: 'name',
           render: (_, record) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {record.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={record.imageUrl}
                   alt=''
                   width={44}
                   height={32}
-                  style={{ objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                  style={{ objectFit: 'cover', borderRadius: 6 }}
                 />
               ) : null}
-              <Text strong>{record.label}</Text>
+              <Text strong>{record.name}</Text>
             </div>
           )
         },
         {
-          title: t('styles.appliesTo'),
-          dataIndex: 'buildingTypeIds',
-          render: (ids: string[]) => (
-            <span>
-              {ids.map((id) => (
-                <Tag key={id}>{typeLabel(id)}</Tag>
-              ))}
-            </span>
-          )
-        },
-        {
-          title: t('styles.status'),
-          dataIndex: 'enabled',
-          width: 130,
-          render: (enabled: boolean) => (
-            <Tag color={enabled ? 'green' : 'default'}>{enabled ? t('styles.shown') : t('styles.hidden')}</Tag>
-          )
+          title: c('assignedTypes'),
+          key: 'types',
+          render: (_, record) => typeTags(record.styleId)
         }
       ]}
+      renderView={(item) => (
+        <Space orientation='vertical' size={16} style={{ width: '100%' }}>
+          {item.imageUrl ? <Image src={item.imageUrl} alt='' style={{ borderRadius: 8 }} /> : null}
+          <Descriptions
+            size='small'
+            column={1}
+            bordered
+            items={[
+              { key: 'name', label: c('styleName'), children: item.name },
+              { key: 'types', label: c('assignedTypes'), children: typeTags(item.styleId) }
+            ]}
+          />
+        </Space>
+      )}
       renderForm={(form) => (
         <>
+          <Form.Item name='expectedCatalogVersion' hidden>
+            <Input />
+          </Form.Item>
           <Form.Item
-            name='label'
-            label={t('styles.name')}
+            name='name'
+            label={c('styleName')}
             rules={[
               { required: true, whitespace: true, message: t('fields.requiredMessage') },
-              { max: 100, message: t('fields.maxLength', { max: 100 }) }
+              { max: NAME_MAX, transform: trimmed, message: t('fields.maxLength', { max: NAME_MAX }) }
             ]}
           >
-            <Input maxLength={100} />
+            <Input showCount maxLength={NAME_MAX + 20} />
           </Form.Item>
-          <ImageUrlField form={form} name='imageUrl' label={t('styles.image')} />
-          <Form.Item name='buildingTypeIds' label={t('styles.appliesTo')} tooltip={t('styles.appliesToHint')}>
-            <Select
-              mode='multiple'
-              options={buildingTypes
-                .filter((type) => type.status === 'active')
-                .map((type) => ({ label: type.label, value: type.id }))}
-            />
-          </Form.Item>
-          <Row gutter={16}>
-            <Col xs={12}>
-              <Form.Item name='order' label={t('styles.order')}>
-                <InputNumber min={1} style={{ width: '100%' }} />
-              </Form.Item>
-            </Col>
-            <Col xs={12}>
-              <Form.Item name='enabled' label={t('styles.status')} valuePropName='checked'>
-                <Switch />
-              </Form.Item>
-            </Col>
-          </Row>
+          <HttpsImageField form={form} name='imageUrl' label={c('styleImage')} />
+          <Alert type='info' showIcon title={c('styleImageNote')} style={{ marginBottom: 12 }} />
+          <Text type='secondary' style={{ fontSize: 12 }}>
+            {c('styleAssignHint')}
+          </Text>
         </>
       )}
     />

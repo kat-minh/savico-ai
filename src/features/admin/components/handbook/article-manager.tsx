@@ -1,245 +1,141 @@
 'use client'
 
+import { DeleteOutlined, EyeInvisibleOutlined, SendOutlined } from '@ant-design/icons'
+import { useQuery } from '@tanstack/react-query'
 import {
   App,
   Button,
-  Card,
-  Col,
   Descriptions,
   Form,
   Image,
   Input,
-  InputNumber,
-  Row,
-  Select,
+  Popconfirm,
+  Segmented,
   Space,
+  Spin,
   Tag,
+  Tooltip,
+  TreeSelect,
   Typography
 } from 'antd'
 import type { FormInstance } from 'antd'
-import dayjs from 'dayjs'
-import { useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useState } from 'react'
 
-import type { HandbookArticle, HandbookStageId } from '@/shared/cms'
-import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
-import { newAdminId, slugify } from '../../services/admin.service'
+import type { Locale } from '@/i18n/routing'
+import { isApiError } from '@/shared/lib/api'
+import { formatDisplayDate } from '@/shared/utils'
+import { adminKeys } from '../../api/admin.keys'
 import {
-  articleContentLength,
-  articleProblem,
-  FEATURED_SLOTS,
-  MAX_ARTICLE_CONTENT
-} from '../../services/article.service'
-import { ImageUrlField, SectionListField, StatusSwitch } from '../common/field-kit'
-import { ResourceManager } from '../common/resource-manager'
+  NEWS_LIMITS,
+  newsAdminApi,
+  type BmtAdminArticleItem,
+  type BmtArticleWrite,
+  type NewsArticleState
+} from '../../api/bmt/news.api'
+import { buildCategoryTree, categoryPath } from '../../services/news-category.service'
+import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ImageUrlField } from '../common/field-kit'
+import { HtmlContentEditor, HtmlPreview } from './html-content-editor'
 
 const { Text, Paragraph } = Typography
 
-interface Filters {
-  label?: string
-  status?: 'active' | 'inactive'
+type StateFilter = 'all' | NewsArticleState
+
+const STATE_COLOR: Record<NewsArticleState, string> = {
+  Draft: 'default',
+  Published: 'green',
+  Hidden: 'orange'
 }
 
-const statusOf = (article: HandbookArticle) => article.status ?? 'active'
+const RESOURCE = 'news-articles'
+const CATEGORIES_KEY = adminKeys.bmt('news-categories', 'all')
+
+interface ArticleFormValues {
+  expectedVersion?: number
+  title?: string
+  summary?: string
+  coverImageUrl?: string
+  contentHtml?: string
+  categoryIds?: string[]
+}
+
+/** Chuỗi rỗng / toàn khoảng trắng → `null` (API hiểu là "chưa nhập"). */
+const textOrNull = (value?: string | null) => {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
+}
+
+function toWrite(values: ArticleFormValues): BmtArticleWrite {
+  return {
+    title: textOrNull(values.title),
+    summary: textOrNull(values.summary),
+    coverImageUrl: textOrNull(values.coverImageUrl),
+    contentHtml: textOrNull(values.contentHtml),
+    categoryIds: values.categoryIds ?? []
+  }
+}
+
+/** Các thành phần còn thiếu để công bố mà danh sách đã biết (nội dung chỉ backend kiểm). */
+function missingForPublish(item: BmtAdminArticleItem): ('title' | 'summary' | 'cover' | 'category')[] {
+  const missing: ('title' | 'summary' | 'cover' | 'category')[] = []
+  if (!item.title?.trim()) missing.push('title')
+  if (!item.summary?.trim()) missing.push('summary')
+  if (!item.coverImageUrl) missing.push('cover')
+  if (!item.categoryIds.length) missing.push('category')
+  return missing
+}
 
 /**
- * BÀI VIẾT (epic ArticleManagement, BR-134 → BR-137).
+ * BÀI VIẾT TIN TỨC (STORY-NEWS-001, BR-NEWS-001) — dữ liệu trên BMT API.
  *
- * Bài mới mặc định Inactive; chỉ Active khi đủ dữ liệu bắt buộc. Bước và Nhóm
- * cẩm nang chọn phụ thuộc nhau, tag "Bước · Nhóm" hệ thống tự tạo. Thời gian tạo
- * hệ thống ghi. Bốn vị trí nổi bật cấu hình ở khối phía trên bảng; bài chuyển
- * Inactive hoặc bị xóa tự rời khỏi danh sách nổi bật.
+ * Vòng đời Nháp → Công bố ⇄ Ẩn; xóa được ở mọi trạng thái (không khôi phục).
+ * Bài mới luôn là Nháp và được thiếu mọi trường; chỉ công bố khi đủ năm thành
+ * phần: tiêu đề, ảnh đại diện, mô tả ngắn, nội dung, ít nhất một danh mục. Sửa
+ * bài đang công bố cũng phải giữ đủ năm thành phần. Mỗi thao tác ghi gửi kèm
+ * `version` đã đọc; bản cũ thì backend trả lỗi xung đột và màn hiện nguyên thông báo.
  */
 export function ArticleManager() {
   const t = useTranslations('admin')
-  const { message } = App.useApp()
-  const [filters, setFilters] = useState<Filters>({})
-  const { data: articles = [] } = useAdminCollection('handbookArticles')
-  const { data: stages = [] } = useAdminCollection('handbookStages')
-  const { data: labels = [] } = useAdminCollection('articleLabels')
-  const save = useSaveAdminItem('handbookArticles')
+  const tn = useTranslations('admin.newsArticles')
+  const locale = useLocale() as Locale
+  const [state, setState] = useState<StateFilter>('all')
+  const { data: categories = [] } = useQuery({
+    queryKey: CATEGORIES_KEY,
+    queryFn: newsAdminApi.listAllCategories
+  })
 
-  const labelName = (id: string) => labels.find((label) => label.id === id)?.name ?? id
-  const activeLabelIds = labels.filter((label) => label.status === 'active').map((label) => label.id)
-  const stageOf = (id?: HandbookStageId) => stages.find((stage) => stage.id === id)
-  const handbookTag = (article: HandbookArticle) => {
-    const stage = stageOf(article.stage)
-    const topic = stage?.topics.find((item) => item.id === article.topicId)
-    return stage && topic ? t('articles.handbookTag', { step: stage.order, group: topic.title }) : null
-  }
-
-  const matches = (article: HandbookArticle) =>
-    (!filters.label || article.category === filters.label) && (!filters.status || statusOf(article) === filters.status)
+  const stateLabel = (value: NewsArticleState) => tn(`states.${value}`)
+  const date = (value?: string | null) => (value ? formatDisplayDate(value, locale) : '-')
 
   return (
-    <ResourceManager
-      collection='handbookArticles'
+    <ApiResourceManager<BmtAdminArticleItem>
       title={t('nav.articles')}
-      description={t('articles.description')}
-      drawerWidth={760}
-      filterItems={matches}
-      filterKey={JSON.stringify(filters)}
-      searchText={(item) => item.title}
+      description={tn('description')}
+      queryKey={adminKeys.bmt(RESOURCE, state)}
+      fetchPage={(params) => newsAdminApi.listArticles({ ...params, state: state === 'all' ? undefined : state })}
+      rowKey={(item) => item.id}
+      searchable
+      drawerWidth={820}
       banner={
-        <Space orientation='vertical' size={12} style={{ width: '100%' }}>
-          <FeaturedSlots />
-          <Space wrap size={8}>
-            <Select
-              allowClear
-              placeholder={t('articles.label')}
-              value={filters.label}
-              onChange={(label?: string) => setFilters((prev) => ({ ...prev, label }))}
-              options={labels.map((label) => ({ value: label.id, label: label.name }))}
-              style={{ minWidth: 200 }}
-            />
-            <Select
-              allowClear
-              placeholder={t('articles.status')}
-              value={filters.status}
-              onChange={(status?: Filters['status']) => setFilters((prev) => ({ ...prev, status }))}
-              options={[
-                { value: 'active', label: 'Active' },
-                { value: 'inactive', label: 'Inactive' }
-              ]}
-              style={{ minWidth: 150 }}
-            />
-          </Space>
-        </Space>
+        <Segmented<StateFilter>
+          value={state}
+          onChange={setState}
+          options={(['all', 'Draft', 'Published', 'Hidden'] as const).map((value) => ({
+            value,
+            label: value === 'all' ? tn('states.all') : stateLabel(value)
+          }))}
+        />
       }
-      createItem={(): HandbookArticle => ({
-        id: newAdminId('art'),
-        slug: '',
-        title: '',
-        excerpt: '',
-        imageUrl: '',
-        category: activeLabelIds[0] ?? '',
-        publishedAt: new Date().toISOString(),
-        readingMinutes: 5,
-        body: [{ heading: '', paragraphs: [''] }],
-        tags: {},
-        status: 'inactive',
-        createdAt: new Date().toISOString()
-      })}
-      fromFormValues={(values, current): HandbookArticle => {
-        const next = { ...current, ...values } as HandbookArticle
-        const title = next.title.trim()
-        const body = next.body
-          .map((section) => ({
-            ...section,
-            heading: section.heading?.trim() || undefined,
-            paragraphs: section.paragraphs.map((item) => item.trim()).filter(Boolean)
-          }))
-          .filter((section) => section.heading || section.paragraphs.length)
-        // Đường dẫn giữ nguyên khi sửa; bài mới tự sinh từ tiêu đề, trùng thì thêm hậu tố.
-        let slug = current.slug || slugify(title)
-        if (!current.slug) {
-          const taken = new Set(articles.filter((item) => item.id !== current.id).map((item) => item.slug))
-          for (let index = 2; taken.has(slug); index += 1) slug = `${slugify(title)}-${index}`
-        }
-        const first = body.flatMap((section) => section.paragraphs)[0] ?? ''
-        return {
-          ...next,
-          title,
-          slug,
-          body,
-          excerpt: first.length > 200 ? `${first.slice(0, 197)}…` : first,
-          stage: next.stage || undefined,
-          topicId: next.stage ? next.topicId || undefined : undefined,
-          publishedAt: new Date().toISOString()
-        }
-      }}
-      validate={(next) => {
-        if ((next.stage && !next.topicId) || (!next.stage && next.topicId)) return t('articles.handbookPair')
-        if (articleContentLength(next) > MAX_ARTICLE_CONTENT)
-          return t('articles.contentTooLong', { max: MAX_ARTICLE_CONTENT })
-        return null
-      }}
-      deleteConfirm={(item) => <Text>{t('articles.deleteConfirm', { title: item.title })}</Text>}
-      rowActions={(item) => {
-        const active = statusOf(item) === 'active'
-        const problem = articleProblem(item, activeLabelIds)
-        return (
-          <StatusSwitch
-            name={item.title}
-            current={active ? 'Active' : 'Inactive'}
-            next={active ? 'Inactive' : 'Active'}
-            blockedReason={!active && problem ? t(`articles.problems.${problem}`) : null}
-            warning={active && item.featuredRank ? t('articles.leavesFeatured') : null}
-            onConfirm={async () => {
-              // Chuyển Inactive thì tự rời danh sách nổi bật (§5).
-              await save.mutateAsync({
-                ...item,
-                status: active ? 'inactive' : 'active',
-                featuredRank: active ? undefined : item.featuredRank
-              })
-              message.success(t('feedback.saved'))
-            }}
-          />
-        )
-      }}
-      renderView={(item) => (
-        <Space orientation='vertical' size={16} style={{ width: '100%' }}>
-          {item.imageUrl ? <Image src={item.imageUrl} alt='' style={{ borderRadius: 8 }} /> : null}
-          <Descriptions
-            size='small'
-            column={1}
-            bordered
-            items={[
-              { key: 'title', label: t('articles.title'), children: item.title },
-              {
-                key: 'created',
-                label: t('articles.createdAt'),
-                children: item.createdAt ? dayjs(item.createdAt).format('DD/MM/YYYY') : '-'
-              },
-              { key: 'label', label: t('articles.label'), children: labelName(item.category) },
-              {
-                key: 'step',
-                label: t('articles.step'),
-                children: stageOf(item.stage)
-                  ? t('articles.stepValue', {
-                      step: stageOf(item.stage)?.order ?? '',
-                      name: stageOf(item.stage)?.title ?? ''
-                    })
-                  : '-'
-              },
-              {
-                key: 'group',
-                label: t('articles.group'),
-                children: stageOf(item.stage)?.topics.find((topic) => topic.id === item.topicId)?.title ?? '-'
-              },
-              {
-                key: 'reading',
-                label: t('articles.readingMinutes'),
-                children: t('articles.minutes', { count: item.readingMinutes })
-              },
-              {
-                key: 'status',
-                label: t('articles.status'),
-                children: statusOf(item) === 'active' ? 'Active' : 'Inactive'
-              }
-            ]}
-          />
-          {item.body.map((section, index) => (
-            <div key={index}>
-              {section.heading ? <Text strong>{section.heading}</Text> : null}
-              {section.paragraphs.map((paragraph) => (
-                <Paragraph key={paragraph} style={{ margin: '4px 0 0' }}>
-                  {paragraph}
-                </Paragraph>
-              ))}
-            </div>
-          ))}
-        </Space>
-      )}
       columns={[
         {
-          title: t('articles.title'),
-          dataIndex: 'title',
+          title: tn('title'),
+          key: 'title',
           render: (_, record) => (
             <Space size={10}>
-              {record.imageUrl ? (
+              {record.coverImageUrl ? (
                 <Image
-                  src={record.imageUrl}
+                  src={record.coverImageUrl}
                   alt=''
                   width={56}
                   height={40}
@@ -248,229 +144,280 @@ export function ArticleManager() {
               ) : (
                 <span className='inline-block h-10 w-14 rounded-md bg-[var(--admin-placeholder)]' />
               )}
-              <div style={{ minWidth: 0 }}>
+              <div style={{ minWidth: 0, maxWidth: 420 }}>
                 <Text strong style={{ display: 'block' }}>
-                  {record.title}
+                  {record.title || <Text type='secondary'>{tn('untitled')}</Text>}
                 </Text>
-                {handbookTag(record) ? <Tag color='green'>{handbookTag(record)}</Tag> : null}
+                {record.summary ? (
+                  <Text type='secondary' style={{ fontSize: 12 }} ellipsis={{ tooltip: record.summary }}>
+                    {record.summary}
+                  </Text>
+                ) : null}
               </div>
             </Space>
           )
         },
         {
-          title: t('articles.createdAt'),
-          dataIndex: 'createdAt',
-          width: 120,
-          sorter: (a, b) => (a.createdAt ?? '').localeCompare(b.createdAt ?? ''),
-          render: (value?: string) => (value ? dayjs(value).format('DD/MM/YYYY') : '-')
+          title: tn('categories'),
+          key: 'categories',
+          width: 240,
+          render: (_, record) =>
+            record.categoryIds.length ? (
+              <Space size={4} wrap>
+                {record.categoryIds.map((id) => (
+                  <Tag key={id}>{categoryPath(categories, id)}</Tag>
+                ))}
+              </Space>
+            ) : (
+              <Text type='secondary'>-</Text>
+            )
         },
         {
-          title: t('articles.label'),
-          dataIndex: 'category',
-          width: 170,
-          render: (category: string) => <Tag>{labelName(category)}</Tag>
+          title: tn('state'),
+          dataIndex: 'state',
+          width: 130,
+          render: (value: NewsArticleState) => <Tag color={STATE_COLOR[value]}>{stateLabel(value)}</Tag>
         },
         {
-          title: t('articles.status'),
-          key: 'status',
-          width: 150,
-          render: (_, record) => (
-            <Space size={4} wrap>
-              <Tag color={statusOf(record) === 'active' ? 'green' : 'default'}>
-                {statusOf(record) === 'active' ? 'Active' : 'Inactive'}
-              </Tag>
-              {record.featuredRank ? <Tag color='gold'>#{String(record.featuredRank).padStart(2, '0')}</Tag> : null}
-            </Space>
-          )
+          title: tn('firstPublishedAt'),
+          dataIndex: 'firstPublishedAtUtc',
+          width: 140,
+          render: (value?: string | null) => date(value)
+        },
+        {
+          title: tn('modifiedAt'),
+          dataIndex: 'modifiedAtUtc',
+          width: 140,
+          render: (value: string) => date(value)
         }
       ]}
-      renderForm={(form) => <ArticleFields form={form} />}
+      createValues={() => ({ title: '', summary: '', coverImageUrl: '', contentHtml: '', categoryIds: [] })}
+      onCreate={(values) => newsAdminApi.createArticle(toWrite(values as ArticleFormValues))}
+      toFormValues={async (item) => {
+        const detail = await newsAdminApi.getArticle(item.id)
+        return {
+          expectedVersion: detail.version,
+          title: detail.title ?? '',
+          summary: detail.summary ?? '',
+          coverImageUrl: detail.coverImageUrl ?? '',
+          contentHtml: detail.contentHtml ?? '',
+          categoryIds: detail.categoryIds
+        }
+      }}
+      onUpdate={(values, item) => {
+        const form = values as ArticleFormValues
+        return newsAdminApi.updateArticle(item.id, {
+          ...toWrite(form),
+          expectedVersion: form.expectedVersion ?? item.version
+        })
+      }}
+      renderForm={(form, { item }) => (
+        <ArticleFields form={form} categories={categories} published={item?.state === 'Published'} />
+      )}
+      rowActions={(item, ctx) => <ArticleActions item={item} ctx={ctx} />}
+      renderView={(item) => <ArticleView id={item.id} categories={categories} />}
     />
   )
 }
 
-function ArticleFields({ form }: { form: FormInstance }) {
+function ArticleFields({
+  form,
+  categories,
+  published
+}: {
+  form: FormInstance
+  categories: Awaited<ReturnType<typeof newsAdminApi.listAllCategories>>
+  published: boolean
+}) {
   const t = useTranslations('admin')
-  const { data: stages = [] } = useAdminCollection('handbookStages')
-  const { data: labels = [] } = useAdminCollection('articleLabels')
-  const stageId = Form.useWatch('stage', form) as HandbookStageId | undefined
-  const current = form.getFieldsValue(true) as HandbookArticle
-  const stage = stages.find((item) => item.id === stageId)
+  const tn = useTranslations('admin.newsArticles')
+  // Bài đang công bố: bản sửa vẫn phải đủ năm thành phần (BR-NEWS-001 khoản 5).
+  const required = published ? [{ required: true, whitespace: true, message: t('fields.requiredMessage') }] : []
 
   return (
     <>
-      <ImageUrlField form={form} name='imageUrl' label={t('articles.cover')} required />
+      <Form.Item name='expectedVersion' hidden>
+        <Input />
+      </Form.Item>
+      {published ? (
+        <Paragraph type='warning' style={{ marginTop: 0 }}>
+          {tn('publishedEditHint')}
+        </Paragraph>
+      ) : (
+        <Paragraph type='secondary' style={{ marginTop: 0 }}>
+          {tn('draftHint')}
+        </Paragraph>
+      )}
+      <ImageUrlField form={form} name='coverImageUrl' label={tn('cover')} required={published} />
       <Form.Item
         name='title'
-        label={t('articles.title')}
+        label={tn('title')}
+        rules={[...required, { max: NEWS_LIMITS.title, message: t('fields.maxLength', { max: NEWS_LIMITS.title }) }]}
+      >
+        <Input maxLength={NEWS_LIMITS.title} showCount />
+      </Form.Item>
+      <Form.Item
+        name='summary'
+        label={tn('summary')}
         rules={[
-          { required: true, whitespace: true, message: t('fields.requiredMessage') },
-          { max: 1000, message: t('fields.maxLength', { max: 1000 }) }
+          ...required,
+          { max: NEWS_LIMITS.summary, message: t('fields.maxLength', { max: NEWS_LIMITS.summary }) }
         ]}
       >
-        <Input.TextArea autoSize={{ minRows: 1, maxRows: 3 }} maxLength={1000} />
+        <Input.TextArea autoSize={{ minRows: 2, maxRows: 5 }} maxLength={NEWS_LIMITS.summary} showCount />
       </Form.Item>
-      <Row gutter={16}>
-        <Col xs={24} md={8}>
-          <Form.Item
-            name='category'
-            label={t('articles.label')}
-            rules={[{ required: true, message: t('fields.requiredMessage') }]}
-          >
-            {/* Nhãn Inactive không dùng cho bài mới; nhãn cũ của bài vẫn hiện để giữ nguyên (BR-136). */}
-            <Select
-              options={labels
-                .filter((label) => label.status === 'active' || label.id === current.category)
-                .sort((a, b) => a.order - b.order)
-                .map((label) => ({ value: label.id, label: label.name, disabled: label.status !== 'active' }))}
-            />
-          </Form.Item>
-        </Col>
-        <Col xs={24} md={8}>
-          <Form.Item name='stage' label={t('articles.step')}>
-            <Select
-              allowClear
-              onChange={() => form.setFieldValue('topicId', undefined)}
-              options={[...stages]
-                .sort((a, b) => a.order - b.order)
-                .map((item) => ({
-                  value: item.id,
-                  label: t('articles.stepValue', { step: item.order, name: item.title })
-                }))}
-            />
-          </Form.Item>
-        </Col>
-        <Col xs={24} md={8}>
-          <Form.Item
-            name='topicId'
-            label={t('articles.group')}
-            rules={stageId ? [{ required: true, message: t('articles.groupRequired') }] : []}
-          >
-            <Select
-              allowClear
-              disabled={!stage}
-              placeholder={stage ? undefined : t('articles.pickStepFirst')}
-              options={(stage?.topics ?? []).map((topic) => ({ value: topic.id, label: topic.title }))}
-            />
-          </Form.Item>
-        </Col>
-        <Col xs={24} md={8}>
-          <Form.Item
-            name='readingMinutes'
-            label={t('articles.readingMinutes')}
-            rules={[{ required: true, type: 'integer', min: 1, message: t('articles.readingRule') }]}
-          >
-            <InputNumber min={1} precision={0} suffix={t('articles.minuteUnit')} style={{ width: '100%' }} />
-          </Form.Item>
-        </Col>
-      </Row>
-      <SectionListField
-        name='body'
-        label={t('articles.content')}
-        headingLabel={t('articles.sectionHeading')}
-        bodyLabel={t('articles.sectionParagraphs')}
-        bodyAsList
-      />
+      <Form.Item
+        name='categoryIds'
+        label={tn('categories')}
+        extra={tn('categoriesHint')}
+        rules={published ? [{ required: true, type: 'array', min: 1, message: tn('categoryRequired') }] : []}
+      >
+        <TreeSelect
+          multiple
+          allowClear
+          treeDefaultExpandAll
+          showSearch={{ treeNodeFilterProp: 'title' }}
+          treeData={buildCategoryTree(categories)}
+          placeholder={tn('pickCategories')}
+        />
+      </Form.Item>
+      <Form.Item
+        name='contentHtml'
+        label={tn('content')}
+        rules={[
+          ...required,
+          {
+            max: NEWS_LIMITS.contentHtml,
+            message: t('fields.maxLength', { max: NEWS_LIMITS.contentHtml.toLocaleString() })
+          }
+        ]}
+      >
+        <HtmlContentEditor maxLength={NEWS_LIMITS.contentHtml} />
+      </Form.Item>
     </>
   )
 }
 
-/**
- * Bốn vị trí bài viết nổi bật (ArticleManagement §7, BR-137): đúng 4 bài Active,
- * không trùng; 01 là bài chính, 02–04 là bài phụ.
- */
-function FeaturedSlots() {
+/** Công bố / Ẩn / Xóa — mỗi nút gửi `version` đang có của dòng. */
+function ArticleActions({ item, ctx }: { item: BmtAdminArticleItem; ctx: ApiRowContext }) {
   const t = useTranslations('admin')
+  const tn = useTranslations('admin.newsArticles')
   const { message } = App.useApp()
-  const { data: articles = [] } = useAdminCollection('handbookArticles')
-  const save = useSaveAdminItem('handbookArticles')
-  const saved = useMemo(
-    () => FEATURED_SLOTS.map((rank) => articles.find((article) => article.featuredRank === rank)?.id),
-    [articles]
-  )
-  const [draft, setDraft] = useState<(string | undefined)[] | null>(null)
-  const slots = draft ?? saved
-  const active = articles.filter((article) => statusOf(article) === 'active')
-  const filled = saved.filter(Boolean).length
-  const chosen = slots.filter(Boolean)
-  const error =
-    chosen.length < FEATURED_SLOTS.length
-      ? t('articles.featured.missing')
-      : new Set(chosen).size !== chosen.length
-        ? t('articles.featured.duplicate')
-        : chosen.some((id) => !active.some((article) => article.id === id))
-          ? t('articles.featured.inactive')
-          : null
+  const name = item.title || tn('untitled')
 
-  const submit = async () => {
-    if (error) return
-    const changed = articles.filter((article) => {
-      const rank = slots.indexOf(article.id)
-      const next = rank >= 0 ? rank + 1 : undefined
-      return article.featuredRank !== next
-    })
-    for (const article of changed) {
-      const rank = slots.indexOf(article.id)
-      await save.mutateAsync({ ...article, featuredRank: rank >= 0 ? rank + 1 : undefined })
+  const run = async (action: () => Promise<unknown>, done: string) => {
+    try {
+      await action()
+      await ctx.refresh()
+      message.success(done)
+    } catch (err) {
+      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
     }
-    setDraft(null)
-    message.success(t('feedback.saved'))
   }
 
+  const missing = missingForPublish(item)
+
   return (
-    <Card
-      size='small'
-      title={t('articles.featured.title', { count: filled })}
-      extra={
-        <Space>
-          <Button disabled={!draft} onClick={() => setDraft(null)}>
-            {t('actions.cancel')}
-          </Button>
-          <Button type='primary' disabled={!draft || Boolean(error)} loading={save.isPending} onClick={submit}>
-            {t('actions.save')}
-          </Button>
-        </Space>
-      }
-    >
-      <div className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4'>
-        {FEATURED_SLOTS.map((rank, index) => {
-          const article = articles.find((item) => item.id === slots[index])
-          return (
-            <div key={rank} className='flex flex-col gap-2 rounded-lg border border-[var(--admin-border)] p-2'>
-              <Text strong>
-                {String(rank).padStart(2, '0')} ·{' '}
-                {rank === 1 ? t('articles.featured.lead') : t('articles.featured.side')}
-              </Text>
-              {article?.imageUrl ? (
-                <Image
-                  src={article.imageUrl}
-                  alt=''
-                  height={80}
-                  style={{ objectFit: 'cover', borderRadius: 6, width: '100%' }}
-                />
-              ) : null}
-              <Select
-                allowClear
-                showSearch={{ optionFilterProp: 'label' }}
-                value={slots[index]}
-                placeholder={t('articles.featured.pick')}
-                onChange={(id?: string) => setDraft(slots.map((value, position) => (position === index ? id : value)))}
-                options={active.map((item) => ({ value: item.id, label: item.title }))}
-              />
-              {article ? (
-                <Text type='secondary' style={{ fontSize: 12 }}>
-                  {t('articles.minutes', { count: article.readingMinutes })}
-                </Text>
-              ) : null}
-            </div>
-          )
-        })}
-      </div>
-      {draft && error ? (
-        <Text type='danger' style={{ display: 'block', marginTop: 8 }}>
-          {error}
-        </Text>
-      ) : null}
-    </Card>
+    <>
+      {item.state === 'Published' ? (
+        <Popconfirm
+          title={tn('hideTitle', { name })}
+          description={<div style={{ maxWidth: 300 }}>{tn('hideBody')}</div>}
+          okText={tn('hide')}
+          cancelText={t('actions.cancel')}
+          onConfirm={() => run(() => newsAdminApi.hideArticle(item.id, item.version), tn('hidden'))}
+        >
+          <Tooltip title={tn('hide')}>
+            <Button type='text' size='small' icon={<EyeInvisibleOutlined />} aria-label={tn('hide')} />
+          </Tooltip>
+        </Popconfirm>
+      ) : missing.length ? (
+        <Tooltip title={tn('missing', { fields: missing.map((key) => tn(`parts.${key}`)).join(', ') })}>
+          <Button type='text' size='small' disabled icon={<SendOutlined />} aria-label={tn('publish')} />
+        </Tooltip>
+      ) : (
+        <Popconfirm
+          title={tn('publishTitle', { name })}
+          description={<div style={{ maxWidth: 300 }}>{tn('publishBody')}</div>}
+          okText={tn('publish')}
+          cancelText={t('actions.cancel')}
+          onConfirm={() => run(() => newsAdminApi.publishArticle(item.id, item.version), tn('published'))}
+        >
+          <Tooltip title={tn('publish')}>
+            <Button type='text' size='small' icon={<SendOutlined />} aria-label={tn('publish')} />
+          </Tooltip>
+        </Popconfirm>
+      )}
+      <Popconfirm
+        title={tn('deleteTitle', { name })}
+        description={<div style={{ maxWidth: 300 }}>{tn('deleteBody')}</div>}
+        okText={t('actions.delete')}
+        okButtonProps={{ danger: true }}
+        cancelText={t('actions.cancel')}
+        onConfirm={() => run(() => newsAdminApi.deleteArticle(item.id, item.version), t('feedback.deleted'))}
+      >
+        <Tooltip title={t('actions.delete')}>
+          <Button type='text' size='small' danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
+        </Tooltip>
+      </Popconfirm>
+    </>
+  )
+}
+
+/** Ngăn kéo xem: đọc bản chi tiết (danh sách không kèm nội dung). */
+function ArticleView({
+  id,
+  categories
+}: {
+  id: string
+  categories: Awaited<ReturnType<typeof newsAdminApi.listAllCategories>>
+}) {
+  const t = useTranslations('admin')
+  const tn = useTranslations('admin.newsArticles')
+  const locale = useLocale() as Locale
+  const { data, isPending, error } = useQuery({
+    queryKey: adminKeys.bmt(RESOURCE, 'detail', id),
+    queryFn: () => newsAdminApi.getArticle(id),
+    staleTime: 0
+  })
+
+  if (isPending) return <Spin />
+  if (!data) return <Text type='danger'>{isApiError(error) ? error.message : t('feedback.apiError')}</Text>
+
+  const date = (value?: string | null) => (value ? formatDisplayDate(value, locale, { time: true }) : '-')
+
+  return (
+    <Space orientation='vertical' size={16} style={{ width: '100%' }}>
+      {data.coverImageUrl ? <Image src={data.coverImageUrl} alt='' style={{ borderRadius: 8 }} /> : null}
+      <Descriptions
+        size='small'
+        column={1}
+        bordered
+        items={[
+          { key: 'title', label: tn('title'), children: data.title || '-' },
+          { key: 'summary', label: tn('summary'), children: data.summary || '-' },
+          {
+            key: 'categories',
+            label: tn('categories'),
+            children: data.categoryIds.length
+              ? data.categoryIds.map((categoryId) => <Tag key={categoryId}>{categoryPath(categories, categoryId)}</Tag>)
+              : '-'
+          },
+          {
+            key: 'state',
+            label: tn('state'),
+            children: <Tag color={STATE_COLOR[data.state]}>{tn(`states.${data.state}`)}</Tag>
+          },
+          { key: 'firstPublished', label: tn('firstPublishedAt'), children: date(data.firstPublishedAtUtc) },
+          { key: 'created', label: tn('createdAt'), children: date(data.createdAtUtc) },
+          { key: 'modified', label: tn('modifiedAt'), children: date(data.modifiedAtUtc) }
+        ]}
+      />
+      {data.contentHtml ? (
+        <HtmlPreview html={data.contentHtml} title={tn('content')} height={520} />
+      ) : (
+        <Text type='secondary'>{tn('noContent')}</Text>
+      )}
+    </Space>
   )
 }
