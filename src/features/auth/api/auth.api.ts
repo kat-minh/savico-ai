@@ -1,24 +1,121 @@
 import type { AuthUser } from '@/shared/auth'
+import { AUTH_ENDPOINTS, ROLES, clearSessionMarker, hasSessionMarker, setSessionMarker } from '@/shared/auth'
 import { env } from '@/shared/config/env'
 import { http } from '@/shared/lib/api'
-import type { LoginPayload, LoginResponse } from '../types/auth.types'
+import type { ApiError } from '@/shared/types'
+import type { ChangePasswordPayload, LoginPayload, LoginResponse, RegisterPayload } from '../types/auth.types'
 import { mockAuthApi } from './auth.mock'
 
+/** `GET /users/me` of the BMT API (`Response.GetMeBasic`). */
+interface BmtMe {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  avatar?: string | null
+  phoneNumber?: string | null
+  roles?: string[] | null
+  mustChangePassword?: boolean
+}
+
 /**
- * Auth feature API surface. Thin functions over the shared HTTP client — no
- * React/state here so they stay unit-testable and reusable by hooks.
- *
- * Endpoint paths are placeholders aligned with a typical .NET auth controller.
+ * The frontend only knows customer vs admin. Every non-customer BMT role
+ * (Admin and any custom staff role) opens the admin area; the backend still
+ * enforces each permission per request.
+ */
+function toRoles(roles: string[] | null | undefined): AuthUser['roles'] {
+  const staff = (roles ?? []).some((r) => r.toLowerCase() !== ROLES.CUSTOMER)
+  return staff ? [ROLES.ADMIN] : [ROLES.CUSTOMER]
+}
+
+function toAuthUser(me: BmtMe): AuthUser {
+  return {
+    id: me.id,
+    email: me.email,
+    // Vietnamese order: họ (lastName) before tên (firstName).
+    // A one-word name is stored as họ = tên (BE requires both), so show it once.
+    name:
+      (me.lastName === me.firstName ? me.firstName : [me.lastName, me.firstName].filter(Boolean).join(' ')).trim() ||
+      me.email,
+    phone: me.phoneNumber ?? undefined,
+    avatarUrl: me.avatar ?? undefined,
+    roles: toRoles(me.roles),
+    mustChangePassword: me.mustChangePassword ?? false
+  }
+}
+
+/**
+ * The register form has a single full-name field; BMT wants họ/tên apart.
+ * The last word is the given name, the rest the family name.
+ */
+function splitName(fullName: string): { firstName: string; lastName: string } {
+  const words = fullName.trim().split(/\s+/)
+  const firstName = words.pop() ?? ''
+  return { firstName, lastName: words.join(' ') || firstName }
+}
+
+async function getCurrentUser(): Promise<AuthUser> {
+  // No marker = never logged in on this browser (or logged out): skip the
+  // `/me` → 401 → refresh → 401 round trips every guest page load would pay.
+  if (!hasSessionMarker()) {
+    const error: ApiError = { status: 401, message: 'No active session.' }
+    throw error
+  }
+  const user = toAuthUser(await http.get<BmtMe>(AUTH_ENDPOINTS.ME))
+  setSessionMarker()
+  return user
+}
+
+/**
+ * Auth feature API surface over the BMT `/users/*` endpoints. Login sets the
+ * httpOnly token cookies and returns no profile, so it is followed by `/me`.
  *
  * While there is no backend, set `NEXT_PUBLIC_USE_MOCK_AUTH=true` to route
  * these through an in-browser mock (see {@link mockAuthApi}).
  */
 const AuthApi = {
-  login: (payload: LoginPayload) => http.post<LoginResponse>('/auth/login', payload),
+  login: async (payload: LoginPayload): Promise<LoginResponse> => {
+    await http.post(AUTH_ENDPOINTS.LOGIN, { email: payload.email, password: payload.password })
+    // Login just set the token cookies, so mark the session BEFORE `/me` —
+    // otherwise `getCurrentUser`'s guest short-circuit would reject it.
+    setSessionMarker()
+    return { user: await getCurrentUser() }
+  },
 
-  logout: () => http.post<void>('/auth/logout'),
+  logout: async (): Promise<void> => {
+    try {
+      await http.post<void>(AUTH_ENDPOINTS.LOGOUT)
+    } finally {
+      clearSessionMarker()
+    }
+  },
 
-  getCurrentUser: () => http.get<AuthUser>('/auth/me')
+  getCurrentUser,
+
+  register: (payload: RegisterPayload) =>
+    http.post<void>(AUTH_ENDPOINTS.REGISTER, {
+      email: payload.email,
+      password: payload.password,
+      ...splitName(payload.name)
+    }),
+
+  /**
+   * Đổi mật khẩu (dùng cho luồng bắt buộc đổi lần đầu, BR-RBAC-006). Backend thu
+   * hồi phiên hiện tại sau khi đổi, nên caller phải đăng nhập lại bằng mật khẩu
+   * mới (xem {@link relogin}).
+   */
+  changePassword: (payload: ChangePasswordPayload) =>
+    http.post<string>(AUTH_ENDPOINTS.CHANGE_PASSWORD, {
+      currentPassword: payload.currentPassword,
+      newPassword: payload.newPassword
+    }),
+
+  /** Đăng nhập lại ngay sau khi đổi mật khẩu, trả hồ sơ đã cập nhật. */
+  relogin: async (email: string, password: string): Promise<LoginResponse> => {
+    await http.post(AUTH_ENDPOINTS.LOGIN, { email, password })
+    setSessionMarker()
+    return { user: await getCurrentUser() }
+  }
 }
 
 export const authApi = env.NEXT_PUBLIC_USE_MOCK_AUTH ? mockAuthApi : AuthApi

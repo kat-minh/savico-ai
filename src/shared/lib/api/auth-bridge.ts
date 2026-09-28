@@ -1,3 +1,5 @@
+import { AUTH_ENDPOINTS } from '@/shared/auth/auth.constants'
+import { clearSessionMarker } from '@/shared/auth/session-marker'
 import { useAuthStore } from '@/shared/auth/auth.store'
 import { API_CONFIG } from '@/shared/config/api.config'
 import axios from 'axios'
@@ -5,13 +7,12 @@ import axios from 'axios'
 /**
  * Thin bridge between the HTTP client and the auth layer.
  *
- * Kept separate from `http-client.ts` to avoid an import cycle and to keep the
- * refresh-token flow a single, swappable placeholder. Replace the endpoint
- * paths below once the .NET refresh contract is finalized.
+ * Kept separate from `http-client.ts` to avoid an import cycle.
  */
 
 /**
- * Attempt to refresh the session using the httpOnly refresh cookie.
+ * Attempt to refresh the session. The BMT API reads both tokens from its
+ * httpOnly cookies, so the body stays empty; on success it re-sets the cookies.
  * Uses a bare axios call (NOT `httpClient`) to avoid recursing through the
  * 401 interceptor.
  *
@@ -19,8 +20,8 @@ import axios from 'axios'
  */
 export async function refreshSession(): Promise<boolean> {
   try {
-    await axios.post(
-      '/auth/refresh',
+    const res = await axios.post<{ isSuccess?: boolean }>(
+      AUTH_ENDPOINTS.REFRESH,
       {},
       {
         baseURL: API_CONFIG.baseURL,
@@ -28,14 +29,14 @@ export async function refreshSession(): Promise<boolean> {
         timeout: API_CONFIG.timeout
       }
     )
-    return true
+    return res.data?.isSuccess !== false
   } catch {
-    // TODO: integrate real refresh contract / error reporting.
     return false
   }
 }
 
 /** Called when the session is irrecoverable — clear client auth state. */
 export function onUnauthorized(): void {
+  clearSessionMarker()
   useAuthStore.getState().reset()
 }

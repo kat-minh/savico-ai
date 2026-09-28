@@ -10,15 +10,28 @@ export function normalizeApiError(error: unknown): ApiError {
   if (error instanceof AxiosError) {
     // Server responded with a non-2xx status.
     if (error.response) {
+      // The BMT API answers errors in two shapes: ASP.NET ProblemDetails
+      // (`title`/`detail`/`messageCode`/`errors`) for auth, validation and
+      // server faults, and the `Result<T>` envelope (`error.code/message`) for
+      // business rejections.
       const data = error.response.data as
-        | { message?: string; code?: string; errors?: Record<string, string[]> }
+        | {
+            message?: string
+            code?: string
+            detail?: string
+            messageCode?: string | null
+            errors?: Record<string, string[]> | null
+            error?: { code?: string; message?: string; messageCode?: string | null } | null
+          }
         | undefined
 
       return {
         status: error.response.status,
-        code: data?.code,
-        message: data?.message ?? defaultMessageForStatus(error.response.status),
-        errors: data?.errors
+        code: data?.error?.code || data?.code || undefined,
+        messageCode: data?.error?.messageCode ?? data?.messageCode ?? undefined,
+        message:
+          data?.error?.message || data?.detail || data?.message || defaultMessageForStatus(error.response.status),
+        errors: data?.errors ?? undefined
       }
     }
 

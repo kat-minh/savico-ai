@@ -10,11 +10,23 @@ export type Role = (typeof ROLES)[keyof typeof ROLES]
 export const ALL_ROLES: readonly Role[] = Object.values(ROLES)
 
 /**
- * Name of the cookie the .NET backend sets to mark an authenticated session.
- * The middleware checks for its presence to guard routes. (The actual token
- * is httpOnly and never read by client JS.)
+ * Name of the non-sensitive marker cookie the proxy checks to guard routes.
+ * The BMT API keeps its real tokens in httpOnly cookies (`accessToken`,
+ * `refreshToken`) whose lifetime the frontend can't see, so the client sets
+ * this marker itself after a confirmed login / `/users/me` and clears it on
+ * logout or an unrecoverable 401 (see `session-marker.ts`).
  */
 export const AUTH_COOKIE_NAME = 'bmt.auth'
+
+/** Auth endpoints of the BMT API, relative to `NEXT_PUBLIC_API_BASE_URL`. */
+export const AUTH_ENDPOINTS = {
+  LOGIN: '/users/login',
+  REFRESH: '/users/refresh_token',
+  LOGOUT: '/users/logout',
+  REGISTER: '/users/register',
+  CHANGE_PASSWORD: '/users/change_password',
+  ME: '/users/me'
+} as const
 
 /** localStorage key under which the (non-sensitive) auth profile is persisted. */
 export const AUTH_STORAGE_KEY = 'bmt.auth-state'
