@@ -97,6 +97,17 @@ export interface HandbookTemplate {
   interiorStyleId?: string
   /** Mẫu 3D: tên phòng / không gian — một mẫu 3D là một phòng với nhiều ảnh. */
   room?: string
+  /**
+   * Phiên bản thư viện (`library-versions/{versionId}`) khi mẫu đến từ BMT API —
+   * dùng để mở phiên bản và tải bộ ảnh/tài nguyên. Bỏ trống với mẫu mock.
+   */
+  versionId?: string
+  /**
+   * Nguồn dữ liệu của mẫu. `'bmt'` = lấy từ API (chi tiết cần đăng nhập, đọc từ
+   * `getTemplate` chứ không lấy floors/description từ pool). Bỏ trống = mẫu mock,
+   * xem công khai như cũ.
+   */
+  source?: 'bmt'
 }
 
 /** Ba giai đoạn xây nhà — khung cố định của cẩm nang nền tảng (Phần 3). */
@@ -163,6 +174,12 @@ export interface HandbookArticle {
   readingMinutes: number
   /** Thứ tự trong Bản tin: 1 = bài nổi bật lớn, 2–4 = ba bài phụ (Hình 11). */
   featuredRank?: number
+  /**
+   * Nội dung rich text đã làm sạch (allowlist p/h2–h6/ul/ol/li/a/img…) khi bài
+   * đến từ BMT API. Có `contentHtml` thì trang bài viết render HTML trực tiếp;
+   * bỏ trống thì render `body` theo từng section như mock cũ.
+   */
+  contentHtml?: string
   body: HandbookArticleSection[]
   tags: HandbookTags
   /** Bài tư vấn trong panel màn chờ: kiến trúc (Bước 2) / nội thất (Bước 3). */

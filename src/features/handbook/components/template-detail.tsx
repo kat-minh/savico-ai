@@ -10,14 +10,16 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent
 } from 'react'
-import { ArrowLeft, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Lock, Maximize2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { flushSync } from 'react-dom'
 import { toast } from 'sonner'
 
 import { Link, useRouter } from '@/i18n/navigation'
+import { useAuth, useAuthDialogStore } from '@/shared/auth'
 import { ErrorState } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
+import { Button } from '@/shared/components/ui/button'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -78,16 +80,26 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
   const [showMobileConsult, setShowMobileConsult] = useState(false)
 
   const markRead = useHandbookReadStore((state) => state.markRead)
-  const initialQuery = useHandbookTemplate(templateId)
   const { data: pool } = useHandbookTemplates()
+  const { isAuthenticated, isInitialized } = useAuth()
+  // Mẫu đến từ BMT API (`source: 'bmt'`) yêu cầu đăng nhập mới xem chi tiết. Chưa
+  // đăng nhập thì dựng cổng đăng nhập và KHÔNG gọi `getTemplate` (không trừ lượt).
+  // Mẫu mock (không có cờ) vẫn xem công khai như cũ.
+  const poolTemplate = pool?.find((item) => item.id === templateId)
+  const isApiTemplate = poolTemplate?.source === 'bmt'
+  const needsLogin = isApiTemplate && isInitialized && !isAuthenticated
+  const initialQuery = useHandbookTemplate(templateId, { enabled: !needsLogin })
   const detailQuota = useHandbookDetailQuota()
 
-  const template = useMemo(
-    () =>
-      pool?.find((item) => item.id === activeTemplateId) ??
-      (activeTemplateId === templateId ? initialQuery.data : undefined),
-    [activeTemplateId, initialQuery.data, pool, templateId]
-  )
+  const template = useMemo(() => {
+    const fromPool = pool?.find((item) => item.id === activeTemplateId)
+    // Mẫu API: chi tiết đầy đủ (floors/description/assets) chỉ có ở `getTemplate`;
+    // pool chỉ có bản tóm tắt nên ưu tiên bản đã tải khi đang xem đúng mẫu vào trang.
+    if (fromPool?.source === 'bmt' && activeTemplateId === templateId && initialQuery.data) {
+      return initialQuery.data
+    }
+    return fromPool ?? (activeTemplateId === templateId ? initialQuery.data : undefined)
+  }, [activeTemplateId, initialQuery.data, pool, templateId])
   const isPending = initialQuery.isPending && !template
   const isError = initialQuery.isError && !template
   const similarSourceTemplate = useMemo(
@@ -506,6 +518,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
     ]
   )
 
+  if (needsLogin) return <TemplateDetailLoginGate />
   if (isPending) return <TemplateDetailSkeleton />
   if (isError) {
     return (
@@ -1192,6 +1205,31 @@ function TemplateFloorViewer({
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+/**
+ * Cổng đăng nhập cho chi tiết mẫu đến từ API (Phần 2.3): không lộ nội dung, mời
+ * khách đăng nhập. Đăng nhập xong store auth đổi → component tự bỏ cổng và tải
+ * chi tiết. Mẫu mock (demo) không đi qua đây, vẫn xem công khai.
+ */
+function TemplateDetailLoginGate() {
+  const t = useTranslations('handbook.detail')
+  const openAuthDialog = useAuthDialogStore((state) => state.open)
+
+  return (
+    <div className='mx-auto w-full max-w-[90rem] px-4 py-16 lg:px-8'>
+      <div className='bg-card mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border p-8 text-center'>
+        <span className='bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full'>
+          <Lock className='size-6' />
+        </span>
+        <h1 className='text-xl font-semibold'>{t('loginRequiredTitle')}</h1>
+        <p className='text-muted-foreground text-sm'>{t('loginRequiredHint')}</p>
+        <Button type='button' onClick={() => openAuthDialog('login')}>
+          {t('loginCta')}
+        </Button>
+      </div>
+    </div>
   )
 }
 

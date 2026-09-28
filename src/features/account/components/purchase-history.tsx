@@ -307,13 +307,6 @@ export function PurchaseHistory() {
                 delay={0.22}
                 reduceMotion={reduceMotion}
               />
-              <UsageRow
-                label={t('consultationCredits')}
-                value={plan.consultation.total - plan.consultation.remaining}
-                total={plan.consultation.total}
-                delay={0.28}
-                reduceMotion={reduceMotion}
-              />
             </div>
 
             <div className='mt-3.5 flex flex-1 flex-col justify-end'>

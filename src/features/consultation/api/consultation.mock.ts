@@ -1,4 +1,4 @@
-import { cmsDb, isSlotClosed } from '@/shared/cms'
+import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import { AVAILABILITY_DAYS, SESSION_TIMES } from '../constants/consultation.constants'
 import type {
@@ -26,12 +26,10 @@ function toDateKey(date: Date): string {
 
 /**
  * Lịch 7 ngày của một KTS (mục VIII.2), BẮT ĐẦU TỪ NGÀY MAI — hôm nay thì các
- * khung sáng có thể đã qua. Khung đã có người đặt vẫn chọn được (góp ý BuildX: tư
- * vấn viên gọi lại xác nhận giờ); chỉ khung admin đánh dấu Không tư vấn là khóa
- * (ArchitectManagement §5).
+ * khung sáng có thể đã qua. Khung giờ chỉ để khách CHỌN GIỜ MONG MUỐN; việc sắp
+ * xếp do bên vận hành liên hệ lại, nên KHÔNG khóa khung nào — khách chọn thoải mái.
  */
-function buildAvailability(consultantId: string): ConsultationDay[] {
-  const closures = cmsDb.find('consultants', consultantId)?.closures ?? []
+function buildAvailability(_consultantId: string): ConsultationDay[] {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -45,7 +43,7 @@ function buildAvailability(consultantId: string): ConsultationDay[] {
         id: `${dateKey}-${time}`,
         time,
         session,
-        full: isSlotClosed(closures, dateKey, time)
+        full: false
       }))
     )
 

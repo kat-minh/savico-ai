@@ -408,52 +408,69 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
             </div>
 
             <div data-article-body className='space-y-6'>
-              {article.body.map((section, index) => (
-                <div key={`${article.id}:${section.heading ?? index}`} className='space-y-6'>
-                  <section
-                    data-article-section={index + 1}
-                    data-entrance-step={index < 2 ? '3' : undefined}
-                    data-entrance-order={index < 2 ? String(index + 1) : undefined}
-                    data-article-scroll-reveal={index >= 2 ? 'true' : undefined}
-                    data-article-reveal={index >= 2 ? 'pending' : undefined}
-                    className='space-y-3'
-                  >
-                    {section.heading ? (
-                      <h2 className='text-primary text-lg font-semibold'>
-                        {index + 1}. {section.heading}
-                      </h2>
-                    ) : null}
-                    {/* Hình 12: đoạn có ảnh thì chữ chiếm cột trái rộng hơn, ảnh
-                      nằm phải và căn theo đầu đoạn — không kéo cao bằng cột chữ. */}
-                    <div
-                      className={cn(
-                        'space-y-2',
-                        section.imageUrl && 'sm:grid sm:grid-cols-[1.35fr_1fr] sm:items-start sm:gap-4 sm:space-y-0'
-                      )}
+              {article.contentHtml ? (
+                <>
+                  {/*
+                    Nội dung bài do admin biên soạn và ĐÃ được backend làm sạch theo
+                    allowlist (p, br, strong, em, h2–h6, ul, ol, li, blockquote, a,
+                    img — script/style/handler/URL javascript:data: bị loại). Repo
+                    chưa có thư viện sanitize phía client nên render trực tiếp; rủi ro
+                    XSS đã được chặn ở server. Nhánh này chỉ chạy cho bài từ API.
+                  */}
+                  <div
+                    className='space-y-4 text-sm leading-relaxed [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:border-primary/40 [&_blockquote]:text-muted-foreground [&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_h2]:text-primary [&_h2]:mt-5 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:font-semibold [&_img]:my-3 [&_img]:rounded-lg [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5'
+                    dangerouslySetInnerHTML={{ __html: article.contentHtml }}
+                  />
+                  <ArticleCompactCta article={article} onCreateProject={onCreateProject} />
+                </>
+              ) : (
+                article.body.map((section, index) => (
+                  <div key={`${article.id}:${section.heading ?? index}`} className='space-y-6'>
+                    <section
+                      data-article-section={index + 1}
+                      data-entrance-step={index < 2 ? '3' : undefined}
+                      data-entrance-order={index < 2 ? String(index + 1) : undefined}
+                      data-article-scroll-reveal={index >= 2 ? 'true' : undefined}
+                      data-article-reveal={index >= 2 ? 'pending' : undefined}
+                      className='space-y-3'
                     >
-                      <div className='space-y-2'>
-                        {section.paragraphs.map((paragraph) => (
-                          <p key={paragraph} className='text-sm leading-relaxed'>
-                            {paragraph}
-                          </p>
-                        ))}
-                      </div>
-                      {section.imageUrl ? (
-                        <Photo
-                          className='aspect-4/3 w-full rounded-lg'
-                          src={section.imageUrl}
-                          alt={section.heading ?? article.title}
-                          sizes='(max-width: 640px) 100vw, 340px'
-                        />
+                      {section.heading ? (
+                        <h2 className='text-primary text-lg font-semibold'>
+                          {index + 1}. {section.heading}
+                        </h2>
                       ) : null}
-                    </div>
-                  </section>
+                      {/* Hình 12: đoạn có ảnh thì chữ chiếm cột trái rộng hơn, ảnh
+                      nằm phải và căn theo đầu đoạn — không kéo cao bằng cột chữ. */}
+                      <div
+                        className={cn(
+                          'space-y-2',
+                          section.imageUrl && 'sm:grid sm:grid-cols-[1.35fr_1fr] sm:items-start sm:gap-4 sm:space-y-0'
+                        )}
+                      >
+                        <div className='space-y-2'>
+                          {section.paragraphs.map((paragraph) => (
+                            <p key={paragraph} className='text-sm leading-relaxed'>
+                              {paragraph}
+                            </p>
+                          ))}
+                        </div>
+                        {section.imageUrl ? (
+                          <Photo
+                            className='aspect-4/3 w-full rounded-lg'
+                            src={section.imageUrl}
+                            alt={section.heading ?? article.title}
+                            sizes='(max-width: 640px) 100vw, 340px'
+                          />
+                        ) : null}
+                      </div>
+                    </section>
 
-                  {index === Math.max(0, Math.floor(article.body.length / 2) - 1) ? (
-                    <ArticleCompactCta article={article} onCreateProject={onCreateProject} />
-                  ) : null}
-                </div>
-              ))}
+                    {index === Math.max(0, Math.floor(article.body.length / 2) - 1) ? (
+                      <ArticleCompactCta article={article} onCreateProject={onCreateProject} />
+                    ) : null}
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

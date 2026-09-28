@@ -160,10 +160,7 @@ export function ConsultationHistory() {
       >
         <p className='text-sm leading-relaxed text-pretty'>
           <Clock3 className='text-primary mr-1.5 inline size-4 -translate-y-px' />
-          {t('quota', {
-            count: data.remainingCredits,
-            plan: t(`planTier.${data.planTier}`)
-          })}
+          {t('freeNote')}
         </p>
         <Button asChild size='sm' className='mt-3 h-8 text-xs hover:brightness-[1.06] motion-reduce:transition-none'>
           <Link href={ROUTES.CONSULT}>
