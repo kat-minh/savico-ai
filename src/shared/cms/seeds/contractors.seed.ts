@@ -541,6 +541,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-thanglongphat',
     name: 'Công ty CP Xây dựng Thăng Long Phát',
+    logoUrl: driveImage('1k2nEzDy4SXby0wy7qPH5KE1ZVPLeVa8v'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.8,
@@ -675,6 +676,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-hongha',
     name: 'Công ty TNHH Kiến trúc Xây dựng Hồng Hà',
+    logoUrl: driveImage('1g-avQFHE87Iy0kFPeTuxKjpfZc3KTjsO'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.6,
@@ -812,6 +814,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-vietbac',
     name: 'Công ty CP Xây dựng Việt Bắc',
+    logoUrl: driveImage('1ucIxacM429sZ2kERHRw72zi6M3T393b7'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.7,
@@ -944,6 +947,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-songhan',
     name: 'Công ty CP Xây dựng Sông Hàn',
+    logoUrl: driveImage('1Qa8-hoPLaHC-GIciwtNMISenjR3vx0Np'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.5,
@@ -1064,6 +1068,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-phatdat',
     name: 'Công ty TNHH Xây dựng Miền Trung Phát Đạt',
+    logoUrl: driveImage('1KMYjLPCfc-S7qNT-5UqysD49Q74BvTbQ'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.3,
@@ -1208,6 +1213,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-cattrang',
     name: 'Công ty CP Xây dựng Cát Trắng',
+    logoUrl: driveImage('1YxJX-YFRWfu76J0-QBMXvgGs2e7YxKnZ'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.9,
@@ -1344,6 +1350,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-binhdinhan',
     name: 'Công ty TNHH Kỹ thuật Xây dựng Bình Định An',
+    logoUrl: driveImage('1LS5GDEgPUJsE1ytIbn9AuOMiCq6h2GXs'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.4,
@@ -1477,6 +1484,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-dainam',
     name: 'Công ty TNHH Xây dựng Đại Nam Phát Triển',
+    logoUrl: driveImage('1xzKJt8xMQT_ft8WcMmRQLm_gZJylwQ45'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.6,
@@ -1602,6 +1610,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-phuongnam',
     name: 'Công ty TNHH Kiến trúc Xây dựng Phương Nam',
+    logoUrl: driveImage('1LKX3Dv9EzerB-ixOAeLbOS2xgsr3fQVA'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.7,
@@ -1736,6 +1745,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-miennamunited',
     name: 'Công ty CP Xây dựng Miền Nam United',
+    logoUrl: driveImage('12o7glq98Iuv46x3tyByEUny_h2CfmNE7'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.5,
@@ -1861,6 +1871,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-cuulongxanh',
     name: 'Công ty TNHH Xây dựng Cửu Long Xanh',
+    logoUrl: driveImage('19bDemro3tfEequtDTVe8xS-Q-gRyahZ4'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.4,
@@ -1992,6 +2003,7 @@ const DIRECTORY: readonly SheetContractor[] = [
     // Tạm ẩn: sheet chưa có đoạn giới thiệu, năm thành lập, quy mô đội ngũ, văn phòng.
     hidden: true,
     name: 'Công ty TNHH Xây dựng Hải Âu',
+    logoUrl: driveImage('1_DZDjB1rLk1Tsh5DP1OeTfRwb6oTQ0Qf'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.6,
@@ -2144,6 +2156,7 @@ const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-bmt-decor',
     name: 'Công ty TNHH TMDV BMT Decor',
+    logoUrl: driveImage('1HYtiaj6RRqG0jcf1rjcT-wio_wSkfuz1'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.7,

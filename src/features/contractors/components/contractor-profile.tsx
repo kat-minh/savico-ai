@@ -45,6 +45,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -53,15 +54,6 @@ import {
 } from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle
-} from '@/shared/components/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import {
@@ -1312,7 +1304,7 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
         </p>
       </motion.section>
 
-      <ProjectDetailSheet
+      <ProjectDetailModal
         contractor={contractor}
         project={selectedProject}
         inviteAction={inviteAction}
@@ -1340,7 +1332,15 @@ function useProjectLabels() {
   return { typeLabel, scaleOf }
 }
 
-function ProjectDetailSheet({
+/**
+ * Popup "Chi tiết dự án đã thực hiện" (góp ý NT — Review Row #1): KHÔNG còn là
+ * ngăn trượt bên phải mà là MODAL LỚN GIỮA MÀN, nền tối mờ (`DialogOverlay` đã
+ * lo `bg-black/45 backdrop-blur-sm`), chia HAI CỘT — trái là bộ ảnh có nút
+ * chuyển ảnh trước/sau kèm dải ảnh nhỏ, phải là thông tin dự án. Nút "Đóng" và
+ * "Mời báo giá" nằm CỐ ĐỊNH ở đáy popup (`DialogFooter` ngoài vùng cuộn) nên
+ * không bao giờ bị nội dung che.
+ */
+function ProjectDetailModal({
   contractor,
   project,
   inviteAction,
@@ -1354,7 +1354,16 @@ function ProjectDetailSheet({
   const t = useTranslations('contractors.firm.projects.detail')
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
-  const [activeGalleryImage, setActiveGalleryImage] = useState<string | undefined>()
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // Đổi dự án → về ảnh đầu. Mẫu "chỉnh state khi prop đổi" của React (giống
+  // `renderedTab` phía trên): đặt lại ngay trong thân hàm, không dùng effect.
+  const projectId = project?.id
+  const [renderedProjectId, setRenderedProjectId] = useState(projectId)
+  if (projectId !== renderedProjectId) {
+    setRenderedProjectId(projectId)
+    setActiveIndex(0)
+  }
 
   const { typeLabel, scaleOf } = useProjectLabels()
   const projectType = project?.buildingTypeId ? typeLabel(project.buildingTypeId) : t('notUpdated')
@@ -1375,10 +1384,19 @@ function ProjectDetailSheet({
           to: formatDate(project.constructionEndedAt, locale, { month: '2-digit', year: 'numeric' })
         })
       : t('completedYear', { year: project?.year ?? '' })
-  const gallery = project ? [project.imageUrl, ...(project.galleryUrls ?? [])].filter(Boolean).slice(0, 3) : []
-  const activeImage = activeGalleryImage && gallery.includes(activeGalleryImage) ? activeGalleryImage : gallery[0]
-  const thumbnails = gallery.filter((imageUrl) => imageUrl !== activeImage).slice(0, 2)
-  const sheetInviteAction = isValidElement<{
+
+  // Modal lớn hơn → dùng cả bộ ảnh làm carousel, không cắt còn 3 như ngăn trượt cũ.
+  const gallery: string[] = project
+    ? [project.imageUrl, ...(project.galleryUrls ?? [])].filter((url): url is string => Boolean(url))
+    : []
+  const safeIndex = gallery.length ? Math.min(activeIndex, gallery.length - 1) : 0
+  const activeImage = gallery[safeIndex]
+  const goPrev = () => setActiveIndex((safeIndex - 1 + gallery.length) % gallery.length)
+  const goNext = () => setActiveIndex((safeIndex + 1) % gallery.length)
+
+  // "Mời báo giá" phải đóng modal trước khi điều hướng/mở bộ chọn dự án — nếu
+  // không, khi quay lại màn này modal vẫn treo mở trên nền.
+  const footerInviteAction = isValidElement<{
     onNavigate?: () => void
     onOpenPicker?: () => void
   }>(inviteAction)
@@ -1395,20 +1413,17 @@ function ProjectDetailSheet({
     : inviteAction
 
   return (
-    <Sheet open={Boolean(project)} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className='w-[96vw] gap-0 overflow-hidden sm:max-w-xl lg:w-[34rem] lg:max-w-[34rem]'>
+    <Dialog open={Boolean(project)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showCloseButton={false}
+        className='flex max-h-[calc(100vh-2rem)] w-full max-w-[62rem] flex-col gap-0 overflow-hidden p-0 sm:max-w-[62rem]'
+      >
         {project ? (
           <>
-            <SheetHeader className='border-b px-5 py-4 pr-12'>
-              <SheetTitle className='text-base'>{project.name}</SheetTitle>
-              <SheetDescription className='sr-only'>
-                {t('description', { contractor: contractor.name })}
-              </SheetDescription>
-            </SheetHeader>
-
-            <div className='min-h-0 flex-1 overflow-y-auto px-5 py-4'>
-              <div className='grid grid-cols-[2fr_1fr] grid-rows-2 gap-1.5'>
-                <div className='bg-muted/50 relative row-span-2 aspect-[4/3] overflow-hidden rounded-lg border'>
+            <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[1.08fr_minmax(0,1fr)] lg:overflow-hidden'>
+              {/* Cột trái — bộ ảnh + carousel + dải ảnh nhỏ. */}
+              <div className='bg-muted/25 flex flex-col gap-3 border-b p-4 lg:overflow-hidden lg:border-r lg:border-b-0'>
+                <div className='bg-muted/50 relative aspect-[4/3] w-full overflow-hidden rounded-xl border lg:aspect-auto lg:min-h-0 lg:flex-1'>
                   <AnimatePresence mode='wait' initial={false}>
                     {activeImage ? (
                       <motion.div
@@ -1421,139 +1436,184 @@ function ProjectDetailSheet({
                       >
                         <RevealPhoto
                           src={activeImage}
-                          alt={t('imageAlt', { project: project.name, index: 1 })}
-                          className='size-full rounded-lg'
-                          sizes='(max-width: 640px) 62vw, 350px'
+                          alt={t('imageAlt', { project: project.name, index: safeIndex + 1 })}
+                          className='size-full'
+                          sizes='(max-width: 1024px) 92vw, 560px'
                         />
                       </motion.div>
                     ) : (
                       <div className='flex size-full items-center justify-center'>
-                        <ImageIcon className='text-muted-foreground/55 size-6' />
+                        <ImageIcon className='text-muted-foreground/55 size-8' />
                       </div>
                     )}
                   </AnimatePresence>
+
+                  {gallery.length > 1 ? (
+                    <>
+                      <button
+                        type='button'
+                        onClick={goPrev}
+                        aria-label={t('prevImage')}
+                        className='absolute top-1/2 left-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                      >
+                        <ChevronLeft className='size-5' />
+                      </button>
+                      <button
+                        type='button'
+                        onClick={goNext}
+                        aria-label={t('nextImage')}
+                        className='absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                      >
+                        <ChevronRight className='size-5' />
+                      </button>
+                      <span className='absolute right-3 bottom-3 rounded-full bg-black/55 px-2.5 py-1 text-xs font-medium text-white tabular-nums backdrop-blur-sm'>
+                        {safeIndex + 1}/{gallery.length}
+                      </span>
+                    </>
+                  ) : null}
                 </div>
 
-                {[0, 1].map((index) => {
-                  const imageUrl = thumbnails[index]
-                  return imageUrl ? (
-                    <button
-                      key={imageUrl}
-                      type='button'
-                      onClick={() => setActiveGalleryImage(imageUrl)}
-                      className='group aspect-[4/3] overflow-hidden rounded-lg border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                      aria-label={t('selectImage', { index: index + 2 })}
-                    >
-                      <RevealPhoto
-                        src={imageUrl}
-                        alt={t('imageAlt', { project: project.name, index: index + 2 })}
-                        className='size-full transition-transform duration-200 group-hover:scale-[1.03]'
-                        sizes='(max-width: 640px) 30vw, 170px'
-                      />
-                    </button>
-                  ) : (
-                    <div
-                      key={`${project.id}-placeholder-${index}`}
-                      className='bg-muted/50 flex aspect-[4/3] items-center justify-center rounded-lg border'
-                    >
-                      <ImageIcon className='text-muted-foreground/55 size-6' />
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className='mt-3 flex flex-wrap gap-2'>
-                <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{projectType}</span>
-                <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{constructionScope}</span>
-                {project.verified ? (
-                  <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'>
-                    <CircleCheck className='size-3.5' />
-                    {t('verifiedBadge')}
-                  </span>
+                {gallery.length > 1 ? (
+                  <div className='flex gap-2 overflow-x-auto pb-1'>
+                    {gallery.map((imageUrl, index) => (
+                      <button
+                        key={imageUrl}
+                        type='button'
+                        onClick={() => setActiveIndex(index)}
+                        aria-label={t('selectImage', { index: index + 1 })}
+                        aria-current={index === safeIndex}
+                        className={cn(
+                          'relative aspect-[4/3] w-20 shrink-0 overflow-hidden rounded-lg border transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                          index === safeIndex ? 'border-primary ring-primary/40 ring-2' : 'opacity-70 hover:opacity-100'
+                        )}
+                      >
+                        <RevealPhoto
+                          src={imageUrl}
+                          alt={t('imageAlt', { project: project.name, index: index + 1 })}
+                          className='size-full'
+                          sizes='96px'
+                        />
+                      </button>
+                    ))}
+                  </div>
                 ) : null}
               </div>
 
-              <motion.section
-                initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.08 }}
-                className='mt-5'
-              >
-                <h3 className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>{t('title')}</h3>
-                <dl className='mt-3 grid grid-cols-[8rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-sm'>
-                  <dt className='text-muted-foreground'>{t('projectType')}</dt>
-                  <dd className='font-medium'>{projectType}</dd>
-                  <dt className='text-muted-foreground'>{t('scale')}</dt>
-                  <dd className='font-medium'>{dimensions || t('notUpdated')}</dd>
-                  <dt className='text-muted-foreground'>{t('constructionScope')}</dt>
-                  <dd className='font-medium'>{constructionScope}</dd>
-                  <dt className='text-muted-foreground'>{t('role')}</dt>
-                  <dd className='font-medium'>{contractorRole}</dd>
-                  <dt className='text-muted-foreground'>{t('constructionPeriod')}</dt>
-                  <dd className='font-medium'>{constructionPeriod}</dd>
-                  <dt className='text-muted-foreground'>{t('location')}</dt>
-                  <dd className='font-medium'>{project.location ?? t('notUpdated')}</dd>
-                  <dt className='text-muted-foreground'>{t('mainItems')}</dt>
-                  <dd className='font-medium text-pretty'>{project.mainItems ?? t('mainItemsFallback')}</dd>
-                </dl>
-              </motion.section>
+              {/* Cột phải — thông tin dự án (cuộn riêng ở desktop). */}
+              <div className='flex min-h-0 flex-col lg:overflow-hidden'>
+                <DialogHeader className='border-b px-5 py-4 pr-12 text-left'>
+                  <DialogTitle className='text-base'>{project.name}</DialogTitle>
+                  <DialogDescription className='sr-only'>
+                    {t('description', { contractor: contractor.name })}
+                  </DialogDescription>
+                  <DialogClose asChild>
+                    <button
+                      type='button'
+                      aria-label={t('close')}
+                      className='ring-offset-background focus:ring-ring absolute top-4 right-4 flex size-8 items-center justify-center rounded-md opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
+                    >
+                      <X className='size-4' />
+                    </button>
+                  </DialogClose>
+                </DialogHeader>
 
-              {project.verified ? (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
-                  className='border-primary/25 bg-primary/5 mt-5 flex items-start gap-3 rounded-xl border p-3.5'
-                >
-                  <ShieldCheck className='text-primary mt-0.5 size-5 shrink-0' />
-                  <div>
-                    <p className='text-sm font-semibold'>
-                      {t('verifiedTitle', {
-                        date: project.verifiedAt
-                          ? formatDisplayDate(project.verifiedAt, locale)
-                          : t('verifiedDateFallback')
-                      })}
-                    </p>
-                    <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('verifiedBody')}</p>
+                <div className='min-h-0 flex-1 px-5 py-4 lg:overflow-y-auto'>
+                  <div className='flex flex-wrap gap-2'>
+                    <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{projectType}</span>
+                    <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{constructionScope}</span>
+                    {project.verified ? (
+                      <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'>
+                        <CircleCheck className='size-3.5' />
+                        {t('verifiedBadge')}
+                      </span>
+                    ) : null}
                   </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
-                  className='mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'
-                >
-                  <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                  <div>
-                    <p className='text-sm font-semibold'>{t('selfReportedTitle')}</p>
-                    <p className='mt-1 text-xs leading-relaxed'>{t('selfReportedBody')}</p>
-                  </div>
-                </motion.div>
-              )}
 
-              <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'>
-                <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                <p className='text-xs leading-relaxed'>{t('priceNotice')}</p>
+                  <motion.section
+                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.08 }}
+                    className='mt-5'
+                  >
+                    <h3 className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>
+                      {t('title')}
+                    </h3>
+                    <dl className='mt-3 grid grid-cols-[7.5rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-sm'>
+                      <dt className='text-muted-foreground'>{t('projectType')}</dt>
+                      <dd className='font-medium'>{projectType}</dd>
+                      <dt className='text-muted-foreground'>{t('scale')}</dt>
+                      <dd className='font-medium'>{dimensions || t('notUpdated')}</dd>
+                      <dt className='text-muted-foreground'>{t('constructionScope')}</dt>
+                      <dd className='font-medium'>{constructionScope}</dd>
+                      <dt className='text-muted-foreground'>{t('role')}</dt>
+                      <dd className='font-medium'>{contractorRole}</dd>
+                      <dt className='text-muted-foreground'>{t('constructionPeriod')}</dt>
+                      <dd className='font-medium'>{constructionPeriod}</dd>
+                      <dt className='text-muted-foreground'>{t('location')}</dt>
+                      <dd className='font-medium'>{project.location ?? t('notUpdated')}</dd>
+                      <dt className='text-muted-foreground'>{t('mainItems')}</dt>
+                      <dd className='font-medium text-pretty'>{project.mainItems ?? t('mainItemsFallback')}</dd>
+                    </dl>
+                  </motion.section>
+
+                  {project.verified ? (
+                    <motion.div
+                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
+                      className='border-primary/25 bg-primary/5 mt-5 flex items-start gap-3 rounded-xl border p-3.5'
+                    >
+                      <ShieldCheck className='text-primary mt-0.5 size-5 shrink-0' />
+                      <div>
+                        <p className='text-sm font-semibold'>
+                          {t('verifiedTitle', {
+                            date: project.verifiedAt
+                              ? formatDisplayDate(project.verifiedAt, locale)
+                              : t('verifiedDateFallback')
+                          })}
+                        </p>
+                        <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('verifiedBody')}</p>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
+                      className='mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'
+                    >
+                      <CircleAlert className='mt-0.5 size-4 shrink-0' />
+                      <div>
+                        <p className='text-sm font-semibold'>{t('selfReportedTitle')}</p>
+                        <p className='mt-1 text-xs leading-relaxed'>{t('selfReportedBody')}</p>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'>
+                    <CircleAlert className='mt-0.5 size-4 shrink-0' />
+                    <p className='text-xs leading-relaxed'>{t('priceNotice')}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <SheetFooter className='flex-row items-center justify-end border-t bg-background px-5 py-3'>
-              <SheetClose asChild>
+            <DialogFooter className='flex-row items-center justify-end gap-2 border-t bg-background px-5 py-3'>
+              <DialogClose asChild>
                 <Button type='button' variant='outline' size='sm' className='hover:bg-muted/80'>
                   {t('close')}
                 </Button>
-              </SheetClose>
-              {sheetInviteAction ? (
+              </DialogClose>
+              {footerInviteAction ? (
                 <div className='min-w-36 [&>*]:w-full [&>*]:transition-[filter] [&>*]:hover:brightness-105'>
-                  {sheetInviteAction}
+                  {footerInviteAction}
                 </div>
               ) : null}
-            </SheetFooter>
+            </DialogFooter>
           </>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 
