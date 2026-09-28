@@ -1598,17 +1598,29 @@ function ProjectDetailModal({
               </div>
             </div>
 
-            <DialogFooter className='flex-row items-center justify-end gap-2 border-t bg-background px-5 py-3'>
-              <DialogClose asChild>
-                <Button type='button' variant='outline' size='sm' className='hover:bg-muted/80'>
-                  {t('close')}
-                </Button>
-              </DialogClose>
-              {footerInviteAction ? (
-                <div className='min-w-36 [&>*]:w-full [&>*]:transition-[filter] [&>*]:hover:brightness-105'>
-                  {footerInviteAction}
+            <DialogFooter className='flex-row items-center justify-between gap-3 border-t bg-background px-5 py-3'>
+              {/* Nhận diện nhà thầu ở đầu thanh: logo + tên + dòng nhỏ loại hình
+                  (`contractor.kind` = "Nhà thầu xây dựng"). Tên co lại khi hẹp để
+                  không đẩy hai nút ra ngoài. */}
+              <div className='flex min-w-0 items-center gap-2.5'>
+                <ContractorLogo contractor={contractor} className='size-9 shrink-0 rounded-lg text-[10px]' />
+                <div className='min-w-0'>
+                  <p className='truncate text-sm font-semibold'>{contractor.name}</p>
+                  <p className='text-muted-foreground truncate text-xs'>{contractor.kind}</p>
                 </div>
-              ) : null}
+              </div>
+              <div className='flex shrink-0 items-center gap-2'>
+                <DialogClose asChild>
+                  <Button type='button' variant='outline' size='sm' className='hover:bg-muted/80'>
+                    {t('close')}
+                  </Button>
+                </DialogClose>
+                {footerInviteAction ? (
+                  <div className='min-w-36 [&>*]:w-full [&>*]:transition-[filter] [&>*]:hover:brightness-105'>
+                    {footerInviteAction}
+                  </div>
+                ) : null}
+              </div>
             </DialogFooter>
           </>
         ) : null}
