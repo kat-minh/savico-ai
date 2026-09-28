@@ -15,8 +15,8 @@ import { checkoutConfirmRoute, checkoutDoneRoute, checkoutFailedRoute } from '@/
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatPriceTag } from '@/shared/utils'
-import { QR_TTL_MINUTES } from '../constants/checkout.constants'
-import { useMarkTransferred, useOrder, useRegenerateQr } from '../hooks/use-checkout'
+import { isApiOrderId, QR_TTL_MINUTES } from '../constants/checkout.constants'
+import { useCancelOrder, useMarkTransferred, useOrder, useRegenerateQr } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
 interface QrPaymentProps {
@@ -103,6 +103,10 @@ export function QrPayment({ orderId }: QrPaymentProps) {
     navigate: false,
     onSuccess: () => toast.success(t('regeneratedToast', { minutes: QR_TTL_MINUTES }))
   })
+  // Đơn API tự đối soát bằng QR: không có nút "Tôi đã chuyển khoản", chỉ chờ
+  // `getOrder` poll tới `paid`/`failed`; thay vào đó cho phép HỦY đơn.
+  const isApiOrder = isApiOrderId(orderId)
+  const cancelOrder = useCancelOrder(orderId)
 
   useLayoutEffect(() => {
     if (isPending || !order) return
@@ -394,7 +398,15 @@ export function QrPayment({ orderId }: QrPaymentProps) {
                 data-payment-qr-corner
                 className='border-primary absolute right-0 bottom-0 size-7 rounded-br-lg border-r-[3px] border-b-[3px]'
               />
-              <QRCodeCanvas value={order.transfer.qrPayload} size={200} level='M' />
+              {isApiOrder ? (
+                // Đơn API: `qrPayload` là ẢNH QR do cổng trả về (`qrUrl`) — hiện
+                // thẳng ảnh thay vì tự dựng mã. Không dùng next/image vì miền ảnh
+                // của cổng không khai trong next.config.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={order.transfer.qrPayload} alt='' width={200} height={200} className='size-[200px]' />
+              ) : (
+                <QRCodeCanvas value={order.transfer.qrPayload} size={200} level='M' />
+              )}
             </div>
           </div>
 
@@ -496,6 +508,12 @@ export function QrPayment({ orderId }: QrPaymentProps) {
                 {regenerate.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
                 {regenerate.isPending ? t('regenerating') : t('regenerate')}
               </Button>
+            ) : isApiOrder ? (
+              // Luồng API: chờ ngân hàng tự xác nhận (QR poll), không bấm gì.
+              <Button className='flex-1' disabled>
+                <LoaderCircle className='size-4 animate-spin' />
+                {t('autoWaiting')}
+              </Button>
             ) : (
               <Button
                 className='flex-1'
@@ -522,6 +540,13 @@ export function QrPayment({ orderId }: QrPaymentProps) {
               <Headset className='size-4' />
               {t('support')}
             </Button>
+            {/* Hủy đơn — chỉ luồng API (mock hết hạn thì tự sang S07). */}
+            {isApiOrder && !expired ? (
+              <Button variant='ghost' onClick={() => cancelOrder.mutate()} disabled={cancelOrder.isPending}>
+                {cancelOrder.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
+                {cancelOrder.isPending ? t('cancelling') : t('cancel')}
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>

@@ -524,7 +524,7 @@
       "eyebrow": "BUILDX PRICING",
       "title": "Pick the package that fits where you are",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
-      "viewAll": "See all packages",
+      "viewAll": "Explore",
       "referenceLabel": "See:",
       "referenceLink": "Pricing",
       "ownedLabel": "Your package - {count} uses left",
@@ -2134,6 +2134,10 @@
     }
   },
   "admin": {
+    "mockApiNotice": {
+      "title": "Not connected to the API",
+      "description": "This screen uses sample data (stored in the browser), not the real API yet."
+    },
     "shell": {
       "brandSuffix": "Admin area",
       "title": "Administration",
@@ -4935,6 +4939,8 @@
           "description": "Project details delivered by {contractor}",
           "imageAlt": "Image {index} of project {project}",
           "selectImage": "Show image {index} as the large image",
+          "prevImage": "Previous image",
+          "nextImage": "Next image",
           "verifiedBadge": "Verified",
           "title": "Project information",
           "projectType": "Project type",
@@ -5281,6 +5287,9 @@
       "transferred": "I have transferred",
       "recording": "Recording…",
       "verifying": "Confirming…",
+      "autoWaiting": "Waiting for bank confirmation…",
+      "cancel": "Cancel order",
+      "cancelling": "Cancelling…",
       "support": "Need help?",
       "supportToast": "The BuildX support team will contact you on your registered phone number.",
       "supportSubject": "Support for order {code}",

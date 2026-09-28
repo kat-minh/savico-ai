@@ -524,7 +524,7 @@
       "eyebrow": "BẢNG GIÁ BUILDX",
       "title": "Chọn gói phù hợp với giai đoạn của bạn",
       "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
-      "viewAll": "Xem tất cả gói",
+      "viewAll": "Tham khảo",
       "referenceLabel": "Tham khảo:",
       "referenceLink": "Bảng giá",
       "ownedLabel": "Gói của bạn - còn {count} lượt",
@@ -2134,6 +2134,10 @@
     }
   },
   "admin": {
+    "mockApiNotice": {
+      "title": "Chưa gắn API",
+      "description": "Màn này đang dùng dữ liệu mẫu (lưu tạm trên trình duyệt), chưa nối API thật."
+    },
     "shell": {
       "brandSuffix": "Khu quản trị",
       "title": "Quản trị",
@@ -4935,6 +4939,8 @@
           "description": "Chi tiết dự án do {contractor} thực hiện",
           "imageAlt": "Ảnh {index} của dự án {project}",
           "selectImage": "Chọn ảnh {index} làm ảnh lớn",
+          "prevImage": "Ảnh trước",
+          "nextImage": "Ảnh sau",
           "verifiedBadge": "Đã xác minh",
           "title": "Thông tin công trình",
           "projectType": "Loại công trình",
@@ -5281,6 +5287,9 @@
       "transferred": "Tôi đã chuyển khoản",
       "recording": "Đang ghi nhận…",
       "verifying": "Đang xác nhận…",
+      "autoWaiting": "Đang chờ ngân hàng xác nhận…",
+      "cancel": "Hủy đơn",
+      "cancelling": "Đang hủy…",
       "support": "Cần hỗ trợ?",
       "supportToast": "Đội hỗ trợ BuildX sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
       "supportSubject": "Hỗ trợ đơn hàng {code}",
