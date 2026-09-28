@@ -20,6 +20,7 @@ import { formatCurrency } from '@/shared/utils'
 import { useAdminCollection } from '../../hooks/use-admin-data'
 import { invitationNeedsAction, pendingChangeRequests, relativeTime } from '../../services/ops.service'
 import { AdminPage } from '../common/admin-page'
+import { MockApiNotice } from '../common/mock-api-notice'
 import { AdminCharts } from './admin-charts'
 
 const { Text } = Typography
@@ -147,6 +148,7 @@ export function AdminInbox() {
 
   return (
     <AdminPage title={t('nav.dashboard')} description={t('inbox.description')}>
+      <MockApiNotice />
       <Row gutter={[16, 16]}>
         <Col xs={12} lg={6}>
           <Card>

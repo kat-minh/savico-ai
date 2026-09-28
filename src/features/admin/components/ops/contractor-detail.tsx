@@ -55,6 +55,7 @@ import {
   type VerificationGap
 } from '../../services/contractor.service'
 import { AdminPage } from '../common/admin-page'
+import { MockApiNotice } from '../common/mock-api-notice'
 import { ContractorFields, PHOTO_SLOTS, useOpenInvitations } from './contractor-fields'
 import { ContractorLegal } from './contractor-legal'
 import { useProfileCommit } from './contractor-manager'
@@ -454,6 +455,7 @@ export function ContractorDetail({ id }: { id: string }) {
         </>
       }
     >
+      <MockApiNotice />
       <Card>
         <div className='flex flex-wrap items-center gap-4'>
           <Avatar shape='square' size={72} src={contractor.logoUrl}>
