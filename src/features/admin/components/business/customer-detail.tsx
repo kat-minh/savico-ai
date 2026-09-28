@@ -38,6 +38,7 @@ import { ADMIN_ROUTES } from '@/shared/constants'
 import { formatCurrency, getInitials } from '@/shared/utils'
 import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
 import { AdminPage } from '../common/admin-page'
+import { MockApiNotice } from '../common/mock-api-notice'
 
 const { Text } = Typography
 
@@ -180,6 +181,7 @@ export function CustomerDetail({ id }: { id: string }) {
         </>
       }
     >
+      <MockApiNotice />
       <Card title={t('customers.profileTitle')}>
         <div className='flex flex-wrap items-start gap-6'>
           <Avatar size={72} src={customer.avatarUrl}>

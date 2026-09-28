@@ -45,6 +45,7 @@ import {
 import { useAdminCollection, useAdminDocument, useSaveAdminDocument } from '../../hooks/use-admin-data'
 import { newAdminId } from '../../services/admin.service'
 import { AdminPage } from '../common/admin-page'
+import { MockApiNotice } from '../common/mock-api-notice'
 
 const { Text } = Typography
 
@@ -182,6 +183,7 @@ export function SurveyScheduleManager() {
 
   return (
     <AdminPage title={t('nav.surveySchedule')} description={t('surveySchedule.description')}>
+      <MockApiNotice />
       <Card
         title={t('surveySchedule.configTitle')}
         extra={
