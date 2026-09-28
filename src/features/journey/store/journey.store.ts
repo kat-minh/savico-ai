@@ -4,8 +4,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import {
-  JOURNEY_DISMISS_30_DAYS_MS,
-  JOURNEY_DISMISS_7_DAYS_MS,
+  JOURNEY_DISMISS_COOLDOWN_MS,
   JOURNEY_POPUP_TEST_MODE,
   JOURNEY_STORAGE_KEY
 } from '../constants/journey.constants'
@@ -37,24 +36,10 @@ export const useJourneyStore = create<JourneyStore>()(
       },
 
       dismissStepOne: () => {
-        if (JOURNEY_POPUP_TEST_MODE) {
-          set((state) => ({
-            stepOne: {
-              ...state.stepOne,
-              dismissCount: 0,
-              lastShownAt: null,
-              suppressedUntil: null,
-              completedAt: null
-            },
-            lastDismissedAt: null
-          }))
-          return
-        }
-
         const now = Date.now()
         set((state) => {
           const dismissCount = state.stepOne.dismissCount + 1
-          const suppressFor = dismissCount >= 2 ? JOURNEY_DISMISS_30_DAYS_MS : JOURNEY_DISMISS_7_DAYS_MS
+          const suppressFor = JOURNEY_DISMISS_COOLDOWN_MS
           return {
             stepOne: {
               ...state.stepOne,
