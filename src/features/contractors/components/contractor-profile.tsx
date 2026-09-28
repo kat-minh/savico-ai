@@ -1598,7 +1598,10 @@ function ProjectDetailModal({
               </div>
             </div>
 
-            <DialogFooter className='flex-row items-center justify-between gap-3 border-t bg-background px-5 py-3'>
+            {/* `sm:justify-between` để đè `sm:justify-end` mặc định của DialogFooter
+                — nếu không, ở desktop cả nhận diện lẫn hai nút bị dồn về bên phải,
+                nửa trái trống. Cần dàn hai mép: nhận diện trái, nút phải. */}
+            <DialogFooter className='flex-row items-center justify-between gap-3 border-t bg-background px-5 py-3 sm:justify-between'>
               {/* Nhận diện nhà thầu ở đầu thanh (bên trái): logo + tên + dòng nhỏ
                   loại hình (`contractor.kind` = "Nhà thầu xây dựng"). Tên co lại
                   khi hẹp để không đẩy hai nút ra ngoài. */}
