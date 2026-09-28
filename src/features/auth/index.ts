@@ -8,9 +8,12 @@ export { LoginForm } from './components/login-form'
 export { RegisterForm } from './components/register-form'
 export { ForgotPasswordForm } from './components/forgot-password-form'
 export { AuthBootstrap } from './components/auth-bootstrap'
+export { MustChangePasswordDialog } from './components/must-change-password-dialog'
 export { useLogin } from './hooks/use-login'
 export { useLogout } from './hooks/use-logout'
+export { useRegister } from './hooks/use-register'
 export { useCurrentUser } from './hooks/use-current-user'
+export { useChangePassword } from './hooks/use-change-password'
 export { authApi } from './api/auth.api'
 export { authKeys } from './api/auth.keys'
 export { createLoginSchema, type LoginFormValues, type LoginSchemaMessages } from './schemas/login.schema'
@@ -20,4 +23,9 @@ export {
   type ForgotPasswordFormValues,
   type ForgotPasswordSchemaMessages
 } from './schemas/forgot-password.schema'
-export type { LoginPayload, LoginResponse } from './types/auth.types'
+export {
+  createChangePasswordSchema,
+  type ChangePasswordFormValues,
+  type ChangePasswordSchemaMessages
+} from './schemas/change-password.schema'
+export type { ChangePasswordPayload, LoginPayload, LoginResponse, RegisterPayload } from './types/auth.types'

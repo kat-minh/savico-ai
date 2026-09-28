@@ -4,11 +4,33 @@
  * never re-declare it.
  */
 
-/** Standard success envelope. */
+/** Error block inside the BMT `Result<T>` envelope. */
+export interface ApiResultError {
+  code: string
+  message: string
+  messageCode?: string | null
+}
+
+/**
+ * Standard envelope of the BMT .NET API (`Result<T>` in Swagger). Failures that
+ * the backend reports without an HTTP error still come back as
+ * `isSuccess: false` with `error` filled, so `http` checks both.
+ */
 export interface ApiResponse<TData = unknown> {
-  data: TData
-  message?: string
-  success: boolean
+  isSuccess: boolean
+  isFailure: boolean
+  error?: ApiResultError | null
+  value?: TData
+}
+
+/** A page of results as returned by BMT list endpoints (`PagedResult<T>`). */
+export interface PagedResult<TItem> {
+  items: TItem[]
+  pageIndex: number
+  pageSize: number
+  totalCount: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }
 
 /** Normalized error shape produced by the response interceptor. */
@@ -17,6 +39,8 @@ export interface ApiError {
   status: number
   /** Machine-readable error code from the backend, when available. */
   code?: string
+  /** Stable reason code from the backend (e.g. `AccountLocked`, `InvalidAccessToken`). */
+  messageCode?: string
   /** Human-readable message (already localized server-side or generic). */
   message: string
   /** Field-level validation errors keyed by field name. */

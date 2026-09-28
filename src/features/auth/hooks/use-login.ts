@@ -1,6 +1,7 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
@@ -19,6 +20,7 @@ import type { LoginPayload } from '../types/auth.types'
  * Errors are normalized to {@link ApiError}.
  */
 export function useLogin(redirectTo?: string) {
+  const t = useTranslations('auth.login')
   const router = useRouter()
   const queryClient = useQueryClient()
   const setUser = useAuthStore((s) => s.setUser)
@@ -37,6 +39,10 @@ export function useLogin(redirectTo?: string) {
       // Consume the pending action BEFORE closing (close() clears it).
       const pending = consumePendingAction()
       closeAuthDialog()
+      // Tài khoản nhân viên mới bị chặn mọi chức năng cho tới khi đổi mật khẩu
+      // (BR-RBAC-006). Đừng đá vào khu quản trị (toàn 403) — màn buộc đổi mật
+      // khẩu ở `AuthBootstrap` sẽ hiện đè lên trang hiện tại và lo phần còn lại.
+      if (user.mustChangePassword) return
       // A pending gated action (download/view) resumes in place; every other
       // login goes to its redirect target, defaulting to the role's home so
       // admins land in the isolated admin area rather than the customer shell.
@@ -46,7 +52,13 @@ export function useLogin(redirectTo?: string) {
       else router.replace(ROUTES.HOME)
     },
     onError: (error) => {
-      toast.error(isApiError(error) ? error.message : 'Unable to sign in. Try again.')
+      if (!isApiError(error) || error.status === 0) {
+        toast.error(isApiError(error) ? error.message : t('invalid'))
+        return
+      }
+      // The API answers an unknown email with a 500 "User does not exist", so
+      // every non-network failure except a lock reads as bad credentials.
+      toast.error(error.messageCode === 'AccountLocked' ? t('locked') : t('invalid'))
     }
   })
 }

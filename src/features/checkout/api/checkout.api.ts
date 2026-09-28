@@ -1,21 +1,24 @@
 import { env } from '@/shared/config/env'
-import { http } from '@/shared/lib/api'
-import type { CreateOrderPayload, Order } from '../types/checkout.types'
+import { bmtCheckoutApi } from './checkout.bmt'
 import { mockCheckoutApi } from './checkout.mock'
 
 /**
- * Checkout API surface (S03–S08). Endpoint là placeholder tới khi controller
- * .NET có thật.
+ * Chức năng đã nối BMT API — GIỮ MOCK LÀM NỀN. Mỗi hàm tự chọn nhánh theo dạng
+ * ID (UUID → API, còn lại → mock, xem `checkout.bmt.ts`), nên gói mock của trang
+ * Bảng giá (DB backend rỗng) vẫn mua được bình thường.
  *
- * Không có hàm nào cho cổng thanh toán / thẻ: chỉ QR chuyển khoản (R10).
+ * Đã nối cho gói API: `createOrder` (`POST /payment-orders {planId, offerKey}`),
+ * `getOrder` (`GET /payment-orders/{id}` — màn QR poll trạng thái), `regenerateQr`
+ * (đọc lại `qrUrl`), `cancelOrder` (`POST /payment-orders/{id}/cancel`).
+ *
+ * Giữ mock: `markTransferred` — luồng API tự đối soát bằng QR, không có nút thủ
+ * công nên hàm này chỉ dùng cho gói mock.
  */
-const CheckoutApi = {
-  createOrder: (payload: CreateOrderPayload) => http.post<Order>('/orders', payload),
-  getOrder: (orderId: string) => http.get<Order>(`/orders/${orderId}`),
-  /** "Tôi đã chuyển khoản" ở S04 → đơn sang trạng thái đang xác nhận (S06). */
-  markTransferred: (orderId: string) => http.post<Order>(`/orders/${orderId}/transferred`, {}),
-  /** "Thử lại thanh toán" ở S07 → sinh mã QR mới, quay lại S04. */
-  regenerateQr: (orderId: string) => http.post<Order>(`/orders/${orderId}/qr`, {})
-}
+const BmtCheckoutApi = {
+  createOrder: bmtCheckoutApi.createOrder,
+  getOrder: bmtCheckoutApi.getOrder,
+  regenerateQr: bmtCheckoutApi.regenerateQr,
+  cancelOrder: bmtCheckoutApi.cancelOrder
+} satisfies Partial<typeof mockCheckoutApi>
 
-export const checkoutApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockCheckoutApi : CheckoutApi
+export const checkoutApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockCheckoutApi : { ...mockCheckoutApi, ...BmtCheckoutApi }

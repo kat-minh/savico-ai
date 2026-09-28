@@ -54,6 +54,13 @@ import { usePlans } from '../hooks/use-plans'
 const TIERS: readonly PlanTier[] = ['basic', 'advanced', 'pro'] as const
 
 /**
+ * Chu kỳ gói thiết kế gửi kèm khi vào checkout — đơn `POST /payment-orders` cần
+ * `offerKey`. Trang chưa có công tắc chu kỳ (Tháng/Năm) nên mặc định `Month`;
+ * gói mock bỏ qua giá trị này (checkout tự chạy mock).
+ */
+const DESIGN_OFFER_KEY = 'Month'
+
+/**
  * Cả ba giá bắt đầu cùng một nhịp nhưng kết thúc lệch nhau BASIC → PLUS → PRO.
  * Duration dùng ở cả counter và mốc hiện dòng "Thanh toán 1 lần" để hai phần
  * không thể lệch choreography.
@@ -474,7 +481,10 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         variant={plan.popular ? 'default' : 'outline'}
                         className={cn('plan-table-buy text-xs font-bold', plan.popular && 'plan-table-buy-popular')}
                       >
-                        <Link href={checkoutConfirmRoute(plan.id)} onClick={() => rememberCheckoutReturn(plan.id)}>
+                        <Link
+                          href={checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY)}
+                          onClick={() => rememberCheckoutReturn(plan.id)}
+                        >
                           {plan.ctaLabel || t(`cta.${tier}`)}
                         </Link>
                       </Button>
@@ -1287,12 +1297,12 @@ function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled:
         })
         .finished.catch(() => undefined)
     }
-    if (alive.current) router.push(checkoutConfirmRoute(plan.id))
+    if (alive.current) router.push(checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY))
   }
   return (
     <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold'>
       <Link
-        href={checkoutConfirmRoute(plan.id)}
+        href={checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY)}
         aria-disabled={disabled || pending}
         aria-busy={pending}
         onClick={(e) => void buy(e)}

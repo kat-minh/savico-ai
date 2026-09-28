@@ -453,7 +453,7 @@ export const mockDesignApi = {
     return { token: `share-${projectId.toLowerCase()}` }
   },
 
-  sendDossierEmail: async (): Promise<void> => {
+  sendDossierEmail: async (_projectId: string, _email: string): Promise<void> => {
     await mockDelay(400)
   },
 

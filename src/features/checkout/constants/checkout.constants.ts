@@ -14,3 +14,15 @@ export const REFUND_WINDOW_HOURS = 24
 
 /** Đơn hàng chưa thanh toán được giữ lại bao lâu (S07). */
 export const ORDER_HOLD_HOURS = 24
+
+/**
+ * Phân biệt gói / đơn của BMT API với gói / đơn MOCK bằng dạng ID: gói và đơn
+ * mock có mã ngắn (`basic`, `pro`, `SVC-26001`), còn BMT API dùng UUID. Nhờ vậy
+ * checkout tự chọn nhánh: ID là UUID → gọi API; còn lại → chạy mock.
+ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** ID này có phải của BMT API (UUID) không? Không phải → gói / đơn mock. */
+export function isApiOrderId(id: string): boolean {
+  return UUID_RE.test(id.trim())
+}

@@ -8,7 +8,10 @@ import { z } from 'zod'
  * replaced. We validate once at module load and fail fast on misconfiguration.
  */
 const publicEnvSchema = z.object({
-  NEXT_PUBLIC_API_BASE_URL: z.string().url(),
+  // Either an absolute URL or a same-origin path. The default `/api/v1` goes
+  // through the Next rewrite in `next.config.ts`, which keeps the backend's
+  // httpOnly auth cookies first-party.
+  NEXT_PUBLIC_API_BASE_URL: z.union([z.string().url(), z.string().regex(/^\/\S*$/)]).default('/api/v1'),
   NEXT_PUBLIC_API_TIMEOUT: z.coerce.number().int().positive().default(30000),
   NEXT_PUBLIC_APP_NAME: z.string().min(1).default('BUILDX AI'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),

@@ -159,12 +159,12 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
               gọn một dòng và phần nhấn tách dòng riêng, cân hai dòng (`text-balance`)
               — tổng 3 dòng, không ngắt giữa cụm kể cả máy màn nhỏ (Responsive case 3).
               Chỗ ngắt dòng admin đặt bằng ký tự xuống dòng được `whitespace-pre-line` giữ. */}
-          <h1 className='text-[clamp(1.25rem,6vw,1.875rem)] leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
+          <h1 className='text-[clamp(1.05rem,5.4vw,1.875rem)] leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
             <motion.span
               initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={seq(0.1, 0.75)}
-              className='block whitespace-pre-line'
+              className='block text-balance whitespace-pre-line'
             >
               {t('titleLead')}{' '}
               <motion.span

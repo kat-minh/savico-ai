@@ -1,12 +1,11 @@
-import type { ProjectChatContext } from '@/shared/chat-context'
 import { env } from '@/shared/config/env'
-import { http } from '@/shared/lib/api'
 import { mockChatbotApi } from './chatbot.mock'
 
-const realChatbotApi = {
-  /** Ngữ cảnh dự án gửi kèm để AI trả lời theo dữ liệu thật (mục III.3a). */
-  sendMessage: (message: string, context: ProjectChatContext | null) =>
-    http.post<string>('/chatbot/messages', { message, context })
-}
+/**
+ * Chức năng đã nối BMT API. Hàm nào API chưa đáp ứng đủ giao diện thì KHÔNG
+ * khai ở đây — vẫn chạy bản mock kể cả khi tắt `NEXT_PUBLIC_USE_MOCK_API`
+ * (danh sách thiếu gửi BE: `docs/BE_API_GAPS.md`).
+ */
+const BmtChatbotApi = {} satisfies Partial<typeof mockChatbotApi>
 
-export const chatbotApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockChatbotApi : realChatbotApi
+export const chatbotApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockChatbotApi : { ...mockChatbotApi, ...BmtChatbotApi }

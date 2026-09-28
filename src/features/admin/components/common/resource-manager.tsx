@@ -25,6 +25,7 @@ import { useAdminCollection, useDeleteAdminItem, useSaveAdminItem } from '../../
 import { useUnsavedGuard } from '../../hooks/use-unsaved-guard'
 import { AdminPage } from './admin-page'
 import { ContentLocaleBanner } from './content-locale-banner'
+import { MockApiNotice } from './mock-api-notice'
 
 /** Mọi bản ghi trong kho đều có `id` — engine dựa vào đó để sửa / xóa. */
 type WithId = { id: string }
@@ -334,6 +335,7 @@ export function ResourceManager<K extends CmsCollection>({
         </>
       }
     >
+      <MockApiNotice />
       {isLocalizedCollection(collection) ? <ContentLocaleBanner /> : null}
       {banner}
 

@@ -109,6 +109,15 @@ export const ADMIN_NAV = [
     items: [{ key: 'customers', href: ADMIN_ROUTES.CUSTOMERS, icon: UserOutlined }]
   },
   {
+    key: 'access',
+    icon: SafetyCertificateOutlined,
+    items: [
+      { key: 'roles', href: ADMIN_ROUTES.ROLES, icon: SafetyCertificateOutlined },
+      { key: 'staff', href: ADMIN_ROUTES.STAFF, icon: TeamOutlined },
+      { key: 'assignments', href: ADMIN_ROUTES.ASSIGNMENTS, icon: ScheduleOutlined }
+    ]
+  },
+  {
     key: 'catalog',
     icon: AppstoreOutlined,
     items: [

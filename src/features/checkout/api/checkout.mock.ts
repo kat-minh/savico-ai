@@ -176,5 +176,11 @@ export const mockCheckoutApi = {
       expiresAt: expiryFromNow(),
       transfer: transferInfoFor(order.id, order.total)
     })
+  },
+
+  cancelOrder: async (orderId: string): Promise<Order> => {
+    await mockDelay(250)
+    const order = findOrder(orderId)
+    return cmsDb.upsert('orders', { ...order, status: 'cancelled' })
   }
 }

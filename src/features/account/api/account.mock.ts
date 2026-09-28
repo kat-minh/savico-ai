@@ -33,8 +33,7 @@ export const mockAccountApi = {
       name: `Gói ${planName}`,
       expiresAt: '2026-08-30T00:00:00.000Z',
       design: { remaining: 5, total: 7 },
-      library: { remaining: 86, total: 100 },
-      consultation: { remaining: 1, total: 2 }
+      library: { remaining: 86, total: 100 }
     }
   },
 

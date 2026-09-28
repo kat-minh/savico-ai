@@ -9,6 +9,12 @@ export interface AuthUser {
   phone?: string
   avatarUrl?: string
   roles: Role[]
+  /**
+   * True khi tài khoản còn dùng mật khẩu do người khác đặt (nhân viên mới do
+   * admin tạo). Theo BR-RBAC-006, backend chặn mọi chức năng khác cho tới khi
+   * đổi mật khẩu, nên giao diện buộc đổi ngay sau khi đăng nhập.
+   */
+  mustChangePassword?: boolean
 }
 
 /** Client-side auth state held in the Zustand store. */

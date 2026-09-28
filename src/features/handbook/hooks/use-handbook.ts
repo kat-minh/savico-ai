@@ -23,12 +23,18 @@ export function useHandbookTemplates() {
   })
 }
 
-/** Một mẫu cụ thể — trang chi tiết mẫu bản vẽ 2D / nội thất 3D. */
-export function useHandbookTemplate(id: string) {
+/**
+ * Một mẫu cụ thể — trang chi tiết mẫu bản vẽ 2D / nội thất 3D.
+ *
+ * `enabled` để trang chi tiết TẠM DỪNG gọi khi mẫu đến từ API mà khách chưa
+ * đăng nhập (dựng cổng đăng nhập trước, không lộ nội dung, không trừ lượt).
+ */
+export function useHandbookTemplate(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: handbookKeys.templateDetail(id),
     queryFn: () => handbookApi.getTemplate(id),
-    staleTime: STATIC_CONTENT_STALE_TIME
+    staleTime: STATIC_CONTENT_STALE_TIME,
+    enabled: options?.enabled ?? true
   })
 }
 

@@ -33,15 +33,31 @@ import { usePageEntrance } from '@/shared/hooks'
 import { canReturnToCheckoutSource, clearCheckoutReturn } from '@/shared/lib/checkout-return'
 import { cn } from '@/shared/lib/utils'
 import { formatCurrency } from '@/shared/utils'
-import { REFUND_WINDOW_HOURS } from '../constants/checkout.constants'
+import { isApiOrderId, REFUND_WINDOW_HOURS } from '../constants/checkout.constants'
 import { useCreateOrder } from '../hooks/use-checkout'
-import type { OrderKind } from '../types/checkout.types'
+import type { OfferKey, OrderKind } from '../types/checkout.types'
 import { CheckoutSteps } from './checkout-steps'
+
+/** Bản chụp gói để hiện khối "Đơn hàng của bạn". */
+interface ConfirmProduct {
+  name: string
+  tierTag: string | null
+  popular: boolean
+  price: number
+  benefits: string[]
+}
 
 interface OrderConfirmProps {
   productId: string
   kind: OrderKind
   projectId?: string
+  /** Khóa offer gửi kèm khi tạo đơn API (`Month` / `Year` / `ConstructionSite`). */
+  offerKey?: OfferKey
+  /**
+   * Gói ĐẾN TỪ API (planId là UUID) không nằm trong kho CMS nên tầng app tra sẵn
+   * từ feature `plans` rồi truyền xuống. Gói mock để trống — component tự đọc CMS.
+   */
+  apiProduct?: ConfirmProduct
 }
 
 /**
@@ -79,7 +95,7 @@ function AnimatedCheckoutTotal({ value, locale }: { value: number; locale: Local
   )
 }
 
-export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) {
+export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct }: OrderConfirmProps) {
   const t = useTranslations('checkout.confirm')
   const tPlans = useTranslations('plans.tiers')
   const tPlanTags = useTranslations('plans.tierTags')
@@ -95,7 +111,12 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
   const discountCodes = useCmsCollection('discountCodes')
   const orders = useCmsCollection('orders')
 
-  const product = useMemo(() => {
+  // Gói ĐẾN TỪ API (planId UUID) không có trong kho CMS: dùng bản chụp tầng app
+  // truyền xuống và ẩn các phần API không đáp ứng (mã giảm giá, người mua, hóa đơn).
+  const isApiProduct = isApiOrderId(productId)
+
+  const product = useMemo<ConfirmProduct | null>(() => {
+    if (isApiProduct) return apiProduct ?? null
     if (kind === 'design') {
       const plan = plans.find((item) => item.id === productId)
       return plan
@@ -124,7 +145,7 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
           benefits: supervision.benefits.slice(0, 3)
         }
       : null
-  }, [kind, productId, plans, supervisionPackages, tPlans, tPlanTags, tSupervision])
+  }, [isApiProduct, apiProduct, kind, productId, plans, supervisionPackages, tPlans, tPlanTags, tSupervision])
 
   const { rootRef, entranceState, entranceStyle } = usePageEntrance(`checkout.confirm.${kind}.${productId}`, {
     enabled: Boolean(product),
@@ -305,7 +326,8 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
       ...(projectId ? { projectId } : {}),
       buyer,
       invoice: { enabled: invoiceOn, ...invoice },
-      discountCode: applied?.code ?? ''
+      discountCode: applied?.code ?? '',
+      ...(offerKey ? { offerKey } : {})
     })
   }
 
@@ -341,58 +363,62 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
 
       <div data-checkout-confirm-transition className='grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px]'>
         <div className='min-w-0 space-y-5'>
-          <section data-entrance-step='2' className='bg-card rounded-2xl border p-5'>
-            <div className='flex items-center justify-between gap-3'>
-              <h2 className='text-lg font-semibold'>{t('buyerTitle')}</h2>
-              {/* Hình S03: "Có thể chỉnh sửa" là chữ ĐEN (chỉ icon bút chì màu xanh). */}
-              <button
-                type='button'
-                onClick={() => {
-                  buyerNameRef.current?.focus()
-                  buyerNameRef.current?.select()
-                }}
-                className='text-foreground flex items-center gap-1.5 rounded-sm text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
-              >
-                <SquarePen className='text-primary size-4' />
-                {t('buyerEditable')}
-              </button>
-            </div>
+          {/* Luồng API không nhận thông tin người mua ở đơn (đối soát theo tài
+              khoản đăng nhập) — ẩn form; gói mock vẫn cho sửa như S03. */}
+          {isApiProduct ? null : (
+            <section data-entrance-step='2' className='bg-card rounded-2xl border p-5'>
+              <div className='flex items-center justify-between gap-3'>
+                <h2 className='text-lg font-semibold'>{t('buyerTitle')}</h2>
+                {/* Hình S03: "Có thể chỉnh sửa" là chữ ĐEN (chỉ icon bút chì màu xanh). */}
+                <button
+                  type='button'
+                  onClick={() => {
+                    buyerNameRef.current?.focus()
+                    buyerNameRef.current?.select()
+                  }}
+                  className='text-foreground flex items-center gap-1.5 rounded-sm text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
+                >
+                  <SquarePen className='text-primary size-4' />
+                  {t('buyerEditable')}
+                </button>
+              </div>
 
-            <div className='mt-4 grid gap-4 sm:grid-cols-3'>
-              <div className='space-y-2'>
-                <Label htmlFor='buyer-name'>{t('name')}</Label>
-                <Input
-                  ref={buyerNameRef}
-                  data-checkout-buyer-input
-                  id='buyer-name'
-                  value={buyer.name}
-                  onChange={(event) => setBuyer({ ...buyer, name: event.target.value })}
-                />
+              <div className='mt-4 grid gap-4 sm:grid-cols-3'>
+                <div className='space-y-2'>
+                  <Label htmlFor='buyer-name'>{t('name')}</Label>
+                  <Input
+                    ref={buyerNameRef}
+                    data-checkout-buyer-input
+                    id='buyer-name'
+                    value={buyer.name}
+                    onChange={(event) => setBuyer({ ...buyer, name: event.target.value })}
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='buyer-phone'>{t('phone')}</Label>
+                  <Input
+                    data-checkout-buyer-input
+                    id='buyer-phone'
+                    inputMode='tel'
+                    value={buyer.phone}
+                    onChange={(event) => setBuyer({ ...buyer, phone: event.target.value })}
+                  />
+                </div>
+                <div className='space-y-2'>
+                  <Label htmlFor='buyer-email'>{t('email')}</Label>
+                  <Input
+                    data-checkout-buyer-input
+                    id='buyer-email'
+                    inputMode='email'
+                    value={buyer.email}
+                    onChange={(event) => setBuyer({ ...buyer, email: event.target.value })}
+                  />
+                </div>
               </div>
-              <div className='space-y-2'>
-                <Label htmlFor='buyer-phone'>{t('phone')}</Label>
-                <Input
-                  data-checkout-buyer-input
-                  id='buyer-phone'
-                  inputMode='tel'
-                  value={buyer.phone}
-                  onChange={(event) => setBuyer({ ...buyer, phone: event.target.value })}
-                />
-              </div>
-              <div className='space-y-2'>
-                <Label htmlFor='buyer-email'>{t('email')}</Label>
-                <Input
-                  data-checkout-buyer-input
-                  id='buyer-email'
-                  inputMode='email'
-                  value={buyer.email}
-                  onChange={(event) => setBuyer({ ...buyer, email: event.target.value })}
-                />
-              </div>
-            </div>
 
-            <p className='text-muted-foreground mt-3 text-xs'>{t('receiptNote')}</p>
-          </section>
+              <p className='text-muted-foreground mt-3 text-xs'>{t('receiptNote')}</p>
+            </section>
+          )}
 
           {/* R10 — chỉ QR chuyển khoản, nên đây là một khối thông tin chứ không
               phải một danh sách để chọn. */}
@@ -418,74 +444,77 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
             </p>
           </section>
 
-          <section data-entrance-step='4' className='bg-card rounded-2xl border p-5'>
-            <div className='flex items-start justify-between gap-4'>
-              <div>
-                <h2 className='text-base font-semibold'>{t('invoiceTitle')}</h2>
-                <p className='text-muted-foreground text-sm'>{t('invoiceHint')}</p>
-              </div>
-              <Switch
-                data-checkout-invoice-switch
-                checked={invoiceOn}
-                onCheckedChange={(checked) => {
-                  setInvoiceOn(checked)
-                  if (checked) {
-                    window.requestAnimationFrame(() => {
+          {/* Luồng API chưa có xuất hóa đơn — ẩn khối; gói mock giữ như S03. */}
+          {isApiProduct ? null : (
+            <section data-entrance-step='4' className='bg-card rounded-2xl border p-5'>
+              <div className='flex items-start justify-between gap-4'>
+                <div>
+                  <h2 className='text-base font-semibold'>{t('invoiceTitle')}</h2>
+                  <p className='text-muted-foreground text-sm'>{t('invoiceHint')}</p>
+                </div>
+                <Switch
+                  data-checkout-invoice-switch
+                  checked={invoiceOn}
+                  onCheckedChange={(checked) => {
+                    setInvoiceOn(checked)
+                    if (checked) {
                       window.requestAnimationFrame(() => {
-                        invoiceCompanyRef.current?.focus()
+                        window.requestAnimationFrame(() => {
+                          invoiceCompanyRef.current?.focus()
+                        })
                       })
-                    })
-                  }
-                }}
-                aria-label={t('invoiceTitle')}
-              />
-            </div>
+                    }
+                  }}
+                  aria-label={t('invoiceTitle')}
+                />
+              </div>
 
-            <div data-checkout-invoice-fields data-open={invoiceOn ? 'true' : 'false'} className='grid'>
-              <div className='overflow-hidden'>
-                <div className='mt-4 grid gap-4 border-t border-dashed pt-4 sm:grid-cols-2'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='invoice-company'>{t('company')}</Label>
-                    <Input
-                      ref={invoiceCompanyRef}
-                      id='invoice-company'
-                      disabled={!invoiceOn}
-                      value={invoice.company}
-                      onChange={(event) => setInvoice({ ...invoice, company: event.target.value })}
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label htmlFor='invoice-tax'>{t('taxCode')}</Label>
-                    <Input
-                      id='invoice-tax'
-                      disabled={!invoiceOn}
-                      value={invoice.taxCode}
-                      onChange={(event) => setInvoice({ ...invoice, taxCode: event.target.value })}
-                    />
-                  </div>
-                  <div className='space-y-2 sm:col-span-2'>
-                    <Label htmlFor='invoice-address'>{t('address')}</Label>
-                    <Input
-                      id='invoice-address'
-                      disabled={!invoiceOn}
-                      value={invoice.address}
-                      onChange={(event) => setInvoice({ ...invoice, address: event.target.value })}
-                    />
-                  </div>
-                  <div className='space-y-2 sm:col-span-2'>
-                    <Label htmlFor='invoice-email'>{t('invoiceEmail')}</Label>
-                    <Input
-                      id='invoice-email'
-                      inputMode='email'
-                      disabled={!invoiceOn}
-                      value={invoice.email}
-                      onChange={(event) => setInvoice({ ...invoice, email: event.target.value })}
-                    />
+              <div data-checkout-invoice-fields data-open={invoiceOn ? 'true' : 'false'} className='grid'>
+                <div className='overflow-hidden'>
+                  <div className='mt-4 grid gap-4 border-t border-dashed pt-4 sm:grid-cols-2'>
+                    <div className='space-y-2'>
+                      <Label htmlFor='invoice-company'>{t('company')}</Label>
+                      <Input
+                        ref={invoiceCompanyRef}
+                        id='invoice-company'
+                        disabled={!invoiceOn}
+                        value={invoice.company}
+                        onChange={(event) => setInvoice({ ...invoice, company: event.target.value })}
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label htmlFor='invoice-tax'>{t('taxCode')}</Label>
+                      <Input
+                        id='invoice-tax'
+                        disabled={!invoiceOn}
+                        value={invoice.taxCode}
+                        onChange={(event) => setInvoice({ ...invoice, taxCode: event.target.value })}
+                      />
+                    </div>
+                    <div className='space-y-2 sm:col-span-2'>
+                      <Label htmlFor='invoice-address'>{t('address')}</Label>
+                      <Input
+                        id='invoice-address'
+                        disabled={!invoiceOn}
+                        value={invoice.address}
+                        onChange={(event) => setInvoice({ ...invoice, address: event.target.value })}
+                      />
+                    </div>
+                    <div className='space-y-2 sm:col-span-2'>
+                      <Label htmlFor='invoice-email'>{t('invoiceEmail')}</Label>
+                      <Input
+                        id='invoice-email'
+                        inputMode='email'
+                        disabled={!invoiceOn}
+                        value={invoice.email}
+                        onChange={(event) => setInvoice({ ...invoice, email: event.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           <label
             ref={termsRef}
@@ -592,52 +621,55 @@ export function OrderConfirm({ productId, kind, projectId }: OrderConfirmProps) 
               <p className='text-muted-foreground mt-2 text-xs'>{t('creditsNeverExpire')}</p>
             </div>
 
-            <div className='mt-4 space-y-2'>
-              <Label htmlFor='discount'>{t('discountLabel')}</Label>
-              <div className='flex gap-2'>
-                <Input
-                  ref={discountInputRef}
-                  id='discount'
-                  value={codeInput}
-                  placeholder={t('discountPlaceholder')}
-                  aria-invalid={codeError || undefined}
-                  disabled={codePending}
-                  readOnly={Boolean(applied)}
-                  onChange={(event) => {
-                    setCodeInput(event.target.value.toUpperCase())
-                    if (codeError) setCodeError(false)
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key !== 'Enter') return
-                    event.preventDefault()
-                    applyCode()
-                  }}
-                />
-                <Button
-                  type='button'
-                  variant='outline'
-                  disabled={codePending || Boolean(applied)}
-                  onClick={applyCode}
-                  className={cn(
-                    applied && 'border-primary/30 bg-primary/10 text-primary hover:bg-primary/10 disabled:opacity-100'
-                  )}
-                >
-                  {codePending ? (
-                    <LoaderCircle className='size-4 animate-spin' />
-                  ) : applied ? (
-                    <CheckCircle2 className='size-4' />
-                  ) : null}
-                  {codePending ? t('applying') : applied ? t('applied') : t('apply')}
-                </Button>
+            {/* Luồng API không nhận mã giảm giá — ẩn ô; gói mock giữ như S03. */}
+            {isApiProduct ? null : (
+              <div className='mt-4 space-y-2'>
+                <Label htmlFor='discount'>{t('discountLabel')}</Label>
+                <div className='flex gap-2'>
+                  <Input
+                    ref={discountInputRef}
+                    id='discount'
+                    value={codeInput}
+                    placeholder={t('discountPlaceholder')}
+                    aria-invalid={codeError || undefined}
+                    disabled={codePending}
+                    readOnly={Boolean(applied)}
+                    onChange={(event) => {
+                      setCodeInput(event.target.value.toUpperCase())
+                      if (codeError) setCodeError(false)
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== 'Enter') return
+                      event.preventDefault()
+                      applyCode()
+                    }}
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    disabled={codePending || Boolean(applied)}
+                    onClick={applyCode}
+                    className={cn(
+                      applied && 'border-primary/30 bg-primary/10 text-primary hover:bg-primary/10 disabled:opacity-100'
+                    )}
+                  >
+                    {codePending ? (
+                      <LoaderCircle className='size-4 animate-spin' />
+                    ) : applied ? (
+                      <CheckCircle2 className='size-4' />
+                    ) : null}
+                    {codePending ? t('applying') : applied ? t('applied') : t('apply')}
+                  </Button>
+                </div>
+                {applied ? (
+                  <p className='text-primary flex items-center gap-1.5 text-xs'>
+                    <CheckCircle2 className='size-3.5' />
+                    {t('discountAppliedPlan', { percent: applied.percent, plan: product.name })}
+                  </p>
+                ) : null}
+                {codeError ? <p className='text-destructive text-xs'>{t('discountInvalid')}</p> : null}
               </div>
-              {applied ? (
-                <p className='text-primary flex items-center gap-1.5 text-xs'>
-                  <CheckCircle2 className='size-3.5' />
-                  {t('discountAppliedPlan', { percent: applied.percent, plan: product.name })}
-                </p>
-              ) : null}
-              {codeError ? <p className='text-destructive text-xs'>{t('discountInvalid')}</p> : null}
-            </div>
+            )}
 
             <dl className='mt-4 space-y-2 border-t pt-4 text-sm'>
               <div className='flex items-center justify-between'>

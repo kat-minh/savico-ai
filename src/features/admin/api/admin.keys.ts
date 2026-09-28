@@ -16,5 +16,8 @@ export const adminKeys = {
   collectionAllLocales: (collection: CmsCollection) => [...adminKeys.collections(), collection] as const,
 
   documents: () => [...adminKeys.all, 'document'] as const,
-  document: (document: CmsDocument, locale: Locale) => [...adminKeys.documents(), document, locale] as const
+  document: (document: CmsDocument, locale: Locale) => [...adminKeys.documents(), document, locale] as const,
+
+  /** Dữ liệu nằm trên BMT API (không phải kho CMS): `bmt(resource, ...params)`. */
+  bmt: (resource: string, ...params: unknown[]) => [...adminKeys.all, 'bmt', resource, ...params] as const
 } as const

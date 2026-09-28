@@ -1,6 +1,7 @@
 'use client'
 
 import { App, Badge, Button, Card, Form, Popconfirm, Skeleton, Space, type FormInstance } from 'antd'
+import { MockApiNotice } from './mock-api-notice'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 
@@ -102,6 +103,7 @@ export function DocumentEditor<K extends CmsDocument>({
       }
     >
       {isLocalizedDocument(document) ? <ContentLocaleBanner /> : null}
+      <MockApiNotice />
       <Card>
         {isPending ? (
           <Skeleton active paragraph={{ rows: 8 }} />

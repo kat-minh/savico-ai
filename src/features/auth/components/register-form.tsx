@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
@@ -15,6 +15,8 @@ import { Input } from '@/shared/components/ui/input'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
+import { useRegister } from '../hooks/use-register'
+import { isApiError } from '@/shared/lib/api'
 import { createRegisterSchema, type RegisterFormValues } from '../schemas/register.schema'
 import { GoogleButton } from './google-button'
 
@@ -26,16 +28,16 @@ interface RegisterFormProps {
 }
 
 /**
- * Account creation form. UI-first: submission is mocked (no backend) — it
- * simulates a request then routes the new user to the login screen (or, when
- * embedded in the auth dialog, switches to the login tab).
+ * Account creation form. On success it routes the new user to the login screen
+ * (or, when embedded in the auth dialog, switches to the login tab).
  */
 export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterFormProps = {}) {
   const t = useTranslations('auth.register')
   const tSocial = useTranslations('auth.social')
   const tv = useTranslations('validation')
   const router = useRouter()
-  const [pending, setPending] = useState(false)
+  const register = useRegister()
+  const pending = register.isPending
 
   const schema = useMemo(
     () =>
@@ -60,18 +62,23 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
     }
   })
 
-  function onSubmit() {
-    setPending(true)
-    // Mock registration latency.
-    setTimeout(() => {
-      setPending(false)
-      toast.success(t('success'))
-      if (embedded && onSwitchToLogin) {
-        onSwitchToLogin()
-      } else {
-        router.push(ROUTES.LOGIN)
+  function onSubmit(values: RegisterFormValues) {
+    register.mutate(
+      { name: values.name, email: values.email, password: values.password },
+      {
+        onSuccess: () => {
+          toast.success(t('success'))
+          if (embedded && onSwitchToLogin) {
+            onSwitchToLogin()
+          } else {
+            router.push(ROUTES.LOGIN)
+          }
+        },
+        onError: (error) => {
+          toast.error(isApiError(error) ? error.message : t('error'))
+        }
       }
-    }, 900)
+    )
   }
 
   const content = (
@@ -146,7 +153,9 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
                   {/* `block`: FormLabel mặc định là `flex`, biến câu chữ và hai đường link thành các ô rời nhau nên
                       "Tôi đồng ý với" bị tách khỏi "Điều khoản…". Để chữ chảy liền như một đoạn văn, hết bề
                       ngang mới xuống dòng. */}
-                  <FormLabel className='block leading-snug font-normal'>
+                  {/* Câu đồng ý dài: ở phone nhỏ giảm cỡ chữ để nằm gọn 1 dòng; `text-balance`
+                      để nếu máy siêu nhỏ có xuống dòng thì chia đều, không ngắt giữa cụm. */}
+                  <FormLabel className='block text-xs leading-snug font-normal text-balance sm:text-sm'>
                     {t.rich('agree', {
                       terms: (chunks) => (
                         <Link
