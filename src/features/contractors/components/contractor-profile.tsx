@@ -1599,6 +1599,16 @@ function ProjectDetailModal({
             </div>
 
             <DialogFooter className='flex-row items-center justify-between gap-3 border-t bg-background px-5 py-3'>
+              {/* Nhận diện nhà thầu ở đầu thanh (bên trái): logo + tên + dòng nhỏ
+                  loại hình (`contractor.kind` = "Nhà thầu xây dựng"). Tên co lại
+                  khi hẹp để không đẩy hai nút ra ngoài. */}
+              <div className='flex min-w-0 items-center gap-2.5'>
+                <ContractorLogo contractor={contractor} className='size-9 shrink-0 rounded-lg text-[10px]' />
+                <div className='min-w-0'>
+                  <p className='truncate text-sm font-semibold'>{contractor.name}</p>
+                  <p className='text-muted-foreground truncate text-xs'>{contractor.kind}</p>
+                </div>
+              </div>
               <div className='flex shrink-0 items-center gap-2'>
                 <DialogClose asChild>
                   <Button type='button' variant='outline' size='sm' className='hover:bg-muted/80'>
@@ -1610,16 +1620,6 @@ function ProjectDetailModal({
                     {footerInviteAction}
                   </div>
                 ) : null}
-              </div>
-              {/* Nhận diện nhà thầu nằm CUỐI thanh (bên phải): logo + tên + dòng
-                  nhỏ loại hình (`contractor.kind` = "Nhà thầu xây dựng"). Tên co
-                  lại khi hẹp để không đẩy hai nút ra ngoài. */}
-              <div className='flex min-w-0 items-center justify-end gap-2.5 text-right'>
-                <div className='min-w-0'>
-                  <p className='truncate text-sm font-semibold'>{contractor.name}</p>
-                  <p className='text-muted-foreground truncate text-xs'>{contractor.kind}</p>
-                </div>
-                <ContractorLogo contractor={contractor} className='size-9 shrink-0 rounded-lg text-[10px]' />
               </div>
             </DialogFooter>
           </>
