@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/shared/components/ui/dialog'
 import { designCreateRoute, ROUTES } from '@/shared/constants/routes'
-import { BUILDING_IMAGE, rememberHandbookQuotaReturn, rememberProjectTemplateSeed } from '@/shared/lib'
+import { BUILDING_IMAGE, rememberHandbookQuotaReturn } from '@/shared/lib'
 import type { HandbookTemplate } from '../types/handbook.types'
 
 interface TemplateLookupExhaustedDialogProps {
@@ -35,23 +35,6 @@ export function TemplateLookupExhaustedDialog({
   const planLabel = planTier === 'advanced' ? 'PLUS' : planTier === 'pro' ? 'PRO' : null
   const image = BUILDING_IMAGE.townhouse
   const title = planLabel ? t('titlePlan', { total, plan: planLabel }) : t('titleFree', { total })
-  const sourceStyle =
-    template.kind === '3d'
-      ? (template.tags.interiorStyle ?? template.tags.architectureStyle)
-      : (template.tags.architectureStyle ?? template.tags.interiorStyle)
-
-  const rememberTemplate = () => {
-    rememberProjectTemplateSeed({
-      templateId: template.id,
-      templateName: template.name,
-      buildingType: template.tags.buildingType,
-      floorCount: template.tags.floorCount,
-      hasAttic: template.tags.hasAttic,
-      style: sourceStyle
-    })
-    onOpenChange(false)
-  }
-
   const openPlans = () => {
     rememberHandbookQuotaReturn(template.id)
     onOpenChange(false)
@@ -157,7 +140,7 @@ export function TemplateLookupExhaustedDialog({
 
               <Link
                 href={designCreateRoute()}
-                onClick={rememberTemplate}
+                onClick={() => onOpenChange(false)}
                 className='inline-flex h-[58px] items-center justify-center gap-2.5 rounded-[14px] border border-white/48 bg-white/[0.025] px-5 text-[15px] font-bold text-white transition-[background-color,border-color] duration-150 hover:border-white/55 hover:bg-white/[0.04] active:bg-white/[0.025] max-[899px]:h-[56px] max-[899px]:rounded-[12px] max-[899px]:bg-transparent max-[899px]:text-[14px]'
               >
                 <FilePlus2 className='size-5 shrink-0 max-[899px]:size-4.5' />
