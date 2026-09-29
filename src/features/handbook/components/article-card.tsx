@@ -28,7 +28,6 @@ export function ArticleCard({ article, className, onOpen }: ArticleCardProps) {
       <Photo className='size-20 shrink-0 rounded-lg' src={article.imageUrl} alt={article.title} sizes='80px' />
       <div className='min-w-0 space-y-1'>
         <h3 className='line-clamp-2 text-sm font-semibold'>{article.title}</h3>
-        <p className='text-muted-foreground line-clamp-2 text-xs leading-relaxed'>{article.excerpt}</p>
         <ReadBadge id={article.id} />
       </div>
 
