@@ -29,8 +29,15 @@ export interface BmtAdminArchitect {
   modifiedOnUtc?: string | null
 }
 
+/**
+ * Chi tiết KTS (admin). `companyName`/`rating`/`reviewCount` chỉ có ở bản chi
+ * tiết (và body ghi), danh sách không trả — tất cả nullable.
+ */
 export interface BmtAdminArchitectDetail extends BmtAdminArchitect {
   categoryIds: string[]
+  companyName?: string | null
+  rating?: number | null
+  reviewCount?: number | null
 }
 
 /** Hồ sơ KTS — PUT thay toàn bộ hồ sơ, tập category và trạng thái Ẩn/Hiện. */
@@ -43,6 +50,12 @@ export interface BmtArchitectWrite {
   introduction: string
   categoryIds: string[]
   isVisible: boolean
+  /** Tên công ty (nullable — tạo mới có thể bỏ trống). */
+  companyName?: string | null
+  /** Điểm đánh giá 0–5, một chữ số thập phân (nullable). */
+  rating?: number | null
+  /** Số lượt đánh giá (nullable). */
+  reviewCount?: number | null
 }
 
 export type ConsultationRequestStatus = 'Pending' | 'Resolved'
@@ -77,6 +90,7 @@ export interface BmtSaved {
 export const CONSULT_LIMITS = {
   fullName: 200,
   title: 200,
+  companyName: 200,
   avatarUrl: 2048,
   introduction: 5000,
   categoryName: 200,

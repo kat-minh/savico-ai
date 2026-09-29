@@ -29,7 +29,7 @@ interface BmtArticleCategory {
 interface BmtArticleSummary {
   id: string
   title: string
-  summary: string
+  readingTimeMinutes?: number | null
   coverImageUrl: string
   firstPublishedAtUtc: string
   categories: BmtArticleCategory[]
@@ -170,11 +170,13 @@ function toArticleSummary(dto: BmtArticleSummary): HandbookArticle {
     // Route `/handbook/bai-viet/[slug]` nhận id trực tiếp làm slug.
     slug: dto.id,
     title: dto.title,
-    excerpt: dto.summary,
+    // BE đã bỏ `summary`; type UI khách bắt buộc `excerpt` nên để chuỗi rỗng.
+    excerpt: '',
     imageUrl: dto.coverImageUrl,
     category: dto.categories[0]?.name ?? '',
     publishedAt: dto.firstPublishedAtUtc,
-    readingMinutes: 3,
+    // Ưu tiên số phút đọc do BE trả; thiếu thì mặc định 3 (danh sách không có nội dung để ước lượng).
+    readingMinutes: dto.readingTimeMinutes ?? 3,
     body: [],
     tags: {}
   }
@@ -183,7 +185,8 @@ function toArticleSummary(dto: BmtArticleSummary): HandbookArticle {
 function toArticleDetail(dto: BmtArticleDetail): HandbookArticle {
   return {
     ...toArticleSummary(dto),
-    readingMinutes: readingMinutesOf(dto.contentHtml ?? ''),
+    // Số phút đọc lấy từ BE; thiếu thì ước lượng theo độ dài nội dung.
+    readingMinutes: dto.readingTimeMinutes ?? readingMinutesOf(dto.contentHtml ?? ''),
     contentHtml: dto.contentHtml,
     body: []
   }

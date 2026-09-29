@@ -9,6 +9,7 @@ import {
   Form,
   Image,
   Input,
+  InputNumber,
   Popconfirm,
   Segmented,
   Space,
@@ -57,7 +58,7 @@ const CATEGORIES_KEY = adminKeys.bmt('news-categories', 'all')
 interface ArticleFormValues {
   expectedVersion?: number
   title?: string
-  summary?: string
+  readingTimeMinutes?: number | null
   coverImageUrl?: string
   contentHtml?: string
   categoryIds?: string[]
@@ -72,7 +73,7 @@ const textOrNull = (value?: string | null) => {
 function toWrite(values: ArticleFormValues): BmtArticleWrite {
   return {
     title: textOrNull(values.title),
-    summary: textOrNull(values.summary),
+    readingTimeMinutes: values.readingTimeMinutes ?? null,
     coverImageUrl: textOrNull(values.coverImageUrl),
     contentHtml: textOrNull(values.contentHtml),
     categoryIds: values.categoryIds ?? []
@@ -80,10 +81,9 @@ function toWrite(values: ArticleFormValues): BmtArticleWrite {
 }
 
 /** Các thành phần còn thiếu để công bố mà danh sách đã biết (nội dung chỉ backend kiểm). */
-function missingForPublish(item: BmtAdminArticleItem): ('title' | 'summary' | 'cover' | 'category')[] {
-  const missing: ('title' | 'summary' | 'cover' | 'category')[] = []
+function missingForPublish(item: BmtAdminArticleItem): ('title' | 'cover' | 'category')[] {
+  const missing: ('title' | 'cover' | 'category')[] = []
   if (!item.title?.trim()) missing.push('title')
-  if (!item.summary?.trim()) missing.push('summary')
   if (!item.coverImageUrl) missing.push('cover')
   if (!item.categoryIds.length) missing.push('category')
   return missing
@@ -148,14 +148,15 @@ export function ArticleManager() {
                   <Text strong style={{ display: 'block' }}>
                     {record.title || <Text type='secondary'>{tn('untitled')}</Text>}
                   </Text>
-                  {record.summary ? (
-                    <Text type='secondary' style={{ fontSize: 12 }} ellipsis={{ tooltip: record.summary }}>
-                      {record.summary}
-                    </Text>
-                  ) : null}
                 </div>
               </Space>
             )
+          },
+          {
+            title: tn('readingTimeMinutes'),
+            dataIndex: 'readingTimeMinutes',
+            width: 120,
+            render: (value?: number | null) => (value == null ? <Text type='secondary'>-</Text> : <Text>{value}</Text>)
           },
           {
             title: tn('categories'),
@@ -191,14 +192,20 @@ export function ArticleManager() {
             render: (value: string) => date(value)
           }
         ]}
-        createValues={() => ({ title: '', summary: '', coverImageUrl: '', contentHtml: '', categoryIds: [] })}
+        createValues={() => ({
+          title: '',
+          readingTimeMinutes: null,
+          coverImageUrl: '',
+          contentHtml: '',
+          categoryIds: []
+        })}
         onCreate={(values) => newsAdminApi.createArticle(toWrite(values as ArticleFormValues))}
         toFormValues={async (item) => {
           const detail = await newsAdminApi.getArticle(item.id)
           return {
             expectedVersion: detail.version,
             title: detail.title ?? '',
-            summary: detail.summary ?? '',
+            readingTimeMinutes: detail.readingTimeMinutes ?? null,
             coverImageUrl: detail.coverImageUrl ?? '',
             contentHtml: detail.contentHtml ?? '',
             categoryIds: detail.categoryIds
@@ -258,15 +265,8 @@ function ArticleFields({
       >
         <Input maxLength={NEWS_LIMITS.title} showCount />
       </Form.Item>
-      <Form.Item
-        name='summary'
-        label={tn('summary')}
-        rules={[
-          ...required,
-          { max: NEWS_LIMITS.summary, message: t('fields.maxLength', { max: NEWS_LIMITS.summary }) }
-        ]}
-      >
-        <Input.TextArea autoSize={{ minRows: 2, maxRows: 5 }} maxLength={NEWS_LIMITS.summary} showCount />
+      <Form.Item name='readingTimeMinutes' label={tn('readingTimeMinutes')}>
+        <InputNumber min={0} max={NEWS_LIMITS.readingTimeMinutesMax} precision={0} style={{ width: '100%' }} />
       </Form.Item>
       <Form.Item
         name='categoryIds'
@@ -397,7 +397,11 @@ function ArticleView({
         bordered
         items={[
           { key: 'title', label: tn('title'), children: data.title || '-' },
-          { key: 'summary', label: tn('summary'), children: data.summary || '-' },
+          {
+            key: 'readingTimeMinutes',
+            label: tn('readingTimeMinutes'),
+            children: data.readingTimeMinutes ?? '-'
+          },
           {
             key: 'categories',
             label: tn('categories'),

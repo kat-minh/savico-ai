@@ -12,7 +12,7 @@ export interface BmtAdminArticleItem {
   id: string
   state: NewsArticleState
   title?: string | null
-  summary?: string | null
+  readingTimeMinutes?: number | null
   coverImageUrl?: string | null
   firstPublishedAtUtc?: string | null
   version: number
@@ -28,7 +28,7 @@ export interface BmtAdminArticleDetail extends BmtAdminArticleItem {
 /** Nội dung ghi của bài. Trường `null` nghĩa là xóa giá trị (PUT thay toàn bộ). */
 export interface BmtArticleWrite {
   title: string | null
-  summary: string | null
+  readingTimeMinutes: number | null
   contentHtml: string | null
   coverImageUrl: string | null
   categoryIds: string[]
@@ -61,7 +61,8 @@ export interface BmtNewsCategoryPosition {
 /** Giới hạn độ dài theo BR-NEWS-001 khoản 9 và BR-NEWS-002 khoản 1. */
 export const NEWS_LIMITS = {
   title: 200,
-  summary: 500,
+  /** Số phút đọc: số nguyên không âm, trần hợp lý cho ô nhập. */
+  readingTimeMinutesMax: 999,
   contentHtml: 200_000,
   categoryName: 200
 } as const

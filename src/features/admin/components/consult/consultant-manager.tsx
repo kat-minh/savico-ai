@@ -55,9 +55,13 @@ interface ArchitectFormValues {
   introduction?: string
   categoryIds?: string[]
   isVisible?: boolean
+  companyName?: string
+  rating?: number | null
+  reviewCount?: number | null
 }
 
 function toWrite(values: ArchitectFormValues): BmtArchitectWrite {
+  const companyName = (values.companyName ?? '').trim()
   return {
     fullName: (values.fullName ?? '').trim(),
     title: (values.title ?? '').trim(),
@@ -66,7 +70,11 @@ function toWrite(values: ArchitectFormValues): BmtArchitectWrite {
     projectCount: values.projectCount ?? 0,
     introduction: (values.introduction ?? '').trim(),
     categoryIds: values.categoryIds ?? [],
-    isVisible: values.isVisible ?? false
+    isVisible: values.isVisible ?? false,
+    // Ba trường tùy chọn (nullable): để trống thì gửi null.
+    companyName: companyName || null,
+    rating: values.rating ?? null,
+    reviewCount: values.reviewCount ?? null
   }
 }
 
@@ -189,7 +197,10 @@ export function ConsultantManager() {
             projectCount: detail.projectCount,
             introduction: detail.introduction,
             categoryIds: detail.categoryIds,
-            isVisible: detail.isVisible
+            isVisible: detail.isVisible,
+            companyName: detail.companyName ?? undefined,
+            rating: detail.rating ?? null,
+            reviewCount: detail.reviewCount ?? null
           }
         }}
         onUpdate={(values, item) => {
@@ -200,36 +211,7 @@ export function ConsultantManager() {
           })
         }}
         rowActions={(item, ctx) => <VisibilityToggle item={item} ctx={ctx} />}
-        renderView={(item) => (
-          <Descriptions
-            size='small'
-            column={1}
-            bordered
-            items={[
-              {
-                key: 'avatar',
-                label: ta('avatar'),
-                children: <Avatar src={item.avatarUrl} size={64} />
-              },
-              { key: 'name', label: ta('name'), children: item.fullName },
-              { key: 'title', label: ta('title'), children: item.title },
-              {
-                key: 'categories',
-                label: ta('categories'),
-                children: item.categories.map((category) => <Tag key={category.id}>{category.name}</Tag>)
-              },
-              { key: 'years', label: ta('experience'), children: ta('years', { years: item.yearsExperience }) },
-              { key: 'projects', label: ta('projectCount'), children: item.projectCount },
-              {
-                key: 'intro',
-                label: ta('intro'),
-                children: <Paragraph style={{ whiteSpace: 'pre-line', margin: 0 }}>{item.introduction}</Paragraph>
-              },
-              { key: 'status', label: ta('status'), children: statusLabel(item.isVisible) },
-              { key: 'created', label: ta('createdAt'), children: formatDisplayDate(item.createdOnUtc, locale) }
-            ]}
-          />
-        )}
+        renderView={(item) => <ArchitectView item={item} locale={locale} />}
         renderForm={(form) => (
           <>
             <Form.Item name='expectedVersion' hidden>
@@ -265,6 +247,9 @@ export function ConsultantManager() {
                 </Form.Item>
               </Col>
             </Row>
+            <Form.Item name='companyName' label={ta('companyName')}>
+              <Input maxLength={CONSULT_LIMITS.companyName} />
+            </Form.Item>
             <Form.Item
               name='categoryIds'
               label={ta('categories')}
@@ -312,6 +297,18 @@ export function ConsultantManager() {
                 </Form.Item>
               </Col>
             </Row>
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <Form.Item name='rating' label={ta('rating')}>
+                  <InputNumber min={0} max={5} step={0.1} precision={1} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item name='reviewCount' label={ta('reviewCount')}>
+                  <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
             <Form.Item
               name='introduction'
               label={ta('intro')}
@@ -340,6 +337,48 @@ export function ConsultantManager() {
 }
 
 /**
+ * Ngăn kéo "Xem chi tiết". Đọc bản chi tiết để có thêm `companyName`, `rating`,
+ * `reviewCount` (danh sách không trả), dùng dòng danh sách làm nền khi đang tải.
+ */
+function ArchitectView({ item, locale }: { item: BmtAdminArchitect; locale: Locale }) {
+  const ta = useTranslations('admin.architects')
+  const { data } = useQuery({
+    queryKey: adminKeys.bmt(RESOURCE, 'detail', item.id),
+    queryFn: () => consultAdminApi.getArchitect(item.id)
+  })
+  const dash = '—'
+  return (
+    <Descriptions
+      size='small'
+      column={1}
+      bordered
+      items={[
+        { key: 'avatar', label: ta('avatar'), children: <Avatar src={item.avatarUrl} size={64} /> },
+        { key: 'name', label: ta('name'), children: item.fullName },
+        { key: 'title', label: ta('title'), children: item.title },
+        { key: 'company', label: ta('companyName'), children: data?.companyName?.trim() || dash },
+        {
+          key: 'categories',
+          label: ta('categories'),
+          children: item.categories.map((category) => <Tag key={category.id}>{category.name}</Tag>)
+        },
+        { key: 'years', label: ta('experience'), children: ta('years', { years: item.yearsExperience }) },
+        { key: 'projects', label: ta('projectCount'), children: item.projectCount },
+        { key: 'rating', label: ta('rating'), children: data?.rating ?? dash },
+        { key: 'reviewCount', label: ta('reviewCount'), children: data?.reviewCount ?? dash },
+        {
+          key: 'intro',
+          label: ta('intro'),
+          children: <Paragraph style={{ whiteSpace: 'pre-line', margin: 0 }}>{item.introduction}</Paragraph>
+        },
+        { key: 'status', label: ta('status'), children: item.isVisible ? ta('shown') : ta('hidden') },
+        { key: 'created', label: ta('createdAt'), children: formatDisplayDate(item.createdOnUtc, locale) }
+      ]}
+    />
+  )
+}
+
+/**
  * Ẩn / Hiện nhanh. API chỉ có PUT thay toàn bộ hồ sơ, nên đọc bản chi tiết (lấy
  * `version` và tập category) rồi gửi lại nguyên hồ sơ với `isVisible` đảo.
  */
@@ -362,6 +401,10 @@ function VisibilityToggle({ item, ctx }: { item: BmtAdminArchitect; ctx: ApiRowC
         introduction: detail.introduction,
         categoryIds: detail.categoryIds,
         isVisible: !detail.isVisible,
+        // PUT thay toàn bộ hồ sơ — giữ nguyên ba trường tùy chọn.
+        companyName: detail.companyName ?? null,
+        rating: detail.rating ?? null,
+        reviewCount: detail.reviewCount ?? null,
         expectedVersion: detail.version
       })
       await ctx.refresh()

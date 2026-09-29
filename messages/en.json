@@ -4117,7 +4117,7 @@
       "effectiveNote": "People holding this role get the new permissions within {minutes} minutes at the latest, when their session is reissued. To apply it now, force them to log out on the Staff accounts screen."
     },
     "newsArticles": {
-      "description": "Handbook news articles. New articles always start as Draft and can be saved incomplete; publishing requires a title, cover image, summary, content and at least one category. Deleting is permanent.",
+      "description": "Handbook news articles. New articles always start as Draft and can be saved incomplete; publishing requires a title, cover image, content and at least one category. Deleting is permanent.",
       "manageCategories": "Manage categories",
       "states": {
         "all": "All",
@@ -4127,7 +4127,7 @@
       },
       "title": "Title",
       "untitled": "(Untitled)",
-      "summary": "Summary",
+      "readingTimeMinutes": "Reading time (min)",
       "cover": "Cover image",
       "categories": "Categories",
       "categoriesHint": "Pick one or more categories at any level — picking a child does not require its parent.",
@@ -4140,7 +4140,7 @@
       "createdAt": "Created",
       "modifiedAt": "Last edited",
       "draftHint": "Drafts can be saved incomplete. Readers cannot see the article until you press Publish in the table.",
-      "publishedEditHint": "This article is live: saving shows the new content to readers immediately, so the edit must keep a title, cover image, summary, content and at least one category.",
+      "publishedEditHint": "This article is live: saving shows the new content to readers immediately, so the edit must keep a title, cover image, content and at least one category.",
       "publish": "Publish",
       "publishTitle": "Publish “{name}”?",
       "publishBody": "The article appears on the News page right away. The first-published date is kept if it was published before.",
@@ -4154,7 +4154,6 @@
       "missing": "Cannot publish yet — missing: {fields}.",
       "parts": {
         "title": "title",
-        "summary": "summary",
         "cover": "cover image",
         "category": "category"
       },
@@ -4218,7 +4217,10 @@
       "statusRequired": "Choose Shown or Hidden for this profile.",
       "intro": "Introduction",
       "createdAt": "Created",
-      "hideWarning": "Customers will not be able to send new requests to this architect; existing requests are kept."
+      "hideWarning": "Customers will not be able to send new requests to this architect; existing requests are kept.",
+      "companyName": "Company",
+      "rating": "Rating",
+      "reviewCount": "Review count"
     },
     "architectCategories": {
       "title": "Expertise categories",

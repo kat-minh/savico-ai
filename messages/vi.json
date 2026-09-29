@@ -4117,7 +4117,7 @@
       "effectiveNote": "Người đang giữ vai trò nhận bộ quyền mới chậm nhất sau {minutes} phút, khi phiên đăng nhập của họ được cấp lại. Muốn có hiệu lực ngay, buộc họ đăng xuất ở màn Tài khoản nhân viên."
     },
     "newsArticles": {
-      "description": "Bài tin tức của Cẩm nang. Bài mới luôn là Nháp và được lưu dù thiếu thông tin; chỉ công bố được khi đủ tiêu đề, ảnh đại diện, mô tả ngắn, nội dung và ít nhất một danh mục. Xóa là xóa hẳn, không khôi phục.",
+      "description": "Bài tin tức của Cẩm nang. Bài mới luôn là Nháp và được lưu dù thiếu thông tin; chỉ công bố được khi đủ tiêu đề, ảnh đại diện, nội dung và ít nhất một danh mục. Xóa là xóa hẳn, không khôi phục.",
       "manageCategories": "Quản lý danh mục",
       "states": {
         "all": "Tất cả",
@@ -4127,7 +4127,7 @@
       },
       "title": "Tiêu đề",
       "untitled": "(Chưa có tiêu đề)",
-      "summary": "Mô tả ngắn",
+      "readingTimeMinutes": "Số phút đọc",
       "cover": "Ảnh đại diện",
       "categories": "Danh mục",
       "categoriesHint": "Chọn một hoặc nhiều danh mục ở bất kỳ cấp nào — chọn danh mục con không cần chọn thêm cha.",
@@ -4140,7 +4140,7 @@
       "createdAt": "Tạo lúc",
       "modifiedAt": "Sửa lần cuối",
       "draftHint": "Lưu nháp được dù còn thiếu thông tin. Khách chưa đọc được bài cho tới khi bấm Công bố ở bảng.",
-      "publishedEditHint": "Bài đang công bố: lưu là khách thấy ngay nội dung mới, nên bản sửa phải đủ tiêu đề, ảnh đại diện, mô tả ngắn, nội dung và ít nhất một danh mục.",
+      "publishedEditHint": "Bài đang công bố: lưu là khách thấy ngay nội dung mới, nên bản sửa phải đủ tiêu đề, ảnh đại diện, nội dung và ít nhất một danh mục.",
       "publish": "Công bố",
       "publishTitle": "Công bố “{name}”?",
       "publishBody": "Bài hiện ngay trên trang Tin tức. Ngày công bố lần đầu được giữ nguyên nếu bài từng công bố.",
@@ -4154,7 +4154,6 @@
       "missing": "Chưa công bố được — còn thiếu: {fields}.",
       "parts": {
         "title": "tiêu đề",
-        "summary": "mô tả ngắn",
         "cover": "ảnh đại diện",
         "category": "danh mục"
       },
@@ -4218,7 +4217,10 @@
       "statusRequired": "Chọn Hiện hoặc Ẩn cho hồ sơ.",
       "intro": "Giới thiệu",
       "createdAt": "Tạo lúc",
-      "hideWarning": "Khách sẽ không gửi được yêu cầu mới cho KTS này; các yêu cầu đã gửi vẫn giữ để xử lý."
+      "hideWarning": "Khách sẽ không gửi được yêu cầu mới cho KTS này; các yêu cầu đã gửi vẫn giữ để xử lý.",
+      "companyName": "Công ty",
+      "rating": "Điểm đánh giá",
+      "reviewCount": "Số lượt đánh giá"
     },
     "architectCategories": {
       "title": "Danh mục chuyên môn",
