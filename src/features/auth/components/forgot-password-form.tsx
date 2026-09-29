@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
@@ -13,14 +13,13 @@ import { isApiError } from '@/shared/lib/api'
 import { PasswordInput } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
 import {
   createForgotPasswordSchema,
-  createResetCodeSchema,
   createResetPasswordSchema,
   type ForgotPasswordFormValues,
-  type ResetCodeFormValues,
   type ResetPasswordFormValues
 } from '../schemas/forgot-password.schema'
 import { authApi } from '../api/auth.api'
@@ -38,9 +37,11 @@ export function ForgotPasswordForm() {
   const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
   const [pending, setPending] = useState(false)
+  // Ô mã dùng state thường (không qua RHF Controller) để chắc chắn nhập được.
+  const [code, setCode] = useState('')
+  const [codeError, setCodeError] = useState<string | null>(null)
 
   const emailSchema = useMemo(() => createForgotPasswordSchema({ required: tv('required'), email: tv('email') }), [tv])
-  const codeSchema = useMemo(() => createResetCodeSchema({ required: tv('required'), code: t('codeInvalid') }), [tv, t])
   const passwordSchema = useMemo(
     () =>
       createResetPasswordSchema({
@@ -54,10 +55,6 @@ export function ForgotPasswordForm() {
   const emailForm = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: '' }
-  })
-  const codeForm = useForm<ResetCodeFormValues>({
-    resolver: zodResolver(codeSchema),
-    defaultValues: { code: '' }
   })
   const passwordForm = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -90,10 +87,17 @@ export function ForgotPasswordForm() {
     }
   }
 
-  async function onSubmitCode(values: ResetCodeFormValues) {
+  async function onSubmitCode(event: FormEvent) {
+    event.preventDefault()
+    const trimmed = code.trim()
+    if (!/^\d+$/.test(trimmed)) {
+      setCodeError(trimmed ? t('codeInvalid') : tv('required'))
+      return
+    }
+    setCodeError(null)
     setPending(true)
     try {
-      await authApi.verifyResetCode(email, Number(values.code))
+      await authApi.verifyResetCode(email, Number(trimmed))
       setStep('password')
     } catch (error) {
       showError(error, t('codeError'))
@@ -165,37 +169,37 @@ export function ForgotPasswordForm() {
           <CardDescription>{t('codeSubtitle', { email })}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...codeForm}>
-            <form onSubmit={codeForm.handleSubmit(onSubmitCode)} className='space-y-4'>
-              <FormField
-                control={codeForm.control}
-                name='code'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('codeLabel')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        inputMode='numeric'
-                        autoComplete='one-time-code'
-                        placeholder={t('codePlaceholder')}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <form onSubmit={onSubmitCode} className='space-y-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='reset-code'>{t('codeLabel')}</Label>
+              <Input
+                id='reset-code'
+                inputMode='numeric'
+                autoComplete='off'
+                placeholder={t('codePlaceholder')}
+                value={code}
+                onChange={(event) => {
+                  setCode(event.target.value)
+                  if (codeError) setCodeError(null)
+                }}
+                aria-invalid={codeError ? true : undefined}
               />
-              <Button type='submit' className='w-full' disabled={pending}>
-                {pending ? <Loader2 className='size-4 animate-spin' /> : null}
-                {t('codeSubmit')}
-              </Button>
-            </form>
-          </Form>
+              {codeError ? <p className='text-destructive text-sm font-medium'>{codeError}</p> : null}
+            </div>
+            <Button type='submit' className='w-full' disabled={pending}>
+              {pending ? <Loader2 className='size-4 animate-spin' /> : null}
+              {t('codeSubmit')}
+            </Button>
+          </form>
           <div className='mt-4 flex items-center justify-between text-sm'>
             <button
               type='button'
               className='text-muted-foreground hover:text-foreground'
-              onClick={() => setStep('email')}
+              onClick={() => {
+                setCode('')
+                setCodeError(null)
+                setStep('email')
+              }}
               disabled={pending}
             >
               {t('changeEmail')}
