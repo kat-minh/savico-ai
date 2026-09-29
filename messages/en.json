@@ -4118,6 +4118,7 @@
     },
     "newsArticles": {
       "description": "Handbook news articles. New articles always start as Draft and can be saved incomplete; publishing requires a title, cover image, summary, content and at least one category. Deleting is permanent.",
+      "manageCategories": "Manage categories",
       "states": {
         "all": "All",
         "Draft": "Draft",

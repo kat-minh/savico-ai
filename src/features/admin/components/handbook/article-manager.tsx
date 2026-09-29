@@ -1,6 +1,6 @@
 'use client'
 
-import { DeleteOutlined, EyeInvisibleOutlined, SendOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EyeInvisibleOutlined, FolderOpenOutlined, SendOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import {
   App,
@@ -34,6 +34,7 @@ import {
   type NewsArticleState
 } from '../../api/bmt/news.api'
 import { buildCategoryTree, categoryPath } from '../../services/news-category.service'
+import { ArticleCategoryDrawer } from './article-category-drawer'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { ImageUrlField } from '../common/field-kit'
 import { StatusTag, type StatusTone } from '../common/status-tag'
@@ -102,6 +103,7 @@ export function ArticleManager() {
   const tn = useTranslations('admin.newsArticles')
   const locale = useLocale() as Locale
   const [state, setState] = useState<StateFilter>('all')
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
   const { data: categories = [] } = useQuery({
     queryKey: CATEGORIES_KEY,
     queryFn: newsAdminApi.listAllCategories
@@ -111,104 +113,112 @@ export function ArticleManager() {
   const date = (value?: string | null) => (value ? formatDisplayDate(value, locale) : '-')
 
   return (
-    <ApiResourceManager<BmtAdminArticleItem>
-      title={t('nav.articles')}
-      description={tn('description')}
-      queryKey={adminKeys.bmt(RESOURCE, state)}
-      fetchPage={(params) => newsAdminApi.listArticles({ ...params, state: state === 'all' ? undefined : state })}
-      rowKey={(item) => item.id}
-      searchable
-      drawerWidth={820}
-      banner={
-        <Segmented<StateFilter>
-          value={state}
-          onChange={setState}
-          options={(['all', 'Draft', 'Published', 'Hidden'] as const).map((value) => ({
-            value,
-            label: value === 'all' ? tn('states.all') : stateLabel(value)
-          }))}
-        />
-      }
-      columns={[
-        {
-          title: tn('title'),
-          key: 'title',
-          render: (_, record) => (
-            <Space size={10}>
-              <TableThumb src={record.coverImageUrl} />
-              <div style={{ minWidth: 0, maxWidth: 420 }}>
-                <Text strong style={{ display: 'block' }}>
-                  {record.title || <Text type='secondary'>{tn('untitled')}</Text>}
-                </Text>
-                {record.summary ? (
-                  <Text type='secondary' style={{ fontSize: 12 }} ellipsis={{ tooltip: record.summary }}>
-                    {record.summary}
+    <>
+      <ApiResourceManager<BmtAdminArticleItem>
+        title={t('nav.articles')}
+        description={tn('description')}
+        queryKey={adminKeys.bmt(RESOURCE, state)}
+        fetchPage={(params) => newsAdminApi.listArticles({ ...params, state: state === 'all' ? undefined : state })}
+        rowKey={(item) => item.id}
+        searchable
+        drawerWidth={820}
+        extraActions={
+          <Button icon={<FolderOpenOutlined />} onClick={() => setCategoriesOpen(true)}>
+            {tn('manageCategories')}
+          </Button>
+        }
+        banner={
+          <Segmented<StateFilter>
+            value={state}
+            onChange={setState}
+            options={(['all', 'Draft', 'Published', 'Hidden'] as const).map((value) => ({
+              value,
+              label: value === 'all' ? tn('states.all') : stateLabel(value)
+            }))}
+          />
+        }
+        columns={[
+          {
+            title: tn('title'),
+            key: 'title',
+            render: (_, record) => (
+              <Space size={10}>
+                <TableThumb src={record.coverImageUrl} />
+                <div style={{ minWidth: 0, maxWidth: 420 }}>
+                  <Text strong style={{ display: 'block' }}>
+                    {record.title || <Text type='secondary'>{tn('untitled')}</Text>}
                   </Text>
-                ) : null}
-              </div>
-            </Space>
-          )
-        },
-        {
-          title: tn('categories'),
-          key: 'categories',
-          width: 240,
-          render: (_, record) =>
-            record.categoryIds.length ? (
-              <Space size={4} wrap>
-                {record.categoryIds.map((id) => (
-                  <Tag key={id}>{categoryPath(categories, id)}</Tag>
-                ))}
+                  {record.summary ? (
+                    <Text type='secondary' style={{ fontSize: 12 }} ellipsis={{ tooltip: record.summary }}>
+                      {record.summary}
+                    </Text>
+                  ) : null}
+                </div>
               </Space>
-            ) : (
-              <Text type='secondary'>-</Text>
             )
-        },
-        {
-          title: tn('state'),
-          dataIndex: 'state',
-          width: 130,
-          render: (value: NewsArticleState) => <StatusTag tone={STATE_TONE[value]}>{stateLabel(value)}</StatusTag>
-        },
-        {
-          title: tn('firstPublishedAt'),
-          dataIndex: 'firstPublishedAtUtc',
-          width: 140,
-          render: (value?: string | null) => date(value)
-        },
-        {
-          title: tn('modifiedAt'),
-          dataIndex: 'modifiedAtUtc',
-          width: 140,
-          render: (value: string) => date(value)
-        }
-      ]}
-      createValues={() => ({ title: '', summary: '', coverImageUrl: '', contentHtml: '', categoryIds: [] })}
-      onCreate={(values) => newsAdminApi.createArticle(toWrite(values as ArticleFormValues))}
-      toFormValues={async (item) => {
-        const detail = await newsAdminApi.getArticle(item.id)
-        return {
-          expectedVersion: detail.version,
-          title: detail.title ?? '',
-          summary: detail.summary ?? '',
-          coverImageUrl: detail.coverImageUrl ?? '',
-          contentHtml: detail.contentHtml ?? '',
-          categoryIds: detail.categoryIds
-        }
-      }}
-      onUpdate={(values, item) => {
-        const form = values as ArticleFormValues
-        return newsAdminApi.updateArticle(item.id, {
-          ...toWrite(form),
-          expectedVersion: form.expectedVersion ?? item.version
-        })
-      }}
-      renderForm={(form, { item }) => (
-        <ArticleFields form={form} categories={categories} published={item?.state === 'Published'} />
-      )}
-      rowActions={(item, ctx) => <ArticleActions item={item} ctx={ctx} />}
-      renderView={(item) => <ArticleView id={item.id} categories={categories} />}
-    />
+          },
+          {
+            title: tn('categories'),
+            key: 'categories',
+            width: 240,
+            render: (_, record) =>
+              record.categoryIds.length ? (
+                <Space size={4} wrap>
+                  {record.categoryIds.map((id) => (
+                    <Tag key={id}>{categoryPath(categories, id)}</Tag>
+                  ))}
+                </Space>
+              ) : (
+                <Text type='secondary'>-</Text>
+              )
+          },
+          {
+            title: tn('state'),
+            dataIndex: 'state',
+            width: 130,
+            render: (value: NewsArticleState) => <StatusTag tone={STATE_TONE[value]}>{stateLabel(value)}</StatusTag>
+          },
+          {
+            title: tn('firstPublishedAt'),
+            dataIndex: 'firstPublishedAtUtc',
+            width: 140,
+            render: (value?: string | null) => date(value)
+          },
+          {
+            title: tn('modifiedAt'),
+            dataIndex: 'modifiedAtUtc',
+            width: 140,
+            render: (value: string) => date(value)
+          }
+        ]}
+        createValues={() => ({ title: '', summary: '', coverImageUrl: '', contentHtml: '', categoryIds: [] })}
+        onCreate={(values) => newsAdminApi.createArticle(toWrite(values as ArticleFormValues))}
+        toFormValues={async (item) => {
+          const detail = await newsAdminApi.getArticle(item.id)
+          return {
+            expectedVersion: detail.version,
+            title: detail.title ?? '',
+            summary: detail.summary ?? '',
+            coverImageUrl: detail.coverImageUrl ?? '',
+            contentHtml: detail.contentHtml ?? '',
+            categoryIds: detail.categoryIds
+          }
+        }}
+        onUpdate={(values, item) => {
+          const form = values as ArticleFormValues
+          return newsAdminApi.updateArticle(item.id, {
+            ...toWrite(form),
+            expectedVersion: form.expectedVersion ?? item.version
+          })
+        }}
+        renderForm={(form, { item }) => (
+          <ArticleFields form={form} categories={categories} published={item?.state === 'Published'} />
+        )}
+        rowActions={(item, ctx) => <ArticleActions item={item} ctx={ctx} />}
+        renderView={(item) => <ArticleView id={item.id} categories={categories} />}
+      />
+      <ArticleCategoryDrawer open={categoriesOpen} onClose={() => setCategoriesOpen(false)} />
+    </>
   )
 }
 

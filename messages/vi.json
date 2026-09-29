@@ -4118,6 +4118,7 @@
     },
     "newsArticles": {
       "description": "Bài tin tức của Cẩm nang. Bài mới luôn là Nháp và được lưu dù thiếu thông tin; chỉ công bố được khi đủ tiêu đề, ảnh đại diện, mô tả ngắn, nội dung và ít nhất một danh mục. Xóa là xóa hẳn, không khôi phục.",
+      "manageCategories": "Quản lý danh mục",
       "states": {
         "all": "Tất cả",
         "Draft": "Nháp",
