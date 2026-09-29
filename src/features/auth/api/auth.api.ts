@@ -121,6 +121,28 @@ const AuthApi = {
       newPassword: payload.newPassword
     }),
 
+  /**
+   * Luồng QUÊN MẬT KHẨU (STORY-AUTH-001 ALT-02, BR-AUTH-002) — 3 bước:
+   *
+   * 1. `requestPasswordReset(email)` → BE gửi mã quên mật khẩu qua email.
+   * 2. `verifyResetCode(email, code)` → mã đúng + tài khoản khách → BE cấp
+   *    **phiên quên mật khẩu** qua cookie (như web). Phiên này chỉ dùng để đặt
+   *    mật khẩu mới, bị từ chối ở các chức năng thường — nên KHÔNG đánh dấu
+   *    session marker (tránh `getCurrentUser` gọi `/me`).
+   * 3. `resetPassword(newPassword)` → `change_password` với `currentPassword=null`
+   *    bằng phiên vừa cấp. BE cắt MỌI phiên (kể cả phiên quên MK), nên xóa marker
+   *    và điều hướng người dùng đăng nhập lại.
+   */
+  requestPasswordReset: (email: string): Promise<void> => http.post<void>(AUTH_ENDPOINTS.FORGOT_PASSWORD, { email }),
+
+  verifyResetCode: (email: string, code: number): Promise<void> =>
+    http.post<void>(AUTH_ENDPOINTS.VERIFY_RESET_CODE, { email, code }),
+
+  resetPassword: async (newPassword: string): Promise<void> => {
+    await http.post<void>(AUTH_ENDPOINTS.CHANGE_PASSWORD, { currentPassword: null, newPassword })
+    clearSessionMarker()
+  },
+
   /** Đăng nhập lại ngay sau khi đổi mật khẩu, trả hồ sơ đã cập nhật. */
   relogin: async (email: string, password: string): Promise<LoginResponse> => {
     await http.post(AUTH_ENDPOINTS.LOGIN, { email, password })

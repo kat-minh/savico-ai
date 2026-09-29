@@ -55,6 +55,15 @@ interface BmtPaymentOrderDetail {
   beneficiary: BmtPaymentBeneficiary
 }
 
+/** Response của `POST /payment-orders/{id}/cancel` — gọn, không đủ dựng `Order`. */
+interface BmtPaymentOrderCanceled {
+  orderId: string
+  state: BmtPaymentOrderDetail['state']
+  version: number
+  canceledAtUtc?: string | null
+  wasAlreadyApplied: boolean
+}
+
 /** Trạng thái đơn BMT → trạng thái màn checkout. */
 function mapState(state: BmtPaymentOrderDetail['state']): OrderStatus {
   switch (state) {
@@ -140,7 +149,15 @@ export const bmtCheckoutApi = {
 
   cancelOrder: async (orderId: string): Promise<Order> => {
     if (!isApiOrderId(orderId)) return mockCheckoutApi.cancelOrder(orderId)
-    const detail = await http.post<BmtPaymentOrderDetail>(`/payment-orders/${orderId}/cancel`)
+    // `POST .../cancel` yêu cầu header `Idempotency-Key` (bắt buộc) và chỉ trả
+    // `PaymentOrderCanceled` (orderId/state/version/…), KHÔNG đủ field dựng
+    // `Order`. Vì vậy hủy xong đọc lại đơn đầy đủ như `regenerateQr`.
+    await http.post<BmtPaymentOrderCanceled>(
+      `/payment-orders/${orderId}/cancel`,
+      {},
+      { headers: { 'Idempotency-Key': crypto.randomUUID() } }
+    )
+    const detail = await http.get<BmtPaymentOrderDetail>(`/payment-orders/${orderId}`)
     return mapOrder(detail)
   }
 }

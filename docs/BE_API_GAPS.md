@@ -1,6 +1,6 @@
 # BuildX ↔ BMT API: phần đã nối và phần cần BE bổ sung
 
-Cập nhật: 26/09/2026. Đối chiếu với Swagger `https://bmt-api.vnzdna.com/swagger` và spec `TaskCoper/bmt-documentation`.
+Cập nhật: 29/09/2026 (đối soát lại toàn bộ — xem **mục 7**). Đối chiếu với Swagger `https://bmt-api.vnzdna.com/swagger` và spec `TaskCoper/bmt-documentation`.
 
 ## Tóm tắt
 
@@ -451,3 +451,35 @@ Không có nút xác nhận thanh toán ở đâu cả. Nội dung chuyển kho�
 - Thao tác vòng đời dùng `designPeriod.version` / `supervisionGrant.version` từ chi tiết gói đã cấp; mỗi lần bấm sinh `Idempotency-Key` mới. Quyền (`package.cancel`, `supervision.complete`, `supervision.unassign`) và hạn gán do BE kiểm — FE chỉ ẩn/hiện nút theo trạng thái. Nút "Gỡ khỏi công trình" vẫn hiện khi đã quá hạn gán; BE sẽ trả 409 `AssignmentDeadlinePassed`.
 - Chưa có tài khoản test nên các endpoint admin chưa gọi thử được; `GET /plans` công khai gọi được, trả `items: []` (DB rỗng).
 - Nhãn menu `admin.nav.planTable` đổi thành "Gói thiết kế & giám sát" / "Design & supervision plans" vì màn giờ quản cả hai loại. Khóa i18n mới nằm ở `admin.bmtPlans`, `admin.bmtCommerce`; các khóa cũ `admin.plans`, `admin.orders`, `admin.transactions`… giữ nguyên (còn màn khác dùng).
+
+## 7. Đối soát lại Swagger — 29/09/2026
+
+Rà soát toàn bộ endpoint đã nối so với Swagger live (133 path / 160 operation) và `../bmt-documentation`. Kết quả: các endpoint **đang gọi** hầu hết khớp path/method/field/luồng (cụm Catalog+Consult, Library+News, RBAC core, Plans, tra cứu Commerce **sạch**). BE có thêm vài field mới không phá vỡ (`slug` ở `/users/me`, `fulfillment` ở payment-order). Mối lo "BE đổi model gói sang `presentation/tier`" **không đúng** — model gói đã phẳng và code khớp. Các điểm cần xử lý:
+
+### 7.1 Bug đã sửa (FE)
+
+- **`checkout.bmt.ts` `cancelOrder`**: trước đây gọi `POST /payment-orders/{id}/cancel` **thiếu header bắt buộc `Idempotency-Key`** và ép response về `PaymentOrderDetail` rồi `mapOrder` → **throw** vì `beneficiary` undefined (endpoint thật trả `PaymentOrderCanceled{orderId,state,version,canceledAtUtc,wasAlreadyApplied}`). **Đã sửa 29/09**: gọi kèm `Idempotency-Key`, dùng type `BmtPaymentOrderCanceled`, rồi đọc lại đơn đầy đủ qua `GET /payment-orders/{id}`.
+
+### 7.2 Cần BE xác nhận / FE chốt
+
+- **`PUT /users/me` — nguy cơ mất dữ liệu**: FE chỉ gửi `firstName,lastName,email,avatar,phoneNumber`; `UpdateUserProfileCommand` còn `coverImageUrl,address,city,state,timeZone`. Nếu PUT là **ghi đè toàn bộ** thì các field không gửi bị set null — mà `GetMeBasic` không trả chúng nên FE không preserve được. → **BE xác nhận**: PUT full-overwrite hay partial; nếu full thì mở rộng DTO đọc để giữ lại.
+- **Mã quota cứng**: FE lọc `/me/design-subscription` theo `code === 'design.generate'` / `'catalog.detail'`. Swagger không có enum mã quota → BE đổi mã thì thẻ "Gói của tôi" và hạn mức thư viện âm thầm về 0. → **Chốt danh mục mã quota với BE**.
+
+### 7.3 Endpoint đã có contract nhưng FE CHƯA nối
+
+| Cụm            | Endpoint                                                                                                              | Nghiệp vụ                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Auth           | `POST /users/forgot_password` → `verify_change_password_code` → `change_password(currentPassword=null)`               | Quên mật khẩu (form hiện **mock**)                                                              |
+| Auth           | `POST /users/verify_account`, `resend_verify_account_code`; đọc `isEmailVerified` từ `/me`                            | Xác minh email sau đăng ký                                                                      |
+| Admin RBAC-004 | `GET /access-audit`, `GET /access-audit/{auditLogId}`                                                                 | Nhật ký thay đổi quyền (quyền `audit.read`) — chưa có api/component/nav                         |
+| Admin PAY-003  | `GET/POST/PUT /admin/payment-connections/*` (+ `/history`), `PUT /admin/payment-environments/{env}/active-connection` | Khai báo tài khoản nhận tiền SePay + chọn kết nối đang dùng (quyền `payment.connection.manage`) |
+| Site khách     | `GET /design-templates/filters` + filter params của `/design-templates`; `GET /me/library-history`                    | Lọc thư viện server-side + lịch sử mẫu đã xem (đang mock/client-side)                           |
+
+### 7.4 Dọn dẹp nhỏ (không chặn)
+
+- `changePassword` khai kiểu trả `<string>` thừa → nên `void`.
+- TS `UpdateRoleRequest` để field optional trong khi contract bắt buộc cả `name`+`permissions`.
+- `createStaff` map dư `firstName/lastName` (luôn rỗng) từ `StaffCreated`.
+- Response detail trả sẵn URL con (`eventsPath`, `historyPath`, `detailUrl`…) nhưng code tự ghép chuỗi từ id → nên đọc theo path BE trả cho bền với thay đổi routing.
+- Nút Google login không có endpoint BE (mock/trang trí).
+- Admin library thiếu filter server-side (2D/3D, tên) → code tải hết mẫu + lọc client (nặng nếu nhiều mẫu) → đề xuất BE thêm filter cho `GET /admin/library/templates`.

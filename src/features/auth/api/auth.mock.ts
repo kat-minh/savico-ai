@@ -88,6 +88,22 @@ export const mockAuthApi = {
     return 'Password changed (mock).'
   },
 
+  // Luồng quên mật khẩu (mock): gửi mã luôn "thành công"; mã hợp lệ là số > 0;
+  // đặt lại mật khẩu luôn thành công. Chỉ để thử giao diện 3 bước không cần BE.
+  async requestPasswordReset(): Promise<void> {
+    await delay(700)
+  },
+
+  async verifyResetCode(_email: string, code: number): Promise<void> {
+    await delay(400)
+    if (!Number.isInteger(code) || code <= 0) throw apiError('Mã không đúng (mock).', 400)
+  },
+
+  async resetPassword(): Promise<void> {
+    await delay(500)
+    clearSessionMarker()
+  },
+
   async relogin(email: string): Promise<LoginResponse> {
     await delay(200)
     const raw = localStorage.getItem(MOCK_SESSION_USER_KEY)

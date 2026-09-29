@@ -4,6 +4,8 @@ Cập nhật: 27/09/2026, sau đợt BE thêm API gửi AI dự toán + thư vi�
 
 **Bản deploy:** https://vnz-bmt-savico-abcxyz.vercel.app/vi — bản đồ route từng trang xem `docs/YEU_CAU_BACKEND.md`.
 
+> **29/09/2026 — đối soát lại Swagger:** kết quả đầy đủ (bug đã sửa `cancelOrder`, các điểm cần BE xác nhận, endpoint có contract nhưng FE chưa nối) nằm ở **`docs/BE_API_GAPS.md` mục 7**.
+
 Nguyên tắc: UI khách đã chốt, không sửa design; chỉ map dữ liệu API vào type UI. Chức năng nào API **chưa đáp ứng đủ** UI thì **không gọi API**, giữ dữ liệu mẫu, và ghi ở đây để báo BE.
 
 ## Đã nối API thật

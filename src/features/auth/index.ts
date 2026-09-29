@@ -21,7 +21,13 @@ export { createRegisterSchema, type RegisterFormValues, type RegisterSchemaMessa
 export {
   createForgotPasswordSchema,
   type ForgotPasswordFormValues,
-  type ForgotPasswordSchemaMessages
+  type ForgotPasswordSchemaMessages,
+  createResetCodeSchema,
+  type ResetCodeFormValues,
+  type ResetCodeSchemaMessages,
+  createResetPasswordSchema,
+  type ResetPasswordFormValues,
+  type ResetPasswordSchemaMessages
 } from './schemas/forgot-password.schema'
 export {
   createChangePasswordSchema,
