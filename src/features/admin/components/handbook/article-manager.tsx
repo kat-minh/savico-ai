@@ -36,16 +36,18 @@ import {
 import { buildCategoryTree, categoryPath } from '../../services/news-category.service'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { ImageUrlField } from '../common/field-kit'
+import { StatusTag, type StatusTone } from '../common/status-tag'
+import { TableThumb } from '../common/table-thumb'
 import { HtmlContentEditor, HtmlPreview } from './html-content-editor'
 
 const { Text, Paragraph } = Typography
 
 type StateFilter = 'all' | NewsArticleState
 
-const STATE_COLOR: Record<NewsArticleState, string> = {
-  Draft: 'default',
-  Published: 'green',
-  Hidden: 'orange'
+const STATE_TONE: Record<NewsArticleState, StatusTone> = {
+  Draft: 'warning',
+  Published: 'success',
+  Hidden: 'off'
 }
 
 const RESOURCE = 'news-articles'
@@ -133,17 +135,7 @@ export function ArticleManager() {
           key: 'title',
           render: (_, record) => (
             <Space size={10}>
-              {record.coverImageUrl ? (
-                <Image
-                  src={record.coverImageUrl}
-                  alt=''
-                  width={56}
-                  height={40}
-                  style={{ objectFit: 'cover', borderRadius: 6 }}
-                />
-              ) : (
-                <span className='inline-block h-10 w-14 rounded-md bg-[var(--admin-placeholder)]' />
-              )}
+              <TableThumb src={record.coverImageUrl} />
               <div style={{ minWidth: 0, maxWidth: 420 }}>
                 <Text strong style={{ display: 'block' }}>
                   {record.title || <Text type='secondary'>{tn('untitled')}</Text>}
@@ -176,7 +168,7 @@ export function ArticleManager() {
           title: tn('state'),
           dataIndex: 'state',
           width: 130,
-          render: (value: NewsArticleState) => <Tag color={STATE_COLOR[value]}>{stateLabel(value)}</Tag>
+          render: (value: NewsArticleState) => <StatusTag tone={STATE_TONE[value]}>{stateLabel(value)}</StatusTag>
         },
         {
           title: tn('firstPublishedAt'),
@@ -406,7 +398,7 @@ function ArticleView({
           {
             key: 'state',
             label: tn('state'),
-            children: <Tag color={STATE_COLOR[data.state]}>{tn(`states.${data.state}`)}</Tag>
+            children: <StatusTag tone={STATE_TONE[data.state]}>{tn(`states.${data.state}`)}</StatusTag>
           },
           { key: 'firstPublished', label: tn('firstPublishedAt'), children: date(data.firstPublishedAtUtc) },
           { key: 'created', label: tn('createdAt'), children: date(data.createdAtUtc) },

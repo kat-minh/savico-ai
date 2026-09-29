@@ -6,12 +6,6 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 import { formatCurrency } from '@/shared/utils'
-import type {
-  BankMatchState,
-  BankProcessingState,
-  PaymentOrderState,
-  PurchaseEffectiveState
-} from '../../api/bmt/commerce.api'
 
 /**
  * Mảnh dùng chung của các màn tra cứu thương mại (đơn, gói đã cấp, giao dịch
@@ -64,40 +58,6 @@ export function DateRangeFilter({
       placeholder={[fromLabel, toLabel]}
     />
   )
-}
-
-export const ORDER_STATE_TAG: Record<PaymentOrderState, string> = {
-  Pending: 'gold',
-  PartiallyPaid: 'orange',
-  Paid: 'green',
-  Expired: 'default',
-  Canceled: 'default'
-}
-
-export const MATCH_STATE_TAG: Record<BankMatchState, string> = {
-  Pending: 'gold',
-  Matched: 'green',
-  Unmatched: 'red',
-  IgnoredDirection: 'default',
-  ConnectionMismatch: 'volcano'
-}
-
-export const PROCESSING_STATE_TAG: Record<BankProcessingState, string> = {
-  Pending: 'gold',
-  Retry: 'orange',
-  Completed: 'green'
-}
-
-export const EFFECTIVE_STATE_TAG: Record<PurchaseEffectiveState, string> = {
-  Active: 'green',
-  Assigned: 'green',
-  Unassigned: 'gold',
-  Completed: 'blue',
-  Expired: 'default',
-  ExpiredUnassigned: 'default',
-  Superseded: 'default',
-  SupersededBeforeActivation: 'default',
-  CanceledByStaff: 'red'
 }
 
 /** Nhãn loại gói / lựa chọn mua dùng chung. */

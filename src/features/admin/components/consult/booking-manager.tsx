@@ -2,20 +2,7 @@
 
 import { CheckOutlined, PhoneOutlined, RollbackOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
-import {
-  App,
-  Button,
-  Descriptions,
-  Form,
-  Input,
-  Popconfirm,
-  Segmented,
-  Select,
-  Spin,
-  Tag,
-  Tooltip,
-  Typography
-} from 'antd'
+import { App, Button, Descriptions, Form, Input, Popconfirm, Segmented, Select, Spin, Tooltip, Typography } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -30,6 +17,7 @@ import {
   type ConsultationRequestStatus
 } from '../../api/bmt/consult.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { StatusTag, type StatusTone } from '../common/status-tag'
 
 const { Text, Paragraph } = Typography
 
@@ -37,9 +25,9 @@ type StatusFilter = 'all' | ConsultationRequestStatus
 
 const RESOURCE = 'consultation-requests'
 
-const STATUS_COLOR: Record<ConsultationRequestStatus, string> = {
-  Pending: 'gold',
-  Resolved: 'green'
+const STATUS_TONE: Record<ConsultationRequestStatus, StatusTone> = {
+  Pending: 'warning',
+  Resolved: 'success'
 }
 
 interface RequestFormValues {
@@ -120,7 +108,9 @@ export function BookingManager() {
           title: tr('status'),
           dataIndex: 'status',
           width: 140,
-          render: (value: ConsultationRequestStatus) => <Tag color={STATUS_COLOR[value]}>{statusLabel(value)}</Tag>
+          render: (value: ConsultationRequestStatus) => (
+            <StatusTag tone={STATUS_TONE[value]}>{statusLabel(value)}</StatusTag>
+          )
         },
         {
           title: tr('createdAt'),
@@ -263,7 +253,7 @@ function RequestSummary({ id, withNote = false }: { id: string; withNote?: boole
         {
           key: 'status',
           label: tr('status'),
-          children: <Tag color={STATUS_COLOR[data.status]}>{tr(`statuses.${data.status}`)}</Tag>
+          children: <StatusTag tone={STATUS_TONE[data.status]}>{tr(`statuses.${data.status}`)}</StatusTag>
         },
         ...(withNote
           ? [

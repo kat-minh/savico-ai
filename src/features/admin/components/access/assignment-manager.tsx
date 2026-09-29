@@ -17,6 +17,7 @@ import {
   type BmtStaffItem
 } from '../../api/bmt/assignments.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { StatusTag } from '../common/status-tag'
 
 const { Text } = Typography
 
@@ -115,7 +116,7 @@ export function AssignmentManager() {
             return (
               <Space orientation='vertical' size={2}>
                 <Text strong>{nameOf(item.staffUserId, item.staffName)}</Text>
-                {locked ? <Tag color='volcano'>{t('lockedAssignee')}</Tag> : null}
+                {locked ? <StatusTag tone='danger'>{t('lockedAssignee')}</StatusTag> : null}
               </Space>
             )
           }
@@ -153,7 +154,7 @@ export function AssignmentManager() {
                 ) : null}
               </Space>
             ) : (
-              <Tag color='green'>{t('activeBadge')}</Tag>
+              <StatusTag tone='success'>{t('activeBadge')}</StatusTag>
             )
         }
       ]}
@@ -296,7 +297,9 @@ function NeedsReassignmentPanel({ activeStaff, staffLoading }: { activeStaff: Bm
               <Space orientation='vertical' size={2}>
                 <Text strong>{item.constructionSiteName}</Text>
                 <Space size={6}>
-                  <Tag color={item.status === 'NoAssignee' ? 'orange' : 'volcano'}>{t(`status.${item.status}`)}</Tag>
+                  <StatusTag tone={item.status === 'NoAssignee' ? 'warning' : 'danger'}>
+                    {t(`status.${item.status}`)}
+                  </StatusTag>
                   <Text type='secondary' style={{ fontSize: 12 }}>
                     {item.supervisionGrantId}
                   </Text>

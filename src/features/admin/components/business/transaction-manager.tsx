@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Alert, Descriptions, Input, Select, Space, Spin, Tag, Typography } from 'antd'
+import { Alert, Descriptions, Input, Select, Space, Spin, Typography } from 'antd'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -15,17 +15,26 @@ import {
   type BmtAdminBankTransactionSummary
 } from '../../api/bmt/commerce.api'
 import { ApiResourceManager } from '../common/api-resource-manager'
-import {
-  DateRangeFilter,
-  MATCH_STATE_TAG,
-  PROCESSING_STATE_TAG,
-  rangeToUtc,
-  stamp,
-  useVnd,
-  type DateRange
-} from '../ops/commerce-kit'
+import { StatusTag, type StatusTone } from '../common/status-tag'
+import { DateRangeFilter, rangeToUtc, stamp, useVnd, type DateRange } from '../ops/commerce-kit'
 
 const { Text, Paragraph } = Typography
+
+/** Sắc thái trạng thái khớp đơn — quy ước tone dùng chung (xanh khớp, gold chờ, đỏ lỗi, xám bỏ qua). */
+const MATCH_STATE_TONE: Record<BankMatchState, StatusTone> = {
+  Pending: 'warning',
+  Matched: 'success',
+  Unmatched: 'danger',
+  IgnoredDirection: 'off',
+  ConnectionMismatch: 'danger'
+}
+
+/** Sắc thái trạng thái xử lý webhook — đang chờ/thử lại là warning, xong là success. */
+const PROCESSING_STATE_TONE: Record<BankProcessingState, StatusTone> = {
+  Pending: 'warning',
+  Retry: 'warning',
+  Completed: 'success'
+}
 
 const MATCH_STATES: BankMatchState[] = ['Pending', 'Matched', 'Unmatched', 'IgnoredDirection', 'ConnectionMismatch']
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -138,7 +147,7 @@ export function TransactionManager() {
           width: 170,
           render: (value: BankMatchState, item) => (
             <Space orientation='vertical' size={2}>
-              <Tag color={MATCH_STATE_TAG[value]}>{t(`matchStates.${value}`)}</Tag>
+              <StatusTag tone={MATCH_STATE_TONE[value]}>{t(`matchStates.${value}`)}</StatusTag>
               {item.matchLabel ? (
                 <Text type='secondary' style={{ fontSize: 12 }}>
                   {item.matchLabel}
@@ -169,7 +178,7 @@ export function TransactionManager() {
           dataIndex: 'processingState',
           width: 140,
           render: (value: BankProcessingState) => (
-            <Tag color={PROCESSING_STATE_TAG[value]}>{t(`processingStates.${value}`)}</Tag>
+            <StatusTag tone={PROCESSING_STATE_TONE[value]}>{t(`processingStates.${value}`)}</StatusTag>
           )
         }
       ]}
@@ -235,7 +244,7 @@ function BankTransactionDetail({ transactionId }: { transactionId: string }) {
           label: t('matchState'),
           children: (
             <Space size={4} wrap>
-              <Tag color={MATCH_STATE_TAG[item.matchState]}>{t(`matchStates.${item.matchState}`)}</Tag>
+              <StatusTag tone={MATCH_STATE_TONE[item.matchState]}>{t(`matchStates.${item.matchState}`)}</StatusTag>
               {item.matchLabel ? <Text type='secondary'>{item.matchLabel}</Text> : null}
             </Space>
           )
@@ -245,9 +254,9 @@ function BankTransactionDetail({ transactionId }: { transactionId: string }) {
           label: t('processingState'),
           children: (
             <Space size={4}>
-              <Tag color={PROCESSING_STATE_TAG[item.processingState]}>
+              <StatusTag tone={PROCESSING_STATE_TONE[item.processingState]}>
                 {t(`processingStates.${item.processingState}`)}
-              </Tag>
+              </StatusTag>
               <Text type='secondary'>{t('attempts', { count: item.attempts })}</Text>
             </Space>
           )

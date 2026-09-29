@@ -35,6 +35,8 @@ import {
 } from '../../api/bmt/consult.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { ImageUrlField } from '../common/field-kit'
+import { StatusTag } from '../common/status-tag'
+import { TableAvatar } from '../common/table-thumb'
 import { ARCHITECT_CATEGORIES_KEY, ArchitectCategoryDrawer } from './architect-category-drawer'
 
 const { Text, Paragraph } = Typography
@@ -128,9 +130,7 @@ export function ConsultantManager() {
             key: 'name',
             render: (_, record) => (
               <Space size={10}>
-                <Avatar src={record.avatarUrl} size={36}>
-                  {record.fullName.slice(0, 1)}
-                </Avatar>
+                <TableAvatar src={record.avatarUrl} name={record.fullName} />
                 <div style={{ minWidth: 0 }}>
                   <Text strong style={{ display: 'block' }}>
                     {record.fullName}
@@ -163,13 +163,16 @@ export function ConsultantManager() {
           {
             title: ta('projectCount'),
             dataIndex: 'projectCount',
-            width: 130
+            width: 130,
+            align: 'right'
           },
           {
             title: ta('status'),
             dataIndex: 'isVisible',
             width: 120,
-            render: (visible: boolean) => <Tag color={visible ? 'green' : 'default'}>{statusLabel(visible)}</Tag>
+            render: (visible: boolean) => (
+              <StatusTag tone={visible ? 'success' : 'off'}>{statusLabel(visible)}</StatusTag>
+            )
           }
         ]}
         // Không đặt sẵn Ẩn/Hiện: người tạo phải tự chọn (BR-CONSULT-001 khoản 8).

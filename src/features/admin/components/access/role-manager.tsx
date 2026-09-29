@@ -36,6 +36,7 @@ import {
 import { useUnsavedGuard } from '../../hooks/use-unsaved-guard'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager } from '../common/api-resource-manager'
+import { StatusTag } from '../common/status-tag'
 
 const { Text } = Typography
 const NAME_MAX = 200
@@ -239,7 +240,7 @@ export function RoleManager() {
             dataIndex: 'kind',
             width: 130,
             render: (kind: RoleSummary['kind']) => (
-              <Tag color={kind === 'System' ? 'geekblue' : 'default'}>{tr(`kind.${kind}`)}</Tag>
+              <StatusTag tone={kind === 'System' ? 'info' : 'off'}>{tr(`kind.${kind}`)}</StatusTag>
             )
           },
           {

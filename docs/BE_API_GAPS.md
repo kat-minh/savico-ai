@@ -464,6 +464,7 @@ Rà soát toàn bộ endpoint đã nối so với Swagger live (133 path / 160 o
 
 - **`PUT /users/me` — nguy cơ mất dữ liệu**: FE chỉ gửi `firstName,lastName,email,avatar,phoneNumber`; `UpdateUserProfileCommand` còn `coverImageUrl,address,city,state,timeZone`. Nếu PUT là **ghi đè toàn bộ** thì các field không gửi bị set null — mà `GetMeBasic` không trả chúng nên FE không preserve được. → **BE xác nhận**: PUT full-overwrite hay partial; nếu full thì mở rộng DTO đọc để giữ lại.
 - **Mã quota cứng**: FE lọc `/me/design-subscription` theo `code === 'design.generate'` / `'catalog.detail'`. Swagger không có enum mã quota → BE đổi mã thì thẻ "Gói của tôi" và hạn mức thư viện âm thầm về 0. → **Chốt danh mục mã quota với BE**.
+- **Admin thư viện mẫu thiếu URL ảnh cover**: `GET /admin/library/templates` và `AdminVersionItem` chỉ trả `coverAssetId`, KHÔNG có `coverContentUrl` → bảng quản trị thư viện không hiện được thumbnail ảnh cover (muốn hiện phải gọi thêm assets từng dòng, không có bulk). → **BE nên trả `coverContentUrl`** ở item danh sách/phiên bản để bảng có cột ảnh.
 
 ### 7.3 Endpoint đã có contract nhưng FE CHƯA nối
 

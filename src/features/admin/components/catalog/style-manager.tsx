@@ -1,6 +1,6 @@
 'use client'
 
-import { Alert, Descriptions, Form, Image, Input, Segmented, Space, Tag, Typography } from 'antd'
+import { Alert, Descriptions, Form, Image, Input, Segmented, Space, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -14,6 +14,8 @@ import {
 import { ESTIMATE_CATALOG_KEY, useEstimateCatalog, useFreshCatalog } from '../../hooks/use-estimate-catalog'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager } from '../common/api-resource-manager'
+import { StatusTag } from '../common/status-tag'
+import { TableThumb } from '../common/table-thumb'
 import { HttpsImageField } from '../common/https-image-field'
 
 const { Text } = Typography
@@ -55,9 +57,9 @@ export function StyleManager() {
   const typeTags = (styleId: string) => (
     <Space size={4} wrap style={{ maxWidth: 360 }}>
       {assignedTypes(catalog, kind, styleId).map((type) => (
-        <Tag key={type.id} color={type.enabled ? 'blue' : undefined}>
+        <StatusTag key={type.id} tone={type.enabled ? 'info' : 'off'}>
           {type.enabled ? type.name : c('typeGroupOff', { name: type.name })}
-        </Tag>
+        </StatusTag>
       ))}
     </Space>
   )
@@ -115,15 +117,7 @@ export function StyleManager() {
           dataIndex: 'name',
           render: (_, record) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {record.imageUrl ? (
-                <Image
-                  src={record.imageUrl}
-                  alt=''
-                  width={44}
-                  height={32}
-                  style={{ objectFit: 'cover', borderRadius: 6 }}
-                />
-              ) : null}
+              <TableThumb src={record.imageUrl} />
               <Text strong>{record.name}</Text>
             </div>
           )

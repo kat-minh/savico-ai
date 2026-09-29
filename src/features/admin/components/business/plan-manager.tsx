@@ -49,6 +49,8 @@ import {
 } from '../../api/bmt/plans.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { ImageUrlField } from '../common/field-kit'
+import { StatusTag, type StatusTone } from '../common/status-tag'
+import { TableThumb } from '../common/table-thumb'
 
 const { Text, Paragraph } = Typography
 
@@ -59,7 +61,7 @@ const DESCRIPTION_MAX = 4000
 /** Giới hạn mềm cho các trường trình bày thẻ (phía client). */
 const HIGHLIGHT_LABEL_MAX = 100
 
-const SALE_TAG: Record<PlanSaleState, string> = { NotPublished: 'default', OnSale: 'green', Stopped: 'red' }
+const SALE_TONE: Record<PlanSaleState, StatusTone> = { NotPublished: 'off', OnSale: 'success', Stopped: 'off' }
 const SALE_STATES: readonly PlanSaleState[] = ['NotPublished', 'OnSale', 'Stopped']
 
 interface QuotaRow {
@@ -306,16 +308,7 @@ export function PlanManager() {
             const summary = workingSummary(plan)
             return (
               <Space size={12}>
-                {summary?.coverImageUrl ? (
-                  <Image
-                    src={summary.coverImageUrl}
-                    alt=''
-                    width={40}
-                    height={30}
-                    style={{ objectFit: 'cover', borderRadius: 6 }}
-                    preview={false}
-                  />
-                ) : null}
+                <TableThumb src={summary?.coverImageUrl} />
                 <div style={{ minWidth: 0 }}>
                   <Space size={6}>
                     <Text strong>{summary?.name || '—'}</Text>
@@ -341,7 +334,7 @@ export function PlanManager() {
           width: 200,
           render: (_, plan) => (
             <Space orientation='vertical' size={2}>
-              <Tag color={SALE_TAG[plan.saleState]}>{t(`saleStates.${plan.saleState}`)}</Tag>
+              <StatusTag tone={SALE_TONE[plan.saleState]}>{t(`saleStates.${plan.saleState}`)}</StatusTag>
               {plan.draft ? (
                 <Text type='warning' style={{ fontSize: 12 }}>
                   {t('hasDraft', { number: plan.draft.number })}
@@ -457,7 +450,7 @@ function PlanDetailView({ planId }: { planId: string }) {
           {
             key: 'state',
             label: t('saleState'),
-            children: <Tag color={SALE_TAG[plan.saleState]}>{t(`saleStates.${plan.saleState}`)}</Tag>
+            children: <StatusTag tone={SALE_TONE[plan.saleState]}>{t(`saleStates.${plan.saleState}`)}</StatusTag>
           }
         ]}
       />
@@ -550,9 +543,9 @@ function RevisionBlock({
                       {[...revision.displayBenefits]
                         .sort((a, b) => a.sortOrder - b.sortOrder)
                         .map((benefit) => (
-                          <Tag key={benefit.code} color={benefit.enabled ? 'green' : 'default'}>
+                          <StatusTag key={benefit.code} tone={benefit.enabled ? 'success' : 'off'}>
                             {benefit.displayText || benefit.label} · {benefit.enabled ? t('on') : t('off')}
-                          </Tag>
+                          </StatusTag>
                         ))}
                     </Space>
                   ) : (

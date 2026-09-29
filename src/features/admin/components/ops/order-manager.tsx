@@ -6,6 +6,7 @@ import {
   App,
   Button,
   Descriptions,
+  Empty,
   Form,
   Input,
   Modal,
@@ -37,19 +38,41 @@ import {
   type PurchaseEffectiveState
 } from '../../api/bmt/commerce.api'
 import { ApiResourceManager } from '../common/api-resource-manager'
-import {
-  DateRangeFilter,
-  EFFECTIVE_STATE_TAG,
-  MATCH_STATE_TAG,
-  ORDER_STATE_TAG,
-  rangeToUtc,
-  stamp,
-  useCommerceLabels,
-  useVnd,
-  type DateRange
-} from './commerce-kit'
+import { StatusTag, type StatusTone } from '../common/status-tag'
+import { DateRangeFilter, rangeToUtc, stamp, useCommerceLabels, useVnd, type DateRange } from './commerce-kit'
 
 const { Text } = Typography
+
+/** Sắc thái trạng thái đơn thanh toán — quy ước tone dùng chung. */
+const ORDER_STATE_TONE: Record<PaymentOrderState, StatusTone> = {
+  Pending: 'warning',
+  PartiallyPaid: 'warning',
+  Paid: 'success',
+  Expired: 'danger',
+  Canceled: 'danger'
+}
+
+/** Sắc thái hiệu lực gói đã cấp — hết hạn/khoá là danger, bị thay thế là off (xám). */
+const EFFECTIVE_STATE_TONE: Record<PurchaseEffectiveState, StatusTone> = {
+  Active: 'success',
+  Assigned: 'success',
+  Unassigned: 'warning',
+  Completed: 'success',
+  Expired: 'danger',
+  ExpiredUnassigned: 'danger',
+  Superseded: 'off',
+  SupersededBeforeActivation: 'off',
+  CanceledByStaff: 'danger'
+}
+
+/** Sắc thái trạng thái khớp giao dịch — dùng ở bảng lồng chi tiết đơn. */
+const MATCH_STATE_TONE: Record<BmtAdminBankTransactionSummary['matchState'], StatusTone> = {
+  Pending: 'warning',
+  Matched: 'success',
+  Unmatched: 'danger',
+  IgnoredDirection: 'off',
+  ConnectionMismatch: 'danger'
+}
 
 type View = 'orders' | 'purchases'
 
@@ -210,7 +233,7 @@ function PaymentOrderTable({ switcher }: { switcher: ReactNode }) {
           width: 170,
           render: (value: PaymentOrderState, order) => (
             <Space orientation='vertical' size={2}>
-              <Tag color={ORDER_STATE_TAG[value]}>{t(`orderStates.${value}`)}</Tag>
+              <StatusTag tone={ORDER_STATE_TONE[value]}>{t(`orderStates.${value}`)}</StatusTag>
               {order.fulfillmentDisposition ? (
                 <Text type='secondary' style={{ fontSize: 12 }}>
                   {t(`dispositions.${order.fulfillmentDisposition}`)}
@@ -294,7 +317,7 @@ function PaymentOrderDetail({ orderId }: { orderId: string }) {
           {
             key: 'state',
             label: t('orderState'),
-            children: <Tag color={ORDER_STATE_TAG[order.state]}>{t(`orderStates.${order.state}`)}</Tag>
+            children: <StatusTag tone={ORDER_STATE_TONE[order.state]}>{t(`orderStates.${order.state}`)}</StatusTag>
           },
           { key: 'plan', label: t('plan'), children: order.planNameAtPurchase },
           { key: 'kind', label: t('kind'), children: labels.kind(order.kind) },
@@ -361,9 +384,15 @@ function PaymentOrderDetail({ orderId }: { orderId: string }) {
             loading={transactions.isPending}
             dataSource={transactions.data?.items ?? []}
             scroll={{ x: 'max-content' }}
+            locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
             columns={[
               { title: t('occurredAt'), dataIndex: 'occurredAtUtc', render: (value: string) => stamp(value) },
-              { title: t('amount'), dataIndex: 'amountVnd', render: (value: string) => vnd(value) },
+              {
+                title: t('amount'),
+                dataIndex: 'amountVnd',
+                align: 'right' as const,
+                render: (value: string) => vnd(value)
+              },
               {
                 title: t('transferContent'),
                 dataIndex: 'content',
@@ -374,7 +403,7 @@ function PaymentOrderDetail({ orderId }: { orderId: string }) {
                 title: t('matchState'),
                 dataIndex: 'matchState',
                 render: (value: BmtAdminBankTransactionSummary['matchState']) => (
-                  <Tag color={MATCH_STATE_TAG[value]}>{t(`matchStates.${value}`)}</Tag>
+                  <StatusTag tone={MATCH_STATE_TONE[value]}>{t(`matchStates.${value}`)}</StatusTag>
                 )
               }
             ]}
@@ -395,6 +424,7 @@ function PaymentOrderDetail({ orderId }: { orderId: string }) {
             pagination={false}
             loading={events.isPending}
             dataSource={events.data?.items ?? []}
+            locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
             columns={[
               { title: t('eventAt'), dataIndex: 'atUtc', render: (value: string) => stamp(value) },
               {
@@ -509,7 +539,7 @@ function PurchaseTable({ switcher }: { switcher: ReactNode }) {
           dataIndex: 'effectiveState',
           width: 180,
           render: (value: PurchaseEffectiveState) => (
-            <Tag color={EFFECTIVE_STATE_TAG[value]}>{t(`effectiveStates.${value}`)}</Tag>
+            <StatusTag tone={EFFECTIVE_STATE_TONE[value]}>{t(`effectiveStates.${value}`)}</StatusTag>
           )
         },
         {
@@ -563,9 +593,9 @@ function PurchaseDetail({ orderId }: { orderId: string }) {
             key: 'state',
             label: t('effectiveState'),
             children: (
-              <Tag color={EFFECTIVE_STATE_TAG[purchase.effectiveState]}>
+              <StatusTag tone={EFFECTIVE_STATE_TONE[purchase.effectiveState]}>
                 {t(`effectiveStates.${purchase.effectiveState}`)}
-              </Tag>
+              </StatusTag>
             )
           },
           { key: 'plan', label: t('plan'), children: purchase.planNameAtPurchase },
@@ -650,6 +680,7 @@ function PurchaseDetail({ orderId }: { orderId: string }) {
             loading={history.isPending}
             dataSource={history.data?.items ?? []}
             scroll={{ x: 'max-content' }}
+            locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
             columns={[
               { title: t('eventAt'), dataIndex: 'atUtc', render: (value: string) => stamp(value) },
               {

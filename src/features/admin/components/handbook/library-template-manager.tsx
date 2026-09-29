@@ -23,6 +23,7 @@ import { useEstimateCatalog } from '../../hooks/use-estimate-catalog'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { StatusSwitch } from '../common/field-kit'
+import { StatusTag } from '../common/status-tag'
 import { useFloorLabel } from '../catalog/use-floor-label'
 import { fileNameOf, resolveMediaType } from './library-assets.helpers'
 import { LibraryContentFields, toTemplateContent } from './library-content-fields'
@@ -246,7 +247,7 @@ export function LibraryTemplateManager() {
             render: (_, row) => (
               <Space orientation='vertical' size={2}>
                 {row.name ? <Text strong>{row.name}</Text> : <Text type='secondary'>{l('untitled')}</Text>}
-                {row.kind === null ? <Tag color='orange'>{l('noDrawingKind')}</Tag> : null}
+                {row.kind === null ? <StatusTag tone='warning'>{l('noDrawingKind')}</StatusTag> : null}
               </Space>
             )
           },
@@ -258,7 +259,7 @@ export function LibraryTemplateManager() {
             render: (_, row) =>
               row.template.currentVersionId ? (
                 <Space orientation='vertical' size={0}>
-                  <Tag color='green'>{l('versionN', { number: row.template.currentNumber ?? 0 })}</Tag>
+                  <StatusTag tone='success'>{l('versionN', { number: row.template.currentNumber ?? 0 })}</StatusTag>
                   {row.template.currentPublishedAtUtc ? (
                     <Text type='secondary' style={{ fontSize: 12 }}>
                       {format.dateTime(new Date(row.template.currentPublishedAtUtc), { dateStyle: 'short' })}
@@ -266,13 +267,14 @@ export function LibraryTemplateManager() {
                   ) : null}
                 </Space>
               ) : (
-                <Tag>{l('notPublished')}</Tag>
+                <StatusTag tone='off'>{l('notPublished')}</StatusTag>
               )
           },
           {
             title: l('drafts'),
             key: 'drafts',
             width: 90,
+            align: 'right',
             render: (_, row) => row.template.draftCount
           },
           {
@@ -280,7 +282,11 @@ export function LibraryTemplateManager() {
             key: 'visibility',
             width: 120,
             render: (_, row) =>
-              row.template.isHidden ? <Tag>{l('hidden')}</Tag> : <Tag color='green'>{l('shown')}</Tag>
+              row.template.isHidden ? (
+                <StatusTag tone='off'>{l('hidden')}</StatusTag>
+              ) : (
+                <StatusTag tone='success'>{l('shown')}</StatusTag>
+              )
           }
         ]}
       />

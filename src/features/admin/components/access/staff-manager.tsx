@@ -6,8 +6,7 @@ import {
   LockOutlined,
   LogoutOutlined,
   TeamOutlined,
-  UnlockOutlined,
-  WarningOutlined
+  UnlockOutlined
 } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -48,6 +47,7 @@ import {
   type StaffRoleRef
 } from '../../api/bmt/staff.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { StatusTag } from '../common/status-tag'
 
 const { Text, Paragraph } = Typography
 
@@ -125,7 +125,7 @@ export function StaffManager() {
             key: 'status',
             width: 120,
             render: (status: StaffItem['status']) => (
-              <Tag color={status === 'Active' ? 'green' : 'red'}>{tr(`status.${status}`)}</Tag>
+              <StatusTag tone={status === 'Active' ? 'success' : 'danger'}>{tr(`status.${status}`)}</StatusTag>
             )
           },
           {
@@ -149,9 +149,7 @@ export function StaffManager() {
             width: 200,
             render: (mustChange: boolean) =>
               mustChange ? (
-                <Tag icon={<WarningOutlined />} color='warning'>
-                  {tr('mustChangePassword')}
-                </Tag>
+                <StatusTag tone='warning'>{tr('mustChangePassword')}</StatusTag>
               ) : (
                 <Text type='secondary'>{tr('passwordChanged')}</Text>
               )

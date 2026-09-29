@@ -15,6 +15,7 @@ import {
 import { ESTIMATE_CATALOG_KEY, useEstimateCatalog, useFreshCatalog } from '../../hooks/use-estimate-catalog'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager } from '../common/api-resource-manager'
+import { StatusTag } from '../common/status-tag'
 import { useFloorLabel } from './use-floor-label'
 
 const { Text } = Typography
@@ -73,7 +74,11 @@ export function BuildingTypeManager() {
     ids.map((id) => styles?.find((style) => style.styleId === id)?.name ?? id)
 
   const groupCell = (enabled: boolean, count: number) =>
-    enabled ? <Tag color='blue'>{c('enabledCount', { count })}</Tag> : <Tag>{c('notApplies')}</Tag>
+    enabled ? (
+      <StatusTag tone='success'>{c('enabledCount', { count })}</StatusTag>
+    ) : (
+      <StatusTag tone='off'>{c('notApplies')}</StatusTag>
+    )
 
   const filterSelect = (key: keyof Filters, label: string) => (
     <Select<Filter>
@@ -150,7 +155,7 @@ export function BuildingTypeManager() {
                 ))}
               </Space>
             ) : (
-              <Tag>{c('notApplies')}</Tag>
+              <StatusTag tone='off'>{c('notApplies')}</StatusTag>
             )
         },
         {
@@ -158,7 +163,11 @@ export function BuildingTypeManager() {
           key: 'tum',
           width: 140,
           render: (_, record) =>
-            record.tumEnabled ? <Tag color='blue'>{c('applies')}</Tag> : <Tag>{c('notApplies')}</Tag>
+            record.tumEnabled ? (
+              <StatusTag tone='success'>{c('applies')}</StatusTag>
+            ) : (
+              <StatusTag tone='off'>{c('notApplies')}</StatusTag>
+            )
         },
         {
           title: c('architectureStyles'),
@@ -180,9 +189,9 @@ export function BuildingTypeManager() {
             {names.length > 0 ? (
               <Space size={4} wrap>
                 {names.map((name, index) => (
-                  <Tag key={`${name}-${index}`} color={enabled ? 'blue' : undefined}>
+                  <StatusTag key={`${name}-${index}`} tone={enabled ? 'info' : 'off'}>
                     {name}
-                  </Tag>
+                  </StatusTag>
                 ))}
               </Space>
             ) : null}
