@@ -9,7 +9,6 @@ import {
   Card,
   Checkbox,
   Col,
-  Collapse,
   Descriptions,
   Empty,
   Form,
@@ -57,7 +56,6 @@ const { Text, Paragraph } = Typography
 /** Giới hạn độ dài theo validator của API (TDD-SUB-001/Notes). */
 const CODE_MAX = 100
 const NAME_MAX = 200
-const DESCRIPTION_MAX = 4000
 /** Giới hạn mềm cho các trường trình bày thẻ (phía client). */
 const HIGHLIGHT_LABEL_MAX = 100
 
@@ -705,23 +703,6 @@ function PlanFields({
             <Input maxLength={NAME_MAX} />
           </Form.Item>
         </Col>
-        <Col xs={24}>
-          <Form.Item
-            name='description'
-            label={kind === 'Supervision' ? t('serviceDescription') : t('descriptionField')}
-            extra={kind === 'Supervision' ? t('serviceDescriptionHint') : undefined}
-            rules={[{ max: DESCRIPTION_MAX, message: tAdmin('fields.maxLength', { max: DESCRIPTION_MAX }) }]}
-          >
-            <Input.TextArea rows={4} maxLength={DESCRIPTION_MAX} showCount />
-          </Form.Item>
-        </Col>
-        {kind === 'Design' ? (
-          <Col xs={24}>
-            <Form.Item name='consultationText' label={t('consultationText')} extra={t('consultationHint')}>
-              <Input.TextArea rows={2} />
-            </Form.Item>
-          </Col>
-        ) : null}
       </Row>
 
       <Text strong style={sectionTitle}>
@@ -863,48 +844,27 @@ function PlanFields({
         </>
       )}
 
-      {/* Khối trình bày thẻ: tùy chọn, thu gọn mặc định để form gọn. */}
-      <Collapse
-        ghost
-        style={{ marginTop: 12 }}
-        items={[
-          {
-            key: 'card',
-            forceRender: true,
-            label: <Text strong>{t('cardSection')}</Text>,
-            children: (
-              <>
-                <Text type='secondary' style={hintText}>
-                  {t('cardNote')}
-                </Text>
-                <ImageUrlField form={form} name='coverImageUrl' label={t('coverImage')} />
-                <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
-                  {t('coverImageHint')}
-                </Text>
-                <Row gutter={16}>
-                  <Col xs={24} md={8}>
-                    <Form.Item name='isHighlighted' label={t('isHighlighted')} valuePropName='checked'>
-                      <Switch />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={16}>
-                    <Form.Item
-                      name='highlightLabel'
-                      label={t('highlightLabel')}
-                      extra={t('highlightLabelHint')}
-                      rules={[
-                        { max: HIGHLIGHT_LABEL_MAX, message: tAdmin('fields.maxLength', { max: HIGHLIGHT_LABEL_MAX }) }
-                      ]}
-                    >
-                      <Input maxLength={HIGHLIGHT_LABEL_MAX} />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </>
-            )
-          }
-        ]}
-      />
+      <ImageUrlField form={form} name='coverImageUrl' label={t('coverImage')} />
+      <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
+        {t('coverImageHint')}
+      </Text>
+      <Row gutter={16}>
+        <Col xs={24} md={8}>
+          <Form.Item name='isHighlighted' label={t('isHighlighted')} valuePropName='checked'>
+            <Switch />
+          </Form.Item>
+        </Col>
+        <Col xs={24} md={16}>
+          <Form.Item
+            name='highlightLabel'
+            label={t('highlightLabel')}
+            extra={t('highlightLabelHint')}
+            rules={[{ max: HIGHLIGHT_LABEL_MAX, message: tAdmin('fields.maxLength', { max: HIGHLIGHT_LABEL_MAX }) }]}
+          >
+            <Input maxLength={HIGHLIGHT_LABEL_MAX} />
+          </Form.Item>
+        </Col>
+      </Row>
 
       <Text type='secondary' style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
         {t('snapshotNote')}

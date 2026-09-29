@@ -1,6 +1,14 @@
 import { http } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
-import type { PlanBenefits, PlanTier, PlanToggleBenefitKey, SubscriptionPlan } from '@/shared/cms'
+import type {
+  PlanAdvisoryLevel,
+  PlanBenefits,
+  PlanEstimateLevel,
+  PlanHighlightKey,
+  PlanLayoutLevel,
+  PlanToggleBenefitKey,
+  SubscriptionPlan
+} from '@/shared/cms'
 import type { PlanView } from '../types/plan.types'
 import { mockPlansApi } from './plans.mock'
 
@@ -71,14 +79,60 @@ interface BmtPublishedPlanItem {
  * Map DTO → type UI (SubscriptionPlan / PlanView)
  * ======================================================================== */
 
+type DesignTier = 'basic' | 'advanced' | 'pro'
+
 /** Suy hạng gói từ mã (chứa BASIC/PLUS/PRO); không nhận ra thì dựa vị trí. */
-function tierFromCode(code: string, index: number): PlanTier {
+function tierFromCode(code: string, index: number): DesignTier {
   const upper = code.toUpperCase()
   if (upper.includes('BASIC')) return 'basic'
   if (upper.includes('PLUS') || upper.includes('ADVANCED')) return 'advanced'
   if (upper.includes('PRO')) return 'pro'
-  const byIndex: PlanTier[] = ['basic', 'advanced', 'pro']
+  const byIndex: DesignTier[] = ['basic', 'advanced', 'pro']
   return byIndex[index] ?? 'basic'
+}
+
+/**
+ * Trang trí thẻ mà API GÓI KHÔNG có field — HARDCODE theo hạng gói (khớp bản
+ * demo). Gói thiết kế là ba hạng cố định BASIC / PLUS / PRO, phần "bán hàng" của
+ * thẻ (dòng đối tượng phù hợp, nhãn nút, quyền lợi nổi bật, mức bố cục / dự toán
+ * nội thất / tư vấn) không đổi theo từng gói; API chỉ điều khiển tên, giá, số
+ * lượt, quyền bật/tắt, ảnh và cờ nổi bật.
+ */
+const TIER_CARD: Record<
+  DesignTier,
+  {
+    fitLine: string
+    ctaLabel: string
+    highlights: PlanHighlightKey[]
+    layout: PlanLayoutLevel
+    interiorEstimate: PlanEstimateLevel
+    advisory: PlanAdvisoryLevel
+  }
+> = {
+  basic: {
+    fitLine: 'Phù hợp khi bạn đã khá rõ nhu cầu và muốn bắt đầu nhanh.',
+    ctaLabel: 'Chọn gói BASIC',
+    highlights: ['designCredits', 'libraryCredits', 'interiorEstimate', 'exportDossier', 'advisory'],
+    layout: 'basic',
+    interiorEstimate: 'rough',
+    advisory: 'online'
+  },
+  advanced: {
+    fitLine: 'Phù hợp khi bạn muốn thử và so sánh nhiều phương án trước khi chốt.',
+    ctaLabel: 'Chọn gói PLUS',
+    highlights: ['designCredits', 'interiorEstimate', 'layout', 'exportDossier', 'advisory'],
+    layout: '2d3d',
+    interiorEstimate: 'detailed',
+    advisory: 'priority'
+  },
+  pro: {
+    fitLine: 'Phù hợp khi bạn muốn tối ưu ngân sách và vật liệu trước khi thi công.',
+    ctaLabel: 'Chọn gói PRO',
+    highlights: ['designCredits', 'interiorEstimate', 'render3d', 'exportDossier', 'advisory'],
+    layout: '2d3dPlus',
+    interiorEstimate: 'optimized',
+    advisory: 'expert'
+  }
 }
 
 /** Khóa toggle của bảng so sánh, để bật đúng những gì API có. */
@@ -147,25 +201,35 @@ function mapPlan(item: BmtPublishedPlanItem, index: number): PlanView {
   // không thấy offer nào thì lấy offer đầu để thẻ vẫn có giá.
   const offer = revision.offers.find((candidate) => candidate.offerKey === 'Month') ?? revision.offers[0]
   const quotas = offer?.quotas ?? []
+  const tier = tierFromCode(item.code, index)
+  const card = TIER_CARD[tier]
+
+  // Toggle theo displayBenefits của API; ba mức bố cục / dự toán nội thất / tư
+  // vấn API không có field nên hardcode theo hạng (card).
+  const benefits = benefitsFrom(revision.displayBenefits)
+  benefits.layout = { level: card.layout }
+  benefits.interiorEstimate = { level: card.interiorEstimate }
+  benefits.advisory = { level: card.advisory }
 
   const plan: SubscriptionPlan = {
     id: item.planId,
-    tier: tierFromCode(item.code, index),
+    tier,
     code: item.code,
     name: revision.name,
     ...(revision.highlightLabel ? { shortLabel: revision.highlightLabel } : {}),
     ...(revision.isHighlighted ? { popular: true } : {}),
     price: offer?.price ?? 0,
-    // API không có dòng "đối tượng phù hợp" và nhãn nút — để trống, thẻ vẫn render.
-    fitLine: '',
+    // API không có dòng "đối tượng phù hợp" và nhãn nút → hardcode theo hạng.
+    fitLine: card.fitLine,
     imageUrl: revision.coverImageUrl ?? '',
-    ctaLabel: '',
+    ctaLabel: card.ctaLabel,
     status: 'selling',
     designCredits: quotaLimit(quotas, 'generate', 'design.generate'),
     libraryCredits: quotaLimit(quotas, 'catalog', 'detail', 'library'),
-    benefits: benefitsFrom(revision.displayBenefits),
-    // API không có cấu trúc "quyền lợi nổi bật" → để trống.
-    highlights: [],
+    benefits,
+    // "Quyền lợi nổi bật" API không có → hardcode theo hạng; dòng nào ứng với
+    // quyền đang tắt sẽ tự bị lọc khỏi thẻ.
+    highlights: card.highlights,
     // Quà tặng có mô tả nhưng KHÔNG có giá trị quy đổi → không dựng khối quà (giá
     // trị = 0 sẽ hiện sai). Giữ điều kiện quà để không mất dữ liệu; `giftId` null.
     giftId: null,
