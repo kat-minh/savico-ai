@@ -8,20 +8,25 @@ import { useState } from 'react'
 import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import {
+  attachTemplateAsset,
   createLibraryTemplate,
+  createTemplateAsset,
   getTemplateVersions,
   listAllLibraryTemplates,
   setTemplateVisibility,
   type AdminTemplateItem,
   type AdminVersionItem,
-  type DrawingKind
+  type DrawingKind,
+  type VersionCreated
 } from '../../api/bmt/library.api'
 import { useEstimateCatalog } from '../../hooks/use-estimate-catalog'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { StatusSwitch } from '../common/field-kit'
 import { useFloorLabel } from '../catalog/use-floor-label'
+import { fileNameOf, resolveMediaType } from './library-assets.helpers'
 import { LibraryContentFields, toTemplateContent } from './library-content-fields'
+import { LibraryCreateImages } from './library-create-images'
 import { LibraryVersionsDrawer } from './library-versions-drawer'
 
 const { Text } = Typography
@@ -69,6 +74,53 @@ async function loadRows(): Promise<LibraryRow[]> {
       kind: shown?.drawingKind ?? null
     }
   })
+}
+
+/**
+ * Sau khi tạo mẫu (đã có `versionId`), gắn các ảnh nhập ở form tạo vào phiên bản
+ * đầu: mỗi ảnh = `createTemplateAsset` (lưu URL) → `attachTemplateAsset` (gắn vào
+ * cuối, đặt ảnh bìa nếu được chọn). Ảnh đã được form validate (https + đúng định
+ * dạng) nên lỗi ở đây chỉ do BE; làm best-effort và ĐẾM số ảnh lỗi thay vì ném để
+ * không tạo lại mẫu (mẫu đã tồn tại). Trả về số ảnh gắn hụt.
+ */
+async function attachCreateImages(created: VersionCreated, values: Record<string, unknown>): Promise<number> {
+  const rows = (values.images as Array<{ url?: string } | undefined> | undefined) ?? []
+  const items = rows
+    .map((row, index) => ({ index, url: (row?.url ?? '').trim() }))
+    .filter((item) => item.url.length > 0)
+  if (items.length === 0) return 0
+
+  const rawCover = typeof values.coverIndex === 'number' ? values.coverIndex : items[0]!.index
+  const coverIndex = items.some((item) => item.index === rawCover) ? rawCover : items[0]!.index
+
+  let editVersion = created.editVersion
+  let position = 1
+  let failed = 0
+  for (const { index, url } of items) {
+    try {
+      const originalName = fileNameOf(url)
+      const mediaType = resolveMediaType('Image', url, originalName)
+      if (!mediaType) {
+        failed++
+        continue
+      }
+      const { assetId } = await createTemplateAsset(created.templateId, {
+        kind: 'Image',
+        url,
+        originalName,
+        mediaType
+      })
+      const edited = await attachTemplateAsset(created.templateId, created.versionId, assetId, {
+        expectedEditVersion: editVersion,
+        position: position++,
+        setAsCover: index === coverIndex
+      })
+      editVersion = edited.editVersion
+    } catch {
+      failed++
+    }
+  }
+  return failed
 }
 
 /**
@@ -122,12 +174,18 @@ export function LibraryTemplateManager({ kind }: { kind: DrawingKind }) {
         rowKey={(row) => row.template.templateId}
         drawerWidth={640}
         banner={<Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('publishFlowNote')} />}
-        createValues={() => ({ drawingKind: kind })}
-        onCreate={(values) => createLibraryTemplate(toTemplateContent(values, catalog))}
+        createValues={() => ({ drawingKind: kind, coverIndex: 0 })}
+        onCreate={async (values) => {
+          const created = await createLibraryTemplate(toTemplateContent(values, catalog))
+          const failed = await attachCreateImages(created, values)
+          if (failed > 0) message.warning(l('createImagesPartial', { count: failed }))
+          return created
+        }}
         renderForm={(form) => (
           <>
             <Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('createNote')} />
             <LibraryContentFields form={form} />
+            <LibraryCreateImages form={form} />
           </>
         )}
         rowActions={(row, ctx) => (

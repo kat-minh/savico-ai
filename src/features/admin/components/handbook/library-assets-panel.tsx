@@ -40,28 +40,9 @@ import {
   type LibraryAssetKind
 } from '../../api/bmt/library.api'
 import { useHttpsUrlRule } from '../common/https-image-field'
+import { fileNameOf, resolveMediaType } from './library-assets.helpers'
 
 const { Text } = Typography
-
-/** Định dạng đã chốt (BR-LIB-001 khoản 2) — FE kiểm, BE chỉ kiểm URL. */
-const EXTENSIONS: Record<LibraryAssetKind, Record<string, string>> = {
-  Image: { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' },
-  Attachment: { pdf: 'application/pdf', dwg: 'image/vnd.dwg', dxf: 'image/vnd.dxf' }
-}
-
-function fileNameOf(url: string): string {
-  try {
-    const path = new URL(url).pathname
-    return decodeURIComponent(path.slice(path.lastIndexOf('/') + 1))
-  } catch {
-    return ''
-  }
-}
-
-function extensionOf(name: string): string {
-  const dot = name.lastIndexOf('.')
-  return dot < 0 ? '' : name.slice(dot + 1).toLowerCase()
-}
 
 export const libraryAssetsKey = (templateId: string, versionId: string) =>
   adminKeys.bmt('library', templateId, 'assets', versionId)
@@ -144,7 +125,7 @@ export function LibraryAssetsPanel({
     if (!values) return
     const url = values.url.trim()
     const originalName = values.originalName?.trim() || fileNameOf(url)
-    const mediaType = EXTENSIONS[values.kind][extensionOf(originalName)] ?? EXTENSIONS[values.kind][extensionOf(url)]
+    const mediaType = resolveMediaType(values.kind, url, originalName)
     if (!mediaType) {
       form.setFields([{ name: 'url', errors: [l(values.kind === 'Image' ? 'imageFormat' : 'attachmentFormat')] }])
       return
