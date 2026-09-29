@@ -2209,7 +2209,8 @@
     },
     "nav": {
       "dashboard": "To-do",
-      "templates": "2D plan templates",
+      "templates": "Template library",
+      "styles": "Styles",
       "articles": "Articles",
       "consultants": "Architects",
       "bookings": "Consultation requests",
@@ -3333,6 +3334,8 @@
       "inspectionsRule": "Inspections must be a whole number from 1."
     },
     "estimateCatalog": {
+      "groupArchitecture": "Architecture",
+      "groupInterior": "Interior",
       "buildingTypesDescription": "Building types used by Create estimate and the template library. Each type separately enables floor choice, tum choice and the two style groups. Saving only affects new estimates; existing estimates keep their configuration.",
       "architectureDescription": "Architecture styles customers pick when creating an estimate. Each style has a name and one image; assign styles to building types on the Building types screen.",
       "interiorDescription": "Interior styles customers pick when creating an estimate. Each style has a name and one image; assign styles to building types on the Building types screen.",
@@ -3370,6 +3373,11 @@
       "httpsUrl": "Must be a URL starting with https://, up to 2048 characters."
     },
     "library": {
+      "libraryTitle": "Template library",
+      "libraryDescription": "The library's 2D and 3D templates. Filter by kind above the table. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
+      "kindAll": "All",
+      "kind2d": "2D drawings",
+      "kind3d": "3D interior",
       "description2d": "2D drawing templates of the library. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
       "description3d": "3D drawing templates of the library. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
       "publishFlowNote": "A new template is a draft customers cannot see. Open \"Manage versions\" to add images, pick a cover and publish.",

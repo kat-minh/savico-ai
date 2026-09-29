@@ -10,9 +10,7 @@ import {
   DollarOutlined,
   FileTextOutlined,
   GiftOutlined,
-  HomeOutlined,
   OrderedListOutlined,
-  PictureOutlined,
   PlayCircleOutlined,
   SafetyCertificateOutlined,
   ScheduleOutlined,
@@ -119,8 +117,7 @@ export const ADMIN_NAV = [
     icon: AppstoreOutlined,
     items: [
       { key: 'buildingTypes', href: ADMIN_ROUTES.BUILDING_TYPES, icon: AppstoreOutlined },
-      { key: 'architectureStyles', href: ADMIN_ROUTES.ARCHITECTURE_STYLES, icon: HomeOutlined },
-      { key: 'interiorStyles', href: ADMIN_ROUTES.INTERIOR_STYLES, icon: SkinOutlined }
+      { key: 'styles', href: ADMIN_ROUTES.STYLES, icon: SkinOutlined }
     ]
   },
   {
@@ -128,7 +125,6 @@ export const ADMIN_NAV = [
     icon: BookOutlined,
     items: [
       { key: 'templates', href: ADMIN_ROUTES.TEMPLATES, icon: BookOutlined },
-      { key: 'templates3d', href: ADMIN_ROUTES.TEMPLATES_3D, icon: PictureOutlined },
       { key: 'templateViews', href: ADMIN_ROUTES.TEMPLATE_VIEWS, icon: ThunderboltOutlined },
       { key: 'articles', href: ADMIN_ROUTES.ARTICLES, icon: FileTextOutlined },
       { key: 'articleLabels', href: ADMIN_ROUTES.ARTICLE_LABELS, icon: TagOutlined },

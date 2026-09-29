@@ -17,8 +17,7 @@ export { QuotaEditor } from './components/business/quota-editor'
 // Thư viện — kho mẫu và video do đội nội dung nhập, đứng riêng khỏi nhóm CMS
 // theo trang: đây là BẢNG BẢN GHI thêm/sửa/xóa hằng ngày, không phải chữ của
 // một trang cụ thể.
-export { Template2DManager } from './components/handbook/template-2d-manager'
-export { Template3DManager } from './components/handbook/template-3d-manager'
+export { LibraryTemplateManager } from './components/handbook/library-template-manager'
 export { ArticleManager } from './components/handbook/article-manager'
 export { ArticleLabelManager } from './components/handbook/article-label-manager'
 export { HandbookStepManager } from './components/handbook/handbook-step-manager'

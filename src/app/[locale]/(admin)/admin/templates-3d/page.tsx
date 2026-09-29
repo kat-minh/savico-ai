@@ -1,16 +1,13 @@
-import { setRequestLocale } from 'next-intl/server'
+import { redirect } from 'next/navigation'
 
-import { Template3DManager } from '@/features/admin'
 import type { Locale } from '@/i18n/routing'
 
 interface PageProps {
   params: Promise<{ locale: Locale }>
 }
 
-/** Mẫu nội thất 3D (spec admin #2). */
+/** Đã gộp Mẫu 2D + 3D vào "Thư viện mẫu" — chuyển hướng để giữ link cũ. */
 export default async function AdminTemplates3dPage({ params }: PageProps) {
   const { locale } = await params
-  setRequestLocale(locale)
-
-  return <Template3DManager />
+  redirect(`/${locale}/admin/templates`)
 }

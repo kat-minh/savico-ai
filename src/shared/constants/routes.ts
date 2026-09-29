@@ -106,6 +106,8 @@ export const ADMIN_ROUTES = {
 
   // Danh mục nhập liệu công trình (spec admin #1, #17)
   BUILDING_TYPES: '/admin/building-types',
+  STYLES: '/admin/styles',
+  // Giữ để redirect link cũ sau khi gộp phong cách KT + NT về một màn.
   ARCHITECTURE_STYLES: '/admin/architecture-styles',
   INTERIOR_STYLES: '/admin/interior-styles',
   /** Cấu hình dự toán (spec admin #3). */

@@ -2209,7 +2209,8 @@
     },
     "nav": {
       "dashboard": "Việc cần xử lý",
-      "templates": "Mẫu bản vẽ 2D",
+      "templates": "Thư viện mẫu",
+      "styles": "Phong cách",
       "articles": "Bài viết",
       "consultants": "Kiến trúc sư",
       "bookings": "Yêu cầu tư vấn",
@@ -3333,6 +3334,8 @@
       "inspectionsRule": "Số lượt kiểm tra là số nguyên từ 1."
     },
     "estimateCatalog": {
+      "groupArchitecture": "Kiến trúc",
+      "groupInterior": "Nội thất",
       "buildingTypesDescription": "Danh mục loại công trình của Tạo dự toán và thư viện mẫu. Mỗi loại bật / tắt riêng việc chọn số tầng, chọn tum và hai nhóm phong cách. Lưu xong chỉ bản dự toán mới dùng cấu hình mới; bản đã tạo giữ cấu hình cũ.",
       "architectureDescription": "Phong cách kiến trúc khách chọn khi tạo dự toán. Mỗi phong cách có tên và một ảnh minh họa; gán phong cách cho loại công trình ở màn Loại công trình.",
       "interiorDescription": "Phong cách nội thất khách chọn khi tạo dự toán. Mỗi phong cách có tên và một ảnh minh họa; gán phong cách cho loại công trình ở màn Loại công trình.",
@@ -3370,6 +3373,11 @@
       "httpsUrl": "Cần URL bắt đầu bằng https://, tối đa 2048 ký tự."
     },
     "library": {
+      "libraryTitle": "Thư viện mẫu",
+      "libraryDescription": "Kho mẫu 2D và 3D của thư viện. Lọc theo loại mẫu ở đầu bảng. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
+      "kindAll": "Tất cả",
+      "kind2d": "Bản vẽ 2D",
+      "kind3d": "Nội thất 3D",
       "description2d": "Mẫu bản vẽ 2D của thư viện. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
       "description3d": "Mẫu bản vẽ 3D của thư viện. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
       "publishFlowNote": "Mẫu mới là một bản nháp, khách chưa thấy. Mở \"Quản lý phiên bản\" để thêm ảnh, chọn ảnh đại diện và công bố.",

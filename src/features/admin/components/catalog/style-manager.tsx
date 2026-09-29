@@ -1,7 +1,8 @@
 'use client'
 
-import { Alert, Descriptions, Form, Image, Input, Space, Tag, Typography } from 'antd'
+import { Alert, Descriptions, Form, Image, Input, Segmented, Space, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import {
   createCatalogStyle,
@@ -33,19 +34,22 @@ function assignedTypes(catalog: AdminCatalog | undefined, kind: 'architecture' |
 }
 
 /**
- * PHONG CÁCH KIẾN TRÚC / PHONG CÁCH NỘI THẤT (STORY-PROJ-005, BR-PROJ-004) —
- * hai danh mục riêng trên BMT API, mỗi danh mục một mục menu.
+ * PHONG CÁCH (STORY-PROJ-005, BR-PROJ-004) — MỘT màn cho cả phong cách kiến trúc
+ * và nội thất (chung endpoint `/admin/estimate-catalog`; một payload trả cả hai
+ * danh sách). Chọn Kiến trúc / Nội thất bằng Segmented thay vì tách hai mục menu.
  *
  * Phong cách chỉ có tên và một ảnh minh họa (URL https thuộc kho presign). Việc
  * gán phong cách cho loại công trình làm ở màn Loại công trình; màn này chỉ
- * hiện lại để đối chiếu. API không có xóa, ẩn hay sắp xếp phong cách.
+ * hiện lại để đối chiếu. API không có xóa, ẩn hay sắp xếp phong cách. `group`
+ * chỉ đặt lúc tạo (không sửa được) nên form Tạo lấy theo tab đang mở.
  */
-export function StyleManager({ kind }: { kind: 'architecture' | 'interior' }) {
+export function StyleManager() {
   const t = useTranslations('admin')
   const c = useTranslations('admin.estimateCatalog')
   const { data: catalog } = useEstimateCatalog()
   const { fetchFresh, invalidate } = useFreshCatalog()
-  const group: CatalogStyleGroup = kind === 'architecture' ? 'Architecture' : 'Interior'
+  const [group, setGroup] = useState<CatalogStyleGroup>('Architecture')
+  const kind: 'architecture' | 'interior' = group === 'Architecture' ? 'architecture' : 'interior'
   const pick = (source: AdminCatalog) => (kind === 'architecture' ? source.architectureStyles : source.interiorStyles)
 
   const typeTags = (styleId: string) => (
@@ -60,10 +64,21 @@ export function StyleManager({ kind }: { kind: 'architecture' | 'interior' }) {
 
   return (
     <ApiResourceManager<CatalogStyleDto>
-      title={t(kind === 'architecture' ? 'nav.architectureStyles' : 'nav.interiorStyles')}
+      title={t('nav.styles')}
       description={c(kind === 'architecture' ? 'architectureDescription' : 'interiorDescription')}
       queryKey={[...ESTIMATE_CATALOG_KEY, 'styles', group]}
       searchable
+      banner={
+        <Segmented
+          value={group}
+          onChange={(value) => setGroup(value as CatalogStyleGroup)}
+          options={[
+            { value: 'Architecture', label: c('groupArchitecture') },
+            { value: 'Interior', label: c('groupInterior') }
+          ]}
+          style={{ marginBottom: 16 }}
+        />
+      }
       fetchPage={async ({ pageIndex, pageSize, keyword }) => {
         const fresh = await fetchFresh()
         return pageLocally(

@@ -1,7 +1,7 @@
 'use client'
 
 import { AppstoreOutlined } from '@ant-design/icons'
-import { Alert, App, Button, Space, Tag, Tooltip, Typography } from 'antd'
+import { Alert, App, Button, Segmented, Space, Tag, Tooltip, Typography } from 'antd'
 import { useFormatter, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -124,12 +124,13 @@ async function attachCreateImages(created: VersionCreated, values: Record<string
 }
 
 /**
- * THƯ VIỆN MẪU BẢN VẼ (STORY-LIB-001, BR-LIB-001) trên BMT API — dùng chung cho
- * menu Mẫu 2D và Mẫu 3D (`drawingKind`). Mỗi mẫu có phiên bản: tạo mẫu là tạo
- * nháp đầu tiên, công bố nháp để khách thấy; ẩn / hiện lại không tạo phiên bản.
- * Mẫu chưa chọn loại bản vẽ hiện ở cả hai menu để không bị lạc.
+ * THƯ VIỆN MẪU BẢN VẼ (STORY-LIB-001, BR-LIB-001) trên BMT API — MỘT màn cho cả
+ * mẫu 2D và 3D (chung endpoint `/admin/library/templates`, chỉ khác `drawingKind`).
+ * Lọc 2D / 3D bằng Segmented ngay trên bảng thay vì tách hai mục menu. Mỗi mẫu có
+ * phiên bản: tạo mẫu là tạo nháp đầu tiên, công bố nháp để khách thấy; ẩn / hiện
+ * lại không tạo phiên bản. Mẫu chưa chọn loại bản vẽ hiện ở mọi tab để không lạc.
  */
-export function LibraryTemplateManager({ kind }: { kind: DrawingKind }) {
+export function LibraryTemplateManager() {
   const t = useTranslations('admin')
   const l = useTranslations('admin.library')
   const format = useFormatter()
@@ -137,8 +138,9 @@ export function LibraryTemplateManager({ kind }: { kind: DrawingKind }) {
   const floorLabel = useFloorLabel()
   const { data: catalog } = useEstimateCatalog()
   const [managing, setManaging] = useState<{ row: LibraryRow; ctx: ApiRowContext } | null>(null)
+  const [activeKind, setActiveKind] = useState<'all' | DrawingKind>('all')
 
-  const listKey = adminKeys.bmt('library', 'templates', kind)
+  const listKey = adminKeys.bmt('library', 'templates', activeKind)
 
   const classification = (version: AdminVersionItem | undefined) => {
     if (!version?.buildingTypeId) return <Text type='secondary'>-</Text>
@@ -160,21 +162,37 @@ export function LibraryTemplateManager({ kind }: { kind: DrawingKind }) {
   return (
     <>
       <ApiResourceManager<LibraryRow>
-        title={t(kind === '2D' ? 'nav.templates' : 'nav.templates3d')}
-        description={l(kind === '2D' ? 'description2d' : 'description3d')}
+        title={l('libraryTitle')}
+        description={l('libraryDescription')}
         queryKey={listKey}
         searchable
+        banner={
+          <>
+            <Segmented
+              value={activeKind}
+              onChange={(value) => setActiveKind(value as 'all' | DrawingKind)}
+              options={[
+                { value: 'all', label: l('kindAll') },
+                { value: '2D', label: l('kind2d') },
+                { value: '3D', label: l('kind3d') }
+              ]}
+              style={{ marginBottom: 16 }}
+            />
+            <Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('publishFlowNote')} />
+          </>
+        }
         fetchPage={async ({ pageIndex, pageSize, keyword }) => {
           const rows = await loadRows()
           const matching = rows.filter(
-            (row) => (row.kind === kind || row.kind === null) && matchesKeyword(row.name, keyword)
+            (row) =>
+              (activeKind === 'all' || row.kind === activeKind || row.kind === null) &&
+              matchesKeyword(row.name, keyword)
           )
           return pageLocally(matching, pageIndex, pageSize)
         }}
         rowKey={(row) => row.template.templateId}
         drawerWidth={640}
-        banner={<Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('publishFlowNote')} />}
-        createValues={() => ({ drawingKind: kind, coverIndex: 0 })}
+        createValues={() => ({ drawingKind: activeKind === 'all' ? undefined : activeKind, coverIndex: 0 })}
         onCreate={async (values) => {
           const created = await createLibraryTemplate(toTemplateContent(values, catalog))
           const failed = await attachCreateImages(created, values)

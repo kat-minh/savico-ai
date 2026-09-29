@@ -1,16 +1,13 @@
-import { setRequestLocale } from 'next-intl/server'
+import { redirect } from 'next/navigation'
 
-import { StyleManager } from '@/features/admin'
 import type { Locale } from '@/i18n/routing'
 
 interface PageProps {
   params: Promise<{ locale: Locale }>
 }
 
-/** Phong cách kiến trúc (spec admin #1). */
+/** Đã gộp phong cách KT + NT vào "Phong cách" — chuyển hướng để giữ link cũ. */
 export default async function AdminArchitectureStylesPage({ params }: PageProps) {
   const { locale } = await params
-  setRequestLocale(locale)
-
-  return <StyleManager kind='architecture' />
+  redirect(`/${locale}/admin/styles`)
 }
