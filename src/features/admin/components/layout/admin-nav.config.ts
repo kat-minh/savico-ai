@@ -3,7 +3,6 @@
 import {
   AimOutlined,
   AppstoreOutlined,
-  AuditOutlined,
   BookOutlined,
   CalculatorOutlined,
   CalendarOutlined,
@@ -71,11 +70,9 @@ export const ADMIN_NAV = [
   {
     key: 'packages',
     icon: GiftOutlined,
-    items: [
-      { key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: GiftOutlined },
-      { key: 'gifts', href: ADMIN_ROUTES.GIFTS, icon: GiftOutlined },
-      { key: 'supervisionPackages', href: ADMIN_ROUTES.SUPERVISION_PACKAGES, icon: AuditOutlined }
-    ]
+    // Đã gỡ "Quà tặng" (gifts) và "Gói giám sát" (supervisionPackages) khỏi menu
+    // theo yêu cầu; route và trang vẫn còn để bật lại sau nếu cần.
+    items: [{ key: 'planTable', href: ADMIN_ROUTES.PLAN_TABLE, icon: GiftOutlined }]
   },
   {
     key: 'contractorFlow',

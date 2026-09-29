@@ -9,6 +9,7 @@ import {
   Card,
   Checkbox,
   Col,
+  Collapse,
   Descriptions,
   Empty,
   Form,
@@ -26,7 +27,7 @@ import {
   type FormInstance
 } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
 import { isApiError } from '@/shared/lib/api'
@@ -38,6 +39,7 @@ import {
   type BmtBenefitDefinition,
   type BmtPlanDetail,
   type BmtPlanDraftContent,
+  type BmtPlanOfferInput,
   type BmtRevisionSummary,
   type BmtRevisionView,
   type PlanKind,
@@ -56,14 +58,12 @@ const NAME_MAX = 200
 const DESCRIPTION_MAX = 4000
 /** Giới hạn mềm cho các trường trình bày thẻ (phía client). */
 const HIGHLIGHT_LABEL_MAX = 100
-const GIFT_TEXT_MAX = 1000
 
 const SALE_TAG: Record<PlanSaleState, string> = { NotPublished: 'default', OnSale: 'green', Stopped: 'red' }
 const SALE_STATES: readonly PlanSaleState[] = ['NotPublished', 'OnSale', 'Stopped']
 
 interface QuotaRow {
   code: PlanQuotaCode
-  included: boolean
   monthUnlimited: boolean
   monthLimit: number | null
   yearUnlimited: boolean
@@ -139,7 +139,6 @@ function toValues(
       const inYear = year?.quotas?.find((quota) => quota.code === definition.code)
       return {
         code: definition.code as PlanQuotaCode,
-        included: Boolean(inMonth || inYear),
         monthUnlimited: inMonth?.isUnlimited ?? false,
         monthLimit: inMonth?.limit ?? null,
         yearUnlimited: inYear?.isUnlimited ?? false,
@@ -170,8 +169,9 @@ function toDraft(values: PlanFormValues): BmtPlanDraftContent {
     coverImageUrl: values.coverImageUrl?.trim() || null,
     isHighlighted: values.isHighlighted ?? false,
     highlightLabel: values.highlightLabel?.trim() || null,
-    giftDescription: values.giftDescription?.trim() || null,
-    giftConditions: values.giftConditions?.trim() || null
+    // Quà tặng đã gỡ khỏi form — luôn gửi null để bản nháp không giữ quà cũ.
+    giftDescription: null,
+    giftConditions: null
   }
   const base = { name: values.name.trim(), description: values.description?.trim() ?? '' }
   if (values.kind === 'Supervision') {
@@ -183,20 +183,27 @@ function toDraft(values: PlanFormValues): BmtPlanDraftContent {
       ...card
     }
   }
-  const included = (values.quotas ?? []).filter((row) => row.included)
+  // Hạn mức suy TRỰC TIẾP từ ô nhập: một quyền chỉ vào kỳ nào khi kỳ đó có
+  // "không giới hạn" hoặc một hạn mức > 0. Ô trống nghĩa là quyền không áp cho kỳ.
   const quotasFor = (cycle: 'month' | 'year') =>
-    included.map((row) => {
+    (values.quotas ?? []).flatMap((row) => {
       const isUnlimited = cycle === 'month' ? row.monthUnlimited : row.yearUnlimited
       const limit = cycle === 'month' ? row.monthLimit : row.yearLimit
-      return { code: row.code, isUnlimited, limit: isUnlimited ? null : limit }
+      const present = isUnlimited || (limit != null && limit > 0)
+      return present ? [{ code: row.code, isUnlimited, limit: isUnlimited ? null : limit }] : []
     })
+  // Gói thiết kế luôn bán theo tháng; "theo năm" là tùy chọn — chỉ gửi offer Năm
+  // khi có nhập giá năm (khớp data gói chỉ có tháng như BASIC / PLUS).
+  const offers: BmtPlanOfferInput[] = [
+    { offerKey: 'Month', price: values.monthPrice ?? 0, currency: 'VND', quotas: quotasFor('month') }
+  ]
+  if (values.yearPrice != null && values.yearPrice > 0) {
+    offers.push({ offerKey: 'Year', price: values.yearPrice, currency: 'VND', quotas: quotasFor('year') })
+  }
   return {
     ...base,
     consultationText: values.consultationText?.trim() ?? '',
-    offers: [
-      { offerKey: 'Month', price: values.monthPrice ?? 0, currency: 'VND', quotas: quotasFor('month') },
-      { offerKey: 'Year', price: values.yearPrice ?? 0, currency: 'VND', quotas: quotasFor('year') }
-    ],
+    offers,
     displayBenefits: (values.benefits ?? [])
       .filter((row) => row.included)
       .map((row) => ({
@@ -222,7 +229,8 @@ export function PlanManager() {
   const tAdmin = useTranslations('admin')
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
-  const [kind, setKind] = useState<PlanKind | 'all'>('all')
+  // Chỉ còn gói thiết kế — không lọc theo loại nữa (đã gỡ gói giám sát khỏi khu tạo).
+  const kind = 'all' as const
   const [saleState, setSaleState] = useState<PlanSaleState | 'all'>('all')
 
   const definitionsQuery = useQuery({
@@ -279,16 +287,6 @@ export function PlanManager() {
       drawerWidth={820}
       banner={
         <Space wrap>
-          <Select<PlanKind | 'all'>
-            value={kind}
-            onChange={setKind}
-            style={{ minWidth: 200 }}
-            options={[
-              { value: 'all', label: t('allKinds') },
-              { value: 'Design', label: kindLabel('Design') },
-              { value: 'Supervision', label: kindLabel('Supervision') }
-            ]}
-          />
           <Select<PlanSaleState | 'all'>
             value={saleState}
             onChange={setSaleState}
@@ -627,24 +625,69 @@ function PlanFields({
   const tAdmin = useTranslations('admin')
   const watchedKind = Form.useWatch('kind', form) as PlanKind | undefined
   const kind = plan?.kind ?? watchedKind ?? 'Design'
-  const quotas = (Form.useWatch('quotas', form) as QuotaRow[] | undefined) ?? []
-  const benefits = (Form.useWatch('benefits', form) as BenefitRow[] | undefined) ?? []
+  // Watch CHỈ để biết trạng thái tick (∞ / bật quyền lợi) cho phần hiển thị — KHÔNG
+  // dùng để quyết định render dòng nào. Các dòng render thẳng từ danh mục hệ thống
+  // (`definitions`) nên luôn hiện đủ khi danh mục đã tải, không lệ thuộc thời điểm
+  // seed giá trị vào form (trước đây `useWatch` rỗng khiến bảng hạn mức trống).
+  const quotas = (Form.useWatch('quotas', form) as (QuotaRow | undefined)[] | undefined) ?? []
+  const benefits = (Form.useWatch('benefits', form) as (BenefitRow | undefined)[] | undefined) ?? []
+  const quotaDefs = designDefinitions(definitions, 'Quota')
+  const benefitDefs = designDefinitions(definitions, 'Boolean')
   const required = { required: true, whitespace: true, message: tAdmin('fields.requiredMessage') }
-  const labelOf = (code: string) => definitions.find((item) => item.code === code)?.label ?? code
-  const priceRules = [{ required: true, type: 'integer' as const, min: 1, message: t('priceRule') }]
+  const requiredPrice = [{ required: true, type: 'integer' as const, min: 1, message: t('priceRule') }]
+  const yearPriceRule = [{ type: 'integer' as const, min: 1, message: t('priceRule') }]
+  const yearPrice = Form.useWatch('yearPrice', form) as number | undefined
+  const hasYear = yearPrice != null && yearPrice > 0
+
+  const sectionTitle = { display: 'block', fontSize: 15, margin: '4px 0 12px' } as const
+  const subTitle = { display: 'block', margin: '16px 0 4px' } as const
+  const hintText = { display: 'block', marginBottom: 12, fontSize: 12 } as const
+
+  /** Một ô hạn mức trong bảng: số lượt + công tắc "không giới hạn (∞)". Ô trống = quyền không áp cho kỳ này. */
+  const renderQuotaCell = (index: number, cycle: 'month' | 'year', unlimited: boolean, disabled: boolean) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+      <Form.Item
+        name={['quotas', index, `${cycle}Limit`]}
+        style={{ marginBottom: 0, flex: 1 }}
+        rules={disabled || unlimited ? [] : [{ type: 'integer', min: 1, message: t('limitRule') }]}
+      >
+        <InputNumber
+          min={1}
+          precision={0}
+          disabled={disabled || unlimited}
+          placeholder={t('limitPlaceholder')}
+          style={{ width: '100%' }}
+        />
+      </Form.Item>
+      <Tooltip title={t('unlimited')}>
+        <Form.Item name={['quotas', index, `${cycle}Unlimited`]} valuePropName='checked' style={{ marginBottom: 0 }}>
+          <Checkbox disabled={disabled} aria-label={t('unlimited')}>
+            ∞
+          </Checkbox>
+        </Form.Item>
+      </Tooltip>
+    </div>
+  )
 
   return (
     <>
       <Form.Item name='expectedVersion' hidden>
         <InputNumber />
       </Form.Item>
+      {/* Chỉ tạo gói thiết kế; giữ giá trị kind để gửi kèm khi tạo (đã gỡ ô chọn loại). */}
+      <Form.Item name='kind' hidden>
+        <Input />
+      </Form.Item>
       {plan?.saleState === 'Stopped' ? (
         <Alert type='warning' showIcon style={{ marginBottom: 12 }} title={t('stoppedNote')} />
       ) : null}
       {!isNew ? <Alert type='info' showIcon style={{ marginBottom: 12 }} title={t('draftNote')} /> : null}
 
+      <Text strong style={sectionTitle}>
+        {t('basicSection')}
+      </Text>
       <Row gutter={16}>
-        <Col xs={24} md={12}>
+        <Col xs={24}>
           {isNew ? (
             <Form.Item
               name='code'
@@ -659,14 +702,6 @@ function PlanFields({
               <Input value={plan?.code} disabled />
             </Form.Item>
           )}
-        </Col>
-        <Col xs={24} md={12}>
-          <Form.Item name='kind' label={t('kind')} extra={isNew ? t('kindHint') : undefined}>
-            <Select
-              disabled={!isNew}
-              options={(['Design', 'Supervision'] as const).map((value) => ({ value, label: t(`kinds.${value}`) }))}
-            />
-          </Form.Item>
         </Col>
         <Col xs={24}>
           <Form.Item
@@ -696,193 +731,187 @@ function PlanFields({
         ) : null}
       </Row>
 
-      <Text strong style={{ display: 'block', margin: '8px 0 12px' }}>
-        {t('offers')}
+      <Text strong style={sectionTitle}>
+        {t('priceQuotaSection')}
       </Text>
       {kind === 'Supervision' ? (
-        <Form.Item name='sitePrice' label={t('offerKeys.ConstructionSite')} rules={priceRules}>
+        <Form.Item
+          name='sitePrice'
+          label={t('offerKeys.ConstructionSite')}
+          extra={t('supervisionNote')}
+          rules={requiredPrice}
+        >
           <InputNumber min={1} step={100_000} precision={0} suffix='₫' style={{ width: '100%' }} />
         </Form.Item>
       ) : (
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            <Form.Item name='monthPrice' label={t('offerKeys.Month')} rules={priceRules}>
-              <InputNumber min={1} step={1000} precision={0} suffix='₫' style={{ width: '100%' }} />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={12}>
-            <Form.Item name='yearPrice' label={t('offerKeys.Year')} rules={priceRules}>
-              <InputNumber min={1} step={1000} precision={0} suffix='₫' style={{ width: '100%' }} />
-            </Form.Item>
-          </Col>
-        </Row>
-      )}
-
-      {kind === 'Design' ? (
         <>
           {definitionsError ? (
             <Alert type='error' showIcon style={{ marginBottom: 12 }} title={definitionsError} />
           ) : null}
 
-          <Text strong style={{ display: 'block', margin: '8px 0 4px' }}>
-            {t('quotaSection')}
-          </Text>
-          <Text type='secondary' style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+          {/* Bảng giá & hạn mức: mỗi dòng là 1 quyền, hai cột Tháng / Năm. Năm tùy chọn. */}
+          <div style={{ overflowX: 'auto' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(150px, 1.3fr) minmax(140px, 1fr) minmax(170px, 1fr)',
+                columnGap: 16,
+                alignItems: 'center',
+                minWidth: 520
+              }}
+            >
+              <div />
+              <Text type='secondary' style={{ fontSize: 12 }}>
+                {t('offerKeys.Month')}
+              </Text>
+              <Text type='secondary' style={{ fontSize: 12 }}>
+                {t('offerKeys.Year')} · {t('optional')}
+              </Text>
+
+              <Text strong>{t('priceRow')}</Text>
+              <Form.Item name='monthPrice' style={{ marginBottom: 8 }} rules={requiredPrice}>
+                <InputNumber min={1} step={1000} precision={0} suffix='₫' style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item name='yearPrice' style={{ marginBottom: 8 }} rules={yearPriceRule}>
+                <InputNumber
+                  min={1}
+                  step={1000}
+                  precision={0}
+                  suffix='₫'
+                  placeholder={t('yearOptionalPlaceholder')}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+
+              {quotaDefs.map((def, index) => {
+                const row = quotas[index]
+                return (
+                  <Fragment key={def.code}>
+                    <Form.Item name={['quotas', index, 'code']} hidden initialValue={def.code}>
+                      <Input />
+                    </Form.Item>
+                    <Text>{def.label}</Text>
+                    {renderQuotaCell(index, 'month', row?.monthUnlimited ?? false, false)}
+                    {renderQuotaCell(index, 'year', row?.yearUnlimited ?? false, !hasYear)}
+                  </Fragment>
+                )
+              })}
+            </div>
+          </div>
+          <Text type='secondary' style={hintText}>
             {t('quotaHint')}
           </Text>
-          {quotas.map((row, index) => (
-            <Card key={row.code} size='small' type='inner' style={{ marginBottom: 12 }}>
-              <Form.Item name={['quotas', index, 'code']} hidden>
-                <Input />
-              </Form.Item>
-              <Form.Item name={['quotas', index, 'included']} valuePropName='checked' style={{ marginBottom: 8 }}>
-                <Checkbox>
-                  <Text strong>{labelOf(row.code)}</Text>
-                </Checkbox>
-              </Form.Item>
-              {row.included ? (
-                <Row gutter={16}>
-                  {(['month', 'year'] as const).map((cycle) => {
-                    const unlimited = cycle === 'month' ? row.monthUnlimited : row.yearUnlimited
-                    return (
-                      <Col xs={24} md={12} key={cycle}>
-                        <Text type='secondary' style={{ display: 'block', marginBottom: 4 }}>
-                          {t(cycle === 'month' ? 'offerKeys.Month' : 'offerKeys.Year')}
-                        </Text>
-                        <Space align='start'>
-                          <Form.Item
-                            name={['quotas', index, `${cycle}Unlimited`]}
-                            valuePropName='checked'
-                            style={{ marginBottom: 8 }}
-                          >
-                            <Switch checkedChildren={t('unlimited')} unCheckedChildren={t('limited')} />
-                          </Form.Item>
-                          <Form.Item
-                            name={['quotas', index, `${cycle}Limit`]}
-                            style={{ marginBottom: 8 }}
-                            rules={
-                              unlimited ? [] : [{ required: true, type: 'integer', min: 1, message: t('limitRule') }]
-                            }
-                          >
-                            <InputNumber
-                              min={1}
-                              precision={0}
-                              disabled={unlimited}
-                              placeholder={t('limitPlaceholder')}
-                              style={{ width: 140 }}
-                            />
-                          </Form.Item>
-                        </Space>
-                      </Col>
-                    )
-                  })}
-                </Row>
-              ) : null}
-            </Card>
-          ))}
 
-          <Text strong style={{ display: 'block', margin: '8px 0 4px' }}>
+          <Text strong style={subTitle}>
             {t('displayBenefits')}
           </Text>
           <Text type='secondary' style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
             {t('displayBenefitsHint')}
           </Text>
-          {benefits.length === 0 ? (
+          {benefitDefs.length === 0 ? (
             <Text type='secondary' style={{ display: 'block', marginBottom: 12 }}>
               {t('noBooleanDefinitions')}
             </Text>
           ) : null}
-          {benefits.map((row, index) => (
-            <Card key={row.code} size='small' type='inner' style={{ marginBottom: 12 }}>
-              <Form.Item name={['benefits', index, 'code']} hidden>
-                <Input />
-              </Form.Item>
-              <Form.Item name={['benefits', index, 'included']} valuePropName='checked' style={{ marginBottom: 8 }}>
-                <Checkbox>
-                  <Text strong>{labelOf(row.code)}</Text>
-                </Checkbox>
-              </Form.Item>
-              {row.included ? (
-                <Row gutter={12} align='middle'>
-                  <Col xs={24} md={5}>
-                    <Form.Item
-                      name={['benefits', index, 'enabled']}
-                      valuePropName='checked'
-                      style={{ marginBottom: 8 }}
-                    >
-                      <Switch checkedChildren={t('on')} unCheckedChildren={t('off')} />
+          {benefitDefs.map((def, index) => {
+            const included = benefits[index]?.included ?? false
+            return (
+              <Card key={def.code} size='small' type='inner' style={{ marginBottom: 12 }}>
+                <Form.Item name={['benefits', index, 'code']} hidden initialValue={def.code}>
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  name={['benefits', index, 'included']}
+                  valuePropName='checked'
+                  initialValue={false}
+                  style={{ marginBottom: 8 }}
+                >
+                  <Checkbox>
+                    <Text strong>{def.label}</Text>
+                  </Checkbox>
+                </Form.Item>
+                {included ? (
+                  <Row gutter={12} align='middle'>
+                    <Col xs={24} md={5}>
+                      <Form.Item
+                        name={['benefits', index, 'enabled']}
+                        valuePropName='checked'
+                        initialValue={true}
+                        style={{ marginBottom: 8 }}
+                      >
+                        <Switch checkedChildren={t('on')} unCheckedChildren={t('off')} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={13}>
+                      <Form.Item
+                        name={['benefits', index, 'displayText']}
+                        initialValue={def.label}
+                        style={{ marginBottom: 8 }}
+                        rules={[required]}
+                      >
+                        <Input placeholder={t('displayText')} />
+                      </Form.Item>
+                    </Col>
+                    <Col xs={24} md={6}>
+                      <Form.Item
+                        name={['benefits', index, 'sortOrder']}
+                        initialValue={index + 1}
+                        style={{ marginBottom: 8 }}
+                        rules={[{ required: true, type: 'integer', message: t('sortOrderRule') }]}
+                      >
+                        <InputNumber precision={0} prefix='#' style={{ width: '100%' }} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                ) : null}
+              </Card>
+            )
+          })}
+        </>
+      )}
+
+      {/* Khối trình bày thẻ: tùy chọn, thu gọn mặc định để form gọn. */}
+      <Collapse
+        ghost
+        style={{ marginTop: 12 }}
+        items={[
+          {
+            key: 'card',
+            forceRender: true,
+            label: <Text strong>{t('cardSection')}</Text>,
+            children: (
+              <>
+                <Text type='secondary' style={hintText}>
+                  {t('cardNote')}
+                </Text>
+                <ImageUrlField form={form} name='coverImageUrl' label={t('coverImage')} />
+                <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
+                  {t('coverImageHint')}
+                </Text>
+                <Row gutter={16}>
+                  <Col xs={24} md={8}>
+                    <Form.Item name='isHighlighted' label={t('isHighlighted')} valuePropName='checked'>
+                      <Switch />
                     </Form.Item>
                   </Col>
-                  <Col xs={24} md={13}>
-                    <Form.Item name={['benefits', index, 'displayText']} style={{ marginBottom: 8 }} rules={[required]}>
-                      <Input placeholder={t('displayText')} />
-                    </Form.Item>
-                  </Col>
-                  <Col xs={24} md={6}>
+                  <Col xs={24} md={16}>
                     <Form.Item
-                      name={['benefits', index, 'sortOrder']}
-                      style={{ marginBottom: 8 }}
-                      rules={[{ required: true, type: 'integer', message: t('sortOrderRule') }]}
+                      name='highlightLabel'
+                      label={t('highlightLabel')}
+                      extra={t('highlightLabelHint')}
+                      rules={[
+                        { max: HIGHLIGHT_LABEL_MAX, message: tAdmin('fields.maxLength', { max: HIGHLIGHT_LABEL_MAX }) }
+                      ]}
                     >
-                      <InputNumber precision={0} prefix='#' style={{ width: '100%' }} />
+                      <Input maxLength={HIGHLIGHT_LABEL_MAX} />
                     </Form.Item>
                   </Col>
                 </Row>
-              ) : null}
-            </Card>
-          ))}
-        </>
-      ) : (
-        <Text type='secondary' style={{ display: 'block', fontSize: 12 }}>
-          {t('supervisionNote')}
-        </Text>
-      )}
-
-      <Text strong style={{ display: 'block', margin: '20px 0 4px' }}>
-        {t('cardSection')}
-      </Text>
-      <Text type='secondary' style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
-        {t('cardNote')}
-      </Text>
-      <ImageUrlField form={form} name='coverImageUrl' label={t('coverImage')} />
-      <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
-        {t('coverImageHint')}
-      </Text>
-      <Row gutter={16}>
-        <Col xs={24} md={8}>
-          <Form.Item name='isHighlighted' label={t('isHighlighted')} valuePropName='checked'>
-            <Switch />
-          </Form.Item>
-        </Col>
-        <Col xs={24} md={16}>
-          <Form.Item
-            name='highlightLabel'
-            label={t('highlightLabel')}
-            extra={t('highlightLabelHint')}
-            rules={[{ max: HIGHLIGHT_LABEL_MAX, message: tAdmin('fields.maxLength', { max: HIGHLIGHT_LABEL_MAX }) }]}
-          >
-            <Input maxLength={HIGHLIGHT_LABEL_MAX} />
-          </Form.Item>
-        </Col>
-        <Col xs={24}>
-          <Form.Item
-            name='giftDescription'
-            label={t('giftDescription')}
-            rules={[{ max: GIFT_TEXT_MAX, message: tAdmin('fields.maxLength', { max: GIFT_TEXT_MAX }) }]}
-          >
-            <Input.TextArea rows={2} maxLength={GIFT_TEXT_MAX} showCount />
-          </Form.Item>
-        </Col>
-        <Col xs={24}>
-          <Form.Item
-            name='giftConditions'
-            label={t('giftConditions')}
-            rules={[{ max: GIFT_TEXT_MAX, message: tAdmin('fields.maxLength', { max: GIFT_TEXT_MAX }) }]}
-          >
-            <Input.TextArea rows={2} maxLength={GIFT_TEXT_MAX} showCount />
-          </Form.Item>
-        </Col>
-      </Row>
+              </>
+            )
+          }
+        ]}
+      />
 
       <Text type='secondary' style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
         {t('snapshotNote')}
