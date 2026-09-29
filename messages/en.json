@@ -144,6 +144,7 @@
       "submit": "Send reset code",
       "backToLogin": "Back to sign in",
       "requestError": "Couldn't send the reset code. Please try again.",
+      "emailNotFound": "No account exists for this email.",
       "codeTitle": "Enter reset code",
       "codeSubtitle": "We sent a reset code to {email}. Enter it to continue.",
       "codeLabel": "Reset code",

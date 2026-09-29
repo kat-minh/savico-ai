@@ -65,8 +65,16 @@ export function ForgotPasswordForm() {
   })
 
   /** Chuẩn hóa lỗi API về một thông báo, fallback là thông báo mặc định. */
+  /**
+   * Hiện lỗi bằng tiếng Việt theo `messageCode` của BE (envelope trả `detail`
+   * tiếng Anh nên KHÔNG phô message thô); còn lại dùng thông báo mặc định của
+   * từng bước.
+   */
   function showError(error: unknown, fallback: string) {
-    toast.error(isApiError(error) && error.message ? error.message : fallback)
+    const code = isApiError(error) ? error.messageCode : undefined
+    if (code === 'UserNotExisted') return toast.error(t('emailNotFound'))
+    if (code === 'InvalidVerificationCode') return toast.error(t('codeError'))
+    toast.error(fallback)
   }
 
   async function onSubmitEmail(values: ForgotPasswordFormValues) {

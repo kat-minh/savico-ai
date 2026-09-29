@@ -144,6 +144,7 @@
       "submit": "Gửi mã đặt lại",
       "backToLogin": "Quay lại đăng nhập",
       "requestError": "Không gửi được mã đặt lại. Vui lòng thử lại.",
+      "emailNotFound": "Email này chưa có tài khoản.",
       "codeTitle": "Nhập mã đặt lại",
       "codeSubtitle": "Chúng tôi đã gửi mã đặt lại tới {email}. Nhập mã để tiếp tục.",
       "codeLabel": "Mã đặt lại",
