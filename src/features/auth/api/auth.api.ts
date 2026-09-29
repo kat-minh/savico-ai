@@ -19,12 +19,23 @@ interface BmtMe {
 }
 
 /**
- * The frontend only knows customer vs admin. Every non-customer BMT role
- * (Admin and any custom staff role) opens the admin area; the backend still
- * enforces each permission per request.
+ * Tên vai trò mà `GET /users/me` trả cho một tài khoản KHÁCH HÀNG thuần. Backend
+ * trả `["User"]` cho khách đăng ký thường (không phải `"customer"` hay tên hệ
+ * thống `"Khách hàng"`), và `["Admin"]` cho quản trị. Chuẩn hóa về chữ thường.
+ */
+const CUSTOMER_ROLE_TOKENS = new Set(['user', 'customer', 'khách hàng'])
+
+/**
+ * The frontend only knows customer vs admin. A pure customer account opens the
+ * public site; any other role (Admin or a custom staff role) opens the admin
+ * area. The backend still enforces each permission per request.
+ *
+ * Lưu ý: `/users/me` trả `"User"` cho khách thường — nếu coi mọi thứ khác
+ * `"customer"` là staff thì khách bị đẩy nhầm vào khu admin. Vì vậy phải whitelist
+ * các token vai trò khách, rồi mới coi phần còn lại là staff.
  */
 function toRoles(roles: string[] | null | undefined): AuthUser['roles'] {
-  const staff = (roles ?? []).some((r) => r.toLowerCase() !== ROLES.CUSTOMER)
+  const staff = (roles ?? []).some((r) => !CUSTOMER_ROLE_TOKENS.has(r.trim().toLowerCase()))
   return staff ? [ROLES.ADMIN] : [ROLES.CUSTOMER]
 }
 
