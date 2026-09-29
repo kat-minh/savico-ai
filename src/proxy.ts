@@ -73,5 +73,7 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   // Run on every path except Next internals, API proxy and static assets.
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+  // `'/'` must be listed explicitly — the lookahead pattern below does not
+  // match the bare root, so without it `/` never redirects to `/vi` (404).
+  matcher: ['/', '/((?!api|_next|_vercel|.*\\..*).*)']
 }
