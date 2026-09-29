@@ -17,7 +17,6 @@ import {
   SendOutlined,
   SettingOutlined,
   SkinOutlined,
-  TagOutlined,
   TeamOutlined,
   ThunderboltOutlined,
   UserOutlined
@@ -61,7 +60,6 @@ export const ADMIN_NAV = [
     icon: DollarOutlined,
     items: [
       { key: 'orders', href: ADMIN_ROUTES.ORDERS, icon: DollarOutlined },
-      { key: 'discounts', href: ADMIN_ROUTES.DISCOUNTS, icon: TagOutlined },
       { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: FileTextOutlined }
     ]
   },
