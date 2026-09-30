@@ -53,15 +53,17 @@ function toProject(item: BmtEstimateListItem): Project {
 
 export const bmtDesignApi = {
   listProjects: async (): Promise<Project[]> => {
+    // Đọc THẲNG dự toán thật `GET /estimates` — KHÔNG về mock khi rỗng nữa (trước
+    // đây fallback demo khiến khách tưởng còn mock; luồng TẠO dự toán chưa nối BE
+    // nên danh sách thật có thể trống cho tới khi bước tạo được nối). Lỗi mạng /
+    // 401 → trả rỗng để trang hiện trạng thái "chưa có dự án" thay vì demo giả.
     try {
       const page = await http.get<PagedResult<BmtEstimateListItem>>('/estimates', {
         params: { pageIndex: 1, pageSize: 100 }
       })
-      // DB rỗng (chưa tạo dự toán thật) → về mock để trang không trống.
-      if (page.items.length === 0) return mockDesignApi.listProjects()
       return page.items.map(toProject)
     } catch {
-      return mockDesignApi.listProjects()
+      return []
     }
   },
 
