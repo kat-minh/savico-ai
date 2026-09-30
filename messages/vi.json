@@ -2232,6 +2232,7 @@
       "dashboard": "Việc cần xử lý",
       "templates": "Thư viện mẫu",
       "styles": "Phong cách",
+      "constructionScopes": "Phạm vi thi công",
       "articles": "Bài viết",
       "consultants": "Kiến trúc sư",
       "bookings": "Yêu cầu tư vấn",
@@ -3354,6 +3355,17 @@
       "name": "Tên gói",
       "priceRule": "Giá là số không âm.",
       "inspectionsRule": "Số lượt kiểm tra là số nguyên từ 1."
+    },
+    "constructionScopes": {
+      "description": "Danh mục phạm vi thi công dùng chung cho hồ sơ nhà thầu và dự án tiêu biểu. Tên phải là duy nhất; phạm vi \"Ngừng dùng\" không gắn mới được nhưng giữ liên kết cũ. Không xoá được phạm vi đang có nơi dùng.",
+      "name": "Tên phạm vi",
+      "descriptionLabel": "Mô tả",
+      "sortOrder": "Thứ tự",
+      "status": "Trạng thái",
+      "active": "Đang dùng",
+      "inactive": "Ngừng dùng",
+      "deleteConfirmTitle": "Xoá phạm vi \"{name}\"?",
+      "deleteConfirmBody": "Chỉ xoá được khi chưa có nhà thầu hay dự án nào dùng phạm vi này."
     },
     "estimateCatalog": {
       "groupArchitecture": "Kiến trúc",

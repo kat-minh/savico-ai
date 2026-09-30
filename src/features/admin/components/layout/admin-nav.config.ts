@@ -3,6 +3,7 @@
 import {
   AppstoreOutlined,
   BookOutlined,
+  BuildOutlined,
   CalendarOutlined,
   DollarOutlined,
   FileTextOutlined,
@@ -108,7 +109,8 @@ export const ADMIN_NAV = [
     icon: AppstoreOutlined,
     items: [
       { key: 'buildingTypes', href: ADMIN_ROUTES.BUILDING_TYPES, icon: AppstoreOutlined },
-      { key: 'styles', href: ADMIN_ROUTES.STYLES, icon: SkinOutlined }
+      { key: 'styles', href: ADMIN_ROUTES.STYLES, icon: SkinOutlined },
+      { key: 'constructionScopes', href: ADMIN_ROUTES.CONSTRUCTION_SCOPES, icon: BuildOutlined }
     ]
   },
   {

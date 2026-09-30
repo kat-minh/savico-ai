@@ -107,6 +107,8 @@ export const ADMIN_ROUTES = {
   // Danh mục nhập liệu công trình (spec admin #1, #17)
   BUILDING_TYPES: '/admin/building-types',
   STYLES: '/admin/styles',
+  // Danh mục phạm vi thi công (STORY-CTR-003) — dùng cho hồ sơ + dự án nhà thầu.
+  CONSTRUCTION_SCOPES: '/admin/construction-scopes',
   // Giữ để redirect link cũ sau khi gộp phong cách KT + NT về một màn.
   ARCHITECTURE_STYLES: '/admin/architecture-styles',
   INTERIOR_STYLES: '/admin/interior-styles',

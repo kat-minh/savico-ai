@@ -2232,6 +2232,7 @@
       "dashboard": "To-do",
       "templates": "Template library",
       "styles": "Styles",
+      "constructionScopes": "Construction scopes",
       "articles": "Articles",
       "consultants": "Architects",
       "bookings": "Consultation requests",
@@ -3354,6 +3355,17 @@
       "name": "Package name",
       "priceRule": "Price must be 0 or more.",
       "inspectionsRule": "Inspections must be a whole number from 1."
+    },
+    "constructionScopes": {
+      "description": "Construction scope catalog shared by contractor profiles and portfolio projects. Names must be unique; an \"Inactive\" scope can't be newly attached but keeps existing links. A scope in use can't be deleted.",
+      "name": "Scope name",
+      "descriptionLabel": "Description",
+      "sortOrder": "Order",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deleteConfirmTitle": "Delete scope \"{name}\"?",
+      "deleteConfirmBody": "Can only be deleted when no contractor or project uses this scope."
     },
     "estimateCatalog": {
       "groupArchitecture": "Architecture",
