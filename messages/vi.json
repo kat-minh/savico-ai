@@ -3401,7 +3401,28 @@
       "registeredAddress": "Địa chỉ đăng ký",
       "industry": "Ngành nghề",
       "deleteConfirmTitle": "Xoá nhà thầu \"{name}\"?",
-      "deleteConfirmBody": "Xoá cả hồ sơ, dự án, pháp lý và ảnh của nhà thầu này. Không thể hoàn tác."
+      "deleteConfirmBody": "Xoá cả hồ sơ, dự án, pháp lý và ảnh của nhà thầu này. Không thể hoàn tác.",
+      "projects": {
+        "title": "Dự án tiêu biểu",
+        "hint": "Mỗi dự án cần một loại công trình, một phạm vi và ít nhất một ảnh.",
+        "add": "Thêm dự án",
+        "editTitle": "Sửa dự án",
+        "empty": "Chưa có dự án nào.",
+        "name": "Tên dự án",
+        "buildingType": "Loại công trình",
+        "scope": "Phạm vi thi công",
+        "images": "Ảnh dự án",
+        "imagesHint": "JPG/PNG/WebP, tối đa 10 MB mỗi ảnh.",
+        "upload": "Tải ảnh",
+        "needImage": "Cần ít nhất một ảnh cho dự án.",
+        "areaM2": "Diện tích (m²)",
+        "floorCount": "Số tầng",
+        "completedYear": "Năm hoàn thành",
+        "locationText": "Địa điểm",
+        "roleText": "Vai trò",
+        "mainWork": "Hạng mục chính",
+        "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
+      }
     },
     "constructionScopes": {
       "description": "Danh mục phạm vi thi công dùng chung cho hồ sơ nhà thầu và dự án tiêu biểu. Tên phải là duy nhất; phạm vi \"Ngừng dùng\" không gắn mới được nhưng giữ liên kết cũ. Không xoá được phạm vi đang có nơi dùng.",

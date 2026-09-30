@@ -14,6 +14,7 @@ import {
 } from '../../api/bmt/contractors.admin.api'
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
 import { ApiResourceManager } from '../common/api-resource-manager'
+import { ContractorProjectsSection } from './contractor-projects-section'
 import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 
@@ -214,7 +215,7 @@ export function ContractorAdminManager() {
           )
         }
       ]}
-      renderForm={(_form, ctx) => {
+      renderForm={(form, ctx) => {
         if (ctx.isNew) {
           return (
             <>
@@ -380,6 +381,8 @@ export function ContractorAdminManager() {
             <Form.Item name='industry' label={c('industry')}>
               <Input />
             </Form.Item>
+
+            {ctx.item ? <ContractorProjectsSection form={form} contractorId={ctx.item.id} /> : null}
           </>
         )
       }}

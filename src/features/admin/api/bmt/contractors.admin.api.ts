@@ -120,6 +120,66 @@ export interface ContractorSaved {
   status: string
 }
 
+/* ===== Dự án tiêu biểu (STORY-CTR-002) ===== */
+export interface ContractorProjectImageInput {
+  assetId: string
+  position: number
+}
+
+export interface ContractorProjectInput {
+  expectedVersion: number
+  name: string
+  buildingTypeId: string
+  scopeId: string
+  images: ContractorProjectImageInput[]
+  widthM?: number | null
+  lengthM?: number | null
+  areaM2?: number | null
+  floorCount?: number | null
+  hasAttic?: boolean | null
+  locationText?: string | null
+  completedYear?: number | null
+  roleText?: string | null
+  mainWork?: string | null
+}
+
+export interface ContractorProjectDetail {
+  id: string
+  name: string
+  buildingTypeId: string
+  scopeId: string
+  images: { assetId: string; position: number; contentUrl?: string | null }[]
+  widthM?: number | null
+  lengthM?: number | null
+  areaM2?: number | null
+  floorCount?: number | null
+  hasAttic?: boolean | null
+  locationText?: string | null
+  completedYear?: number | null
+  roleText?: string | null
+  mainWork?: string | null
+}
+
+export interface ContractorProjectsResult {
+  items: ContractorProjectDetail[]
+  contractorVersion: number
+}
+
+export interface ContractorProjectSaved {
+  projectId: string
+  contractorVersion: number
+}
+
+/** Response của `POST /assets` (TDD-CTR-001) — `contentUrl` là route tệp quản trị. */
+export interface ContractorAssetSaved {
+  assetId: string
+  originalName: string
+  mediaType: string
+  sizeBytes: number
+  contentUrl: string
+  contractorVersion: number
+}
+
 const BASE = '/admin/contractors'
 const idempotent = () => ({ headers: { 'Idempotency-Key': crypto.randomUUID() } })
 
@@ -137,5 +197,28 @@ export const contractorsAdminApi = {
   setVisibility: (id: string, expectedVersion: number, isVisible: boolean) =>
     http.patch<ContractorSaved>(`${BASE}/${id}/visibility`, { expectedVersion, isVisible }, idempotent()),
 
-  remove: (id: string, expectedVersion: number) => http.delete<void>(`${BASE}/${id}`, { params: { expectedVersion } })
+  remove: (id: string, expectedVersion: number) => http.delete<void>(`${BASE}/${id}`, { params: { expectedVersion } }),
+
+  /* ===== Dự án tiêu biểu ===== */
+  listProjects: (id: string) => http.get<ContractorProjectsResult>(`${BASE}/${id}/projects`),
+
+  createProject: (id: string, body: ContractorProjectInput) =>
+    http.post<ContractorProjectSaved>(`${BASE}/${id}/projects`, body, idempotent()),
+
+  updateProject: (id: string, projectId: string, body: ContractorProjectInput) =>
+    http.put<ContractorProjectSaved>(`${BASE}/${id}/projects/${projectId}`, body, idempotent()),
+
+  deleteProject: (id: string, projectId: string, expectedVersion: number) =>
+    http.delete<void>(`${BASE}/${id}/projects/${projectId}`, { params: { expectedVersion } }),
+
+  /* ===== Ảnh / tệp (asset) ===== */
+  uploadAsset: (id: string, file: File, expectedVersion: number) => {
+    const form = new FormData()
+    form.append('file', file)
+    form.append('expectedVersion', String(expectedVersion))
+    return http.post<ContractorAssetSaved>(`${BASE}/${id}/assets`, form, idempotent())
+  },
+
+  deleteAsset: (id: string, assetId: string, expectedVersion: number) =>
+    http.delete<void>(`${BASE}/${id}/assets/${assetId}`, { params: { expectedVersion } })
 }

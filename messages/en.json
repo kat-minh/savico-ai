@@ -3401,7 +3401,28 @@
       "registeredAddress": "Registered address",
       "industry": "Industry",
       "deleteConfirmTitle": "Delete contractor \"{name}\"?",
-      "deleteConfirmBody": "Deletes the profile, projects, legal info and images of this contractor. This cannot be undone."
+      "deleteConfirmBody": "Deletes the profile, projects, legal info and images of this contractor. This cannot be undone.",
+      "projects": {
+        "title": "Portfolio projects",
+        "hint": "Each project needs one building type, one scope and at least one image.",
+        "add": "Add project",
+        "editTitle": "Edit project",
+        "empty": "No projects yet.",
+        "name": "Project name",
+        "buildingType": "Building type",
+        "scope": "Scope",
+        "images": "Project images",
+        "imagesHint": "JPG/PNG/WebP, up to 10 MB each.",
+        "upload": "Upload",
+        "needImage": "At least one image is required.",
+        "areaM2": "Area (m²)",
+        "floorCount": "Floors",
+        "completedYear": "Completed year",
+        "locationText": "Location",
+        "roleText": "Role",
+        "mainWork": "Main work",
+        "deleteConfirmTitle": "Delete project \"{name}\"?"
+      }
     },
     "constructionScopes": {
       "description": "Construction scope catalog shared by contractor profiles and portfolio projects. Names must be unique; an \"Inactive\" scope can't be newly attached but keeps existing links. A scope in use can't be deleted.",
