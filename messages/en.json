@@ -4478,7 +4478,6 @@
       "undecided": "Not decided yet"
     },
     "sort": {
-      "match": "Best match",
       "distance": "Nearest",
       "rating": "Top rated",
       "survey": "Earliest survey"
@@ -4556,13 +4555,11 @@
       "ranking": {
         "stickyNudge": "Create a project brief - free",
         "tabs": {
-          "match": "Best match",
           "distance": "Nearest",
           "rating": "Top rated",
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "bestMatch": "Best match",
         "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
       },
       "safety": {

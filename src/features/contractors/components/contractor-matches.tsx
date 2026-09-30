@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleCheck, Clock, Info, MapPin, Scale, Sparkles, Star, X } from 'lucide-react'
+import { CircleCheck, Clock, Info, MapPin, Scale, Star, X } from 'lucide-react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
@@ -38,7 +38,7 @@ interface ContractorMatchesProps {
   projectId: string
 }
 
-const SORT_ICON = { match: Sparkles, distance: MapPin, rating: Scale, survey: Clock } as const
+const SORT_ICON = { distance: MapPin, rating: Scale, survey: Clock } as const
 
 /** Suy vùng từ tỉnh trong hồ sơ thay vì đoán theo cụm nhà thầu hiện có. */
 function serviceRegionFromProvince(provinceCode?: number | null, provinceName = ''): ServiceRegion {
@@ -180,7 +180,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [radiusChoice, setRadiusKm] = useState<SearchRadiusKm | null>(null)
   const radiusKm =
     radiusChoice !== null && rules.radiusOptions.includes(radiusChoice) ? radiusChoice : rules.defaultRadiusKm
-  const [sort, setSort] = useState<ContractorSort>('match')
+  const [sort, setSort] = useState<ContractorSort>('rating')
   /**
    * Vùng đang chọn. Mặc định lấy vùng có NHIỀU nhà thầu nhất trong danh bạ chứ
    * không cứng "Bắc" như ảnh mẫu — ảnh dùng dữ liệu demo miền Nam, còn danh bạ

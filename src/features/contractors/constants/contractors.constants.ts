@@ -44,8 +44,8 @@ export const MIN_COMPARE = 2
 /** Tab vùng phục vụ (S12). */
 export const SERVICE_REGIONS: readonly ServiceRegion[] = ['north', 'central', 'south'] as const
 
-/** Chip sắp xếp (S12) — cùng thứ tự với 4 tab xếp hạng ở landing (S09). */
-export const CONTRACTOR_SORTS: readonly ContractorSort[] = ['match', 'distance', 'rating', 'survey'] as const
+/** Chip sắp xếp (S12) — cùng thứ tự với các tab xếp hạng ở landing (S09). */
+export const CONTRACTOR_SORTS: readonly ContractorSort[] = ['rating', 'distance', 'survey'] as const
 
 /** 4 thẻ phạm vi thi công ở Bước 1 (S10). */
 export const CONSTRUCTION_SCOPES: readonly ConstructionScope[] = ['turnkey', 'shell', 'finishing', 'interior'] as const

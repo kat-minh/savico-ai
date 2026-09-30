@@ -242,7 +242,7 @@ export function ContractorCard({
                 iconClass={fact.iconClass}
                 value={fact.value}
                 hint={fact.hint}
-                highlighted={highlightField === fact.key || (highlightField === 'match' && fact.key === 'similar')}
+                highlighted={highlightField === fact.key}
               />
             ))}
           </div>

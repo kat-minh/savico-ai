@@ -4478,7 +4478,6 @@
       "undecided": "Chưa xác định"
     },
     "sort": {
-      "match": "Phù hợp nhất",
       "distance": "Gần nhất",
       "rating": "Đánh giá cao",
       "survey": "Khảo sát sớm"
@@ -4556,13 +4555,11 @@
       "ranking": {
         "stickyNudge": "Tạo hồ sơ dự án - miễn phí",
         "tabs": {
-          "match": "Phù hợp nhất",
           "distance": "Gần nhất",
           "rating": "Đánh giá cao",
           "survey": "Khảo sát sớm"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
-        "bestMatch": "Phù hợp nhất",
         "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
       },
       "safety": {

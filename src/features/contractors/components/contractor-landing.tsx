@@ -353,7 +353,7 @@ export function ContractorLanding() {
   const createBrief = useCreateBrief()
   const router = useRouter()
 
-  const [sort, setSort] = useState<ContractorSort>('match')
+  const [sort, setSort] = useState<ContractorSort>('rating')
 
   // Banner hero theo sheet góp ý BuildX; admin vẫn thay được ở màn "Hình ảnh site".
   const mapImage = useSiteImage('map.contractors')
@@ -970,7 +970,7 @@ export function ContractorLanding() {
               {ranked.length === 0 ? (
                 <li className='text-muted-foreground py-10 text-center text-sm text-pretty'>{t('ranking.empty')}</li>
               ) : null}
-              {ranked.map((contractor, index) => (
+              {ranked.map((contractor) => (
                 <motion.li
                   key={contractor.id}
                   layout
@@ -988,27 +988,7 @@ export function ContractorLanding() {
                   <ContractorLogo contractor={contractor} className='size-full aspect-square' />
 
                   <div className='min-w-0'>
-                    <p className='flex flex-wrap items-center gap-2 font-medium'>
-                      {contractor.name}
-                      {/* Ảnh: viên nhãn cam chỉ gắn ở dòng ĐẦU — nhà thầu đang
-                          đứng nhất theo tab đang chọn. Ẩn/hiện bằng hiện dần khi
-                          đổi tab sắp xếp (mục 6): chỉ có nghĩa ở tab "Phù hợp
-                          nhất", các tab khác đứng đầu vì lý do khác (gần nhất,
-                          đánh giá cao nhất…). */}
-                      <AnimatePresence>
-                        {sort === 'match' && index === 0 ? (
-                          <motion.span
-                            key='best-match'
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className='bg-brand-orange-soft text-brand-orange rounded-full px-2 py-0.5 text-[11px] font-semibold'
-                          >
-                            {t('ranking.bestMatch')}
-                          </motion.span>
-                        ) : null}
-                      </AnimatePresence>
-                    </p>
+                    <p className='flex flex-wrap items-center gap-2 font-medium'>{contractor.name}</p>
                     <span className='text-muted-foreground mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
                       <span className='flex items-center gap-1.5'>
                         <Star className='text-warning size-3.5 shrink-0 fill-current' />
