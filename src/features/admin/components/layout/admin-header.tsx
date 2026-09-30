@@ -27,6 +27,9 @@ const { Text } = Typography
 /** Tạm ẩn chọn ngôn ngữ bảng điều khiển (mặc định tiếng Việt). `true` để bật lại. */
 const SHOW_LANGUAGE_TOGGLE = false
 
+/** Tạm ẩn đổi giao diện (khóa nền sáng — xem `theme-provider`). `true` để bật lại. */
+const SHOW_THEME_TOGGLE = false
+
 /**
  * Thanh trên cùng của khu quản trị.
  *
@@ -142,14 +145,16 @@ export function AdminHeader({
           </Dropdown>
         )}
 
-        <Tooltip title={t('shell.toggleTheme')}>
-          <Button
-            type='text'
-            aria-label={t('shell.toggleTheme')}
-            icon={resolvedTheme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
-            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-          />
-        </Tooltip>
+        {SHOW_THEME_TOGGLE && (
+          <Tooltip title={t('shell.toggleTheme')}>
+            <Button
+              type='text'
+              aria-label={t('shell.toggleTheme')}
+              icon={resolvedTheme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            />
+          </Tooltip>
+        )}
 
         <Tooltip title={t('shell.viewSite')}>
           <Link href={ROUTES.HOME} target='_blank' rel='noreferrer'>
