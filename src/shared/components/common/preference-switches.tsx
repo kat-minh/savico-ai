@@ -13,6 +13,9 @@ import { cn } from '@/shared/lib/utils'
 /** Stable no-op subscribe so `useSyncExternalStore` only distinguishes SSR vs client. */
 const emptySubscribe = () => () => {}
 
+/** Tạm ẩn chọn ngôn ngữ (mặc định tiếng Việt). Đổi thành `true` để bật lại. */
+const SHOW_LANGUAGE_TOGGLE = false
+
 const THEME_MODES = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof THEME_MODES)[number]
 const THEME_ICON: Record<ThemeMode, LucideIcon> = { light: Sun, dark: Moon, system: Monitor }
@@ -49,25 +52,28 @@ export function PreferenceSwitches({ className }: { className?: string }) {
 
   return (
     <div className={cn('space-y-3 px-2 py-2', className)}>
-      <Field icon={<Languages className='size-3.5' />} label={tLanguage('label')}>
-        <ToggleGroup
-          type='single'
-          value={activeLocale}
-          disabled={isPending}
-          onValueChange={(value) => {
-            if (!value || value === activeLocale) return
-            // `pathname` from next-intl navigation is already locale-agnostic.
-            startTransition(() => router.replace(pathname, { locale: value as Locale }))
-          }}
-          className='bg-muted grid w-full grid-cols-2 gap-0.5 rounded-lg p-0.5'
-        >
-          {LOCALES.map((locale) => (
-            <ToggleGroupItem key={locale} value={locale} className={segmentClasses}>
-              {tLanguage(locale)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </Field>
+      {/* Toggle ngôn ngữ TẠM ẨN (mặc định tiếng Việt) — bật lại: đổi cờ thành true. */}
+      {SHOW_LANGUAGE_TOGGLE && (
+        <Field icon={<Languages className='size-3.5' />} label={tLanguage('label')}>
+          <ToggleGroup
+            type='single'
+            value={activeLocale}
+            disabled={isPending}
+            onValueChange={(value) => {
+              if (!value || value === activeLocale) return
+              // `pathname` from next-intl navigation is already locale-agnostic.
+              startTransition(() => router.replace(pathname, { locale: value as Locale }))
+            }}
+            className='bg-muted grid w-full grid-cols-2 gap-0.5 rounded-lg p-0.5'
+          >
+            {LOCALES.map((locale) => (
+              <ToggleGroupItem key={locale} value={locale} className={segmentClasses}>
+                {tLanguage(locale)}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Field>
+      )}
 
       <Field icon={<Sun className='size-3.5' />} label={tTheme('label')}>
         <ToggleGroup

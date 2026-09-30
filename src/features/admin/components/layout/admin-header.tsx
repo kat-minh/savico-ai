@@ -24,6 +24,9 @@ import { ADMIN_NAV } from './admin-nav.config'
 const { Header } = Layout
 const { Text } = Typography
 
+/** Tạm ẩn chọn ngôn ngữ bảng điều khiển (mặc định tiếng Việt). `true` để bật lại. */
+const SHOW_LANGUAGE_TOGGLE = false
+
 /**
  * Thanh trên cùng của khu quản trị.
  *
@@ -122,19 +125,22 @@ export function AdminHeader({
           </Space>
         </Tooltip>
 
-        <Dropdown
-          menu={{
-            selectable: true,
-            selectedKeys: [uiLocale],
-            items: LOCALES.map((code) => ({
-              key: code,
-              label: t(`shell.uiLocaleOption.${code}`),
-              onClick: () => router.replace(pathname, { locale: code })
-            }))
-          }}
-        >
-          <Button type='text' aria-label={t('shell.uiLocale')} icon={<GlobalOutlined />} />
-        </Dropdown>
+        {/* Toggle ngôn ngữ bảng điều khiển TẠM ẨN — mặc định tiếng Việt. */}
+        {SHOW_LANGUAGE_TOGGLE && (
+          <Dropdown
+            menu={{
+              selectable: true,
+              selectedKeys: [uiLocale],
+              items: LOCALES.map((code) => ({
+                key: code,
+                label: t(`shell.uiLocaleOption.${code}`),
+                onClick: () => router.replace(pathname, { locale: code })
+              }))
+            }}
+          >
+            <Button type='text' aria-label={t('shell.uiLocale')} icon={<GlobalOutlined />} />
+          </Dropdown>
+        )}
 
         <Tooltip title={t('shell.toggleTheme')}>
           <Button

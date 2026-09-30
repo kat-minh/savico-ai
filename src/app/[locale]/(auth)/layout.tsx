@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { GuestRoute } from '@/shared/auth'
-import { LanguageSwitcher, Logo, ThemeToggle } from '@/shared/components/common'
+import { Logo, ThemeToggle } from '@/shared/components/common'
 import { ROUTES } from '@/shared/constants/routes'
 
 /**
@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <div className='flex items-center gap-1'>
-            <LanguageSwitcher />
+            {/* Toggle ngôn ngữ tạm ẩn — mặc định tiếng Việt. */}
             <ThemeToggle />
           </div>
         </header>
