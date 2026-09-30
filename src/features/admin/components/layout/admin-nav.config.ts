@@ -2,11 +2,13 @@
 
 import {
   AppstoreOutlined,
+  BankOutlined,
   BookOutlined,
   BuildOutlined,
   CalendarOutlined,
   DollarOutlined,
   FileTextOutlined,
+  HistoryOutlined,
   GiftOutlined,
   OrderedListOutlined,
   PlayCircleOutlined,
@@ -54,7 +56,8 @@ export const ADMIN_NAV = [
     icon: DollarOutlined,
     items: [
       { key: 'orders', href: ADMIN_ROUTES.ORDERS, icon: DollarOutlined },
-      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: FileTextOutlined }
+      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: FileTextOutlined },
+      { key: 'paymentConnections', href: ADMIN_ROUTES.PAYMENT_CONNECTIONS, icon: BankOutlined }
     ]
   },
   {
@@ -101,7 +104,8 @@ export const ADMIN_NAV = [
     items: [
       { key: 'roles', href: ADMIN_ROUTES.ROLES, icon: SafetyCertificateOutlined },
       { key: 'staff', href: ADMIN_ROUTES.STAFF, icon: TeamOutlined },
-      { key: 'assignments', href: ADMIN_ROUTES.ASSIGNMENTS, icon: ScheduleOutlined }
+      { key: 'assignments', href: ADMIN_ROUTES.ASSIGNMENTS, icon: ScheduleOutlined },
+      { key: 'accessAudit', href: ADMIN_ROUTES.ACCESS_AUDIT, icon: HistoryOutlined }
     ]
   },
   {
