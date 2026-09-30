@@ -288,16 +288,30 @@ function GuideFields({ form }: { form: FormInstance }) {
             <LoadingOutlined /> {g('loadingMeta')}
           </Text>
         ) : preview ? (
-          <Space align='start' style={{ marginTop: 12 }}>
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: 8,
+              border: '1px solid var(--admin-border)',
+              borderRadius: 8,
+              background: 'var(--admin-surface)'
+            }}
+          >
             <Image
               src={preview.metadata.thumbnailUrl}
               alt=''
               width={160}
               height={90}
-              style={{ objectFit: 'cover', borderRadius: 6 }}
+              preview={false}
+              style={{ objectFit: 'cover', borderRadius: 6, display: 'block', flexShrink: 0 }}
             />
-            <Text type='secondary'>{g('metaLine', { duration: durationLabel(preview.metadata.durationSeconds) })}</Text>
-          </Space>
+            <Text type='secondary' style={{ fontSize: 13 }}>
+              {g('metaLine', { duration: durationLabel(preview.metadata.durationSeconds) })}
+            </Text>
+          </div>
         ) : null}
       </div>
       <Form.Item
