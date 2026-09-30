@@ -39,6 +39,38 @@ const str = (v: unknown): string | null => {
   return s === '' ? null : s
 }
 
+/** Dự án nhập lúc THÊM hồ sơ: chưa có contractorId nên giữ trong form, gửi sau khi hồ sơ được tạo. */
+export interface PendingProject {
+  key: string
+  values: Record<string, unknown>
+  images: ProjectImageDraft[]
+}
+
+/** Điều khiển ẩn chỉ để Form giữ giá trị mảng. */
+const HiddenValue = () => null
+
+let pendingCounter = 0
+
+export function buildProjectBody(
+  values: Record<string, unknown>,
+  images: readonly ProjectImageDraft[],
+  expectedVersion: number
+): ContractorProjectInput {
+  return {
+    expectedVersion,
+    name: String(values.name).trim(),
+    buildingTypeId: String(values.buildingTypeId),
+    scopeId: String(values.scopeId),
+    images: projectImagesToRequest(images),
+    areaM2: num(values.areaM2),
+    floorCount: num(values.floorCount),
+    locationText: str(values.locationText),
+    completedYear: num(values.completedYear),
+    roleText: str(values.roleText),
+    mainWork: str(values.mainWork)
+  }
+}
+
 /**
  * DỰ ÁN TIÊU BIỂU của nhà thầu (STORY-CTR-002, BR-CTR-003) — CRUD gọn ngay trong
  * ngăn kéo sửa hồ sơ. Mỗi dự án cần đúng một loại công trình + một phạm vi + ≥1
@@ -49,20 +81,25 @@ const str = (v: unknown): string | null => {
  * Tải ảnh KHÔNG đụng version nhà thầu, nhưng tạo/sửa/xoá dự án thì có: sau mỗi lần ghi cập nhật
  * lại `expectedVersion` của form hồ sơ cha để lưu hồ sơ sau đó không bị 409.
  */
-export function ContractorProjectsSection({ form, contractorId }: { form: FormInstance; contractorId: string }) {
+export function ContractorProjectsSection({ form, contractorId }: { form: FormInstance; contractorId?: string }) {
   const t = useTranslations('admin')
   const c = useTranslations('admin.contractorsAdmin.projects')
   const { modal, message } = App.useApp()
   const describeError = useContractorErrorMessage()
-  const [editing, setEditing] = useState<ContractorProjectDetail | 'new' | null>(null)
+  const [editing, setEditing] = useState<ContractorProjectDetail | PendingProject | 'new' | null>(null)
   const [projectForm] = Form.useForm()
   const [images, setImages] = useState<ProjectImageDraft[]>([])
   const [saving, setSaving] = useState(false)
 
   const projects = useQuery({
     queryKey: ['admin', 'contractor-projects', contractorId],
-    queryFn: () => contractorsAdminApi.listProjects(contractorId)
+    queryFn: () => contractorsAdminApi.listProjects(contractorId as string),
+    enabled: Boolean(contractorId)
   })
+
+  // Chưa có hồ sơ (đang THÊM): dự án giữ trong form, tạo cùng lúc khi bấm Lưu.
+  const pending = (Form.useWatch('pendingProjects', form) as PendingProject[] | undefined) ?? []
+  const setPending = (next: PendingProject[]) => form.setFieldValue('pendingProjects', next)
 
   const options = useQuery<FilterOptions>({
     queryKey: ['admin', 'contractor-form-options'],
@@ -95,9 +132,15 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
     projectForm.resetFields()
   }
 
+  function openEditPending(p: PendingProject) {
+    setEditing(p)
+    setImages(p.images)
+    projectForm.setFieldsValue(p.values)
+  }
+
   function openEdit(p: ContractorProjectDetail) {
     setEditing(p)
-    setImages(projectImagesFromDetail(p.images, contractorId))
+    setImages(projectImagesFromDetail(p.images, contractorId as string))
     projectForm.setFieldsValue({
       name: p.name,
       buildingTypeId: p.buildingTypeId,
@@ -118,21 +161,27 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
       message.error(c('needImage'))
       return
     }
+    if (!contractorId) {
+      // Giữ lại trong form; gửi lên BE khi bấm Lưu hồ sơ.
+      const entry: PendingProject = {
+        key:
+          editing !== null && editing !== 'new'
+            ? (editing as PendingProject).key
+            : `pending-project-${(pendingCounter += 1)}`,
+        values,
+        images
+      }
+      setPending(
+        editing === 'new' || editing === null
+          ? [...pending, entry]
+          : pending.map((item) => (item.key === entry.key ? entry : item))
+      )
+      setEditing(null)
+      return
+    }
     setSaving(true)
     try {
-      const body: ContractorProjectInput = {
-        expectedVersion: Number(form.getFieldValue('expectedVersion')),
-        name: String(values.name).trim(),
-        buildingTypeId: values.buildingTypeId,
-        scopeId: values.scopeId,
-        images: projectImagesToRequest(images),
-        areaM2: num(values.areaM2),
-        floorCount: num(values.floorCount),
-        locationText: str(values.locationText),
-        completedYear: num(values.completedYear),
-        roleText: str(values.roleText),
-        mainWork: str(values.mainWork)
-      }
+      const body = buildProjectBody(values, images, Number(form.getFieldValue('expectedVersion')))
       const saved =
         editing === 'new'
           ? await contractorsAdminApi.createProject(contractorId, body)
@@ -155,7 +204,11 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
       cancelText: t('actions.cancel'),
       onOk: async () => {
         try {
-          await contractorsAdminApi.deleteProject(contractorId, p.id, Number(form.getFieldValue('expectedVersion')))
+          await contractorsAdminApi.deleteProject(
+            contractorId as string,
+            p.id,
+            Number(form.getFieldValue('expectedVersion'))
+          )
           message.success(t('feedback.deleted'))
           // deleteProject trả 204, version đã tăng ở BE → tải lại để lấy version mới.
           await projects.refetch()
@@ -165,6 +218,39 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
       }
     })
   }
+
+  interface ProjectRow {
+    key: string
+    name: string
+    buildingTypeId: string
+    scopeId: string
+    completedYear?: number | null
+    thumb?: string
+    onEdit: () => void
+    onDelete: () => void
+  }
+
+  const rowsToShow: ProjectRow[] = contractorId
+    ? (projects.data?.items ?? []).map((p) => ({
+        key: p.id,
+        name: p.name,
+        buildingTypeId: p.buildingTypeId,
+        scopeId: p.scopeId,
+        completedYear: p.completedYear,
+        thumb: projectImagesFromDetail(p.images, contractorId)[0]?.previewUrl,
+        onEdit: () => openEdit(p),
+        onDelete: () => confirmDelete(p)
+      }))
+    : pending.map((p) => ({
+        key: p.key,
+        name: String(p.values.name ?? ''),
+        buildingTypeId: String(p.values.buildingTypeId ?? ''),
+        scopeId: String(p.values.scopeId ?? ''),
+        completedYear: num(p.values.completedYear),
+        thumb: p.images[0]?.previewUrl,
+        onEdit: () => openEditPending(p),
+        onDelete: () => setPending(pending.filter((item) => item.key !== p.key))
+      }))
 
   return (
     <>
@@ -178,11 +264,15 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
         </Button>
       </div>
 
-      {projects.data?.items.length ? (
+      <Form.Item name='pendingProjects' hidden>
+        <HiddenValue />
+      </Form.Item>
+
+      {rowsToShow.length ? (
         <Space orientation='vertical' size={8} style={{ width: '100%' }}>
-          {projects.data.items.map((p) => (
+          {rowsToShow.map((row) => (
             <div
-              key={p.id}
+              key={row.key}
               style={{
                 display: 'flex',
                 gap: 12,
@@ -192,9 +282,9 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
                 borderRadius: 8
               }}
             >
-              {projectImagesFromDetail(p.images, contractorId)[0]?.previewUrl ? (
+              {row.thumb ? (
                 <Image
-                  src={projectImagesFromDetail(p.images, contractorId)[0]?.previewUrl}
+                  src={row.thumb}
                   alt=''
                   width={56}
                   height={40}
@@ -205,15 +295,16 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
                 <div style={{ width: 56, height: 40, borderRadius: 6, background: 'var(--admin-placeholder)' }} />
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <Text strong>{p.name}</Text>
+                <Text strong>{row.name}</Text>
                 <div>
                   <Text type='secondary' style={{ fontSize: 12 }}>
-                    {nameOf(options.data?.buildingTypes, p.buildingTypeId)} · {nameOf(options.data?.scopes, p.scopeId)}
-                    {p.completedYear ? ` · ${p.completedYear}` : ''}
+                    {nameOf(options.data?.buildingTypes, row.buildingTypeId)} ·{' '}
+                    {nameOf(options.data?.scopes, row.scopeId)}
+                    {row.completedYear ? ` · ${row.completedYear}` : ''}
                   </Text>
                 </div>
               </div>
-              <Button size='small' type='text' onClick={() => openEdit(p)}>
+              <Button size='small' type='text' onClick={row.onEdit}>
                 {t('actions.edit')}
               </Button>
               <Button
@@ -222,7 +313,7 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
                 danger
                 icon={<DeleteOutlined />}
                 aria-label={t('actions.delete')}
-                onClick={() => confirmDelete(p)}
+                onClick={row.onDelete}
               />
             </div>
           ))}

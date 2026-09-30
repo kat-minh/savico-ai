@@ -32,7 +32,7 @@ import {
   type PartnershipDraft,
   type ProfileImageDraft
 } from './contractor-form.logic'
-import { ContractorProjectsSection } from './contractor-projects-section'
+import { ContractorProjectsSection, buildProjectBody, type PendingProject } from './contractor-projects-section'
 import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 
@@ -187,7 +187,16 @@ export function ContractorAdminManager() {
         // Hỏng ở bước PUT thì hồ sơ vẫn tồn tại ở trạng thái Ẩn, mở ra sửa tiếp
         // được — không mất dữ liệu đã nhập ngoài lần bấm đó.
         const created = await contractorsAdminApi.create(String(values.name ?? '').trim())
-        await contractorsAdminApi.update(created.contractorId, buildProfileBody(values, created.version))
+        const saved = await contractorsAdminApi.update(created.contractorId, buildProfileBody(values, created.version))
+        // Dự án tiêu biểu nhập ngay trong form: mỗi lần tạo dự án tăng version nên nối tiếp từng cái.
+        let version = saved.version
+        for (const project of (values.pendingProjects as PendingProject[] | undefined) ?? []) {
+          const projectSaved = await contractorsAdminApi.createProject(
+            created.contractorId,
+            buildProjectBody(project.values, project.images, version)
+          )
+          version = projectSaved.contractorVersion
+        }
       }}
       toFormValues={async (item) => {
         const d = await contractorsAdminApi.get(item.contractorId)
@@ -493,16 +502,7 @@ export function ContractorAdminManager() {
               <ContractorPartnershipField fieldName='partnership' contractorId={ctx.item?.contractorId} />
             </Form.Item>
 
-            {/* Dự án tiêu biểu cần contractorId nên chỉ thêm được sau khi hồ sơ
-                đã lưu; nói rõ thay vì để trống một khoảng không giải thích. */}
-            {ctx.item ? (
-              <ContractorProjectsSection form={form} contractorId={ctx.item.contractorId} />
-            ) : (
-              <>
-                <Divider titlePlacement='start'>{c('sections.projects')}</Divider>
-                <Text type='secondary'>{c('createHint')}</Text>
-              </>
-            )}
+            <ContractorProjectsSection form={form} contractorId={ctx.item?.contractorId} />
           </>
         )
       }}
