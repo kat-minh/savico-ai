@@ -4184,10 +4184,13 @@
         "category": "category"
       },
       "editor": {
-        "edit": "Edit HTML",
+        "edit": "Compose",
         "preview": "Preview",
         "count": "{count}/{max} characters",
         "hint": "Images must be https links on the system image store. Disallowed tags are stripped on save.",
+        "urlPlaceholder": "Paste an https link…",
+        "urlAdd": "Insert",
+        "imagePlaceholder": "Paste an https image link…",
         "tools": {
           "bold": "Bold",
           "italic": "Italic",

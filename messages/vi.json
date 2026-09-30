@@ -4184,10 +4184,13 @@
         "category": "danh mục"
       },
       "editor": {
-        "edit": "Soạn HTML",
+        "edit": "Soạn",
         "preview": "Xem trước",
         "count": "{count}/{max} ký tự",
         "hint": "Ảnh trong bài phải là link https trên kho ảnh của hệ thống. Hệ thống tự lọc thẻ không cho phép khi lưu.",
+        "urlPlaceholder": "Dán link https…",
+        "urlAdd": "Chèn",
+        "imagePlaceholder": "Dán link ảnh https…",
         "tools": {
           "bold": "In đậm",
           "italic": "In nghiêng",
