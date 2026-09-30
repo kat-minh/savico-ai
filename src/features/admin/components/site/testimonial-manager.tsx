@@ -1,13 +1,15 @@
 'use client'
 
+import { SwapOutlined } from '@ant-design/icons'
 import { App, Avatar, Form, Input, InputNumber, Tag } from 'antd'
 import { useTranslations } from 'next-intl'
 
 import type { CmsTestimonial } from '@/shared/cms'
 import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
 import { newAdminId } from '../../services/admin.service'
-import { ImageUrlField, StatusSwitch } from '../common/field-kit'
+import { ImageUrlField } from '../common/field-kit'
 import { ResourceManager } from '../common/resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 
 /**
  * NHẬN XÉT KHÁCH HÀNG — dải "Khách hàng nói về BuildX" của trang chủ: ảnh đại diện, tên, thông tin
@@ -18,7 +20,7 @@ import { ResourceManager } from '../common/resource-manager'
 export function TestimonialManager() {
   const t = useTranslations('admin')
   const tDefault = useTranslations('landing.testimonials')
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const { data: items = [] } = useAdminCollection('testimonials')
   const save = useSaveAdminItem('testimonials')
 
@@ -62,19 +64,28 @@ export function TestimonialManager() {
         quote: String(values.quote ?? '').trim(),
         avatarUrl: String(values.avatarUrl ?? '').trim()
       })}
-      rowActions={(item) => {
+      rowActions={(item): RowAction[] => {
         const active = item.status === 'active'
-        return (
-          <StatusSwitch
-            name={effective(item, 'name')}
-            current={active ? 'Active' : 'Inactive'}
-            next={active ? 'Inactive' : 'Active'}
-            onConfirm={async () => {
-              await save.mutateAsync({ ...item, status: active ? 'inactive' : 'active' })
-              message.success(t('feedback.saved'))
-            }}
-          />
-        )
+        const current = active ? 'Active' : 'Inactive'
+        const next = active ? 'Inactive' : 'Active'
+        return [
+          {
+            key: 'status',
+            label: t('actions.switchStatus'),
+            icon: <SwapOutlined />,
+            onClick: () =>
+              modal.confirm({
+                title: t('actions.switchStatusTitle', { name: effective(item, 'name') }),
+                content: t('actions.switchStatusBody', { current, next }),
+                okText: t('actions.confirm'),
+                cancelText: t('actions.cancel'),
+                onOk: async () => {
+                  await save.mutateAsync({ ...item, status: active ? 'inactive' : 'active' })
+                  message.success(t('feedback.saved'))
+                }
+              })
+          }
+        ]
       }}
       columns={[
         {
