@@ -85,6 +85,29 @@ function quotaOf(offers: BmtOfferView[], code: string): number | undefined {
   return undefined
 }
 
+/** Hạn mức của một mã TRONG một offer cụ thể (khác `quotaOf` — lấy offer Month trước). */
+function quotaInOffer(offer: BmtOfferView, code: string): number | undefined {
+  const quota = offer.quotas?.find((item) => item.code.toLowerCase() === code)
+  return quota && !quota.isUnlimited && typeof quota.limit === 'number' ? quota.limit : undefined
+}
+
+/** Giá + hạn mức của từng chu kỳ (Tháng / Năm) có giá hợp lệ trong các offer của API. */
+function cyclesOf(offers: BmtOfferView[]): NonNullable<PlanView['cycles']> {
+  const cycles: NonNullable<PlanView['cycles']> = {}
+  for (const offer of offers) {
+    if (offer.offerKey !== 'Month' && offer.offerKey !== 'Year') continue
+    if (typeof offer.price !== 'number' || offer.price <= 0) continue
+    const design = quotaInOffer(offer, DESIGN_QUOTA)
+    const library = quotaInOffer(offer, LIBRARY_QUOTA)
+    cycles[offer.offerKey] = {
+      price: offer.price,
+      ...(design !== undefined ? { designCredits: design } : {}),
+      ...(library !== undefined ? { libraryCredits: library } : {})
+    }
+  }
+  return cycles
+}
+
 function mergeToggles(
   base: PlanView['benefits']['toggles'],
   benefits: BmtDisplayBenefitView[]
@@ -108,14 +131,13 @@ function mergePlan(plan: PlanView, item: BmtPublishedPlanItem): PlanView {
 
   const offers = revision.offers ?? []
   const price = ordered(offers).find((offer) => typeof offer.price === 'number' && offer.price > 0)?.price
+  const cycles = cyclesOf(offers)
   // Checkout chọn nhánh mua THEO DẠNG ID: UUID → `POST /payment-orders` thật, còn lại →
-  // đơn mock. Nên gói đã có bản bán trên API phải mang `planId` làm `id`, nếu không
-  // thẻ hiện số liệu của API mà bấm mua lại chạy bằng mock. Chỉ đổi khi có offer
-  // `Month` vì trang thiết kế tạo đơn theo Month: thiếu offer đó thì đơn thật sẽ bị
-  // BE từ chối, để lại id mock an toàn hơn.
-  const purchasable = offers.some(
-    (offer) => offer.offerKey === 'Month' && typeof offer.price === 'number' && offer.price > 0
-  )
+  // đơn mock. Nên gói đã có bản bán trên API phải mang `planId` làm `id`, nếu không thẻ hiện
+  // số liệu của API mà bấm mua lại chạy bằng mock. Chỉ đổi khi có ít nhất một chu kỳ có giá để
+  // bán; thiếu thì đơn thật sẽ bị BE từ chối, để lại id mock an toàn hơn. Trang khoá nút mua
+  // ở chu kỳ mà gói không có offer, nên đơn không bao giờ xin một offer không tồn tại.
+  const purchasable = Object.keys(cycles).length > 0
   const name = text(revision.name)
   const shortLabel = text(revision.highlightLabel)
   const imageUrl = text(revision.coverImageUrl)
@@ -126,6 +148,7 @@ function mergePlan(plan: PlanView, item: BmtPublishedPlanItem): PlanView {
   return {
     ...plan,
     ...(item.planId && purchasable ? { id: item.planId } : {}),
+    ...(purchasable ? { cycles } : {}),
     ...(name ? { name } : {}),
     ...(shortLabel ? { shortLabel } : {}),
     ...(typeof revision.isHighlighted === 'boolean' ? { popular: revision.isHighlighted } : {}),

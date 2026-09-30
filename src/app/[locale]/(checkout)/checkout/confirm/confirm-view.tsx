@@ -52,6 +52,13 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
 
   const offerKey = toOfferKey(offer)
 
+  // Gói thiết kế có giá và hạn mức RIÊNG theo chu kỳ (tháng 20 phương án / năm 240…). Lấy đúng
+  // offer đang mua; gói API mà không có offer đó thì không có gì để bán → coi như không tìm thấy,
+  // thay vì hiện giá tháng cho đơn năm.
+  const cycle = offerKey === 'Year' ? 'Year' : 'Month'
+  const cycleOffer = apiPlan?.cycles?.[cycle]
+  const planForOffer = apiPlan && (!apiPlan.cycles || cycleOffer) ? apiPlan : undefined
+
   const apiProduct = apiPackage
     ? {
         name: apiPackage.name,
@@ -62,25 +69,25 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
         // Gói giám sát không có chu kỳ: điều kiện thật là phải gán vào công trình trong một năm.
         validity: t('validityAssign')
       }
-    : apiPlan
+    : planForOffer
       ? {
-          name: apiPlan.name,
+          name: planForOffer.name,
           tierTag: null,
-          popular: Boolean(apiPlan.popular),
-          price: apiPlan.price,
+          popular: Boolean(planForOffer.popular),
+          price: cycleOffer?.price ?? planForOffer.price,
           // Chỉ những gì BE có: hai hạn mức (phương án thiết kế, tra cứu thư viện) và quyền
           // phối cảnh 3D nếu bật. KHÔNG có "lượt chỉnh sửa" — BE không có hạn mức đó, đừng suy
           // ra từ số phương án.
           benefits: [
-            `${apiPlan.designCredits} phương án thiết kế`,
-            `${apiPlan.libraryCredits} lượt tra cứu thư viện mẫu`,
-            ...(apiPlan.benefits.toggles.render3d.enabled && apiPlan.benefits.toggles.render3d.text
-              ? [apiPlan.benefits.toggles.render3d.text]
+            `${cycleOffer?.designCredits ?? planForOffer.designCredits} phương án thiết kế`,
+            `${cycleOffer?.libraryCredits ?? planForOffer.libraryCredits} lượt tra cứu thư viện mẫu`,
+            ...(planForOffer.benefits.toggles.render3d.enabled && planForOffer.benefits.toggles.render3d.text
+              ? [planForOffer.benefits.toggles.render3d.text]
               : [])
           ],
           // Lượt thuộc KỲ mua (tháng/năm) và hết kỳ thì không dùng được nữa (BR-SUB-014/021) —
           // câu "lượt không hết hạn" của bản mock là sai với gói thật.
-          validity: t(offerKey === 'Year' ? 'validityYear' : 'validityMonth')
+          validity: t(cycle === 'Year' ? 'validityYear' : 'validityMonth')
         }
       : undefined
 

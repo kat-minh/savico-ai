@@ -345,6 +345,16 @@ export type PlanHighlightKey =
  * PRO, admin chỉ cập nhật, không thêm hay xóa. Chu kỳ sử dụng là cấu hình DÙNG
  * CHUNG (`planSettings.periodDays`), không nằm ở từng gói.
  */
+/** Chu kỳ mua của gói thiết kế — trùng `offerKey` của BMT API. */
+export type PlanCycle = 'Month' | 'Year'
+
+/** Giá và hạn mức của MỘT chu kỳ, lấy từ offer tương ứng của BMT API. */
+export interface PlanCycleOffer {
+  price: number
+  designCredits?: number
+  libraryCredits?: number
+}
+
 export interface SubscriptionPlan {
   /** Khóa bản ghi; trùng `tier` với ba gói gốc. */
   id: string
@@ -378,6 +388,11 @@ export interface SubscriptionPlan {
   giftId: string | null
   /** Điều kiện nhận quà — bắt buộc khi có quà, tối đa 500 ký tự. */
   giftConditions?: string
+  /**
+   * Giá + hạn mức theo từng chu kỳ, CHỈ có với gói đã bán trên BMT API (mock không có).
+   * `price` / `designCredits` / `libraryCredits` ở trên là của chu kỳ tháng.
+   */
+  cycles?: Partial<Record<PlanCycle, PlanCycleOffer>>
 }
 
 /** Cấu hình chung của gói thiết kế — mọi gói dùng chung một chu kỳ (§4). */

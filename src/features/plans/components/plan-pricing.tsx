@@ -22,7 +22,16 @@ import {
 } from 'lucide-react'
 import { animate, AnimatePresence, motion, useInView, useMotionValue } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react'
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent
+} from 'react'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -49,12 +58,15 @@ import {
 import { usePlanHighlights } from '../hooks/use-plan-highlights'
 import type { PlanView } from '../types/plan.types'
 import { usePlans } from '../hooks/use-plans'
+import { hasYearOffer, maxYearlySaving, planForCycle } from '../services/plan-cycle'
+import type { PlanCycle } from '../types/plan.types'
+import { PlanCycleToggle } from './plan-cycle-toggle'
 
 const TIERS: readonly PlanTier[] = ['basic', 'advanced', 'pro'] as const
 
 /**
  * Chu kỳ gói thiết kế gửi kèm khi vào checkout — đơn `POST /payment-orders` cần
- * `offerKey`. Trang chưa có công tắc chu kỳ (Tháng/Năm) nên mặc định `Month`;
+ * `offerKey`. Mặc định `Month`; công tắc Tháng/Năm đổi sang `Year` khi gói có offer năm;
  * gói mock bỏ qua giá trị này (checkout tự chạy mock).
  */
 const DESIGN_OFFER_KEY = 'Month'
@@ -110,6 +122,13 @@ function PlanPricingContent() {
   const { data: plans, isPending } = usePlans()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.design', { offsetMs: 120 })
 
+  // Chu kỳ đang xem. Công tắc chỉ hiện khi có gói bán theo năm; không thì luôn là tháng. Dựng
+  // bản "nhìn theo chu kỳ" ngay từ đây để thẻ, bảng so sánh và nút mua dùng nguyên price / hạn mức.
+  const [cycle, setCycle] = useState<PlanCycle>('Month')
+  const showCycleToggle = hasYearOffer(plans ?? [])
+  const activeCycle: PlanCycle = showCycleToggle ? cycle : 'Month'
+  const cyclePlans = useMemo(() => (plans ?? []).map((plan) => planForCycle(plan, activeCycle)), [plans, activeCycle])
+
   const { reduceMotion } = usePricingMotion()
 
   // Ảnh S01: cụm thẻ + bảng so sánh chiếm ~88% bề ngang màn hình, và CỠ CHỮ
@@ -127,6 +146,10 @@ function PlanPricingContent() {
           đề trong CMS thì phần tô màu vẫn tự bám chữ cuối. */}
       <PlanHeading />
 
+      {showCycleToggle ? (
+        <PlanCycleToggle value={activeCycle} onChange={setCycle} saving={maxYearlySaving(plans ?? [])} />
+      ) : null}
+
       {isPending ? (
         <div className='grid gap-5 md:grid-cols-3'>
           {[0, 1, 2].map((i) => (
@@ -134,7 +157,7 @@ function PlanPricingContent() {
           ))}
         </div>
       ) : (
-        <PlanCards plans={plans ?? []} />
+        <PlanCards plans={cyclePlans} />
       )}
 
       {/* Dải CTA giữa trang — trong ảnh nó nằm SÁT ngay dưới cụm thẻ (khoảng
@@ -182,7 +205,7 @@ function PlanPricingContent() {
         </div>
       </motion.section>
 
-      {plans ? <ComparisonTable plans={plans} /> : null}
+      {plans ? <ComparisonTable plans={cyclePlans} /> : null}
       {plans ? <ValueTable /> : null}
 
       {/* Góp ý BuildX: bỏ ghi chú "Lượt không hết hạn", còn ĐÚNG 3 ghi chú trên một hàng.
@@ -385,15 +408,11 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
               label={t('comparison.core.designOptions')}
               values={TIERS.map((tier) => t('comparison.core.optionUnit', { count: byTier(tier)?.designCredits ?? 0 }))}
             />
+            {/* Không có dòng "lượt chỉnh sửa": BE chỉ có hai hạn mức (phương án thiết kế, tra cứu
+                thư viện) — dòng đó từng được ghép từ số phương án nên in một con số không có thật. */}
             <CoreRow
               popularTier={POPULAR_TIER}
               index={1}
-              label={t('comparison.core.editCredits')}
-              values={TIERS.map((tier) => t('comparison.core.editUnit', { count: byTier(tier)?.designCredits ?? 0 }))}
-            />
-            <CoreRow
-              popularTier={POPULAR_TIER}
-              index={2}
               label={t('comparison.core.libraryCredits')}
               values={TIERS.map((tier) =>
                 t('comparison.core.libraryUnit', { count: byTier(tier)?.libraryCredits ?? 0 })
@@ -473,7 +492,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                       ease: pricingEase
                     }}
                   >
-                    {plan ? (
+                    {plan && !plan.cycleUnavailable ? (
                       <Button
                         asChild
                         size='sm'
@@ -481,7 +500,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         className={cn('plan-table-buy text-xs font-bold', plan.popular && 'plan-table-buy-popular')}
                       >
                         <Link
-                          href={checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY)}
+                          href={checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY)}
                           onClick={() => rememberCheckoutReturn(plan.id)}
                         >
                           {plan.ctaLabel || t(`cta.${tier}`)}
@@ -1045,20 +1064,26 @@ function PlanCard({
             </p>
 
             <p className='mt-3 text-center'>
-              <PlanPrice
-                value={plan.price}
-                tier={plan.tier}
-                started={pricesStarted}
-                instant={pricesInstant}
-                popular={!!plan.popular}
-              />
+              {plan.cycleUnavailable ? (
+                <span className='text-muted-foreground inline-block text-[10cqw] font-bold'>—</span>
+              ) : (
+                <PlanPrice
+                  value={plan.price}
+                  tier={plan.tier}
+                  started={pricesStarted}
+                  instant={pricesInstant}
+                  popular={!!plan.popular}
+                />
+              )}
               <span
                 className={cn(
                   'text-muted-foreground block text-[3.9cqw] transition-opacity duration-300',
                   pricesDone ? 'opacity-100' : 'opacity-0'
                 )}
               >
-                {t('oneTime')}
+                {plan.cycleUnavailable
+                  ? t('cycle.unavailable')
+                  : t(plan.cycle === 'Year' ? 'cycle.noteYear' : 'cycle.noteMonth')}
               </span>
             </p>
 
@@ -1152,11 +1177,17 @@ function PlanCard({
 
             {/* Hình S01: cả ba nút đều là nút đặc, chữ in hoa; riêng gói PLUS
               tô cam thay vì xanh. */}
-            <PlanBuyButton
-              plan={plan}
-              disabled={selected !== null && selected !== plan.id}
-              onSelect={() => onSelect(plan.id)}
-            />
+            {plan.cycleUnavailable ? (
+              <Button disabled size='lg' variant='outline' className='mt-5 h-[11cqw] w-full text-[4.4cqw] font-bold'>
+                {t('cycle.unavailable')}
+              </Button>
+            ) : (
+              <PlanBuyButton
+                plan={plan}
+                disabled={selected !== null && selected !== plan.id}
+                onSelect={() => onSelect(plan.id)}
+              />
+            )}
           </div>
         </section>
       </div>
@@ -1181,16 +1212,29 @@ function PlanPrice({
   const { reduceMotion } = usePricingMotion()
   const ref = useRef<HTMLSpanElement>(null)
   const startValue = value <= 0 ? 0 : 10 ** Math.max(0, String(Math.trunc(value)).length - 1)
-  const [number, setNumber] = useState(startValue)
-  const done = useRef(false)
+  // Số đang hiển thị (đếm dở hoặc đã xong). Giá đổi (đổi chu kỳ Tháng/Năm) thì đếm TỪ số đang
+  // hiển thị sang giá mới, tăng hay giảm đều được; lần đầu xuất hiện đếm từ mốc `startValue` lên.
+  // Không đếm từ mốc đầu cho mọi lần: mốc đầu của số 6 chữ số chính là 100.000 nên 399.000đ →
+  // 100.000đ sẽ không có gì để đếm, và mốc đầu cũng không bao giờ đếm xuống được.
+  const [current, setCurrent] = useState(startValue)
+  // Bản sao của `current` cho effect đọc mà không phải phụ thuộc vào state (đổi state mỗi nhịp).
+  const currentRef = useRef(startValue)
+  // Giá đã đếm xong; giá đổi thì khác đi và effect đếm lại.
+  const animatedFor = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!started || done.current) return
+    if (!started || animatedFor.current === value) return
 
+    // Giảm chuyển động / vào trang đã xem: không đếm, giao diện hiện thẳng `value`.
     if (instant || reduceMotion) {
-      done.current = true
-      const sync = window.setTimeout(() => setNumber(value), 0)
-      return () => window.clearTimeout(sync)
+      animatedFor.current = value
+      return
+    }
+
+    const from = currentRef.current
+    if (from === value) {
+      animatedFor.current = value
+      return
     }
 
     const duration = PRICE_COUNT_DURATION_MS[tier]
@@ -1200,15 +1244,16 @@ function PlanPrice({
     const tick = (now: number) => {
       const progress = Math.min(1, (now - startAt) / duration)
       const eased = 1 - Math.pow(1 - progress, 4)
-      setNumber(Math.round(startValue + (value - startValue) * eased))
+      const next = progress < 1 ? Math.round(from + (value - from) * eased) : value
+      currentRef.current = next
+      setCurrent(next)
 
       if (progress < 1) {
         frame = window.requestAnimationFrame(tick)
         return
       }
 
-      done.current = true
-      setNumber(value)
+      animatedFor.current = value
       ref.current?.animate([{ scale: '1' }, { scale: '1.035' }, { scale: '1' }], {
         duration: PRICE_SETTLE_PULSE_MS,
         easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
@@ -1216,12 +1261,15 @@ function PlanPrice({
     }
 
     frame = window.requestAnimationFrame(tick)
+    // Đổi giá giữa chừng thì huỷ nhịp cũ; nhịp mới đếm tiếp từ số đang hiển thị.
     return () => window.cancelAnimationFrame(frame)
-  }, [instant, reduceMotion, started, startValue, tier, value])
+  }, [instant, reduceMotion, started, tier, value])
 
   const final = formatPriceTag(value, locale)
-  const digits = String(instant || reduceMotion ? value : number).padStart(String(Math.trunc(value)).length, '0')
-  let digitIndex = 0
+  const shown = instant || reduceMotion ? value : current
+  // Định dạng lại theo số đang đếm (không ép vào khuôn của `final`): khi đếm từ số nhiều chữ số
+  // xuống số ít chữ số, khuôn của `final` sẽ cắt mất chữ số đầu.
+  const text = formatPriceTag(shown, locale)
 
   return (
     <span
@@ -1235,10 +1283,10 @@ function PlanPrice({
     >
       <span className='sr-only'>{final}</span>
       <span aria-hidden>
-        {[...final].map((char, charIndex) =>
+        {[...text].map((char, charIndex) =>
           /\d/.test(char) ? (
             <span key={charIndex} className='inline-block w-[0.62em]'>
-              {digits[digitIndex++]}
+              {char}
             </span>
           ) : (
             <span key={charIndex}>{char}</span>
@@ -1286,12 +1334,12 @@ function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled:
         })
         .finished.catch(() => undefined)
     }
-    if (alive.current) router.push(checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY))
+    if (alive.current) router.push(checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY))
   }
   return (
     <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold'>
       <Link
-        href={checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY)}
+        href={checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY)}
         aria-disabled={disabled || pending}
         aria-busy={pending}
         onClick={(e) => void buy(e)}
