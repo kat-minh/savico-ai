@@ -47,7 +47,9 @@ export function useLogin(redirectTo?: string) {
       // dù phiên khách có `redirect`/hành động chờ (vd guest bấm link /account
       // rồi đăng nhập bằng tài khoản admin). Khu admin và khu khách tách biệt.
       if (user.roles.includes(ROLES.ADMIN)) {
-        router.replace(ADMIN_ROUTES.DASHBOARD)
+        // Trang Tổng quan (`/admin`) đã ẩn khỏi menu → đá về mục đầu sidebar
+        // (Đơn hàng) để không rơi vào trang không có trong điều hướng.
+        router.replace(ADMIN_ROUTES.ORDERS)
         return
       }
       // Khách: nối lại hành động đang chờ (tải / xem) tại chỗ → đích `redirect`

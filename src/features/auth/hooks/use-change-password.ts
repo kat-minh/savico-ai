@@ -36,7 +36,8 @@ export function useChangePassword() {
     onSuccess: ({ user }) => {
       setUser(user)
       queryClient.setQueryData(authKeys.currentUser(), user)
-      router.replace(user.roles.includes(ROLES.ADMIN) ? ADMIN_ROUTES.DASHBOARD : ROUTES.HOME)
+      // Tổng quan (`/admin`) đã ẩn khỏi menu → admin về mục đầu sidebar (Đơn hàng).
+      router.replace(user.roles.includes(ROLES.ADMIN) ? ADMIN_ROUTES.ORDERS : ROUTES.HOME)
     }
   })
 }
