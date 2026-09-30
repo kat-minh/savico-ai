@@ -1001,7 +1001,7 @@ function TemplateFloorViewer({
   const finishDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType === 'mouse') {
       const target = event.target as HTMLElement
-      if (template.kind === '3d' && !target.closest('[data-detail-zoom]')) setLightboxOpen(true)
+      if (template.kind === '3d' && !target.closest('[data-detail-zoom],[data-detail-nav]')) setLightboxOpen(true)
       return
     }
 
@@ -1130,6 +1130,36 @@ function TemplateFloorViewer({
         >
           BUILDX
         </span>
+        {/* Mũi tên trái/phải chuyển tầng / góc nhìn: ẩn mặc định, chỉ hiện khi rê chuột (hoặc
+            focus bàn phím) vào vùng ảnh để không che bản vẽ. Cảm ứng vuốt ngang như cũ. */}
+        {floors.length > 1 ? (
+          <>
+            {(
+              [
+                { dir: -1, label: labels.previousFloor, side: 'left-3', Icon: ChevronLeft },
+                { dir: 1, label: labels.nextFloor, side: 'right-3', Icon: ChevronRight }
+              ] as const
+            ).map(({ dir, label, side, Icon }) => {
+              const target = activeIndex + dir
+              if (target < 0 || target >= floors.length) return null
+              return (
+                <button
+                  key={dir}
+                  type='button'
+                  data-detail-nav
+                  aria-label={label}
+                  onClick={() => selectIndex(target)}
+                  className={cn(
+                    'bg-background/85 text-foreground hover:bg-background absolute top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-full border opacity-0 shadow-sm backdrop-blur transition-[opacity,background-color,transform] duration-200 group-focus-within/viewer:opacity-100 group-hover/viewer:opacity-100 hover:scale-105 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none',
+                    side
+                  )}
+                >
+                  <Icon className='size-5' />
+                </button>
+              )
+            })}
+          </>
+        ) : null}
         <button
           type='button'
           data-detail-zoom

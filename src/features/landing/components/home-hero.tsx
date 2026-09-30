@@ -141,7 +141,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
           này, nên chỗ hở thật là 56 − 38 = 18px. Đổi `pb-14` hay `-mt-9.5` thì đổi số này theo.
           Từ `lg` giữ `gap-10` như cũ. */}
       <div className='mx-auto grid w-full max-w-[90rem] items-center gap-y-4.5 px-4 pt-5 pb-14 lg:grid-cols-[minmax(0,1fr)_14rem_minmax(0,0.65fr)] lg:gap-10 lg:px-8 lg:py-20'>
-        <div className='space-y-4'>
+        <div className='min-w-0 space-y-4'>
           <motion.p
             initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -200,10 +200,13 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
             initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={seq(0.72, 0.75)}
-            className='flex flex-col gap-3 pt-1 sm:flex-row'
+            className='flex min-w-0 flex-col gap-3 pt-1 sm:flex-row'
           >
             {resumeProject ? (
-              <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>
+              <Button
+                asChild
+                className='brand-green-button h-11 max-w-full min-w-0 shrink overflow-hidden rounded-full px-8 text-base has-[>svg]:px-8'
+              >
                 <Link href={resumeProject.href} title={`${t('resumeCta')} ${resumeProject.name}`}>
                   <ResumeProjectLabel label={t('resumeCta')} name={resumeProject.name} />
                   <ArrowRight className='size-4' />
@@ -211,7 +214,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
               </Button>
             ) : (
               <Button
-                className='brand-green-button group h-11 rounded-full px-8 text-base active:scale-95 has-[>svg]:px-8'
+                className='brand-green-button group h-11 rounded-full px-8 text-base has-[>svg]:px-8'
                 onClick={onCreateProject}
               >
                 {t('primaryCta')}
@@ -221,7 +224,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
             <Button
               type='button'
               variant='outline'
-              className='bg-card/85 h-11 rounded-full px-8 text-base active:scale-95 has-[>svg]:px-8'
+              className='bg-card/85 h-11 shrink-0 rounded-full px-8 text-base has-[>svg]:px-8'
               onClick={onWatchIntro}
             >
               <Play className='size-4' />

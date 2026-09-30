@@ -99,13 +99,7 @@ export function SupervisionSummary({ projectId }: SupervisionSummaryProps) {
         </p>
       </div>
 
-      <Button
-        asChild
-        className={cn(
-          'mt-4 w-full',
-          'bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90 bg-none shadow-none'
-        )}
-      >
+      <Button asChild className={cn('mt-4 w-full', 'brand-orange-button text-brand-orange-foreground')}>
         <Link href={supervisionRoute(project.id)}>
           {t('open')}
           <ArrowRight className='size-4' />

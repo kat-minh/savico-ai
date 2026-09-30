@@ -256,7 +256,7 @@
       ]
     },
     "privacy": {
-      "title": "Chính sách bảo mật",
+      "title": "Quyền riêng tư",
       "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
       "intro": "Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn theo Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.",
       "sections": [
@@ -287,7 +287,7 @@
       ]
     },
     "payment": {
-      "title": "Chính sách thanh toán và hoàn tiền",
+      "title": "Thanh toán & Hoàn tiền",
       "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
       "intro": "Chính sách này mô tả cách bạn thanh toán các gói dịch vụ trên nền tảng, cách chúng tôi xác nhận thanh toán và các trường hợp được hoàn tiền.",
       "sections": [
@@ -320,6 +320,9 @@
           "body": "Mọi thắc mắc về thanh toán và hoàn tiền, vui lòng liên hệ qua các kênh ở mục liên hệ cuối trang."
         }
       ]
+    },
+    "ecommerce": {
+      "title": "TMĐT & Đối tác"
     }
   },
   "chatbot": {
@@ -391,9 +394,10 @@
       "consult": "Tư vấn 1:1",
       "faq": "Câu hỏi thường gặp",
       "about": "Giới thiệu",
-      "privacy": "Chính sách bảo mật",
+      "privacy": "Quyền riêng tư",
       "terms": "Điều khoản sử dụng",
-      "paymentPolicy": "Chính sách thanh toán"
+      "paymentPolicy": "Thanh toán & Hoàn tiền",
+      "ecommerce": "TMĐT & Đối tác"
     },
     "social": {
       "facebook": "Facebook BuildX",
@@ -660,14 +664,23 @@
     },
     "brands": {
       "title": "BuildX được tin tưởng bởi",
-      "label": "BUILDX ĐƯỢC TIN TƯỞNG BỞI",
+      "label": "Các thương hiệu được tin dùng",
       "items": {
         "hoaphat": "Hòa Phát",
         "inax": "INAX",
         "viglacera": "Viglacera",
         "dulux": "Dulux",
         "cadivi": "CADIVI",
-        "scg": "SCG"
+        "scg": "SCG",
+        "kova": "KOVA",
+        "dongtam": "Đồng Tâm Group",
+        "jotun": "Jotun",
+        "toto": "TOTO",
+        "vinhtuong": "Vĩnh Tường",
+        "eurowindow": "Eurowindow",
+        "tienphong": "Nhựa Tiền Phong",
+        "hoasen": "Hoa Sen Group",
+        "hatien": "Xi măng Hà Tiên"
       }
     },
     "testimonials": {
@@ -1413,7 +1426,7 @@
       },
       "xlsx": {
         "fileName": "Du-toan-{project}.xlsx",
-        "untitledProject": "BUILDX",
+        "untitledProject": "BuildX",
         "sheet": "Dự toán chi tiết",
         "title": "BẢNG DỰ TOÁN CHI TIẾT",
         "project": "Dự án",
@@ -2158,7 +2171,11 @@
       "bookCta": "Đặt lịch tư vấn",
       "notFound": "Không tìm thấy kiến trúc sư này",
       "bookCtaWithTime": "Đặt lịch tư vấn lúc {time} · {date}",
-      "chooseSlotHint": "Chọn 1 khung giờ để đặt lịch"
+      "chooseSlotHint": "Chọn 1 khung giờ để đặt lịch",
+      "lightboxClose": "Đóng",
+      "lightboxPrev": "Ảnh trước",
+      "lightboxNext": "Ảnh sau",
+      "viewLarger": "Xem ảnh lớn: {label}"
     },
     "slots": {
       "title": "Chọn khung giờ tư vấn",
@@ -6004,7 +6021,7 @@
     }
   },
   "meta": {
-    "home": "Thiết kế và dự toán xây nhà bằng AI từ ảnh lô đất | BUILDX",
+    "home": "Thiết kế và dự toán xây nhà bằng AI từ ảnh lô đất | BuildX",
     "design": "Thiết kế & Dự toán",
     "designInput": "Nhập thông tin dự án",
     "designEstimate": "Kết quả dự toán",

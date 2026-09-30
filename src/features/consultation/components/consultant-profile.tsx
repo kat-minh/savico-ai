@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Award, Briefcase, CalendarCheck, Star, X } from 'lucide-react'
+import { Award, Briefcase, CalendarCheck, Star, X, ZoomIn } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { useAuth, useAuthDialogStore } from '@/shared/auth'
-import { Photo, revealEase } from '@/shared/components/common'
+import { useAuth } from '@/shared/auth'
+import { ImageLightbox, Photo, revealEase, type LightboxPhoto } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES } from '@/shared/constants/routes'
@@ -58,8 +58,7 @@ export function ConsultantProfile({
   const t = useTranslations('consult.profile')
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
-  const { isAuthenticated, isInitialized } = useAuth()
-  const openAuthDialog = useAuthDialogStore((state) => state.open)
+  const { isAuthenticated } = useAuth()
   const { data: history } = useMyConsultations(isAuthenticated)
   // Khung giờ khách đã đặt với KTS này — hiện "Lịch của bạn" chứ không như bị người khác lấy.
   const myBookings = new Set(
@@ -74,6 +73,13 @@ export function ConsultantProfile({
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [hoveredWork, setHoveredWork] = useState<number | null>(null)
+  // Ảnh đại diện + ảnh công trình dùng chung một hộp xem lớn (chỉ số 0 = ảnh đại diện).
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const lightboxPhotos: LightboxPhoto[] = [
+    ...(consultant.avatarUrl ? [{ url: consultant.avatarUrl, caption: consultant.name }] : []),
+    ...consultant.works.map((work) => ({ url: work.imageUrl, caption: work.label }))
+  ]
+  const avatarOffset = consultant.avatarUrl ? 1 : 0
 
   // Lịch về sau khi trang đã render nên ngày đang chọn được SUY RA thay vì đặt
   // bằng effect: chưa chọn gì (hoặc ngày đã chọn không còn trong lịch mới) thì
@@ -127,12 +133,6 @@ export function ConsultantProfile({
   )
 
   function openBookingDialog() {
-    // Chưa đăng nhập: mở popup đăng nhập (đặt lịch cần phiên) và hẹn mở lại
-    // form đặt lịch sau khi đăng nhập xong — không để API trả "token missing".
-    if (isInitialized && !isAuthenticated) {
-      openAuthDialog('login', () => openBookingDialog())
-      return
-    }
     const rect = ctaRef.current?.getBoundingClientRect()
     setBookOrigin(
       rect
@@ -169,13 +169,28 @@ export function ConsultantProfile({
       <motion.div key={consultant.id} className='space-y-6'>
         <header className='flex flex-col gap-4 sm:flex-row'>
           <motion.div {...entrance(0)} className='aspect-square w-28 shrink-0 sm:w-32'>
-            <Photo
-              className='size-full rounded-xl'
-              src={consultant.avatarUrl}
-              alt={consultant.name}
-              sizes='128px'
-              priority
-            />
+            <button
+              type='button'
+              onClick={() => setLightboxIndex(0)}
+              aria-label={t('viewLarger', { label: consultant.name })}
+              className='group/zoom relative block size-full cursor-zoom-in overflow-hidden rounded-xl'
+            >
+              <Photo
+                className='size-full rounded-xl'
+                src={consultant.avatarUrl}
+                alt={consultant.name}
+                sizes='128px'
+                priority
+              />
+              <span
+                aria-hidden
+                className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-[inherit] bg-black/0 opacity-0 transition-[opacity,background-color] duration-300 group-hover/zoom:bg-black/30 group-hover/zoom:opacity-100 group-focus-visible/zoom:opacity-100'
+              >
+                <span className='flex size-9 scale-75 items-center justify-center rounded-full bg-white/90 text-black shadow-md transition-transform duration-300 group-hover/zoom:scale-100'>
+                  <ZoomIn className='size-4' />
+                </span>
+              </span>
+            </button>
           </motion.div>
 
           <div className='min-w-0 space-y-2'>
@@ -229,17 +244,42 @@ export function ConsultantProfile({
                   hoveredWork === index ? 'scale-105 brightness-110' : hoveredWork !== null ? 'brightness-90' : ''
                 )}
               >
-                <Photo
-                  className='aspect-4/3 w-full rounded-lg'
-                  src={work.imageUrl}
-                  alt={work.label}
-                  sizes='(max-width: 640px) 45vw, 200px'
-                />
+                <button
+                  type='button'
+                  onClick={() => setLightboxIndex(avatarOffset + index)}
+                  aria-label={t('viewLarger', { label: work.label })}
+                  className='group/zoom relative block w-full cursor-zoom-in overflow-hidden rounded-lg'
+                >
+                  <Photo
+                    className='aspect-4/3 w-full rounded-lg'
+                    src={work.imageUrl}
+                    alt={work.label}
+                    sizes='(max-width: 640px) 45vw, 200px'
+                  />
+                  <span
+                    aria-hidden
+                    className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-[inherit] bg-black/0 opacity-0 transition-[opacity,background-color] duration-300 group-hover/zoom:bg-black/30 group-hover/zoom:opacity-100 group-focus-visible/zoom:opacity-100'
+                  >
+                    <span className='flex size-9 scale-75 items-center justify-center rounded-full bg-white/90 text-black shadow-md transition-transform duration-300 group-hover/zoom:scale-100'>
+                      <ZoomIn className='size-4' />
+                    </span>
+                  </span>
+                </button>
               </div>
               <figcaption className='sr-only'>{work.label}</figcaption>
             </motion.figure>
           ))}
         </div>
+
+        <ImageLightbox
+          photos={lightboxPhotos}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+          closeLabel={t('lightboxClose')}
+          previousLabel={t('lightboxPrev')}
+          nextLabel={t('lightboxNext')}
+        />
 
         {isPending ? (
           <Skeleton className='h-44 w-full rounded-xl' />

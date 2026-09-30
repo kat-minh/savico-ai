@@ -42,8 +42,8 @@ export type PageMetaKey =
   | 'share'
 
 /**
- * `generateMetadata` cho một trang: tiêu đề riêng theo mẫu "Chủ đề trang | BUILDX"
- * (góp ý BuildX, PC19). Phần "| BUILDX" do `title.template` của layout gắn; trang
+ * `generateMetadata` cho một trang: tiêu đề riêng theo mẫu "Chủ đề trang | BuildX"
+ * (góp ý BuildX, PC19). Phần "| BuildX" do `title.template` của layout gắn; trang
  * chủ dùng tiêu đề tuyệt đối vì câu của nó đã có sẵn thương hiệu.
  *
  * Dùng: `export const generateMetadata = pageMetadata('guide')`.

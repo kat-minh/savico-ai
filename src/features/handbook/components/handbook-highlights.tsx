@@ -42,87 +42,96 @@ export function HandbookHighlights() {
   const [now] = useState(() => Date.now())
 
   return (
-    <section className='brand-band'>
-      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-        <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-16'>
+      <header>
+        {/* Desktop: eyebrow đứng riêng một hàng; headline + CTA nằm cùng hàng để
+            bố cục cân bằng với các section khác trên trang chủ. */}
+        <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>{t('eyebrow')}</p>
+
+        <div className='mt-2 flex flex-wrap items-center justify-between gap-x-10 gap-y-3'>
           <div className='space-y-2'>
-            {/* Góp ý BuildX: bỏ chữ "Cẩm nang xây nhà", câu "Kiến thức thực tế…" là tiêu đề chính. */}
-            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+            {/* Dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Cẩm nang xây nhà"
+                (`titleMobile`) và câu "Kiến thức thực tế…" thành mô tả nhỏ. */}
+            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
+              <span className='lg:hidden'>{t('titleMobile')}</span>
+              <span className='hidden lg:inline'>{t('title')}</span>
+            </h2>
+            <p className='text-muted-foreground text-sm lg:hidden'>{t('title')}</p>
           </div>
 
           <Link
             href={ROUTES.HANDBOOK}
-            className='inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
+            className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
           >
             {t('viewAll')}
             <ChevronRight className='size-4 lg:hidden' />
             <ArrowRight className='hidden size-4 lg:block' />
           </Link>
-        </header>
+        </div>
+      </header>
 
-        <ul className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
-          {isPending
-            ? Array.from({ length: HOME_HANDBOOK_COUNT }, (_, index) => (
-                <li key={index}>
-                  <Skeleton className='h-64 w-full rounded-2xl' />
-                </li>
-              ))
-            : latest.map((article, index) => {
-                const isNew = now - new Date(article.publishedAt).getTime() < NEW_BADGE_WINDOW_MS
+      <ul className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+        {isPending
+          ? Array.from({ length: HOME_HANDBOOK_COUNT }, (_, index) => (
+              <li key={index}>
+                <Skeleton className='h-64 w-full rounded-2xl' />
+              </li>
+            ))
+          : latest.map((article, index) => {
+              const isNew = now - new Date(article.publishedAt).getTime() < NEW_BADGE_WINDOW_MS
 
-                return (
-                  <motion.li
-                    key={article.id}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.5, delay: index * 0.1, ease: revealEase }}
+              return (
+                <motion.li
+                  key={article.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: revealEase }}
+                >
+                  <Link
+                    href={handbookArticleRoute(article.slug)}
+                    className='bg-card group hover:border-primary/50 flex h-full flex-col overflow-hidden rounded-2xl border transition-colors'
                   >
-                    <Link
-                      href={handbookArticleRoute(article.slug)}
-                      className='bg-card text-card-foreground group hover:border-primary/50 flex h-full flex-col overflow-hidden rounded-2xl border transition-colors'
-                    >
-                      <div className='relative'>
-                        <RevealPhoto
-                          className='aspect-[16/9] w-full'
-                          src={article.imageUrl}
-                          alt={article.title}
-                          sizes='(max-width: 1024px) 50vw, 420px'
-                        />
-                        {/* Phủ xanh mờ khi rê — nằm ĐÈ LÊN ảnh, không thay ảnh. */}
-                        <div className='bg-primary/0 group-hover:bg-primary/20 pointer-events-none absolute inset-0 transition-colors duration-300' />
-                        {isNew ? (
-                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'>
-                            {t('newBadge')}
-                          </span>
-                        ) : null}
-                      </div>
-                      <span className='flex flex-1 flex-col gap-2 p-4'>
-                        <span className='group-hover:text-brand-orange line-clamp-2 font-bold transition-colors'>
-                          {article.title}
+                    <div className='relative'>
+                      <RevealPhoto
+                        className='aspect-[16/9] w-full'
+                        src={article.imageUrl}
+                        alt={article.title}
+                        sizes='(max-width: 1024px) 50vw, 420px'
+                      />
+                      {/* Phủ xanh mờ khi rê — nằm ĐÈ LÊN ảnh, không thay ảnh. */}
+                      <div className='bg-primary/0 group-hover:bg-primary/20 pointer-events-none absolute inset-0 transition-colors duration-300' />
+                      {isNew ? (
+                        <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+                          {t('newBadge')}
                         </span>
-                        <span className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
-                          <span className='flex items-center gap-1.5'>
-                            <Tag className='text-primary/70 size-3.5' />
-                            {labelName(article.category)}
-                          </span>
-                          <span className='flex items-center gap-1.5 border-l pl-4'>
-                            <CalendarDays className='text-primary/70 size-3.5' />
-                            {formatDisplayDate(article.publishedAt, locale)}
-                          </span>
-                          {/* Thời gian đọc nằm cùng hàng ngày đăng (góp ý BuildX) — bớt một dòng dưới thẻ. */}
-                          <span className='flex items-center gap-1.5 border-l pl-4'>
-                            <Clock className='text-primary/70 size-3.5' />
-                            {t('readTime', { minutes: article.readingMinutes })}
-                          </span>
+                      ) : null}
+                    </div>
+                    <span className='flex flex-1 flex-col gap-2 p-4'>
+                      <span className='group-hover:text-primary-strong line-clamp-2 font-bold transition-colors'>
+                        {article.title}
+                      </span>
+                      <span className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
+                        <span className='flex items-center gap-1.5'>
+                          <Tag className='text-primary/70 size-3.5' />
+                          {labelName(article.category)}
+                        </span>
+                        <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <CalendarDays className='text-primary/70 size-3.5' />
+                          {formatDisplayDate(article.publishedAt, locale)}
+                        </span>
+                        {/* Thời gian đọc nằm cùng hàng ngày đăng (góp ý BuildX) — bớt một dòng dưới thẻ. */}
+                        <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <Clock className='text-primary/70 size-3.5' />
+                          {t('readTime', { minutes: article.readingMinutes })}
                         </span>
                       </span>
-                    </Link>
-                  </motion.li>
-                )
-              })}
-        </ul>
-      </div>
+                    </span>
+                  </Link>
+                </motion.li>
+              )
+            })}
+      </ul>
     </section>
   )
 }

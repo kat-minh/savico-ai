@@ -242,7 +242,7 @@ export const HANDBOOK_IMAGE = {
  * BuildX. Thẻ nhà thầu được đặt nổi lên trên bằng CSS.
  */
 export const MAP_IMAGE = {
-  contractors: '/images/contractors/hero-banner.webp'
+  contractors: '/images/contractors/hero-tim-nha-thau.png'
 } as const
 
 /**

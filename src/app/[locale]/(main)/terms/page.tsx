@@ -18,5 +18,5 @@ export default async function TermsPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <LegalPage namespace='terms' />
+  return <LegalPage doc='terms' />
 }

@@ -45,20 +45,45 @@ export const HOME_PAIN_POINTS = ['budget', 'design', 'contractor', 'dossier', 's
 export type HomePainPoint = (typeof HOME_PAIN_POINTS)[number]
 
 /**
- * Sáu thương hiệu vật liệu ở dải "được tin tưởng bởi" — logo lấy từ Drive theo
- * sheet góp ý BuildX (tab "Hình ảnh website"), đặt ở `public/images/partners`.
- * Tên nằm trong i18n làm chữ thay thế cho ảnh.
+ * 15 thương hiệu vật liệu ở dải "Các thương hiệu được tin dùng".
+ * Sáu logo cũ + chín logo khách bổ sung từ thư mục SAVICO/IMG, chuẩn hóa tên
+ * file và đặt ở `public/images/partners`. Tên nằm trong i18n làm alt ảnh.
  */
-export const HOME_BRANDS = ['hoaphat', 'inax', 'viglacera', 'dulux', 'cadivi', 'scg'] as const
+export const HOME_BRANDS = [
+  'hoaphat',
+  'inax',
+  'viglacera',
+  'dulux',
+  'cadivi',
+  'scg',
+  'kova',
+  'dongtam',
+  'jotun',
+  'toto',
+  'vinhtuong',
+  'eurowindow',
+  'tienphong',
+  'hoasen',
+  'hatien'
+] as const
 
-/** Ảnh logo của từng thương hiệu (nền trong suốt, cao 120px). */
+/** Ảnh logo của từng thương hiệu. */
 export const HOME_BRAND_LOGOS: Record<(typeof HOME_BRANDS)[number], string> = {
   hoaphat: '/images/partners/hoa-phat.png',
   inax: '/images/partners/inax.png',
   viglacera: '/images/partners/viglacera.png',
   dulux: '/images/partners/dulux.png',
   cadivi: '/images/partners/cadivi.png',
-  scg: '/images/partners/scg.png'
+  scg: '/images/partners/scg.png',
+  kova: '/images/partners/kova.png',
+  dongtam: '/images/partners/dong-tam-group.png',
+  jotun: '/images/partners/jotun.png',
+  toto: '/images/partners/toto.png',
+  vinhtuong: '/images/partners/vinh-tuong.png',
+  eurowindow: '/images/partners/eurowindow.png',
+  tienphong: '/images/partners/nhua-tien-phong.png',
+  hoasen: '/images/partners/hoa-sen-group.png',
+  hatien: '/images/partners/xi-mang-ha-tien.png'
 }
 
 export type HomeBrand = (typeof HOME_BRANDS)[number]

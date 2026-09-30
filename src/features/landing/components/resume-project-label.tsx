@@ -7,7 +7,7 @@ export function ResumeProjectLabel({ label, name }: { label: string; name: strin
   return (
     <span className='flex min-w-0 items-center gap-1'>
       <span className='shrink-0'>{label}</span>
-      <span className='max-w-[7rem] truncate sm:max-w-[11rem]'>{name}</span>
+      <span className='max-w-24 truncate sm:max-w-28 xl:max-w-32'>{name}</span>
     </span>
   )
 }

@@ -225,7 +225,7 @@
   },
   "legal": {
     "terms": {
-      "title": "Terms of Service",
+      "title": "Terms of use",
       "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
       "intro": "These terms govern your use of the BuildX AI platform. By creating an account or using the service, you agree to the terms below.",
       "sections": [
@@ -256,7 +256,7 @@
       ]
     },
     "privacy": {
-      "title": "Privacy Policy",
+      "title": "Privacy",
       "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
       "intro": "This policy explains how we collect, use and protect your personal data in accordance with Vietnam's Decree 13/2023/ND-CP on personal data protection.",
       "sections": [
@@ -287,7 +287,7 @@
       ]
     },
     "payment": {
-      "title": "Payment and refund policy",
+      "title": "Payments & Refunds",
       "updated": "Last updated: sample content — BuildX will provide the official text before go-live.",
       "intro": "This policy explains how you pay for packages on the platform, how we confirm payments and when you are entitled to a refund.",
       "sections": [
@@ -320,6 +320,9 @@
           "body": "For any payment or refund question, use the contact channels at the bottom of the page."
         }
       ]
+    },
+    "ecommerce": {
+      "title": "E-commerce & Partners"
     }
   },
   "chatbot": {
@@ -391,9 +394,10 @@
       "consult": "1:1 consultation",
       "faq": "FAQ",
       "about": "About us",
-      "privacy": "Privacy policy",
+      "privacy": "Privacy",
       "terms": "Terms of use",
-      "paymentPolicy": "Payment policy"
+      "paymentPolicy": "Payments & Refunds",
+      "ecommerce": "E-commerce & Partners"
     },
     "social": {
       "facebook": "BuildX on Facebook",
@@ -587,7 +591,8 @@
           "action": "Request a call",
           "usedAtStep": "Used in steps 04–05"
         }
-      }
+      },
+      "titleMobile": "BuildX packages"
     },
     "dossiers": {
       "eyebrow": "SAMPLE DOSSIERS",
@@ -659,14 +664,23 @@
     },
     "brands": {
       "title": "Trusted by",
-      "label": "TRUSTED BY",
+      "label": "Trusted brands",
       "items": {
         "hoaphat": "Hòa Phát",
         "inax": "INAX",
         "viglacera": "Viglacera",
         "dulux": "Dulux",
         "cadivi": "CADIVI",
-        "scg": "SCG"
+        "scg": "SCG",
+        "kova": "KOVA",
+        "dongtam": "Đồng Tâm Group",
+        "jotun": "Jotun",
+        "toto": "TOTO",
+        "vinhtuong": "Vĩnh Tường",
+        "eurowindow": "Eurowindow",
+        "tienphong": "Tiền Phong Plastic",
+        "hoasen": "Hoa Sen Group",
+        "hatien": "Hà Tiên Cement"
       }
     },
     "testimonials": {
@@ -1412,7 +1426,7 @@
       },
       "xlsx": {
         "fileName": "BuildX-estimate-{project}.xlsx",
-        "untitledProject": "BUILDX",
+        "untitledProject": "BuildX",
         "sheet": "Detailed estimate",
         "title": "DETAILED COST ESTIMATE",
         "project": "Project",
@@ -2157,7 +2171,11 @@
       "bookCta": "Book a consultation",
       "notFound": "Architect not found",
       "bookCtaWithTime": "Book a consultation at {time} · {date}",
-      "chooseSlotHint": "Pick a time slot to book"
+      "chooseSlotHint": "Pick a time slot to book",
+      "lightboxClose": "Close",
+      "lightboxPrev": "Previous photo",
+      "lightboxNext": "Next photo",
+      "viewLarger": "View larger: {label}"
     },
     "slots": {
       "title": "Choose a consultation slot",
@@ -6003,7 +6021,7 @@
     }
   },
   "meta": {
-    "home": "AI house design and cost estimates from a photo of your plot | BUILDX",
+    "home": "AI house design and cost estimates from a photo of your plot | BuildX",
     "design": "Design & Estimate",
     "designInput": "Project details",
     "designEstimate": "Estimate result",
