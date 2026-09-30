@@ -30,7 +30,11 @@ const nextConfig: NextConfig = {
       // Ảnh nhà thầu gửi qua Google Drive (`driveImage` trong contractors.seed).
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       // Thumbnail video YouTube của các bước hướng dẫn (epic GuideStepManagement).
-      { protocol: 'https', hostname: 'i.ytimg.com' }
+      { protocol: 'https', hostname: 'i.ytimg.com' },
+      // Kho tệp của backend — Bizfly Simple Storage (TDD-CTR-001/External API).
+      // Ảnh thật do admin tải lên (tin tức, hướng dẫn, nhà thầu, thư viện mẫu) trả
+      // về từ host này; thiếu nó thì `next/image` ném lỗi và LÀM GÃY CẢ TRANG.
+      { protocol: 'https', hostname: '**.ss.bfcplatform.vn' }
       // Add CDN / asset hosts served by the backend here.
       // { protocol: 'https', hostname: 'cdn.example.com' },
     ]
