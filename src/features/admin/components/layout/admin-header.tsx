@@ -30,6 +30,9 @@ const SHOW_LANGUAGE_TOGGLE = false
 /** Tạm ẩn đổi giao diện (khóa nền sáng — xem `theme-provider`). `true` để bật lại. */
 const SHOW_THEME_TOGGLE = false
 
+/** Tạm ẩn công tắc đổi ngôn ngữ NỘI DUNG (chỉ soạn tiếng Việt). `true` để bật lại. */
+const SHOW_CONTENT_LOCALE_TOGGLE = false
+
 /**
  * Thanh trên cùng của khu quản trị.
  *
@@ -114,19 +117,22 @@ export function AdminHeader({
       </div>
 
       <Space size={4}>
-        <Tooltip title={t('shell.contentLocaleHint')}>
-          <Space size={6}>
-            <Text type='secondary' style={{ fontSize: 12, whiteSpace: 'nowrap' }} className='hidden md:inline'>
-              {t('shell.contentLocale')}
-            </Text>
-            <Segmented
-              size='small'
-              value={contentLocale}
-              onChange={(value) => switchContentLocale(value as Locale)}
-              options={CMS_LOCALES.map((code) => ({ label: code.toUpperCase(), value: code }))}
-            />
-          </Space>
-        </Tooltip>
+        {/* Đổi ngôn ngữ NỘI DUNG TẠM ẨN (chỉ soạn tiếng Việt) — bật lại: đổi cờ thành true. */}
+        {SHOW_CONTENT_LOCALE_TOGGLE && (
+          <Tooltip title={t('shell.contentLocaleHint')}>
+            <Space size={6}>
+              <Text type='secondary' style={{ fontSize: 12, whiteSpace: 'nowrap' }} className='hidden md:inline'>
+                {t('shell.contentLocale')}
+              </Text>
+              <Segmented
+                size='small'
+                value={contentLocale}
+                onChange={(value) => switchContentLocale(value as Locale)}
+                options={CMS_LOCALES.map((code) => ({ label: code.toUpperCase(), value: code }))}
+              />
+            </Space>
+          </Tooltip>
+        )}
 
         {/* Toggle ngôn ngữ bảng điều khiển TẠM ẨN — mặc định tiếng Việt. */}
         {SHOW_LANGUAGE_TOGGLE && (
