@@ -1652,6 +1652,10 @@
   },
   "account": {
     "title": "Tài khoản của tôi",
+    "pending": {
+      "title": "Tính năng đang hoàn thiện",
+      "description": "Phần này sẽ sớm được cập nhật khi hệ thống sẵn sàng. Cảm ơn bạn đã kiên nhẫn chờ."
+    },
     "info": {
       "title": "Thông tin tài khoản",
       "name": "Họ và tên",

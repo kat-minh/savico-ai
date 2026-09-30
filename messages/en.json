@@ -1652,6 +1652,10 @@
   },
   "account": {
     "title": "My account",
+    "pending": {
+      "title": "Coming soon",
+      "description": "This section will be available once the system is ready. Thanks for your patience."
+    },
     "info": {
       "title": "Account information",
       "name": "Full name",

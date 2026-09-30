@@ -902,6 +902,12 @@ export interface CmsTransaction {
   customerEmail: string
   /** Gói được mua / gia hạn — gói thiết kế hoặc gói giám sát. */
   tier: PlanTier | SupervisionTier
+  /**
+   * Tên gói hiển thị lấy thẳng từ đơn hàng thật (`GET /payment-orders`). Ưu tiên
+   * hiện tên này thay cho nhãn theo `tier` khi có, vì đơn thật không kèm hạng gói
+   * cố định. Bản mock để trống → vẫn hiện theo `tier` như cũ.
+   */
+  planName?: string
   /** Số tiền, VND. */
   amount: number
   method: CmsTransactionMethod

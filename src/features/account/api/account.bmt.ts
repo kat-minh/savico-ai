@@ -1,9 +1,10 @@
+import type { CmsTransaction, CmsTransactionStatus } from '@/shared/cms'
 import type { AuthUser } from '@/shared/auth'
 import { AUTH_ENDPOINTS, useAuthStore } from '@/shared/auth'
 import { http } from '@/shared/lib/api'
-import type { ApiError } from '@/shared/types'
+import type { ApiError, PagedResult } from '@/shared/types'
 import { normalizePhone } from '@/shared/utils'
-import type { AccountPlan, PlanAllowance, UpdateProfilePayload } from '../types/account.types'
+import type { AccountPlan, AccountPurchaseHistory, PlanAllowance, UpdateProfilePayload } from '../types/account.types'
 
 /** `GET /users/me` — `Response.GetMeBasic` (chỉ các trường feature này dùng). */
 interface BmtMe {
@@ -127,5 +128,67 @@ export async function bmtGetPlan(): Promise<AccountPlan | null> {
     expiresAt: sub.endsAtUtc,
     design: toAllowance(quota('design.generate')),
     library: toAllowance(quota('catalog.detail'))
+  }
+}
+
+/** `GET /payment-orders` — `Response.PaymentOrderSummary` (đơn mua của chính khách). */
+interface BmtPaymentOrderSummary {
+  id: string
+  planId: string
+  planName: string
+  kind: 'Design' | 'Supervision'
+  offerKey: 'Month' | 'Year' | 'ConstructionSite'
+  state: 'Pending' | 'PartiallyPaid' | 'Paid' | 'Expired' | 'Canceled'
+  priceVnd: string
+  receivedAmountVnd: string
+  createdAtUtc: string
+  expiresAtUtc: string
+  paidAtUtc: string
+}
+
+/** Trạng thái đơn BMT → trạng thái giao dịch của UI (UI chưa có "một phần"/"hết hạn"). */
+function toTransactionStatus(state: BmtPaymentOrderSummary['state']): CmsTransactionStatus {
+  if (state === 'Paid') return 'paid'
+  if (state === 'Pending' || state === 'PartiallyPaid') return 'pending'
+  return 'failed' // Expired | Canceled
+}
+
+/**
+ * Lịch sử mua đọc đơn thật `GET /payment-orders`. Đơn thật chỉ có tên gói + giá +
+ * trạng thái + ngày, KHÔNG có hạng gói cố định, hóa đơn VAT, hoàn tiền hay khối
+ * gói giám sát của bản mock — nên các phần đó để trống (thẻ gói/khối thiết kế tự
+ * ẩn khi `subscription`/`designOrderId` = null; thẻ "GÓI CỦA TÔI" cột trái vẫn
+ * đọc `/me/design-subscription`). `tier` chỉ là giá trị đệm để hợp kiểu — UI ưu
+ * tiên hiện `planName`.
+ */
+export async function bmtGetPurchaseHistory(): Promise<AccountPurchaseHistory> {
+  const orders: BmtPaymentOrderSummary[] = []
+  for (let pageIndex = 1; pageIndex <= 20; pageIndex++) {
+    const page = await http.get<PagedResult<BmtPaymentOrderSummary>>('/payment-orders', {
+      params: { pageIndex, pageSize: 100 }
+    })
+    orders.push(...page.items)
+    if (!page.hasNextPage) break
+  }
+
+  const transactions: CmsTransaction[] = orders.map((order) => ({
+    id: order.id,
+    customerName: '',
+    customerEmail: '',
+    tier: order.kind === 'Supervision' ? 'check' : 'basic',
+    planName: order.planName,
+    amount: Number(order.priceVnd) || 0,
+    method: 'bank-qr',
+    status: toTransactionStatus(order.state),
+    createdAt: order.createdAtUtc
+  }))
+
+  return {
+    subscription: null,
+    designOrderId: null,
+    supervisionOrderId: null,
+    pendingSupervisionOrderId: null,
+    supervisionExpiresAt: null,
+    transactions
   }
 }
