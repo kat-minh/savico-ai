@@ -244,6 +244,7 @@ export function ResourceManager<K extends CmsCollection>({
     title: t('table.actions'),
     key: 'actions',
     fixed: 'right',
+    align: 'right',
     render: (_, record) => (
       <Space size={0}>
         {rowActions ? rowActions(record) : null}

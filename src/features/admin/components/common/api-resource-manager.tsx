@@ -180,6 +180,7 @@ export function ApiResourceManager<T>({
     title: t('table.actions'),
     key: 'actions',
     fixed: 'right',
+    align: 'right',
     render: (_, record) => (
       <Space size={0}>
         {rowActions?.(record, ctx)}
