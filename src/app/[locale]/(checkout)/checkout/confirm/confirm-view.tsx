@@ -50,13 +50,17 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
     return <LoadingSpinner className='py-24' label={t('loadingProduct')} />
   }
 
+  const offerKey = toOfferKey(offer)
+
   const apiProduct = apiPackage
     ? {
         name: apiPackage.name,
         tierTag: null,
         popular: Boolean(apiPackage.recommended),
         price: apiPackage.price,
-        benefits: apiPackage.benefits
+        benefits: apiPackage.benefits,
+        // Gói giám sát không có chu kỳ: điều kiện thật là phải gán vào công trình trong một năm.
+        validity: t('validityAssign')
       }
     : apiPlan
       ? {
@@ -64,11 +68,19 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
           tierTag: null,
           popular: Boolean(apiPlan.popular),
           price: apiPlan.price,
+          // Chỉ những gì BE có: hai hạn mức (phương án thiết kế, tra cứu thư viện) và quyền
+          // phối cảnh 3D nếu bật. KHÔNG có "lượt chỉnh sửa" — BE không có hạn mức đó, đừng suy
+          // ra từ số phương án.
           benefits: [
             `${apiPlan.designCredits} phương án thiết kế`,
-            `${apiPlan.designCredits} lượt chỉnh sửa phương án`,
-            `${apiPlan.libraryCredits} lượt tra cứu thư viện mẫu`
-          ]
+            `${apiPlan.libraryCredits} lượt tra cứu thư viện mẫu`,
+            ...(apiPlan.benefits.toggles.render3d.enabled && apiPlan.benefits.toggles.render3d.text
+              ? [apiPlan.benefits.toggles.render3d.text]
+              : [])
+          ],
+          // Lượt thuộc KỲ mua (tháng/năm) và hết kỳ thì không dùng được nữa (BR-SUB-014/021) —
+          // câu "lượt không hết hạn" của bản mock là sai với gói thật.
+          validity: t(offerKey === 'Year' ? 'validityYear' : 'validityMonth')
         }
       : undefined
 
@@ -77,7 +89,7 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
       productId={productId}
       kind={resolvedKind}
       projectId={projectId}
-      offerKey={toOfferKey(offer)}
+      offerKey={offerKey}
       apiProduct={apiProduct}
     />
   )

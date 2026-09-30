@@ -293,7 +293,15 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
 
             {/* Hình S08: "Lượt không hết hạn" và mã đơn nằm CÙNG MỘT HÀNG. */}
             <div className='mt-4 flex items-center justify-between gap-3 text-xs'>
-              <span className='opacity-80'>{isSupervision ? '' : t('noExpiry')}</span>
+              <span className='opacity-80'>
+                {isSupervision
+                  ? ''
+                  : isApiOrder
+                    ? // Gói thật: lượt thuộc kỳ mua nên có hạn (BR-SUB-014/021); "không hết hạn" chỉ là
+                      // câu của bản mock.
+                      t(order.api?.offerKey === 'Year' ? 'validityYear' : 'validityMonth')
+                    : t('noExpiry')}
+              </span>
               <span className='font-mono opacity-70'>#{order.id}</span>
             </div>
           </section>

@@ -3516,7 +3516,21 @@
       "history": "History",
       "historyTitle": "Operation history",
       "historyEmpty": "No operations yet.",
-      "secretNote": "The webhook secret is set on the server by ops per secretConfigKeys — not configured on this screen."
+      "secretNote": "The webhook secret is set on the server by ops per secretConfigKeys — not configured on this screen.",
+      "accountLockedNote": "This connection already has orders or transactions, so the receiving-account fields (bank, account number, VA, QR code) cannot change. You can still enable or disable it.",
+      "secretOk": "The secret is configured on the server — it can be selected as the active connection.",
+      "secretMissing": "No secret on the server yet — it cannot be selected as the active connection.",
+      "connectionId": "Connection ID",
+      "webhookPath": "Webhook path",
+      "webhookPathHint": "Paste into the SePay webhook settings, appended to the API server address.",
+      "secretKeys": "Server secret configuration keys",
+      "secretKeysHint": "Operations set these variables on the backend server: {n} is an arbitrary index, ConnectionId is the connection ID above, WebhookSecret is the SePay secret.",
+      "createNote": "After creating, ask operations to set the secret on the server using the keys shown when you reopen this connection. Without a secret it cannot be selected as the active connection.",
+      "action": {
+        "Created": "Created",
+        "Updated": "Updated",
+        "Selected": "Selected as active connection"
+      }
     },
     "accessAudit": {
       "description": "Log of every role, permission and assignment change — read-only, append-only. Includes rejected attempts.",
@@ -5570,7 +5584,10 @@
       "termsRequiredToast": "Please tick the terms agreement before continuing.",
       "missingProduct": "We could not find the plan you picked. Go back to pricing and choose again.",
       "backToPlans": "Back to pricing",
-      "loadingProduct": "Loading plan…"
+      "loadingProduct": "Loading plan…",
+      "validityMonth": "Allowances are valid for 1 month from payment. When the period ends, unused credits can no longer be used.",
+      "validityYear": "Allowances are valid for 1 year from payment. When the period ends, unused credits can no longer be used.",
+      "validityAssign": "The plan must be assigned to a construction site within 1 year of payment."
     },
     "payment": {
       "title": "Payment",
@@ -5671,7 +5688,9 @@
       "dataNote": "Your project data is stored privately and securely on BuildX.",
       "assignNote": "The support team will assign an engineer and open the six supervision stages for your project.",
       "assignNoteApi": "Your supervision plan is ready. Assign it to one of your construction sites to get started; it must be assigned within one year from today.",
-      "assignSite": "Assign to a site"
+      "assignSite": "Assign to a site",
+      "validityMonth": "Valid for 1 month from today.",
+      "validityYear": "Valid for 1 year from today."
     }
   },
   "supervision": {

@@ -45,6 +45,8 @@ interface ConfirmProduct {
   popular: boolean
   price: number
   benefits: string[]
+  /** Ghi chú hiệu lực đúng với gói (đã dịch). Không có thì dùng câu mặc định của mock. */
+  validity?: string
 }
 
 interface OrderConfirmProps {
@@ -127,11 +129,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
             tierTag: tPlanTags(plan.tier),
             popular: Boolean(plan.popular),
             price: plan.price,
-            benefits: [
-              `${plan.designCredits} phương án thiết kế`,
-              `${plan.designCredits} lượt chỉnh sửa phương án`,
-              `${plan.libraryCredits} lượt tra cứu thư viện mẫu`
-            ]
+            benefits: [`${plan.designCredits} phương án thiết kế`, `${plan.libraryCredits} lượt tra cứu thư viện mẫu`]
           }
         : null
     }
@@ -618,7 +616,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
                 })}
               </ul>
               {/* Hình S03: dưới ba dòng quyền lợi có dòng nhắc lượt không hết hạn. */}
-              <p className='text-muted-foreground mt-2 text-xs'>{t('creditsNeverExpire')}</p>
+              <p className='text-muted-foreground mt-2 text-xs'>{product.validity ?? t('creditsNeverExpire')}</p>
             </div>
 
             {/* Luồng API không nhận mã giảm giá — ẩn ô; gói mock giữ như S03. */}

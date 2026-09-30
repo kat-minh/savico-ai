@@ -57,11 +57,7 @@ function productSnapshot(payload: CreateOrderPayload): OrderProduct {
       // Hình S03: ba dòng quyền lợi trong thẻ đơn hàng là SỐ LƯỢT của gói
       // (phương án · lượt chỉnh sửa · lượt tra thư viện), không phải ba tính
       // năng đầu tiên — cắt `features` thì dòng thứ ba ra "Dự toán nội thất".
-      benefits: [
-        `${plan.designCredits} phương án thiết kế`,
-        `${plan.designCredits} lượt chỉnh sửa phương án`,
-        `${plan.libraryCredits} lượt tra cứu thư viện mẫu`
-      ],
+      benefits: [`${plan.designCredits} phương án thiết kế`, `${plan.libraryCredits} lượt tra cứu thư viện mẫu`],
       // Snapshot lúc tạo đơn: đổi cấu hình gói sau này không làm đơn cũ đổi theo.
       // Chu kỳ dùng chung, snapshot vào đơn (§4).
       periodDays: cmsDb.getDocument('planSettings').periodDays,

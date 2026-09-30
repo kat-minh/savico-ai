@@ -116,3 +116,58 @@ export function mapOrder(detail: BmtPaymentOrderDetail, nowMs: number = Date.now
     }
   }
 }
+
+/* ===========================================================================
+ * Lợi ích của gói, dựng từ dữ liệu gói THẬT (`GET /plans`)
+ * ======================================================================== */
+
+export interface BmtPlanForBenefits {
+  planId?: string
+  kind?: 'Design' | 'Supervision'
+  revision?: {
+    name?: string | null
+    description?: string | null
+    offers?: { offerKey: string; quotas?: { code: string; isUnlimited: boolean; limit?: number | null }[] }[]
+    displayBenefits?: { code: string; enabled: boolean; displayText?: string | null }[]
+  }
+}
+
+/**
+ * Các dòng lợi ích của một gói, chỉ gồm những gì BE thật sự có:
+ * - Gói thiết kế: đúng HAI hạn mức (`design.generate`, `catalog.detail`) của offer đã mua,
+ *   cộng các quyền bật/tắt đang bật (vd phối cảnh 3D). KHÔNG có "lượt chỉnh sửa" —
+ *   BE không có hạn mức đó, đừng suy ra từ số phương án.
+ * - Gói giám sát: không có hạn mức, chỉ có mô tả dịch vụ tự do → mỗi dòng mô tả là một
+ *   lợi ích (bỏ gạch đầu dòng); dòng không có gạch đầu dòng là câu "phù hợp khi…" nên bỏ.
+ */
+export function planBenefits(plan: BmtPlanForBenefits, offerKey?: string): string[] {
+  const revision = plan.revision
+  if (!revision) return []
+
+  if (plan.kind === 'Supervision') {
+    return (revision.description ?? '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('-'))
+      .map((line) => line.replace(/^-\s*/, '').trim())
+      .filter(Boolean)
+  }
+
+  const offers = revision.offers ?? []
+  const offer = offers.find((item) => item.offerKey === (offerKey ?? 'Month')) ?? offers[0]
+  const limitOf = (code: string): number | undefined => {
+    const quota = offer?.quotas?.find((item) => item.code.toLowerCase() === code)
+    return quota && !quota.isUnlimited && typeof quota.limit === 'number' ? quota.limit : undefined
+  }
+
+  const lines: string[] = []
+  const design = limitOf('design.generate')
+  const library = limitOf('catalog.detail')
+  if (design !== undefined) lines.push(`${design} phương án thiết kế`)
+  if (library !== undefined) lines.push(`${library} lượt tra cứu thư viện mẫu`)
+  for (const benefit of revision.displayBenefits ?? []) {
+    const text = benefit.displayText?.trim()
+    if (benefit.enabled && text) lines.push(text)
+  }
+  return lines
+}

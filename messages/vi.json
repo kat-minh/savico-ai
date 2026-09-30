@@ -3516,7 +3516,21 @@
       "history": "Lịch sử",
       "historyTitle": "Lịch sử thao tác",
       "historyEmpty": "Chưa có thao tác nào.",
-      "secretNote": "Secret webhook do vận hành đặt trên máy chủ theo secretConfigKeys — không cấu hình ở màn này."
+      "secretNote": "Secret webhook do vận hành đặt trên máy chủ theo secretConfigKeys — không cấu hình ở màn này.",
+      "accountLockedNote": "Kết nối này đã có đơn hoặc giao dịch nên không đổi được các trường tài khoản nhận (ngân hàng, số tài khoản, VA, mã QR). Bạn vẫn bật/tắt được.",
+      "secretOk": "Đã có secret trên máy chủ — có thể chọn làm kết nối đang dùng.",
+      "secretMissing": "Chưa có secret trên máy chủ — chưa thể chọn làm kết nối đang dùng.",
+      "connectionId": "Mã kết nối",
+      "webhookPath": "Đường dẫn webhook",
+      "webhookPathHint": "Dán vào cấu hình webhook của SePay, ghép sau địa chỉ máy chủ API.",
+      "secretKeys": "Khoá cấu hình secret trên máy chủ",
+      "secretKeysHint": "Vận hành đặt các biến này trên máy chủ BE: {n} là số thứ tự tuỳ chọn, ConnectionId là mã kết nối ở trên, WebhookSecret là secret của SePay.",
+      "createNote": "Tạo xong, nhờ vận hành đặt secret trên máy chủ theo các khoá hiển thị khi mở lại kết nối này. Chưa có secret thì chưa chọn làm kết nối đang dùng được.",
+      "action": {
+        "Created": "Tạo kết nối",
+        "Updated": "Sửa kết nối",
+        "Selected": "Chọn làm kết nối đang dùng"
+      }
     },
     "accessAudit": {
       "description": "Nhật ký các lần thay đổi vai trò, quyền và phân công — chỉ đọc, chỉ ghi thêm. Gồm cả lần thao tác bị từ chối.",
@@ -5570,7 +5584,10 @@
       "termsRequiredToast": "Vui lòng tích đồng ý điều khoản trước.",
       "missingProduct": "Không tìm thấy gói bạn chọn. Quay lại bảng giá để chọn lại.",
       "backToPlans": "Về bảng giá",
-      "loadingProduct": "Đang tải gói…"
+      "loadingProduct": "Đang tải gói…",
+      "validityMonth": "Hạn mức dùng trong 1 tháng kể từ khi thanh toán. Hết kỳ, lượt chưa dùng không còn sử dụng được.",
+      "validityYear": "Hạn mức dùng trong 1 năm kể từ khi thanh toán. Hết kỳ, lượt chưa dùng không còn sử dụng được.",
+      "validityAssign": "Gói cần được gán vào công trình trong vòng 1 năm kể từ khi thanh toán."
     },
     "payment": {
       "title": "Thanh toán",
@@ -5671,7 +5688,9 @@
       "dataNote": "Dữ liệu dự án của bạn được lưu riêng và bảo mật trên hệ thống BuildX.",
       "assignNote": "Đội hỗ trợ sẽ phân công kỹ sư và mở 6 giai đoạn giám sát cho dự án của bạn.",
       "assignNoteApi": "Gói giám sát đã sẵn sàng. Hãy gán gói vào công trình của bạn để bắt đầu; gói cần được gán trong vòng một năm kể từ hôm nay.",
-      "assignSite": "Gán vào công trình"
+      "assignSite": "Gán vào công trình",
+      "validityMonth": "Dùng trong 1 tháng kể từ hôm nay.",
+      "validityYear": "Dùng trong 1 năm kể từ hôm nay."
     }
   },
   "supervision": {

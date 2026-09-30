@@ -1,6 +1,16 @@
 import type { ApiError } from '@/shared/types'
 import { AxiosError } from 'axios'
 
+/** Một phần tử của `errors[]` trong lỗi validator 422. */
+interface ValidationItem {
+  code?: string
+  message?: string
+  messageCode?: string | null
+  /** API media: `PropertyName` / `ErrorMessage`. */
+  PropertyName?: string
+  ErrorMessage?: string
+}
+
 /**
  * Normalize any thrown value (Axios error, network failure, unknown) into our
  * stable {@link ApiError} shape so feature code never has to inspect Axios
@@ -20,18 +30,29 @@ export function normalizeApiError(error: unknown): ApiError {
             code?: string
             detail?: string
             messageCode?: string | null
-            errors?: Record<string, string[]> | null
+            errors?: Record<string, string[]> | ValidationItem[] | null
             error?: { code?: string; message?: string; messageCode?: string | null } | null
           }
         | undefined
 
+      // Lỗi validator (422) của BMT là ProblemDetails với `errors` là MẢNG
+      // `[{code, message, messageCode}]` (API media dùng `PropertyName`/`ErrorMessage`), và
+      // `detail` chỉ là câu tiếng Anh chung "A validation error occured". Câu có ích nằm ở
+      // phần tử đầu của mảng nên ưu tiên nó.
+      const items = Array.isArray(data?.errors) ? data.errors : []
+      const first = items.find((item) => item?.message || item?.ErrorMessage)
       return {
         status: error.response.status,
         code: data?.error?.code || data?.code || undefined,
-        messageCode: data?.error?.messageCode ?? data?.messageCode ?? undefined,
+        messageCode: data?.error?.messageCode ?? data?.messageCode ?? first?.messageCode ?? undefined,
         message:
-          data?.error?.message || data?.detail || data?.message || defaultMessageForStatus(error.response.status),
-        errors: data?.errors ?? undefined
+          data?.error?.message ||
+          first?.message ||
+          first?.ErrorMessage ||
+          data?.detail ||
+          data?.message ||
+          defaultMessageForStatus(error.response.status),
+        errors: data?.errors && !Array.isArray(data.errors) ? data.errors : undefined
       }
     }
 

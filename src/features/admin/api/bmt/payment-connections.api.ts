@@ -1,5 +1,6 @@
 import { http } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
+import { normalizeHistoryItem, selectionVersion, type PaymentConnectionHistoryItem } from './payment-connections.logic'
 
 /**
  * KẾT NỐI THANH TOÁN (PaymentConnection — STORY-PAY-001/003, TDD-PAY-001).
@@ -51,14 +52,6 @@ export interface PaymentConnectionUpdate {
   enabled: boolean
 }
 
-export interface PaymentConnectionHistoryItem {
-  id: string
-  action: string
-  atUtc: string
-  actor?: string | null
-  detail?: string | null
-}
-
 const BASE = '/admin/payment-connections'
 const idempotent = () => ({ headers: { 'Idempotency-Key': crypto.randomUUID() } })
 
@@ -81,18 +74,40 @@ export const paymentConnectionsApi = {
   update: (id: string, body: PaymentConnectionUpdate) =>
     http.put<PaymentConnectionDto>(`${BASE}/${id}`, body, idempotent()),
 
-  history: (id: string, params: { pageIndex: number; pageSize: number }) =>
-    http.get<PagedResult<PaymentConnectionHistoryItem>>(`${BASE}/${id}/history`, { params }),
+  history: async (id: string, params: { pageIndex: number; pageSize: number }) => {
+    const page = await http.get<PagedResult<Record<string, unknown>>>(`${BASE}/${id}/history`, { params })
+    return { ...page, items: (page.items ?? []).map(normalizeHistoryItem) }
+  },
 
   /**
-   * Đặt connection làm "đang dùng" của môi trường. `expectedVersion` là version
-   * của bản-ghi-lựa-chọn (null khi môi trường chưa từng chọn) — hiện chưa có API
-   * đọc riêng nên truyền theo version connection; nếu lệch BE trả 409.
+   * Đặt connection làm "đang dùng" của môi trường. Tự tra `expectedVersion` của bản ghi
+   * lựa chọn (xem `selectionVersion`): `null` cho lần chọn đầu. Gặp 409
+   * `PaymentConnectionVersionConflict` nghĩa là có người vừa đổi — để lỗi nổi lên, màn tải
+   * lại rồi thử lần nữa.
    */
-  setActive: (environment: PaymentEnvironment, connectionId: string, expectedVersion: number | null) =>
-    http.put<{ environment: string; connectionId: string; previousConnectionId?: string | null; version: number }>(
+  async selectActive(environment: PaymentEnvironment, connectionId: string) {
+    const inEnvironment = (await paymentConnectionsApi.list()).filter((item) => item.environment === environment)
+    const historyByConnection: Record<string, PaymentConnectionHistoryItem[]> = {}
+    // Không có connection đang dùng thì chắc chắn là lần chọn đầu, khỏi tốn các lời gọi lịch sử.
+    if (inEnvironment.some((item) => item.isActive)) {
+      await Promise.all(
+        inEnvironment.map(async (item) => {
+          historyByConnection[item.id] = (
+            await paymentConnectionsApi.history(item.id, { pageIndex: 1, pageSize: 100 })
+          ).items
+        })
+      )
+    }
+    return http.put<{
+      environment: string
+      connectionId: string
+      previousConnectionId?: string | null
+      selectedAtUtc?: string
+      version: number
+    }>(
       `/admin/payment-environments/${environment}/active-connection`,
-      { connectionId, expectedVersion },
+      { connectionId, expectedVersion: selectionVersion(inEnvironment, historyByConnection) },
       idempotent()
     )
+  }
 }

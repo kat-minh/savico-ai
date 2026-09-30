@@ -1,8 +1,9 @@
 import { http, isApiError } from '@/shared/lib/api'
+import type { PagedResult } from '@/shared/types'
 import { isApiOrderId } from '../constants/checkout.constants'
 import type { CreateOrderPayload, Order } from '../types/checkout.types'
 import { mockCheckoutApi } from './checkout.mock'
-import { mapOrder, type BmtPaymentOrderDetail } from './checkout.map'
+import { mapOrder, planBenefits, type BmtPaymentOrderDetail, type BmtPlanForBenefits } from './checkout.map'
 
 /**
  * Nối luồng MUA GÓI vào BMT API (TDD-PAY-001) — GIỮ MOCK LÀM NỀN.
@@ -36,6 +37,35 @@ async function readOrder(orderId: string): Promise<BmtPaymentOrderDetail> {
   return http.get<BmtPaymentOrderDetail>(`/payment-orders/${orderId}`)
 }
 
+/**
+ * Đơn ĐÃ TRẢ: bổ sung những gì `PaymentOrderDetail` không mô tả được — tên gói, loại đơn
+ * và các dòng lợi ích — bằng cách tra đúng gói trong danh sách công khai. Màn Hoàn tất cần
+ * chúng; thiếu thì thẻ gói trống và đơn giám sát bị coi là gói thiết kế. Tra lỗi hay không
+ * thấy (gói đã ngừng bán) thì giữ nguyên đơn, không làm hỏng màn.
+ */
+async function enrichPaid(order: Order, detail: BmtPaymentOrderDetail): Promise<Order> {
+  if (detail.state !== 'Paid' || !detail.planId) return order
+  try {
+    for (const kind of ['Design', 'Supervision'] as const) {
+      const page = await http.get<PagedResult<BmtPlanForBenefits>>('/plans', { params: { kind, pageSize: 100 } })
+      const plan = page.items.find((item) => item.planId === detail.planId)
+      if (!plan) continue
+      return {
+        ...order,
+        product: {
+          ...order.product,
+          kind: kind === 'Supervision' ? 'supervision' : 'design',
+          name: order.product.name || plan.revision?.name || '',
+          benefits: planBenefits({ ...plan, kind }, detail.offerKey)
+        }
+      }
+    }
+  } catch {
+    // Giữ bản chưa bổ sung.
+  }
+  return order
+}
+
 export const bmtCheckoutApi = {
   createOrder: async (payload: CreateOrderPayload): Promise<Order> => {
     // Gói mock (id không phải UUID) → tạo đơn mock như cũ.
@@ -53,7 +83,8 @@ export const bmtCheckoutApi = {
 
   getOrder: async (orderId: string): Promise<Order> => {
     if (!isApiOrderId(orderId)) return mockCheckoutApi.getOrder(orderId)
-    return mapOrder(await readOrder(orderId))
+    const detail = await readOrder(orderId)
+    return enrichPaid(mapOrder(detail), detail)
   },
 
   regenerateQr: async (orderId: string): Promise<Order> => {
