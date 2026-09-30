@@ -74,6 +74,8 @@ export function useGenerationProgress({
       window.clearInterval(timer)
       document.removeEventListener('visibilitychange', synchronize)
     }
+    // `creep` only seeds the start time on the first run; depending on it would restart the timer every tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [complete, expectedMs, paused])
 
   // 100% is derived, not stored — writing it from the effect would cascade renders.

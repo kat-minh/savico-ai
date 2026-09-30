@@ -5721,6 +5721,7 @@
       }
     },
     "dashboard": {
+      "stageShort": "Stage {index}",
       "title": "Supervision dashboard",
       "breadcrumbProjects": "My projects",
       "lead": "Six fixed stages from legal paperwork to acceptance and handover. Uploading named photos or documents completes a stage and moves the progress thread on; the supervisor then inspects on site and confirms. Confirmed records only change when both sides agree.",

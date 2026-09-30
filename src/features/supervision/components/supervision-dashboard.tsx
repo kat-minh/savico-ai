@@ -158,7 +158,9 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
                     )}
                   >
                     <div className='flex items-center gap-2'>
-                      <span className='text-muted-foreground font-mono text-[11px]'>GĐ {stage.index}</span>
+                      <span className='text-muted-foreground font-mono text-[11px]'>
+                        {t('stageShort', { index: stage.index })}
+                      </span>
                       <StageStatusBadge stage={stage} />
                     </div>
                     <p className='mt-1 text-sm font-medium'>{tStages(stage.key)}</p>

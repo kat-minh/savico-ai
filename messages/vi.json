@@ -5722,6 +5722,7 @@
       }
     },
     "dashboard": {
+      "stageShort": "GĐ {index}",
       "title": "Bảng điều khiển giám sát",
       "breadcrumbProjects": "Dự án của tôi",
       "lead": "6 giai đoạn cố định từ hồ sơ pháp lý đến nghiệm thu & bàn giao. Tải ảnh/tài liệu kèm tên là giai đoạn hoàn thành và đường tiến độ chạy tiếp; Giám sát kiểm tra thực tế và xác nhận. Hồ sơ đã xác nhận chỉ thay đổi khi cả hai bên đồng ý.",

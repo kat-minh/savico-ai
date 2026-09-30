@@ -266,6 +266,8 @@ export function BriefForm({ projectId }: BriefFormProps) {
     }
   })
 
+  // React Hook Form's watch() is not memoizable; the compiler skips this component, which is intended.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const provinceCode = form.watch('provinceCode')
   const { provinces, isLoadingProvinces } = useGetProvinces()
   const { wards, isLoadingWards } = useGetWards(provinceCode ? Number(provinceCode) : undefined)

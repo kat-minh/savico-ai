@@ -674,6 +674,8 @@ export function FoundationBlock() {
 
       return () => {
         if (!isCurrentRun()) return
+        // The counter is a plain number, not a DOM node: the latest value is exactly what we want to bump.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         ++panelRunIdRef.current
         freezeAndCancelPanelAnimations()
       }
