@@ -97,7 +97,7 @@ export function BookingManager() {
               <Text strong style={{ display: 'block' }}>
                 {record.customerName}
               </Text>
-              <Text copyable type='secondary' style={{ fontSize: 12 }}>
+              <Text copyable={{ text: record.contactPhone }} type='secondary' style={{ fontSize: 12 }}>
                 <PhoneOutlined /> {record.contactPhone}
               </Text>
             </div>
