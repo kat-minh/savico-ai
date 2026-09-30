@@ -113,6 +113,15 @@
   padding-inline: 24px;
 }
 
+/* `scroll.x='max-content'` khiến bảng chỉ rộng bằng nội dung; khi ÍT cột, bảng
+   hẹp hơn thẻ nên cột "Thao tác" (fixed right) sát mép BẢNG, lơ lửng giữa thẻ.
+   Ép bảng rộng tối thiểu bằng thẻ → cột thao tác luôn nằm sát mép phải; nội dung
+   rộng hơn thẻ thì max-content vẫn thắng và cuộn ngang như cũ. */
+.admin-table-card .ant-table-content > table,
+.admin-table-card .ant-table-body > table {
+  min-width: 100%;
+}
+
 /* Tiêu đề cột không xuống dòng. "Số tầng ảnh" bị bẻ làm hai dòng khiến cả hàng
    tiêu đề cao gấp đôi trong khi các cột khác vẫn một dòng — nhìn như lỗi. Bảng
    đã bật cuộn ngang (`scroll.x`) nên để tiêu đề đẩy cột rộng ra là an toàn. */
