@@ -20,7 +20,6 @@ export {
   HOME_JOURNEY_STEPS,
   HOME_SERVICES,
   HOME_STATS,
-  HOME_TESTIMONIALS,
   SHOWCASE_TABS,
   type HeroCardRow,
   type HomeBrand,
@@ -29,6 +28,5 @@ export {
   type HomeJourneyStep,
   type HomeService,
   type HomeStat,
-  type HomeTestimonial,
   type ShowcaseTab
 } from './constants/landing.constants'

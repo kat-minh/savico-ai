@@ -422,7 +422,7 @@
       }
     },
     "painPoints": {
-      "title": "BUILDX giúp bạn kiểm soát từng bước",
+      "title": "BuildX giúp bạn kiểm soát từng bước",
       "subtitle": "Từ ngân sách, thiết kế đến lựa chọn nhà thầu và giám sát thi công.",
       "note": "Bạn cũng đang\ngặp những vấn đề này?",
       "items": {
@@ -450,7 +450,7 @@
     },
     "journey": {
       "title": "Một hành trình rõ ràng cho dự án của bạn",
-      "subtitle": "BUILDX đồng hành và giúp bạn theo dõi tiến trình dự án trong suốt quá trình thực hiện.",
+      "subtitle": "BuildX đồng hành và giúp bạn theo dõi tiến trình dự án trong suốt quá trình thực hiện.",
       "cta": "Tạo dự án mới",
       "resumeCta": "Tiếp tục dự án",
       "currentStepBadge": "Bạn đang ở bước này",
@@ -498,10 +498,10 @@
       }
     },
     "services": {
-      "eyebrow": "BẢNG GIÁ BUILDX",
       "title": "Chọn gói phù hợp với giai đoạn của bạn",
       "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
       "viewAll": "Xem tất cả gói",
+      "viewAllMobile": "Tham khảo",
       "ownedLabel": "Gói của bạn - còn {count} lượt",
       "openPackage": "Xem gói thiết kế",
       "openSupervision": "Mở gói",
@@ -530,12 +530,13 @@
           "action": "Đăng ký triển khai",
           "usedAtStep": "Dùng ở bước 04–05"
         }
-      },
-      "titleMobile": "Bảng giá BuildX"
+      }
     },
     "dossiers": {
       "eyebrow": "HỒ SƠ MẪU",
       "title": "Danh sách thư viện mẫu",
+      "tab2d": "Mẫu bản vẽ 2D",
+      "tab3d": "Mẫu bản vẽ 3D",
       "viewAll": "Xem tất cả hồ sơ mẫu",
       "viewOne": "Xem hồ sơ mẫu",
       "items": {
@@ -600,6 +601,7 @@
       "currency": "đ"
     },
     "brands": {
+      "title": "BuildX được tin tưởng bởi",
       "label": "BUILDX ĐƯỢC TIN TƯỞNG BỞI",
       "items": {
         "hoaphat": "Hòa Phát",
@@ -614,7 +616,7 @@
       "label": "KHÁCH HÀNG NÓI VỀ BUILDX",
       "items": {
         "tuan": {
-          "quote": "“Tôi không rành xây dựng nên ban đầu cũng khá mơ hồ. Có BUILDX thì tôi dễ hình dung hơn mình sẽ làm gì và ngân sách khoảng bao nhiêu.”",
+          "quote": "“Tôi không rành xây dựng nên ban đầu cũng khá mơ hồ. Có BuildX thì tôi dễ hình dung hơn mình sẽ làm gì và ngân sách khoảng bao nhiêu.”",
           "name": "Anh Minh Tuấn",
           "meta": "Nhà phố · 120m² · Buôn Ma Thuột"
         },
@@ -624,7 +626,7 @@
           "meta": "Biệt thự · 280m² · Đắk Lắk"
         },
         "bao": {
-          "quote": "“Trước đây tôi phải tự tìm hiểu khá nhiều thứ nên mất nhiều thời gian. BUILDX giúp tôi tập trung thông tin lại một chỗ, dễ theo dõi và kiểm soát chi phí hơn.”",
+          "quote": "“Trước đây tôi phải tự tìm hiểu khá nhiều thứ nên mất nhiều thời gian. BuildX giúp tôi tập trung thông tin lại một chỗ, dễ theo dõi và kiểm soát chi phí hơn.”",
           "name": "Anh Quốc Bảo",
           "meta": "Biệt thự · 320m² · Đà Lạt"
         },
@@ -634,12 +636,12 @@
           "meta": "Nhà phố · 95m² · TP. Hồ Chí Minh"
         },
         "nam": {
-          "quote": "“Điều tôi quan tâm nhất là chi phí có rõ ràng hay không. BUILDX giúp tôi có cái nhìn tổng thể hơn nên khi ra quyết định cũng đỡ mông lung.”",
+          "quote": "“Điều tôi quan tâm nhất là chi phí có rõ ràng hay không. BuildX giúp tôi có cái nhìn tổng thể hơn nên khi ra quyết định cũng đỡ mông lung.”",
           "name": "Anh Hoàng Nam",
           "meta": "Nhà phố · 140m² · Bình Dương"
         },
         "vy": {
-          "quote": "“Tôi không có nhiều thời gian theo sát từ đầu nên rất cần một nền tảng dễ hiểu. BUILDX giúp tôi nắm được tiến độ và biết dự án đang ở giai đoạn nào.”",
+          "quote": "“Tôi không có nhiều thời gian theo sát từ đầu nên rất cần một nền tảng dễ hiểu. BuildX giúp tôi nắm được tiến độ và biết dự án đang ở giai đoạn nào.”",
           "name": "Chị Thanh Vy",
           "meta": "Biệt thự · 250m² · Cần Thơ"
         }
@@ -2166,6 +2168,7 @@
       "templates3d": "Mẫu nội thất 3D",
       "templateViews": "Lượt xem chi tiết mẫu",
       "articleLabels": "Nhãn bài viết",
+      "testimonials": "Nhận xét khách hàng",
       "handbookSteps": "Các bước Cẩm nang",
       "costGroups": "Nhóm chi phí",
       "costItems": "Hạng mục",
@@ -3515,6 +3518,18 @@
         "inactive": "Có bài không còn Active."
       }
     },
+    "testimonials": {
+      "description": "Các lời nhận xét ở dải \"Khách hàng nói về BuildX\" trên trang chủ: ảnh đại diện, tên, thông tin công trình và nội dung. Chỗ để trống dùng bản dịch mặc định của site. Nhận xét Inactive không hiện trên trang chủ.",
+      "name": "Tên khách",
+      "meta": "Thông tin công trình",
+      "metaHint": "Ví dụ: Nhà phố · 120m² · Buôn Ma Thuột.",
+      "quote": "Nội dung nhận xét",
+      "avatar": "Ảnh đại diện",
+      "order": "Thứ tự",
+      "orderRule": "Thứ tự là số nguyên từ 1.",
+      "orderHint": "Số nhỏ hiện trước trên trang chủ.",
+      "defaultNote": "Chữ mặc định của site — sửa để ghi đè."
+    },
     "articleLabels": {
       "description": "Nhãn của bài viết và thứ tự trong bộ lọc phía khách hàng. Không xóa nhãn — chỉ chuyển Inactive; nhãn Inactive không dùng cho bài mới và không hiện trong bộ lọc.",
       "name": "Tên nhãn",
@@ -3752,13 +3767,11 @@
       "ranking": {
         "stickyNudge": "Tạo hồ sơ dự án - miễn phí",
         "tabs": {
-          "match": "Phù hợp nhất",
           "distance": "Gần nhất",
           "rating": "Đánh giá cao",
           "survey": "Khảo sát sớm"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
-        "bestMatch": "Phù hợp nhất",
         "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
       },
       "safety": {

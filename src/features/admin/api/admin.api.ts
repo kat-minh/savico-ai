@@ -26,6 +26,7 @@ const ENDPOINTS: Record<CmsCollection, string> = {
   costItems: '/admin/estimate/items',
   materialPrices: '/admin/estimate/material-prices',
   articleLabels: '/admin/handbook/labels',
+  testimonials: '/admin/content/testimonials',
   supervisionStages: '/admin/supervision/stages',
   supervisionPackages: '/admin/supervision-packages',
   consultants: '/admin/consultants',

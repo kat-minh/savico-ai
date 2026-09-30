@@ -840,12 +840,12 @@ export function TemplateLibrary() {
           data-template-kind-toggle
           data-entrance-step='1'
           data-entrance-order='0'
-          className='bg-muted/60 relative inline-flex rounded-lg border p-1'
+          className='bg-muted relative inline-flex rounded-full p-1.5'
         >
           <span
             data-template-kind-pill
             data-ready={pillStyle.ready}
-            className='bg-primary pointer-events-none absolute top-0 left-0 rounded-md'
+            className='brand-green-button pointer-events-none absolute top-0 left-0 rounded-full'
             style={{
               transform: pillStyle.transform,
               width: pillStyle.width,
@@ -875,7 +875,7 @@ export function TemplateLibrary() {
               }}
               aria-pressed={kind === option}
               className={cn(
-                'relative z-10 rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200',
+                'relative z-10 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-200',
                 kind === option ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >

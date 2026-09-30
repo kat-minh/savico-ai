@@ -127,7 +127,8 @@ export const ADMIN_NAV = [
       { key: 'articles', href: ADMIN_ROUTES.ARTICLES, icon: FileTextOutlined },
       { key: 'articleLabels', href: ADMIN_ROUTES.ARTICLE_LABELS, icon: TagOutlined },
       { key: 'handbookSteps', href: ADMIN_ROUTES.HANDBOOK_STEPS, icon: OrderedListOutlined },
-      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
+      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined },
+      { key: 'testimonials', href: ADMIN_ROUTES.TESTIMONIALS, icon: TeamOutlined }
     ]
   },
   {

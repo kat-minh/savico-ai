@@ -302,7 +302,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
                 <Button
                   type='button'
                   onClick={createProject}
-                  className='brand-orange-button group/button relative h-12 w-full rounded-xl text-[15px] font-bold'
+                  className='brand-orange-button group/button relative h-12 w-full rounded-full text-[15px] font-bold'
                 >
                   {t('popup.create.action')}
                   <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -321,7 +321,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               value={t('popup.architect.value')}
               order={1}
               actions={
-                <Button asChild className='brand-green-button h-12 w-full rounded-xl text-[15px] font-bold'>
+                <Button asChild className='brand-green-button h-12 w-full rounded-full text-[15px] font-bold'>
                   <Link href={ROUTES.CONSULT} onClick={commitAction} className='group/button relative'>
                     {t('popup.architect.action')}
                     <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -341,7 +341,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               value={t('popup.legal.value')}
               order={2}
               actions={
-                <Button asChild className='brand-green-button h-12 w-full rounded-xl text-[15px] font-bold'>
+                <Button asChild className='brand-green-button h-12 w-full rounded-full text-[15px] font-bold'>
                   <Link href={`${ROUTES.CONSULT}?type=legal`} onClick={commitAction} className='group/button relative'>
                     {t('popup.legal.action')}
                     <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />

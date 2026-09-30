@@ -1,15 +1,6 @@
 'use client'
 
-import {
-  ArrowRight,
-  ChevronDown,
-  DraftingCompass,
-  FilePen,
-  FileText,
-  House,
-  Users,
-  type LucideIcon
-} from 'lucide-react'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
@@ -21,12 +12,17 @@ import { cn } from '@/shared/lib/utils'
 import { HOME_JOURNEY_STEPS, type HomeJourneyStep } from '../constants/landing.constants'
 import { ResumeProjectLabel } from './resume-project-label'
 
-const STEP_ICON: Record<HomeJourneyStep, LucideIcon> = {
-  project: FilePen,
-  design: DraftingCompass,
-  dossier: FileText,
-  contractor: Users,
-  build: House
+/**
+ * Icon nét của từng bước (bộ icon khách gửi, `public/images/journey`). Vẽ bằng `mask-image` chứ không
+ * phải thẻ `img`: PNG chỉ đóng vai hình dạng, màu lấy từ `currentColor` nên vẫn xanh mặc định, cam khi
+ * rê chuột và trắng khi thẻ mobile đang mở — đúng như các icon cũ.
+ */
+const STEP_ICON: Record<HomeJourneyStep, string> = {
+  project: '/images/journey/project.png',
+  design: '/images/journey/design.png',
+  dossier: '/images/journey/dossier.png',
+  contractor: '/images/journey/contractor.png',
+  build: '/images/journey/build.png'
 }
 
 const DETAIL_FIELDS = ['youDo', 'savicoDoes', 'youGet'] as const
@@ -97,12 +93,12 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
   return (
     // Dưới `lg`: đệm trên 20px (đồng bộ mọi cụm trang chủ), dòng nhãn ẩn — khối đầu chỉ còn
     // tiêu đề + mô tả; mô tả là MỘT câu liền: dưới `lg` ký tự xuống dòng trong câu chữ chỉ còn là khoảng trắng, chữ chạy hết bề ngang rồi mới xuống dòng (`text-pretty` tránh chừa một chữ lẻ ở dòng cuối).
-    <section id='home-journey' className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-14 lg:px-8 lg:py-16'>
+    <section id='home-journey' className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
       <header className='flex flex-wrap items-end justify-between gap-x-10 gap-y-3'>
         <div className='space-y-2'>
           {/* Góp ý BuildX: bỏ dòng nhãn, chỉ còn tiêu đề + một câu mô tả. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
-          <p className='text-muted-foreground max-w-5xl text-sm text-pretty'>{t('subtitle')}</p>
+          <p className='text-foreground max-w-5xl text-sm text-pretty'>{t('subtitle')}</p>
         </div>
       </header>
 
@@ -111,7 +107,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
         className='mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr)_auto)_minmax(0,1fr)] lg:gap-3'
       >
         {HOME_JOURNEY_STEPS.map((step, index) => {
-          const Icon = STEP_ICON[step]
+          const iconSrc = STEP_ICON[step]
           const isCurrent = index === activeIndex
           const isHovered = hovered === index
           const isSweptPassed = sweepIndex !== null && index < sweepIndex
@@ -140,9 +136,8 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                 className={cn(
                   'relative flex h-full cursor-pointer flex-col rounded-2xl border p-4 pt-5 text-left transition-[background-color,border-color,color,box-shadow] duration-500 ease-in-out sm:items-center sm:gap-2 sm:p-5 sm:pt-7 sm:text-center',
                   isPastCard ? 'bg-muted/40' : 'bg-card',
-                  isCurrent && 'border-primary shadow-[0_0_0_3px_var(--color-accent)]',
                   isSwept && 'border-primary shadow-[0_0_0_4px_var(--color-accent),0_0_18px_var(--color-accent)]',
-                  isOpen && 'ring-primary/40 ring-2'
+                  isOpen && 'border-brand-orange ring-brand-orange/30 ring-2'
                 )}
               >
                 {/* Con số nằm ĐÈ LÊN viền trên, căn giữa thẻ (ảnh mockup). Rê
@@ -158,12 +153,12 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                   className={cn(
                     'absolute -top-3 left-4 rounded-lg px-2.5 py-1 text-sm font-bold transition-colors duration-500 ease-in-out sm:left-1/2 sm:-translate-x-1/2',
                     isHovered
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-brand-orange text-brand-orange-foreground'
                       : isPastCard
                         ? 'bg-muted text-muted-foreground'
                         : 'bg-primary-soft text-primary',
                     // Mobile: thẻ đang mở thì ô nền bọc số đậm lên xanh đậm (thẻ vẫn giữ màu cũ).
-                    isOpen && 'max-sm:bg-primary-strong max-sm:text-primary-foreground'
+                    isOpen && 'max-sm:bg-brand-orange max-sm:text-brand-orange-foreground'
                   )}
                 >
                   {String(index + 1).padStart(2, '0')}
@@ -177,13 +172,40 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                   <span
                     className={cn(
                       'flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors duration-500 ease-in-out sm:size-auto sm:rounded-none sm:bg-transparent',
-                      isOpen ? 'bg-primary-strong text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      isOpen ? 'bg-brand-orange text-brand-orange-foreground' : 'bg-muted text-muted-foreground'
                     )}
                   >
-                    <Icon className='size-5 sm:text-primary sm:size-6' strokeWidth={1.75} />
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'block size-6 bg-current transition-colors duration-500 ease-in-out sm:size-8',
+                        isOpen
+                          ? 'text-brand-orange max-sm:text-brand-orange-foreground'
+                          : isHovered
+                            ? 'text-brand-orange'
+                            : 'sm:text-primary'
+                      )}
+                      style={{
+                        maskImage: `url(${iconSrc})`,
+                        WebkitMaskImage: `url(${iconSrc})`,
+                        maskSize: 'contain',
+                        WebkitMaskSize: 'contain',
+                        maskRepeat: 'no-repeat',
+                        WebkitMaskRepeat: 'no-repeat',
+                        maskPosition: 'center',
+                        WebkitMaskPosition: 'center'
+                      }}
+                    />
                   </span>
                   <div className='min-w-0 flex-1 space-y-0.5 sm:contents sm:space-y-0'>
-                    <h3 className='text-sm leading-snug font-bold text-balance'>{t(`items.${step}.title`)}</h3>
+                    <h3
+                      className={cn(
+                        'text-sm leading-snug font-bold text-balance transition-colors duration-500 ease-in-out',
+                        (isHovered || isOpen) && 'text-brand-orange'
+                      )}
+                    >
+                      {t(`items.${step}.title`)}
+                    </h3>
                     <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
                       {t(`items.${step}.description`)}
                     </p>
@@ -216,10 +238,10 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                     >
                       {DETAIL_FIELDS.map((field) => (
                         <div key={field} className='first:mt-2'>
-                          <dt className='text-primary text-xs font-semibold tracking-wide uppercase'>
+                          <dt className='text-brand-orange text-xs font-semibold tracking-wide uppercase'>
                             {t(`detailLabels.${field}`)}
                           </dt>
-                          <dd className='text-muted-foreground mt-1 text-sm leading-relaxed text-pretty'>
+                          <dd className='text-foreground mt-1 text-sm leading-relaxed text-pretty'>
                             {t(`items.${step}.${field}`)}
                           </dd>
                         </div>
@@ -256,17 +278,23 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: revealEase }}
-            className='bg-muted/40 mt-4 grid grid-cols-1 gap-x-6 gap-y-3 overflow-hidden rounded-2xl border p-5 text-left max-sm:hidden sm:grid-cols-3'
+            className='bg-brand-orange-soft border-brand-orange/40 mt-4 grid grid-cols-1 gap-x-6 gap-y-3 overflow-hidden rounded-2xl border p-5 text-left max-sm:hidden sm:grid-cols-3'
           >
-            {DETAIL_FIELDS.map((field) => (
-              <div key={field}>
-                <dt className='text-primary text-xs font-semibold tracking-wide uppercase'>
+            {DETAIL_FIELDS.map((field, fieldIndex) => (
+              <motion.div
+                // `key` gồm cả bước: đổi sang thẻ khác thì nội dung fade in lại từ đầu.
+                key={`${expanded}-${field}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 + fieldIndex * 0.12, ease: 'easeOut' }}
+              >
+                <dt className='text-brand-orange text-xs font-semibold tracking-wide uppercase'>
                   {t(`detailLabels.${field}`)}
                 </dt>
-                <dd className='text-muted-foreground mt-1 text-sm leading-relaxed text-pretty'>
+                <dd className='text-foreground mt-1 text-sm leading-relaxed text-pretty'>
                   {t(`items.${expanded}.${field}`)}
                 </dd>
-              </div>
+              </motion.div>
             ))}
           </motion.dl>
         ) : null}

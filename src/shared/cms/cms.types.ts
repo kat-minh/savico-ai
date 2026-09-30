@@ -137,6 +137,24 @@ export interface CmsArticleLabel {
   order: number
 }
 
+/**
+ * Một lời nhận xét ở dải "Khách hàng nói về BuildX" (trang chủ). Ba trường chữ để TRỐNG nghĩa là
+ * chưa sửa: site dùng bản dịch trong `messages/*.json` (`landing.testimonials.items.<id>`), nên
+ * cả hai ngôn ngữ vẫn có chữ. Ảnh đại diện để trống thì thẻ hiện chữ cái đầu của tên.
+ */
+export interface CmsTestimonial {
+  /** Mã bản ghi. Sáu mã gốc (tuan, hang, bao, ngocanh, nam, vy) khớp khóa bản dịch dự phòng. */
+  id: string
+  name: string
+  /** Dòng phụ dưới tên — loại công trình · diện tích · nơi ở. */
+  meta: string
+  quote: string
+  avatarUrl: string
+  status: 'active' | 'inactive'
+  /** Thứ tự hiện trên trang chủ (nhỏ trước). */
+  order: number
+}
+
 /** Một mục trong thân bài: tiêu đề đánh số + các đoạn văn, có thể kèm ảnh. */
 export interface HandbookArticleSection {
   heading?: string

@@ -28,6 +28,7 @@ import type {
   CmsRescheduleRequest,
   CmsSiteSettings,
   CmsSubscription,
+  CmsTestimonial,
   CmsSupervisionProject,
   CmsTransaction,
   CmsStaticPage,
@@ -83,7 +84,8 @@ import {
   QUOTAS_SEED,
   SITE_SETTINGS_SEED,
   STYLE_OPTIONS_SEED,
-  TERMS_PAGE_SEED
+  TERMS_PAGE_SEED,
+  TESTIMONIALS_SEED
 } from './seeds'
 
 /**
@@ -113,6 +115,8 @@ export interface CmsCollectionMap {
   handbookStages: HandbookStage
   /** Nhãn bài viết (BR-136). */
   articleLabels: CmsArticleLabel
+  /** Lời nhận xét khách hàng ở trang chủ. */
+  testimonials: CmsTestimonial
   guideVideos: GuideVideo
   guideArticles: GuideArticle
   plans: SubscriptionPlan
@@ -252,6 +256,7 @@ const COLLECTION_SEEDS: { [K in CmsCollection]: CmsCollectionMap[K][] } = {
   handbookArticles: HANDBOOK_ARTICLES_SEED,
   handbookStages: HANDBOOK_STAGES_SEED,
   articleLabels: ARTICLE_LABELS_SEED,
+  testimonials: TESTIMONIALS_SEED,
   guideVideos: GUIDE_VIDEOS_SEED,
   guideArticles: GUIDE_ARTICLES_SEED,
   plans: PLANS_SEED,
@@ -306,7 +311,7 @@ const DOCUMENT_SEEDS: { [K in CmsDocument]: CmsDocumentMap[K] } = {
 
 /** Khóa localStorage. Đổi `VERSION` để bỏ bản ghi cũ khi cấu trúc thay đổi. */
 const STORAGE_KEY = 'savico.cms'
-const VERSION = 12
+const VERSION = 13
 
 interface CmsSnapshot {
   version: number

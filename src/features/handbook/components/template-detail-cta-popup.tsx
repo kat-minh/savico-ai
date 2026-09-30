@@ -221,7 +221,7 @@ export function TemplateDetailCtaPopup({ template }: TemplateDetailCtaPopupProps
             value={planLabel ? t('create.valuePlan', { plan: planLabel }) : t('create.valueFree')}
             order={0}
             actions={
-              <Button asChild className='brand-orange-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-orange-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link href={designCreateRoute()} onClick={rememberTemplate} className='group/button relative'>
                   <span>{t('create.action')}</span>
                   <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -244,7 +244,7 @@ export function TemplateDetailCtaPopup({ template }: TemplateDetailCtaPopupProps
               <Button
                 type='button'
                 onClick={saveTemplate}
-                className='brand-green-button group/button relative h-12 w-full rounded-xl text-[15px] font-bold'
+                className='brand-green-button group/button relative h-12 w-full rounded-full text-[15px] font-bold'
               >
                 <span>{favorite ? t('save.savedAction') : t('save.action')}</span>
                 <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -263,7 +263,7 @@ export function TemplateDetailCtaPopup({ template }: TemplateDetailCtaPopupProps
             value={t('consult.value')}
             order={2}
             actions={
-              <Button asChild className='brand-green-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-green-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link
                   href={`${ROUTES.CONSULT}?template=${encodeURIComponent(template.id)}`}
                   onClick={() => setOpen(false)}

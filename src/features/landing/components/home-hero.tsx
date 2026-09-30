@@ -157,7 +157,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
               span `inline` nên xuống dòng theo từng từ; từ `lg` phần nhấn xuống
               dòng riêng. Dưới `lg` tối đa 3 dòng (`max-h` 3 × 1.15em). Chỗ ngắt
               dòng admin đặt bằng ký tự xuống dòng được `whitespace-pre-line` giữ. */}
-          <h1 className='text-3xl leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
+          <h1 className='text-[clamp(1rem,5.4vw,1.5rem)] leading-[1.15] font-bold tracking-tight sm:text-4xl lg:text-[2.2rem]'>
             <motion.span
               initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -174,7 +174,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
                     'linear-gradient(to right, var(--color-primary-strong) 50%, color-mix(in oklab, var(--color-foreground) 35%, transparent) 50%)',
                   backgroundSize: '200% 100%'
                 }}
-                className='bg-clip-text text-transparent lg:block lg:whitespace-nowrap'
+                className='bg-clip-text text-transparent max-sm:block max-sm:whitespace-nowrap lg:block lg:whitespace-nowrap'
               >
                 {t('titleAccent')}
               </motion.span>
@@ -347,7 +347,7 @@ function HeroDossierCard({ skip, skipStar, seq, onCreateProject }: HeroDossierCa
 
       {/* "Xem hồ sơ mẫu": mở hộp thoại Tạo dự án mới (sheet góp ý BuildX) —
           trước đây chỉ cuộn xuống khối "Hồ sơ mẫu" bên dưới. */}
-      <Button type='button' className='brand-green-button h-8.5 w-full rounded-lg text-xs' onClick={onCreateProject}>
+      <Button type='button' className='brand-green-button h-8.5 w-full rounded-full text-xs' onClick={onCreateProject}>
         {t('cta')}
       </Button>
     </motion.div>

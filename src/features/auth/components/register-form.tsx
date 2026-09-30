@@ -146,7 +146,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
                   {/* `block`: FormLabel mặc định là `flex`, biến câu chữ và hai đường link thành các ô rời nhau nên
                       "Tôi đồng ý với" bị tách khỏi "Điều khoản…". Để chữ chảy liền như một đoạn văn, hết bề
                       ngang mới xuống dòng. */}
-                  <FormLabel className='block leading-snug font-normal'>
+                  <FormLabel className='block leading-snug font-normal max-sm:min-w-0 max-sm:text-[clamp(0.5rem,2.75vw,0.875rem)] max-sm:whitespace-nowrap'>
                     {t.rich('agree', {
                       terms: (chunks) => (
                         <Link

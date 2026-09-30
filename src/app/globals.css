@@ -503,6 +503,17 @@
     filter: brightness(1.06);
   }
 
+  /* Dải nền xanh gradient của trang chủ — các cụm xen kẽ nền sáng/nền xanh từ trên xuống (góp ý
+     BuildX). Xanh logo #2A753F đậm dần về góc trên-trái, sáng nhẹ về góc dưới-phải; đủ tối để chữ trắng đọc rõ. */
+  .brand-band {
+    background-image: linear-gradient(
+      135deg,
+      var(--primary-strong),
+      color-mix(in oklch, var(--primary-strong) 76%, var(--brand-gradient-to))
+    );
+    color: var(--primary-foreground);
+  }
+
   .brand-orange-button {
     background-image: none;
     background-color: var(--brand-orange);

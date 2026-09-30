@@ -22,8 +22,8 @@ export function HomeBrands() {
   const marquee = isMobile || HOME_BRANDS.length > 7
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 lg:px-8'>
-      <p className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'>{t('label')}</p>
+    <section className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
+      <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
 
       {marquee ? (
         <div

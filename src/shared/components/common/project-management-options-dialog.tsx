@@ -103,7 +103,7 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('self.value')}
             order={0}
             actions={
-              <Button asChild className='brand-green-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-green-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link href={supervisionRoute(projectId)} onClick={commitChoice} className='group/button relative'>
                   <span>{t('self.action')}</span>
                   <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -124,7 +124,7 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('check.value', { price: checkPrice })}
             order={1}
             actions={
-              <Button asChild className='brand-orange-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-orange-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link
                   href={checkoutConfirmRoute(checkId, projectId)}
                   onClick={() => choosePaidPlan(checkId)}
@@ -149,7 +149,7 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('control.value', { price: controlPrice })}
             order={2}
             actions={
-              <Button asChild className='brand-orange-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-orange-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link
                   href={checkoutConfirmRoute(controlId, projectId)}
                   onClick={() => choosePaidPlan(controlId)}

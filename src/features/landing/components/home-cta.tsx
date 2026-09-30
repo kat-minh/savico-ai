@@ -38,7 +38,7 @@ export function HomeCta({ onCreateProject, resumeProject, skipShine }: HomeCtaPr
   const t = useTranslations('landing.cta')
 
   return (
-    <section id='home-cta' className='mx-auto w-full max-w-[90rem] px-4 pb-5 lg:px-8 lg:pb-16'>
+    <section id='home-cta' className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}

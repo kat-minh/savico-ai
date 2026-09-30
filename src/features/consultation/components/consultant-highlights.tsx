@@ -58,50 +58,44 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
   const ordered = sortConsultants(consultants ?? [], preferredSpecialtyId).slice(0, HOME_CONSULTANT_COUNT)
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-14 lg:px-8 lg:py-16'>
-      <header className='mb-8 flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
-        <div className='space-y-2'>
-          {/* Cùng khuôn với các khối phía trên: dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Tư vấn 1:1"
-              (`titleMobile`), còn tiêu đề cũ + mô tả gộp thành MỘT mô tả nhỏ. Từ `lg` giữ nguyên. */}
-          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
-            {t('eyebrow')}
-          </p>
-          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
-            <span className='lg:hidden'>{t('titleMobile')}</span>
-            <span className='hidden lg:inline'>{t('title')}</span>
-          </h2>
-          <p className='text-muted-foreground text-sm max-lg:hidden'>{t('subtitle')}</p>
-          <p className='text-muted-foreground text-sm lg:hidden'>
-            {t('title')}. {t('subtitle')}
-          </p>
-        </div>
+    <section className='brand-band'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
+        <header className='mb-8 flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
+          <div className='space-y-2'>
+            {/* Cùng khuôn với "Hướng dẫn sử dụng": tiêu đề + một dòng mô tả, không có dòng nhãn. */}
+            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('titleMobile')}</h2>
+            <p className='text-primary-foreground max-w-2xl text-sm text-pretty'>
+              {t('title')}. {t('subtitle')}
+            </p>
+          </div>
 
-        <Link
-          href={ROUTES.CONSULT}
-          className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
-        >
-          {t('viewAll')}
-          <ChevronRight className='size-4 lg:hidden' />
-          <ArrowRight className='hidden size-4 lg:block' />
-        </Link>
-      </header>
+          <Link
+            href={ROUTES.CONSULT}
+            className='inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
+          >
+            {t('viewAll')}
+            <ChevronRight className='size-4 lg:hidden' />
+            <ArrowRight className='hidden size-4 lg:block' />
+          </Link>
+        </header>
 
-      <ul className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
-        {isPending
-          ? Array.from({ length: HOME_CONSULTANT_COUNT }, (_, index) => (
-              <li key={index}>
-                <Skeleton className='h-28 w-full rounded-2xl' />
-              </li>
-            ))
-          : ordered.map((consultant, index) => (
-              <ConsultantHighlightCard
-                key={consultant.id}
-                consultant={consultant}
-                index={index}
-                isBooked={isAuthenticated && bookedConsultantIds.has(consultant.id)}
-              />
-            ))}
-      </ul>
+        <ul className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+          {isPending
+            ? Array.from({ length: HOME_CONSULTANT_COUNT }, (_, index) => (
+                <li key={index}>
+                  <Skeleton className='h-28 w-full rounded-2xl' />
+                </li>
+              ))
+            : ordered.map((consultant, index) => (
+                <ConsultantHighlightCard
+                  key={consultant.id}
+                  consultant={consultant}
+                  index={index}
+                  isBooked={isAuthenticated && bookedConsultantIds.has(consultant.id)}
+                />
+              ))}
+        </ul>
+      </div>
     </section>
   )
 }
@@ -126,7 +120,7 @@ function ConsultantHighlightCard({
       viewport={{ once: true, amount: 0.4 }}
       transition={{ layout: { duration: 0.4, ease: revealEase }, opacity: { duration: 0.5, delay: index * 0.1 } }}
       whileHover={{ y: -4 }}
-      className='group/card bg-card flex items-center gap-4 rounded-2xl border p-4 transition-shadow hover:shadow-lg'
+      className='group/card bg-card text-card-foreground flex items-center gap-4 rounded-2xl border p-4 transition-shadow hover:shadow-lg'
     >
       {/* Ảnh, tên và nút đều dẫn sang hồ sơ KTS (nơi chọn khung giờ) — ba liên
           kết riêng vì cột phải xếp dọc, không bọc chung được một thẻ <a>. */}
@@ -151,7 +145,7 @@ function ConsultantHighlightCard({
           <Button
             asChild
             variant='outline'
-            className='border-primary/40 text-primary-strong bg-primary/5 h-8 w-full rounded-lg text-xs'
+            className='border-primary/40 text-primary-strong bg-primary/5 h-8 w-full rounded-full text-xs'
           >
             <Link href={consultantRoute(consultant.id)}>
               <Check className='size-3.5' />
@@ -162,7 +156,7 @@ function ConsultantHighlightCard({
           <Button
             asChild
             variant='outline'
-            className='text-primary group-hover/card:bg-primary group-hover/card:bg-none group-hover/card:text-primary-foreground h-8 w-full rounded-lg text-xs transition-colors'
+            className='text-primary group-hover/card:bg-primary group-hover/card:bg-none group-hover/card:text-primary-foreground h-8 w-full rounded-full text-xs transition-colors'
           >
             <Link href={consultantRoute(consultant.id)}>{t('book')}</Link>
           </Button>

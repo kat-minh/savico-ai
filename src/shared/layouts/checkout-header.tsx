@@ -37,7 +37,7 @@ export function CheckoutHeader() {
             <Headphones className='text-primary size-5' />
             {t('headerSupport')}
           </span>
-          <Button asChild variant='outline' size='sm' className='rounded-lg'>
+          <Button asChild variant='outline' size='sm' className='rounded-full'>
             <a href={`tel:${hotline.replace(/\s/g, '')}`}>{t('headerSupportAction')}</a>
           </Button>
         </div>

@@ -76,6 +76,8 @@ export const ADMIN_ROUTES = {
   /** Bài viết + nhãn bài viết Cẩm nang (epic ArticleManagement, BR-136). */
   ARTICLES: '/admin/articles',
   ARTICLE_LABELS: '/admin/article-labels',
+  /** Lời nhận xét khách hàng ở trang chủ (ảnh đại diện + nội dung). */
+  TESTIMONIALS: '/admin/testimonials',
   /** Các bước trong Cẩm nang + Nhóm cẩm nang (epic HandbookStepManagement). */
   HANDBOOK_STEPS: '/admin/handbook-steps',
   /** Video hướng dẫn của trang Hướng dẫn. */

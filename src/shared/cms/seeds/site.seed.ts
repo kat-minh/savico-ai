@@ -1,4 +1,18 @@
-import type { CmsSiteSettings, CmsStaticPage } from '../cms.types'
+import type { CmsSiteSettings, CmsStaticPage, CmsTestimonial } from '../cms.types'
+
+/**
+ * Sáu lời nhận xét gốc của trang chủ. Chữ và ảnh để trống có chủ đích: chữ lấy từ bản dịch
+ * (`landing.testimonials.items.<id>`) nên đúng ngôn ngữ đang xem, ảnh chờ ảnh thật của khách.
+ */
+export const TESTIMONIALS_SEED: CmsTestimonial[] = ['tuan', 'hang', 'bao', 'ngocanh', 'nam', 'vy'].map((id, index) => ({
+  id,
+  name: '',
+  meta: '',
+  quote: '',
+  avatarUrl: '',
+  status: 'active',
+  order: index + 1
+}))
 
 const LEGAL_UPDATED_NOTE = 'Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.'
 

@@ -47,6 +47,9 @@ export const SERVICE_REGIONS: readonly ServiceRegion[] = ['north', 'central', 's
 /** Chip sắp xếp (S12) — cùng thứ tự với 4 tab xếp hạng ở landing (S09). */
 export const CONTRACTOR_SORTS: readonly ContractorSort[] = ['match', 'distance', 'rating', 'survey'] as const
 
+/** Tab xếp hạng ở landing (S09) — chỉ ba tab, KHÔNG có "Phù hợp nhất". */
+export const LANDING_SORTS: readonly Exclude<ContractorSort, 'match'>[] = ['distance', 'rating', 'survey'] as const
+
 /** 4 thẻ phạm vi thi công ở Bước 1 (S10). */
 export const CONSTRUCTION_SCOPES: readonly ConstructionScope[] = ['turnkey', 'shell', 'finishing', 'interior'] as const
 

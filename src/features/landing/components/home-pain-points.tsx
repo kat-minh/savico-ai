@@ -60,7 +60,7 @@ export function HomePainPoints() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.6 }}
               transition={{ duration: 0.75, delay: 0.18, ease: revealEase }}
-              className='text-primary-foreground/80 max-w-5xl text-sm whitespace-pre-line'
+              className='text-primary-foreground max-w-5xl text-sm whitespace-pre-line'
             >
               {t('subtitle')}
             </motion.p>
@@ -109,7 +109,7 @@ export function HomePainPoints() {
               >
                 <div
                   className={cn(
-                    'bg-card text-card-foreground flex h-full w-full flex-row items-start gap-3 rounded-2xl border p-4 text-left transition-[opacity,transform,border-color,box-shadow] duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none sm:min-h-52 sm:flex-col sm:items-center sm:gap-2.5 sm:p-5 sm:text-center',
+                    'bg-card text-card-foreground flex h-full w-full flex-row items-start gap-3 rounded-2xl border p-4 text-left transition-[opacity,transform,border-color,box-shadow] duration-500 ease-out motion-reduce:transform-none motion-reduce:transition-none sm:flex-col sm:items-center sm:gap-2.5 sm:p-5 sm:text-center',
                     dimmed ? cn('opacity-45', DIM_DELAY[dimOrder]) : 'delay-0 opacity-100',
                     isHovered && 'border-primary/50 ring-primary/15 -translate-y-1 shadow-md ring-4'
                   )}
@@ -121,13 +121,26 @@ export function HomePainPoints() {
                     viewport={{ once: true, amount: 0.4 }}
                     transition={{ duration: 0.4, delay: index * 0.1 + 0.15 }}
                   >
-                    <Icon className='text-primary size-7' strokeWidth={1.75} />
+                    <Icon
+                      className={cn(
+                        'size-7 transition-colors duration-500 ease-out motion-reduce:transition-none',
+                        isHovered ? 'text-brand-orange' : 'text-primary'
+                      )}
+                      strokeWidth={1.75}
+                    />
                   </motion.span>
                   {/* `sm:contents`: từ `sm` khung bọc này biến mất để tiêu đề, mô tả nằm thẳng
                       trong cột giữa thẻ như cũ. */}
                   <div className='min-w-0 flex-1 space-y-1 sm:contents sm:space-y-0'>
-                    <h3 className='text-sm leading-snug font-bold text-balance'>{t(`items.${point}.title`)}</h3>
-                    <p className='text-muted-foreground text-xs leading-relaxed text-pretty'>
+                    <h3
+                      className={cn(
+                        'text-sm leading-snug font-bold text-balance transition-colors duration-500 ease-out motion-reduce:transition-none',
+                        isHovered && 'text-brand-orange'
+                      )}
+                    >
+                      {t(`items.${point}.title`)}
+                    </h3>
+                    <p className='text-foreground text-xs leading-relaxed font-normal text-pretty'>
                       {t(`items.${point}.description`)}
                     </p>
                   </div>

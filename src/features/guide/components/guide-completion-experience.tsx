@@ -107,7 +107,7 @@ function GuideCompletionSection({ video, onCreateProject, onBrowseGuides }: EndC
               <Button
                 type='button'
                 onClick={onCreateProject}
-                className='brand-green-button h-11 rounded-xl px-5 text-[14px] font-bold max-[899px]:w-full'
+                className='brand-green-button h-11 rounded-full px-5 text-[14px] font-bold max-[899px]:w-full'
               >
                 <Camera className='size-4' />
                 {t('create')}
@@ -119,7 +119,7 @@ function GuideCompletionSection({ video, onCreateProject, onBrowseGuides }: EndC
               type='button'
               variant='outline'
               onClick={onBrowseGuides}
-              className='border-primary/30 text-primary-strong hover:bg-accent h-11 rounded-xl px-5 text-[14px] font-bold max-[899px]:w-full'
+              className='border-primary/30 text-primary-strong hover:bg-accent h-11 rounded-full px-5 text-[14px] font-bold max-[899px]:w-full'
             >
               <BookOpen className='size-4' />
               {t('browse')}
@@ -128,7 +128,7 @@ function GuideCompletionSection({ video, onCreateProject, onBrowseGuides }: EndC
             <Button
               asChild
               variant='outline'
-              className='border-primary/30 text-primary-strong hover:bg-accent h-11 rounded-xl px-5 text-[14px] font-bold max-[899px]:w-full'
+              className='border-primary/30 text-primary-strong hover:bg-accent h-11 rounded-full px-5 text-[14px] font-bold max-[899px]:w-full'
             >
               <Link href={ROUTES.CONSULT}>
                 <UserRoundPlus className='size-4' />
@@ -278,7 +278,7 @@ function GuideEndCardDialog({
                 type='button'
                 onClick={closeAndCreate}
                 disabled={!onCreateProject}
-                className='brand-orange-button group/button relative h-12 w-full rounded-xl text-[15px] font-bold'
+                className='brand-orange-button group/button relative h-12 w-full rounded-full text-[15px] font-bold'
               >
                 <span>{t('create.action')}</span>
                 <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -300,7 +300,7 @@ function GuideEndCardDialog({
               <Button
                 type='button'
                 onClick={closeAndBrowse}
-                className='brand-green-button group/button relative h-12 w-full rounded-xl text-[15px] font-bold'
+                className='brand-green-button group/button relative h-12 w-full rounded-full text-[15px] font-bold'
               >
                 <span>{t('browse.action')}</span>
                 <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
@@ -319,7 +319,7 @@ function GuideEndCardDialog({
             value={t('consult.value')}
             order={2}
             actions={
-              <Button asChild className='brand-green-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-green-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link href={ROUTES.CONSULT} onClick={() => onOpenChange(false)} className='group/button relative'>
                   <span>{t('consult.action')}</span>
                   <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />

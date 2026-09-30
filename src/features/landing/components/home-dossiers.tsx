@@ -22,6 +22,11 @@ import { HOME_DOSSIERS, type HomeDossier } from '../constants/landing.constants'
  */
 const LIBRARY_HREF = `${ROUTES.HANDBOOK}?tab=library`
 
+/** Thư viện của một mẫu: bản vẽ 2D hoặc nội thất 3D. */
+export type HomeTemplateKind = '2d' | '3d'
+
+const TEMPLATE_KINDS: readonly HomeTemplateKind[] = ['2d', '3d']
+
 /** Loại thông số trên thẻ — quyết định icon đứng trước chữ. */
 export type HomeTemplateFactKind = 'area' | 'lot' | 'floors' | 'images'
 
@@ -38,6 +43,8 @@ const FACT_ICON = {
  */
 export interface HomeTemplateItem {
   id: string
+  /** Thư viện của mẫu — quyết định thẻ hiện ở tab "Mẫu 2D" hay "Mẫu 3D". */
+  kind: HomeTemplateKind
   /** Trang chi tiết của mẫu. */
   href: string
   title: string
@@ -85,6 +92,7 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
   const tCommon = useTranslations('common')
   const { ref: trackRef, active, scrollTo } = useScrollSnapIndex<HTMLUListElement>()
   const [edge, setEdge] = useState({ start: true, end: false })
+  const [kind, setKind] = useState<HomeTemplateKind>('2d')
 
   // Mũi tên mờ đi ở hai đầu hàng: theo dõi vị trí cuộn của chính dải này.
   useEffect(() => {
@@ -99,7 +107,12 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
       el.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
-  }, [trackRef, items])
+  }, [trackRef, items, kind])
+
+  const selectKind = (next: HomeTemplateKind) => {
+    setKind(next)
+    trackRef.current?.scrollTo({ left: 0 })
+  }
 
   const page = (direction: 1 | -1) => {
     const el = trackRef.current
@@ -107,30 +120,44 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
   }
 
   const fallback = items !== undefined && items.length === 0
-  const cards: readonly HomeTemplateItem[] | null = items === undefined || fallback ? null : items
+  const cards: readonly HomeTemplateItem[] | null =
+    items === undefined || fallback ? null : items.filter((item) => item.kind === kind)
   const dotCount = cards ? cards.length : fallback ? HOME_DOSSIERS.length : 0
 
   return (
-    <section id='home-dossiers' className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-16'>
+    <section id='home-dossiers' className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
       <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
         <div className='space-y-2'>
-          {/* Cùng khuôn với các khối phía trên: dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Hồ sơ mẫu"
-              (`titleMobile`) và câu "Danh sách thư viện mẫu" thành mô tả nhỏ bên dưới. Từ `lg` giữ nguyên
-              nhãn + tiêu đề. */}
-          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
-            {t('eyebrow')}
-          </p>
-          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
-            <span className='lg:hidden'>{t('titleMobile')}</span>
-            <span className='hidden lg:inline'>{t('title')}</span>
-          </h2>
-          <p className='text-muted-foreground text-sm lg:hidden'>{t('title')}</p>
+          {/* Góp ý BuildX: bỏ chữ "Hồ sơ mẫu", lấy "Danh sách thư viện mẫu" làm tiêu đề; bên dưới là nút chọn 2D/3D. */}
+          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+          {cards ? (
+            <div role='tablist' aria-label={t('title')} className='bg-muted mt-3 inline-flex rounded-full p-1.5'>
+              {TEMPLATE_KINDS.map((option) => {
+                const selected = option === kind
+                return (
+                  <button
+                    key={option}
+                    type='button'
+                    role='tab'
+                    aria-selected={selected}
+                    onClick={() => selectKind(option)}
+                    className={cn(
+                      'rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-300',
+                      selected ? 'brand-green-button' : 'text-foreground hover:text-primary'
+                    )}
+                  >
+                    {t(option === '2d' ? 'tab2d' : 'tab3d')}
+                  </button>
+                )
+              })}
+            </div>
+          ) : null}
         </div>
 
         <div className='flex items-center gap-4'>
           <Link
             href={LIBRARY_HREF}
-            className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
+            className='text-primary hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
           >
             {t('viewAll')}
             <ChevronRight className='size-4 lg:hidden' />
@@ -208,6 +235,7 @@ function FallbackCard({ dossier, index }: { dossier: HomeDossier; index: number 
       index={index}
       item={{
         id: dossier,
+        kind: '2d',
         href: LIBRARY_HREF,
         title: t(`items.${dossier}.title`),
         badge: t(`items.${dossier}.badge`),
@@ -275,14 +303,14 @@ function DossierCard({ item, index }: { item: HomeTemplateItem; index: number })
                   transition={{ duration: 0.3, delay: order * 0.1 + 0.35 + factIndex * 0.08 }}
                   className='flex items-center gap-1.5 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4'
                 >
-                  <Icon className='text-primary/70 size-3.5' />
+                  <Icon className='text-primary/70 group-hover:text-brand-orange size-3.5 transition-colors duration-300' />
                   {text}
                 </motion.li>
               )
             })}
           </ul>
 
-          <span className='text-primary mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium group-hover:underline'>
+          <span className='text-primary group-hover:text-brand-orange mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-medium transition-colors group-hover:underline'>
             {t('viewOne')}
             <ArrowRight className='size-3.5' />
           </span>
