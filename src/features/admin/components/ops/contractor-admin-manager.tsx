@@ -13,6 +13,7 @@ import {
   type AdminContractorItem
 } from '../../api/bmt/contractors.admin.api'
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
+import { AddressAutoComplete } from '../common/address-autocomplete'
 import { ApiResourceManager } from '../common/api-resource-manager'
 import { ContractorProjectsSection } from './contractor-projects-section'
 import type { RowAction } from '../common/row-actions-menu'
@@ -254,8 +255,18 @@ export function ContractorAdminManager() {
             </Form.Item>
 
             <Divider titlePlacement='start'>{c('sections.location')}</Divider>
-            <Form.Item name='address' label={c('address')}>
-              <Input />
+            {/* Chọn gợi ý là tự điền luôn vĩ độ/kinh độ bên dưới — BR-CTR-002 bắt
+                đủ toạ độ mới cho bật Hiện hồ sơ. */}
+            <Form.Item name='address' label={c('address')} extra={c('addressHint')}>
+              <AddressAutoComplete
+                onResolved={(found) => {
+                  form.setFieldsValue({
+                    address: found.display,
+                    latitude: found.latitude,
+                    longitude: found.longitude
+                  })
+                }}
+              />
             </Form.Item>
             <Row gutter={12}>
               <Col span={12}>

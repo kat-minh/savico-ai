@@ -1683,7 +1683,14 @@
       "pickSite": "Chọn công trình",
       "assign": "Gán",
       "assignedOk": "Đã gán gói vào công trình.",
-      "grantState": { "Assigned": "Đang gắn", "Completed": "Hoàn thành", "CanceledByStaff": "Đã huỷ" }
+      "grantState": {
+        "Assigned": "Đang gắn",
+        "Completed": "Hoàn thành",
+        "CanceledByStaff": "Đã huỷ"
+      },
+      "addressHint": "Gõ địa chỉ rồi chọn một gợi ý — hệ thống cần toạ độ để tìm nhà thầu quanh công trình.",
+      "coordinatesReady": "Đã xác định được toạ độ của địa chỉ này.",
+      "needCoordinates": "Hãy chọn địa chỉ từ danh sách gợi ý để lấy toạ độ."
     },
     "info": {
       "title": "Thông tin tài khoản",
@@ -3453,7 +3460,8 @@
         "roleText": "Vai trò",
         "mainWork": "Hạng mục chính",
         "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
-      }
+      },
+      "addressHint": "Chọn một gợi ý để tự điền vĩ độ/kinh độ; vẫn sửa tay được bên dưới."
     },
     "paymentConnections": {
       "description": "Cấu hình tài khoản ngân hàng nhận tiền cho cổng SePay, tách hai môi trường Test/Live. Mỗi môi trường chỉ có một kết nối đang dùng. Secret do vận hành đặt trên máy chủ, không nhập ở đây.",
@@ -3488,8 +3496,15 @@
       "rejectReason": "Lý do từ chối",
       "before": "Trước",
       "after": "Sau",
-      "outcomeValues": { "Succeeded": "Thành công", "Rejected": "Bị từ chối" },
-      "targetTypes": { "Role": "Vai trò", "User": "Người dùng", "Assignment": "Phân công" },
+      "outcomeValues": {
+        "Succeeded": "Thành công",
+        "Rejected": "Bị từ chối"
+      },
+      "targetTypes": {
+        "Role": "Vai trò",
+        "User": "Người dùng",
+        "Assignment": "Phân công"
+      },
       "actionLabels": {
         "RoleCreated": "Tạo vai trò",
         "RoleUpdated": "Sửa vai trò",
@@ -4591,6 +4606,10 @@
         "transferred": "Đã chuyển giao phân công.",
         "removed": "Đã gỡ phân công."
       }
+    },
+    "address": {
+      "noResult": "Không tìm thấy địa chỉ phù hợp",
+      "resolveFailed": "Không lấy được toạ độ của địa chỉ này, thử chọn lại"
     }
   },
   "contractors": {
@@ -6003,5 +6022,10 @@
     "checkoutDone": "Hoàn tất đơn hàng",
     "checkoutFailed": "Thanh toán chưa thành công",
     "share": "Hồ sơ dự án được chia sẻ"
+  },
+  "address": {
+    "searching": "Đang tìm địa chỉ…",
+    "noResult": "Không tìm thấy địa chỉ phù hợp",
+    "resolveFailed": "Không lấy được toạ độ của địa chỉ này, thử chọn lại"
   }
 }

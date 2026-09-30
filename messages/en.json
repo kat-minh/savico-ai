@@ -1683,7 +1683,14 @@
       "pickSite": "Pick a site",
       "assign": "Assign",
       "assignedOk": "Package assigned to the site.",
-      "grantState": { "Assigned": "Assigned", "Completed": "Completed", "CanceledByStaff": "Canceled" }
+      "grantState": {
+        "Assigned": "Assigned",
+        "Completed": "Completed",
+        "CanceledByStaff": "Canceled"
+      },
+      "addressHint": "Type the address then pick a suggestion — coordinates are needed to find nearby contractors.",
+      "coordinatesReady": "Coordinates found for this address.",
+      "needCoordinates": "Please pick the address from the suggestion list to get coordinates."
     },
     "info": {
       "title": "Account information",
@@ -3453,7 +3460,8 @@
         "roleText": "Role",
         "mainWork": "Main work",
         "deleteConfirmTitle": "Delete project \"{name}\"?"
-      }
+      },
+      "addressHint": "Pick a suggestion to auto-fill latitude/longitude; you can still edit them below."
     },
     "paymentConnections": {
       "description": "Configure the SePay receiving bank accounts, split into Test/Live environments. Each environment has exactly one active connection. Secrets are set on the server by ops, not here.",
@@ -3488,8 +3496,15 @@
       "rejectReason": "Reject reason",
       "before": "Before",
       "after": "After",
-      "outcomeValues": { "Succeeded": "Succeeded", "Rejected": "Rejected" },
-      "targetTypes": { "Role": "Role", "User": "User", "Assignment": "Assignment" },
+      "outcomeValues": {
+        "Succeeded": "Succeeded",
+        "Rejected": "Rejected"
+      },
+      "targetTypes": {
+        "Role": "Role",
+        "User": "User",
+        "Assignment": "Assignment"
+      },
       "actionLabels": {
         "RoleCreated": "Role created",
         "RoleUpdated": "Role updated",
@@ -4591,6 +4606,10 @@
         "transferred": "Assignment transferred.",
         "removed": "Assignment removed."
       }
+    },
+    "address": {
+      "noResult": "No matching address",
+      "resolveFailed": "Could not get coordinates for this address, please pick again"
     }
   },
   "contractors": {
@@ -6003,5 +6022,10 @@
     "checkoutDone": "Order complete",
     "checkoutFailed": "Payment unsuccessful",
     "share": "Shared project dossier"
+  },
+  "address": {
+    "searching": "Searching addresses…",
+    "noResult": "No matching address",
+    "resolveFailed": "Could not get coordinates for this address, please pick again"
   }
 }

@@ -19,15 +19,29 @@ export interface ConstructionSite {
   constructionSiteId: string
   name: string
   address: string
+  /**
+   * Swagger BE không mô tả thân phản hồi nên chưa rõ có trả toạ độ hay không —
+   * khai tuỳ chọn: có thì form sửa dùng lại, không có thì bắt chọn lại địa chỉ
+   * (PUT vẫn đòi đủ hai trường).
+   */
+  latitude?: number | null
+  longitude?: number | null
   version: number
   createdAtUtc: string
   updatedAtUtc: string
   supervisionGrants: SiteGrant[]
 }
 
+/**
+ * Backend BẮT BUỘC `latitude` + `longitude` khi tạo/sửa công trình (swagger:
+ * `required: ["latitude","longitude"]`, và BR-SITE-001/002) — frontend chịu
+ * trách nhiệm tra toạ độ từ địa chỉ, xem `shared/geocode`. Thiếu là BE từ chối.
+ */
 export interface SiteInput {
   name: string
   address: string
+  latitude: number
+  longitude: number
 }
 
 /** Trạng thái gói giám sát của khách (TDD-SUB-004). */

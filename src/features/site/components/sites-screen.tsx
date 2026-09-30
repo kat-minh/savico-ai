@@ -6,6 +6,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 
 import type { Locale } from '@/i18n/routing'
+import { AddressAutocomplete } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import {
@@ -44,6 +45,8 @@ export function SitesScreen() {
   const [editing, setEditing] = useState<ConstructionSite | 'new' | null>(null)
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
+  // Toạ độ chỉ có khi người dùng CHỌN một gợi ý địa chỉ; gõ tay thì về null.
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null)
   const [deleting, setDeleting] = useState<ConstructionSite | null>(null)
   const [assignChoice, setAssignChoice] = useState<Record<string, string>>({})
 
@@ -57,17 +60,29 @@ export function SitesScreen() {
     setEditing('new')
     setName('')
     setAddress('')
+    setCoords(null)
   }
   function openEdit(site: ConstructionSite) {
     setEditing(site)
     setName(site.name)
     setAddress(site.address)
+    setCoords(
+      typeof site.latitude === 'number' && typeof site.longitude === 'number'
+        ? { latitude: site.latitude, longitude: site.longitude }
+        : null
+    )
   }
 
   function onSubmit(event: FormEvent) {
     event.preventDefault()
-    const body = { name: name.trim(), address: address.trim() }
-    if (!body.name || !body.address) return
+    if (!name.trim() || !address.trim()) return
+    // BE từ chối khi thiếu toạ độ, nên chặn ngay ở đây và nói rõ phải làm gì —
+    // để gửi đi rồi mới báo lỗi thì người dùng không hiểu mình sai chỗ nào.
+    if (!coords) {
+      toast.error(t('needCoordinates'))
+      return
+    }
+    const body = { name: name.trim(), address: address.trim(), ...coords }
     const onDone = () => {
       toast.success(t('saved'))
       setEditing(null)
@@ -242,7 +257,18 @@ export function SitesScreen() {
             </div>
             <div className='space-y-2'>
               <Label htmlFor='site-address'>{t('address')}</Label>
-              <Input id='site-address' value={address} onChange={(e) => setAddress(e.target.value)} maxLength={500} />
+              <AddressAutocomplete
+                id='site-address'
+                value={address}
+                maxLength={500}
+                onChange={setAddress}
+                onResolved={(found) => {
+                  setAddress(found.display)
+                  setCoords({ latitude: found.latitude, longitude: found.longitude })
+                }}
+                onCleared={() => setCoords(null)}
+              />
+              <p className='text-muted-foreground text-xs'>{coords ? t('coordinatesReady') : t('addressHint')}</p>
             </div>
             <DialogFooter>
               <Button type='button' variant='outline' onClick={() => setEditing(null)}>
