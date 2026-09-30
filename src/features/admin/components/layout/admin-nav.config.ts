@@ -4,7 +4,6 @@ import {
   AimOutlined,
   AppstoreOutlined,
   BookOutlined,
-  CalculatorOutlined,
   CalendarOutlined,
   DashboardOutlined,
   DollarOutlined,
@@ -15,7 +14,6 @@ import {
   SafetyCertificateOutlined,
   ScheduleOutlined,
   SendOutlined,
-  SettingOutlined,
   SkinOutlined,
   TeamOutlined,
   ThunderboltOutlined,
@@ -128,17 +126,9 @@ export const ADMIN_NAV = [
       { key: 'handbookSteps', href: ADMIN_ROUTES.HANDBOOK_STEPS, icon: OrderedListOutlined },
       { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
     ]
-  },
-  {
-    key: 'config',
-    icon: SettingOutlined,
-    items: [
-      { key: 'costGroups', href: ADMIN_ROUTES.COST_GROUPS, icon: AppstoreOutlined },
-      { key: 'costItems', href: ADMIN_ROUTES.COST_ITEMS, icon: OrderedListOutlined },
-      { key: 'materialPrices', href: ADMIN_ROUTES.MATERIAL_PRICES, icon: CalculatorOutlined },
-      { key: 'estimateAdvice', href: ADMIN_ROUTES.ESTIMATE_ADVICE, icon: FileTextOutlined }
-    ]
   }
+  // Đã ẩn "Cấu hình dự toán" (config: nhóm chi phí, hạng mục, đơn giá vật liệu,
+  // tư vấn dự toán) khỏi menu theo yêu cầu; route và trang vẫn còn để bật lại sau.
 ] as const satisfies readonly {
   key: string
   /** Biểu tượng của hàng cha trong menu gập. */
