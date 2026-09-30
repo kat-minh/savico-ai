@@ -7,6 +7,7 @@ import {
   BuildOutlined,
   CalendarOutlined,
   DollarOutlined,
+  EnvironmentOutlined,
   FileTextOutlined,
   HistoryOutlined,
   GiftOutlined,
@@ -81,6 +82,7 @@ export const ADMIN_NAV = [
     key: 'supervision',
     icon: SafetyCertificateOutlined,
     items: [
+      { key: 'constructionSites', href: ADMIN_ROUTES.CONSTRUCTION_SITES, icon: EnvironmentOutlined },
       { key: 'inspections', href: ADMIN_ROUTES.INSPECTIONS, icon: SafetyCertificateOutlined },
       { key: 'supervisionStages', href: ADMIN_ROUTES.SUPERVISION_STAGES, icon: OrderedListOutlined }
     ]

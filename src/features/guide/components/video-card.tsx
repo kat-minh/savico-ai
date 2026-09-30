@@ -108,6 +108,8 @@ export function VideoCard({
   const t = useTranslations('guide.card')
   const row = layout === 'row'
   const duration = formatDuration(video.durationSeconds)
+  // BE trả `metadata = null` khi YouTube lỗi → thời lượng 0: ẩn nhãn, đừng in "0:00" giả.
+  const hasDuration = video.durationSeconds > 0
   const interactive = Boolean(onOpenVideo)
   const showDuration = durationInTitle ?? hideDescription
   const editing = !video.videoUrl
@@ -120,7 +122,7 @@ export function VideoCard({
   const [previewing, setPreviewing] = useState(false)
 
   const progress = useGuideProgressStore((s) => s.getProgress(video.id))
-  const watchedRatio = progress ? Math.min(1, progress.position / video.durationSeconds) : 0
+  const watchedRatio = progress && hasDuration ? Math.min(1, progress.position / video.durationSeconds) : 0
   const inProgress = Boolean(progress) && !progress?.completed && watchedRatio > 0.02
   const completed = Boolean(progress?.completed)
 
@@ -310,7 +312,7 @@ export function VideoCard({
             <span className='bg-foreground/20 absolute right-2 bottom-2 left-2 h-1 overflow-hidden rounded-full'>
               <PreviewProgressFill videoRef={previewRef} />
             </span>
-          ) : (
+          ) : hasDuration ? (
             <motion.span
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -322,7 +324,7 @@ export function VideoCard({
             >
               {duration}
             </motion.span>
-          )}
+          ) : null}
 
           {/* Đang xem dở: thanh mảnh sát đáy ảnh, rê hiện nhãn "Xem tiếp từ…". */}
           {inProgress ? (
@@ -367,7 +369,9 @@ export function VideoCard({
           >
             {index != null ? <span>{index}. </span> : null}
             <HighlightedText text={video.title} query={query} />
-            {showDuration ? <span className='text-muted-foreground font-normal'> ({duration})</span> : null}
+            {showDuration && hasDuration ? (
+              <span className='text-muted-foreground font-normal'> ({duration})</span>
+            ) : null}
           </h3>
           {hideDescription ? null : (
             <p

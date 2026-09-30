@@ -67,9 +67,10 @@ import {
 import { useCountUp, usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
+import { mergeProjectDetail } from '../api/contractors.logic'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
-import { useContractor } from '../hooks/use-contractors'
+import { useContractor, useContractorProject } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
 import { isInvited, remainingInvites } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
@@ -1094,6 +1095,12 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [projectSort, setProjectSort] = useState<'latest' | 'oldest'>('latest')
   const [showAllProjects, setShowAllProjects] = useState(false)
+  // Mở dự án → nạp chi tiết từ `GET /contractors/{id}/projects/{projectId}` rồi phủ lên dữ liệu thẻ
+  // (field API có thì lấy, không có thì giữ). Dự án mock không có gì để nạp nên hook trả `null`.
+  const { data: projectDetail } = useContractorProject(contractor.id, selectedProject?.id ?? '')
+  const shownProject = selectedProject
+    ? mergeProjectDetail(selectedProject, projectDetail, (count) => t('projects.detail.floors', { count }))
+    : null
   const allProjects = contractor.featuredProjects
   const projects = [...allProjects]
     .filter((project) => !verifiedOnly || project.verified)
@@ -1306,7 +1313,7 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
 
       <ProjectDetailModal
         contractor={contractor}
-        project={selectedProject}
+        project={shownProject}
         inviteAction={inviteAction}
         onClose={() => setSelectedProject(null)}
       />

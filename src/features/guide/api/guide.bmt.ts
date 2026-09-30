@@ -1,6 +1,7 @@
-import { http } from '@/shared/lib/api'
+import { http, isApiError } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
 import type { GuideVideo } from '../types/guide.types'
+import { classifyGuideLookupStatus, isUuid, normalizeGuide } from './guide.logic'
 import { mockGuideApi } from './guide.mock'
 
 /**
@@ -21,49 +22,41 @@ import { mockGuideApi } from './guide.mock'
  * `listArticles` (bài hướng dẫn) BE không có endpoint → luôn mock.
  */
 
-/** `GET /guides` (Response.PublicGuide) — video hướng dẫn công khai. */
-interface BmtPublicGuide {
-  id: string
-  title: string
-  description: string
-  youtubeVideoId: string
-  youtubeUrl: string
-  metadata: { thumbnailUrl: string; durationSeconds: number; fetchedAtUtc: string }
-}
-
-function toGuideVideo(guide: BmtPublicGuide, index: number): GuideVideo {
-  return {
-    id: guide.id,
-    // BE chưa có nhóm chủ đề — dồn tạm, không lọc hiển thị (xem chú thích đầu file).
-    topic: 'input',
-    title: guide.title,
-    description: guide.description,
-    thumbnailUrl: guide.metadata.thumbnailUrl,
-    videoUrl: guide.youtubeUrl,
-    durationSeconds: guide.metadata.durationSeconds,
-    youtubeId: guide.youtubeVideoId,
-    status: 'visible',
-    // BE chưa có cờ nổi bật — lấy video đầu danh sách.
-    featured: index === 0
-  }
-}
-
 export const bmtGuideApi = {
   async listVideos(): Promise<GuideVideo[]> {
     try {
-      const items: BmtPublicGuide[] = []
+      const items: unknown[] = []
       for (let pageIndex = 1; pageIndex <= 20; pageIndex++) {
-        const page = await http.get<PagedResult<BmtPublicGuide>>('/guides', {
+        const page = await http.get<PagedResult<unknown>>('/guides', {
           params: { pageIndex, pageSize: 100 }
         })
         items.push(...page.items)
         if (!page.hasNextPage) break
       }
+      // Phần tử không dùng được bị bỏ qua (xem `normalizeGuide`) chứ không làm vỡ cả danh sách.
+      const videos = items.map((item, index) => normalizeGuide(item, index)).filter((video) => video !== null)
       // BE rỗng → về mock để trang demo không trống.
-      if (!items.length) return mockGuideApi.listVideos()
-      return items.map(toGuideVideo)
+      if (!videos.length) return mockGuideApi.listVideos()
+      return videos
     } catch {
       return mockGuideApi.listVideos()
+    }
+  },
+
+  /**
+   * `GET /guides/{guideId}` — một hướng dẫn công khai, cùng DTO với item của danh sách. `null` khi
+   * video không xem được: 404 `GuideNotFound` (Draft / Hidden / đã xoá) hoặc 400 (id sai định dạng).
+   * Id không phải GUID là id của bản mock → chỉ tra mock, không gọi API (BE sẽ trả 400).
+   */
+  async getGuide(guideId: string): Promise<GuideVideo | null> {
+    if (!isUuid(guideId)) return mockGuideApi.getGuide(guideId)
+    try {
+      // `index = 1`: bản chi tiết không phải "video đầu danh sách" nên không mang cờ nổi bật.
+      return normalizeGuide(await http.get<unknown>(`/guides/${guideId}`), 1)
+    } catch (error) {
+      if (isApiError(error) && classifyGuideLookupStatus(error.status) === 'unavailable') return null
+      // Lỗi mạng / 5xx không khẳng định video mất: thử bản mock rồi thôi.
+      return mockGuideApi.getGuide(guideId)
     }
   }
 }

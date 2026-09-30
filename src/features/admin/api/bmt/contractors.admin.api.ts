@@ -12,8 +12,12 @@ import type { PagedResult } from '@/shared/types'
  * `expectedVersion` (khoá lạc quan) — 409 `ContractorVersionConflict` thì dừng,
  * không tự ghi đè.
  *
- * Swagger BE không mô tả response body → các kiểu dưới dựng theo TDD-CTR-001,
- * cần verify bằng gọi live (map thủ công ở service khi có sai khác).
+ * TỆP: ảnh / bản quét đi qua MEDIA presign (`shared/media`), backend trả URL HTTPS cố
+ * định và hồ sơ CHỈ lưu URL (TDD-CTR-001, commit c1f318b). Upload không đụng tới version nhà
+ * thầu. `POST /assets` multipart chỉ còn để tương thích dữ liệu cũ — KHÔNG dùng nữa. Tệp cũ
+ * (có `assetId`, không có `url`) vẫn đọc và gửi lại được; không bao giờ gửi cả hai cho một tệp.
+ *
+ * Swagger BE không mô tả response body → các kiểu dưới dựng theo TDD-CTR-001.
  */
 
 /* ===== Kiểu con của hồ sơ ===== */
@@ -52,13 +56,20 @@ export interface ContractorLegalInput {
   insuranceDescription?: string | null
 }
 
+/** Vị trí ảnh của hồ sơ (TDD-CTR-001): mỗi hồ sơ một Logo, một Cover; Office/Team là bộ ảnh. */
+export type ContractorImageKind = 'Logo' | 'Cover' | 'Office' | 'Team'
+
 export interface ContractorLicenseInput {
+  /** Có khi sửa giấy phép đã lưu; bỏ trống khi tạo mới. */
   licenseId?: string | null
   licenseType?: string | null
   licenseNumber?: string | null
   issuer?: string | null
   issuedOn?: string | null
   expiresOn?: string | null
+  /** Bản quét MỚI: URL cố định từ MEDIA. */
+  scanUrl?: string | null
+  /** Bản quét CŨ (multipart). Không gửi cùng `scanUrl`. */
   assetId?: string | null
 }
 
@@ -68,12 +79,15 @@ export interface ContractorPartnershipInput {
   signedOn?: string | null
   recordCode?: string | null
   pageCount?: number | null
+  scanUrl?: string | null
   assetId?: string | null
 }
 
+/** Một ảnh của hồ sơ: `url` cho ảnh mới, `assetId` cho ảnh cũ — không gửi cả hai. */
 export interface ContractorImageInput {
-  assetId: string
-  kind: string
+  url?: string | null
+  assetId?: string | null
+  kind: ContractorImageKind
   position: number
 }
 
@@ -85,7 +99,8 @@ export interface ContractorProfileUpdate {
   scopeIds: string[]
   legal: ContractorLegalInput
   licenses: ContractorLicenseInput[]
-  partnership: ContractorPartnershipInput
+  /** `null` xoá section hợp tác (BE bắt buộc CÓ khoá này nhưng cho giá trị null). */
+  partnership: ContractorPartnershipInput | null
   images: ContractorImageInput[]
 }
 
@@ -110,6 +125,7 @@ export interface AdminContractorDetail {
   legal: ContractorLegalInput | null
   licenses: ContractorLicenseInput[]
   partnership: ContractorPartnershipInput | null
+  /** GET trả `url` cho tệp mới, `assetId` cho tệp cũ (`assetId` toàn số 0 = không có). */
   images: ContractorImageInput[]
   status: string
   version: number
@@ -123,8 +139,10 @@ export interface ContractorSaved {
 }
 
 /* ===== Dự án tiêu biểu (STORY-CTR-002) ===== */
+/** Ảnh dự án: `url` (mới, từ MEDIA) hoặc `assetId` (cũ) — không gửi cả hai. */
 export interface ContractorProjectImageInput {
-  assetId: string
+  url?: string
+  assetId?: string
   position: number
 }
 
@@ -150,7 +168,8 @@ export interface ContractorProjectDetail {
   name: string
   buildingTypeId: string
   scopeId: string
-  images: { assetId: string; position: number; contentUrl?: string | null }[]
+  /** `url` cho ảnh mới; ảnh cũ có `assetId` và (admin) `contentUrl` của route tương thích. */
+  images: { assetId?: string | null; url?: string | null; contentUrl?: string | null; position: number }[]
   widthM?: number | null
   lengthM?: number | null
   areaM2?: number | null
@@ -169,16 +188,6 @@ export interface ContractorProjectsResult {
 
 export interface ContractorProjectSaved {
   projectId: string
-  contractorVersion: number
-}
-
-/** Response của `POST /assets` (TDD-CTR-001) — `contentUrl` là route tệp quản trị. */
-export interface ContractorAssetSaved {
-  assetId: string
-  originalName: string
-  mediaType: string
-  sizeBytes: number
-  contentUrl: string
   contractorVersion: number
 }
 
@@ -211,16 +220,5 @@ export const contractorsAdminApi = {
     http.put<ContractorProjectSaved>(`${BASE}/${id}/projects/${projectId}`, body, idempotent()),
 
   deleteProject: (id: string, projectId: string, expectedVersion: number) =>
-    http.delete<void>(`${BASE}/${id}/projects/${projectId}`, { params: { expectedVersion } }),
-
-  /* ===== Ảnh / tệp (asset) ===== */
-  uploadAsset: (id: string, file: File, expectedVersion: number) => {
-    const form = new FormData()
-    form.append('file', file)
-    form.append('expectedVersion', String(expectedVersion))
-    return http.post<ContractorAssetSaved>(`${BASE}/${id}/assets`, form, idempotent())
-  },
-
-  deleteAsset: (id: string, assetId: string, expectedVersion: number) =>
-    http.delete<void>(`${BASE}/${id}/assets/${assetId}`, { params: { expectedVersion } })
+    http.delete<void>(`${BASE}/${id}/projects/${projectId}`, { params: { expectedVersion } })
 }

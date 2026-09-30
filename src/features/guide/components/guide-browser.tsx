@@ -16,6 +16,7 @@ import { JOURNEY_POPUP_TEST_MODE } from '@/shared/constants'
 import { cn } from '@/shared/lib/utils'
 import { GUIDE_PAGE_SIZE } from '../constants/guide.constants'
 import { useGuideArticles, useGuideVideos } from '../hooks/use-guide'
+import { useGuideDeepLink } from '../hooks/use-guide-deep-link'
 import { useGuideProgressStore } from '../store/guide-progress.store'
 import { matchesQuery } from '../services/guide.service'
 import type { GuideVideo } from '../types/guide.types'
@@ -265,7 +266,11 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
     window.setTimeout(() => setEndCardOpen(true), reduceMotion ? 0 : 120)
   }
 
+  // `?video=<id>`: mở thẳng video (tra trong danh sách, không có thì `GET /guides/{id}`).
+  const deepLink = useGuideDeepLink({ videos, videosPending, onOpen: (video) => openVideo(video, null) })
+
   function closeVideo() {
+    deepLink.release()
     // Vừa xem xong thì đóng popup → thẻ CHƯA XEM kế tiếp cùng chủ đề sáng viền
     // một nhịp (mục 3, "đóng popup sau khi xem xong").
     if (playing && getProgress(playing.id)?.completed) {
@@ -319,6 +324,18 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
         <h1 className='text-3xl font-bold tracking-tight text-balance'>{t('pageTitle')}</h1>
         <p className='text-muted-foreground mt-2 text-pretty'>{t('pageSubtitle')}</p>
       </motion.header>
+
+      {deepLink.unavailable ? (
+        <div
+          role='status'
+          className='bg-muted text-muted-foreground mx-auto mb-6 flex max-w-3xl flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm'
+        >
+          <span>{t('deepLink.unavailable')}</span>
+          <button type='button' onClick={deepLink.release} className='text-primary font-medium hover:underline'>
+            {t('deepLink.backToList')}
+          </button>
+        </div>
+      ) : null}
 
       <motion.div
         ref={searchWrapperRef}

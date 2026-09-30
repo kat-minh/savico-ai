@@ -49,6 +49,7 @@ export { AssignmentManager } from './components/access/assignment-manager'
 
 export { BuildingTypeManager } from './components/catalog/building-type-manager'
 export { ConstructionScopeManager } from './components/catalog/construction-scope-manager'
+export { ConstructionSiteManager } from './components/ops/construction-site-manager'
 export { StyleManager } from './components/catalog/style-manager'
 export { CostGroupManager } from './components/estimate/cost-group-manager'
 export { CostItemManager } from './components/estimate/cost-item-manager'

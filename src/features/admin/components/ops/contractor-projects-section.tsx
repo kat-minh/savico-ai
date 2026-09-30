@@ -1,34 +1,30 @@
 'use client'
 
-import { DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
-import {
-  App,
-  Button,
-  Divider,
-  Empty,
-  Form,
-  Image,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  Space,
-  Typography,
-  Upload
-} from 'antd'
+import { App, Button, Divider, Empty, Form, Image, Input, InputNumber, Modal, Select, Space, Typography } from 'antd'
 import type { FormInstance } from 'antd'
-import type { RcFile } from 'antd/es/upload'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { http, isApiError } from '@/shared/lib/api'
+import { http } from '@/shared/lib/api'
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
 import {
   contractorsAdminApi,
   type ContractorProjectDetail,
   type ContractorProjectInput
 } from '../../api/bmt/contractors.admin.api'
+import { useContractorErrorMessage } from './contractor-errors'
+import { ImageStrip } from './contractor-files'
+import {
+  MAX_IMAGES_PER_SET,
+  addProjectImage,
+  moveProjectImage,
+  projectImagesFromDetail,
+  projectImagesToRequest,
+  removeProjectImage,
+  type ProjectImageDraft
+} from './contractor-form.logic'
 
 const { Text } = Typography
 
@@ -46,18 +42,21 @@ const str = (v: unknown): string | null => {
 /**
  * DỰ ÁN TIÊU BIỂU của nhà thầu (STORY-CTR-002, BR-CTR-003) — CRUD gọn ngay trong
  * ngăn kéo sửa hồ sơ. Mỗi dự án cần đúng một loại công trình + một phạm vi + ≥1
- * ảnh. Ảnh upload trước (`POST /assets` → assetId) rồi mới tạo/sửa dự án.
+ * ảnh. Ảnh được chọn và tải lên qua MEDIA presign (`ContractorImage`, JPG/PNG/WebP ≤ 10 MiB) rồi
+ * gửi URL cố định kèm dự án (`images: [{url, position}]`). Ảnh CŨ của dự án (chỉ có `assetId`)
+ * vẫn đọc và gửi lại được; không bao giờ gửi cả hai cho một ảnh.
  *
- * Thao tác project/asset đều tăng `Contractor.Version`; sau mỗi lần ghi cập nhật
+ * Tải ảnh KHÔNG đụng version nhà thầu, nhưng tạo/sửa/xoá dự án thì có: sau mỗi lần ghi cập nhật
  * lại `expectedVersion` của form hồ sơ cha để lưu hồ sơ sau đó không bị 409.
  */
 export function ContractorProjectsSection({ form, contractorId }: { form: FormInstance; contractorId: string }) {
   const t = useTranslations('admin')
   const c = useTranslations('admin.contractorsAdmin.projects')
   const { modal, message } = App.useApp()
+  const describeError = useContractorErrorMessage()
   const [editing, setEditing] = useState<ContractorProjectDetail | 'new' | null>(null)
   const [projectForm] = Form.useForm()
-  const [uploadedAssetIds, setUploadedAssetIds] = useState<string[]>([])
+  const [images, setImages] = useState<ProjectImageDraft[]>([])
   const [saving, setSaving] = useState(false)
 
   const projects = useQuery({
@@ -92,13 +91,13 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
 
   function openNew() {
     setEditing('new')
-    setUploadedAssetIds([])
+    setImages([])
     projectForm.resetFields()
   }
 
   function openEdit(p: ContractorProjectDetail) {
     setEditing(p)
-    setUploadedAssetIds(p.images.map((img) => img.assetId))
+    setImages(projectImagesFromDetail(p.images, contractorId))
     projectForm.setFieldsValue({
       name: p.name,
       buildingTypeId: p.buildingTypeId,
@@ -112,24 +111,10 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
     })
   }
 
-  async function uploadImage(file: RcFile): Promise<void> {
-    try {
-      const saved = await contractorsAdminApi.uploadAsset(
-        contractorId,
-        file,
-        Number(form.getFieldValue('expectedVersion'))
-      )
-      setUploadedAssetIds((ids) => [...ids, saved.assetId])
-      await syncVersion(saved.contractorVersion)
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
   async function submitProject() {
     const values = await projectForm.validateFields().catch(() => null)
     if (!values) return
-    if (uploadedAssetIds.length === 0) {
+    if (images.length === 0) {
       message.error(c('needImage'))
       return
     }
@@ -140,7 +125,7 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
         name: String(values.name).trim(),
         buildingTypeId: values.buildingTypeId,
         scopeId: values.scopeId,
-        images: uploadedAssetIds.map((assetId, position) => ({ assetId, position })),
+        images: projectImagesToRequest(images),
         areaM2: num(values.areaM2),
         floorCount: num(values.floorCount),
         locationText: str(values.locationText),
@@ -156,7 +141,7 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
       message.success(t('feedback.saved'))
       setEditing(null)
     } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+      message.error(describeError(err))
     } finally {
       setSaving(false)
     }
@@ -175,7 +160,7 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
           // deleteProject trả 204, version đã tăng ở BE → tải lại để lấy version mới.
           await projects.refetch()
         } catch (err) {
-          message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+          message.error(describeError(err))
         }
       }
     })
@@ -207,9 +192,9 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
                 borderRadius: 8
               }}
             >
-              {p.images[0]?.contentUrl ? (
+              {projectImagesFromDetail(p.images, contractorId)[0]?.previewUrl ? (
                 <Image
-                  src={p.images[0].contentUrl}
+                  src={projectImagesFromDetail(p.images, contractorId)[0]?.previewUrl}
                   alt=''
                   width={56}
                   height={40}
@@ -279,25 +264,13 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
             <Select options={scopeOptions} loading={options.isPending} optionFilterProp='label' showSearch />
           </Form.Item>
           <Form.Item label={c('images')} required extra={c('imagesHint')}>
-            <Upload
-              listType='picture-card'
-              multiple
-              maxCount={8}
-              accept='image/jpeg,image/png,image/webp'
-              fileList={uploadedAssetIds.map((id, i) => ({ uid: id, name: `${i + 1}`, status: 'done' as const }))}
-              customRequest={({ file, onSuccess }) => {
-                void uploadImage(file as RcFile).then(() => onSuccess?.('ok'))
-              }}
-              onRemove={(f) => {
-                setUploadedAssetIds((ids) => ids.filter((id) => id !== f.uid))
-                return true
-              }}
-            >
-              <div>
-                <UploadOutlined />
-                <div style={{ marginTop: 4 }}>{c('upload')}</div>
-              </div>
-            </Upload>
+            <ImageStrip
+              items={images.map((image) => ({ key: image.key, src: image.previewUrl ?? '' }))}
+              max={MAX_IMAGES_PER_SET}
+              onUploaded={(url) => setImages((current) => addProjectImage(current, url))}
+              onRemove={(key) => setImages((current) => removeProjectImage(current, key))}
+              onMove={(key, delta) => setImages((current) => moveProjectImage(current, key, delta))}
+            />
           </Form.Item>
           <Space size={8} style={{ width: '100%' }}>
             <Form.Item name='areaM2' label={c('areaM2')} style={{ flex: 1 }}>

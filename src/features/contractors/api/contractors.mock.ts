@@ -10,6 +10,7 @@ import {
 } from '@/shared/cms'
 import { useAuthStore } from '@/shared/auth'
 import { mockDelay } from '@/shared/lib/mock'
+import type { ApiProject } from './contractors.logic'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { emptyBrief, fullAddress, isBlankBrief } from '../services/brief.service'
 import type {
@@ -208,6 +209,9 @@ function contractorName(contractorId: string): string {
 }
 
 export const mockContractorsApi = {
+  /** Dự án mock đã có đủ dữ liệu trên thẻ trong danh sách — không có chi tiết riêng để bổ sung. */
+  getContractorProject: async (_contractorId: string, _projectId: string): Promise<ApiProject | null> => null,
+
   /**
    * Danh sách đề xuất theo Quy tắc đề xuất nhà thầu do admin cấu hình (spec
    * admin #12, BR-075): nhà thầu Ẩn không bao giờ vào; khu vực, tiêu chí đủ điều

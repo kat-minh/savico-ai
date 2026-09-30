@@ -108,6 +108,8 @@ export const ADMIN_ROUTES = {
   STAFF: '/admin/staff',
   /** Phân công nhân viên phụ trách gói giám sát (STORY-RBAC-003). */
   ASSIGNMENTS: '/admin/assignments',
+  // Công trình của khách — nhân viên chỉ xem (STORY-SITE-002).
+  CONSTRUCTION_SITES: '/admin/construction-sites',
   ACCESS_AUDIT: '/admin/access-audit',
 
   // Danh mục nhập liệu công trình (spec admin #1, #17)

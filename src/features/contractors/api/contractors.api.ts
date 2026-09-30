@@ -29,12 +29,14 @@ export interface SurveyRequestDetail {
  * (danh sách thiếu gửi BE: `docs/BE_API_GAPS.md`).
  *
  * Đã nối: `listContractors` (`GET /contractors`), `getContractor`
- * (`GET /contractors/{id}`) — STORY-CTR-004. Luồng cũ (mời/khảo sát/đánh giá/so
+ * (`GET /contractors/{id}`), `getContractorProject`
+ * (`GET /contractors/{id}/projects/{projectId}`) — STORY-CTR-004. Luồng cũ (mời/khảo sát/đánh giá/so
  * sánh/hồ sơ gửi thầu) không có API → giữ mock.
  */
 const BmtContractorsApi = {
   listContractors: bmtContractorsApi.listContractors,
-  getContractor: bmtContractorsApi.getContractor
+  getContractor: bmtContractorsApi.getContractor,
+  getContractorProject: bmtContractorsApi.getContractorProject
 } satisfies Partial<typeof mockContractorsApi>
 
 export const contractorsApi = env.NEXT_PUBLIC_USE_MOCK_API

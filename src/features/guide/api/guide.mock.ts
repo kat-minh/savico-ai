@@ -20,6 +20,11 @@ export const mockGuideApi = {
       .sort((a, b) => (a.video.createdAt ?? '').localeCompare(b.video.createdAt ?? '') || a.index - b.index)
       .map(({ video }) => video)
   },
+  /** Tra một video mock theo id (deep link `?video=`); không có → `null`. */
+  getGuide: async (id: string): Promise<GuideVideo | null> => {
+    const videos = await mockGuideApi.listVideos()
+    return videos.find((video) => video.id === id) ?? null
+  },
   listArticles: async (): Promise<GuideArticle[]> => {
     await mockDelay(250)
     return cmsDb.list('guideArticles')

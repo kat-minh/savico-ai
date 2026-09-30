@@ -6,7 +6,7 @@ import { App, Col, Divider, Form, Input, InputNumber, Row, Select, Switch, Typog
 import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
-import { http, isApiError } from '@/shared/lib/api'
+import { http } from '@/shared/lib/api'
 import {
   contractorsAdminApi,
   type AdminContractorDetail,
@@ -16,6 +16,22 @@ import {
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
 import { AddressAutoComplete } from '../common/address-autocomplete'
 import { ApiResourceManager } from '../common/api-resource-manager'
+import { useContractorErrorMessage } from './contractor-errors'
+import { ContractorImagesField, ContractorLicensesField, ContractorPartnershipField } from './contractor-files'
+import {
+  emptyPartnership,
+  imagesFromDetail,
+  imagesToRequest,
+  licenseProblems,
+  licensesFromDetail,
+  licensesToRequest,
+  partnershipDateOrderInvalid,
+  partnershipFromDetail,
+  partnershipToRequest,
+  type LicenseDraft,
+  type PartnershipDraft,
+  type ProfileImageDraft
+} from './contractor-form.logic'
 import { ContractorProjectsSection } from './contractor-projects-section'
 import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
@@ -39,9 +55,12 @@ interface FilterOptions {
  * này gộp lại theo ý người dùng.
  *
  * Hồ sơ mới lưu ẨN; muốn HIỆN cần đủ trường bắt buộc (name + address + toạ độ +
- * ≥1 loại công trình + ≥1 phạm vi) — BE chặn 422 nếu thiếu. Ảnh/giấy phép/hợp
- * tác chưa quản lý ở bản CRUD này nên giữ nguyên khi lưu (không gửi rỗng để khỏi
- * xoá mất).
+ * ≥1 loại công trình + ≥1 phạm vi) — BE chặn 422 nếu thiếu.
+ *
+ * Ảnh hồ sơ, giấy phép (kèm bản quét) và hợp tác BuildX nằm CHUNG form này. Tệp được chọn và
+ * tải lên qua MEDIA presign ngay trong form (kể cả lúc TẠO, vì tải lên không cần hồ sơ tồn tại
+ * và không đụng version); hồ sơ chỉ lưu URL. PUT thay TOÀN BỘ từng section nên form giữ đủ
+ * dữ liệu của chúng — kể cả tệp CŨ chỉ có `assetId` — để sửa hồ sơ không làm mất gì.
  */
 /**
  * Thân PUT hồ sơ — dùng chung cho cả lúc TẠO và lúc SỬA.
@@ -88,9 +107,11 @@ function buildProfileBody(
       registeredAddress: str(values.registeredAddress),
       industry: str(values.industry)
     },
-    licenses: prev?.licenses ?? [],
-    partnership: prev?.partnership ?? {},
-    images: prev?.images ?? []
+    // Form giữ đủ dữ liệu của ba phần này nên không cần mượn từ bản chi tiết đã tải.
+    licenses: licensesToRequest((values.licenses as LicenseDraft[] | undefined) ?? []),
+    // `null` = xoá section hợp tác (form để trống hoàn toàn).
+    partnership: partnershipToRequest(values.partnership as PartnershipDraft | undefined),
+    images: imagesToRequest((values.images as ProfileImageDraft[] | undefined) ?? [])
   }
 }
 
@@ -98,6 +119,7 @@ export function ContractorAdminManager() {
   const t = useTranslations('admin')
   const c = useTranslations('admin.contractorsAdmin')
   const { modal, message } = App.useApp()
+  const describeError = useContractorErrorMessage()
   // Giữ bản chi tiết đã tải để lưu lại ảnh/giấy phép/hợp tác chưa quản lý ở form
   // CRUD này (tránh gửi rỗng làm BE xoá mất).
   const detailRef = useRef(new Map<string, AdminContractorDetail>())
@@ -154,7 +176,10 @@ export function ContractorAdminManager() {
         taxCode: '',
         representative: '',
         registeredAddress: '',
-        industry: ''
+        industry: '',
+        images: [] as ProfileImageDraft[],
+        licenses: [] as LicenseDraft[],
+        partnership: emptyPartnership()
       })}
       onCreate={async (values) => {
         // API tạo của BE chỉ nhận tên, nhưng người vận hành chỉ thấy MỘT form:
@@ -195,7 +220,10 @@ export function ContractorAdminManager() {
           taxCode: d.legal?.taxCode ?? '',
           representative: d.legal?.representative ?? '',
           registeredAddress: d.legal?.registeredAddress ?? '',
-          industry: d.legal?.industry ?? ''
+          industry: d.legal?.industry ?? '',
+          images: imagesFromDetail(d.images),
+          licenses: licensesFromDetail(d.licenses),
+          partnership: partnershipFromDetail(d.partnership)
         }
       }}
       onUpdate={async (values, item) => {
@@ -217,7 +245,7 @@ export function ContractorAdminManager() {
                 message.success(t('feedback.saved'))
                 await ctx.refresh()
               } catch (err) {
-                message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                message.error(describeError(err))
               }
             }
           },
@@ -239,7 +267,7 @@ export function ContractorAdminManager() {
                     message.success(t('feedback.deleted'))
                     await ctx.refresh()
                   } catch (err) {
-                    message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                    message.error(describeError(err))
                   }
                 }
               })
@@ -425,6 +453,44 @@ export function ContractorAdminManager() {
             </Form.Item>
             <Form.Item name='industry' label={c('industry')}>
               <Input />
+            </Form.Item>
+
+            <Divider titlePlacement='start'>{c('sections.images')}</Divider>
+            <Text type='secondary' style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
+              {c('files.savedNote')}
+            </Text>
+            <Form.Item name='images'>
+              <ContractorImagesField fieldName='images' contractorId={ctx.item?.contractorId} />
+            </Form.Item>
+
+            <Divider titlePlacement='start'>{c('sections.licenses')}</Divider>
+            <Form.Item
+              name='licenses'
+              rules={[
+                {
+                  validator: (_, list?: LicenseDraft[]) =>
+                    licenseProblems(list ?? []).length > 0
+                      ? Promise.reject(new Error(c('files.licenses.fixBeforeSave')))
+                      : Promise.resolve()
+                }
+              ]}
+            >
+              <ContractorLicensesField fieldName='licenses' contractorId={ctx.item?.contractorId} />
+            </Form.Item>
+
+            <Divider titlePlacement='start'>{c('sections.partnership')}</Divider>
+            <Form.Item
+              name='partnership'
+              rules={[
+                {
+                  validator: (_, draft?: PartnershipDraft) =>
+                    partnershipDateOrderInvalid(draft)
+                      ? Promise.reject(new Error(c('files.partnership.dateOrder')))
+                      : Promise.resolve()
+                }
+              ]}
+            >
+              <ContractorPartnershipField fieldName='partnership' contractorId={ctx.item?.contractorId} />
             </Form.Item>
 
             {/* Dự án tiêu biểu cần contractorId nên chỉ thêm được sau khi hồ sơ
