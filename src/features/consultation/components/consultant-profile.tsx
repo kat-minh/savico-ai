@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { useAuth } from '@/shared/auth'
+import { useAuth, useAuthDialogStore } from '@/shared/auth'
 import { Photo, revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -58,7 +58,8 @@ export function ConsultantProfile({
   const t = useTranslations('consult.profile')
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isInitialized } = useAuth()
+  const openAuthDialog = useAuthDialogStore((state) => state.open)
   const { data: history } = useMyConsultations(isAuthenticated)
   // Khung giờ khách đã đặt với KTS này — hiện "Lịch của bạn" chứ không như bị người khác lấy.
   const myBookings = new Set(
@@ -126,6 +127,12 @@ export function ConsultantProfile({
   )
 
   function openBookingDialog() {
+    // Chưa đăng nhập: mở popup đăng nhập (đặt lịch cần phiên) và hẹn mở lại
+    // form đặt lịch sau khi đăng nhập xong — không để API trả "token missing".
+    if (isInitialized && !isAuthenticated) {
+      openAuthDialog('login', () => openBookingDialog())
+      return
+    }
     const rect = ctaRef.current?.getBoundingClientRect()
     setBookOrigin(
       rect
