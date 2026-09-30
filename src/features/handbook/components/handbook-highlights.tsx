@@ -43,28 +43,31 @@ export function HandbookHighlights() {
 
   return (
     <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-16'>
-      <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
-        <div className='space-y-2'>
-          {/* Cùng khuôn với các khối phía trên: dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Cẩm nang xây
-              nhà" (`titleMobile`) và câu "Kiến thức thực tế…" thành mô tả nhỏ. Từ `lg` giữ nguyên. */}
-          <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
-            {t('eyebrow')}
-          </p>
-          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
-            <span className='lg:hidden'>{t('titleMobile')}</span>
-            <span className='hidden lg:inline'>{t('title')}</span>
-          </h2>
-          <p className='text-muted-foreground text-sm lg:hidden'>{t('title')}</p>
-        </div>
+      <header>
+        {/* Desktop: eyebrow đứng riêng một hàng; headline + CTA nằm cùng hàng để
+            bố cục cân bằng với các section khác trên trang chủ. */}
+        <p className='text-primary hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>{t('eyebrow')}</p>
 
-        <Link
-          href={ROUTES.HANDBOOK}
-          className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
-        >
-          {t('viewAll')}
-          <ChevronRight className='size-4 lg:hidden' />
-          <ArrowRight className='hidden size-4 lg:block' />
-        </Link>
+        <div className='mt-2 flex flex-wrap items-center justify-between gap-x-10 gap-y-3'>
+          <div className='space-y-2'>
+            {/* Dưới `lg` bỏ dòng nhãn, tiêu đề LỚN là "Cẩm nang xây nhà"
+                (`titleMobile`) và câu "Kiến thức thực tế…" thành mô tả nhỏ. */}
+            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
+              <span className='lg:hidden'>{t('titleMobile')}</span>
+              <span className='hidden lg:inline'>{t('title')}</span>
+            </h2>
+            <p className='text-muted-foreground text-sm lg:hidden'>{t('title')}</p>
+          </div>
+
+          <Link
+            href={ROUTES.HANDBOOK}
+            className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
+          >
+            {t('viewAll')}
+            <ChevronRight className='size-4 lg:hidden' />
+            <ArrowRight className='hidden size-4 lg:block' />
+          </Link>
+        </div>
       </header>
 
       <ul className='mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>

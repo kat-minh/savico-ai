@@ -1,21 +1,19 @@
 'use client'
 
+import Image from 'next/image'
 import {
   ArrowLeftRight,
   ArrowRight,
   BadgeCheck,
   Building2,
   CalendarClock,
-  CheckCircle2,
   ClipboardCheck,
   Coins,
   ChevronRight,
   ClipboardList,
-  Clock,
   FileLock2,
   Handshake,
   House,
-  Link2,
   Lock,
   MapPin,
   Shield,
@@ -24,23 +22,15 @@ import {
   Users,
   X
 } from 'lucide-react'
-import {
-  AnimatePresence,
-  animate,
-  motion,
-  useInView,
-  useMotionValue,
-  useReducedMotion,
-  useTransform
-} from 'motion/react'
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth, useAuthDialogStore } from '@/shared/auth'
 import { isContractorEligible, useCmsCollection, useCmsDocument, useSiteImage } from '@/shared/cms'
-import { Photo, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
+import { revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import {
   CONTRACTOR_PREVIEW_ID,
@@ -134,7 +124,12 @@ function SafetyIcon({ kind }: { kind: (typeof SAFETY_CARDS)[number]['key'] }) {
       style={{ strokeDasharray: 90 }}
       className='relative flex aspect-square w-[20.6%] min-w-12 shrink-0 items-center justify-center'
     >
-      {kind === 'record' ? <FileLock2 className='text-primary size-full' strokeWidth={1.25} /> : null}
+      {kind === 'record' ? (
+        <FileLock2
+          className='text-primary transition-colors duration-300 group-hover:text-brand-orange size-full'
+          strokeWidth={1.25}
+        />
+      ) : null}
 
       {kind === 'review' ? (
         <span className='flex size-full flex-col items-center justify-center gap-1'>
@@ -154,143 +149,28 @@ function SafetyIcon({ kind }: { kind: (typeof SAFETY_CARDS)[number]['key'] }) {
               </motion.span>
             ))}
           </span>
-          <Users className='text-primary size-[72%]' strokeWidth={1.25} />
+          <Users
+            className='text-primary transition-colors duration-300 group-hover:text-brand-orange size-[72%]'
+            strokeWidth={1.25}
+          />
         </span>
       ) : null}
 
       {kind === 'privacy' ? (
         <>
-          <Shield className='text-primary size-full' strokeWidth={1.25} />
+          <Shield
+            className='text-primary transition-colors duration-300 group-hover:text-brand-orange size-full'
+            strokeWidth={1.25}
+          />
           {/* Mục 5 (★ thẻ 1): quai khoá hạ xuống một nhịp khi rê thẻ — gợi cảm
               giác "đóng" lại. `group` nằm ở thẻ <li> bao ngoài. */}
           <Lock
-            className='text-primary absolute size-[32%] transition-transform duration-300 group-hover:translate-y-[15%]'
+            className='text-primary group-hover:text-brand-orange absolute size-[32%] transition-[transform,color] duration-300 group-hover:translate-y-[15%]'
             strokeWidth={1.75}
           />
         </>
       ) : null}
     </motion.span>
-  )
-}
-
-/**
- * Sáu dòng thông số trong thẻ nhà thầu nổi trên bản đồ ở hero (Hình S09).
- *
- * Ảnh vẽ chúng thành hai cột NHÃN — GIÁ TRỊ, mỗi dòng một icon; khác hẳn dãy
- * chip của {@link ContractorStats} dùng ở S12/S13, nên dựng riêng thay vì nhồi
- * thêm một biến thể `variant` vào component kia.
- */
-function AnimatedFactValue({ value, format }: { value: number; format: (value: number) => string }) {
-  const reduceMotion = useReducedMotion()
-  const progress = useMotionValue(reduceMotion ? value : 0)
-  const text = useTransform(progress, format)
-
-  useEffect(() => {
-    if (reduceMotion) {
-      progress.set(value)
-      return
-    }
-    progress.set(0)
-    const controls = animate(progress, value, { duration: 0.72, ease: 'easeOut' })
-    return () => controls.stop()
-  }, [progress, reduceMotion, value])
-
-  return <motion.span>{text}</motion.span>
-}
-
-function HeroContractorFacts({ contractor }: { contractor: Contractor }) {
-  const t = useTranslations('contractors.landing.hero.card')
-  const tCommon = useTranslations('contractors.common')
-  const locale = useLocale() as Locale
-
-  const rows = [
-    {
-      key: 'distance',
-      icon: MapPin,
-      label: t('distance'),
-      numericValue: contractor.distanceKm,
-      format: (value: number) =>
-        t('distanceValue', { km: formatNumber(value, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })
-    },
-    {
-      key: 'rating',
-      icon: Star,
-      label: t('rating'),
-      numericValue: contractor.rating,
-      format: (value: number) =>
-        `${formatNumber(value, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}/5`
-    },
-    {
-      key: 'completed',
-      icon: Building2,
-      label: t('completed'),
-      numericValue: contractor.completedProjects,
-      format: (value: number) => t('completedValue', { count: Math.round(value) })
-    },
-    {
-      key: 'similar',
-      icon: CheckCircle2,
-      label: t('similar'),
-      numericValue: contractor.similarProjects,
-      format: (value: number) => t('similarValue', { count: Math.round(value) })
-    },
-    {
-      key: 'survey',
-      icon: Clock,
-      label: t('survey'),
-      numericValue: contractor.surveyWithinHours,
-      format: (value: number) => t('surveyValue', { hours: Math.round(value) })
-    },
-    {
-      key: 'status',
-      icon: BadgeCheck,
-      label: t('status'),
-      value: contractor.acceptingProjects ? tCommon('accepting') : tCommon('notAccepting'),
-      highlight: true
-    }
-  ] as const
-
-  // Cỡ chữ và icon trong thẻ tính bằng `cqi` (1% bề ngang thẻ) chứ không phải
-  // `text-sm`/`size-4` cố định: thẻ được đo theo % của khối bản đồ, nên khi khối
-  // co lại (thu nhỏ hero, hay màn hẹp hơn) mà chữ đứng yên thì thẻ vỡ tỉ lệ
-  // ngay. `@container` trên thẻ là thứ làm cho `cqi` có nghĩa.
-  //
-  // Đo trên Hình S09, thẻ rộng 135px: icon ở x=276, nhãn bắt đầu x=288, và cột
-  // giá trị bắt đầu ở x=354 trong MỌI dòng — tức giá trị canh TRÁI theo một mốc
-  // cố định (86/135 = 63.7% bề ngang thẻ), không phải canh phải như bản trước
-  // (dòng "Đang nhận dự án" dài hơn hẳn nên canh phải là thấy ngay).
-  return (
-    <motion.ul
-      variants={revealContainerVariants}
-      initial='hidden'
-      animate='show'
-      className='mt-[9.1%] space-y-[5.2%] text-[4cqi]'
-    >
-      {rows.map((row) => (
-        <motion.li
-          key={row.key}
-          variants={revealItemVariants}
-          className='grid grid-cols-[6cqi_minmax(0,1fr)] items-center gap-x-[1.5cqi]'
-        >
-          {/* Hình S09: icon đầu dòng của MỌI dòng đều màu xanh thương hiệu —
-              kể cả dòng "Đánh giá". Ngôi sao vàng là của GIÁ TRỊ "★ 4,8/5",
-              đứng trước con số bên cột phải. */}
-          <row.icon className='text-primary size-[4.6cqi] shrink-0' />
-          <span className='grid grid-cols-[63.7%_minmax(0,1fr)] items-center'>
-            <span className='text-muted-foreground truncate'>{row.label}</span>
-            <span
-              className={cn(
-                'flex items-center gap-[1.2cqi] font-semibold',
-                'highlight' in row && row.highlight ? 'text-primary-strong' : 'text-foreground'
-              )}
-            >
-              {row.key === 'rating' ? <Star className='text-warning size-[4cqi] shrink-0 fill-current' /> : null}
-              {'numericValue' in row ? <AnimatedFactValue value={row.numericValue} format={row.format} /> : row.value}
-            </span>
-          </span>
-        </motion.li>
-      ))}
-    </motion.ul>
   )
 }
 
@@ -321,6 +201,42 @@ const CRITERIA_ITEMS: readonly CriterionItem[] = [
   { key: 'rating', icon: Star },
   { key: 'schedule', icon: CalendarClock }
 ] as const
+
+/**
+ * Dải logo nhà thầu chạy liên tục một chiều như dải thương hiệu ở trang chủ
+ * (`animate-marquee`): danh sách được nhân đôi rồi trượt đúng nửa bề ngang nên
+ * vòng lặp liền mạch. Rê chuột / chạm thì dừng. Ít nhà thầu thì lặp nửa đầu cho
+ * đủ dài hơn khung, nếu không sẽ hở ở điểm nối.
+ */
+function ContractorLogoMarquee({ contractors }: { contractors: Contractor[] }) {
+  const [paused, setPaused] = useState(false)
+  // Lặp NGUYÊN cả danh sách (không cắt lẻ): cắt lẻ làm phần đệm cuối trùng logo đầu nên hai logo giống nhau đứng cạnh nhau ở điểm nối.
+  const half = Array.from({ length: Math.ceil(10 / contractors.length) }, () => contractors).flat()
+  const items = [...half, ...half]
+
+  return (
+    <div
+      className='mt-2 overflow-hidden border-t pt-4'
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+    >
+      <ul className={cn('animate-marquee flex w-max items-center gap-6', paused && 'paused')}>
+        {items.map((contractor, index) => (
+          <li
+            key={`${contractor.id}-${index}`}
+            title={contractor.name}
+            aria-hidden={index >= half.length || undefined}
+            className='size-24 shrink-0'
+          >
+            <ContractorLogo contractor={contractor} className='size-full' />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 /**
  * Landing "Tìm nhà thầu" (S09) — trang công khai, khách chưa đăng nhập cũng xem
@@ -364,24 +280,11 @@ export function ContractorLanding() {
   const directory = useCmsCollection('contractors').filter((contractor) =>
     isContractorEligible(contractor, matching, today)
   )
-  const [featuredContractorId, setFeaturedContractorId] = useState('')
-  const featured = useMemo(
-    () => directory.find((contractor) => contractor.id === featuredContractorId) ?? directory[0],
-    [directory, featuredContractorId]
-  )
-  const featuredHoverTimer = useRef<number | null>(null)
   const rankingSectionRef = useRef<HTMLElement>(null)
   // Tới dải CTA cuối trang thì thanh đáy tự ẩn — hai lời mời giống nhau chồng lên nhau.
   const ctaSectionRef = useRef<HTMLElement>(null)
   const ctaInView = useInView(ctaSectionRef, { amount: 0.2 })
   const [leavingForBrief, setLeavingForBrief] = useState(false)
-
-  useEffect(
-    () => () => {
-      if (featuredHoverTimer.current) window.clearTimeout(featuredHoverTimer.current)
-    },
-    []
-  )
 
   // Thẻ "phù hợp nhất" ở hero chỉ MỞ KHOÁ số liệu khi tài khoản đã có ít nhất
   // một hồ sơ dự án — chưa có thì SAVICO không có gì để ghép, số liệu thật sẽ
@@ -438,6 +341,7 @@ export function ContractorLanding() {
   }
 
   const ranked = filterContractors(directory, { radiusKm, sort }, criteria).slice(0, 3)
+  const moreContractors = directory.filter((contractor) => !ranked.some((item) => item.id === contractor.id))
 
   /**
    * Đứng ở danh sách xếp hạng lâu không bấm gì → thanh "Tạo hồ sơ dự án - miễn
@@ -488,34 +392,12 @@ export function ContractorLanding() {
     router.push(contractorMatchesRoute(brief.id))
   }
 
-  const previewFeaturedContractor = (contractorId: string) => {
-    if (featuredHoverTimer.current) window.clearTimeout(featuredHoverTimer.current)
-    featuredHoverTimer.current = window.setTimeout(() => setFeaturedContractorId(contractorId), 560)
-  }
-
-  const restoreBestContractor = () => {
-    if (featuredHoverTimer.current) window.clearTimeout(featuredHoverTimer.current)
-    featuredHoverTimer.current = window.setTimeout(() => setFeaturedContractorId(directory[0]?.id ?? ''), 120)
-  }
-
-  /** FAQ (mục 10): sao chép liên kết #faq-N + loé dòng khi mở trang bằng liên kết đó. */
-  const [faqCopiedIndex, setFaqCopiedIndex] = useState<number | null>(null)
+  /** FAQ (mục 10): loé dòng khi mở trang bằng liên kết #faq-N. */
   const [faqFlashIndex, setFaqFlashIndex] = useState<number | null>(null)
   const [partnerDialogOpen, setPartnerDialogOpen] = useState(false)
   const flashFaqRow = (index: number) => {
     setFaqFlashIndex(index)
     window.setTimeout(() => setFaqFlashIndex((current) => (current === index ? null : current)), 900)
-  }
-  const copyFaqLink = async (index: number) => {
-    try {
-      const url = `${window.location.origin}${window.location.pathname}#faq-${index}`
-      await navigator.clipboard.writeText(url)
-    } catch {
-      return
-    }
-    setFaqCopiedIndex(index)
-    window.setTimeout(() => setFaqCopiedIndex((current) => (current === index ? null : current)), 1800)
-    flashFaqRow(index)
   }
   useEffect(() => {
     const match = /^#faq-(\d)$/.exec(window.location.hash)
@@ -535,14 +417,17 @@ export function ContractorLanding() {
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
     <div className='space-y-11 pb-14'>
-      {/* Hero — Hình S09 (ảnh gốc 450×800, phần nội dung x=13…437 = 424px):
-          NỀN TRẮNG, không có dải nền xanh nào. Hai cột gần bằng nhau: cột chữ
-          13…220 (48.8%), khe 15 (3.5%), khối minh hoạ 235…437 (47.6%). */}
-      <section className={cn(PAGE_CONTAINER, 'pt-6')}>
-        {/* Tỉ lệ hai cột (48.8% · khe 3.5% · 47.7%) đúng số đo trên ảnh; khổ
-            chung của trang do `PAGE_CONTAINER` quyết định. */}
-        <div className='grid items-center gap-x-[3.5%] gap-y-8 lg:grid-cols-[48.8%_minmax(0,1fr)]'>
-          {/* Cỡ chữ hero.
+      {/* Hero — banner toàn chiều rộng, cột chữ nền trắng bên trái (góp ý BuildX). */}
+      <section className='relative isolate overflow-hidden'>
+        {/* Banner phủ kín cả khối, ảnh nằm bên phải; bên trái là nền trắng của trang
+            cho cột chữ, tan dần vào ảnh — cùng cách dựng với hero trang chủ. */}
+        <div aria-hidden className='absolute inset-0 -z-10'>
+          <Image src={mapImage} alt='' fill priority sizes='100vw' className='object-cover object-right' />
+          <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r from-30% via-55% to-transparent' />
+        </div>
+        <div className={cn(PAGE_CONTAINER, 'py-14 lg:py-24')}>
+          <div className='max-w-[38rem]'>
+            {/* Cỡ chữ hero.
               Đo trên Hình S09 rồi quy theo % bề ngang phần nội dung (424px) →
               khổ thật ~1447px cho ra: tiêu đề 64px, câu dẫn 26px, nút cao 80px.
               Nhưng ảnh demo được AI vẽ ở khổ trang hẹp hơn (bám các mốc khác
@@ -557,169 +442,77 @@ export function ContractorLanding() {
               - nút cao 56px, rộng tối thiểu 200px, cách nhau 32px.
               Bản đầu tiên (`text-[2.75rem]`/`text-lg`/`h-14`) thì ngược lại —
               khối chữ chỉ cao 16% bề ngang nội dung trong khi ảnh là 30%. */}
-          <motion.div
-            variants={revealContainerVariants}
-            initial='hidden'
-            animate={leavingForBrief ? { opacity: 0, y: -24 } : 'show'}
-            transition={{ duration: 0.28, ease: revealEase }}
-          >
-            <motion.h1
-              className='text-primary-strong text-4xl leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
-              aria-label={t('hero.title')}
+            <motion.div
+              variants={revealContainerVariants}
+              initial='hidden'
+              animate={leavingForBrief ? { opacity: 0, y: -24 } : 'show'}
+              transition={{ duration: 0.28, ease: revealEase }}
             >
-              <motion.span variants={revealItemVariants} className='block'>
-                {t('hero.titleLine1')}
-              </motion.span>
-              <motion.span variants={revealItemVariants} className='block'>
-                {t('hero.titleLine2')}
-              </motion.span>
-            </motion.h1>
-            {/* Hình S09: câu dẫn ngắt đúng BA dòng và rộng bằng ~88% cột chữ, hẹp
+              <motion.h1
+                className='text-primary-strong text-4xl leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
+                aria-label={t('hero.title')}
+              >
+                <motion.span variants={revealItemVariants} className='block'>
+                  {t('hero.titleLine1')}
+                </motion.span>
+                <motion.span variants={revealItemVariants} className='block'>
+                  {t('hero.titleLine2')}
+                </motion.span>
+              </motion.h1>
+              {/* Hình S09: câu dẫn ngắt đúng BA dòng và rộng bằng ~88% cột chữ, hẹp
                 hơn tiêu đề một chút. Cỡ chữ ở đây đã hạ theo yêu cầu nên phải
                 chặn bề ngang mới ra đúng ba dòng như ảnh. */}
-            <motion.p
-              variants={revealItemVariants}
-              className='text-muted-foreground mt-[26px] max-w-[30rem] text-base leading-[1.65] text-pretty sm:text-lg'
-            >
-              {t('hero.subtitle')}
-            </motion.p>
-            {/* Hình S09: hai nút cùng cỡ, nút phụ nền trắng viền xanh, và nút
-                chính KHÔNG có mũi tên. */}
-            <motion.div variants={revealItemVariants} className='mt-[38px] flex flex-wrap gap-8'>
-              {currentBrief ? (
-                <Button
-                  size='lg'
-                  className='h-14 max-w-full min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
-                  onClick={continueBrief}
-                  title={t('continueWith', { name: currentBriefName })}
-                >
-                  <span className='truncate'>{t('continueWith', { name: currentBriefName })}</span>
-                </Button>
-              ) : (
-                <Button
-                  size='lg'
-                  className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
-                  onClick={startBrief}
-                  disabled={createBrief.isPending}
-                >
-                  {t('hero.createBrief')}
-                </Button>
-              )}
-              <Button
-                size='lg'
-                variant='outline'
-                className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
-                asChild
-              >
-                {/* Dẫn sang trang danh sách nhà thầu đầy đủ (góp ý BuildX); 3 nhà thầu bên
-                    dưới trang này chỉ là phần xem trước. */}
-                <Link href={contractorPreviewRoute()}>{t('hero.viewContractors')}</Link>
-              </Button>
-            </motion.div>
-            {currentBrief ? (
-              <motion.button
+              <motion.p
                 variants={revealItemVariants}
-                type='button'
-                onClick={openPicker}
-                className='text-primary-strong mt-4 inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
+                className='text-muted-foreground mt-[26px] max-w-[30rem] text-base leading-[1.65] text-pretty sm:text-lg'
               >
-                <ArrowLeftRight className='size-4' />
-                {t('switchBrief')}
-              </motion.button>
-            ) : null}
-          </motion.div>
-
-          {/* Thẻ nhà thầu nổi CHÍNH GIỮA khối ảnh, rộng 137/212 = 65% và cao
-              122/180 = 68% khối (Hình S09). Ảnh là `map.contractors`. */}
-          <div className='relative'>
-            <Photo
-              src={mapImage}
-              alt=''
-              priority
-              sizes='(max-width: 1024px) 100vw, 700px'
-              className='aspect-[212/180] w-full rounded-3xl border'
-            />
-
-            {/* Thẻ CANH GIỮA khối minh hoạ, rộng 63.4% (số đo trên Hình
-                S09: thẻ 135px trên khối 213px).
-
-                Đo thô ban đầu cho ra lệch trái 15.5% / mép trên 21.5%, nhưng
-                bản đồ trong ảnh mờ dần ở rìa nên không chốt được mép thật của
-                khối — sai số đủ để nuốt hết phần "lệch" đó. Canh giữa mới là
-                thứ nhìn đúng, và cũng là thứ giữ được khi khối đổi tỉ lệ. */}
-            {featured ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.15, ease: revealEase }}
-                className='@container absolute top-1/2 left-1/2 w-[63.4%] min-w-[16rem] -translate-x-1/2 -translate-y-1/2'
-              >
-                {/* Khung nét đứt hiện SAU thẻ, viền ngoài thẻ một khoảng nhỏ (mục 3). */}
-                <motion.span
-                  aria-hidden
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.55 }}
-                  className='border-primary/40 pointer-events-none absolute -inset-2 rounded-[1.25rem] border-2 border-dashed'
-                />
-
-                <AnimatePresence mode='wait' initial={false}>
-                  <motion.div
-                    key={featured.id}
-                    initial={{ opacity: 0, x: 14, y: -10 }}
-                    animate={{ opacity: 1, x: 0, y: 0 }}
-                    exit={{ opacity: 0, x: -14, y: 10 }}
-                    transition={{ duration: 0.24, ease: revealEase }}
-                    className='bg-card relative rounded-2xl border p-[5.9%] shadow-lg'
+                {t('hero.subtitle')}
+              </motion.p>
+              {/* Hình S09: hai nút cùng cỡ, nút phụ nền trắng viền xanh, và nút
+                chính KHÔNG có mũi tên. */}
+              <motion.div variants={revealItemVariants} className='mt-[38px] flex flex-wrap gap-8'>
+                {currentBrief ? (
+                  <Button
+                    size='lg'
+                    className='h-14 max-w-full min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
+                    onClick={continueBrief}
+                    title={t('continueWith', { name: currentBriefName })}
                   >
-                    {/* Hình S09: khối đầu thẻ cao 27/135 = 20% bề ngang thẻ, do ô
-                      logo quyết định — nên ô logo đo theo % chứ không phải
-                      `size-14` cố định, để thẻ giữ đúng tỉ lệ cao/rộng 0.93 ở
-                      mọi khổ màn. */}
-                    <div className='flex items-center gap-[3.5%]'>
-                      <div className='aspect-square w-[22.8%] shrink-0'>
-                        <ContractorLogo contractor={featured} className='size-full rounded-2xl text-base' />
-                      </div>
-                      <div className='min-w-0 flex-1'>
-                        {/* Hình S09: sau tên nhà thầu KHÔNG có icon xác minh nào —
-                          dấu tick chỉ xuất hiện ở thẻ danh sách S12 và header hồ
-                          sơ S13. */}
-                        <p className='truncate text-[4.6cqi] font-semibold'>{featured.name}</p>
-                        {hasBrief ? (
-                          <motion.span
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ type: 'spring', bounce: 0.55, duration: 0.5, delay: 0.3 }}
-                            className='bg-brand-orange text-brand-orange-foreground relative mt-[2cqi] inline-flex items-center gap-[1.5cqi] rounded-full px-[3cqi] py-[1.2cqi] text-[3.1cqi] font-semibold'
-                          >
-                            <motion.span
-                              aria-hidden
-                              initial={{ opacity: 0.8, scale: 1 }}
-                              animate={{ opacity: 0, scale: 1.6 }}
-                              transition={{ duration: 0.6, delay: 0.7, ease: revealEase }}
-                              className='bg-brand-orange absolute inset-0 -z-10 rounded-full'
-                            />
-                            <Star className='size-[3.4cqi] fill-current' />
-                            {t('hero.bestMatch')}
-                          </motion.span>
-                        ) : (
-                          <span className='text-muted-foreground mt-[2cqi] block text-[3.4cqi] text-pretty'>
-                            {t('hero.card.locked')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {hasBrief ? (
-                      <HeroContractorFacts key={featured.id} contractor={featured} />
-                    ) : (
-                      <div className='pointer-events-none mt-[9.1%] opacity-40 select-none'>
-                        <HeroContractorFacts contractor={featured} />
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                    <span className='truncate'>{t('continueWith', { name: currentBriefName })}</span>
+                  </Button>
+                ) : (
+                  <Button
+                    size='lg'
+                    className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
+                    onClick={startBrief}
+                    disabled={createBrief.isPending}
+                  >
+                    {t('hero.createBrief')}
+                  </Button>
+                )}
+                <Button
+                  size='lg'
+                  variant='outline'
+                  className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
+                  asChild
+                >
+                  {/* Dẫn sang trang danh sách nhà thầu đầy đủ (góp ý BuildX); 3 nhà thầu bên
+                    dưới trang này chỉ là phần xem trước. */}
+                  <Link href={contractorPreviewRoute()}>{t('hero.viewContractors')}</Link>
+                </Button>
               </motion.div>
-            ) : null}
+              {currentBrief ? (
+                <motion.button
+                  variants={revealItemVariants}
+                  type='button'
+                  onClick={openPicker}
+                  className='text-primary-strong mt-4 inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
+                >
+                  <ArrowLeftRight className='size-4' />
+                  {t('switchBrief')}
+                </motion.button>
+              ) : null}
+            </motion.div>
           </div>
         </div>
       </section>
@@ -771,7 +564,7 @@ export function ContractorLanding() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.75, delay: 0.12, ease: revealEase }}
                 style={{ strokeDasharray: 64 }}
-                className='text-primary shrink-0 transition-[transform,color] duration-200 group-hover:-translate-y-0.5 group-hover:text-primary-strong'
+                className='text-primary shrink-0 transition-[transform,color] duration-200 group-hover:-translate-y-0.5 group-hover:text-brand-orange'
               >
                 <item.icon className='size-7' strokeWidth={1.5} />
               </motion.span>
@@ -797,7 +590,7 @@ export function ContractorLanding() {
       >
         <div className='grid gap-6 lg:grid-cols-[31.8%_minmax(0,1fr)] lg:gap-x-[2.8%]'>
           <div>
-            <h2 className='text-primary-strong text-lg font-bold tracking-wide uppercase'>{t('criteria.title')}</h2>
+            <h2 className='text-foreground text-lg font-bold tracking-wide uppercase'>{t('criteria.title')}</h2>
             <ul className='mt-4 space-y-2'>
               {CRITERIA_ITEMS.map((item) => {
                 const open = openCriterion === item.key
@@ -924,7 +717,7 @@ export function ContractorLanding() {
             </ul>
           </div>
 
-          <div className='bg-card relative min-w-0 overflow-hidden rounded-2xl border p-5'>
+          <div className='bg-card relative min-w-0 self-start overflow-hidden rounded-2xl border p-5'>
             {/* Hình S09: KHÔNG có tiêu đề "Nhà thầu tiêu biểu" — hàng tab nằm
                 ngay mép trên khung. Và bốn tab TRẢI ĐỀU hết bề ngang khung
                 (đo: bốn cụm chữ ở 175…212, 238…262, 287…333, 359…409 — khoảng
@@ -979,10 +772,6 @@ export function ContractorLanding() {
                   whileInView='show'
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ layout: { duration: 0.35, ease: revealEase } }}
-                  onMouseEnter={() => previewFeaturedContractor(contractor.id)}
-                  onMouseLeave={restoreBestContractor}
-                  onFocus={() => previewFeaturedContractor(contractor.id)}
-                  onBlur={restoreBestContractor}
                   className='group grid grid-cols-[10.1%_32.5%_13.7%_18.8%] items-center justify-between gap-x-4 gap-y-3 rounded-lg py-4 transition-colors max-sm:grid-cols-1 hover:bg-accent/30'
                 >
                   <ContractorLogo contractor={contractor} className='size-full aspect-square' />
@@ -1024,7 +813,7 @@ export function ContractorLanding() {
                     </span>
                   </div>
 
-                  <p className='text-muted-foreground text-xs text-pretty'>
+                  <p className='text-foreground/75 text-xs font-medium text-pretty'>
                     {t('ranking.surveyWithin', { hours: contractor.surveyWithinHours })}
                   </p>
 
@@ -1045,6 +834,11 @@ export function ContractorLanding() {
                 </motion.li>
               ))}
             </ul>
+
+            {/* Dải logo các nhà thầu còn lại: chạy liên tục như dải thương hiệu
+                ở trang chủ, rê chuột thì dừng. Dải có chiều cao cố định nên mở
+                rộng cột trái không làm đổi cột phải. */}
+            {moreContractors.length > 0 ? <ContractorLogoMarquee contractors={moreContractors} /> : null}
           </div>
         </div>
       </motion.section>
@@ -1060,9 +854,9 @@ export function ContractorLanding() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 96, opacity: 0 }}
             transition={{ duration: 0.35, ease: revealEase }}
-            className='bg-card fixed inset-x-0 bottom-0 z-40 border-t shadow-lg'
+            className='pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center px-3 sm:bottom-6 sm:px-6'
           >
-            <div className={cn(PAGE_CONTAINER, 'flex items-center justify-between gap-4 py-3')}>
+            <div className='bg-card pointer-events-auto flex w-full max-w-[570px] items-center justify-between gap-4 rounded-[22px] border px-4 py-3 shadow-lg sm:px-5'>
               <p className='min-w-0 truncate text-sm font-medium'>
                 {currentBrief ? t('continueHint', { name: currentBriefName }) : t('ranking.stickyNudge')}
               </p>
@@ -1102,9 +896,7 @@ export function ContractorLanding() {
           không có ô vuông nền xanh nhạt; tiêu đề mỗi thẻ màu xanh, ngắt hai
           dòng. */}
       <section className={PAGE_CONTAINER}>
-        <h2 className='text-primary-strong text-center text-lg font-bold tracking-wide uppercase'>
-          {t('safety.title')}
-        </h2>
+        <h2 className='text-foreground text-center text-lg font-bold tracking-wide uppercase'>{t('safety.title')}</h2>
         {/* Số đo trên Hình S09 (phần nội dung 424px): ba thẻ 14…148, 158…288,
             298…436 → mỗi thẻ 135px (31.8%), khe 10px (**2.36%**, bản trước để
             `gap-4` = 1.1% nên ba thẻ dính nhau hơn ảnh).
@@ -1129,7 +921,7 @@ export function ContractorLanding() {
               <div className='min-w-0 flex-1'>
                 {/* Hình S09: tiêu đề thẻ ngắt HAI dòng — cột chữ chỉ rộng
                     53.3% bề ngang thẻ nên chữ phải đủ lớn mới gãy dòng như ảnh. */}
-                <h3 className='text-primary-strong text-xl leading-snug font-bold text-balance'>
+                <h3 className='text-primary-strong text-xl leading-snug font-bold text-balance transition-colors duration-300 group-hover:text-brand-orange'>
                   {t(`safety.${item.key}Title`)}
                 </h3>
                 <p className='text-muted-foreground mt-2 text-[15px] leading-relaxed text-pretty'>
@@ -1157,7 +949,7 @@ export function ContractorLanding() {
           so sánh", trái R1 (tối đa 3 nhà thầu/dự án). Phần chữ của bản mô tả
           thắng ảnh ở chỗ này. */}
       <section className={PAGE_CONTAINER}>
-        <h2 className='text-primary-strong text-center text-lg font-bold tracking-wide uppercase'>{t('faq.title')}</h2>
+        <h2 className='text-foreground text-center text-lg font-bold tracking-wide uppercase'>{t('faq.title')}</h2>
         <motion.dl
           variants={revealContainerVariants}
           initial={reduceMotion ? false : 'hidden'}
@@ -1182,22 +974,10 @@ export function ContractorLanding() {
               </dt>
               <dd className='text-muted-foreground text-sm text-pretty'>
                 {t.rich(`faq.a${index}`, {
-                  // Mục 10: từ khoá "3 nhà thầu" nền xanh nhạt, đứng yên (không animate).
-                  mark: (chunks) => <mark className='bg-accent/60 text-foreground rounded px-1'>{chunks}</mark>
+                  // "3 nhà thầu": font-weight 400, không highlight nền.
+                  mark: (chunks) => <span className='text-foreground font-medium'>{chunks}</span>
                 })}
               </dd>
-              <button
-                type='button'
-                onClick={() => void copyFaqLink(index)}
-                aria-label={t('faq.copyLink')}
-                className='text-muted-foreground hover:text-primary-strong absolute top-3 right-3 opacity-0 transition-opacity group-hover/faq:opacity-100'
-              >
-                {faqCopiedIndex === index ? (
-                  <span className='text-primary-strong text-xs font-medium'>{t('faq.linkCopied')}</span>
-                ) : (
-                  <Link2 className='size-4' />
-                )}
-              </button>
             </motion.div>
           ))}
         </motion.dl>
@@ -1287,7 +1067,7 @@ export function ContractorLanding() {
           <button
             type='button'
             onClick={() => setPartnerDialogOpen(true)}
-            className='text-brand-orange inline-flex items-center gap-1.5 font-semibold'
+            className='text-brand-orange inline-flex cursor-pointer items-center gap-1.5 font-semibold'
           >
             {t('partner.action')}
             <ArrowRight className='size-3.5 transition-transform duration-300 group-hover:translate-x-1' />

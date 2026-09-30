@@ -569,7 +569,7 @@ export function HomeReminderHost() {
                   whileHover={reduceMotion ? undefined : { y: -1 }}
                   whileTap={reduceMotion ? undefined : { scale: 0.995 }}
                   transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}
-                  className='mt-6 inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(90deg,var(--brand-gradient-to)_0%,var(--brand-gradient-from)_100%)] px-4 text-[15px] font-extrabold text-white shadow-[0_8px_18px_-10px_rgba(42,117,63,.42)] transition-[filter,box-shadow] duration-180 hover:brightness-[1.015] hover:shadow-[0_10px_20px_-10px_rgba(42,117,63,.46)]'
+                  className='mt-6 inline-flex h-[54px] w-full items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(to_top,var(--brand-gradient-from)_0%,var(--brand-gradient-to)_100%)] px-4 text-[15px] font-extrabold text-white shadow-[0_8px_18px_-10px_rgba(42,117,63,.42)] transition-[filter,box-shadow] duration-180 hover:brightness-[1.015] hover:shadow-[0_10px_20px_-10px_rgba(42,117,63,.46)]'
                 >
                   {snapshot.state === 'S1' ? <Crown className='size-4' /> : <Lightbulb className='size-4' />}
                   {primaryLabel}

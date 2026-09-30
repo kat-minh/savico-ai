@@ -20,10 +20,10 @@ export type FooterLinkKey =
   | 'handbook'
   | 'consult'
   | 'faq'
-  | 'about'
-  | 'privacy'
-  | 'paymentPolicy'
   | 'terms'
+  | 'privacy'
+  | 'ecommerce'
+  | 'paymentPolicy'
 
 export interface FooterLink {
   labelKey: FooterLinkKey
@@ -51,8 +51,8 @@ export const FOOTER_SUPPORT_LINKS: readonly FooterLink[] = [
 
 /** Cot "Ve SAVICO". */
 export const FOOTER_ABOUT_LINKS: readonly FooterLink[] = [
-  { labelKey: 'about', href: ROUTES.PLANS },
+  { labelKey: 'terms', href: ROUTES.TERMS },
   { labelKey: 'privacy', href: ROUTES.PRIVACY },
-  { labelKey: 'paymentPolicy', href: ROUTES.PAYMENT_POLICY },
-  { labelKey: 'terms', href: ROUTES.TERMS }
+  { labelKey: 'ecommerce', href: ROUTES.ECOMMERCE_PARTNERS },
+  { labelKey: 'paymentPolicy', href: ROUTES.PAYMENT_POLICY }
 ] as const

@@ -150,6 +150,7 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
         <nav className='absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex'>
           {SITE_NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+            const navLabel = t(item.labelKey === 'plans' && !authed ? 'plansGuest' : item.labelKey)
             return (
               <Link
                 data-site-nav-link
@@ -165,7 +166,14 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
               >
                 {/* Bản mô tả S01: mục này tên "Bảng giá" với khách chưa đăng
                     nhập, "Gói đăng ký" khi đã đăng nhập. */}
-                {t(item.labelKey === 'plans' && !authed ? 'plansGuest' : item.labelKey)}
+                {/* Rê chuột chữ đậm thêm một nấc (medium → semibold). `before` là bản chữ semibold
+                    vô hình chiếm sẵn bề ngang, nên đổi độ đậm không làm menu xê dịch. */}
+                <span
+                  data-text={navLabel}
+                  className='transition-[font-weight] duration-200 before:invisible before:block before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-text)] group-hover:font-semibold group-focus-visible:font-semibold'
+                >
+                  {navLabel}
+                </span>
                 {!active ? (
                   <span
                     data-site-nav-hover-line

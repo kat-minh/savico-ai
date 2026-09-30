@@ -19,6 +19,7 @@ export const ROUTES = {
   TERMS: '/terms',
   PRIVACY: '/privacy',
   PAYMENT_POLICY: '/payment-policy', // Chính sách thanh toán và hoàn tiền
+  ECOMMERCE_PARTNERS: '/ecommerce-partners', // TMĐT & Đối tác (Điều khoản sử dụng AI)
 
   // Auth
   LOGIN: '/login',

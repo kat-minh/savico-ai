@@ -41,7 +41,7 @@ function FooterNavLink({
         <button
           type='button'
           onClick={() => onAction(action)}
-          className='footer-animated-link text-footer-foreground/75 hover:text-footer-foreground relative inline-block text-left text-sm transition-colors'
+          className='footer-animated-link text-footer-foreground relative inline-block text-left text-sm transition-colors'
         >
           {label}
         </button>
@@ -60,7 +60,7 @@ function FooterNavLink({
         <span
           aria-disabled='true'
           title={pendingLabel}
-          className='text-footer-foreground/35 cursor-default text-sm select-none'
+          className='text-footer-foreground/50 cursor-default text-sm select-none'
         >
           {label}
         </span>
@@ -77,7 +77,7 @@ function FooterNavLink({
     >
       <Link
         href={link.href}
-        className='footer-animated-link text-footer-foreground/75 hover:text-footer-foreground relative inline-block text-sm transition-colors'
+        className='footer-animated-link text-footer-foreground relative inline-block text-sm transition-colors'
       >
         {label}
       </Link>
@@ -179,7 +179,7 @@ export function SiteFooter() {
           <div className='max-lg:[zoom:1.4]'>
             <Logo onDark />
           </div>
-          <p className='text-footer-foreground/70 mt-4 max-w-xs text-sm leading-relaxed'>
+          <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
             {cmsText(settings.tagline, t('tagline'))}
           </p>
 
@@ -234,7 +234,7 @@ export function SiteFooter() {
           style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
         >
           <ColumnTitle>{t('contactTitle')}</ColumnTitle>
-          <ul className='text-footer-foreground/75 space-y-2.5 text-sm'>
+          <ul className='text-footer-foreground space-y-2.5 text-sm'>
             <motion.li
               initial={{ opacity: 0, y: 5 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -242,10 +242,7 @@ export function SiteFooter() {
               transition={{ duration: 0.42, delay: 0.74, ease: [0.22, 1, 0.36, 1] }}
             >
               {t('hotline')}:{' '}
-              <HotlineLink
-                hotline={hotline}
-                className='footer-animated-link hover:text-footer-foreground relative inline-block transition-colors'
-              >
+              <HotlineLink hotline={hotline} className='footer-animated-link relative inline-block transition-colors'>
                 {hotline}
               </HotlineLink>
             </motion.li>
@@ -256,10 +253,7 @@ export function SiteFooter() {
               transition={{ duration: 0.42, delay: 0.81, ease: [0.22, 1, 0.36, 1] }}
             >
               {t('emailLabel')}:{' '}
-              <a
-                href={`mailto:${email}`}
-                className='footer-animated-link hover:text-footer-foreground relative inline-block transition-colors'
-              >
+              <a href={`mailto:${email}`} className='footer-animated-link relative inline-block transition-colors'>
                 {email}
               </a>
             </motion.li>

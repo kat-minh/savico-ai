@@ -11,7 +11,6 @@ import {
   ImageIcon,
   Info,
   MapPin,
-  Leaf,
   Minus,
   QrCode,
   Ruler,
@@ -101,15 +100,6 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
       <header data-entrance-step='0' data-entrance-from='right' className='supervision-heading space-y-2 text-center'>
         <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>
           <motion.span
-            aria-hidden
-            className='supervision-heading-leaf supervision-heading-leaf-left text-primary inline-flex'
-            initial={{ opacity: 0, scale: 0.45, rotate: -24 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.52, delay: 0.58, ease: pricingEase }}
-          >
-            <Leaf className='size-7 -scale-x-100 sm:size-8' />
-          </motion.span>
-          <motion.span
             className='text-pretty'
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -130,15 +120,6 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
               </motion.span>
             ) : null}
           </motion.span>
-          <motion.span
-            aria-hidden
-            className='supervision-heading-leaf supervision-heading-leaf-right text-primary inline-flex'
-            initial={{ opacity: 0, scale: 0.45, rotate: 24 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.52, delay: 0.68, ease: pricingEase }}
-          >
-            <Leaf className='size-7 sm:size-8' />
-          </motion.span>
         </h1>
         <motion.p
           className='text-muted-foreground text-pretty'
@@ -158,7 +139,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
         data-entrance-step='4'
         data-entrance-from='right'
         data-hovering={hoveredTier ? 'true' : undefined}
-        className='supervision-card-track grid items-stretch gap-6 pt-11 md:grid-cols-3'
+        className='supervision-card-track grid items-stretch gap-6 pt-5 md:grid-cols-3'
       >
         {packages.map((item, index) => (
           <PackageCard
@@ -236,11 +217,9 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
  * bảng so sánh, nên tách hằng số để hai chỗ không lệch nhau.
  */
 const ORANGE_BUTTON =
-  // `bg-none` là bắt buộc: biến thể mặc định của Button phủ nền bằng CLASS
-  // `brand-gradient` (background-image), mà `bg-brand-orange` chỉ đổi
-  // background-color nên gradient xanh vẫn nằm đè lên. Quầng bóng cũng phải
-  // đổi sang cam, nếu không nút cam lại toả sáng xanh.
-  'bg-brand-orange bg-none text-brand-orange-foreground hover:bg-brand-orange/90 shadow-[0_1px_--theme(--color-white/0.12)_inset,0_2px_6px_--theme(--color-brand-orange/0.35),0_8px_22px_-6px_--theme(--color-brand-orange/0.5)] focus-visible:ring-brand-orange/30'
+  // `brand-orange-button` = gradient cam của logo (dưới đậm → trên nhạt) và ghi đè lớp gradient xanh
+  // mà biến thể mặc định của Button phủ lên nền. Quầng bóng cũng cam, không toả sáng xanh.
+  'brand-orange-button text-brand-orange-foreground focus-visible:ring-brand-orange/30'
 
 /** Cột SVC CONTROL được tô nền nhạt suốt bảng để mắt bám theo một cột. */
 const CONTROL_COLUMN = 'bg-brand-orange-soft/35'
@@ -284,7 +263,7 @@ function PackageCard({
     >
       {item.recommended ? (
         <motion.span
-          className='supervision-control-label supervision-control-label-top bg-brand-orange text-brand-orange-foreground absolute -top-10 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 rounded-full px-4 py-1 text-xs font-semibold tracking-wide uppercase whitespace-nowrap'
+          className='supervision-control-label supervision-control-label-top bg-brand-orange text-brand-orange-foreground absolute -top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 rounded-full px-4 py-1 text-xs font-semibold tracking-wide uppercase whitespace-nowrap'
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.86, ease: pricingEase }}
@@ -296,140 +275,156 @@ function PackageCard({
 
       <section
         className={cn(
-          'bg-card flex w-full flex-col rounded-2xl border p-5',
+          'bg-card flex w-full flex-col overflow-hidden rounded-2xl border',
           item.recommended ? 'border-brand-orange shadow-md' : 'border-border'
         )}
       >
-        <motion.p
+        {/* Dải tiêu đề cùng chiều cao ở cả ba gói (ba khung ngang nhau): Tự quản lý / An tâm nền xanh nhạt +
+            tên xanh đậm, Toàn diện nền kem + tên cam; viên nhãn nằm vắt qua mép dưới dải. */}
+        <div
           className={cn(
-            'supervision-control-label bg-card relative mx-auto -mt-8 w-fit rounded-full border px-3.5 py-1 text-center text-[11px] font-semibold tracking-wide uppercase',
-            item.recommended ? 'border-brand-orange text-brand-orange' : 'text-muted-foreground'
-          )}
-          initial={item.recommended ? { opacity: 0, y: -12 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.48, delay: item.recommended ? 2.08 : 1.02 + index * 0.17, ease: pricingEase }}
-        >
-          {tTags(item.tier)}
-        </motion.p>
-        <h2
-          className={cn(
-            'mt-3 text-center text-2xl font-bold tracking-wide uppercase',
-            item.recommended ? 'text-brand-orange' : 'text-primary-strong'
+            'relative px-5 pt-7 pb-8 text-center',
+            item.recommended ? 'bg-brand-orange-soft/50' : 'bg-primary/12'
           )}
         >
-          {item.name || tTiers(item.tier)}
-        </h2>
+          <h2
+            className={cn(
+              'text-2xl font-bold tracking-wide uppercase',
+              item.recommended ? 'text-brand-orange' : 'text-primary-strong'
+            )}
+          >
+            {item.name || tTiers(item.tier)}
+          </h2>
+          <motion.p
+            className={cn(
+              'supervision-control-label absolute bottom-0 left-1/2 w-fit -translate-x-1/2 translate-y-1/2 rounded-full px-3.5 py-1 text-center text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
+              item.recommended
+                ? 'bg-brand-orange text-brand-orange-foreground'
+                : 'bg-primary-strong text-primary-foreground'
+            )}
+            initial={item.recommended ? { opacity: 0, y: -12 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.48, delay: item.recommended ? 2.08 : 1.02 + index * 0.17, ease: pricingEase }}
+          >
+            {tTags(item.tier)}
+          </motion.p>
+        </div>
 
-        {/* CHỖ CHỜ ASSET: Hình S19 dùng tranh minh hoạ riêng cho từng gói
+        <div className='flex flex-1 flex-col p-5 pt-6'>
+          {/* CHỖ CHỜ ASSET: Hình S19 dùng tranh minh hoạ riêng cho từng gói
             (người tự theo dõi công trình · kỹ sư SVC cầm bảng kiểm · kỹ sư
             đồng hành trọn công trình). Chưa có tranh thật thì để KHUNG NÉT
             ĐỨT — nhét ảnh kho vào đây trông như đã xong nên không ai biết là
             còn thiếu. Đội vận hành tải ảnh lên là hiện, không phải sửa code. */}
-        {item.imageUrl ? (
-          <motion.div
-            className='mt-4'
-            initial={{ opacity: 0, filter: 'blur(5px)', scale: 0.985 }}
-            animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
-            transition={{ duration: 0.72, delay: 1.3 + index * 0.17, ease: pricingEase }}
-          >
-            <Photo src={item.imageUrl} alt='' className='aspect-16/10 w-full rounded-xl' sizes='360px' />
-          </motion.div>
-        ) : (
-          <div
-            className='supervision-image-placeholder bg-muted/30 text-muted-foreground/50 mt-4 flex aspect-16/10 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed'
-            style={{ '--placeholder-delay': `${index * 1.25}s` } as CSSProperties}
-          >
-            <ImageIcon aria-hidden className='size-7' />
-          </div>
-        )}
-
-        <p className='text-muted-foreground mt-4 text-center text-sm text-pretty'>{item.fitLine}</p>
-
-        <p className='mt-3 text-center'>
-          <span
-            className={cn(
-              'text-3xl font-bold tracking-tight',
-              item.recommended ? 'text-brand-orange' : 'text-primary-strong'
-            )}
-          >
-            {isFree ? (
-              <motion.span
-                className='inline-block'
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.48, delay: 1.5, ease: pricingEase }}
-              >
-                {t('free')}
-              </motion.span>
-            ) : (
-              <SupervisionPrice value={item.price} index={index} />
-            )}
-          </span>
-          {isFree ? null : (
-            <motion.span
-              className='text-muted-foreground block text-xs'
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.42, delay: item.recommended ? 3.05 : 2.8 }}
+          {item.imageUrl ? (
+            <motion.div
+              className='mt-4'
+              initial={{ opacity: 0, filter: 'blur(5px)', scale: 0.985 }}
+              animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+              transition={{ duration: 0.72, delay: 1.3 + index * 0.17, ease: pricingEase }}
             >
-              {t('perProject')} · {t('duration', { months: item.durationMonths })}
-            </motion.span>
+              <Photo src={item.imageUrl} alt='' className='aspect-16/10 w-full rounded-xl' sizes='360px' />
+            </motion.div>
+          ) : (
+            <div
+              className='supervision-image-placeholder bg-muted/30 text-muted-foreground/50 mt-4 flex aspect-16/10 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed'
+              style={{ '--placeholder-delay': `${index * 1.25}s` } as CSSProperties}
+            >
+              <ImageIcon aria-hidden className='size-7' />
+            </div>
           )}
-        </p>
 
-        <InspectionBand item={item} />
+          <p className='text-muted-foreground mt-4 text-center text-sm text-pretty'>{item.fitLine}</p>
 
-        {/* Ba gói ba kiểu dấu tick, đúng Hình S19: gói miễn phí là vòng tròn
+          <p className='mt-3 text-center'>
+            <span
+              className={cn(
+                'text-3xl font-bold tracking-tight',
+                item.recommended ? 'text-brand-orange' : 'text-primary-strong'
+              )}
+            >
+              {isFree ? (
+                <motion.span
+                  className='inline-block'
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.48, delay: 1.5, ease: pricingEase }}
+                >
+                  {t('free')}
+                </motion.span>
+              ) : (
+                <SupervisionPrice value={item.price} index={index} />
+              )}
+            </span>
+            {isFree ? null : (
+              <motion.span
+                className='text-muted-foreground block text-xs'
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.42, delay: item.recommended ? 3.05 : 2.8 }}
+              >
+                {t('perProject')} · {t('duration', { months: item.durationMonths })}
+              </motion.span>
+            )}
+          </p>
+
+          <InspectionBand item={item} />
+
+          {/* Ba gói ba kiểu dấu tick, đúng Hình S19: gói miễn phí là vòng tròn
             RỖNG (quyền lợi có sẵn, không phải thứ mua thêm), hai gói trả phí là
             vòng tròn TÔ ĐẶC theo màu gói. */}
-        <motion.ul
-          className='supervision-benefits mt-4 flex-1 space-y-2'
-          onViewportEnter={(entry) => {
-            if (entry) (entry.target as HTMLElement).dataset.seen = 'true'
-          }}
-          viewport={{ once: true, amount: 0.35 }}
-          data-control={item.recommended || undefined}
-          data-empty={!item.inspections || undefined}
-        >
-          {item.benefits.map((benefit, benefitIndex) => (
-            <li
-              key={benefit}
-              data-upgrade={isFree && benefitIndex === item.benefits.length - 1 ? 'true' : undefined}
-              className='supervision-benefit flex items-start gap-2 text-sm'
-              style={{ '--benefit-index': benefitIndex } as CSSProperties}
-            >
-              <CircleCheck
-                aria-hidden
-                className={cn(
-                  'mt-0.5 size-4.5 shrink-0',
-                  isFree && 'text-primary/70',
-                  !isFree &&
-                    (item.recommended
-                      ? 'fill-brand-orange text-brand-orange-foreground'
-                      : 'fill-primary text-primary-foreground')
-                )}
-              />
-              <span className='text-pretty'>{benefit}</span>
-            </li>
-          ))}
-        </motion.ul>
+          <motion.ul
+            className='supervision-benefits mt-4 flex-1 space-y-2'
+            onViewportEnter={(entry) => {
+              if (entry) (entry.target as HTMLElement).dataset.seen = 'true'
+            }}
+            viewport={{ once: true, amount: 0.35 }}
+            data-control={item.recommended || undefined}
+            data-empty={!item.inspections || undefined}
+          >
+            {item.benefits.map((benefit, benefitIndex) => (
+              <li
+                key={benefit}
+                data-upgrade={isFree && benefitIndex === item.benefits.length - 1 ? 'true' : undefined}
+                className='supervision-benefit flex items-start gap-2 text-sm'
+                style={{ '--benefit-index': benefitIndex } as CSSProperties}
+              >
+                {/* Cùng `strokeWidth` cho mọi gói: gói Miễn phí là vòng tròn outline (không tô nền),
+                  màu xanh đặc như nét của gói trả phí — trước đây `text-primary/70` làm nét mảnh hơn. */}
+                <CircleCheck
+                  aria-hidden
+                  strokeWidth={2}
+                  className={cn(
+                    'mt-0.5 size-4.5 shrink-0',
+                    isFree && 'text-primary',
+                    !isFree &&
+                      (item.recommended
+                        ? 'fill-brand-orange text-brand-orange-foreground'
+                        : 'fill-primary text-primary-foreground')
+                  )}
+                />
+                <span className='text-pretty'>{benefit}</span>
+              </li>
+            ))}
+          </motion.ul>
 
-        {/* Gói miễn phí KHÔNG có nút: Hình S19 để thẻ này kết thúc ở danh sách
+          {/* Gói miễn phí KHÔNG có nút: Hình S19 để thẻ này kết thúc ở danh sách
             quyền lợi. Tự quản lý là trạng thái mặc định của mọi dự án, không có
             gì để "chọn" — nút ở đây chỉ tạo một thao tác thừa.
             Hai nút trả phí đều TÔ ĐẶC — CHECK xanh, CONTROL cam. */}
-        {isFree ? null : (
-          <Button asChild size='lg' className={cn('mt-5 w-full', item.recommended && ORANGE_BUTTON)}>
-            <Link
-              href={checkoutConfirmRoute(item.id, projectId)}
-              onClick={() => rememberCheckoutReturn(item.id, projectId)}
-              className={cn('supervision-buy group', item.recommended && 'supervision-buy-control')}
-            >
-              {t('choose', { tier: item.name || tTiers(item.tier) })}
-              <ArrowRight className='size-4 transition-transform duration-300 group-hover:translate-x-1.5' />
-            </Link>
-          </Button>
-        )}
+          {isFree ? null : (
+            <Button asChild size='lg' className={cn('mt-5 w-full', item.recommended && ORANGE_BUTTON)}>
+              <Link
+                href={checkoutConfirmRoute(item.id, projectId)}
+                onClick={() => rememberCheckoutReturn(item.id, projectId)}
+                className={cn('supervision-buy group', item.recommended && 'supervision-buy-control')}
+              >
+                {t('choose', { tier: item.name || tTiers(item.tier) })}
+                <ArrowRight className='size-4 transition-transform duration-300 group-hover:translate-x-1.5' />
+              </Link>
+            </Button>
+          )}
+        </div>
       </section>
     </motion.li>
   )

@@ -133,7 +133,7 @@ export function SupervisionProjectStrip({ projectId }: SupervisionProjectStripPr
           size='sm'
           // `self-start`: cột chữ là flex-col nên nút mặc định giãn hết bề
           // ngang; Hình S24 để nút ôm sát chữ.
-          className='bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90 mt-1 self-start bg-none shadow-none'
+          className='brand-orange-button text-brand-orange-foreground mt-1 self-start'
         >
           <Link href={supervisionRoute(project.id)}>
             {t('open')}

@@ -101,10 +101,10 @@ const handwriting = Sriracha({
 })
 
 export const metadata: Metadata = {
-  // Mỗi trang tự đặt tiêu đề (`pageMetadata`), layout gắn đuôi "| BUILDX" (góp ý BuildX, PC19).
+  // Mỗi trang tự đặt tiêu đề (`pageMetadata`), layout gắn đuôi "| BuildX" (góp ý BuildX, PC19).
   title: {
-    default: 'BUILDX',
-    template: '%s | BUILDX'
+    default: 'BuildX',
+    template: '%s | BuildX'
   },
   description: 'Plan, estimate and manage construction projects on one premium platform.',
   metadataBase: new URL(siteConfig.url)

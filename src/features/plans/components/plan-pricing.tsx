@@ -2,7 +2,6 @@
 
 import {
   ArrowRight,
-  Leaf,
   Gift,
   Star,
   LoaderCircle,
@@ -200,7 +199,7 @@ function PlanPricingContent() {
         }}
         viewport={{ once: true, amount: 0.18 }}
       >
-        <ul className='bg-accent/30 text-muted-foreground grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-xs md:grid-cols-3'>
+        <ul className='bg-accent/30 text-primary-strong grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-xs font-medium md:grid-cols-3'>
           {(
             [
               { key: 'payment', icon: QrCode },
@@ -210,18 +209,18 @@ function PlanPricingContent() {
           ).map((note, index) => (
             <li
               key={note.key}
-              className='plan-note-chip flex items-start gap-3'
+              className='plan-note-chip flex items-center gap-3'
               style={{ '--note-delay': `${1.6 + index * 0.24}s` } as CSSProperties}
             >
               <span className='plan-note-icon-wrap bg-accent text-primary flex size-8 shrink-0 items-center justify-center rounded-full'>
                 <note.icon aria-hidden className='plan-note-icon size-4' />
               </span>
-              <span className='pt-1 text-pretty'>{t(`notes.${note.key}`)}</span>
+              <span className='text-pretty'>{t(`notes.${note.key}`)}</span>
             </li>
           ))}
         </ul>
-        <p className='plan-notes-disclaimer text-muted-foreground flex items-start justify-center gap-2 text-center text-xs text-pretty'>
-          <Info className='mt-0.5 size-3.5 shrink-0' />
+        <p className='plan-notes-disclaimer text-primary-strong flex items-center justify-center gap-2 text-center text-xs font-medium text-pretty'>
+          <Info className='size-3.5 shrink-0' />
           <span>{t('notes.scope')}</span>
         </p>
       </motion.div>
@@ -676,14 +675,8 @@ function PlanHeading() {
       data-paused={!visible || isScrolling || reduceMotion}
     >
       <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>
-        <span className='plan-leaf-enter'>
-          <Leaf aria-hidden className='plan-leaf size-7 -scale-x-100 sm:size-8' />
-        </span>
         <span className='plan-title'>
           {title.slice(0, split)} <span className='plan-title-accent text-brand-orange'>{title.slice(split + 1)}</span>
-        </span>
-        <span className='plan-leaf-enter'>
-          <Leaf aria-hidden className='plan-leaf size-7 sm:size-8' />
         </span>
       </h1>
       <p className='plan-subtitle text-muted-foreground text-pretty'>{t('subtitle')}</p>
@@ -995,23 +988,19 @@ function PlanCard({
               'plan-card-title relative px-5 text-center',
               // Thẻ PLUS CÓ dải nền như hai thẻ kia, chỉ là màu kem rất nhạt thay
               // vì xanh (đo trên ảnh: nền header 255,243,231 so với thân thẻ trắng).
-              plan.popular
-                ? 'bg-brand-orange-soft/50 pt-[9.8cqw] pb-[5.5cqw]'
-                : 'from-primary-strong to-primary text-primary-foreground bg-linear-to-r pt-[6.3cqw] pb-[8cqw]'
+              // Cả ba dải cùng một chiều cao để ba khung ngang nhau (ruy-băng "Phổ biến nhất" chỉ nhô lên
+              // trên mép thẻ PLUS). BASIC/PRO nền xanh nhạt + chữ xanh đậm (góp ý BuildX).
+              'pt-[9.8cqw] pb-[8cqw]',
+              plan.popular ? 'bg-brand-orange-soft/50' : 'bg-primary/12'
             )}
           >
             <h2
               className={cn(
                 'flex items-center justify-center gap-[1.5cqw] text-[8.3cqw] leading-none font-bold tracking-wide uppercase',
-                plan.popular ? 'text-brand-orange' : 'text-primary-foreground'
+                plan.popular ? 'text-brand-orange' : 'text-primary-strong'
               )}
             >
               {plan.name}
-              {/* Hình S01: mỗi tên gói có một chiếc lá nhỏ đứng ngay sau. */}
-              <Leaf
-                aria-hidden
-                className={cn('size-[5cqw]', plan.popular ? 'text-brand-orange' : 'text-primary-foreground')}
-              />
             </h2>
             <span
               className={cn(

@@ -213,101 +213,16 @@
   },
   "legal": {
     "terms": {
-      "title": "Điều khoản sử dụng",
-      "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
-      "intro": "Các điều khoản này điều chỉnh việc bạn sử dụng nền tảng BuildX AI. Khi tạo tài khoản hoặc sử dụng dịch vụ, bạn đồng ý với các điều khoản dưới đây.",
-      "sections": [
-        {
-          "title": "1. Chấp nhận điều khoản",
-          "body": "Khi truy cập hoặc sử dụng nền tảng, bạn đồng ý tuân thủ Điều khoản sử dụng và Chính sách bảo mật của chúng tôi."
-        },
-        {
-          "title": "2. Sử dụng dịch vụ",
-          "body": "Bản vẽ và dự toán do AI tạo ra chỉ mang tính tham khảo; kết quả và chi phí thực tế có thể thay đổi. Bạn chịu trách nhiệm về tính chính xác của thông tin cung cấp."
-        },
-        {
-          "title": "3. Tài khoản",
-          "body": "Bạn cần cung cấp thông tin đăng ký chính xác và bảo mật thông tin đăng nhập. Bạn chịu trách nhiệm cho các hoạt động trong tài khoản của mình."
-        },
-        {
-          "title": "4. Sở hữu trí tuệ",
-          "body": "Nội dung, thương hiệu và tài liệu trên nền tảng thuộc về BuildX trừ khi có ghi chú khác."
-        },
-        {
-          "title": "5. Giới hạn trách nhiệm",
-          "body": "Dự toán chỉ mang tính tham khảo. BuildX không chịu trách nhiệm cho các quyết định chỉ dựa trên kết quả do AI tạo ra."
-        },
-        {
-          "title": "6. Liên hệ",
-          "body": "Mọi thắc mắc về điều khoản, vui lòng liên hệ qua các kênh ở mục liên hệ."
-        }
-      ]
+      "title": "Điều khoản sử dụng"
     },
     "privacy": {
-      "title": "Chính sách bảo mật",
-      "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
-      "intro": "Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ dữ liệu cá nhân của bạn theo Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân.",
-      "sections": [
-        {
-          "title": "1. Dữ liệu thu thập",
-          "body": "Thông tin tài khoản (họ tên, email, SĐT), ảnh mặt bằng bạn tải lên để xử lý AI, và thông tin từ form liên hệ. Chúng tôi không thu thập ảnh sổ đỏ."
-        },
-        {
-          "title": "2. Mục đích sử dụng",
-          "body": "Để cung cấp dịch vụ thiết kế và dự toán, phản hồi yêu cầu của bạn và cải thiện nền tảng."
-        },
-        {
-          "title": "3. Dữ liệu hình ảnh",
-          "body": "Ảnh mặt bằng tải lên chỉ dùng để tạo bản vẽ và phối cảnh. Dữ liệu được lưu trữ an toàn và có thể xóa theo yêu cầu."
-        },
-        {
-          "title": "4. Chia sẻ dữ liệu",
-          "body": "Chúng tôi không bán dữ liệu cá nhân của bạn. Việc xử lý AI có thể liên quan đến các đối tác đáng tin cậy theo cam kết bảo mật."
-        },
-        {
-          "title": "5. Quyền của bạn",
-          "body": "Bạn có thể yêu cầu truy cập, chỉnh sửa hoặc xóa dữ liệu cá nhân bất cứ lúc nào."
-        },
-        {
-          "title": "6. Liên hệ",
-          "body": "Mọi yêu cầu về bảo mật, vui lòng liên hệ qua các kênh ở mục liên hệ."
-        }
-      ]
+      "title": "Quyền riêng tư"
+    },
+    "ecommerce": {
+      "title": "TMĐT & Đối tác"
     },
     "payment": {
-      "title": "Chính sách thanh toán và hoàn tiền",
-      "updated": "Cập nhật lần cuối: nội dung mẫu — BuildX cung cấp nội dung chính thức trước khi go-live.",
-      "intro": "Chính sách này mô tả cách bạn thanh toán các gói dịch vụ trên nền tảng, cách chúng tôi xác nhận thanh toán và các trường hợp được hoàn tiền.",
-      "sections": [
-        {
-          "title": "1. Phương thức thanh toán",
-          "body": "Các gói thiết kế và gói giám sát được thanh toán qua mã QR chuyển khoản ngân hàng hiển thị ở bước Thanh toán. Vui lòng giữ nguyên nội dung chuyển khoản (mã đơn hàng) để hệ thống đối soát tự động."
-        },
-        {
-          "title": "2. Xác nhận thanh toán",
-          "body": "Sau khi chuyển khoản, đơn hàng chuyển sang trạng thái chờ xác nhận. Thông thường gói được kích hoạt trong vài phút; nếu quá 24 giờ làm việc chưa được kích hoạt, vui lòng liên hệ hỗ trợ kèm mã đơn hàng."
-        },
-        {
-          "title": "3. Hóa đơn",
-          "body": "Hóa đơn điện tử được xuất theo thông tin người mua bạn nhập ở bước Xác nhận đơn hàng. Bạn có thể xem lại đơn hàng và hóa đơn trong mục Tài khoản của tôi."
-        },
-        {
-          "title": "4. Trường hợp được hoàn tiền",
-          "body": "Bạn được hoàn tiền khi: chuyển khoản trùng hoặc thừa so với giá trị đơn hàng; đơn hàng không được kích hoạt do lỗi từ phía nền tảng; hoặc yêu cầu hủy gói trong vòng 7 ngày kể từ ngày thanh toán khi chưa sử dụng lượt nào của gói."
-        },
-        {
-          "title": "5. Trường hợp không hoàn tiền",
-          "body": "Gói đã sử dụng một phần lượt (phương án thiết kế, lượt tra cứu, lượt kiểm tra đã thực hiện) không được hoàn lại phần đã dùng. Quà tặng kèm gói không quy đổi thành tiền."
-        },
-        {
-          "title": "6. Quy trình hoàn tiền",
-          "body": "Gửi yêu cầu qua kênh hỗ trợ kèm mã đơn hàng và lý do. Chúng tôi phản hồi trong 2 ngày làm việc và hoàn tiền về tài khoản đã chuyển trong 7–10 ngày làm việc sau khi yêu cầu được chấp thuận."
-        },
-        {
-          "title": "7. Liên hệ",
-          "body": "Mọi thắc mắc về thanh toán và hoàn tiền, vui lòng liên hệ qua các kênh ở mục liên hệ cuối trang."
-        }
-      ]
+      "title": "Thanh toán & Hoàn tiền"
     }
   },
   "chatbot": {
@@ -378,10 +293,10 @@
       "handbook": "Cẩm nang",
       "consult": "Tư vấn 1:1",
       "faq": "Câu hỏi thường gặp",
-      "about": "Giới thiệu",
-      "privacy": "Chính sách bảo mật",
+      "privacy": "Quyền riêng tư",
+      "ecommerce": "TMĐT & Đối tác",
       "terms": "Điều khoản sử dụng",
-      "paymentPolicy": "Chính sách thanh toán"
+      "paymentPolicy": "Thanh toán & Hoàn tiền"
     },
     "social": {
       "facebook": "Facebook BuildX",
@@ -465,7 +380,7 @@
       }
     },
     "painPoints": {
-      "title": "BUILDX giúp bạn kiểm soát từng bước",
+      "title": "BuildX giúp bạn kiểm soát từng bước",
       "subtitle": "Từ ngân sách, thiết kế đến lựa chọn nhà thầu và giám sát thi công.",
       "note": "Bạn cũng đang\ngặp những vấn đề này?",
       "items": {
@@ -493,7 +408,7 @@
     },
     "journey": {
       "title": "Một hành trình rõ ràng cho dự án của bạn",
-      "subtitle": "BUILDX đồng hành và giúp bạn theo dõi tiến trình dự án trong suốt quá trình thực hiện.",
+      "subtitle": "BuildX đồng hành và giúp bạn theo dõi tiến trình dự án trong suốt quá trình thực hiện.",
       "cta": "Tạo dự án mới",
       "resumeCta": "Tiếp tục dự án",
       "currentStepBadge": "Bạn đang ở bước này",
@@ -645,21 +560,30 @@
       "currency": "đ"
     },
     "brands": {
-      "label": "BUILDX ĐƯỢC TIN TƯỞNG BỞI",
+      "label": "Các thương hiệu được tin dùng",
       "items": {
         "hoaphat": "Hòa Phát",
         "inax": "INAX",
         "viglacera": "Viglacera",
         "dulux": "Dulux",
         "cadivi": "CADIVI",
-        "scg": "SCG"
+        "scg": "SCG",
+        "kova": "KOVA",
+        "dongtam": "Đồng Tâm Group",
+        "jotun": "Jotun",
+        "toto": "TOTO",
+        "vinhtuong": "Vĩnh Tường",
+        "eurowindow": "Eurowindow",
+        "tienphong": "Nhựa Tiền Phong",
+        "hoasen": "Hoa Sen Group",
+        "hatien": "Xi măng Hà Tiên"
       }
     },
     "testimonials": {
       "label": "KHÁCH HÀNG NÓI VỀ BUILDX",
       "items": {
         "tuan": {
-          "quote": "“Tôi không rành xây dựng nên ban đầu cũng khá mơ hồ. Có BUILDX thì tôi dễ hình dung hơn mình sẽ làm gì và ngân sách khoảng bao nhiêu.”",
+          "quote": "“Tôi không rành xây dựng nên ban đầu cũng khá mơ hồ. Có BuildX thì tôi dễ hình dung hơn mình sẽ làm gì và ngân sách khoảng bao nhiêu.”",
           "name": "Anh Minh Tuấn",
           "meta": "Nhà phố · 120m² · Buôn Ma Thuột"
         },
@@ -669,7 +593,7 @@
           "meta": "Biệt thự · 280m² · Đắk Lắk"
         },
         "bao": {
-          "quote": "“Trước đây tôi phải tự tìm hiểu khá nhiều thứ nên mất nhiều thời gian. BUILDX giúp tôi tập trung thông tin lại một chỗ, dễ theo dõi và kiểm soát chi phí hơn.”",
+          "quote": "“Trước đây tôi phải tự tìm hiểu khá nhiều thứ nên mất nhiều thời gian. BuildX giúp tôi tập trung thông tin lại một chỗ, dễ theo dõi và kiểm soát chi phí hơn.”",
           "name": "Anh Quốc Bảo",
           "meta": "Biệt thự · 320m² · Đà Lạt"
         },
@@ -679,12 +603,12 @@
           "meta": "Nhà phố · 95m² · TP. Hồ Chí Minh"
         },
         "nam": {
-          "quote": "“Điều tôi quan tâm nhất là chi phí có rõ ràng hay không. BUILDX giúp tôi có cái nhìn tổng thể hơn nên khi ra quyết định cũng đỡ mông lung.”",
+          "quote": "“Điều tôi quan tâm nhất là chi phí có rõ ràng hay không. BuildX giúp tôi có cái nhìn tổng thể hơn nên khi ra quyết định cũng đỡ mông lung.”",
           "name": "Anh Hoàng Nam",
           "meta": "Nhà phố · 140m² · Bình Dương"
         },
         "vy": {
-          "quote": "“Tôi không có nhiều thời gian theo sát từ đầu nên rất cần một nền tảng dễ hiểu. BUILDX giúp tôi nắm được tiến độ và biết dự án đang ở giai đoạn nào.”",
+          "quote": "“Tôi không có nhiều thời gian theo sát từ đầu nên rất cần một nền tảng dễ hiểu. BuildX giúp tôi nắm được tiến độ và biết dự án đang ở giai đoạn nào.”",
           "name": "Chị Thanh Vy",
           "meta": "Biệt thự · 250m² · Cần Thơ"
         }
@@ -1397,7 +1321,7 @@
       },
       "xlsx": {
         "fileName": "Du-toan-{project}.xlsx",
-        "untitledProject": "BUILDX",
+        "untitledProject": "BuildX",
         "sheet": "Dự toán chi tiết",
         "title": "BẢNG DỰ TOÁN CHI TIẾT",
         "project": "Dự án",
@@ -2098,7 +2022,11 @@
       "bookCta": "Đặt lịch tư vấn",
       "notFound": "Không tìm thấy kiến trúc sư này",
       "bookCtaWithTime": "Đặt lịch tư vấn lúc {time} · {date}",
-      "chooseSlotHint": "Chọn 1 khung giờ để đặt lịch"
+      "chooseSlotHint": "Chọn 1 khung giờ để đặt lịch",
+      "lightboxClose": "Đóng",
+      "lightboxPrev": "Ảnh trước",
+      "lightboxNext": "Ảnh sau",
+      "viewLarger": "Xem ảnh lớn: {label}"
     },
     "slots": {
       "title": "Chọn khung giờ tư vấn",
@@ -5771,7 +5699,7 @@
     }
   },
   "meta": {
-    "home": "Thiết kế và dự toán xây nhà bằng AI từ ảnh lô đất | BUILDX",
+    "home": "Thiết kế và dự toán xây nhà bằng AI từ ảnh lô đất | BuildX",
     "design": "Thiết kế & Dự toán",
     "designInput": "Nhập thông tin dự án",
     "designEstimate": "Kết quả dự toán",

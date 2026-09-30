@@ -18,5 +18,5 @@ export default async function PaymentPolicyPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <LegalPage namespace='payment' />
+  return <LegalPage doc='payment' />
 }

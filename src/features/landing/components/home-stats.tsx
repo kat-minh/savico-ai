@@ -123,10 +123,13 @@ function StatCell({ Icon, label, rawValue, parsed, onActivate }: StatCellProps) 
         {/* Icon để TRẦN theo ảnh mockup — không ô nền bo góc; rê ô thì mới nổi
             vòng tròn xanh nhạt sau lưng icon. */}
         <span className='group-hover:bg-accent animate-in fade-in-0 slide-in-from-bottom-2 -m-1.5 flex shrink-0 items-center justify-center rounded-full p-1.5 duration-700 ease-out motion-reduce:animate-none'>
-          <Icon className='text-primary size-6 shrink-0' strokeWidth={1.75} />
+          <Icon
+            className='text-primary group-hover:text-brand-orange size-6 shrink-0 transition-colors'
+            strokeWidth={1.75}
+          />
         </span>
         <span ref={ref} className='flex flex-col leading-tight'>
-          <span className='text-primary-strong animate-in fade-in-0 slide-in-from-bottom-2 text-[0.9375rem] font-bold tabular-nums duration-700 ease-out motion-reduce:animate-none'>
+          <span className='text-primary-strong group-hover:text-brand-orange animate-in fade-in-0 slide-in-from-bottom-2 text-[0.9375rem] font-bold tabular-nums transition-colors duration-700 ease-out motion-reduce:animate-none'>
             {parsed ? `${display}${parsed.suffix}` : rawValue}
           </span>
           <span className='text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both text-xs text-pretty delay-100 duration-700 ease-out motion-reduce:animate-none'>

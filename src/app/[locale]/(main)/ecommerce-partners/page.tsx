@@ -10,13 +10,13 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: 'legal.privacy' })
+  const t = await getTranslations({ locale, namespace: 'legal.ecommerce' })
   return { title: t('title') }
 }
 
-export default async function PrivacyPage({ params }: PageProps) {
+export default async function EcommercePartnersPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
 
-  return <LegalPage doc='privacy' />
+  return <LegalPage doc='ecommerce' />
 }

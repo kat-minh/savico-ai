@@ -213,101 +213,16 @@
   },
   "legal": {
     "terms": {
-      "title": "Terms of Service",
-      "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
-      "intro": "These terms govern your use of the BuildX AI platform. By creating an account or using the service, you agree to the terms below.",
-      "sections": [
-        {
-          "title": "1. Acceptance of terms",
-          "body": "By accessing or using the platform you agree to be bound by these Terms of Service and our Privacy Policy."
-        },
-        {
-          "title": "2. Use of the service",
-          "body": "The AI-generated drawings and cost estimates are for reference only; actual results and costs may vary. You are responsible for the accuracy of the information you provide."
-        },
-        {
-          "title": "3. Accounts",
-          "body": "You must provide accurate registration details and keep your credentials secure. You are responsible for activity under your account."
-        },
-        {
-          "title": "4. Intellectual property",
-          "body": "Content, branding and materials on the platform belong to BuildX unless stated otherwise."
-        },
-        {
-          "title": "5. Limitation of liability",
-          "body": "Estimates are indicative. BuildX is not liable for decisions made solely based on AI-generated outputs."
-        },
-        {
-          "title": "6. Contact",
-          "body": "For questions about these terms, please contact us via the channels listed on the contact section."
-        }
-      ]
+      "title": "Terms of use"
     },
     "privacy": {
-      "title": "Privacy Policy",
-      "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
-      "intro": "This policy explains how we collect, use and protect your personal data in accordance with Vietnam's Decree 13/2023/ND-CP on personal data protection.",
-      "sections": [
-        {
-          "title": "1. Data we collect",
-          "body": "Account details (name, email, phone), floor-plan images you upload for AI processing, and contact/lead form submissions. We do not collect land-title (deed) documents."
-        },
-        {
-          "title": "2. How we use data",
-          "body": "To provide the design and estimate services, respond to your requests, and improve the platform."
-        },
-        {
-          "title": "3. Image data",
-          "body": "Uploaded floor-plan images are used only to generate drawings and renders. They are stored securely and can be deleted on request."
-        },
-        {
-          "title": "4. Data sharing",
-          "body": "We do not sell your personal data. AI processing may involve trusted providers under confidentiality obligations."
-        },
-        {
-          "title": "5. Your rights",
-          "body": "You may request access to, correction of, or deletion of your personal data at any time."
-        },
-        {
-          "title": "6. Contact",
-          "body": "For privacy requests, please contact us via the channels listed on the contact section."
-        }
-      ]
+      "title": "Privacy"
+    },
+    "ecommerce": {
+      "title": "E-commerce & Partners"
     },
     "payment": {
-      "title": "Payment and refund policy",
-      "updated": "Last updated: sample content — BuildX will provide the official text before go-live.",
-      "intro": "This policy explains how you pay for packages on the platform, how we confirm payments and when you are entitled to a refund.",
-      "sections": [
-        {
-          "title": "1. Payment method",
-          "body": "Design and supervision packages are paid by bank transfer using the QR code shown at the Payment step. Keep the transfer note (your order code) unchanged so the system can reconcile it automatically."
-        },
-        {
-          "title": "2. Payment confirmation",
-          "body": "After you transfer, the order waits for confirmation. Packages are usually activated within minutes; if it is not activated within 24 working hours, contact support with your order code."
-        },
-        {
-          "title": "3. Invoices",
-          "body": "E-invoices are issued with the buyer details you entered at the Order confirmation step. You can review orders and invoices under My account."
-        },
-        {
-          "title": "4. When you get a refund",
-          "body": "You are refunded when: you transferred twice or more than the order value; the order was not activated because of a platform error; or you cancel within 7 days of payment without using any of the package's credits."
-        },
-        {
-          "title": "5. When refunds do not apply",
-          "body": "Credits already used (design options, lookups, completed inspections) are not refunded. Gifts bundled with a package cannot be exchanged for cash."
-        },
-        {
-          "title": "6. Refund process",
-          "body": "Send a request through support with your order code and reason. We reply within 2 working days and refund to the paying account within 7–10 working days after approval."
-        },
-        {
-          "title": "7. Contact",
-          "body": "For any payment or refund question, use the contact channels at the bottom of the page."
-        }
-      ]
+      "title": "Payments & Refunds"
     }
   },
   "chatbot": {
@@ -378,10 +293,10 @@
       "handbook": "Handbook",
       "consult": "1:1 consultation",
       "faq": "FAQ",
-      "about": "About us",
-      "privacy": "Privacy policy",
+      "privacy": "Privacy",
+      "ecommerce": "E-commerce & Partners",
       "terms": "Terms of use",
-      "paymentPolicy": "Payment policy"
+      "paymentPolicy": "Payments & Refunds"
     },
     "social": {
       "facebook": "BuildX on Facebook",
@@ -465,7 +380,7 @@
       }
     },
     "painPoints": {
-      "title": "BUILDX helps you stay in control at every step",
+      "title": "BuildX helps you stay in control at every step",
       "subtitle": "From budget and design to choosing a contractor and supervising construction.",
       "note": "Sound familiar?",
       "items": {
@@ -493,7 +408,7 @@
     },
     "journey": {
       "title": "A clear journey for your project",
-      "subtitle": "BUILDX stays with you and helps you track your project from start to finish.",
+      "subtitle": "BuildX stays with you and helps you track your project from start to finish.",
       "cta": "Start a project",
       "resumeCta": "Continue project",
       "currentStepBadge": "You're on this step",
@@ -645,21 +560,30 @@
       "currency": "đ"
     },
     "brands": {
-      "label": "TRUSTED BY",
+      "label": "Trusted brands",
       "items": {
         "hoaphat": "Hòa Phát",
         "inax": "INAX",
         "viglacera": "Viglacera",
         "dulux": "Dulux",
         "cadivi": "CADIVI",
-        "scg": "SCG"
+        "scg": "SCG",
+        "kova": "KOVA",
+        "dongtam": "Đồng Tâm Group",
+        "jotun": "Jotun",
+        "toto": "TOTO",
+        "vinhtuong": "Vĩnh Tường",
+        "eurowindow": "Eurowindow",
+        "tienphong": "Tiền Phong Plastic",
+        "hoasen": "Hoa Sen Group",
+        "hatien": "Hà Tiên Cement"
       }
     },
     "testimonials": {
       "label": "WHAT CUSTOMERS SAY ABOUT BUILDX",
       "items": {
         "tuan": {
-          "quote": "“I don't know much about construction, so at first it all felt vague. BUILDX made it easier to picture what I'd do and roughly what it would cost.”",
+          "quote": "“I don't know much about construction, so at first it all felt vague. BuildX made it easier to picture what I'd do and roughly what it would cost.”",
           "name": "Minh Tuan",
           "meta": "Townhouse · 120m² · Buon Ma Thuot"
         },
@@ -669,7 +593,7 @@
           "meta": "Villa · 280m² · Dak Lak"
         },
         "bao": {
-          "quote": "“I used to research everything myself, which took a lot of time. BUILDX puts it all in one place, easier to follow and to keep costs in check.”",
+          "quote": "“I used to research everything myself, which took a lot of time. BuildX puts it all in one place, easier to follow and to keep costs in check.”",
           "name": "Quoc Bao",
           "meta": "Villa · 320m² · Da Lat"
         },
@@ -679,12 +603,12 @@
           "meta": "Townhouse · 95m² · Ho Chi Minh City"
         },
         "nam": {
-          "quote": "“My main concern was whether the costs were clear. BUILDX gave me the bigger picture, so decisions felt far less uncertain.”",
+          "quote": "“My main concern was whether the costs were clear. BuildX gave me the bigger picture, so decisions felt far less uncertain.”",
           "name": "Hoang Nam",
           "meta": "Townhouse · 140m² · Binh Duong"
         },
         "vy": {
-          "quote": "“I don't have much time to follow things from the start, so I needed an easy platform. BUILDX keeps me on top of progress and the current stage.”",
+          "quote": "“I don't have much time to follow things from the start, so I needed an easy platform. BuildX keeps me on top of progress and the current stage.”",
           "name": "Thanh Vy",
           "meta": "Villa · 250m² · Can Tho"
         }
@@ -1397,7 +1321,7 @@
       },
       "xlsx": {
         "fileName": "BuildX-estimate-{project}.xlsx",
-        "untitledProject": "BUILDX",
+        "untitledProject": "BuildX",
         "sheet": "Detailed estimate",
         "title": "DETAILED COST ESTIMATE",
         "project": "Project",
@@ -2098,7 +2022,11 @@
       "bookCta": "Book a consultation",
       "notFound": "Architect not found",
       "bookCtaWithTime": "Book a consultation at {time} · {date}",
-      "chooseSlotHint": "Pick a time slot to book"
+      "chooseSlotHint": "Pick a time slot to book",
+      "lightboxClose": "Close",
+      "lightboxPrev": "Previous photo",
+      "lightboxNext": "Next photo",
+      "viewLarger": "View larger: {label}"
     },
     "slots": {
       "title": "Choose a consultation slot",
@@ -5771,7 +5699,7 @@
     }
   },
   "meta": {
-    "home": "AI house design and cost estimates from a photo of your plot | BUILDX",
+    "home": "AI house design and cost estimates from a photo of your plot | BuildX",
     "design": "Design & Estimate",
     "designInput": "Project details",
     "designEstimate": "Estimate result",

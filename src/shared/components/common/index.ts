@@ -16,6 +16,7 @@ export { PageHeader } from './page-header'
 export { PasswordInput } from './password-input'
 export { PreferenceSwitches } from './preference-switches'
 export { Photo } from './photo'
+export { ImageLightbox, type LightboxPhoto } from './image-lightbox'
 export { ProjectReadyOptionsDialog } from './project-ready-options-dialog'
 export { ProjectManagementOptionsDialog } from './project-management-options-dialog'
 export {

@@ -168,10 +168,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
               b: (chunks) => <b className='font-semibold'>{chunks}</b>
             })}
           </p>
-          <Button
-            className='bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90 bg-none shadow-none'
-            onClick={() => setChangeOpen(true)}
-          >
+          <Button className='brand-orange-button text-brand-orange-foreground' onClick={() => setChangeOpen(true)}>
             {tChange('review')}
           </Button>
         </section>
@@ -186,10 +183,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
           thích và nút hành động chen nhau trên cùng một dòng. */}
       {locked && stage.inspection && !pendingForCustomer ? (
         <div className='space-y-4'>
-          <Button
-            className='bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90 bg-none shadow-none'
-            onClick={() => setChangeOpen(true)}
-          >
+          <Button className='brand-orange-button text-brand-orange-foreground' onClick={() => setChangeOpen(true)}>
             {t('requestChange')}
           </Button>
 
