@@ -5,7 +5,6 @@ import {
   AppstoreOutlined,
   BookOutlined,
   CalendarOutlined,
-  DashboardOutlined,
   DollarOutlined,
   FileTextOutlined,
   GiftOutlined,
@@ -48,11 +47,8 @@ import { ADMIN_ROUTES, type AdminRoute } from '@/shared/constants'
  * `key` là hậu tố khóa dịch dưới namespace `admin.nav`.
  */
 export const ADMIN_NAV = [
-  {
-    key: 'overview',
-    icon: DashboardOutlined,
-    items: [{ key: 'dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: DashboardOutlined }]
-  },
+  // Đã ẩn "Tổng quan" (overview/dashboard) khỏi menu theo yêu cầu; route /admin và
+  // trang AdminInbox vẫn còn (vẫn là trang đích khi vào /admin) để bật lại sau.
   {
     key: 'payments',
     icon: DollarOutlined,
