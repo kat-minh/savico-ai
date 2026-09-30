@@ -15,6 +15,12 @@ export interface AuthUser {
    * đổi mật khẩu, nên giao diện buộc đổi ngay sau khi đăng nhập.
    */
   mustChangePassword?: boolean
+  /**
+   * `false` khi email chưa xác minh. Backend chặn các chức năng cần email đã
+   * xác minh, nên giao diện buộc nhập mã xác minh (gửi qua email) ngay sau khi
+   * đăng nhập. `undefined` = không xác định được → không chặn.
+   */
+  emailVerified?: boolean
 }
 
 /** Client-side auth state held in the Zustand store. */

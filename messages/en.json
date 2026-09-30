@@ -166,6 +166,18 @@
       "doneSubtitle": "Your password has been updated. Please sign in again with the new password.",
       "goToLogin": "Sign in"
     },
+    "verifyEmail": {
+      "title": "Verify your email to continue",
+      "subtitle": "We sent a verification code to {email}. Enter it to activate your account.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "Enter the code from the email",
+      "submit": "Verify",
+      "resend": "Resend code",
+      "resendOk": "Verification code sent again.",
+      "codeInvalid": "The code contains digits only",
+      "success": "Email verified. You can continue.",
+      "error": "The code is wrong or expired. Please try again."
+    },
     "mustChange": {
       "title": "Change your password to continue",
       "subtitle": "Your account is using a temporary password set by an administrator. Set a new password to get started.",

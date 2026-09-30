@@ -27,6 +27,8 @@ export const AUTH_ENDPOINTS = {
   CHANGE_PASSWORD: '/users/change_password',
   FORGOT_PASSWORD: '/users/forgot_password',
   VERIFY_RESET_CODE: '/users/verify_change_password_code',
+  VERIFY_ACCOUNT: '/users/verify_account',
+  RESEND_VERIFY_CODE: '/users/resend_verify_account_code',
   ME: '/users/me'
 } as const
 

@@ -104,6 +104,16 @@ export const mockAuthApi = {
     clearSessionMarker()
   },
 
+  // Xác minh email (mock): mã hợp lệ là số > 0; gửi lại luôn "thành công".
+  async verifyAccount(_email: string, code: number): Promise<void> {
+    await delay(400)
+    if (!Number.isInteger(code) || code <= 0) throw apiError('Mã không đúng (mock).', 400)
+  },
+
+  async resendVerifyCode(): Promise<void> {
+    await delay(500)
+  },
+
   async relogin(email: string): Promise<LoginResponse> {
     await delay(200)
     const raw = localStorage.getItem(MOCK_SESSION_USER_KEY)
