@@ -3942,7 +3942,18 @@
       "orderRule": "Thứ tự là số nguyên từ 1."
     },
     "guideSteps": {
-      "description": "Mỗi bước là một video YouTube trên trang Hướng dẫn. Số bước tự đánh theo thời gian tạo; thumbnail và thời lượng hệ thống lấy từ YouTube. Chỉ bước Hiển thị mới xuất hiện với người dùng.",
+      "description": "Mỗi bước là một video YouTube trên trang Hướng dẫn. Dán URL YouTube, hệ thống tự lấy ảnh đại diện và thời lượng. Công bố thì bước mới hiện với người dùng; kéo lên/xuống để đổi thứ tự.",
+      "preview": "Xem trước",
+      "warning": "Video lỗi",
+      "untitled": "(Chưa có tiêu đề)",
+      "moveUp": "Lên một bậc",
+      "moveDown": "Xuống một bậc",
+      "deleteAsk": "Xóa \"{title}\"? Thao tác không khôi phục được.",
+      "states": {
+        "Draft": "Nháp",
+        "Published": "Đang hiển thị",
+        "Hidden": "Đã ẩn"
+      },
       "step": "Số bước",
       "thumbnail": "Thumbnail",
       "title": "Tiêu đề",

@@ -476,6 +476,12 @@ Rà soát toàn bộ endpoint đã nối so với Swagger live (133 path / 160 o
 | Admin PAY-003  | `GET/POST/PUT /admin/payment-connections/*` (+ `/history`), `PUT /admin/payment-environments/{env}/active-connection` | Khai báo tài khoản nhận tiền SePay + chọn kết nối đang dùng (quyền `payment.connection.manage`) |
 | Site khách     | `GET /design-templates/filters` + filter params của `/design-templates`; `GET /me/library-history`                    | Lọc thư viện server-side + lịch sử mẫu đã xem (đang mock/client-side)                           |
 
+### 7.5 BE đổi field / thêm cụm (đối soát 30/09 → 01/10)
+
+- **KTS**: BE thêm `companyName`, `rating`, `reviewCount` (write + chi tiết + public) — đã nối phía admin; thẻ KTS khách còn mock.
+- **Bài viết**: BE bỏ `summary`, thêm `readingTimeMinutes` — đã cập nhật admin + đọc khách; đã bỏ dòng excerpt ở thẻ bài viết khách.
+- **Hướng dẫn (Guides) — MỚI**: BE ship hẳn cụm video YouTube (`/guides`, `/admin/guides` CRUD + `/publish` `/hide` `/move` + `/video-preview`). **Admin đã nối API thật** (thay kho CMS): nhập URL → BE lấy metadata + preview, publish/ẩn/sắp xếp theo `orderVersion`. **Trang Hướng dẫn KHÁCH (`features/guide`) còn đọc CMS** — nối `GET /guides` là việc customer.
+
 ### 7.4 Dọn dẹp nhỏ (không chặn)
 
 - `changePassword` khai kiểu trả `<string>` thừa → nên `void`.

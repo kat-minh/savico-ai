@@ -3942,7 +3942,18 @@
       "orderRule": "Order must be a whole number from 1."
     },
     "guideSteps": {
-      "description": "Each step is a YouTube video on the Guide page. Step numbers follow creation time; thumbnails and durations come from YouTube. Only Visible steps are shown to users.",
+      "description": "Each step is a YouTube video on the Guide page. Paste a YouTube URL and the system fetches the thumbnail and duration. Publish to show a step to users; drag up/down to reorder.",
+      "preview": "Preview",
+      "warning": "Video error",
+      "untitled": "(No title)",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "deleteAsk": "Delete \"{title}\"? This cannot be undone.",
+      "states": {
+        "Draft": "Draft",
+        "Published": "Published",
+        "Hidden": "Hidden"
+      },
       "step": "Step",
       "thumbnail": "Thumbnail",
       "title": "Title",
