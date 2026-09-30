@@ -1220,6 +1220,7 @@
       "descriptionLabel": "Description (optional)",
       "descriptionHint": "Private notes about this project — only you can see them.",
       "descriptionPlaceholder": "Add a description (optional)...",
+      "needPlan": "You need a design plan to create a construction dossier. Please pick a plan on the Pricing page.",
       "submit": "Create project"
     },
     "input": {

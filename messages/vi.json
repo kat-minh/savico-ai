@@ -1220,6 +1220,7 @@
       "descriptionLabel": "Mô tả (không bắt buộc)",
       "descriptionHint": "Ghi chú riêng về dự án, chỉ bạn nhìn thấy.",
       "descriptionPlaceholder": "Nhập mô tả dự án (nếu có)...",
+      "needPlan": "Bạn cần mua gói thiết kế để tạo hồ sơ thi công. Mời chọn gói ở trang Bảng giá.",
       "submit": "Tạo dự án"
     },
     "input": {

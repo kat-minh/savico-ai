@@ -1,13 +1,17 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { Suspense, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
+import { Suspense, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 
+import { useAccountPlan } from '@/features/account'
 import { AuthDialog, useLogout } from '@/features/auth'
 import { CreateProjectDialog, resumeProjectRoute, useDesignStore } from '@/features/design'
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
 import { AccountMenu } from '@/shared/components/account-menu'
+import { ROUTES } from '@/shared/constants/routes'
 import { SiteHeader } from '@/shared/layouts'
 import { JourneyPopupHost } from './journey-popup-host'
 import { useActiveProject } from './use-active-project'
@@ -61,6 +65,41 @@ function CreateProjectQueryBridge() {
 }
 
 /**
+ * Chặn tạo hồ sơ thi công khi tài khoản CHƯA MUA GÓI (không còn tạo miễn phí):
+ * mở cửa sổ Tạo dự án mà `/me/design-subscription` trả rỗng → đóng modal và đá
+ * về trang Bảng giá. Đặt ở app-layer vì phải đọc gói (`features/account`) lẫn cờ
+ * mở modal (`features/design`) cùng lúc. Gói được nạp sẵn khi đăng nhập để lúc
+ * mở modal đã biết ngay, tránh nháy form. `plan === null` chỉ đúng khi ĐÃ gọi
+ * xong API và không có gói — lỗi / đang tải (`undefined`) thì KHÔNG chặn, để
+ * backend tự quyết. Bản mock luôn trả gói nên dev vẫn tạo được.
+ */
+function DesignPlanGate() {
+  const t = useTranslations('design.createProject')
+  const router = useRouter()
+  const isCreateOpen = useDesignStore((s) => s.isCreateDialogOpen)
+  const closeCreateDialog = useDesignStore((s) => s.closeCreateDialog)
+  const { isAuthenticated, isInitialized } = useAuth()
+  const { data: plan } = useAccountPlan(isAuthenticated && isInitialized)
+  const redirectedRef = useRef(false)
+
+  useEffect(() => {
+    if (!isCreateOpen) {
+      redirectedRef.current = false
+      return
+    }
+    // Chỉ chặn khi CHẮC CHẮN chưa có gói (API đã trả `null`), tránh chặn nhầm lúc
+    // đang tải hoặc lỗi (`undefined`).
+    if (plan !== null || redirectedRef.current) return
+    redirectedRef.current = true
+    closeCreateDialog()
+    toast.info(t('needPlan'))
+    router.push(ROUTES.PLANS)
+  }, [isCreateOpen, plan, closeCreateDialog, router, t])
+
+  return null
+}
+
+/**
  * App-layer glue for the shared toolbar (mục II.1).
  *
  * Lives in `app/` because only this layer may import `features/auth` and
@@ -83,6 +122,7 @@ export function MainChrome() {
         <CreateProjectQueryBridge />
       </Suspense>
       <CreateProjectDialog />
+      <DesignPlanGate />
       <JourneyPopupHost />
     </>
   )
