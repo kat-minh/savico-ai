@@ -12,11 +12,17 @@ export interface CreateProjectPayload {
  * khai ở đây — vẫn chạy bản mock kể cả khi tắt `NEXT_PUBLIC_USE_MOCK_API`
  * (danh sách thiếu gửi BE: `docs/BE_API_GAPS.md`).
  *
- * Đã nối: màn "Dự án của tôi" — danh sách (`GET /estimates`) và xóa
- * (`POST /estimates/bulk-delete`). Tạo / nhập liệu / gửi AI vẫn mock.
+ * Đã nối: CRUD dự án — danh sách (`GET /estimates`), tạo (`POST /estimates`),
+ * mở (`GET /estimates/{id}`), đổi tên (`PATCH /estimates/{id}/name`), xóa
+ * (`POST /estimates/bulk-delete`). Luồng nhập liệu / gửi AI / kết quả VẪN mock
+ * (DTO input dùng GUID vs FE enum, dossier "chờ AI") — thin fns đã sẵn ở
+ * `design.bmt.ts` để nối khi UI đổi model + BE chốt dossier.
  */
 const BmtDesignApi = {
   listProjects: bmtDesignApi.listProjects,
+  createProject: bmtDesignApi.createProject,
+  getProject: bmtDesignApi.getProject,
+  renameProject: bmtDesignApi.renameProject,
   deleteProject: bmtDesignApi.deleteProject
 } satisfies Partial<typeof mockDesignApi>
 

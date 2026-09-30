@@ -34,7 +34,8 @@ export const ROUTES = {
   ACCOUNT_FAVORITES: '/account/favorites',
   ACCOUNT_DOSSIERS: '/account/dossiers',
   ACCOUNT_PURCHASES: '/account/purchases',
-  ACCOUNT_CONSULTATIONS: '/account/consultations'
+  ACCOUNT_CONSULTATIONS: '/account/consultations',
+  ACCOUNT_SITES: '/account/sites'
 } as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]

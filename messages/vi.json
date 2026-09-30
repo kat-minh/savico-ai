@@ -1656,6 +1656,35 @@
       "title": "Tính năng đang hoàn thiện",
       "description": "Phần này sẽ sớm được cập nhật khi hệ thống sẵn sàng. Cảm ơn bạn đã kiên nhẫn chờ."
     },
+    "sites": {
+      "title": "Công trình của tôi",
+      "subtitle": "Quản lý công trình và gán gói giám sát đã mua vào đúng công trình.",
+      "add": "Thêm công trình",
+      "editTitle": "Sửa công trình",
+      "formHint": "Nhập tên và địa chỉ công trình.",
+      "name": "Tên công trình",
+      "address": "Địa chỉ",
+      "edit": "Sửa",
+      "delete": "Xoá",
+      "cancel": "Huỷ",
+      "save": "Lưu",
+      "saved": "Đã lưu công trình.",
+      "deleted": "Đã xoá công trình.",
+      "error": "Có lỗi xảy ra, vui lòng thử lại.",
+      "noGrant": "Chưa gán gói giám sát nào.",
+      "empty": {
+        "title": "Chưa có công trình nào",
+        "description": "Thêm công trình để gán gói giám sát và theo dõi thi công."
+      },
+      "deleteConfirmTitle": "Xoá công trình \"{name}\"?",
+      "deleteConfirmBody": "Chỉ xoá được công trình chưa có gói giám sát đang gắn.",
+      "grantsTitle": "Gói giám sát chưa gán",
+      "assignBy": "Cần gán trước {date}",
+      "pickSite": "Chọn công trình",
+      "assign": "Gán",
+      "assignedOk": "Đã gán gói vào công trình.",
+      "grantState": { "Assigned": "Đang gắn", "Completed": "Hoàn thành", "CanceledByStaff": "Đã huỷ" }
+    },
     "info": {
       "title": "Thông tin tài khoản",
       "name": "Họ và tên",

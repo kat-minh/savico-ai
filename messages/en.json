@@ -1656,6 +1656,35 @@
       "title": "Coming soon",
       "description": "This section will be available once the system is ready. Thanks for your patience."
     },
+    "sites": {
+      "title": "My sites",
+      "subtitle": "Manage your construction sites and assign purchased supervision packages to them.",
+      "add": "Add site",
+      "editTitle": "Edit site",
+      "formHint": "Enter the site name and address.",
+      "name": "Site name",
+      "address": "Address",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saved": "Site saved.",
+      "deleted": "Site deleted.",
+      "error": "Something went wrong, please try again.",
+      "noGrant": "No supervision package assigned.",
+      "empty": {
+        "title": "No sites yet",
+        "description": "Add a site to assign supervision packages and track construction."
+      },
+      "deleteConfirmTitle": "Delete site \"{name}\"?",
+      "deleteConfirmBody": "A site with an attached supervision package can't be deleted.",
+      "grantsTitle": "Unassigned supervision packages",
+      "assignBy": "Assign before {date}",
+      "pickSite": "Pick a site",
+      "assign": "Assign",
+      "assignedOk": "Package assigned to the site.",
+      "grantState": { "Assigned": "Assigned", "Completed": "Completed", "CanceledByStaff": "Canceled" }
+    },
     "info": {
       "title": "Account information",
       "name": "Full name",
