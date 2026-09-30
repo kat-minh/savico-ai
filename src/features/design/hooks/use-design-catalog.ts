@@ -12,6 +12,8 @@ interface CatalogOption {
   value: string
   label: string
   imageUrl?: string
+  /** Loại đã Ngừng hoạt động, chỉ hiện vì hồ sơ đã lưu nó — không chọn lại được. */
+  disabled?: boolean
 }
 
 interface DesignCatalog {
@@ -28,7 +30,10 @@ interface DesignCatalog {
  * Chữ và ảnh chỉ GHI ĐÈ: admin để trống thì rơi về bản dịch `messages/*.json`
  * và ảnh mẫu trong `shared/lib/imagery`, nên đổi ngôn ngữ vẫn có nhãn đúng.
  */
-export function useDesignCatalog(buildingType: BuildingType | null): DesignCatalog {
+export function useDesignCatalog(
+  buildingType: BuildingType | null,
+  savedBuildingType: BuildingType | null = null
+): DesignCatalog {
   const t = useTranslations('design.input')
   const cmsBuildingTypes = useCmsCollection('buildingTypes')
   const cmsStyles = useCmsCollection('styleOptions')
@@ -36,16 +41,18 @@ export function useDesignCatalog(buildingType: BuildingType | null): DesignCatal
 
   return useMemo(
     () => ({
-      buildingTypes: catalogBuildingTypes(cmsBuildingTypes).map((option) => ({
-        value: option.value,
-        label: cmsText(option.label, t(`buildingType.options.${option.value}`))
-      })),
+      buildingTypes: catalogBuildingTypes(cmsBuildingTypes, savedBuildingType).map((option) => {
+        const label = cmsText(option.label, t(`buildingType.options.${option.value}`))
+        return option.inactive
+          ? { value: option.value, label: `${label} ${t('inactiveSuffix')}`, disabled: true }
+          : { value: option.value, label }
+      }),
       styles: catalogStyles(cmsStyles, buildingType).map((option) => ({
         value: option.value,
         label: cmsText(option.label, t(`style.options.${option.value}`)),
         imageUrl: cmsText(option.imageUrl, siteImage(assets, `style.${option.value}`))
       }))
     }),
-    [cmsBuildingTypes, cmsStyles, assets, buildingType, t]
+    [cmsBuildingTypes, cmsStyles, assets, buildingType, savedBuildingType, t]
   )
 }

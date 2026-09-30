@@ -1,398 +1,369 @@
 'use client'
 
-import { ExclamationCircleOutlined, LoadingOutlined, ReloadOutlined } from '@ant-design/icons'
-import { Alert, App, Button, Descriptions, Form, Image, Input, Select, Space, Tag, Typography } from 'antd'
-import type { FormInstance } from 'antd'
-import dayjs from 'dayjs'
+import { ArrowDownOutlined, ArrowUpOutlined, DeleteOutlined, LoadingOutlined, SwapOutlined } from '@ant-design/icons'
+import { App, Alert, Button, Form, Image, Input, Space, Tooltip, Typography, type FormInstance } from 'antd'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
-import type { GuideVideo } from '@/shared/cms'
-import { fetchYouTubeMeta, youTubeEmbedUrl, type YouTubeMetaError } from '../../api/youtube.api'
-import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
-import { newAdminId } from '../../services/admin.service'
-import { guideStepNumbers, parseYouTubeId } from '../../services/guide.service'
-import { StatusSwitch } from '../common/field-kit'
-import { ResourceManager } from '../common/resource-manager'
+import { isApiError } from '@/shared/lib/api'
+import { adminKeys } from '../../api/admin.keys'
+import { guidesAdminApi, type AdminGuide, type GuideVideoPreview } from '../../api/bmt/guides.api'
+import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
+import { StatusTag, type StatusTone } from '../common/status-tag'
+import { TableThumb } from '../common/table-thumb'
 
 const { Text } = Typography
 
-type FormValues = GuideVideo & { youtubeUrl?: string; metaFor?: string; metaError?: YouTubeMetaError }
+const TITLE_MAX = 100
+const DESCRIPTION_MAX = 1000
+/** Guides ít (các bước hướng dẫn) nên tải một trang lớn để sắp xếp trong trang. */
+const PAGE_SIZE = 50
 
-function duration(seconds: number): string {
+function durationLabel(seconds?: number): string {
+  if (!seconds) return '—'
   const minutes = Math.floor(seconds / 60)
   return `${minutes}:${String(seconds % 60).padStart(2, '0')}`
 }
 
-function watchUrl(videoId: string): string {
-  return `https://www.youtube.com/watch?v=${videoId}`
+const STATE_TONE: Record<string, StatusTone> = {
+  Published: 'success',
+  Draft: 'warning',
+  Hidden: 'off'
+}
+
+interface GuideFormValues {
+  title?: string
+  description?: string
+  youtubeUrl?: string
+  expectedVersion?: number
+}
+
+const trimOrNull = (value?: string) => {
+  const next = value?.trim()
+  return next ? next : null
 }
 
 /**
- * CÁC BƯỚC HƯỚNG DẪN (epic GuideStepManagement).
- *
- * Mỗi bước là một video YouTube: admin nhập tiêu đề, link, mô tả, trạng thái;
- * thumbnail và thời lượng hệ thống tự lấy từ YouTube; số bước tự đánh theo thời
- * gian tạo tăng dần (xóa là tự đánh lại). Không lấy được thông tin video thì
- * không lưu. Chỉ bước Hiển thị và video còn phát nhúng được mới lên trang Hướng dẫn.
+ * HƯỚNG DẪN (video YouTube) trên BMT API — thay kho CMS cũ. Admin chỉ nhập URL
+ * YouTube + tiêu đề + mô tả; BE tự lấy ảnh đại diện, thời lượng và cảnh báo nếu
+ * video lỗi. Vòng đời: tạo là Nháp → Công bố (khách thấy) → Ẩn. Sắp xếp thứ tự
+ * bằng nút lên/xuống (khóa lạc quan theo `orderVersion` của cả danh sách).
  */
 export function GuideVideoManager() {
   const t = useTranslations('admin')
-  const { message } = App.useApp()
-  const { data: videos = [] } = useAdminCollection('guideVideos')
-  const save = useSaveAdminItem('guideVideos')
-  const steps = useMemo(() => guideStepNumbers(videos), [videos])
+  const g = useTranslations('admin.guideSteps')
+  const { message, modal } = App.useApp()
+  const listKey = adminKeys.bmt('guides')
 
-  /** Chuyển sang Hiển thị: kiểm tra lại video còn tồn tại và phát nhúng được (§5). */
-  const switchStatus = async (item: GuideVideo) => {
-    const next = item.status === 'hidden' ? 'visible' : 'hidden'
-    if (next === 'visible' && item.youtubeId) {
-      const problem = await fetchYouTubeMeta(item.youtubeId).then(
-        () => null,
-        (error: YouTubeMetaError) => error
-      )
-      if (problem) {
-        if (problem !== 'failed') await save.mutateAsync({ ...item, unavailable: true })
-        message.error(t(`guideSteps.metaErrors.${problem}`))
-        return
-      }
+  // `move` cần orderVersion của cả danh sách + id các hàng lân cận → giữ lại từ
+  // lần tải gần nhất (ApiResourceManager chỉ trả PagedResult cho bảng).
+  const orderRef = useRef(0)
+  const rowsRef = useRef<AdminGuide[]>([])
+
+  async function run(action: () => Promise<unknown>, ctx: ApiRowContext, success = t('feedback.saved')) {
+    try {
+      await action()
+      message.success(success)
+    } catch (err) {
+      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+    } finally {
+      await ctx.refresh()
     }
-    await save.mutateAsync({ ...item, status: next, unavailable: false })
+  }
+
+  /** Đưa guide lên/xuống một bậc: đặt TRƯỚC hàng phù hợp (null = xuống cuối). */
+  function move(item: AdminGuide, direction: -1 | 1, ctx: ApiRowContext) {
+    const rows = rowsRef.current
+    const index = rows.findIndex((row) => row.id === item.id)
+    if (index < 0) return
+    const beforeId = direction === -1 ? (rows[index - 1]?.id ?? null) : (rows[index + 2]?.id ?? null)
+    void run(
+      () =>
+        guidesAdminApi.move(item.id, {
+          expectedVersion: item.version,
+          expectedOrderVersion: orderRef.current,
+          beforeId
+        }),
+      ctx
+    )
   }
 
   return (
-    <ResourceManager
-      collection='guideVideos'
+    <ApiResourceManager<AdminGuide>
       title={t('nav.guideVideos')}
-      description={t('guideSteps.description')}
-      drawerWidth={720}
-      searchText={(item) => item.title}
-      createItem={(): GuideVideo => ({
-        id: newAdminId('vid'),
-        // Chủ đề là trường cũ của trang Hướng dẫn — không còn quản lý ở đây.
-        topic: 'input',
-        title: '',
-        description: '',
-        thumbnailUrl: '',
-        videoUrl: '',
-        durationSeconds: 0,
-        status: 'hidden',
-        createdAt: new Date().toISOString()
-      })}
-      toFormValues={(item) => ({
-        ...item,
-        youtubeUrl: item.youtubeId ? watchUrl(item.youtubeId) : '',
-        metaFor: item.youtubeId
-      })}
-      fromFormValues={(values, current): GuideVideo => {
-        const { youtubeUrl: _url, metaFor: _for, metaError: _error, ...rest } = values as unknown as FormValues
+      description={g('description')}
+      queryKey={listKey}
+      searchable
+      drawerWidth={640}
+      pageSize={PAGE_SIZE}
+      fetchPage={async ({ pageIndex, pageSize, keyword }) => {
+        const res = await guidesAdminApi.list({ pageIndex, pageSize, keyword: keyword || undefined })
+        orderRef.current = res.orderVersion
+        rowsRef.current = res.page.items
+        return res.page
+      }}
+      rowKey={(item) => item.id}
+      createValues={() => ({ title: '', description: '', youtubeUrl: '' })}
+      onCreate={(values) => {
+        const form = values as GuideFormValues
+        return guidesAdminApi.create({
+          title: trimOrNull(form.title),
+          description: trimOrNull(form.description),
+          youtubeUrl: trimOrNull(form.youtubeUrl)
+        })
+      }}
+      toFormValues={async (item) => {
+        const detail = await guidesAdminApi.get(item.id)
         return {
-          ...current,
-          ...rest,
-          title: rest.title.trim(),
-          description: rest.description.trim(),
-          // Video vừa lấy được thông tin là video phát nhúng được.
-          unavailable: rest.youtubeId !== current.youtubeId ? false : current.unavailable
+          title: detail.title ?? '',
+          description: detail.description ?? '',
+          youtubeUrl: detail.youtubeUrl ?? '',
+          expectedVersion: detail.version
         }
       }}
-      validate={(next) => {
-        if (!next.youtubeId || !next.durationSeconds) return t('guideSteps.metaRequired')
-        const clash = videos.find((item) => item.id !== next.id && item.youtubeId === next.youtubeId)
-        return clash ? t('guideSteps.duplicate', { step: steps.get(clash.id) ?? '?', title: clash.title }) : null
+      onUpdate={(values, item) => {
+        const form = values as GuideFormValues
+        return guidesAdminApi.update(item.id, {
+          title: trimOrNull(form.title),
+          description: trimOrNull(form.description),
+          youtubeUrl: trimOrNull(form.youtubeUrl),
+          expectedVersion: form.expectedVersion ?? item.version
+        })
       }}
-      deleteConfirm={(item) => (
-        <Text>{t('guideSteps.deleteConfirm', { step: steps.get(item.id) ?? '?', title: item.title })}</Text>
-      )}
-      rowActions={(item) => (
-        <StatusSwitch
-          name={item.title}
-          current={t(`guideSteps.status.${item.status ?? 'visible'}`)}
-          next={t(`guideSteps.status.${item.status === 'hidden' ? 'visible' : 'hidden'}`)}
-          onConfirm={() => switchStatus(item)}
-        />
-      )}
-      renderView={(item) => <StepView video={item} step={steps.get(item.id) ?? 0} />}
+      renderForm={(form) => <GuideFields form={form} />}
+      renderView={(item) => <GuideView item={item} />}
+      rowActions={(item, ctx): RowAction[] => [
+        {
+          key: 'moveUp',
+          label: g('moveUp'),
+          icon: <ArrowUpOutlined />,
+          disabled: rowsRef.current[0]?.id === item.id,
+          onClick: () => move(item, -1, ctx)
+        },
+        {
+          key: 'moveDown',
+          label: g('moveDown'),
+          icon: <ArrowDownOutlined />,
+          disabled: rowsRef.current[rowsRef.current.length - 1]?.id === item.id,
+          onClick: () => move(item, 1, ctx)
+        },
+        {
+          key: 'status',
+          label: t('actions.switchStatus'),
+          icon: <SwapOutlined />,
+          onClick: () =>
+            modal.confirm({
+              title: t('actions.switchStatusTitle', { name: item.title ?? '' }),
+              content: t('actions.switchStatusBody', {
+                current: g(`states.${item.state === 'Published' ? 'Published' : 'Hidden'}`),
+                next: g(`states.${item.state === 'Published' ? 'Hidden' : 'Published'}`)
+              }),
+              okText: t('actions.confirm'),
+              cancelText: t('actions.cancel'),
+              onOk: () =>
+                run(
+                  () =>
+                    item.state === 'Published'
+                      ? guidesAdminApi.hide(item.id, item.version)
+                      : guidesAdminApi.publish(item.id, item.version),
+                  ctx
+                )
+            })
+        },
+        {
+          key: 'delete',
+          label: t('actions.delete'),
+          icon: <DeleteOutlined />,
+          danger: true,
+          onClick: () =>
+            modal.confirm({
+              title: g('deleteAsk', { title: item.title ?? '' }),
+              okText: t('actions.confirm'),
+              cancelText: t('actions.cancel'),
+              okButtonProps: { danger: true },
+              onOk: () => run(() => guidesAdminApi.remove(item.id, item.version), ctx, t('feedback.deleted'))
+            })
+        }
+      ]}
       columns={[
         {
-          title: t('guideSteps.step'),
-          key: 'step',
-          width: 80,
-          defaultSortOrder: 'ascend',
-          sorter: (a, b) => (steps.get(a.id) ?? 0) - (steps.get(b.id) ?? 0),
-          render: (_, record) => <Text strong>{steps.get(record.id)}</Text>
+          title: g('thumbnail'),
+          key: 'thumbnail',
+          width: 72,
+          render: (_, record) => <TableThumb src={record.metadata?.thumbnailUrl} />
         },
         {
-          title: t('guideSteps.thumbnail'),
-          dataIndex: 'thumbnailUrl',
-          width: 120,
-          render: (url: string) =>
-            url ? (
-              <Image src={url} alt='' width={96} height={54} style={{ objectFit: 'cover', borderRadius: 6 }} />
-            ) : (
-              <Text type='secondary'>—</Text>
-            )
-        },
-        {
-          title: t('guideSteps.title'),
-          dataIndex: 'title',
+          title: g('title'),
+          key: 'title',
           render: (_, record) => (
             <div style={{ minWidth: 0 }}>
               <Text strong style={{ display: 'block' }}>
-                {record.title}
+                {record.title || <Text type='secondary'>{g('untitled')}</Text>}
               </Text>
-              <Text type='secondary' style={{ fontSize: 12 }} ellipsis={{ tooltip: record.description }}>
-                {record.description}
-              </Text>
+              {record.description ? (
+                <Text type='secondary' style={{ fontSize: 12 }} ellipsis={{ tooltip: record.description }}>
+                  {record.description}
+                </Text>
+              ) : null}
             </div>
           )
         },
         {
-          title: t('guideSteps.duration'),
-          dataIndex: 'durationSeconds',
-          width: 100,
-          render: (seconds: number) => (seconds ? duration(seconds) : '—')
+          title: g('duration'),
+          key: 'duration',
+          width: 90,
+          align: 'right',
+          render: (_, record) => durationLabel(record.metadata?.durationSeconds)
         },
         {
-          title: t('guideSteps.statusLabel'),
-          key: 'status',
-          width: 170,
+          title: g('statusLabel'),
+          key: 'state',
+          width: 160,
           render: (_, record) => (
             <Space size={4} wrap>
-              <Tag color={record.status === 'hidden' ? 'default' : 'green'}>
-                {t(`guideSteps.status.${record.status ?? 'visible'}`)}
-              </Tag>
-              {record.unavailable ? (
-                <Tag color='red' icon={<ExclamationCircleOutlined />}>
-                  {t('guideSteps.unavailable')}
-                </Tag>
+              <StatusTag tone={STATE_TONE[record.state] ?? 'off'}>
+                {record.state === 'Published' || record.state === 'Draft' || record.state === 'Hidden'
+                  ? g(`states.${record.state}`)
+                  : record.state}
+              </StatusTag>
+              {record.videoWarning ? (
+                <Tooltip title={record.videoWarning}>
+                  <StatusTag tone='danger'>{g('warning')}</StatusTag>
+                </Tooltip>
               ) : null}
             </Space>
           )
-        },
-        {
-          title: t('guideSteps.createdAt'),
-          dataIndex: 'createdAt',
-          width: 150,
-          render: (value?: string) => (value ? dayjs(value).format('DD/MM/YYYY HH:mm') : '—')
         }
       ]}
-      renderForm={(form) => <StepFields form={form} />}
     />
   )
 }
 
-/** Trường của form Thêm / Cập nhật (§3, §4) — link đổi là lấy lại thông tin video. */
-function StepFields({ form }: { form: FormInstance }) {
+/** Trường form: URL YouTube + xem trước (BE lấy meta), tiêu đề, mô tả. */
+function GuideFields({ form }: { form: FormInstance }) {
   const t = useTranslations('admin')
-  const url = Form.useWatch('youtubeUrl', form) as string | undefined
-  const metaFor = Form.useWatch('metaFor', form) as string | undefined
-  const metaError = Form.useWatch('metaError', form) as YouTubeMetaError | undefined
-  const thumbnail = Form.useWatch('thumbnailUrl', form) as string | undefined
-  const seconds = Form.useWatch('durationSeconds', form) as number | undefined
-  const [loadingFor, setLoadingFor] = useState<string | null>(null)
-  const videoId = url ? parseYouTubeId(url) : null
+  const g = useTranslations('admin.guideSteps')
+  const { message } = App.useApp()
+  const [preview, setPreview] = useState<GuideVideoPreview | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const load = (id: string) => {
-    setLoadingFor(id)
-    fetchYouTubeMeta(id)
-      .then((meta) => {
-        // Chỉ nhận kết quả nếu link vẫn là video này.
-        if (parseYouTubeId(form.getFieldValue('youtubeUrl') ?? '') !== id) return
-        form.setFieldsValue({ youtubeId: id, metaFor: id, metaError: undefined, ...meta })
-      })
-      .catch((error: YouTubeMetaError) => {
-        if (parseYouTubeId(form.getFieldValue('youtubeUrl') ?? '') !== id) return
-        // Lấy thất bại: giữ nguyên video cũ đã lưu, chỉ báo lỗi (§4).
-        form.setFieldsValue({ metaError: error })
-      })
-      .finally(() => setLoadingFor((current) => (current === id ? null : current)))
+  async function onPreview() {
+    const url = (form.getFieldValue('youtubeUrl') as string | undefined)?.trim()
+    if (!url) return
+    setLoading(true)
+    try {
+      setPreview(await guidesAdminApi.previewVideo(url))
+    } catch (err) {
+      setPreview(null)
+      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+    } finally {
+      setLoading(false)
+    }
   }
-
-  // Gõ / dán link xong một nhịp là tự lấy thông tin video mới.
-  const debounce = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(debounce.current), [])
-  const onUrlChange = (value: string) => {
-    form.setFieldValue('metaError', undefined)
-    clearTimeout(debounce.current)
-    const id = parseYouTubeId(value)
-    if (!id || id === form.getFieldValue('metaFor')) return
-    debounce.current = setTimeout(() => load(id), 500)
-  }
-
-  const pendingNew = videoId !== null && videoId !== metaFor
 
   return (
     <>
+      <Form.Item name='expectedVersion' hidden>
+        <Input />
+      </Form.Item>
       <Form.Item
         name='title'
-        label={t('guideSteps.title')}
+        label={g('title')}
         rules={[
           { required: true, whitespace: true, message: t('fields.requiredMessage') },
-          { max: 100, message: t('fields.maxLength', { max: 100 }) }
+          { max: TITLE_MAX, message: t('fields.maxLength', { max: TITLE_MAX }) }
         ]}
       >
-        <Input maxLength={100} showCount />
+        <Input maxLength={TITLE_MAX} showCount />
       </Form.Item>
       <Form.Item
         name='youtubeUrl'
-        label={t('guideSteps.youtubeUrl')}
-        extra={t('guideSteps.youtubeHint')}
-        rules={[
-          { required: true, whitespace: true, message: t('fields.requiredMessage') },
-          {
-            validator: (_, value?: string) =>
-              !value || parseYouTubeId(value)
-                ? Promise.resolve()
-                : Promise.reject(new Error(t('guideSteps.invalidUrl')))
-          }
-        ]}
+        label={g('youtubeUrl')}
+        extra={g('youtubeHint')}
+        rules={[{ required: true, whitespace: true, message: t('fields.requiredMessage') }]}
       >
-        <Input placeholder='https://www.youtube.com/watch?v=…' onChange={(event) => onUrlChange(event.target.value)} />
+        <Input placeholder='https://www.youtube.com/watch?v=…' onChange={() => setPreview(null)} />
       </Form.Item>
-
       <div style={{ marginBottom: 16 }}>
-        {loadingFor && loadingFor === videoId ? (
-          <Text type='secondary'>
-            <LoadingOutlined /> {t('guideSteps.loadingMeta')}
+        <Button size='small' loading={loading} onClick={onPreview}>
+          {g('preview')}
+        </Button>
+        {loading ? (
+          <Text type='secondary' style={{ marginLeft: 8 }}>
+            <LoadingOutlined /> {g('loadingMeta')}
           </Text>
-        ) : metaError && pendingNew ? (
-          <Alert
-            type='error'
-            showIcon
-            title={t(`guideSteps.metaErrors.${metaError}`)}
-            action={
-              videoId ? (
-                <Button size='small' icon={<ReloadOutlined />} onClick={() => load(videoId)}>
-                  {t('guideSteps.retry')}
-                </Button>
-              ) : null
-            }
-          />
-        ) : thumbnail && !pendingNew ? (
-          <Space align='start'>
-            <Image src={thumbnail} alt='' width={160} height={90} style={{ objectFit: 'cover', borderRadius: 6 }} />
-            <Text type='secondary'>{t('guideSteps.metaLine', { duration: duration(seconds ?? 0) })}</Text>
-          </Space>
+        ) : preview ? (
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: 8,
+              border: '1px solid var(--admin-border)',
+              borderRadius: 8,
+              background: 'var(--admin-surface)'
+            }}
+          >
+            <Image
+              src={preview.metadata.thumbnailUrl}
+              alt=''
+              width={160}
+              height={90}
+              preview={false}
+              style={{ objectFit: 'cover', borderRadius: 6, display: 'block', flexShrink: 0 }}
+            />
+            <Text type='secondary' style={{ fontSize: 13 }}>
+              {g('metaLine', { duration: durationLabel(preview.metadata.durationSeconds) })}
+            </Text>
+          </div>
         ) : null}
       </div>
-
       <Form.Item
         name='description'
-        label={t('guideSteps.descriptionLabel')}
+        label={g('descriptionLabel')}
         rules={[
           { required: true, whitespace: true, message: t('fields.requiredMessage') },
-          { max: 1000, message: t('fields.maxLength', { max: 1000 }) }
+          { max: DESCRIPTION_MAX, message: t('fields.maxLength', { max: DESCRIPTION_MAX }) }
         ]}
       >
-        <Input.TextArea rows={4} maxLength={1000} showCount />
+        <Input.TextArea rows={4} maxLength={DESCRIPTION_MAX} showCount />
       </Form.Item>
-      <Form.Item name='status' label={t('guideSteps.statusLabel')}>
-        <Select
-          style={{ maxWidth: 220 }}
-          options={(['visible', 'hidden'] as const).map((value) => ({
-            value,
-            label: t(`guideSteps.status.${value}`)
-          }))}
-        />
-      </Form.Item>
-      {/* Hệ thống điền — admin không nhập (§3). */}
-      {(['youtubeId', 'thumbnailUrl', 'durationSeconds', 'metaFor', 'metaError'] as const).map((name) => (
-        <Form.Item key={name} name={name} hidden>
-          <Input />
-        </Form.Item>
-      ))}
     </>
   )
 }
 
-/** Chi tiết bước (§2) — mở ra là kiểm tra lại video còn phát nhúng được không. */
-function StepView({ video, step }: { video: GuideVideo; step: number }) {
-  const t = useTranslations('admin')
-  const save = useSaveAdminItem('guideVideos')
-  const [problem, setProblem] = useState<YouTubeMetaError | null>(null)
-
-  useEffect(() => {
-    if (!video.youtubeId) return
-    let alive = true
-    fetchYouTubeMeta(video.youtubeId).then(
-      () => {
-        if (alive && video.unavailable) save.mutate({ ...video, unavailable: false })
-      },
-      (error: YouTubeMetaError) => {
-        if (!alive) return
-        setProblem(error)
-        // Video bị gỡ / chặn nhúng: ngừng hiện công khai và cảnh báo admin (§8).
-        if (error !== 'failed' && !video.unavailable) save.mutate({ ...video, unavailable: true })
-      }
-    )
-    return () => {
-      alive = false
-    }
-    // Kiểm tra một lần mỗi khi mở chi tiết một video.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [video.id, video.youtubeId])
-
+/** Chi tiết: nhúng video + cảnh báo nếu BE báo video lỗi. */
+function GuideView({ item }: { item: AdminGuide }) {
+  const g = useTranslations('admin.guideSteps')
   return (
     <Space orientation='vertical' size={16} style={{ width: '100%' }}>
-      {video.youtubeId && !problem ? (
+      {item.videoWarning ? <Alert type='warning' showIcon title={item.videoWarning} /> : null}
+      {item.youtubeVideoId ? (
         <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden' }}>
           <iframe
-            src={youTubeEmbedUrl(video.youtubeId)}
-            title={video.title}
+            src={`https://www.youtube-nocookie.com/embed/${item.youtubeVideoId}`}
+            title={item.title ?? ''}
             allow='accelerometer; encrypted-media; gyroscope; picture-in-picture'
             allowFullScreen
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
           />
         </div>
-      ) : (
-        <Alert
-          type='warning'
-          showIcon
-          title={t(`guideSteps.metaErrors.${problem ?? 'unavailable'}`)}
-          description={t('guideSteps.cannotPlay')}
-        />
-      )}
-      <Descriptions
-        size='small'
-        column={1}
-        bordered
-        items={[
-          { key: 'step', label: t('guideSteps.step'), children: step },
-          { key: 'title', label: t('guideSteps.title'), children: video.title },
-          { key: 'description', label: t('guideSteps.descriptionLabel'), children: video.description },
-          {
-            key: 'url',
-            label: t('guideSteps.youtubeUrl'),
-            children: video.youtubeId ? (
-              <a href={watchUrl(video.youtubeId)} target='_blank' rel='noreferrer'>
-                {watchUrl(video.youtubeId)}
-              </a>
-            ) : (
-              '—'
-            )
-          },
-          {
-            key: 'thumb',
-            label: t('guideSteps.thumbnail'),
-            children: video.thumbnailUrl ? <Image src={video.thumbnailUrl} alt='' width={160} /> : '—'
-          },
-          {
-            key: 'duration',
-            label: t('guideSteps.duration'),
-            children: video.durationSeconds ? duration(video.durationSeconds) : '—'
-          },
-          {
-            key: 'status',
-            label: t('guideSteps.statusLabel'),
-            children: t(`guideSteps.status.${video.status ?? 'visible'}`)
-          },
-          {
-            key: 'created',
-            label: t('guideSteps.createdAt'),
-            children: video.createdAt ? dayjs(video.createdAt).format('DD/MM/YYYY HH:mm') : '—'
-          }
-        ]}
-      />
+      ) : null}
+      <div>
+        <Text strong style={{ display: 'block' }}>
+          {item.title}
+        </Text>
+        {item.description ? (
+          <Text type='secondary' style={{ whiteSpace: 'pre-wrap' }}>
+            {item.description}
+          </Text>
+        ) : null}
+      </div>
+      <Text type='secondary' style={{ fontSize: 12 }}>
+        {g('duration')}: {durationLabel(item.metadata?.durationSeconds)}
+      </Text>
     </Space>
   )
 }

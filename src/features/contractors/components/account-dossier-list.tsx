@@ -2,15 +2,16 @@
 
 import { ArrowRight, House, Info, Plus, Search } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
+import type { Locale } from '@/i18n/routing'
 import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorInvitationsRoute, contractorMatchesRoute, ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDisplayDateTime } from '@/shared/utils'
 import { useBriefSummaries } from '../hooks/use-brief-summaries'
 import { useCreateBrief } from '../hooks/use-brief'
 import { useInvitations } from '../hooks/use-invitations'
@@ -42,6 +43,7 @@ function DossierRow({
   reduceMotion: boolean
 }) {
   const t = useTranslations('account.dossiers')
+  const locale = useLocale() as Locale
   const { brief, invitedCount } = summary
   const { data: invitations, isPending } = useInvitations(brief.id)
 
@@ -115,8 +117,7 @@ function DossierRow({
                   <span className='truncate'>{invitation.contractorName}</span>
                 </span>
                 <span className={cn('truncate', STATUS_TONE[invitation.status])}>
-                  {t(`status.${invitation.status}`)} ·{' '}
-                  {formatDayMonth(invitation.updatedAt, { time: true }).replace(' ', ' · ')}
+                  {t(`status.${invitation.status}`)} · {formatDisplayDateTime(invitation.updatedAt, locale)}
                 </span>
               </div>
             ))

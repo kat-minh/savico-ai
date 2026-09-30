@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 import { siteConfig } from '@/shared/config/site'
-import { formatCurrency, formatDate, formatNumber } from '@/shared/utils'
+import { formatCurrency, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { COST_SECTIONS } from '../constants/design.constants'
 import type { DossierPdfData, DossierPdfLabels, DossierPdfSection } from '../services/pdf/dossier-pdf.types'
 import type { CostSection, Dossier, EstimateResult } from '../types/design.types'
@@ -76,7 +76,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
       const data: DossierPdfData = {
         brand: siteConfig.name,
         projectName: info.projectName,
-        issuedAt: formatDate(new Date(), locale),
+        issuedAt: formatDisplayDate(new Date(), locale),
         grandTotal: money(result.grandTotal),
         sections,
         advisory,
@@ -85,7 +85,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
           [t('info.projectName'), `${info.projectName} (${info.projectId})`],
           [t('info.phone'), info.phone],
           [t('info.address'), info.address],
-          [t('info.createdAt'), info.createdAt ? formatDate(info.createdAt, locale) : ''],
+          [t('info.createdAt'), info.createdAt ? formatDisplayDate(info.createdAt, locale) : ''],
           [t('info.buildingType'), info.buildingTypeLabel],
           [t('info.scale'), info.scaleLabel],
           [t('info.floorArea'), t('floorAreaValue', { value: formatNumber(info.floorArea, locale) })],

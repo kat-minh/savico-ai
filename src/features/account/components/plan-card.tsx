@@ -1,13 +1,14 @@
 'use client'
 
 import { Crown } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
+import type { Locale } from '@/i18n/routing'
 import { ROUTES } from '@/shared/constants/routes'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { useAccountPlan } from '../hooks/use-account-plan'
 import type { PlanAllowance } from '../types/account.types'
 
@@ -52,6 +53,7 @@ interface PlanCardProps {
  */
 export function PlanCard({ designAllowance }: PlanCardProps = {}) {
   const t = useTranslations('account.plan')
+  const locale = useLocale() as Locale
   const { data: plan, isPending } = useAccountPlan()
 
   if (isPending) return <Skeleton className='h-52 w-full rounded-xl' />
@@ -71,7 +73,7 @@ export function PlanCard({ designAllowance }: PlanCardProps = {}) {
         <div className='min-w-0'>
           <p className='truncate font-semibold'>{plan.name}</p>
           <p className='text-muted-foreground truncate text-xs'>
-            {t('expiresAt', { date: formatDayMonth(plan.expiresAt, { year: true }) })}
+            {t('expiresAt', { date: formatDisplayDate(plan.expiresAt, locale) })}
           </p>
         </div>
       </div>

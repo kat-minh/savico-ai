@@ -353,7 +353,7 @@ export function NewsletterBlock() {
         </h2>
         {lead ? (
           <p data-newsletter-date className='text-muted-foreground text-sm'>
-            {formatDisplayDate(lead.publishedAt, locale)}
+            {formatDisplayDate(lead.publishedAt, locale, { weekday: true })}
           </p>
         ) : null}
         <span
@@ -400,7 +400,7 @@ export function NewsletterBlock() {
                   {displayedLead.excerpt}
                 </p>
                 <p data-newsletter-lead-part className='text-muted-foreground flex items-center gap-2 text-xs'>
-                  {formatDisplayDate(displayedLead.publishedAt, locale)}
+                  {formatDisplayDate(displayedLead.publishedAt, locale, { weekday: true })}
                   <span aria-hidden>·</span>
                   <Clock className='size-3.5' />
                   {t('readingTime', { minutes: displayedLead.readingMinutes })}

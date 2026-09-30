@@ -6,6 +6,7 @@ import type { Locale } from '@/i18n/routing'
 import { useCmsDocument } from '@/shared/cms'
 import { formatCurrency, formatNumber } from '@/shared/utils'
 import { advisoryFacts } from '../services/advisory.service'
+import { useFloorCountLabel } from './use-floor-count-label'
 import type { DesignInput, EstimateResult } from '../types/design.types'
 
 /**
@@ -18,6 +19,7 @@ import type { DesignInput, EstimateResult } from '../types/design.types'
 export function useAdvisory(result: EstimateResult | undefined, customerName: string, input?: DesignInput): string[] {
   const t = useTranslations('design.estimate.advisory')
   const tInput = useTranslations('design.input')
+  const floorLabel = useFloorCountLabel()
   const locale = useLocale() as Locale
   // Nội dung tư vấn SAVICO admin soạn (spec admin #3); trống thì dùng câu mặc định.
   const advice = useCmsDocument('estimateAdvice')
@@ -32,7 +34,7 @@ export function useAdvisory(result: EstimateResult | undefined, customerName: st
   const buildingLabel = input?.buildingType
     ? tInput(`buildingType.options.${input.buildingType}`).toLowerCase()
     : t('unknownBuilding')
-  const scaleLabel = input?.floorCount ? tInput(`floorCount.options.${input.floorCount}`).toLowerCase() : ''
+  const scaleLabel = input?.floorCount ? floorLabel(input.floorCount).toLowerCase() : ''
   const packageLabel = input ? tInput(`packageTier.options.${input.packageTier}`) : ''
   const interiorLabel = input?.style ? tInput(`style.options.${input.style}`) : ''
 

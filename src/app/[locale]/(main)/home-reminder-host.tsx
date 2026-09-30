@@ -33,6 +33,7 @@ interface ReminderSnapshot {
 
 interface ReminderMemory {
   lastShownAt: number
+  lastDismissedAt?: number
   count: number
 }
 
@@ -86,6 +87,7 @@ function readMemory(email: string, state: ReminderState): ReminderMemory {
     const parsed = JSON.parse(raw) as Partial<ReminderMemory>
     return {
       lastShownAt: typeof parsed.lastShownAt === 'number' ? parsed.lastShownAt : 0,
+      lastDismissedAt: typeof parsed.lastDismissedAt === 'number' ? parsed.lastDismissedAt : undefined,
       count: typeof parsed.count === 'number' ? parsed.count : 0
     }
   } catch {
@@ -98,7 +100,7 @@ function writeShown(email: string, state: ReminderState): void {
   const current = readMemory(email, state)
   window.localStorage.setItem(
     reminderStorageKey(email, state),
-    JSON.stringify({ lastShownAt: Date.now(), count: current.count + 1 } satisfies ReminderMemory)
+    JSON.stringify({ ...current, lastShownAt: Date.now(), count: current.count + 1 } satisfies ReminderMemory)
   )
   if (state !== 'S5') {
     window.localStorage.setItem(
@@ -108,10 +110,22 @@ function writeShown(email: string, state: ReminderState): void {
   }
 }
 
+function writeDismissed(email: string, state: ReminderState): void {
+  try {
+    window.localStorage.setItem(
+      reminderStorageKey(email, state),
+      JSON.stringify({ ...readMemory(email, state), lastDismissedAt: Date.now() } satisfies ReminderMemory)
+    )
+  } catch {
+    // The in-memory guard still prevents reopening during this visit.
+  }
+}
+
 function canShowByFrequency(email: string, state: ReminderState): boolean {
+  const memory = readMemory(email, state)
+  if (memory.lastDismissedAt !== undefined && Date.now() - memory.lastDismissedAt < DAY_MS) return false
   if (JOURNEY_POPUP_TEST_MODE) return true
   const policy = POLICY[state]
-  const memory = readMemory(email, state)
   if (policy.maxShows !== undefined && memory.count >= policy.maxShows) return false
   return Date.now() - memory.lastShownAt >= policy.cadenceMs
 }
@@ -218,9 +232,13 @@ export function HomeReminderHost() {
     const ownedIds = new Set([...projectIds, ...briefIds])
 
     const email = user.email.toLowerCase()
-    const supervision = [...supervisionProjects]
+    const matchingSupervisionProjects = [...supervisionProjects]
       .filter((project) => project.customer?.email?.toLowerCase() === email || ownedIds.has(project.id))
-      .sort((a, b) => b.activatedAt.localeCompare(a.activatedAt))[0]
+      .sort((a, b) => b.activatedAt.localeCompare(a.activatedAt))
+
+    // Phase hiện tại chưa có rule chọn dự án khi khách có nhiều dự án giám sát.
+    // Khi đó chỉ bỏ qua reminder S5; các reminder hợp lệ khác vẫn được xét tiếp.
+    const supervision = matchingSupervisionProjects.length === 1 ? matchingSupervisionProjects[0] : undefined
 
     if (supervision) {
       const pendingStage =
@@ -244,7 +262,12 @@ export function HomeReminderHost() {
     }
 
     const relatedInvitations = [...invitations]
-      .filter((invitation) => briefIds.has(invitation.projectId) && invitation.status !== 'done')
+      .filter(
+        (invitation) =>
+          briefIds.has(invitation.projectId) &&
+          invitation.status === 'accepted' &&
+          invitation.survey.status === 'confirmed'
+      )
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 
     const latestInvitation = relatedInvitations[0]
@@ -330,7 +353,7 @@ export function HomeReminderHost() {
     let retryTimer: ReturnType<typeof setTimeout> | null = null
 
     const attemptShow = () => {
-      if (cancelled) return
+      if (cancelled || !canShowByFrequency(user.email, snapshot.state)) return
       if (interactionIsBusy(panelOpen)) {
         retryTimer = setTimeout(attemptShow, 450)
         return
@@ -398,6 +421,7 @@ export function HomeReminderHost() {
   }, [collapsed, visible])
 
   const closeReminder = () => {
+    if (snapshot && user?.email) writeDismissed(user.email, snapshot.state)
     dismissedRef.current = true
     setVisible(false)
   }

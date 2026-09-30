@@ -14,6 +14,7 @@ interface ArticleDetailDialogProps {
 /** Bấm thẻ bài viết tư vấn → mở popup đọc nội dung đầy đủ. */
 export function ArticleDetailDialog({ article, onClose }: ArticleDetailDialogProps) {
   const t = useTranslations('handbook.detail')
+  const tArticle = useTranslations('handbook.article')
 
   return (
     <Dialog open={Boolean(article)} onOpenChange={(open) => !open && onClose()}>
@@ -24,7 +25,7 @@ export function ArticleDetailDialog({ article, onClose }: ArticleDetailDialogPro
           <>
             <DialogHeader>
               <DialogTitle className='pr-8 leading-snug'>{article.title}</DialogTitle>
-              <DialogDescription>{article.excerpt}</DialogDescription>
+              <DialogDescription>{tArticle('readingTime', { minutes: article.readingMinutes })}</DialogDescription>
             </DialogHeader>
 
             <Photo

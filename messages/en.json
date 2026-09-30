@@ -10,6 +10,13 @@
     "search": "Search",
     "submit": "Submit",
     "close": "Close",
+    "hotlinePopover": {
+      "title": "BuildX hotline",
+      "hint": "Call this number from your phone, or message BuildX on Zalo.",
+      "copy": "Copy number",
+      "copied": "Copied",
+      "zalo": "Zalo chat"
+    },
     "confirm": "Confirm",
     "back": "Back",
     "next": "Next",
@@ -35,7 +42,7 @@
           "bullet1": "Design & cost estimation",
           "bullet2": "Receive completed drawings",
           "bullet3": "Project ready to execute",
-          "info": "Design plans from ₫399,000 · 1 free design remaining",
+          "info": "Design plans from ₫399,000",
           "cta": "Design & estimate"
         },
         "withDrawing": {
@@ -96,7 +103,9 @@
       "forgotPassword": "Forgot password?",
       "submit": "Sign in",
       "noAccount": "Don't have an account?",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "invalid": "Incorrect email or password.",
+      "locked": "This account is locked. Please contact BuildX."
     },
     "social": {
       "or": "or",
@@ -123,18 +132,64 @@
       "agree": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>",
       "submit": "Sign up",
       "success": "Account created. Please sign in.",
+      "error": "Could not create the account. Please try again.",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in"
     },
     "forgot": {
       "title": "Forgot password",
-      "subtitle": "Enter your email to receive a reset link",
+      "subtitle": "Enter your email to receive a reset code",
       "emailLabel": "Email",
       "emailPlaceholder": "you@company.com",
-      "submit": "Send reset link",
+      "submit": "Send reset code",
       "backToLogin": "Back to sign in",
-      "sentTitle": "Email sent",
-      "sentSubtitle": "We sent a reset link to {email}. Please check your inbox."
+      "requestError": "Couldn't send the reset code. Please try again.",
+      "emailNotFound": "No account exists for this email.",
+      "codeTitle": "Enter reset code",
+      "codeSubtitle": "We sent a reset code to {email}. Enter it to continue.",
+      "codeLabel": "Reset code",
+      "codePlaceholder": "Enter the code from the email",
+      "codeSubmit": "Verify code",
+      "codeInvalid": "The code contains digits only",
+      "codeError": "The code is wrong or expired. Please try again.",
+      "changeEmail": "Change email",
+      "resend": "Resend code",
+      "resendOk": "Reset code sent again.",
+      "passwordTitle": "Set a new password",
+      "passwordSubtitle": "Choose a new password for your account.",
+      "newPasswordLabel": "New password",
+      "confirmPasswordLabel": "Confirm password",
+      "passwordPlaceholder": "At least 8 characters",
+      "resetSubmit": "Reset password",
+      "resetError": "Couldn't reset the password. Please try again.",
+      "doneTitle": "Password changed",
+      "doneSubtitle": "Your password has been updated. Please sign in again with the new password.",
+      "goToLogin": "Sign in"
+    },
+    "verifyEmail": {
+      "title": "Verify your email to continue",
+      "subtitle": "We sent a verification code to {email}. Enter it to activate your account.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "Enter the code from the email",
+      "submit": "Verify",
+      "resend": "Resend code",
+      "resendOk": "Verification code sent again.",
+      "codeInvalid": "The code contains digits only",
+      "success": "Email verified. You can continue.",
+      "error": "The code is wrong or expired. Please try again."
+    },
+    "mustChange": {
+      "title": "Change your password to continue",
+      "subtitle": "Your account is using a temporary password set by an administrator. Set a new password to get started.",
+      "currentLabel": "Current password",
+      "currentPlaceholder": "Enter the password you were given",
+      "newLabel": "New password",
+      "newPlaceholder": "At least 8 characters",
+      "confirmLabel": "Confirm new password",
+      "confirmPlaceholder": "Re-enter the new password",
+      "submit": "Change password",
+      "success": "Password changed successfully.",
+      "error": "Could not change the password. Please try again."
     }
   },
   "errors": {
@@ -500,7 +555,9 @@
     "services": {
       "title": "Pick the package that fits where you are",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
-      "viewAll": "See all packages",
+      "viewAll": "Explore",
+      "referenceLabel": "See:",
+      "referenceLink": "Pricing",
       "viewAllMobile": "Explore",
       "ownedLabel": "Your package - {count} uses left",
       "openPackage": "View design plans",
@@ -791,14 +848,17 @@
       "notFound": "Template not found",
       "notFoundHint": "It may have been removed. Go back to the library to pick another one.",
       "note": "Reference template curated by BuildX. Actual results depend on your project details.",
-      "articleNote": "This article is for reference. Contact BuildX for advice on your specific project."
+      "articleNote": "This article is for reference. Contact BuildX for advice on your specific project.",
+      "loginRequiredTitle": "Sign in to view template details",
+      "loginRequiredHint": "This template needs a BuildX account to open its images and details. Each open uses one lookup credit.",
+      "loginCta": "Sign in"
     },
     "foundation": {
       "eyebrow": "Core handbook",
-      "kicker": "Read this before you build",
-      "title": "The essential handbook for building a house",
-      "description": "Foundational knowledge to help you control quality, cost and schedule from groundbreaking to handover.",
-      "start": "Start reading",
+      "kicker": "BuildX handbook",
+      "title": "Understand every step of building a house",
+      "description": "From the structure to the finishing, explore the knowledge that puts you in control of your build.",
+      "start": "Explore the handbook",
       "stagesTitle": "3 key stages of building a house",
       "stepLabel": "Step {order}",
       "stageHeading": "{stage} handbook",
@@ -821,12 +881,14 @@
       }
     },
     "articles": {
-      "title": "All articles",
+      "eyebrow": "BuildX handbook",
+      "title": "Explore building knowledge",
+      "subtitle": "Useful insights to stay in control at every step of building your home.",
       "all": "All",
       "searchPlaceholder": "Search articles…",
       "resultCount": "{count} results",
       "clearFilters": "Clear filters",
-      "showMore": "Show more",
+      "showMore": "Show more articles",
       "loading": "Loading",
       "readMore": "Read more",
       "readingTime": "{minutes} min read",
@@ -871,19 +933,19 @@
       "badge": "Template library",
       "close": "Close",
       "title": "What would you like to do with this template?",
-      "subtitle": "“{name}” — create a project option from it, save it for later, or ask an architect first.",
+      "subtitle": "“{name}” — use it as a reference, save it for later, or ask an architect first.",
       "later": "Maybe later, keep browsing",
       "create": {
         "imageAlt": "The design template you are viewing",
         "badge": "Primary choice",
-        "title": "Create an option from this template",
-        "subtitle": "Use this template as inspiration and input for your project.",
+        "title": "Design now",
+        "subtitle": "Start a new design & estimate project without using this template as input data.",
         "p1": "Continue into project creation",
         "p2": "Design & estimate for your actual lot",
         "p3": "Receive completed drawings → ready to implement",
         "valuePlan": "Uses a credit from your {plan} plan",
-        "valueFree": "1 free design remaining",
-        "action": "Create from this template"
+        "valueFree": "Design plans from 399,000 VND",
+        "action": "Design now"
       },
       "save": {
         "imageAlt": "Design template saved to your account",
@@ -891,7 +953,7 @@
         "subtitle": "Save it to your account and come back later.",
         "p1": "Appears in your Saved templates",
         "p2": "Compare templates you have saved",
-        "p3": "Create an option or ask an architect later",
+        "p3": "Start a new design or ask an architect later",
         "value": "Free · does not use a lookup credit",
         "action": "Save template",
         "savedAction": "Saved",
@@ -903,7 +965,7 @@
         "subtitle": "A BuildX architect can advise whether this template suits you.",
         "p1": "Does it fit your lot & needs?",
         "p2": "What should change · cost & layout guidance",
-        "p3": "After consulting: use this template or choose another",
+        "p3": "After consulting: start a new design or choose another template",
         "value": "Free · BuildX architect",
         "action": "Ask an architect 1:1"
       }
@@ -934,15 +996,15 @@
       "close": "Close",
       "titlePlan": "You have used all {total} template lookups in your {plan} plan",
       "titleFree": "You have used all {total} template lookups today",
-      "description": "Upgrade or add more lookups to keep browsing, or use “{name}” now to create an option for your project.",
+      "description": "Upgrade or add more lookups to keep browsing, or start a new design & estimate project.",
       "chip1": "Modern townhouse",
       "chip2": "Garden villa",
       "chip3": "Single-storey house",
       "more": "Get more lookups",
-      "useSelected": "Use selected template",
+      "useSelected": "Design now",
       "consult": "Ask an architect",
-      "footnoteDay": "You are out of lookups today. You can still use the selected template or ask an architect; free lookups reset on the next day.",
-      "footnoteMonth": "You are out of lookups for this plan period. Add more benefits to continue, or use the selected template now.",
+      "footnoteDay": "You are out of lookups today. You can still start a new design or ask an architect; free lookups reset on the next day.",
+      "footnoteMonth": "You are out of lookups for this plan period. Add more benefits to continue, or start a new design project.",
       "later": "Maybe later",
       "returnToLibrary": "Back to Template library"
     },
@@ -983,7 +1045,7 @@
           "p1": "No drawings → Design & estimate",
           "p2": "Receive drawings / dossier",
           "p3": "Project ready to implement",
-          "value": "1 free design remaining",
+          "value": "Design plans from 399,000 VND",
           "action": "Create project now"
         },
         "architect": {
@@ -1103,7 +1165,7 @@
           "p1": "Upload a lot / existing-site photo",
           "p2": "BuildX analyzes the current site",
           "p3": "Design & estimate → receive drawings",
-          "value": "Start from your site photo",
+          "value": "Design plans from 399,000 VND",
           "action": "Photograph & create project"
         },
         "browse": {
@@ -1160,6 +1222,7 @@
       "descriptionLabel": "Description (optional)",
       "descriptionHint": "Private notes about this project — only you can see them.",
       "descriptionPlaceholder": "Add a description (optional)...",
+      "needPlan": "You need a design plan to create a construction dossier. Please pick a plan on the Pricing page.",
       "submit": "Create project"
     },
     "input": {
@@ -1167,8 +1230,16 @@
         "title": "Additional details",
         "empty": "Pick a building type to see the matching options"
       },
+      "inactiveSuffix": "(Inactive)",
+      "configChanged": "The building type settings just changed. Please choose the highlighted fields again.",
+      "typeChange": {
+        "title": "Change building type?",
+        "description": "The new building type is set up differently, so these values are no longer valid and will be cleared from the form: {fields}.",
+        "confirm": "Change and clear",
+        "cancel": "Keep current type"
+      },
       "landPhoto": {
-        "label": "Plot photo",
+        "label": "Site photo",
         "labelApartment": "Current apartment floor plan",
         "hint": "Photograph or upload the plot (boundaries clearly visible, well lit). AI detects the shape and proportions — no dimensions needed.",
         "hintApartment": "Upload the apartment floor plan (developer drawing) so AI can detect the rooms.",
@@ -1583,6 +1654,10 @@
   },
   "account": {
     "title": "My account",
+    "pending": {
+      "title": "Coming soon",
+      "description": "This section will be available once the system is ready. Thanks for your patience."
+    },
     "info": {
       "title": "Account information",
       "name": "Full name",
@@ -1602,6 +1677,10 @@
     },
     "projects": {
       "title": "My projects",
+      "pendingNotice": {
+        "title": "The estimate creation flow (3 steps) isn't connected yet",
+        "description": "This list only shows real estimates saved on the system. Projects created in the input step aren't persisted yet, so they don't appear here — they will once the creation step is wired to the API."
+      },
       "step": "Step {step}/3",
       "empty": {
         "title": "No projects yet",
@@ -1773,6 +1852,7 @@
       "title": "1:1 consultation history",
       "description": "Your upcoming session, architect notes and previous consultations.",
       "quota": "1:1 consultations: {count} credit remaining in your {plan} · the first session is always free · reschedule or cancel at least 24 hours ahead to restore the credit.",
+      "freeNote": "1:1 consultation is free — book with an architect anytime.",
       "planTier": {
         "basic": "the BASIC plan",
         "advanced": "the PLUS plan",
@@ -1893,9 +1973,10 @@
       "pro": "Go all in"
     },
     "ctaBand": {
-      "title": "Start designing your home today",
-      "subtitle": "Pick the package that fits and get advice from the BuildX team.",
-      "action": "Sign up now"
+      "title": "Not sure which plan to pick? Get free advice",
+      "subtitle": "Call our hotline or ask the AI assistant for the plan that fits your project.",
+      "call": "Call {hotline}",
+      "chat": "Chat with the AI assistant"
     },
     "gift": {
       "badge": "Special gift",
@@ -2026,6 +2107,7 @@
     "card": {
       "experience": "{years} years of experience",
       "projects": "{count}+ projects",
+      "company": "at {company}",
       "viewProfile": "View profile"
     },
     "rail": {
@@ -2033,6 +2115,7 @@
     },
     "profile": {
       "reviews": "({count} reviews)",
+      "company": "at {company}",
       "experience": "{years}+ years of experience",
       "specialtyPrefix": "Expertise: {value}",
       "bookCta": "Book a consultation",
@@ -2094,6 +2177,10 @@
     }
   },
   "admin": {
+    "mockApiNotice": {
+      "title": "Not connected to the API",
+      "description": "This screen uses sample data (stored in the browser), not the real API yet."
+    },
     "shell": {
       "brandSuffix": "Admin area",
       "title": "Administration",
@@ -2124,7 +2211,8 @@
       "people": "Customers",
       "library": "Library",
       "catalog": "Construction catalogue",
-      "packages": "Plans"
+      "packages": "Plans",
+      "access": "Staff & access"
     },
     "charts": {
       "viewChart": "View chart",
@@ -2144,14 +2232,16 @@
     },
     "nav": {
       "dashboard": "To-do",
-      "templates": "2D plan templates",
+      "templates": "Template library",
+      "styles": "Styles",
+      "constructionScopes": "Construction scopes",
       "articles": "Articles",
       "consultants": "Architects",
-      "bookings": "Consultations",
+      "bookings": "Consultation requests",
       "invitations": "Invitations & surveys",
       "inspections": "Supervised projects",
       "customers": "Customer accounts",
-      "planTable": "Design plans",
+      "planTable": "Design & supervision plans",
       "transactions": "Transaction ledger",
       "orders": "Orders & reconciliation",
       "discounts": "Discount codes",
@@ -2167,13 +2257,16 @@
       "supervisionStages": "Supervision stages",
       "templates3d": "3D interior templates",
       "templateViews": "Template view limit",
-      "articleLabels": "Article labels",
+      "articleLabels": "News categories",
       "testimonials": "Testimonials",
       "handbookSteps": "Handbook steps",
       "costGroups": "Cost groups",
       "costItems": "Cost items",
       "materialPrices": "Regional material prices",
-      "estimateAdvice": "Advisory content"
+      "estimateAdvice": "Advisory content",
+      "roles": "Roles & permissions",
+      "staff": "Staff accounts",
+      "assignments": "Supervision assignments"
     },
     "actions": {
       "create": "Add new",
@@ -2194,8 +2287,10 @@
       "discard": "Discard changes",
       "keepEditing": "Keep editing",
       "discardConfirmTitle": "Close without saving?",
+      "confirmSaveTitle": "Save these changes?",
       "discardConfirmBody": "Everything you just typed in this drawer will be lost.",
       "view": "View details",
+      "more": "Actions",
       "switchStatus": "Change status",
       "switchStatusTitle": "Change status of “{name}”?",
       "switchStatusBody": "{current} → {next}"
@@ -2203,13 +2298,15 @@
     "feedback": {
       "created": "Record added.",
       "saved": "Saved. The public site is updated.",
-      "deleted": "Record deleted."
+      "deleted": "Record deleted.",
+      "apiError": "The server returned an error. Please try again."
     },
     "table": {
       "actions": "Actions",
       "searchPlaceholder": "Search this table…",
       "empty": "No records yet.",
       "noSearchResult": "No record matches \"{query}\".",
+      "noFilterResult": "No record matches the selected filters.",
       "clearSearch": "Clear search",
       "total": "{total} records"
     },
@@ -2221,6 +2318,79 @@
       "sectionIndex": "Section {index}",
       "name": "Full name",
       "maxLength": "At most {max} characters."
+    },
+    "rbacStaff": {
+      "title": "Staff accounts",
+      "description": "Create staff accounts, assign roles, lock or force logout. The system generates the password and shows it only once at creation.",
+      "noName": "(No name)",
+      "noRoles": "No roles",
+      "mustChangePassword": "First password not changed",
+      "passwordChanged": "Password changed",
+      "columns": {
+        "name": "Full name",
+        "email": "Email",
+        "status": "Status",
+        "roles": "Roles",
+        "firstLogin": "First login"
+      },
+      "status": {
+        "Active": "Active",
+        "Locked": "Locked"
+      },
+      "actions": {
+        "manageRoles": "Roles",
+        "lock": "Lock account",
+        "unlock": "Unlock",
+        "forceLogout": "Force logout",
+        "revokeRole": "Revoke role"
+      },
+      "form": {
+        "passwordNotice": "The system generates the password and shows it once after creation. No password entry needed.",
+        "email": "Email",
+        "emailPlaceholder": "staff@bmt.local",
+        "lastName": "Last name",
+        "firstName": "First name",
+        "roles": "Roles",
+        "rolesPlaceholder": "Pick one or more staff roles",
+        "rolesHint": "Only staff roles are listed; the Customer role cannot be assigned to staff.",
+        "rolesRequired": "Pick at least one role."
+      },
+      "password": {
+        "title": "Password for the new account",
+        "warning": "This password is shown ONCE. Copy it and hand it to the staff member through a private channel now; once you close this box it cannot be retrieved.",
+        "label": "Generated password",
+        "copy": "Copy",
+        "copied": "Password copied.",
+        "copyFailed": "Could not copy. Please select and copy it manually.",
+        "saved": "I have saved the password"
+      },
+      "confirm": {
+        "lockTitle": "Lock account “{name}”?",
+        "lockBody": "The account is locked immediately and all sessions are revoked. Roles and assignments are kept.",
+        "unlockTitle": "Unlock account “{name}”?",
+        "unlockBody": "The staff member can sign in again with the same roles and assignments as before the lock.",
+        "forceLogoutTitle": "Force logout “{name}”?",
+        "forceLogoutBody": "Revoke all open sessions so new permissions take effect immediately. The account stays active, not locked.",
+        "revokeTitle": "Revoke role “{role}”?",
+        "revokeBody": "If after revoking the staff member still supervises packages but loses the completion permission, the system will reject it."
+      },
+      "rolesDrawer": {
+        "hint": "A staff member's permissions are the union of all roles they hold.",
+        "current": "Current roles",
+        "add": "Add a role",
+        "addPlaceholder": "Pick a role to add",
+        "addButton": "Add",
+        "noneLeft": "No roles left to add.",
+        "noRoles": "This staff member holds no roles yet."
+      },
+      "feedback": {
+        "locked": "Account locked and all sessions revoked.",
+        "lockedWithAssignments": "Account locked. This person still supervises {count} package(s) that need reassigning.",
+        "unlocked": "Account unlocked.",
+        "forcedLogout": "All sessions for the account have been revoked.",
+        "roleGranted": "Role “{role}” assigned.",
+        "roleRevoked": "Role “{role}” revoked."
+      }
     },
     "planTier": {
       "basic": "Basic",
@@ -2753,7 +2923,6 @@
       "scanUrl": "Contract / agreement scan",
       "person": "Contact person",
       "phone": "Phone",
-      "opsNote": "Operations note",
       "noReviews": "No reviews yet",
       "detailDescription": "Admin profile of the contractor. Contractor, project, legal and partnership verification are independent statuses.",
       "info": "Contractor",
@@ -2848,7 +3017,14 @@
       "historyBy": "By",
       "historyGroup": "Area",
       "historyAction": "Action",
-      "maxUpperFloors": "Max upper floors (excluding ground)"
+      "provinceRequired": "Choose a province / city.",
+      "wardRequired": "Choose a ward / commune.",
+      "openInvitations": "Open the invitation list",
+      "coordsInvalid": "Coordinates need updating",
+      "licenseExpiredWarning": "The business licence is no longer valid — the legal profile is no longer shown as verified. Update it with valid details and review it again.",
+      "delete": "Delete contractor",
+      "deleteConfirm": "Permanently delete contractor {name}?",
+      "deletedToast": "Contractor deleted."
     },
     "discountValidity": {
       "active": "Running",
@@ -2900,6 +3076,274 @@
       "usedCount": "Uses so far",
       "noteHint": "Visible to admins only."
     },
+    "bmtPlans": {
+      "description": "Design plans (sold monthly / yearly) and supervision plans (sold per construction site). Editing a plan edits its draft — the website only changes when you Publish. Purchased plans keep the version locked at purchase.",
+      "allKinds": "All plan types",
+      "allSaleStates": "All sale statuses",
+      "kinds": {
+        "Design": "Design plan",
+        "Supervision": "Supervision plan"
+      },
+      "publishConfirmTitle": "Publish the draft of “{name}”?",
+      "publishConfirmBody": "The draft becomes the public version and the plan goes on sale. Periods / packages customers already bought are unchanged.",
+      "stopConfirmTitle": "Stop selling “{name}”?",
+      "stopConfirmBody": "The plan disappears from the website and no new orders can be created. Purchased plans keep their benefits and term. Stopped plans cannot be put back on sale yet.",
+      "publish": "Publish",
+      "stopSelling": "Stop selling",
+      "published": "Draft published.",
+      "stopped": "Plan stopped.",
+      "name": "Plan name",
+      "code": "Plan code",
+      "planId": "Plan ID",
+      "kind": "Plan type",
+      "saleState": "Sale status",
+      "saleStates": {
+        "NotPublished": "Not published",
+        "OnSale": "On sale",
+        "Stopped": "Stopped"
+      },
+      "hasDraft": "Unpublished draft #{number}",
+      "revision": "Public version",
+      "revisionNumber": "Version #{number}",
+      "publishedBlock": "Published version",
+      "draftBlock": "Draft",
+      "noRevision": "None.",
+      "unlimited": "Unlimited",
+      "limited": "Limited",
+      "limitValue": "{limit} uses",
+      "serviceDescription": "Service description",
+      "descriptionField": "Plan description",
+      "consultationText": "Consultation text",
+      "offers": "Purchase options & price (VND)",
+      "offerKeys": {
+        "Month": "Monthly",
+        "Year": "Yearly",
+        "ConstructionSite": "Per construction site"
+      },
+      "displayBenefits": "Display benefits (on / off)",
+      "on": "On",
+      "off": "Off",
+      "noBenefits": "No benefits yet.",
+      "stoppedNote": "This plan is stopped: you can still save a draft but it cannot be published again yet.",
+      "draftNote": "Saving overwrites the whole draft; the website keeps showing the published version until you Publish from the plan row.",
+      "codeHint": "Must be unique and cannot change after creation.",
+      "kindHint": "Chosen once at creation, cannot change later.",
+      "serviceDescriptionHint": "Required to publish. Display only, locked per order — creates no uses or counters.",
+      "consultationHint": "Free text describing the offline consultation service; creates no consultation uses or levels.",
+      "priceRule": "Price must be a whole VND amount greater than 0.",
+      "quotaSection": "Usage-based benefits",
+      "basicSection": "Basic information",
+      "priceQuotaSection": "Pricing & limits",
+      "priceRow": "Price",
+      "optional": "optional",
+      "yearOptionalPlaceholder": "Leave blank if not sold yearly",
+      "quotaHint": "Enter the monthly quota (and yearly if sold yearly), or tick ∞ for unlimited. An empty cell means the plan does not include that benefit. Yearly is not 12× monthly automatically.",
+      "limitRule": "Enter at least 1 use, or choose unlimited.",
+      "limitPlaceholder": "Uses",
+      "displayBenefitsHint": "Shared by month and year. Not added or switched off both mean no access. A design plan needs at least one benefit (usage-based or on / off) to be published.",
+      "noBooleanDefinitions": "The system catalogue has no on / off benefits yet.",
+      "displayText": "Display text",
+      "sortOrderRule": "Order must be a whole number.",
+      "supervisionNote": "Supervision plans use no benefit catalogue and no consultation text; publishing needs a name, price and service description.",
+      "snapshotNote": "Existing orders keep the plan version at order time — published changes apply to later purchases only.",
+      "highlightedBadge": "Highlighted",
+      "cardSection": "Plan card presentation",
+      "cardNote": "Cover image, highlight label and gift shown on the plan card on the website. All optional.",
+      "coverImage": "Cover image",
+      "coverImageHint": "Paste an image URL from the system image store; leave empty if none.",
+      "isHighlighted": "Highlighted plan",
+      "highlightLabel": "Highlight label",
+      "highlightLabelHint": "Text shown on the badge when the plan is highlighted (e.g. Best seller).",
+      "giftDescription": "Gift description",
+      "giftConditions": "Gift conditions"
+    },
+    "bmtCommerce": {
+      "views": {
+        "orders": "Payment orders",
+        "purchases": "Granted packages"
+      },
+      "ordersDescription": "Every customer plan order: pending, underpaid, expired, canceled, paid. Status is matched by the system from bank transactions — lookup only, no manual confirmation.",
+      "purchasesTitle": "Granted packages",
+      "purchasesDescription": "One row per purchase that was granted a package. Open details for term, usage, history and cancel / complete / unassign actions (requires the matching permission).",
+      "transactionsDescription": "Every SePay transaction received by the system, including ones not matched to an order — read-only, no manual matching.",
+      "allKinds": "All plan types",
+      "kinds": {
+        "Design": "Design",
+        "Supervision": "Supervision"
+      },
+      "offerKeys": {
+        "Month": "Monthly",
+        "Year": "Yearly",
+        "ConstructionSite": "Per construction site"
+      },
+      "allOrderStates": "All order states",
+      "orderStates": {
+        "Pending": "Awaiting payment",
+        "PartiallyPaid": "Underpaid",
+        "Paid": "Paid",
+        "Expired": "Expired",
+        "Canceled": "Canceled"
+      },
+      "paymentCodePlaceholder": "Search transfer code",
+      "createdFrom": "Created from",
+      "createdTo": "to",
+      "paymentCode": "Transfer code",
+      "orderingDiscrepancy": "Ordering discrepancy",
+      "orderingDiscrepancyHint": "A late payment reversed the order against an already granted design purchase — handle outside the system.",
+      "buyer": "Buyer",
+      "unknownBuyer": "Order not identified",
+      "plan": "Plan",
+      "kind": "Plan type",
+      "offer": "Purchase option",
+      "price": "Price",
+      "received": "Received",
+      "eligible": "Eligible amount",
+      "remaining": "Outstanding",
+      "extraReceived": "Overpaid",
+      "transactionCount": "Matched transactions",
+      "orderState": "Order status",
+      "dispositions": {
+        "Activated": "Package granted",
+        "SupersededBeforeActivation": "Superseded before activation"
+      },
+      "allDispositions": "All grant results",
+      "disposition": "Grant result",
+      "createdAt": "Created",
+      "expiresAt": "Payment deadline",
+      "paidAt": "Fully paid at",
+      "canceledAt": "Canceled at",
+      "expiredAt": "Expired at",
+      "orderId": "Order ID",
+      "orderBlock": "Order",
+      "amountBlock": "Amounts",
+      "fulfillmentBlock": "Grant",
+      "fulfilledAt": "Granted at",
+      "appliedPaidAt": "Paid time used for grant",
+      "transactionsBlock": "Bank transactions matched to this order",
+      "eventsBlock": "Payment history",
+      "eventAt": "Time",
+      "eventKind": "Event",
+      "eventKinds": {
+        "Created": "Created",
+        "Canceled": "Canceled",
+        "Expired": "Expired",
+        "Paid": "Fully paid",
+        "Fulfilled": "Granted",
+        "OrderingDiscrepancy": "Ordering discrepancy"
+      },
+      "actor": "By",
+      "system": "System",
+      "allEffectiveStates": "All effective states",
+      "effectiveState": "Effective state",
+      "effectiveStates": {
+        "Active": "Active",
+        "Expired": "Expired",
+        "CanceledByStaff": "Canceled by staff",
+        "Superseded": "Superseded",
+        "SupersededBeforeActivation": "Superseded before activation",
+        "Unassigned": "Not assigned to a site",
+        "ExpiredUnassigned": "Assignment deadline passed",
+        "Assigned": "Assigned to a site",
+        "Completed": "Completed"
+      },
+      "constructionSite": "Construction site",
+      "purchaseBlock": "Granted package",
+      "periodBlock": "Design period",
+      "grantBlock": "Supervision package",
+      "lifecycleState": "State",
+      "periodStates": {
+        "Active": "Active",
+        "CanceledByStaff": "Canceled by staff",
+        "Superseded": "Superseded"
+      },
+      "grantStates": {
+        "Unassigned": "Not assigned",
+        "Assigned": "Assigned",
+        "CanceledByStaff": "Canceled by staff",
+        "Completed": "Completed"
+      },
+      "startsAt": "Starts",
+      "endsAt": "Scheduled end",
+      "closedAt": "Closed at",
+      "quotas": "Uses",
+      "quotaUsage": "{used} used, {reserved} reserved / {limit}",
+      "unlimited": "unlimited",
+      "grantedAt": "Granted at",
+      "assignmentDeadline": "Site assignment deadline",
+      "firstAssignedAt": "First assigned",
+      "assignedAt": "Currently assigned",
+      "historyBlock": "Package history",
+      "historyKinds": {
+        "Created": "Order created",
+        "Canceled": "Order canceled",
+        "Expired": "Order expired",
+        "Paid": "Fully paid",
+        "Fulfilled": "Granted",
+        "OrderingDiscrepancy": "Ordering discrepancy",
+        "Cancel": "Package canceled",
+        "Restore": "Restored (legacy)",
+        "Complete": "Completed",
+        "Reopen": "Reopened",
+        "Unassign": "Removed from site",
+        "FirstAssigned": "First assigned",
+        "CurrentAssigned": "Currently assigned"
+      },
+      "reason": "Reason",
+      "lifecycle": {
+        "cancel": "Cancel package",
+        "cancelTitle": "Cancel this package?",
+        "cancelBody": "This is final and cannot be undone. No refund, used uses are not returned; canceling a supervision package ends its assignment.",
+        "cancelDone": "Package canceled.",
+        "complete": "Complete",
+        "completeTitle": "Mark this supervision package as completed?",
+        "completeBody": "The package stays attached to and keeps its slot on the site. It can be reopened later.",
+        "completeDone": "Supervision package completed.",
+        "reopen": "Reopen",
+        "reopenTitle": "Reopen this supervision package?",
+        "reopenBody": "The package returns to Assigned.",
+        "reopenDone": "Supervision package reopened.",
+        "unassign": "Remove from site",
+        "unassignTitle": "Remove this supervision package from its site?",
+        "unassignBody": "Only possible before the original assignment deadline. The package returns to Not assigned, keeping its owner and deadline; the customer reassigns it.",
+        "unassignDone": "Package removed from the site."
+      },
+      "filteredByOrder": "Showing transactions of order {orderId}.",
+      "allMatchStates": "All match states",
+      "providerIdPlaceholder": "Search SePay transaction ID",
+      "occurredFrom": "Occurred from",
+      "occurredTo": "to",
+      "occurredAt": "Occurred",
+      "receivedAt": "Received by system",
+      "providerId": "SePay ID",
+      "amount": "Amount",
+      "transferContent": "Transfer content",
+      "codeLine": "Code: {code}",
+      "matchState": "Order match",
+      "matchStates": {
+        "Pending": "Awaiting match",
+        "Matched": "Matched",
+        "Unmatched": "Not matched",
+        "IgnoredDirection": "Ignored (outgoing)",
+        "ConnectionMismatch": "Wrong receiving account"
+      },
+      "processingState": "Processing",
+      "processingStates": {
+        "Pending": "Pending",
+        "Retry": "Retrying",
+        "Completed": "Done"
+      },
+      "direction": "Direction",
+      "directions": {
+        "in": "Incoming",
+        "out": "Outgoing"
+      },
+      "code": "Detected payment code",
+      "referenceCode": "Reference code",
+      "receivedAccount": "Receiving account",
+      "receivedGateway": "Bank",
+      "receivedSubAccount": "Sub-account",
+      "attempts": "{count} processing attempts"
+    },
     "supervisionPackages": {
       "description": "The three construction-management options on the Supervision plans page. Edit only — the plan picker and the dashboard refer to exactly these three. New prices apply to new orders only.",
       "tier": "Plan",
@@ -2915,6 +3359,210 @@
       "priceRule": "Price must be 0 or more.",
       "inspectionsRule": "Inspections must be a whole number from 1."
     },
+    "contractorsAdmin": {
+      "description": "Manage contractor profiles: info, capability (building type × scope), contact, legal. New profiles are Hidden; going Visible needs name + address + coordinates + ≥1 building type + ≥1 scope.",
+      "name": "Contractor name",
+      "address": "Address",
+      "statusLabel": "Status",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "hide": "Hide profile",
+      "show": "Show profile",
+      "createHint": "Create with a name first, then open Edit to fill in the full profile.",
+      "requiredForVisible": "Required to be publicly visible.",
+      "ratingHint": "Admin-entered score, 0–5. Leave both score and count empty to hide the rating.",
+      "contactNote": "Contact details are admin-only and never shown on the public site.",
+      "sections": {
+        "general": "General",
+        "location": "Address & coordinates",
+        "capability": "Capability",
+        "contact": "Contact (internal)",
+        "legal": "Legal"
+      },
+      "contractorType": "Contractor type",
+      "shortDescription": "Short description",
+      "introduction": "Introduction",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "serviceAreaText": "Service area",
+      "buildingTypes": "Building types",
+      "scopes": "Construction scopes",
+      "foundedYear": "Founded year",
+      "architectCount": "Architects",
+      "engineerCount": "Engineers",
+      "surveyHours": "Survey within (hours)",
+      "warrantyMonths": "Warranty (months)",
+      "acceptingProjects": "Accepting projects",
+      "rating": "Rating",
+      "ratingCount": "Rating count",
+      "contactPerson": "Contact person",
+      "contactPhone": "Contact phone",
+      "contactEmail": "Contact email",
+      "legalName": "Legal name",
+      "taxCode": "Tax code",
+      "representative": "Representative",
+      "registeredAddress": "Registered address",
+      "industry": "Industry",
+      "deleteConfirmTitle": "Delete contractor \"{name}\"?",
+      "deleteConfirmBody": "Deletes the profile, projects, legal info and images of this contractor. This cannot be undone.",
+      "projects": {
+        "title": "Portfolio projects",
+        "hint": "Each project needs one building type, one scope and at least one image.",
+        "add": "Add project",
+        "editTitle": "Edit project",
+        "empty": "No projects yet.",
+        "name": "Project name",
+        "buildingType": "Building type",
+        "scope": "Scope",
+        "images": "Project images",
+        "imagesHint": "JPG/PNG/WebP, up to 10 MB each.",
+        "upload": "Upload",
+        "needImage": "At least one image is required.",
+        "areaM2": "Area (m²)",
+        "floorCount": "Floors",
+        "completedYear": "Completed year",
+        "locationText": "Location",
+        "roleText": "Role",
+        "mainWork": "Main work",
+        "deleteConfirmTitle": "Delete project \"{name}\"?"
+      }
+    },
+    "constructionScopes": {
+      "description": "Construction scope catalog shared by contractor profiles and portfolio projects. Names must be unique; an \"Inactive\" scope can't be newly attached but keeps existing links. A scope in use can't be deleted.",
+      "name": "Scope name",
+      "descriptionLabel": "Description",
+      "sortOrder": "Order",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deleteConfirmTitle": "Delete scope \"{name}\"?",
+      "deleteConfirmBody": "Can only be deleted when no contractor or project uses this scope."
+    },
+    "estimateCatalog": {
+      "groupArchitecture": "Architecture",
+      "groupInterior": "Interior",
+      "buildingTypesDescription": "Building types used by Create estimate and the template library. Each type separately enables floor choice, tum choice and the two style groups. Saving only affects new estimates; existing estimates keep their configuration.",
+      "architectureDescription": "Architecture styles customers pick when creating an estimate. Each style has a name and one image; assign styles to building types on the Building types screen.",
+      "interiorDescription": "Interior styles customers pick when creating an estimate. Each style has a name and one image; assign styles to building types on the Building types screen.",
+      "buildingTypeName": "Building type name",
+      "floors": "Floors",
+      "tum": "Tum",
+      "architectureStyles": "Architecture styles",
+      "interiorStyles": "Interior styles",
+      "applies": "Applies",
+      "notApplies": "Not applicable",
+      "enabledCount": "On · {count} styles",
+      "filter": {
+        "all": "All",
+        "yes": "Applies",
+        "no": "Not applicable"
+      },
+      "floorGround": "Ground floor",
+      "floorUpper": "Ground + {count} floors",
+      "floorsEnabled": "Let customers choose the number of floors",
+      "floorsEmpty": "Floor choice is on — add at least one floor count.",
+      "tumEnabled": "Let customers choose with / without tum",
+      "tumHint": "Tum is an on / off flag only, with no list.",
+      "architectureEnabled": "Let customers choose an architecture style",
+      "architectureEmpty": "Architecture styles are on — assign at least one style.",
+      "interiorEnabled": "Let customers choose an interior style",
+      "interiorEmpty": "Interior styles are on — assign at least one style.",
+      "keptWhileDisabled": "Turning a group off keeps its list, so it comes back when turned on again. Customers only see groups that are on.",
+      "versionNote": "The catalogue is versioned: every save creates a new version for new estimates. If someone else just saved, you will get a conflict — close the drawer and reopen it to load the latest.",
+      "styleName": "Style name",
+      "styleImage": "Illustration",
+      "styleImageNote": "JPG, PNG or WebP, up to 5 MB. There is no upload button yet: paste the https URL of an image already uploaded to storage.",
+      "styleAssignHint": "Only building types with this group enabled are listed. To add a type whose group is off, enable it on the Building types screen.",
+      "styleAssignLabel": "Applies to building types",
+      "styleAssignPlaceholder": "Select building types",
+      "assignedTypes": "Assigned to building types",
+      "typeGroupOff": "{name} (group off)",
+      "httpsUrl": "Must be a URL starting with https://, up to 2048 characters."
+    },
+    "library": {
+      "libraryTitle": "Template library",
+      "libraryDescription": "The library's 2D and 3D templates. Filter by kind above the table. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
+      "kindAll": "All",
+      "kind2d": "2D drawings",
+      "kind3d": "3D interior",
+      "description2d": "2D drawing templates of the library. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
+      "description3d": "3D drawing templates of the library. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
+      "publishFlowNote": "A new template is a draft customers cannot see. Open \"Manage versions\" to add images, pick a cover and publish.",
+      "createNote": "Drafts may be incomplete. Publishing requires: name, drawing kind, all three dimensions, building type (plus floors / tum if that type enables them), at least one image and a cover.",
+      "createImagesTitle": "Template images (optional)",
+      "createImagesHint": "Paste https URLs of uploaded images (JPG, PNG, WebP) and pick a cover. You can add or reorder them later under Images & files.",
+      "addImage": "Add image",
+      "createImagesPartial": "Template created, but {count} image(s) couldn't be attached. Open Images & files to add them again.",
+      "name": "Template name",
+      "untitled": "(Untitled)",
+      "draftHint": "May be empty for a draft; required to publish.",
+      "drawingKind": "Drawing kind",
+      "noDrawingKind": "2D / 3D not set",
+      "widthM": "Width",
+      "lengthM": "Length",
+      "areaM2": "Area",
+      "areaHint": "Entered separately; does not have to equal width × length.",
+      "decimal": "{field} must be greater than 0 with at most two decimals (e.g. 5.25).",
+      "buildingType": "Building type",
+      "floorCount": "Floors",
+      "tum": "Tum",
+      "tumYes": "With tum",
+      "tumNo": "Without tum",
+      "notApplies": "Not applicable",
+      "description": "Description",
+      "catalogUnavailable": "Could not load building types (requires the estimate catalogue permission).",
+      "pinnedTypeNote": "The pinned building type is no longer in the current catalogue. Editing only name, description or dimensions keeps the old classification; changing it requires the current catalogue.",
+      "classification": "Classification",
+      "dimensions": "Dimensions",
+      "currentVersion": "Current version",
+      "notPublished": "Not published",
+      "versionN": "Version {number}",
+      "draft": "Draft",
+      "drafts": "Drafts",
+      "visibility": "Visibility",
+      "shown": "Visible",
+      "hidden": "Hidden",
+      "visibilityNote": "Hiding does not change versions; people who already have access keep it.",
+      "manageVersions": "Manage versions",
+      "version": "Version",
+      "current": "Current",
+      "readOnly": "Read-only",
+      "assets": "Assets",
+      "modifiedAt": "Updated",
+      "versionsHint": "Editing the current version corrects it in place (same version number). Superseded versions are read-only. Only drafts can be deleted; hide published templates instead.",
+      "newDraft": "New draft from current",
+      "newDraftConfirm": "Create a new draft from the current version?",
+      "newDraftNote": "The draft copies details, classification, images, order and cover. Customers keep seeing the current version until you publish.",
+      "draftCreated": "Draft created.",
+      "publish": "Publish",
+      "publishConfirm": "Publish this draft as a new version?",
+      "publishNote": "Customers will see the new version; the previous one is kept and locked. The template's visibility does not change.",
+      "published": "New version published.",
+      "deleteDraftConfirm": "Delete this draft?",
+      "editCurrentNote": "You are editing the version customers see: changes apply immediately without a new version. The current version must stay complete.",
+      "manageAssets": "Images & files",
+      "readOnlyVersion": "This version has been superseded — view only.",
+      "noAssets": "No images or files yet.",
+      "asset": "Asset",
+      "kindImage": "Image",
+      "kindAttachment": "Attachment",
+      "cover": "Cover",
+      "setCover": "Set as cover",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "detach": "Remove from version",
+      "detachConfirm": "Remove this asset from the version?",
+      "detachNote": "The stored file is not deleted. The current version cannot lose its cover or its last image.",
+      "addAsset": "Add image / file",
+      "assetAdded": "Added to the version.",
+      "uploadMissing": "No upload button yet: upload the file to storage first, then paste its https URL here.",
+      "assetKind": "Kind",
+      "assetUrl": "File URL",
+      "imageFormat": "JPG, PNG or WebP image.",
+      "attachmentFormat": "PDF, DWG or DXF file.",
+      "originalName": "Display file name",
+      "originalNameHint": "Leave empty to use the name from the URL."
+    },
     "catalogStatus": {
       "active": "Active",
       "inactive": "Inactive"
@@ -2925,7 +3573,6 @@
       "descriptionField": "Description",
       "status": "Status",
       "statusHint": "New types start Inactive. They can be activated only when the Floors and Attic settings are valid.",
-      "order": "Display order",
       "allStatuses": "All statuses",
       "applyFilter": {
         "all": "All",
@@ -2954,6 +3601,7 @@
       "atticRequired": "Attic is required",
       "disableWarning": "Switching to Does not apply: new projects will no longer ask for this field. Existing projects keep their saved value.",
       "historyNote": "Changes apply the next time a project is created or edited and never overwrite saved data.",
+      "removedOptionImpact": "Removing “{option}”: {count} projects currently use this option.",
       "usage": "Records using it",
       "duplicateName": "This building type already exists.",
       "deleteBlocked": "This building type is in use — it can only be set to Inactive.",
@@ -3401,7 +4049,18 @@
       "orderRule": "Order must be a whole number from 1."
     },
     "guideSteps": {
-      "description": "Each step is a YouTube video on the Guide page. Step numbers follow creation time; thumbnails and durations come from YouTube. Only Visible steps are shown to users.",
+      "description": "Each step is a YouTube video on the Guide page. Paste a YouTube URL and the system fetches the thumbnail and duration. Publish to show a step to users; drag up/down to reorder.",
+      "preview": "Preview",
+      "warning": "Video error",
+      "untitled": "(No title)",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "deleteAsk": "Delete \"{title}\"? This cannot be undone.",
+      "states": {
+        "Draft": "Draft",
+        "Published": "Published",
+        "Hidden": "Hidden"
+      },
       "step": "Step",
       "thumbnail": "Thumbnail",
       "title": "Title",
@@ -3540,6 +4199,197 @@
       "duplicate": "A label with this name already exists.",
       "inUse": "{count} Active articles use this label — relabel them or make them Inactive first."
     },
+    "rbacRoles": {
+      "title": "Roles & permissions",
+      "description": "Create and configure staff roles: grant permissions per group without code changes. System roles (Admin, Customer) cannot be edited, renamed or deleted.",
+      "columns": {
+        "name": "Role name",
+        "kind": "Type",
+        "memberCount": "Members",
+        "permissionCount": "Permissions"
+      },
+      "kind": {
+        "System": "System",
+        "Custom": "Custom"
+      },
+      "view": {
+        "code": "Role code",
+        "noPermissions": "No permissions yet"
+      },
+      "fields": {
+        "name": "Role name",
+        "namePlaceholder": "e.g. Package operations staff",
+        "permissions": "Role permissions",
+        "permissionsHint": "Pick the permissions for this staff group. The permission catalogue is system-defined.",
+        "permissionsLoading": "Loading permission catalogue…",
+        "requiresAssignment": "Needs assignment",
+        "requiresAssignmentNote": "Permissions marked “Needs assignment” only allow acting on resources assigned to that person (BR-RBAC-010)."
+      },
+      "modules": {
+        "commerce": "Commerce",
+        "package": "Supervision packages",
+        "supervision": "Supervision",
+        "user": "Accounts",
+        "role": "Roles",
+        "assignment": "Assignments",
+        "audit": "Audit log",
+        "plan": "Subscription plans",
+        "estimate": "Estimates",
+        "payment": "Payments",
+        "consultation": "Architect consulting",
+        "news": "News",
+        "library": "Template library"
+      },
+      "systemLocked": "System roles cannot be edited, renamed or deleted.",
+      "deleteTitle": "Delete role “{name}”?",
+      "deleteBody": "Only roles with no members can be deleted. Audit logs keep the role name for history.",
+      "effectiveNoteTitle": "Change not effective immediately",
+      "effectiveNote": "People holding this role get the new permissions within {minutes} minutes at the latest, when their session is reissued. To apply it now, force them to log out on the Staff accounts screen."
+    },
+    "newsArticles": {
+      "description": "Handbook news articles. New articles always start as Draft and can be saved incomplete; publishing requires a title, cover image, content and at least one category. Deleting is permanent.",
+      "manageCategories": "Manage categories",
+      "states": {
+        "all": "All",
+        "Draft": "Draft",
+        "Published": "Published",
+        "Hidden": "Hidden"
+      },
+      "title": "Title",
+      "untitled": "(Untitled)",
+      "readingTimeMinutes": "Reading time (min)",
+      "cover": "Cover image",
+      "categories": "Categories",
+      "categoriesHint": "Pick one or more categories at any level — picking a child does not require its parent.",
+      "categoryRequired": "A published article needs at least one category.",
+      "pickCategories": "Pick categories",
+      "content": "Content",
+      "noContent": "This article has no content yet.",
+      "state": "Status",
+      "firstPublishedAt": "First published",
+      "createdAt": "Created",
+      "modifiedAt": "Last edited",
+      "draftHint": "Drafts can be saved incomplete. Readers cannot see the article until you press Publish in the table.",
+      "publishedEditHint": "This article is live: saving shows the new content to readers immediately, so the edit must keep a title, cover image, content and at least one category.",
+      "publish": "Publish",
+      "publishTitle": "Publish “{name}”?",
+      "publishBody": "The article appears on the News page right away. The first-published date is kept if it was published before.",
+      "published": "Article published.",
+      "hide": "Hide",
+      "hideTitle": "Hide “{name}”?",
+      "hideBody": "The article leaves the public list and its direct link returns not found. You can publish it again later.",
+      "hidden": "Article hidden.",
+      "deleteTitle": "Permanently delete “{name}”?",
+      "deleteBody": "The article is deleted in any status, with no trash or restore. Its old link will return not found.",
+      "missing": "Cannot publish yet — missing: {fields}.",
+      "parts": {
+        "title": "title",
+        "cover": "cover image",
+        "category": "category"
+      },
+      "editor": {
+        "edit": "Compose",
+        "preview": "Preview",
+        "count": "{count}/{max} characters",
+        "hint": "Images must be https links on the system image store. Disallowed tags are stripped on save.",
+        "urlPlaceholder": "Paste an https link…",
+        "urlAdd": "Insert",
+        "imagePlaceholder": "Paste an https image link…",
+        "tools": {
+          "bold": "Bold",
+          "italic": "Italic",
+          "underline": "Underline",
+          "heading2": "Section heading",
+          "heading3": "Subheading",
+          "paragraph": "Paragraph",
+          "bulletList": "Bulleted list",
+          "numberList": "Numbered list",
+          "quote": "Quote",
+          "link": "Link",
+          "image": "Insert image (paste link)"
+        }
+      }
+    },
+    "newsCategories": {
+      "description": "The News category tree, with no depth limit. Click a name to open its children. Names must be unique within the same parent; a category can only be deleted when it has no children and no articles (including drafts and hidden ones).",
+      "root": "Root categories",
+      "order": "Order",
+      "name": "Category name",
+      "nameHint": "Up to 200 characters. Must not match another category under the same parent (case-insensitive).",
+      "children": "Subcategories",
+      "hasChildren": "Has subcategories",
+      "parent": "Parent category",
+      "parentHint": "Leave empty for a root category. It cannot be itself or one of its descendants. Moving puts it at the end of the new parent; linked articles are kept.",
+      "open": "Open subcategories",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "deleteHasChildren": "It still has subcategories — move or delete them first.",
+      "deleteTitle": "Delete category “{name}”?",
+      "deleteBody": "Only possible when no article uses this category, including drafts and hidden articles."
+    },
+    "architects": {
+      "description": "Architect profiles that receive consultation requests. All seven groups of information are required. Profiles are never deleted — only hidden: a hidden profile takes no new requests, existing requests are kept.",
+      "manageCategories": "Expertise categories",
+      "allStatuses": "All",
+      "shown": "Shown",
+      "hidden": "Hidden",
+      "name": "Full name",
+      "title": "Job title",
+      "avatar": "Avatar",
+      "avatarHint": "An https link to an image on the system image store (the same store as estimate images). Links on other domains are rejected.",
+      "categories": "Expertise",
+      "categoriesHint": "Pick at least one. Add new ones with the “Expertise categories” button.",
+      "noCategories": "No expertise yet — create some with the “Expertise categories” button first.",
+      "categoryRequired": "Pick at least one expertise.",
+      "experience": "Experience",
+      "years": "{years} years",
+      "projectCount": "Projects",
+      "nonNegative": "Enter a whole number of 0 or more.",
+      "status": "Visibility",
+      "pickStatus": "Choose Shown or Hidden",
+      "statusRequired": "Choose Shown or Hidden for this profile.",
+      "intro": "Introduction",
+      "createdAt": "Created",
+      "hideWarning": "Customers will not be able to send new requests to this architect; existing requests are kept.",
+      "companyName": "Company",
+      "rating": "Rating",
+      "reviewCount": "Review count"
+    },
+    "architectCategories": {
+      "title": "Expertise categories",
+      "description": "Expertise assigned to architect profiles. Duplicate names are allowed. A category can only be deleted when no architect uses it, including hidden ones.",
+      "name": "Expertise name",
+      "newPlaceholder": "New expertise name",
+      "nameRequired": "Enter a name.",
+      "deleteTitle": "Delete expertise “{name}”?",
+      "deleteBody": "It cannot be deleted while any architect (including hidden ones) still uses it — unassign it from those profiles first."
+    },
+    "consultRequests": {
+      "description": "Consultation requests customers send to architects. The chosen time is only a preference — call the contact number on the request to agree a slot, then mark it Resolved. Times are shown in Vietnam time.",
+      "statuses": {
+        "all": "All",
+        "Pending": "Pending",
+        "Resolved": "Resolved"
+      },
+      "desiredAt": "Preferred time",
+      "customer": "Customer",
+      "contactPhone": "Contact number on request",
+      "architect": "Architect",
+      "message": "Consultation details",
+      "noMessage": "The customer left no details.",
+      "status": "Status",
+      "statusHint": "Once contacted and handled, choose Resolved. If the customer no longer needs it, note the reason and choose Resolved. You can reopen it to follow up again.",
+      "internalNote": "Internal note",
+      "internalNoteHint": "Visible to admins only, never sent to the customer. Leave empty to clear the note.",
+      "createdAt": "Sent",
+      "modifiedAt": "Updated",
+      "markResolved": "Mark resolved",
+      "reopen": "Reopen",
+      "resolveTitle": "Mark {name}'s request as resolved?",
+      "resolveBody": "The internal note is kept. No email is sent to the customer.",
+      "reopenTitle": "Reopen {name}'s request?",
+      "reopenBody": "The request goes back to Pending for follow-up. The internal note is kept."
+    },
     "handbookSteps": {
       "description": "The three fixed Handbook steps: Structure, Finishing, Interior. Only the image, name and description can change — no adding, deleting or reordering.",
       "step": "Step",
@@ -3625,6 +4475,55 @@
     },
     "pageSections": {
       "plans_brand": "System logo (top-left of the menu bar)"
+    },
+    "rbacAssignments": {
+      "title": "Supervision assignments",
+      "description": "Assign each supervision grant to a staff member, transfer it when needed and remove it when they stop. Each grant has exactly one owner at a time.",
+      "needsTitle": "Needs reassignment",
+      "needsDescription": "Grants attached to a construction site that have no owner, or whose owner is now locked. Pick a staff member to assign.",
+      "needsEmpty": "No grants need reassignment.",
+      "assign": "Assign",
+      "assignTitle": "Assign supervision grant",
+      "transfer": "Transfer",
+      "transferTitle": "Transfer to another staff member",
+      "remove": "Remove",
+      "removeConfirmTitle": "Remove this assignment?",
+      "removeConfirmBody": "The current owner loses access to the grant. If the grant is assigned, it returns to the needs-reassignment list.",
+      "selectStaff": "Staff owner",
+      "selectStaffPlaceholder": "Pick an active staff member",
+      "staffRequired": "Pick a staff member.",
+      "noStaff": "No active staff members.",
+      "activeBadge": "Currently owns",
+      "lockedAssignee": "Account locked",
+      "filters": {
+        "allStaff": "All staff",
+        "activeOnly": "Active only",
+        "allAssignments": "All assignments"
+      },
+      "columns": {
+        "staff": "Staff",
+        "resource": "Resource",
+        "effectiveFrom": "From",
+        "effectiveTo": "To"
+      },
+      "resourceTypes": {
+        "SupervisionGrant": "Supervision grant"
+      },
+      "status": {
+        "NoAssignee": "No owner",
+        "AssigneeLocked": "Owner locked"
+      },
+      "endReasons": {
+        "Transferred": "Transferred",
+        "Removed": "Removed",
+        "PackageCanceled": "Package canceled",
+        "PackageUnassigned": "Removed from site"
+      },
+      "feedback": {
+        "assigned": "Grant assigned to staff.",
+        "transferred": "Assignment transferred.",
+        "removed": "Assignment removed."
+      }
     }
   },
   "contractors": {
@@ -3689,7 +4588,6 @@
       "undecided": "Not decided yet"
     },
     "sort": {
-      "match": "Best match",
       "distance": "Nearest",
       "rating": "Top rated",
       "survey": "Earliest survey"
@@ -3826,6 +4724,7 @@
         "close": "Done"
       },
       "continueWith": "Continue with {name}",
+      "untitledBrief": "untitled brief",
       "continueShort": "Continue",
       "continueHint": "Continue with {name}",
       "switchBrief": "Switch profile"
@@ -3985,7 +4884,9 @@
         "p3": "Material and furniture supply",
         "p4": "Quality & cost control",
         "p5": "Acceptance & handover",
-        "action": "Register for full delivery"
+        "action": "Register for full delivery",
+        "titlePro": "Turnkey build with BuildX",
+        "needPro": "Requires the PRO plan to unlock this offer."
       },
       "expert": {
         "title": "Talk to an expert",
@@ -3994,6 +4895,7 @@
         "p2": "Design direction that fits your budget",
         "p3": "Answers on the process and the platform",
         "action": "Book a consultation",
+        "free": "Free",
         "included": "Already included in your plan",
         "priceFrom": "From {price}",
         "viewPricing": "View consultation plans"
@@ -4193,12 +5095,10 @@
         "filterLabel": "Filter by project type",
         "filters": {
           "all": "All {count}",
-          "house": "Houses {count}",
-          "villa": "Villas {count}",
-          "renovation": "Renovations {count}",
-          "factory": "Factories {count}"
+          "type": "{label} {count}"
         },
         "verifiedBadge": "Verified",
+        "featuredBadge": "Featured",
         "area": "{area} m²",
         "completed": "Completed {year}",
         "viewDetail": "View details",
@@ -4209,6 +5109,8 @@
           "description": "Project details delivered by {contractor}",
           "imageAlt": "Image {index} of project {project}",
           "selectImage": "Show image {index} as the large image",
+          "prevImage": "Previous image",
+          "nextImage": "Next image",
           "verifiedBadge": "Verified",
           "title": "Project information",
           "projectType": "Project type",
@@ -4223,17 +5125,14 @@
           "completedYear": "Completed {year}",
           "notUpdated": "Being updated",
           "mainItemsFallback": "Construction work based on the supplied project records.",
-          "projectTypes": {
-            "house": "Townhouse",
-            "villa": "Villa",
-            "renovation": "Renovation",
-            "factory": "Factory"
-          },
           "constructionScopes": {
-            "turnkey": "Turnkey",
-            "structural": "Structural work",
-            "finishing": "Finishing"
+            "turnkey": "Turnkey construction",
+            "shell": "Structural work",
+            "finishing": "Finishing",
+            "interior": "Interior"
           },
+          "attic": "With attic",
+          "noAttic": "No attic",
           "roles": {
             "general-contractor": "General contractor",
             "contractor": "Construction contractor"
@@ -4384,7 +5283,7 @@
       "copyCode": "Copy code",
       "copied": "Copied",
       "remainingInvites": "You have {count} invitations left - invite more contractors for more options",
-      "inviteMore": "Invite more contractors"
+      "inviteMore": "Invite more contractors ({left} left)"
     },
     "invitations": {
       "title": "Invitations to quote",
@@ -4448,7 +5347,9 @@
       "createMore": "New project brief (free)",
       "buyPlan": "Buy a design package for drawings & quantities",
       "contracted": "Contractor settled",
-      "untitled": "Untitled brief"
+      "untitled": "Untitled brief",
+      "draft": "Draft",
+      "completeBrief": "Complete brief"
     },
     "projectBar": {
       "label": "Selected project",
@@ -4556,6 +5457,9 @@
       "transferred": "I have transferred",
       "recording": "Recording…",
       "verifying": "Confirming…",
+      "autoWaiting": "Waiting for bank confirmation…",
+      "cancel": "Cancel order",
+      "cancelling": "Cancelling…",
       "support": "Need help?",
       "supportToast": "The BuildX support team will contact you on your registered phone number.",
       "supportSubject": "Support for order {code}",
@@ -4657,12 +5561,12 @@
       "self": {
         "imageAlt": "Construction drawings and project management tools",
         "title": "Self-managed",
-        "subtitle": "Work directly with your contractor while BuildX keeps your records and basic progress tracking.",
-        "p1": "Self-managed dashboard",
-        "p2": "Track records & progress",
-        "p3": "Construction",
-        "value": "Free",
-        "action": "Self-manage"
+        "subtitle": "Work directly with your contractor; this option is informational and only compares against BuildX's two supervision plans.",
+        "p1": "You track the construction yourself",
+        "p2": "No BuildX supervision plan",
+        "p3": "Information for plan comparison",
+        "value": "No supervision plan",
+        "action": "Self-managed"
       },
       "check": {
         "imageAlt": "Engineer checking key construction milestones",

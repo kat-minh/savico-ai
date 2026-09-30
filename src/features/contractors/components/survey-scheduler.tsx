@@ -46,7 +46,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { contractorCompareRoute, contractorInviteRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDate, formatNumber } from '@/shared/utils'
+import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor } from '../hooks/use-contractors'
@@ -526,12 +526,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                           transition={{ duration: 0.3 }}
                           className='text-muted-foreground mt-1 text-sm capitalize'
                         >
-                          {formatDate(selectedDate, locale, {
-                            weekday: 'long',
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })}
+                          {formatDisplayDate(date, locale, { weekday: true })}
                         </motion.p>
                       </AnimatePresence>
                     ) : null}
@@ -681,11 +676,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                         className='border-primary/30 bg-accent/40 text-primary-strong w-full rounded-xl border p-3 text-left text-sm'
                       >
                         {t('dayFull', {
-                          date: formatDate(nearestAvailableDay, locale, {
-                            weekday: 'long',
-                            day: '2-digit',
-                            month: '2-digit'
-                          })
+                          date: formatDisplayDate(toDateKey(nearestAvailableDay), locale, { weekday: true })
                         })}
                       </motion.button>
                     ) : null}

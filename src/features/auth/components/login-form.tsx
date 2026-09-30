@@ -125,7 +125,7 @@ export function LoginForm({ embedded = false }: LoginFormProps = {}) {
       {!embedded && (
         <p className='text-muted-foreground mt-6 text-center text-sm'>
           {t('noAccount')}{' '}
-          <Link href={ROUTES.REGISTER} className='text-foreground font-medium hover:underline'>
+          <Link href={ROUTES.REGISTER} className='text-foreground font-medium underline underline-offset-4'>
             {t('signUp')}
           </Link>
         </p>

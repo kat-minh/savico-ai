@@ -10,7 +10,7 @@ import type { Locale } from '@/i18n/routing'
 import { useCmsCollection } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/shared/components/ui/dialog'
-import { checkoutConfirmRoute, supervisionRoute } from '@/shared/constants/routes'
+import { checkoutConfirmRoute } from '@/shared/constants/routes'
 import { SUPERVISION_IMAGE, TOPIC_IMAGE, cn, completeManagementPopup, dismissManagementPopup } from '@/shared/lib'
 import { rememberCheckoutReturn } from '@/shared/lib/checkout-return'
 import { formatCurrency } from '@/shared/utils'
@@ -103,12 +103,9 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('self.value')}
             order={0}
             actions={
-              <Button asChild className='brand-green-button h-12 w-full rounded-full text-[15px] font-bold'>
-                <Link href={supervisionRoute(projectId)} onClick={commitChoice} className='group/button relative'>
-                  <span>{t('self.action')}</span>
-                  <ArrowRight className='absolute right-4 size-4 transition-transform duration-150 group-hover/button:translate-x-1' />
-                </Link>
-              </Button>
+              <div className='bg-accent text-primary-strong flex h-12 w-full items-center justify-center rounded-full px-4 text-center text-[15px] font-bold'>
+                {t('self.action')}
+              </div>
             }
           />
 

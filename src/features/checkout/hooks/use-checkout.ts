@@ -119,6 +119,27 @@ export function useRegenerateQr(orderId: string, { navigate = true, onSuccess }:
 }
 
 /**
+ * "Hủy đơn" ở màn QR — chỉ dùng cho gói API (`POST /payment-orders/{id}/cancel`).
+ * Hủy xong đơn về trạng thái Thất bại nên chuyển thẳng sang màn S07.
+ */
+export function useCancelOrder(orderId: string) {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const t = useTranslations('errors')
+
+  return useMutation({
+    mutationFn: () => checkoutApi.cancelOrder(orderId),
+    onSuccess: (order) => {
+      queryClient.setQueryData(checkoutKeys.order(orderId), order)
+      router.replace(checkoutFailedRoute(order.id))
+    },
+    onError: (error) => {
+      toast.error(isApiError(error) ? error.message : t('generic'))
+    }
+  })
+}
+
+/**
  * Đưa người dùng về đúng màn của trạng thái đơn.
  *
  * Trạng thái đơn là nguồn sự thật duy nhất cho việc "đang ở bước nào": mở lại

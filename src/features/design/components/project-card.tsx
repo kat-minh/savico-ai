@@ -15,7 +15,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu'
 import { designDossierRoute, designEstimateRoute, designInputRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDate } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { DESIGN_STEPS } from '../constants/design.constants'
 import { miniStepState } from '../services/project-list.service'
 import type { Project, ProjectStatus } from '../types/design.types'
@@ -231,7 +231,7 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
 
         <p className='text-muted-foreground mt-1 font-mono text-xs'>{project.id}</p>
         <p className='text-muted-foreground text-xs'>
-          {t('createdAt', { date: formatDate(project.createdAt, locale) })}
+          {t('createdAt', { date: formatDisplayDate(project.createdAt, locale) })}
         </p>
 
         {/* Nhãn đứng trên mini-stepper, đúng Hình S24 — không có nhãn thì ba

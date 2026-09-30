@@ -2,17 +2,15 @@
 
 import { ArrowRight, CalendarClock, CircleCheck, Gift, HardHat, Loader2, Search, Star } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Link } from '@/i18n/navigation'
-import type { Locale } from '@/i18n/routing'
 import { resolvePlanGift, useCmsCollection, type PlanGift } from '@/shared/cms'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatCurrency } from '@/shared/utils'
 import { revealEase } from './reveal'
 import { TurnkeyRequestDialog } from './turnkey-request-dialog'
 
@@ -25,8 +23,11 @@ interface StartOptionsProps {
    * xuất" chạy chậm hơn). `checkout` (S08) không truyền prop này.
    */
   onFindNavigate?: () => void
-  /** Gói thiết kế đang hoạt động đã bao gồm quyền tư vấn 1:1. */
-  hasPlan?: boolean
+  /**
+   * Khách vừa có gói PRO — thẻ trọn gói ghi "Thi công trọn gói cùng BuildX"; gói thấp
+   * hơn thì quà 100 triệu kèm dòng "cần mua thêm gói PRO" (popup 23/09, góp ý NT33).
+   */
+  isPro?: boolean
   /** Báo cho lớp bọc biết một liên kết sắp điều hướng để đóng hộp chọn và giữ progress ở ngoài. */
   onNavigateStart?: () => void
   /** Lớp bọc hộp thoại tự quản lý luồng mở form trọn gói để hộp chọn đóng trước. */
@@ -54,7 +55,7 @@ interface StartOptionsProps {
 export function StartOptions({
   findHref,
   onFindNavigate,
-  hasPlan = false,
+  isPro = false,
   onNavigateStart,
   onTurnkeySelect,
   showRouteProgress = true,
@@ -66,15 +67,9 @@ export function StartOptions({
   const gifts = useCmsCollection('gifts')
   const giftPlan = useCmsCollection('plans').find((plan) => plan.status === 'selling' && plan.giftId)
   const gift = giftPlan ? resolvePlanGift(giftPlan, gifts) : undefined
-  const consultPackages = useCmsCollection('consultPackages')
   const t = useTranslations('contractors.start')
-  const locale = useLocale() as Locale
   const [turnkeyOpen, setTurnkeyOpen] = useState(false)
   const [routeLoading, setRouteLoading] = useState(false)
-
-  const consultationPrice = consultPackages
-    .filter((item) => item.enabled && item.price > 0)
-    .sort((a, b) => a.price - b.price)[0]?.price
 
   const startNavigation = () => {
     setRouteLoading(true)
@@ -123,10 +118,11 @@ export function StartOptions({
           index={2}
           icon={HardHat}
           highlighted
-          title={t('turnkey.title')}
+          title={isPro ? t('turnkey.titlePro') : t('turnkey.title')}
           subtitle={t('turnkey.subtitle')}
           points={[t('turnkey.p1'), t('turnkey.p2'), t('turnkey.p3'), t('turnkey.p4'), t('turnkey.p5')]}
           gift={gift}
+          giftNote={isPro ? undefined : t('turnkey.needPro')}
           action={
             <>
               {/* S08: "Đăng ký triển khai → form đăng ký, Ops liên hệ" — nút mở
@@ -155,14 +151,9 @@ export function StartOptions({
           title={t('expert.title')}
           subtitle={t('expert.subtitle')}
           points={[t('expert.p1'), t('expert.p2'), t('expert.p3')]}
-          included={hasPlan}
-          value={
-            hasPlan
-              ? t('expert.included')
-              : consultationPrice
-                ? t('expert.priceFrom', { price: formatCurrency(consultationPrice, locale) })
-                : t('expert.viewPricing')
-          }
+          // Tư vấn 1:1 miễn phí cho mọi khách, ở mọi ngữ cảnh (chốt 23/09, góp ý NT33).
+          included
+          value={t('expert.free')}
           revealDelay={completionMode ? 2.29 : 0.15}
           completionMode={completionMode}
           animateEntrance={animateEntrance}
@@ -321,7 +312,7 @@ interface StartOptionsDialogProps extends StartOptionsProps {
 }
 
 /** Bản hộp thoại — dùng sau khi khách chốt hồ sơ ở Bước 2 (S11, R7). */
-export function StartOptionsDialog({ open, onOpenChange, findHref, onFindNavigate, hasPlan }: StartOptionsDialogProps) {
+export function StartOptionsDialog({ open, onOpenChange, findHref, onFindNavigate, isPro }: StartOptionsDialogProps) {
   const t = useTranslations('contractors.start')
   const [routeLoading, setRouteLoading] = useState(false)
   const [turnkeyOpen, setTurnkeyOpen] = useState(false)
@@ -383,7 +374,7 @@ export function StartOptionsDialog({ open, onOpenChange, findHref, onFindNavigat
             <StartOptions
               findHref={findHref}
               onFindNavigate={onFindNavigate}
-              hasPlan={hasPlan}
+              isPro={isPro}
               onNavigateStart={() => {
                 setRouteLoading(true)
                 onOpenChange(false)
@@ -468,6 +459,7 @@ function OptionCard({
   points,
   action,
   gift,
+  giftNote,
   included = false,
   value,
   highlighted = false,
@@ -486,6 +478,8 @@ function OptionCard({
   action: React.ReactNode
   /** Quà tặng in trong thẻ "Triển khai trọn gói" (Hình S08). */
   gift?: PlanGift
+  /** Dòng nhắc điều kiện nhận quà, in đậm dưới khối đặc quyền. */
+  giftNote?: string
   included?: boolean
   value?: string
   highlighted?: boolean
@@ -727,6 +721,7 @@ function OptionCard({
               <p className='text-muted-foreground mt-2 text-[10px] leading-relaxed text-pretty italic'>
                 {gift.conditions}
               </p>
+              {giftNote ? <p className='text-brand-orange mt-1 text-xs font-semibold'>{giftNote}</p> : null}
             </motion.section>
           ) : null}
 

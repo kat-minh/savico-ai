@@ -25,7 +25,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { contractorInvitationsRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { canShowManagementPopup } from '@/shared/lib'
 import { cn } from '@/shared/lib/utils'
-import { formatDate } from '@/shared/utils'
+import { formatDisplayDate, formatDisplayDateTime } from '@/shared/utils'
 import { surveySlotLabel } from '@/shared/cms'
 import {
   INVITATIONS_ARRIVE_FORWARD_KEY,
@@ -208,7 +208,8 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
     .map((invitation) => contractorOf(invitation.contractorId)?.name ?? invitation.contractorId)
     .join(', ')
   // Chưa tải xong danh sách lời mời thì chưa biết còn lượt — không đoán là còn đủ 3.
-  const showMoreHint = invitations !== undefined && remainingInvites(invitations) > 0 && (instant || hintDelayDone)
+  const invitesLeft = invitations === undefined ? 0 : remainingInvites(invitations)
+  const showMoreHint = invitesLeft > 0 && (instant || hintDelayDone)
   const markInviteReturn = () =>
     window.sessionStorage.setItem(
       MATCHES_INVITE_RETURN_KEY,
@@ -402,13 +403,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
                 </span>
               </span>{' '}
               {t('sentAt', {
-                time: formatDate(data.request.createdAt, locale, {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
+                time: formatDisplayDateTime(data.request.createdAt, locale)
               })}
             </span>
           </motion.p>
@@ -455,12 +450,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
 
                   <motion.span variants={crossFadeVariants} className='flex shrink-0 items-center gap-2 text-sm'>
                     <CalendarDays aria-hidden className='text-primary size-4' />
-                    {formatDate(invitation.survey.date, locale, {
-                      weekday: 'long',
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    })}
+                    {formatDisplayDate(invitation.survey.date, locale, { weekday: true })}
                   </motion.span>
 
                   <motion.span variants={crossFadeVariants} className='flex shrink-0 items-center gap-2 text-sm'>
@@ -558,9 +548,11 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
               </Link>
             </Button>
           </motion.span>
+          {/* Còn lượt mời → nút thứ hai là "Mời thêm nhà thầu (còn x)", hiện ngay cùng nút
+              chính (góp ý NT35: dòng gợi ý nhỏ bên trên dễ bị lỡ). Hết lượt → "Quay lại danh sách". */}
           <Button asChild variant='outline' className='border-primary/50 text-primary-strong min-w-52'>
             <Link href={contractorMatchesRoute(projectId)} onClick={backToList}>
-              {tCommon('backToList')}
+              {invitesLeft > 0 ? t('inviteMore', { left: invitesLeft }) : tCommon('backToList')}
             </Link>
           </Button>
         </motion.div>

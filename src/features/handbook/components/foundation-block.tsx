@@ -1,11 +1,12 @@
 'use client'
 
 import { createElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, BookOpenCheck, Clock, Plus, X } from 'lucide-react'
+import { ArrowRight, Clock, Plus, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
+import { useSiteImage } from '@/shared/cms'
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -118,6 +119,7 @@ function StepToggleIcon({ open }: { open: boolean }) {
  */
 export function FoundationBlock() {
   const t = useTranslations('handbook.foundation')
+  const bannerImage = useSiteImage('handbook.banner')
   const searchParams = useSearchParams()
   // "Mở nhanh bài viết" / "Thu gọn" / "Xem chi tiết" là chữ của HÀNH VI mở nhanh,
   // dùng chung với khối "Tất cả bài viết" — hai khối cùng một thao tác thì phải
@@ -976,36 +978,43 @@ export function FoundationBlock() {
       data-handbook-foundation
       className='border-primary/40 bg-card space-y-5 rounded-2xl border p-5'
     >
-      {/* Hình 9: nhãn chữ xanh in hoa ở góc trên, không phải chip có nền. */}
-      <p data-foundation-sequence className='text-primary text-sm font-bold tracking-wide uppercase'>
-        {t('eyebrow')}
-      </p>
+      {/* Góp ý BuildX (CN02): banner ảnh công trình thật ở đầu Cẩm nang thay cho băng
+          "Cẩm nang bắt buộc cho xây nhà" — chữ nằm trên nền ảnh, phía trái mờ dần. */}
+      <div className='relative isolate overflow-hidden rounded-xl'>
+        <Photo
+          className='foundation-hero-motion absolute inset-0 -z-10 size-full transition-[filter] duration-300 motion-reduce:!filter-none'
+          imageClassName='object-[70%_center]'
+          src={bannerImage}
+          alt=''
+          priority
+          sizes='(max-width: 1440px) 100vw, 1400px'
+        />
+        <div
+          aria-hidden
+          className='bg-background/80 md:from-background md:via-background/70 absolute inset-0 -z-10 md:bg-transparent md:bg-gradient-to-r md:to-transparent'
+        />
 
-      {/* Băng giới thiệu ba phần: minh họa · chữ · ảnh công trình (Hình 9). */}
-      <div className='bg-primary/5 grid items-center gap-4 overflow-hidden rounded-xl md:grid-cols-[auto_1fr] lg:grid-cols-[auto_1.1fr_1fr]'>
-        <div className='flex justify-center p-6 pr-0 md:pl-8'>
-          <span
-            data-foundation-book
-            className='bg-primary/15 text-primary flex size-32 items-center justify-center rounded-full'
+        <div className='max-w-xl space-y-4 px-6 py-10 sm:px-10 md:py-14 lg:px-12'>
+          <p
+            data-foundation-sequence
+            className='text-primary-strong flex items-center gap-3 text-xs font-semibold tracking-[0.14em] uppercase'
           >
-            <BookOpenCheck className='size-16' strokeWidth={1.5} />
-          </span>
-        </div>
-
-        <div className='space-y-3 p-6'>
-          <p data-foundation-sequence className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
             {t('kicker')}
+            <span aria-hidden className='bg-primary-strong/40 h-px w-16' />
           </p>
-          <h2 data-foundation-sequence className='text-2xl font-semibold tracking-tight text-balance'>
+          <h2
+            data-foundation-sequence
+            className='text-primary-strong text-4xl leading-[1.1] font-bold tracking-tight text-balance lg:text-5xl'
+          >
             {t('title')}
           </h2>
-          <p data-foundation-sequence className='text-muted-foreground text-sm leading-relaxed'>
+          <p data-foundation-sequence className='text-foreground/75 max-w-md text-sm leading-relaxed sm:text-base'>
             {t('description')}
           </p>
           <Button
             data-foundation-cta
             data-foundation-sequence
-            className='relative isolate overflow-hidden transition-[transform,filter,box-shadow] duration-200 ease-out'
+            className='bg-primary-strong hover:bg-primary-strong relative isolate h-11 overflow-hidden rounded-lg px-5 transition-[transform,filter,box-shadow] duration-200 ease-out'
             onPointerEnter={() => {
               ctaPointerInsideRef.current = true
               pauseCtaIdle()
@@ -1053,15 +1062,6 @@ export function FoundationBlock() {
             />
           </Button>
         </div>
-
-        {stages?.[0] ? (
-          <Photo
-            className='foundation-hero-motion hidden h-full min-h-56 w-full transition-[filter] duration-300 motion-reduce:!filter-none lg:block'
-            src={stages[0].imageUrl}
-            alt={t('title')}
-            sizes='(max-width: 1024px) 100vw, 520px'
-          />
-        ) : null}
       </div>
 
       <h3 ref={stagesHeadingRef} className='text-base font-semibold'>

@@ -1,14 +1,15 @@
 'use client'
 
 import { ArrowRight, ShieldCheck } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import type { Locale } from '@/i18n/routing'
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, supervisionRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { useSupervisionProject } from '../hooks/use-supervision'
 import { currentStage, daysUntil, elapsedPercent, progressPercent } from '../services/supervision.service'
 
@@ -28,6 +29,7 @@ interface SupervisionSummaryProps {
  */
 export function SupervisionSummary({ projectId }: SupervisionSummaryProps) {
   const t = useTranslations('supervision.account')
+  const locale = useLocale() as Locale
   const tAlias = useTranslations('supervision.tierAlias')
 
   const { data: project, isPending } = useSupervisionProject(projectId)
@@ -91,8 +93,8 @@ export function SupervisionSummary({ projectId }: SupervisionSummaryProps) {
 
         <p className='text-muted-foreground text-xs text-pretty'>
           {t('dates', {
-            expires: formatDayMonth(project.expiresAt, { year: true }),
-            handover: formatDayMonth(project.handoverDate, { year: true })
+            expires: formatDisplayDate(project.expiresAt, locale),
+            handover: formatDisplayDate(project.handoverDate, locale)
           })}
         </p>
       </div>

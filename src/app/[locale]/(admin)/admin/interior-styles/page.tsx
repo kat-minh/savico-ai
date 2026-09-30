@@ -1,16 +1,16 @@
 import { setRequestLocale } from 'next-intl/server'
 
-import { StyleManager } from '@/features/admin'
+import { redirect } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
+import { ADMIN_ROUTES } from '@/shared/constants/routes'
 
 interface PageProps {
   params: Promise<{ locale: Locale }>
 }
 
-/** Phong cách nội thất (spec admin #1). */
+/** Đã gộp phong cách KT + NT vào "Phong cách" — chuyển hướng để giữ link cũ. */
 export default async function AdminInteriorStylesPage({ params }: PageProps) {
   const { locale } = await params
   setRequestLocale(locale)
-
-  return <StyleManager kind='interior' />
+  redirect({ href: ADMIN_ROUTES.STYLES, locale })
 }

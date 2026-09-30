@@ -1,26 +1,30 @@
 import { env } from '@/shared/config/env'
-import { http } from '@/shared/lib/api'
-import type { HandbookArticle, HandbookQuota, HandbookStage, HandbookTemplate } from '../types/handbook.types'
+import { bmtHandbookApi } from './handbook.bmt'
 import { mockHandbookApi } from './handbook.mock'
 
 /**
- * Cẩm nang API. Dữ liệu tĩnh do admin biên soạn (mục VI) — the client only
- * reads it, so there is no write surface here. Hạn mức tra cứu là ngoại lệ duy
- * nhất phụ thuộc tài khoản, backend tự đếm theo ngày.
+ * Chức năng đã nối BMT API — GIỮ MOCK LÀM NỀN. DB backend đang rỗng nên mọi hàm
+ * ở đây TỰ VỀ MOCK khi API trả rỗng / lỗi / 404 / chưa đăng nhập (xem
+ * `handbook.bmt.ts`), để demo không bị trống và giao diện đã chốt vẫn chạy đúng
+ * với cả dữ liệu mock cũ lẫn API mới.
+ *
+ * Đã nối:
+ *   - Bài viết: `listArticles` (`GET /news/articles`), `getArticle`
+ *     (`GET /news/articles/{id}`, kèm `contentHtml`). Panel tư vấn theo `topic`
+ *     không có API → luôn mock.
+ *   - Thư viện mẫu: `listTemplates` (`GET /design-templates`), `getTemplate`
+ *     (chi tiết CẦN ĐĂNG NHẬP: access-info → open trừ 1 lượt → library-versions +
+ *     assets), `getQuota` (`catalog.detail` của `/me/design-subscription`).
+ *
+ * Giữ mock: `listStages` (không có API); lượt TRA lưới của `getQuota` (API chỉ có
+ * `catalog.detail`); `/me/library-history` không có màn UI tiêu thụ.
  */
-const HandbookApi = {
-  listTemplates: () => http.get<HandbookTemplate[]>('/handbook/templates'),
+const BmtHandbookApi = {
+  listArticles: bmtHandbookApi.listArticles,
+  getArticle: bmtHandbookApi.getArticle,
+  listTemplates: bmtHandbookApi.listTemplates,
+  getTemplate: bmtHandbookApi.getTemplate,
+  getQuota: bmtHandbookApi.getQuota
+} satisfies Partial<typeof mockHandbookApi>
 
-  getTemplate: (id: string) => http.get<HandbookTemplate | null>(`/handbook/templates/${id}`),
-
-  listArticles: (topic?: string) =>
-    http.get<HandbookArticle[]>('/handbook/articles', topic ? { params: { topic } } : undefined),
-
-  getArticle: (slug: string) => http.get<HandbookArticle | null>(`/handbook/articles/${slug}`),
-
-  listStages: () => http.get<HandbookStage[]>('/handbook/stages'),
-
-  getQuota: () => http.get<HandbookQuota>('/handbook/quota')
-}
-
-export const handbookApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockHandbookApi : HandbookApi
+export const handbookApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockHandbookApi : { ...mockHandbookApi, ...BmtHandbookApi }

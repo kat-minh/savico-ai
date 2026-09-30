@@ -97,6 +97,17 @@ export interface HandbookTemplate {
   interiorStyleId?: string
   /** Mẫu 3D: tên phòng / không gian — một mẫu 3D là một phòng với nhiều ảnh. */
   room?: string
+  /**
+   * Phiên bản thư viện (`library-versions/{versionId}`) khi mẫu đến từ BMT API —
+   * dùng để mở phiên bản và tải bộ ảnh/tài nguyên. Bỏ trống với mẫu mock.
+   */
+  versionId?: string
+  /**
+   * Nguồn dữ liệu của mẫu. `'bmt'` = lấy từ API (chi tiết cần đăng nhập, đọc từ
+   * `getTemplate` chứ không lấy floors/description từ pool). Bỏ trống = mẫu mock,
+   * xem công khai như cũ.
+   */
+  source?: 'bmt'
 }
 
 /** Ba giai đoạn xây nhà — khung cố định của cẩm nang nền tảng (Phần 3). */
@@ -181,6 +192,12 @@ export interface HandbookArticle {
   readingMinutes: number
   /** Thứ tự trong Bản tin: 1 = bài nổi bật lớn, 2–4 = ba bài phụ (Hình 11). */
   featuredRank?: number
+  /**
+   * Nội dung rich text đã làm sạch (allowlist p/h2–h6/ul/ol/li/a/img…) khi bài
+   * đến từ BMT API. Có `contentHtml` thì trang bài viết render HTML trực tiếp;
+   * bỏ trống thì render `body` theo từng section như mock cũ.
+   */
+  contentHtml?: string
   body: HandbookArticleSection[]
   tags: HandbookTags
   /** Bài tư vấn trong panel màn chờ: kiến trúc (Bước 2) / nội thất (Bước 3). */
@@ -427,6 +444,9 @@ export interface SupervisionPackage {
 /**
  * Chuyên môn của kiến trúc sư — danh mục do admin cấu hình (mục X, #5).
  */
+/** Miền Bắc / miền Nam — cột "Miền" trong sheet hồ sơ KTS. */
+export type ConsultantRegion = 'north' | 'south'
+
 export interface ConsultantSpecialty {
   id: string
   label: string
@@ -449,6 +469,10 @@ export interface Consultant {
   name: string
   /** Chức danh dưới tên: "Kiến trúc sư SAVICO", "Kiến trúc sư trưởng SAVICO". */
   title: string
+  /** Nơi công tác — dòng phụ nhỏ "tại {company}" dưới chức danh ở thẻ và hồ sơ. */
+  company?: string
+  /** Khu vực nhận tư vấn theo hồ sơ khách gửi — chưa lọc/hiển thị ở đâu. */
+  region?: ConsultantRegion
   avatarUrl: string
   /** Hai chip chuyên môn trên thẻ; phần tử đầu là chuyên môn chính. */
   specialties: ConsultantSpecialty[]
@@ -621,6 +645,12 @@ export interface CmsDesignProject {
   customerEmail: string
   address: string
   buildingTypeLabel: string
+  /**
+   * Phương án Số tầng hồ sơ đã lưu (`CmsFloorOption.id`); bỏ trống khi loại
+   * công trình không áp dụng Số tầng. Dùng để đếm hồ sơ bị ảnh hưởng khi admin
+   * bỏ một phương án khỏi loại công trình (epic ConstructionTypeManagement §5).
+   */
+  floorOptionId?: string
   styleLabel: string
   /** Bước đang dừng: 1 Nhập liệu · 2 Dự toán · 3 Hồ sơ. */
   currentStep: 1 | 2 | 3
@@ -890,6 +920,12 @@ export interface CmsTransaction {
   customerEmail: string
   /** Gói được mua / gia hạn — gói thiết kế hoặc gói giám sát. */
   tier: PlanTier | SupervisionTier
+  /**
+   * Tên gói hiển thị lấy thẳng từ đơn hàng thật (`GET /payment-orders`). Ưu tiên
+   * hiện tên này thay cho nhãn theo `tier` khi có, vì đơn thật không kèm hạng gói
+   * cố định. Bản mock để trống → vẫn hiện theo `tier` như cũ.
+   */
+  planName?: string
   /** Số tiền, VND. */
   amount: number
   method: CmsTransactionMethod
@@ -1226,7 +1262,7 @@ export interface CmsSupervisionProject {
   customer?: CmsProjectOwner
   /** Gói đang dùng: `check` hoặc `control`. */
   packageTier: 'check' | 'control'
-  /** Mã gói hiển thị trên thẻ dự án, ví dụ `SVG-2026-0001-AT`. */
+  /** Mã gói hiển thị trên thẻ dự án, ví dụ `SVC-2026-0001-AT`. */
   packageCode: string
   engineer: string
   /** Ngày kích hoạt gói — mốc tính lịch chuẩn. */
@@ -1302,12 +1338,11 @@ export interface CmsContractorProject {
   imageUrl?: string
   /** Dữ liệu tóm tắt trên thẻ ở tab "Dự án đã thực hiện" (Hình S13 mở rộng). */
   verified?: boolean
-  category?: 'house' | 'villa' | 'renovation' | 'factory'
   areaM2?: number
   dimensions?: string
+  /** Dòng quy mô dạng chữ của dự án nhập trước khi có Số tầng / Tum theo danh mục — chỉ đọc. */
   scale?: string
   location?: string
-  constructionScope?: 'turnkey' | 'structural' | 'finishing'
   contractorRole?: 'general-contractor' | 'contractor'
   constructionMonths?: number
   constructionStartedAt?: string
@@ -1315,8 +1350,6 @@ export interface CmsContractorProject {
   mainItems?: string
   verifiedAt?: string
   galleryUrls?: string[]
-  /** Thế mạnh liên quan, dùng để lọc dự án khi bấm tag ở M06. */
-  tags?: string[]
 }
 
 /**
@@ -1496,6 +1529,8 @@ export interface CmsContractor {
   /**
    * Số lầu cao nhất nhà thầu nhận thi công, không tính trệt (0 = chỉ nhà trệt).
    * Bộ lọc "Quy mô công trình" ở S09 đọc trường này; bỏ trống thì không bị loại.
+   * Epic Quản lý nhà thầu không có trường này nên form quản trị không nhập — chỉ
+   * còn giá trị trong dữ liệu mẫu.
    */
   maxUpperFloors?: number
   photos: CmsContractorPhoto[]
@@ -1534,8 +1569,6 @@ export interface CmsContractor {
    * trỏ tới nhà thầu này, xóa đi thì thẻ lời mời của khách mất tên.
    */
   hidden?: boolean
-  /** Ghi chú nội bộ của vận hành. */
-  opsNote?: string
 }
 
 /* ===========================================================================

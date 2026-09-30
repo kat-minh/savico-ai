@@ -22,6 +22,7 @@ import { isContractorEligible, type CmsContractorMatching, type CmsServiceRegion
 import { useAdminCollection, useAdminDocument, useSaveAdminDocument } from '../../hooks/use-admin-data'
 import { todayKey } from '../../services/admin.service'
 import { AdminPage } from '../common/admin-page'
+import { MockApiNotice } from '../common/mock-api-notice'
 
 const { Text } = Typography
 
@@ -99,6 +100,7 @@ export function ContractorMatchingEditor() {
         </Space>
       }
     >
+      <MockApiNotice />
       <Form form={form} layout='vertical' initialValues={data}>
         <Row gutter={16}>
           <Col xs={24} lg={12}>

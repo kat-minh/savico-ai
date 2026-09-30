@@ -170,6 +170,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'self',
     tier: 'self',
+    imageUrl: '/images/supervision/self.webp',
     name: 'TỰ QUẢN LÝ',
     price: 0,
     durationMonths: 6,
@@ -185,6 +186,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'check',
     tier: 'check',
+    imageUrl: '/images/supervision/check.webp',
     name: 'AN TÂM',
     price: 8_900_000,
     durationMonths: 6,
@@ -202,6 +204,7 @@ export const SUPERVISION_PACKAGES_SEED: SupervisionPackage[] = [
   {
     id: 'control',
     tier: 'control',
+    imageUrl: '/images/supervision/control.webp',
     name: 'TOÀN DIỆN',
     price: 18_900_000,
     durationMonths: 6,

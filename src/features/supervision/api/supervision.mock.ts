@@ -322,7 +322,7 @@ function seedProject(projectId: string, projectName: string): SupervisionProject
     id: projectId,
     projectName,
     packageTier: 'check',
-    packageCode: `SVG-${new Date().getFullYear()}-0001-AT`,
+    packageCode: `SVC-${new Date().getFullYear()}-0001-AT`,
     engineer: 'KS. Trần Minh Hùng',
     activatedAt: shift(-62),
     expiresAt: shift(118),

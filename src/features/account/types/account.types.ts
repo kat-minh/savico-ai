@@ -19,8 +19,6 @@ export interface AccountPlan {
   design: PlanAllowance
   /** Lượt tra thư viện mẫu (mục V — sẽ bổ sung sau). */
   library: PlanAllowance
-  /** Lượt tư vấn 1:1 đi kèm gói; tab lịch sử hiển thị số ĐÃ DÙNG / tổng. */
-  consultation: PlanAllowance
 }
 
 /** Gói hiện tại + giao dịch thuộc riêng tài khoản đang đăng nhập. */

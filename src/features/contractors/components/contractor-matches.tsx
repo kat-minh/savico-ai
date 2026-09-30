@@ -1,16 +1,16 @@
 'use client'
 
-import { CircleCheck, Clock, Info, MapPin, Scale, Sparkles, Star, X } from 'lucide-react'
+import { CircleCheck, Clock, Info, MapPin, Scale, Star, X } from 'lucide-react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { useCmsDocument } from '@/shared/cms'
 import { EmptyState, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { CONTRACTOR_PREVIEW_ID, contractorCompareRoute } from '@/shared/constants/routes'
+import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute, contractorCompareRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import {
   CONTRACTOR_SORTS,
@@ -24,6 +24,7 @@ import {
 import { useBrief } from '../hooks/use-brief'
 import { useContractors } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
+import { briefReadiness, isBriefComplete } from '../services/brief.service'
 import { filterContractors, isInvited, remainingInvites } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import { useProjectPickerStore } from '../store/project-picker.store'
@@ -37,7 +38,7 @@ interface ContractorMatchesProps {
   projectId: string
 }
 
-const SORT_ICON = { match: Sparkles, distance: MapPin, rating: Scale, survey: Clock } as const
+const SORT_ICON = { distance: MapPin, rating: Scale, survey: Clock } as const
 
 /** Suy vùng từ tỉnh trong hồ sơ thay vì đoán theo cụm nhà thầu hiện có. */
 function serviceRegionFromProvince(provinceCode?: number | null, provinceName = ''): ServiceRegion {
@@ -160,6 +161,16 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
    */
   const preview = projectId === CONTRACTOR_PREVIEW_ID
 
+  // Hồ sơ còn là bản nháp (thiếu trường bắt buộc) thì chưa có gì để ghép nhà thầu —
+  // đưa khách về đúng nhóm còn thiếu của Bước 1 thay vì ra danh sách đề xuất (góp ý NT30).
+  const router = useRouter()
+  const briefIsDraft = !preview && brief !== undefined && !isBriefComplete(brief)
+  useEffect(() => {
+    if (!briefIsDraft || !brief) return
+    const group = briefReadiness(brief).hasProjectInfo ? 'needs' : 'site'
+    router.replace(`${contractorBriefRoute(projectId)}?focus=${group}`)
+  }, [briefIsDraft, brief, projectId, router])
+
   // Nấc bán kính, mặc định và khu vực được hỗ trợ do admin cấu hình (Quy tắc đề xuất nhà thầu).
   const rules = useCmsDocument('contractorMatching')
   const regions = useMemo(
@@ -169,7 +180,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [radiusChoice, setRadiusKm] = useState<SearchRadiusKm | null>(null)
   const radiusKm =
     radiusChoice !== null && rules.radiusOptions.includes(radiusChoice) ? radiusChoice : rules.defaultRadiusKm
-  const [sort, setSort] = useState<ContractorSort>('match')
+  const [sort, setSort] = useState<ContractorSort>('rating')
   /**
    * Vùng đang chọn. Mặc định lấy vùng có NHIỀU nhà thầu nhất trong danh bạ chứ
    * không cứng "Bắc" như ảnh mẫu — ảnh dùng dữ liệu demo miền Nam, còn danh bạ

@@ -98,8 +98,20 @@ export const ADMIN_ROUTES = {
   INSPECTIONS: '/admin/inspections',
   CUSTOMERS: '/admin/customers',
 
+  // Nhân sự & phân quyền — RBAC theo backend BMT (STORY-RBAC-001..004)
+  /** Vai trò và mã quyền (STORY-RBAC-001). */
+  ROLES: '/admin/roles',
+  /** Tài khoản nhân viên: tạo, gán vai trò, khóa, buộc đăng xuất (STORY-RBAC-002). */
+  STAFF: '/admin/staff',
+  /** Phân công nhân viên phụ trách gói giám sát (STORY-RBAC-003). */
+  ASSIGNMENTS: '/admin/assignments',
+
   // Danh mục nhập liệu công trình (spec admin #1, #17)
   BUILDING_TYPES: '/admin/building-types',
+  STYLES: '/admin/styles',
+  // Danh mục phạm vi thi công (STORY-CTR-003) — dùng cho hồ sơ + dự án nhà thầu.
+  CONSTRUCTION_SCOPES: '/admin/construction-scopes',
+  // Giữ để redirect link cũ sau khi gộp phong cách KT + NT về một màn.
   ARCHITECTURE_STYLES: '/admin/architecture-styles',
   INTERIOR_STYLES: '/admin/interior-styles',
   /** Cấu hình dự toán (spec admin #3). */
@@ -148,9 +160,16 @@ export const shareRoute = (token: string) => `/share/${token}`
  * R10), nên đường dẫn đặt theo TRẠNG THÁI ĐƠN chứ không theo số bước.
  * ======================================================================== */
 
-/** Bước 2/4 — Xác nhận đơn hàng (S03). `plan` là gói được chọn ở S01/S19. */
-export const checkoutConfirmRoute = (plan: string, projectId?: string) =>
-  `/checkout/confirm?plan=${plan}${projectId ? `&project=${projectId}` : ''}`
+/**
+ * Bước 2/4 — Xác nhận đơn hàng (S03). `plan` là gói được chọn ở S01/S19.
+ *
+ * `offer` là khóa chu kỳ / hình thức của gói theo BMT API (`Month` | `Year` cho
+ * gói thiết kế, `ConstructionSite` cho gói giám sát) — đơn `POST /payment-orders`
+ * cần `offerKey` chứ không chỉ `planId`. Bỏ trống với gói mock (checkout tự chạy
+ * mock).
+ */
+export const checkoutConfirmRoute = (plan: string, projectId?: string, offer?: string) =>
+  `/checkout/confirm?plan=${plan}${projectId ? `&project=${projectId}` : ''}${offer ? `&offer=${offer}` : ''}`
 
 /** Bước 3/4 — Thanh toán QR (S04). */
 export const checkoutPaymentRoute = (orderId: string) => `/checkout/${orderId}/payment`

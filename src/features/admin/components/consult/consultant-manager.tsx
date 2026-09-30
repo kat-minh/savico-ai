@@ -1,6 +1,7 @@
 'use client'
 
-import { CalendarOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, SwapOutlined } from '@ant-design/icons'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   App,
   Avatar,
@@ -10,247 +11,137 @@ import {
   Form,
   Input,
   InputNumber,
-  Rate,
   Row,
+  Segmented,
   Select,
   Space,
   Tag,
-  Tooltip,
   Typography
 } from 'antd'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import type { CmsBooking, Consultant } from '@/shared/cms'
-import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
-import { newAdminId, slugify, todayKey } from '../../services/admin.service'
-import { ImageUrlField, StatusSwitch } from '../common/field-kit'
-import { ResourceManager } from '../common/resource-manager'
-import { ConsultantScheduleModal } from './consultant-schedule'
+import type { Locale } from '@/i18n/routing'
+import { isApiError } from '@/shared/lib/api'
+import { formatDisplayDate } from '@/shared/utils'
+import { adminKeys } from '../../api/admin.keys'
+import {
+  CONSULT_LIMITS,
+  consultAdminApi,
+  type BmtAdminArchitect,
+  type BmtArchitectWrite
+} from '../../api/bmt/consult.api'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import { ImageUrlField } from '../common/field-kit'
+import type { RowAction } from '../common/row-actions-menu'
+import { StatusTag } from '../common/status-tag'
+import { TableAvatar } from '../common/table-thumb'
+import { ARCHITECT_CATEGORIES_KEY, ArchitectCategoryDrawer } from './architect-category-drawer'
 
-const { Text } = Typography
+const { Text, Paragraph } = Typography
 
-/** Số ảnh công trình tiêu biểu tối đa (ArchitectManagement §3). */
-const MAX_WORKS = 4
+type VisibilityFilter = 'all' | 'visible' | 'hidden'
 
-interface FormValues {
-  name: string
-  title: string
-  avatarUrl: string
-  intro: string
-  specialties: string[]
-  yearsExperience: number
-  works: Consultant['works']
-  visible: boolean
+const RESOURCE = 'architects'
+
+interface ArchitectFormValues {
+  expectedVersion?: string
+  fullName?: string
+  title?: string
+  avatarUrl?: string
+  yearsExperience?: number
+  projectCount?: number
+  introduction?: string
+  categoryIds?: string[]
+  isVisible?: boolean
+  companyName?: string
+  rating?: number | null
+  reviewCount?: number | null
+}
+
+function toWrite(values: ArchitectFormValues): BmtArchitectWrite {
+  const companyName = (values.companyName ?? '').trim()
+  return {
+    fullName: (values.fullName ?? '').trim(),
+    title: (values.title ?? '').trim(),
+    avatarUrl: (values.avatarUrl ?? '').trim(),
+    yearsExperience: values.yearsExperience ?? 0,
+    projectCount: values.projectCount ?? 0,
+    introduction: (values.introduction ?? '').trim(),
+    categoryIds: values.categoryIds ?? [],
+    isVisible: values.isVisible ?? false,
+    // Ba trường tùy chọn (nullable): để trống thì gửi null.
+    companyName: companyName || null,
+    rating: values.rating ?? null,
+    reviewCount: values.reviewCount ?? null
+  }
 }
 
 /**
- * KIẾN TRÚC SƯ TƯ VẤN 1:1 (epic ArchitectManagement).
+ * HỒ SƠ KIẾN TRÚC SƯ (STORY-CONSULT-001, BR-CONSULT-001) — dữ liệu trên BMT API.
  *
- * Thêm / sửa hồ sơ; KHÔNG xóa — chỉ chuyển sang Ẩn (lịch đã đặt vẫn trỏ tới
- * hồ sơ này). KTS mới mặc định Ẩn. Điểm và số lượt đánh giá do hệ thống tổng
- * hợp, không nhập tay. Nút lịch mở màn Quản lý lịch tư vấn.
+ * Bảy nhóm thông tin bắt buộc: ảnh đại diện, họ tên, chức danh, chuyên môn (ít
+ * nhất một category), số năm kinh nghiệm, số công trình, giới thiệu. Người tạo tự
+ * chọn Ẩn/Hiện, không qua phê duyệt. Không có xóa hồ sơ — chỉ Ẩn; hồ sơ ẩn không
+ * nhận yêu cầu mới nhưng yêu cầu cũ vẫn giữ. Danh mục chuyên môn quản lý trong
+ * ngăn kéo "Danh mục chuyên môn" ngay trên màn này.
  */
 export function ConsultantManager() {
   const t = useTranslations('admin')
-  const { message } = App.useApp()
-  const { data: consultants = [] } = useAdminCollection('consultants')
-  const { data: bookings = [] } = useAdminCollection('bookings')
-  const save = useSaveAdminItem('consultants')
+  const ta = useTranslations('admin.architects')
+  const { modal, message } = App.useApp()
+  const locale = useLocale() as Locale
+  const queryClient = useQueryClient()
+  const [visibility, setVisibility] = useState<VisibilityFilter>('all')
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const { data: categories = [] } = useQuery({
+    queryKey: ARCHITECT_CATEGORIES_KEY,
+    queryFn: consultAdminApi.listAllCategories
+  })
 
-  const [specialty, setSpecialty] = useState<string>('all')
-  const [status, setStatus] = useState<'all' | 'visible' | 'hidden'>('all')
-  const [scheduleFor, setScheduleFor] = useState<string | null>(null)
-
-  const today = todayKey()
-  const upcomingOf = (consultant: Consultant): CmsBooking[] =>
-    bookings.filter(
-      (booking) =>
-        booking.consultantId === consultant.id &&
-        booking.date >= today &&
-        (booking.status === 'pending' || booking.status === 'confirmed')
-    )
-  const specialtyOptions = [
-    ...new Map(consultants.flatMap((c) => c.specialties).map((item) => [item.label, item.label])).values()
-  ].map((label) => ({ value: label, label }))
-  const statusLabel = (visible: boolean) => (visible ? t('consultants.shown') : t('consultants.hidden'))
+  const statusLabel = (visible: boolean) => (visible ? ta('shown') : ta('hidden'))
 
   return (
     <>
-      <ResourceManager
-        collection='consultants'
+      <ApiResourceManager<BmtAdminArchitect>
         title={t('nav.consultants')}
-        description={t('consultants.description')}
+        description={ta('description')}
+        queryKey={adminKeys.bmt(RESOURCE, visibility)}
+        fetchPage={(params) =>
+          consultAdminApi.listArchitects({
+            pageIndex: params.pageIndex,
+            pageSize: params.pageSize,
+            isVisible: visibility === 'all' ? undefined : visibility === 'visible'
+          })
+        }
+        rowKey={(item) => item.id}
         drawerWidth={680}
-        allowDelete={false}
-        searchText={(item) => item.name}
-        filterItems={(item) =>
-          (specialty === 'all' || item.specialties.some((s) => s.label === specialty)) &&
-          (status === 'all' || item.visible === (status === 'visible'))
+        extraActions={
+          <Button icon={<AppstoreOutlined />} onClick={() => setCategoriesOpen(true)}>
+            {ta('manageCategories')}
+          </Button>
         }
-        filterKey={`${specialty}|${status}`}
         banner={
-          <Space wrap>
-            <Select
-              value={specialty}
-              onChange={setSpecialty}
-              style={{ minWidth: 200 }}
-              options={[{ value: 'all', label: t('consultants.allSpecialties') }, ...specialtyOptions]}
-            />
-            <Select<'all' | 'visible' | 'hidden'>
-              value={status}
-              onChange={setStatus}
-              style={{ minWidth: 180 }}
-              options={[
-                { value: 'all', label: t('consultants.allStatuses') },
-                { value: 'visible', label: t('consultants.shown') },
-                { value: 'hidden', label: t('consultants.hidden') }
-              ]}
-            />
-          </Space>
-        }
-        createItem={(): Consultant => ({
-          id: newAdminId('kts'),
-          name: '',
-          title: '',
-          avatarUrl: '',
-          specialties: [],
-          yearsExperience: 0,
-          projectCount: 0,
-          headline: '',
-          bio: [],
-          rating: 0,
-          reviewCount: 0,
-          works: [],
-          // KTS mới luôn Ẩn cho tới khi hoàn thiện hồ sơ (§3).
-          visible: false
-        })}
-        toFormValues={(item) => ({
-          ...item,
-          intro: item.bio.join('\n'),
-          specialties: item.specialties.map((s) => s.label)
-        })}
-        fromFormValues={(values, current) => {
-          const form = values as unknown as FormValues
-          const bio = form.intro
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean)
-          return {
-            ...current,
-            name: form.name.trim(),
-            title: form.title.trim(),
-            avatarUrl: form.avatarUrl,
-            bio,
-            // Thẻ lưới dùng dòng đầu của phần giới thiệu làm mô tả ngắn.
-            headline: bio[0] ?? '',
-            specialties: form.specialties.map((label) => ({ id: slugify(label), label: label.trim() })),
-            yearsExperience: form.yearsExperience,
-            works: (form.works ?? []).filter((work) => work.imageUrl).slice(0, MAX_WORKS),
-            visible: form.visible
-          }
-        }}
-        rowActions={(item) => {
-          const upcoming = upcomingOf(item)
-          return (
-            <>
-              <Tooltip title={t('consultants.manageSchedule')}>
-                <Button
-                  type='text'
-                  size='small'
-                  icon={<CalendarOutlined />}
-                  aria-label={t('consultants.manageSchedule')}
-                  onClick={() => setScheduleFor(item.id)}
-                />
-              </Tooltip>
-              <StatusSwitch
-                name={item.name}
-                current={statusLabel(item.visible)}
-                next={statusLabel(!item.visible)}
-                warning={
-                  item.visible && upcoming.length > 0 ? (
-                    <Text type='warning'>{t('consultants.hideWarning', { count: upcoming.length })}</Text>
-                  ) : null
-                }
-                onConfirm={async () => {
-                  await save.mutateAsync({ ...item, visible: !item.visible })
-                  message.success(t('feedback.saved'))
-                }}
-              />
-            </>
-          )
-        }}
-        renderView={(item) => (
-          <Descriptions
-            size='small'
-            column={1}
-            bordered
-            items={[
-              {
-                key: 'avatar',
-                label: t('consultants.avatar'),
-                children: <Avatar src={item.avatarUrl} size={64} />
-              },
-              { key: 'name', label: t('consultants.name'), children: item.name },
-              { key: 'title', label: t('consultants.title'), children: item.title },
-              { key: 'intro', label: t('consultants.intro'), children: item.bio.join(' ') },
-              {
-                key: 'specialties',
-                label: t('consultants.specialties'),
-                children: item.specialties.map((s) => <Tag key={s.id}>{s.label}</Tag>)
-              },
-              {
-                key: 'years',
-                label: t('consultants.experience'),
-                children: t('consultants.years', { years: item.yearsExperience })
-              },
-              {
-                key: 'rating',
-                label: t('consultants.rating'),
-                children: item.reviewCount
-                  ? `${item.rating.toFixed(1)}/5 (${item.reviewCount})`
-                  : t('consultants.noReviews')
-              },
-              {
-                key: 'works',
-                label: t('consultants.works'),
-                children: (
-                  <Space wrap>
-                    {item.works.map((work) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={work.imageUrl}
-                        src={work.imageUrl}
-                        alt={work.label}
-                        width={96}
-                        height={72}
-                        style={{ objectFit: 'cover', borderRadius: 6 }}
-                      />
-                    ))}
-                  </Space>
-                )
-              },
-              { key: 'status', label: t('consultants.status'), children: statusLabel(item.visible) },
-              {
-                key: 'upcoming',
-                label: t('consultants.upcoming'),
-                children: upcomingOf(item).length
-              }
+          <Segmented<VisibilityFilter>
+            value={visibility}
+            onChange={setVisibility}
+            options={[
+              { value: 'all', label: ta('allStatuses') },
+              { value: 'visible', label: ta('shown') },
+              { value: 'hidden', label: ta('hidden') }
             ]}
           />
-        )}
+        }
         columns={[
           {
-            title: t('consultants.name'),
-            dataIndex: 'name',
+            title: ta('name'),
+            key: 'name',
             render: (_, record) => (
               <Space size={10}>
-                <Avatar src={record.avatarUrl} size={36}>
-                  {record.name.slice(0, 1)}
-                </Avatar>
+                <TableAvatar src={record.avatarUrl} name={record.fullName} />
                 <div style={{ minWidth: 0 }}>
                   <Text strong style={{ display: 'block' }}>
-                    {record.name}
+                    {record.fullName}
                   </Text>
                   <Text type='secondary' style={{ fontSize: 12 }}>
                     {record.title}
@@ -260,190 +151,280 @@ export function ConsultantManager() {
             )
           },
           {
-            title: t('consultants.specialties'),
-            key: 'specialties',
-            width: 220,
+            title: ta('categories'),
+            key: 'categories',
+            width: 240,
             render: (_, record) => (
               <Space size={4} wrap>
-                {record.specialties.map((s) => (
-                  <Tag key={s.id}>{s.label}</Tag>
+                {record.categories.map((category) => (
+                  <Tag key={category.id}>{category.name}</Tag>
                 ))}
               </Space>
             )
           },
           {
-            title: t('consultants.experience'),
+            title: ta('experience'),
             dataIndex: 'yearsExperience',
+            width: 130,
+            render: (years: number) => ta('years', { years })
+          },
+          {
+            title: ta('projectCount'),
+            dataIndex: 'projectCount',
+            width: 130,
+            align: 'right'
+          },
+          {
+            title: ta('status'),
+            dataIndex: 'isVisible',
             width: 120,
-            render: (years: number) => t('consultants.years', { years })
-          },
-          {
-            title: t('consultants.rating'),
-            dataIndex: 'rating',
-            width: 150,
-            render: (rating: number, record) =>
-              record.reviewCount ? (
-                <Space size={6}>
-                  <Text strong>{rating.toFixed(1)}</Text>
-                  <Text type='secondary' style={{ fontSize: 12 }}>
-                    ({record.reviewCount})
-                  </Text>
-                </Space>
-              ) : (
-                <Text type='secondary'>{t('consultants.noReviews')}</Text>
-              )
-          },
-          {
-            title: t('consultants.status'),
-            dataIndex: 'visible',
-            width: 190,
-            render: (visible: boolean, record) => (
-              <Space orientation='vertical' size={2}>
-                <Tag color={visible ? 'green' : 'default'}>{statusLabel(visible)}</Tag>
-                {!visible && upcomingOf(record).length > 0 ? (
-                  <Text type='warning' style={{ fontSize: 12 }}>
-                    {t('consultants.hiddenWithBookings', { count: upcomingOf(record).length })}
-                  </Text>
-                ) : null}
-              </Space>
+            render: (visible: boolean) => (
+              <StatusTag tone={visible ? 'success' : 'off'}>{statusLabel(visible)}</StatusTag>
             )
           }
         ]}
+        // Không đặt sẵn Ẩn/Hiện: người tạo phải tự chọn (BR-CONSULT-001 khoản 8).
+        createValues={() => ({ categoryIds: [], yearsExperience: null, projectCount: null, isVisible: undefined })}
+        onCreate={(values) => consultAdminApi.createArchitect(toWrite(values as ArchitectFormValues))}
+        toFormValues={async (item) => {
+          const detail = await consultAdminApi.getArchitect(item.id)
+          return {
+            expectedVersion: detail.version,
+            fullName: detail.fullName,
+            title: detail.title,
+            avatarUrl: detail.avatarUrl,
+            yearsExperience: detail.yearsExperience,
+            projectCount: detail.projectCount,
+            introduction: detail.introduction,
+            categoryIds: detail.categoryIds,
+            isVisible: detail.isVisible,
+            companyName: detail.companyName ?? undefined,
+            rating: detail.rating ?? null,
+            reviewCount: detail.reviewCount ?? null
+          }
+        }}
+        onUpdate={(values, item) => {
+          const form = values as ArchitectFormValues
+          return consultAdminApi.updateArchitect(item.id, {
+            ...toWrite(form),
+            expectedVersion: form.expectedVersion ?? item.version
+          })
+        }}
+        rowActions={(item, ctx) => {
+          const current = item.isVisible ? ta('shown') : ta('hidden')
+          const next = item.isVisible ? ta('hidden') : ta('shown')
+          return [
+            {
+              key: 'visibility',
+              label: t('actions.switchStatus'),
+              icon: <SwapOutlined />,
+              onClick: () =>
+                modal.confirm({
+                  title: t('actions.switchStatusTitle', { name: item.fullName }),
+                  content: (
+                    <div style={{ maxWidth: 300 }}>
+                      <Text>{t('actions.switchStatusBody', { current, next })}</Text>
+                      {item.isVisible ? (
+                        <div style={{ marginTop: 6 }}>
+                          <Text type='warning'>{ta('hideWarning')}</Text>
+                        </div>
+                      ) : null}
+                    </div>
+                  ),
+                  okText: t('actions.confirm'),
+                  cancelText: t('actions.cancel'),
+                  // Danh sách không đủ trường (thiếu `version` và tập category);
+                  // đọc bản chi tiết rồi gửi lại nguyên hồ sơ với `isVisible` đảo.
+                  onOk: async () => {
+                    try {
+                      const detail = await consultAdminApi.getArchitect(item.id)
+                      await consultAdminApi.updateArchitect(item.id, {
+                        fullName: detail.fullName,
+                        title: detail.title,
+                        avatarUrl: detail.avatarUrl,
+                        yearsExperience: detail.yearsExperience,
+                        projectCount: detail.projectCount,
+                        introduction: detail.introduction,
+                        categoryIds: detail.categoryIds,
+                        isVisible: !detail.isVisible,
+                        companyName: detail.companyName ?? null,
+                        rating: detail.rating ?? null,
+                        reviewCount: detail.reviewCount ?? null,
+                        expectedVersion: detail.version
+                      })
+                      await ctx.refresh()
+                      message.success(t('feedback.saved'))
+                    } catch (err) {
+                      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                    }
+                  }
+                })
+            }
+          ] satisfies RowAction[]
+        }}
+        renderView={(item) => <ArchitectView item={item} locale={locale} />}
         renderForm={(form) => (
           <>
-            <ImageUrlField form={form} name='avatarUrl' label={t('consultants.avatar')} required />
+            <Form.Item name='expectedVersion' hidden>
+              <Input />
+            </Form.Item>
+            <ImageUrlField form={form} name='avatarUrl' label={ta('avatar')} required />
+            <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
+              {ta('avatarHint')}
+            </Text>
             <Row gutter={16}>
               <Col xs={24} md={14}>
                 <Form.Item
-                  name='name'
-                  label={t('consultants.name')}
+                  name='fullName'
+                  label={ta('name')}
                   rules={[
                     { required: true, whitespace: true, message: t('fields.requiredMessage') },
-                    { min: 2, max: 100, message: t('consultants.nameLength') }
+                    { max: CONSULT_LIMITS.fullName, message: t('fields.maxLength', { max: CONSULT_LIMITS.fullName }) }
                   ]}
                 >
-                  <Input maxLength={100} placeholder='KTS. Nguyễn Văn A' />
+                  <Input maxLength={CONSULT_LIMITS.fullName} />
                 </Form.Item>
               </Col>
               <Col xs={24} md={10}>
                 <Form.Item
                   name='title'
-                  label={t('consultants.title')}
+                  label={ta('title')}
                   rules={[
                     { required: true, whitespace: true, message: t('fields.requiredMessage') },
-                    { max: 100, message: t('fields.maxLength', { max: 100 }) }
+                    { max: CONSULT_LIMITS.title, message: t('fields.maxLength', { max: CONSULT_LIMITS.title }) }
                   ]}
                 >
-                  <Input maxLength={100} />
+                  <Input maxLength={CONSULT_LIMITS.title} />
                 </Form.Item>
               </Col>
             </Row>
+            <Form.Item name='companyName' label={ta('companyName')}>
+              <Input maxLength={CONSULT_LIMITS.companyName} />
+            </Form.Item>
             <Form.Item
-              name='intro'
-              label={t('consultants.intro')}
-              extra={t('consultants.introHint')}
-              rules={[
-                { required: true, whitespace: true, message: t('fields.requiredMessage') },
-                { max: 1000, message: t('fields.maxLength', { max: 1000 }) }
-              ]}
+              name='categoryIds'
+              label={ta('categories')}
+              extra={categories.length ? ta('categoriesHint') : <Text type='warning'>{ta('noCategories')}</Text>}
+              rules={[{ required: true, type: 'array', min: 1, message: ta('categoryRequired') }]}
             >
-              <Input.TextArea rows={4} maxLength={1000} showCount />
+              <Select
+                mode='multiple'
+                optionFilterProp='label'
+                options={categories.map((category) => ({ value: category.id, label: category.name }))}
+              />
             </Form.Item>
             <Row gutter={16}>
-              <Col xs={24} md={16}>
-                <Form.Item
-                  name='specialties'
-                  label={t('consultants.specialties')}
-                  extra={t('consultants.specialtiesHint')}
-                  rules={[{ required: true, type: 'array', min: 1, message: t('consultants.specialtyRequired') }]}
-                >
-                  <Select mode='tags' options={specialtyOptions} />
-                </Form.Item>
-              </Col>
               <Col xs={24} md={8}>
                 <Form.Item
                   name='yearsExperience'
-                  label={t('consultants.experience')}
-                  rules={[{ required: true, type: 'integer', min: 0, message: t('consultants.yearsRule') }]}
+                  label={ta('experience')}
+                  rules={[{ required: true, type: 'integer', min: 0, message: ta('nonNegative') }]}
                 >
                   <InputNumber min={0} precision={0} style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
+              <Col xs={24} md={8}>
+                <Form.Item
+                  name='projectCount'
+                  label={ta('projectCount')}
+                  rules={[{ required: true, type: 'integer', min: 0, message: ta('nonNegative') }]}
+                >
+                  <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item
+                  name='isVisible'
+                  label={ta('status')}
+                  rules={[{ required: true, message: ta('statusRequired') }]}
+                >
+                  <Select
+                    placeholder={ta('pickStatus')}
+                    options={[
+                      { value: true, label: ta('shown') },
+                      { value: false, label: ta('hidden') }
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
             </Row>
-
-            <Form.Item label={t('consultants.works')} tooltip={t('consultants.worksHint')}>
-              <Form.List name='works'>
-                {(fields, { add, remove }) => (
-                  <Space orientation='vertical' size={8} style={{ width: '100%' }}>
-                    {fields.map((field) => (
-                      <Row key={field.key} gutter={8}>
-                        <Col xs={13}>
-                          <Form.Item name={[field.name, 'imageUrl']} noStyle>
-                            <Input placeholder='https://…' />
-                          </Form.Item>
-                        </Col>
-                        <Col xs={9}>
-                          <Form.Item name={[field.name, 'label']} noStyle>
-                            <Input placeholder={t('consultants.workLabel')} />
-                          </Form.Item>
-                        </Col>
-                        <Col xs={2}>
-                          <Button
-                            type='text'
-                            danger
-                            icon={<DeleteOutlined />}
-                            aria-label={t('actions.removeRow')}
-                            onClick={() => remove(field.name)}
-                          />
-                        </Col>
-                      </Row>
-                    ))}
-                    <Button
-                      type='dashed'
-                      block
-                      icon={<PlusOutlined />}
-                      disabled={fields.length >= MAX_WORKS}
-                      onClick={() => add({ imageUrl: '', label: '' })}
-                    >
-                      {t('actions.addRow')}
-                    </Button>
-                  </Space>
-                )}
-              </Form.List>
-            </Form.Item>
-
-            <Form.Item name='visible' label={t('consultants.status')}>
-              <Select
-                options={[
-                  { value: true, label: t('consultants.shown') },
-                  { value: false, label: t('consultants.hidden') }
-                ]}
-              />
-            </Form.Item>
-
-            {/* Chỉ đọc: điểm và số lượt đánh giá do hệ thống tổng hợp từ đánh giá
-                của khách — spec cấm admin nhập tay. */}
-            <Form.Item label={t('consultants.rating')} extra={t('consultants.ratingReadOnly')} shouldUpdate>
-              {() => {
-                const reviewCount = (form.getFieldValue('reviewCount') as number | undefined) ?? 0
-                return reviewCount ? (
-                  <Space>
-                    <Rate allowHalf disabled value={(form.getFieldValue('rating') as number) ?? 0} />
-                    <Text type='secondary'>({reviewCount})</Text>
-                  </Space>
-                ) : (
-                  <Text type='secondary'>{t('consultants.noReviews')}</Text>
-                )
-              }}
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <Form.Item name='rating' label={ta('rating')}>
+                  <InputNumber min={0} max={5} step={0.1} precision={1} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={12}>
+                <Form.Item name='reviewCount' label={ta('reviewCount')}>
+                  <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item
+              name='introduction'
+              label={ta('intro')}
+              rules={[
+                { required: true, whitespace: true, message: t('fields.requiredMessage') },
+                {
+                  max: CONSULT_LIMITS.introduction,
+                  message: t('fields.maxLength', { max: CONSULT_LIMITS.introduction })
+                }
+              ]}
+            >
+              <Input.TextArea rows={6} maxLength={CONSULT_LIMITS.introduction} showCount />
             </Form.Item>
           </>
         )}
       />
 
-      <ConsultantScheduleModal
-        consultant={consultants.find((item) => item.id === scheduleFor) ?? null}
-        onClose={() => setScheduleFor(null)}
+      <ArchitectCategoryDrawer
+        open={categoriesOpen}
+        onClose={() => setCategoriesOpen(false)}
+        // Đổi tên category thì tên trong bảng KTS cũng phải đổi theo.
+        onChanged={() => queryClient.invalidateQueries({ queryKey: adminKeys.bmt(RESOURCE) })}
       />
     </>
+  )
+}
+
+/**
+ * Ngăn kéo "Xem chi tiết". Đọc bản chi tiết để có thêm `companyName`, `rating`,
+ * `reviewCount` (danh sách không trả), dùng dòng danh sách làm nền khi đang tải.
+ */
+function ArchitectView({ item, locale }: { item: BmtAdminArchitect; locale: Locale }) {
+  const ta = useTranslations('admin.architects')
+  const { data } = useQuery({
+    queryKey: adminKeys.bmt(RESOURCE, 'detail', item.id),
+    queryFn: () => consultAdminApi.getArchitect(item.id)
+  })
+  const dash = '—'
+  return (
+    <Descriptions
+      size='small'
+      column={1}
+      bordered
+      items={[
+        { key: 'avatar', label: ta('avatar'), children: <Avatar src={item.avatarUrl} size={64} /> },
+        { key: 'name', label: ta('name'), children: item.fullName },
+        { key: 'title', label: ta('title'), children: item.title },
+        { key: 'company', label: ta('companyName'), children: data?.companyName?.trim() || dash },
+        {
+          key: 'categories',
+          label: ta('categories'),
+          children: item.categories.map((category) => <Tag key={category.id}>{category.name}</Tag>)
+        },
+        { key: 'years', label: ta('experience'), children: ta('years', { years: item.yearsExperience }) },
+        { key: 'projects', label: ta('projectCount'), children: item.projectCount },
+        { key: 'rating', label: ta('rating'), children: data?.rating ?? dash },
+        { key: 'reviewCount', label: ta('reviewCount'), children: data?.reviewCount ?? dash },
+        {
+          key: 'intro',
+          label: ta('intro'),
+          children: <Paragraph style={{ whiteSpace: 'pre-line', margin: 0 }}>{item.introduction}</Paragraph>
+        },
+        { key: 'status', label: ta('status'), children: item.isVisible ? ta('shown') : ta('hidden') },
+        { key: 'created', label: ta('createdAt'), children: formatDisplayDate(item.createdOnUtc, locale) }
+      ]}
+    />
   )
 }

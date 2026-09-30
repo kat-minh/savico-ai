@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import type { Locale } from '@/i18n/routing'
 import { EmptyState, LoadingSpinner } from '@/shared/components/common'
 import { Table, TableBody, TableCell, TableRow } from '@/shared/components/ui/table'
-import { formatCurrency, formatDate, formatNumber } from '@/shared/utils'
+import { formatCurrency, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { designApi } from '../api/design.api'
 import { designKeys } from '../api/design.keys'
 import { COST_SECTIONS } from '../constants/design.constants'
@@ -54,7 +54,7 @@ export function SharedDossierView({ token }: { token: string }) {
         <p className='text-muted-foreground text-xs tracking-widest uppercase'>{t('eyebrow')}</p>
         <h1 className='text-3xl font-semibold tracking-tight text-balance'>{data.projectName}</h1>
         <p className='text-muted-foreground text-sm'>
-          {[data.address, formatDate(data.createdAt, locale)].filter(Boolean).join(' · ')}
+          {[data.address, formatDisplayDate(data.createdAt, locale)].filter(Boolean).join(' · ')}
         </p>
       </header>
 

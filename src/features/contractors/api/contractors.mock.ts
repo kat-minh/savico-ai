@@ -11,7 +11,7 @@ import {
 import { useAuthStore } from '@/shared/auth'
 import { mockDelay } from '@/shared/lib/mock'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import { emptyBrief, fullAddress } from '../services/brief.service'
+import { emptyBrief, fullAddress, isBlankBrief } from '../services/brief.service'
 import type {
   Contractor,
   ContractorReview,
@@ -159,7 +159,6 @@ function withDerivedStatus(brief: ProjectBrief): ProjectBrief {
  */
 function publicProfile({
   contact: _contact,
-  opsNote: _opsNote,
   history: _history,
   unverifyReason: _unverifyReason,
   ...contractor
@@ -220,9 +219,12 @@ export const mockContractorsApi = {
     const rules = cmsDb.getDocument('contractorMatching')
     const brief = loadStore().briefs[projectId]
     // Hồ sơ lưu nhãn loại công trình — quy về mã trong danh mục dùng chung để so năng lực.
-    const buildingTypeId = brief
-      ? (cmsDb.list('buildingTypes').find((type) => type.label === brief.buildingType)?.id ?? null)
-      : null
+    const buildingType = brief
+      ? cmsDb.list('buildingTypes').find((type) => type.label === brief.buildingType)
+      : undefined
+    // Chỉ Loại công trình đang Hoạt động mới dùng để đề xuất nhà thầu (ContractorManagement §12).
+    if (buildingType && buildingType.status !== 'active') return []
+    const buildingTypeId = buildingType?.id ?? null
     const context = brief ? { buildingTypeId, scope: brief.scope } : undefined
     if (!isBriefSupported(rules, context)) return []
     const today = new Date().toISOString().slice(0, 10)
@@ -242,6 +244,8 @@ export const mockContractorsApi = {
   createBrief: async (): Promise<ProjectBrief> => {
     await mockDelay(200)
     const store = loadStore()
+    // Hồ sơ mở form rồi thoát, chưa điền gì, thì bỏ đi — không để lại "Hồ sơ chưa đặt tên" (NT30).
+    for (const [id, brief] of Object.entries(store.briefs)) if (isBlankBrief(brief)) delete store.briefs[id]
     const now = new Date().toISOString()
     const brief: ProjectBrief = {
       ...emptyBrief(),
@@ -277,7 +281,9 @@ export const mockContractorsApi = {
 
   listBriefs: async (): Promise<ProjectBrief[]> => {
     await mockDelay(150)
-    return Object.values(loadStore().briefs).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    return Object.values(loadStore().briefs)
+      .filter((brief) => !isBlankBrief(brief))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   },
 
   listBriefSummaries: async (): Promise<ProjectBriefSummary[]> => {
@@ -289,6 +295,7 @@ export const mockContractorsApi = {
       counts.set(invitation.projectId, (counts.get(invitation.projectId) ?? 0) + 1)
     }
     return Object.values(loadStore().briefs)
+      .filter((brief) => !isBlankBrief(brief))
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .map((brief) => ({ brief: withDerivedStatus(brief), invitedCount: counts.get(brief.id) ?? 0 }))
   },

@@ -10,10 +10,8 @@ import {
   Form,
   Grid,
   Input,
-  Popconfirm,
   Space,
   Table,
-  Tooltip,
   type FormInstance,
   type TableProps
 } from 'antd'
@@ -25,6 +23,8 @@ import { useAdminCollection, useDeleteAdminItem, useSaveAdminItem } from '../../
 import { useUnsavedGuard } from '../../hooks/use-unsaved-guard'
 import { AdminPage } from './admin-page'
 import { ContentLocaleBanner } from './content-locale-banner'
+import { MockApiNotice } from './mock-api-notice'
+import { RowActionsMenu, type RowAction } from './row-actions-menu'
 
 /** Mọi bản ghi trong kho đều có `id` — engine dựa vào đó để sửa / xóa. */
 type WithId = { id: string }
@@ -76,8 +76,11 @@ export interface ResourceManagerProps<K extends CmsCollection> {
   deleteBlockedReason?: (item: CmsCollectionMap[K]) => string | null
   /** Nội dung xác nhận xóa riêng cho từng bản ghi (tên, số liệu liên quan…). */
   deleteConfirm?: (item: CmsCollectionMap[K]) => ReactNode
-  /** Nút riêng của từng dòng (chuyển trạng thái, xác minh…), đứng trước cây bút. */
-  rowActions?: (item: CmsCollectionMap[K]) => ReactNode
+  /**
+   * Hành động riêng của từng dòng (chuyển trạng thái, xác minh…) — trả DANH SÁCH
+   * `RowAction[]`, hiện trong menu "…" kèm icon + chữ, đứng TRƯỚC Xem/Sửa/Xóa.
+   */
+  rowActions?: (item: CmsCollectionMap[K]) => RowAction[]
   /** Ngăn kéo "Xem chi tiết" chỉ đọc — có thì dòng nào cũng có nút con mắt. */
   renderView?: (item: CmsCollectionMap[K]) => ReactNode
   /**
@@ -85,6 +88,11 @@ export interface ResourceManagerProps<K extends CmsCollection> {
    * hợp lệ. Dùng cho quy tắc không gắn với một ô (trùng tên, điều kiện kích hoạt…).
    */
   validate?: (next: CmsCollectionMap[K], current: CmsCollectionMap[K], isNew: boolean) => string | null
+  /**
+   * Hỏi lại trước khi lưu — trả về nội dung cảnh báo (ví dụ số hồ sơ bị ảnh
+   * hưởng) để hiện hộp xác nhận, `null` khi lưu thẳng.
+   */
+  confirmSave?: (next: CmsCollectionMap[K], current: CmsCollectionMap[K], isNew: boolean) => ReactNode | null
   /**
    * Đổi giá trị này (bộ lọc ngoài vừa đổi) là bảng quay về trang đầu — spec yêu
    * cầu mọi danh sách về trang 1 khi đổi từ khóa hoặc bộ lọc.
@@ -127,6 +135,7 @@ export function ResourceManager<K extends CmsCollection>({
   rowActions,
   renderView,
   validate,
+  confirmSave,
   filterKey,
   initialQuery,
   initialViewId,
@@ -217,6 +226,16 @@ export function ResourceManager<K extends CmsCollection>({
       message.error(problem)
       return
     }
+    const warning = confirmSave?.(next, editing, isNew)
+    if (warning) {
+      const confirmed = await modal.confirm({
+        title: t('actions.confirmSaveTitle'),
+        content: warning,
+        okText: t('actions.save'),
+        cancelText: t('actions.keepEditing')
+      })
+      if (!confirmed) return
+    }
     await save.mutateAsync(next)
     await afterSave?.(next, editing)
     message.success(isNew ? t('feedback.created') : t('feedback.saved'))
@@ -227,57 +246,49 @@ export function ResourceManager<K extends CmsCollection>({
     title: t('table.actions'),
     key: 'actions',
     fixed: 'right',
-    render: (_, record) => (
-      <Space size={0}>
-        {rowActions ? rowActions(record) : null}
-        {renderView ? (
-          <Tooltip title={t('actions.view')}>
-            <Button
-              type='text'
-              size='small'
-              icon={<EyeOutlined />}
-              aria-label={t('actions.view')}
-              onClick={() => setViewing(record)}
-            />
-          </Tooltip>
-        ) : null}
-        {allowEdit ? (
-          <Button
-            type='text'
-            size='small'
-            icon={<EditOutlined />}
-            aria-label={t('actions.edit')}
-            onClick={() => openEditor(record, false)}
-          />
-        ) : null}
-        {allowDelete && deleteBlockedReason?.(record) ? (
-          <Tooltip title={deleteBlockedReason(record)}>
-            <Button
-              type='text'
-              size='small'
-              danger
-              disabled
-              icon={<DeleteOutlined />}
-              aria-label={t('actions.delete')}
-            />
-          </Tooltip>
-        ) : allowDelete ? (
-          <Popconfirm
-            title={t('actions.deleteConfirmTitle')}
-            description={deleteConfirm ? deleteConfirm(record) : t('actions.deleteConfirmBody')}
-            okText={t('actions.delete')}
-            okButtonProps={{ danger: true }}
-            cancelText={t('actions.cancel')}
-            onConfirm={async () => {
-              await remove.mutateAsync((record as WithId).id)
-              message.success(t('feedback.deleted'))
-            }}
-          >
-            <Button type='text' size='small' danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-          </Popconfirm>
-        ) : null}
-      </Space>
-    )
+    align: 'right',
+    render: (_, record) => {
+      const actions: RowAction[] = [...(rowActions?.(record) ?? [])]
+      if (renderView) {
+        actions.push({
+          key: 'view',
+          label: t('actions.view'),
+          icon: <EyeOutlined />,
+          onClick: () => setViewing(record)
+        })
+      }
+      if (allowEdit) {
+        actions.push({
+          key: 'edit',
+          label: t('actions.edit'),
+          icon: <EditOutlined />,
+          onClick: () => openEditor(record, false)
+        })
+      }
+      if (allowDelete) {
+        const blocked = deleteBlockedReason?.(record)
+        actions.push({
+          key: 'delete',
+          label: t('actions.delete'),
+          icon: <DeleteOutlined />,
+          danger: true,
+          disabled: Boolean(blocked),
+          onClick: () =>
+            modal.confirm({
+              title: t('actions.deleteConfirmTitle'),
+              content: deleteConfirm ? deleteConfirm(record) : t('actions.deleteConfirmBody'),
+              okText: t('actions.delete'),
+              okButtonProps: { danger: true },
+              cancelText: t('actions.cancel'),
+              onOk: async () => {
+                await remove.mutateAsync((record as WithId).id)
+                message.success(t('feedback.deleted'))
+              }
+            })
+        })
+      }
+      return <RowActionsMenu actions={actions} moreLabel={t('actions.more')} />
+    }
   }
 
   /**
@@ -290,6 +301,9 @@ export function ResourceManager<K extends CmsCollection>({
       <Empty description={t('table.noSearchResult', { query: query.trim() })}>
         <Button onClick={() => setQuery('')}>{t('table.clearSearch')}</Button>
       </Empty>
+    ) : all.length > 0 ? (
+      // Có dữ liệu nhưng bộ lọc ngoài loại hết — không phải "chưa có bản ghi".
+      <Empty description={t('table.noFilterResult')} />
     ) : (
       <Empty description={t('table.empty')}>
         {createItem ? (
@@ -315,6 +329,7 @@ export function ResourceManager<K extends CmsCollection>({
         </>
       }
     >
+      <MockApiNotice />
       {isLocalizedCollection(collection) ? <ContentLocaleBanner /> : null}
       {banner}
 

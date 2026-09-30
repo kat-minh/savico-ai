@@ -16,6 +16,7 @@ import { contractorMatchesRoute, ROUTES, supervisionRoute } from '@/shared/const
 import { usePageEntrance } from '@/shared/hooks'
 import { clearHandbookQuotaReturn, readHandbookQuotaReturn } from '@/shared/lib'
 import { formatCurrency } from '@/shared/utils'
+import { isApiOrderId } from '../constants/checkout.constants'
 import { routeForStatus, useOrder } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -180,13 +181,20 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
   }
 
   const isSupervision = order.product.kind === 'supervision'
-  const planName = isSupervision
-    ? tSupervision(order.product.name as 'check' | 'control')
-    : tPlans(order.product.name as 'basic' | 'advanced' | 'pro')
+  // Đơn MOCK dùng mã hạng gói ('basic'/'check') làm khóa dịch; đơn API mang sẵn
+  // tên gói hiển thị (`planName`) nên in thẳng, không tra bản dịch theo tên.
+  const isApiOrder = isApiOrderId(order.id)
+  const planName = isApiOrder
+    ? order.product.name
+    : isSupervision
+      ? tSupervision(order.product.name as 'check' | 'control')
+      : tPlans(order.product.name as 'basic' | 'advanced' | 'pro')
   // Nhãn nhóm gói in dưới tên gói trong thẻ "Gói của tôi" (Hình S08).
-  const planTag = isSupervision
-    ? tSupervisionTags(order.product.name as 'check' | 'control')
-    : tPlanTags(order.product.name as 'basic' | 'advanced' | 'pro')
+  const planTag = isApiOrder
+    ? null
+    : isSupervision
+      ? tSupervisionTags(order.product.name as 'check' | 'control')
+      : tPlanTags(order.product.name as 'basic' | 'advanced' | 'pro')
 
   // Bề ngang đo trên Hình S08 (ảnh gốc 800×533): phần nội dung chạy từ x=20 đến
   // x=767, tức 748/800 = 93.5% bề ngang trang. Vì vậy dùng `w-[93.5%]` chứ không
@@ -356,7 +364,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
             </div>
             <StartOptions
               findHref={order.projectId ? contractorMatchesRoute(order.projectId) : ROUTES.CONTRACTORS}
-              hasPlan
+              isPro={order.product.name === 'pro'}
               completionMode
               animateEntrance={entranceState === 'play'}
               onTurnkeySelect={() => toast.success(t('turnkeyContactConfirmation'))}

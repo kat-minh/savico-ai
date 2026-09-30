@@ -64,9 +64,20 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
             <p className='text-primary-foreground max-w-3xl text-sm'>{t('subtitle')}</p>
           </div>
 
+          {/* Dưới `lg` bỏ "Xem tất cả gói", thay bằng dòng "Tham khảo: Bảng giá" (Responsive case 11). */}
+          <p className='text-primary-foreground/80 flex items-center gap-1.5 text-sm lg:hidden'>
+            {t('referenceLabel')}
+            <Link
+              href={ROUTES.PLANS}
+              className='text-primary-foreground inline-flex items-center gap-1 font-medium underline underline-offset-4'
+            >
+              {t('referenceLink')}
+              <ChevronRight className='size-4' />
+            </Link>
+          </p>
           <Link
             href={ROUTES.PLANS}
-            className='inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
+            className='hidden items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline lg:inline-flex'
           >
             <span className='sm:hidden'>{t('viewAllMobile')}</span>
             <span className='hidden sm:inline'>{t('viewAll')}</span>

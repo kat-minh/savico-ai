@@ -1,8 +1,8 @@
 import type { AuthUser } from '@/shared/auth'
 import { ROLES } from '@/shared/auth'
-import { AUTH_COOKIE_NAME, MOCK_SESSION_USER_KEY } from '@/shared/auth/auth.constants'
+import { MOCK_SESSION_USER_KEY, clearSessionMarker, hasSessionMarker, setSessionMarker } from '@/shared/auth'
 import type { ApiError } from '@/shared/types'
-import type { LoginPayload, LoginResponse } from '../types/auth.types'
+import type { LoginPayload, LoginResponse, RegisterPayload } from '../types/auth.types'
 
 /**
  * In-memory / localStorage-backed auth mock for local development WITHOUT a
@@ -39,24 +39,6 @@ const apiError = (message: string, status: number): ApiError => ({
   message
 })
 
-function setSessionCookie(): void {
-  // Non-httpOnly cookie (the real one is httpOnly, but JS can't set those).
-  // The middleware only checks for its presence, not its value.
-  document.cookie = `${AUTH_COOKIE_NAME}=mock; path=/; max-age=86400; SameSite=Lax`
-}
-
-function clearSessionCookie(): void {
-  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`
-}
-
-/** Whether the (mock) session cookie is still present. */
-function hasSessionCookie(): boolean {
-  return (
-    typeof document !== 'undefined' &&
-    document.cookie.split(';').some((c) => c.trim().startsWith(`${AUTH_COOKIE_NAME}=`))
-  )
-}
-
 export const mockAuthApi = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
     await delay()
@@ -71,14 +53,14 @@ export const mockAuthApi = {
       roles: rolesForEmail(payload.email)
     }
     localStorage.setItem(MOCK_SESSION_USER_KEY, JSON.stringify(user))
-    setSessionCookie()
+    setSessionMarker()
     return { user }
   },
 
   async logout(): Promise<void> {
     await delay(150)
     localStorage.removeItem(MOCK_SESSION_USER_KEY)
-    clearSessionCookie()
+    clearSessionMarker()
   },
 
   async getCurrentUser(): Promise<AuthUser> {
@@ -87,10 +69,55 @@ export const mockAuthApi = {
     // The session is only valid if BOTH the profile and the cookie exist.
     // Once the cookie expires, drop the stale profile so the client store
     // agrees with the middleware (otherwise login ↔ dashboard redirect loop).
-    if (!raw || !hasSessionCookie()) {
+    if (!raw || !hasSessionMarker()) {
       localStorage.removeItem(MOCK_SESSION_USER_KEY)
       throw apiError('No active session (mock).', 401)
     }
     return JSON.parse(raw) as AuthUser
+  },
+
+  async register(payload: RegisterPayload): Promise<void> {
+    await delay(900)
+    if (!payload.email) throw apiError('Email is required (mock).', 400)
+  },
+
+  // Bản mock không có tài khoản bắt buộc đổi mật khẩu lần đầu, nên hai hàm này
+  // chỉ để khớp giao diện với API thật.
+  async changePassword(): Promise<string> {
+    await delay(400)
+    return 'Password changed (mock).'
+  },
+
+  // Luồng quên mật khẩu (mock): gửi mã luôn "thành công"; mã hợp lệ là số > 0;
+  // đặt lại mật khẩu luôn thành công. Chỉ để thử giao diện 3 bước không cần BE.
+  async requestPasswordReset(): Promise<void> {
+    await delay(700)
+  },
+
+  async verifyResetCode(_email: string, code: number): Promise<void> {
+    await delay(400)
+    if (!Number.isInteger(code) || code <= 0) throw apiError('Mã không đúng (mock).', 400)
+  },
+
+  async resetPassword(): Promise<void> {
+    await delay(500)
+    clearSessionMarker()
+  },
+
+  // Xác minh email (mock): mã hợp lệ là số > 0; gửi lại luôn "thành công".
+  async verifyAccount(_email: string, code: number): Promise<void> {
+    await delay(400)
+    if (!Number.isInteger(code) || code <= 0) throw apiError('Mã không đúng (mock).', 400)
+  },
+
+  async resendVerifyCode(_email: string): Promise<void> {
+    await delay(500)
+  },
+
+  async relogin(email: string): Promise<LoginResponse> {
+    await delay(200)
+    const raw = localStorage.getItem(MOCK_SESSION_USER_KEY)
+    const user = raw ? (JSON.parse(raw) as AuthUser) : { ...MOCK_USER, email }
+    return { user: { ...user, mustChangePassword: false } }
   }
 }

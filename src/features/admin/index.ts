@@ -17,8 +17,7 @@ export { QuotaEditor } from './components/business/quota-editor'
 // Thư viện — kho mẫu và video do đội nội dung nhập, đứng riêng khỏi nhóm CMS
 // theo trang: đây là BẢNG BẢN GHI thêm/sửa/xóa hằng ngày, không phải chữ của
 // một trang cụ thể.
-export { Template2DManager } from './components/handbook/template-2d-manager'
-export { Template3DManager } from './components/handbook/template-3d-manager'
+export { LibraryTemplateManager } from './components/handbook/library-template-manager'
 export { ArticleManager } from './components/handbook/article-manager'
 export { ArticleLabelManager } from './components/handbook/article-label-manager'
 export { HandbookStepManager } from './components/handbook/handbook-step-manager'
@@ -28,6 +27,7 @@ export { GuideVideoManager } from './components/guide/guide-manager'
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
 export { OrderManager } from './components/ops/order-manager'
 export { DiscountManager } from './components/ops/discount-manager'
+export { ContractorAdminManager } from './components/ops/contractor-admin-manager'
 export { ContractorManager } from './components/ops/contractor-manager'
 export { ContractorDetail } from './components/ops/contractor-detail'
 export { ContractorMatchingEditor } from './components/ops/contractor-matching'
@@ -41,8 +41,12 @@ export { InvitationManager } from './components/business/invitation-manager'
 export { InspectionManager } from './components/business/inspection-manager'
 export { CustomerManager } from './components/business/customer-manager'
 export { CustomerDetail } from './components/business/customer-detail'
+export { RoleManager } from './components/access/role-manager'
+export { StaffManager } from './components/access/staff-manager'
+export { AssignmentManager } from './components/access/assignment-manager'
 
 export { BuildingTypeManager } from './components/catalog/building-type-manager'
+export { ConstructionScopeManager } from './components/catalog/construction-scope-manager'
 export { StyleManager } from './components/catalog/style-manager'
 export { CostGroupManager } from './components/estimate/cost-group-manager'
 export { CostItemManager } from './components/estimate/cost-item-manager'
@@ -51,6 +55,12 @@ export { EstimateAdviceEditor } from './components/estimate/estimate-advice-edit
 
 export { ADMIN_NAV, ADMIN_NAV_ITEMS, type AdminNavGroup, type AdminNavItem } from './components/layout/admin-nav.config'
 export { adminApi } from './api/admin.api'
+export {
+  ApiResourceManager,
+  type ApiPageParams,
+  type ApiResourceManagerProps,
+  type ApiRowContext
+} from './components/common/api-resource-manager'
 export { adminKeys } from './api/admin.keys'
 export {
   useAdminCollection,

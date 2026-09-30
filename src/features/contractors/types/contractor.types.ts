@@ -52,7 +52,7 @@ export type StartWindow = 'asap' | 'in-1-3-months' | 'in-3-6-months' | 'undecide
 export type BriefStatus = 'ready' | 'inviting' | 'contracted'
 
 /** Chip sắp xếp danh sách nhà thầu (S12) và tab xếp hạng ở landing (S09). */
-export type ContractorSort = 'match' | 'distance' | 'rating' | 'survey'
+export type ContractorSort = 'rating' | 'distance' | 'survey'
 
 /** Bán kính tìm kiếm — 4 nấc ở header dự án (S12). */
 /** Bán kính tìm kiếm (km) — các nấc do admin cấu hình ở Quy tắc đề xuất nhà thầu. */
@@ -187,7 +187,7 @@ export type ContractorLegalProfile = CmsContractorLegalProfile
 
 /**
  * Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. Trường
- * `contact` / `opsNote` chỉ dành cho vận hành, trang công khai không in ra.
+ * `contact` chỉ dành cho vận hành, trang công khai không in ra.
  */
 export type Contractor = CmsContractor
 

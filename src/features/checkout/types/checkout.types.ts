@@ -41,6 +41,12 @@ export type OrderProduct = CmsOrderProduct
 /** Một đơn mua gói. */
 export type Order = CmsOrder
 
+/**
+ * Khóa offer của BMT API: `Month` / `Year` cho gói thiết kế, `ConstructionSite`
+ * cho gói giám sát. Đơn `POST /payment-orders` cần `offerKey` kèm `planId`.
+ */
+export type OfferKey = 'Month' | 'Year' | 'ConstructionSite'
+
 /** Dữ liệu tạo đơn từ màn xác nhận (S03). */
 export interface CreateOrderPayload {
   productId: string
@@ -49,4 +55,9 @@ export interface CreateOrderPayload {
   buyer: OrderBuyer
   invoice: OrderInvoice
   discountCode: string
+  /**
+   * Chu kỳ / hình thức gói (BMT API). Bỏ trống với gói mock — mock bỏ qua trường
+   * này; gói API (planId là UUID) gửi kèm khi tạo đơn.
+   */
+  offerKey?: OfferKey
 }

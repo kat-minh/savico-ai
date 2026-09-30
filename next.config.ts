@@ -7,8 +7,18 @@ import createNextIntlPlugin from 'next-intl/plugin'
  */
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
+/**
+ * Origin of the BMT .NET API. The browser calls `/api/v1/*` on this app and
+ * Next forwards it here, so the API's httpOnly `accessToken`/`refreshToken`
+ * cookies are set on our own domain — no third-party cookies, no CORS.
+ */
+const BMT_API_ORIGIN = (process.env.BMT_API_ORIGIN ?? 'https://bmt-api.vnzdna.com').replace(/\/$/, '')
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  async rewrites() {
+    return [{ source: '/api/v1/:path*', destination: `${BMT_API_ORIGIN}/api/v1/:path*` }]
+  },
   poweredByHeader: false,
   // Type-safe `Link`/`router` routes.
   typedRoutes: true,

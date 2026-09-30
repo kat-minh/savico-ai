@@ -25,7 +25,7 @@ import { cn } from '@/shared/lib/utils'
 import { MATCHES_PROJECT_CHANGED_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBriefSummaries } from '../hooks/use-brief-summaries'
 import { useCreateBrief } from '../hooks/use-brief'
-import { shortAddress } from '../services/brief.service'
+import { briefReadiness, isBriefComplete, shortAddress } from '../services/brief.service'
 import { useProjectPickerStore } from '../store/project-picker.store'
 import type { ProjectBriefSummary } from '../types/contractor.types'
 
@@ -106,7 +106,9 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
                       viewInvites: t('viewInvites'),
                       menu: t('rowMenu'),
                       edit: tCommon('editBrief'),
-                      view: t('viewBrief')
+                      view: t('viewBrief'),
+                      draft: t('draft'),
+                      completeBrief: t('completeBrief')
                     }}
                   />
                 </li>
@@ -192,6 +194,8 @@ interface BriefRowLabels {
   menu: string
   edit: string
   view: string
+  draft: string
+  completeBrief: string
 }
 
 /** Một dòng dự án trong hộp thoại (Hình 3, Hình 4). */
@@ -211,6 +215,10 @@ function BriefRow({
   const { brief, invitedCount } = summary
   const contracted = brief.status === 'contracted'
   const full = invitedCount >= MAX_INVITATIONS
+  // Thiếu trường bắt buộc = "Bản nháp": không cho "Chọn" (trang Đề xuất sẽ ghép nhà
+  // thầu trên dữ liệu rỗng) mà dẫn về đúng nhóm còn thiếu của Bước 1 (góp ý NT30).
+  const draft = !contracted && !isBriefComplete(brief)
+  const missingGroup = briefReadiness(brief).hasProjectInfo ? 'needs' : 'site'
 
   return (
     // Đã chốt thầu thì dòng LÀM MỜ và bỏ hẳn nút hành động: dự án đó xong việc
@@ -262,11 +270,23 @@ function BriefRow({
           >
             {contracted ? labels.contracted : invitedCount === 0 ? labels.notInvited : labels.invited}
           </span>
+          {draft ? (
+            <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+              {labels.draft}
+            </span>
+          ) : null}
         </div>
       </div>
 
       <div className='flex shrink-0 items-center gap-2'>
-        {contracted ? null : current ? (
+        {contracted ? null : draft ? (
+          <Button asChild>
+            <Link href={`${contractorBriefRoute(brief.id)}?focus=${missingGroup}`} onClick={onNavigate}>
+              <Pencil className='size-4' />
+              {labels.completeBrief}
+            </Link>
+          </Button>
+        ) : current ? (
           // Hình 4: "Đang chọn" là VIÊN NHÃN chứ không phải nút — dòng này đang
           // được chọn sẵn nên chẳng có gì để bấm; dựng thành nút (kể cả nút đã
           // khoá) là mời người ta bấm vào một thứ không phản hồi.

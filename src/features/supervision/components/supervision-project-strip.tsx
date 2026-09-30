@@ -1,15 +1,16 @@
 'use client'
 
 import { ArrowRight, Check, ShieldCheck } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import type { Locale } from '@/i18n/routing'
 import { Link } from '@/i18n/navigation'
 import { useSiteImage } from '@/shared/cms'
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { ROUTES, supervisionRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
-import { formatDayMonth } from '@/shared/utils'
+import { formatDisplayDate } from '@/shared/utils'
 import { useStageLabel } from '../hooks/use-stage-label'
 import { useSupervisionProject } from '../hooks/use-supervision'
 import { currentStage, daysUntil, handoverDrift, progressPercent } from '../services/supervision.service'
@@ -34,6 +35,7 @@ interface SupervisionProjectStripProps {
  */
 export function SupervisionProjectStrip({ projectId }: SupervisionProjectStripProps) {
   const t = useTranslations('supervision.account')
+  const locale = useLocale() as Locale
   const tStages = useStageLabel()
   // Hình S24 rút gọn tên giai đoạn ("Kỹ thuật & chống thấm") để dòng "Giai đoạn
   // 4/6 · … · Còn 16 ngày" nằm gọn MỘT dòng cạnh tấm ảnh; tên đầy đủ theo R5
@@ -123,7 +125,7 @@ export function SupervisionProjectStrip({ projectId }: SupervisionProjectStripPr
           <span className={cn(drift.early ? 'text-primary-strong' : 'text-destructive')}>
             {t(drift.early ? 'aheadOfPlan' : 'behindPlan')}
           </span>{' '}
-          · {t('handoverInline', { date: formatDayMonth(project.handoverDate, { year: true }) })}
+          · {t('handoverInline', { date: formatDisplayDate(project.handoverDate, locale) })}
         </p>
 
         <Button

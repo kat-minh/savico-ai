@@ -1,12 +1,15 @@
 import { env } from '@/shared/config/env'
-import { http } from '@/shared/lib/api'
-import type { GuideArticle, GuideVideo } from '../types/guide.types'
+import { bmtGuideApi } from './guide.bmt'
 import { mockGuideApi } from './guide.mock'
 
-/** Tài liệu hướng dẫn sử dụng — nội dung tĩnh do admin biên soạn. */
-const GuideApi = {
-  listVideos: () => http.get<GuideVideo[]>('/guide/videos'),
-  listArticles: () => http.get<GuideArticle[]>('/guide/articles')
-}
+/**
+ * Chức năng đã nối BMT API — GIỮ MOCK LÀM NỀN (tự về mock khi API rỗng/lỗi).
+ *
+ * Đã nối: `listVideos` (`GET /guides`). `listArticles` (bài hướng dẫn) BE không
+ * có endpoint → luôn mock (xem `docs/BE_API_GAPS.md` mục 2.5).
+ */
+const BmtGuideApi = {
+  listVideos: bmtGuideApi.listVideos
+} satisfies Partial<typeof mockGuideApi>
 
-export const guideApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockGuideApi : GuideApi
+export const guideApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockGuideApi : { ...mockGuideApi, ...BmtGuideApi }

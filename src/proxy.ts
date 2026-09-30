@@ -32,6 +32,15 @@ function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
  *     authorization is enforced server-side by the API.)
  */
 export default function proxy(request: NextRequest) {
+  // TẠM ẨN tiếng Anh: mọi `/en` và `/en/*` đá về `/vi` tương ứng. Giữ locale
+  // 'en' trong cấu hình để bật lại dễ (chỉ cần bỏ khối này + hiện lại toggle).
+  const { pathname: rawPath } = request.nextUrl
+  if (rawPath === '/en' || rawPath.startsWith('/en/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/vi' + rawPath.slice(3)
+    return NextResponse.redirect(url)
+  }
+
   const response = intlMiddleware(request)
 
   const { pathname } = request.nextUrl
@@ -73,5 +82,7 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   // Run on every path except Next internals, API proxy and static assets.
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
+  // `'/'` must be listed explicitly — the lookahead pattern below does not
+  // match the bare root, so without it `/` never redirects to `/vi` (404).
+  matcher: ['/', '/((?!api|_next|_vercel|.*\\..*).*)']
 }

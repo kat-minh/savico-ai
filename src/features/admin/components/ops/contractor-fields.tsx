@@ -21,7 +21,9 @@ import type { NamePath } from 'antd/es/form/interface'
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
 
+import { Link } from '@/i18n/navigation'
 import type { CmsContractor, CmsServiceRegion } from '@/shared/cms'
+import { ADMIN_ROUTES } from '@/shared/constants'
 import { useGetProvinces, useGetWards } from '@/shared/hooks'
 import { useAdminCollection } from '../../hooks/use-admin-data'
 import { CONTRACTOR_SCOPES } from '../../services/contractor.service'
@@ -106,7 +108,7 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
         <Form.Item name='shortDescription' label={t('contractors.shortDescription')}>
           <Input maxLength={200} />
         </Form.Item>
-        <Form.Item name='intro' label={t('contractors.intro')} rules={[required]}>
+        <Form.Item name='intro' label={t('contractors.intro')}>
           <Input.TextArea rows={4} />
         </Form.Item>
         <Row gutter={16}>
@@ -150,13 +152,6 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
           extra={t('contractors.buildingTypesHint')}
         >
           <Select mode='multiple' options={typeOptions} />
-        </Form.Item>
-        <Form.Item
-          name='maxUpperFloors'
-          label={t('contractors.maxUpperFloors')}
-          rules={[{ type: 'integer', min: 0, message: t('contractors.nonNegativeInt') }]}
-        >
-          <InputNumber min={0} max={50} precision={0} style={{ width: 200 }} />
         </Form.Item>
         <Form.Item name='scopes' label={t('contractors.scopes')}>
           <Checkbox.Group
@@ -211,7 +206,7 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
         <Text strong style={{ display: 'block', marginBottom: 8 }}>
           {t('contractors.headquarters')}
         </Text>
-        <LocationFields form={form} path={['headquarters']} required />
+        <LocationFields form={form} path={['headquarters']} isHeadquarters />
         <Row gutter={16}>
           <Col xs={24} md={8}>
             <Form.Item name='region' label={t('contractors.region')}>
@@ -334,6 +329,12 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
                 showIcon
                 style={{ marginTop: 8 }}
                 title={t('contractors.hideWarning', { count: pending })}
+                action={
+                  // Mở tab mới để không mất dữ liệu đang nhập trong form (§14).
+                  <Link href={ADMIN_ROUTES.INVITATIONS} target='_blank' rel='noreferrer'>
+                    {t('contractors.openInvitations')}
+                  </Link>
+                }
               />
             ) : null
           }
@@ -344,9 +345,6 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
               { value: true, label: t('contractors.hiddenTag') }
             ]}
           />
-        </Form.Item>
-        <Form.Item name='opsNote' label={t('contractors.opsNote')}>
-          <Input.TextArea rows={2} />
         </Form.Item>
       </Section>
     </>
@@ -362,17 +360,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 /**
- * Địa chỉ theo danh mục hành chính + tọa độ + bán kính (§5): chọn tỉnh thì tải
- * phường của tỉnh đó; đổi tỉnh là xóa phường cũ không còn phù hợp.
+ * Địa chỉ theo danh mục hành chính + tọa độ + bán kính (§5): tỉnh và phường bắt
+ * buộc chọn từ danh mục; chọn tỉnh thì tải phường của tỉnh đó, đổi tỉnh là xóa
+ * phường cũ và buộc chọn lại.
  */
 function LocationFields({
   form,
   path,
-  required = false
+  isHeadquarters = false
 }: {
   form: FormInstance
   path: (string | number)[]
-  required?: boolean
+  isHeadquarters?: boolean
 }) {
   const t = useTranslations('admin')
   const at = (key: string): NamePath => [...path, key]
@@ -388,7 +387,12 @@ function LocationFields({
         <Form.Item
           name={name('provinceCode')}
           label={t('contractors.province')}
-          rules={required ? [{ required: true, message: t('contractors.hqRequired') }] : []}
+          rules={[
+            {
+              required: true,
+              message: isHeadquarters ? t('contractors.hqRequired') : t('contractors.provinceRequired')
+            }
+          ]}
         >
           <Select
             showSearch
@@ -404,7 +408,11 @@ function LocationFields({
         </Form.Item>
       </Col>
       <Col xs={24} md={8}>
-        <Form.Item name={name('wardCode')} label={t('contractors.ward')}>
+        <Form.Item
+          name={name('wardCode')}
+          label={t('contractors.ward')}
+          rules={[{ required: true, message: t('contractors.wardRequired') }]}
+        >
           <Select
             showSearch
             optionFilterProp='label'

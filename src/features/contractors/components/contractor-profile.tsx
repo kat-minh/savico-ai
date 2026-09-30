@@ -28,6 +28,7 @@ import {
   Search,
   Send,
   ShieldCheck,
+  Star,
   Users,
   X
 } from 'lucide-react'
@@ -38,11 +39,13 @@ import { createPortal } from 'react-dom'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
+import { useCmsCollection } from '@/shared/cms'
 import { Photo, revealContainerVariants, revealEase, revealItemVariants, RevealPhoto } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -51,15 +54,6 @@ import {
 } from '@/shared/components/ui/dialog'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle
-} from '@/shared/components/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import {
@@ -72,7 +66,7 @@ import {
 } from '@/shared/constants/routes'
 import { useCountUp, usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
-import { formatDate, formatNumber } from '@/shared/utils'
+import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor } from '../hooks/use-contractors'
@@ -537,7 +531,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                       size='sm'
                     />
                   }
-                  detailed
                 />
               ) : null}
               {tab === 'legal' ? (
@@ -580,7 +573,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                     <>
                       <IntroCard contractor={contractor} onOpenPhoto={setActivePhotoIndex} />
                       <PartnershipSummary contractor={contractor} />
-                      <FeaturedProjects contractor={contractor} />
                       <LegalChecks contractor={contractor} />
                     </>
                   ) : null}
@@ -698,7 +690,10 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
         aria-hidden={!barCollapsed}
         className={cn(
           PAGE_CONTAINER,
-          'pointer-events-none fixed top-14 left-1/2 z-30 hidden -translate-x-1/2 md:block'
+          // Nằm NGAY DƯỚI menu (bám `--public-header-offset`, menu trang này cao 64px — `top-14`
+          // cũ đè 8px lên menu) và chỉ từ `lg`, khớp với thanh đáy `lg:hidden`: mọi khổ màn hình
+          // chỉ có MỘT thanh cố định (góp ý NT31).
+          'pointer-events-none fixed top-[calc(var(--public-header-offset,64px)+0.5rem)] left-1/2 z-30 hidden -translate-x-1/2 lg:block'
         )}
       >
         <AnimatePresence>
@@ -1084,331 +1079,268 @@ function PartnershipSummary({ contractor }: { contractor: Contractor }) {
   )
 }
 
-/** Khối "Dự án tiêu biểu": ảnh bên trái, tên + năm + liên kết bên phải. */
-function FeaturedProjects({
-  contractor,
-  filter,
-  onClearFilter,
-  inviteAction,
-  detailed = false
-}: {
-  contractor: Contractor
-  filter?: string | null
-  onClearFilter?: () => void
-  inviteAction?: React.ReactNode
-  detailed?: boolean
-}) {
+/**
+ * Tab "Dự án đã thực hiện" (epic ContractorManagement §2, §7, §12): tổng số và số
+ * đã xác minh đếm từ chính danh sách dự án đang hiển thị, lọc theo Loại công
+ * trình trong danh mục dùng chung, badge Đã xác minh / Nổi bật trên thẻ. Tab
+ * Tổng quan không có khối dự án riêng.
+ */
+function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor; inviteAction?: React.ReactNode }) {
   const t = useTranslations('contractors.firm')
   const reduceMotion = useReducedMotion()
+  const { typeLabel, scaleOf } = useProjectLabels()
   const [selectedProject, setSelectedProject] = useState<ContractorProject | null>(null)
   const [verifiedOnly, setVerifiedOnly] = useState(false)
-  const [category, setCategory] = useState<'all' | NonNullable<ContractorProject['category']>>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
   const [projectSort, setProjectSort] = useState<'latest' | 'oldest'>('latest')
   const [showAllProjects, setShowAllProjects] = useState(false)
-  /* Giữ nguyên toàn bộ nội dung. Khi có tag, dự án khớp được đưa lên đầu để người dùng
-     vẫn nhìn thấy hồ sơ đầy đủ và thấy rõ chuyển động sắp xếp của các thẻ. */
-  const projects = [...contractor.featuredProjects]
+  const allProjects = contractor.featuredProjects
+  const projects = [...allProjects]
     .filter((project) => !verifiedOnly || project.verified)
-    .filter((project) => category === 'all' || project.category === category)
-    .sort((left, right) => {
-      const filterPriority = filter
-        ? Number(Boolean(right.tags?.includes(filter))) - Number(Boolean(left.tags?.includes(filter)))
-        : 0
-      return filterPriority || (projectSort === 'latest' ? right.year - left.year : left.year - right.year)
-    })
+    .filter((project) => typeFilter === 'all' || project.buildingTypeId === typeFilter)
+    .sort((left, right) => (projectSort === 'latest' ? right.year - left.year : left.year - right.year))
 
+  const typeCounts = new Map<string, number>()
+  for (const project of allProjects) {
+    if (project.buildingTypeId)
+      typeCounts.set(project.buildingTypeId, (typeCounts.get(project.buildingTypeId) ?? 0) + 1)
+  }
   const projectFilters = [
-    { key: 'all' as const, count: contractor.similarProjects },
-    ...(['house', 'villa', 'renovation', 'factory'] as const).map((key) => ({
+    { key: 'all', label: t('projects.filters.all', { count: allProjects.length }) },
+    ...[...typeCounts].map(([key, count]) => ({
       key,
-      count: contractor.featuredProjects.filter((project) => project.category === key).length
+      label: t('projects.filters.type', { label: typeLabel(key), count })
     }))
   ]
   const visibleProjects = showAllProjects ? projects : projects.slice(0, 6)
   const moreCount = Math.max(0, projects.length - visibleProjects.length)
-  const resultsKey = `${verifiedOnly}-${category}-${projectSort}-${filter ?? 'all'}`
-
-  if (detailed) {
-    return (
-      <>
-        <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-          className='border-t px-4 py-5 sm:px-5 sm:py-6'
-        >
-          <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
-            <p className='text-sm'>
-              <strong className='font-semibold'>
-                {t('projects.projectCount', { count: contractor.similarProjects })}
-              </strong>
-              <span className='text-muted-foreground'>
-                {' '}
-                · {t('projects.verifiedSummary', { count: contractor.verifiedProjects })}
-              </span>
-            </p>
-
-            <div className='flex flex-wrap items-center gap-3'>
-              <label className='hover:bg-muted/40 flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors'>
-                <Checkbox
-                  checked={verifiedOnly}
-                  onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
-                  aria-label={t('projects.verifiedOnly')}
-                />
-                <span>{t('projects.verifiedOnly')}</span>
-              </label>
-              <Select value={projectSort} onValueChange={(value) => setProjectSort(value as 'latest' | 'oldest')}>
-                <SelectTrigger className='w-36' aria-label={t('projects.sortLabel')}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='latest'>{t('projects.sortLatest')}</SelectItem>
-                  <SelectItem value='oldest'>{t('projects.sortOldest')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className='mt-4 flex gap-2 overflow-x-auto pb-1' role='group' aria-label={t('projects.filterLabel')}>
-            {projectFilters.map((item) => (
-              <button
-                key={item.key}
-                type='button'
-                aria-pressed={category === item.key}
-                onClick={() => setCategory(item.key)}
-                className={cn(
-                  'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-[0.98]',
-                  category === item.key
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'hover:border-primary/40 hover:text-primary-strong bg-background'
-                )}
-              >
-                {t(`projects.filters.${item.key}`, { count: item.count })}
-              </button>
-            ))}
-          </div>
-
-          {filter ? (
-            <button
-              type='button'
-              onClick={onClearFilter}
-              className='bg-primary/10 text-primary-strong mt-3 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'
-            >
-              {filter}
-              <X className='size-3' />
-              <span className='sr-only'>{t('clearProjectFilter')}</span>
-            </button>
-          ) : null}
-
-          {projects.length ? (
-            <motion.ul
-              key={resultsKey}
-              layout
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
-              className='mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3'
-            >
-              <AnimatePresence mode='popLayout'>
-                {visibleProjects.map((project, index) => (
-                  <motion.li
-                    layout
-                    initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    whileHover={reduceMotion ? undefined : { y: -3 }}
-                    transition={{
-                      duration: reduceMotion ? 0 : 0.26,
-                      delay: reduceMotion ? 0 : Math.min(index % 6, 5) * 0.045,
-                      ease: revealEase
-                    }}
-                    key={project.id}
-                    className='overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-[0_14px_28px_-22px_rgba(42,117,63,0.62)]'
-                  >
-                    <button
-                      type='button'
-                      onClick={() => setSelectedProject(project)}
-                      className='group block size-full text-left active:scale-[0.995]'
-                    >
-                      <div className='bg-muted/30 relative aspect-[16/9] overflow-hidden'>
-                        {project.imageUrl ? (
-                          <RevealPhoto
-                            src={project.imageUrl}
-                            alt={project.name}
-                            className='size-full transition-transform duration-300 group-hover:scale-[1.02]'
-                            sizes='(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 260px'
-                          />
-                        ) : (
-                          <div className='flex size-full items-center justify-center'>
-                            <ImageIcon className='text-muted-foreground/45 size-8' />
-                          </div>
-                        )}
-                        {project.verified ? (
-                          <span className='bg-background/95 text-primary-strong absolute top-2 left-2 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
-                            <CircleCheck className='size-3.5' />
-                            {t('projects.verifiedBadge')}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className='p-3'>
-                        <h3 className='group-hover:text-primary-strong text-sm font-semibold transition-colors'>
-                          {project.name}
-                        </h3>
-                        {project.tags?.length ? (
-                          <div className='mt-2 flex flex-wrap gap-1.5'>
-                            {project.tags.slice(0, 2).map((tag) => (
-                              <span
-                                key={tag}
-                                className='bg-muted rounded-md px-2 py-1 text-[11px] text-muted-foreground'
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                        <div className='text-muted-foreground mt-3 flex flex-wrap items-center gap-y-1 text-xs'>
-                          {project.dimensions ? <span className='pr-2'>{project.dimensions}</span> : null}
-                          {project.areaM2 ? (
-                            <span className='border-l px-2'>{t('projects.area', { area: project.areaM2 })}</span>
-                          ) : null}
-                          {project.scale ? <span className='border-l px-2'>{project.scale}</span> : null}
-                        </div>
-                        <p className='text-muted-foreground mt-2 text-xs'>
-                          {t('projects.completed', { year: project.year })}
-                        </p>
-                        {project.location ? (
-                          <p className='text-muted-foreground mt-2 flex items-start gap-1.5 text-xs'>
-                            <MapPin className='mt-0.5 size-3.5 shrink-0' />
-                            <span>{project.location}</span>
-                          </p>
-                        ) : null}
-                        <span className='text-primary-strong mt-3 inline-flex items-center gap-1 text-xs font-medium'>
-                          {t('projects.viewDetail')}
-                          <span className='transition-transform group-hover:translate-x-0.5'>→</span>
-                        </span>
-                      </div>
-                    </button>
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </motion.ul>
-          ) : (
-            <motion.div
-              key={resultsKey}
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='bg-muted/30 mt-4 rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground'
-            >
-              {t('projects.empty')}
-            </motion.div>
-          )}
-
-          {moreCount > 0 ? (
-            <div className='mt-5 text-center'>
-              <Button type='button' variant='outline' size='sm' onClick={() => setShowAllProjects(true)}>
-                {t('projects.showMore', { count: moreCount })}
-              </Button>
-            </div>
-          ) : null}
-
-          <p className='text-muted-foreground mt-5 flex items-start gap-1.5 text-xs'>
-            <CircleCheck className='mt-0.5 size-3.5 shrink-0' />
-            <span>{t('projects.disclaimer')}</span>
-          </p>
-        </motion.section>
-
-        <ProjectDetailSheet
-          contractor={contractor}
-          project={selectedProject}
-          inviteAction={inviteAction}
-          onClose={() => setSelectedProject(null)}
-        />
-      </>
-    )
-  }
+  const resultsKey = `${verifiedOnly}-${typeFilter}-${projectSort}`
 
   return (
     <>
       <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.4, ease: revealEase }}
-        className='bg-card rounded-2xl border p-4'
+        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
+        className='border-t px-4 py-5 sm:px-5 sm:py-6'
       >
-        <div className='flex flex-wrap items-center justify-between gap-2'>
-          <h2 className='text-base font-semibold'>{t('featured')}</h2>
-          <AnimatePresence>
-            {filter ? (
-              <motion.button
-                type='button'
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                onClick={onClearFilter}
-                className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'
-              >
-                {filter}
-                <X className='size-3' />
-                <span className='sr-only'>{t('clearProjectFilter')}</span>
-              </motion.button>
-            ) : null}
-          </AnimatePresence>
+        <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+          <p className='text-sm'>
+            <strong className='font-semibold'>{t('projects.projectCount', { count: allProjects.length })}</strong>
+            <span className='text-muted-foreground'>
+              {' '}
+              · {t('projects.verifiedSummary', { count: allProjects.filter((project) => project.verified).length })}
+            </span>
+          </p>
+
+          <div className='flex flex-wrap items-center gap-3'>
+            <label className='hover:bg-muted/40 flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors'>
+              <Checkbox
+                checked={verifiedOnly}
+                onCheckedChange={(checked) => setVerifiedOnly(checked === true)}
+                aria-label={t('projects.verifiedOnly')}
+              />
+              <span>{t('projects.verifiedOnly')}</span>
+            </label>
+            <Select value={projectSort} onValueChange={(value) => setProjectSort(value as 'latest' | 'oldest')}>
+              <SelectTrigger className='w-36' aria-label={t('projects.sortLabel')}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='latest'>{t('projects.sortLatest')}</SelectItem>
+                <SelectItem value='oldest'>{t('projects.sortOldest')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <motion.ul layout className='mt-3 grid gap-x-[3%] gap-y-4 sm:grid-cols-3'>
-          <AnimatePresence mode='popLayout'>
-            {projects.map((project) => (
-              <motion.li
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                key={project.id}
-              >
-                <button
-                  type='button'
-                  onClick={() => setSelectedProject(project)}
-                  className='group flex w-full min-w-0 gap-3 text-left active:scale-[0.99]'
+        <div className='mt-4 flex gap-2 overflow-x-auto pb-1' role='group' aria-label={t('projects.filterLabel')}>
+          {projectFilters.map((item) => (
+            <button
+              key={item.key}
+              type='button'
+              aria-pressed={typeFilter === item.key}
+              onClick={() => setTypeFilter(item.key)}
+              className={cn(
+                'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-[0.98]',
+                typeFilter === item.key
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'hover:border-primary/40 hover:text-primary-strong bg-background'
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {projects.length ? (
+          <motion.ul
+            key={resultsKey}
+            layout
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
+            className='mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3'
+          >
+            <AnimatePresence mode='popLayout'>
+              {visibleProjects.map((project, index) => (
+                <motion.li
+                  layout
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.97 }}
+                  whileHover={reduceMotion ? undefined : { y: -3 }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.26,
+                    delay: reduceMotion ? 0 : Math.min(index % 6, 5) * 0.045,
+                    ease: revealEase
+                  }}
+                  key={project.id}
+                  className='overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-[0_14px_28px_-22px_rgba(42,117,63,0.62)]'
                 >
-                  {project.imageUrl ? (
-                    <div className='w-1/2 shrink-0 overflow-hidden rounded-lg'>
-                      <RevealPhoto
-                        src={project.imageUrl}
-                        alt={project.name}
-                        className='aspect-video size-full'
-                        sizes='(max-width: 768px) 40vw, 160px'
-                      />
+                  <button
+                    type='button'
+                    onClick={() => setSelectedProject(project)}
+                    className='group block size-full text-left active:scale-[0.995]'
+                  >
+                    <div className='bg-muted/30 relative aspect-[16/9] overflow-hidden'>
+                      {project.imageUrl ? (
+                        <RevealPhoto
+                          src={project.imageUrl}
+                          alt={project.name}
+                          className='size-full transition-transform duration-300 group-hover:scale-[1.02]'
+                          sizes='(max-width: 640px) 90vw, (max-width: 1280px) 40vw, 260px'
+                        />
+                      ) : (
+                        <div className='flex size-full items-center justify-center'>
+                          <ImageIcon className='text-muted-foreground/45 size-8' />
+                        </div>
+                      )}
+                      <div className='absolute top-2 left-2 flex flex-wrap gap-1.5'>
+                        {project.verified ? (
+                          <span className='bg-background/95 text-primary-strong inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
+                            <CircleCheck className='size-3.5' />
+                            {t('projects.verifiedBadge')}
+                          </span>
+                        ) : null}
+                        {project.featured ? (
+                          <span className='bg-background/95 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
+                            <Star className='size-3.5' />
+                            {t('projects.featuredBadge')}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
-                  ) : (
-                    <div className='bg-muted/30 flex aspect-video w-1/2 shrink-0 items-center justify-center rounded-lg border border-dashed'>
-                      <ImageIcon className='text-muted-foreground/50 size-5' />
+
+                    <div className='p-3'>
+                      <h3 className='group-hover:text-primary-strong text-sm font-semibold transition-colors'>
+                        {project.name}
+                      </h3>
+                      {project.buildingTypeId || project.scope ? (
+                        <div className='mt-2 flex flex-wrap gap-1.5'>
+                          {[
+                            project.buildingTypeId ? typeLabel(project.buildingTypeId) : null,
+                            project.scope ? t(`projects.detail.constructionScopes.${project.scope}`) : null
+                          ]
+                            .filter(Boolean)
+                            .map((label) => (
+                              <span
+                                key={label}
+                                className='bg-muted rounded-md px-2 py-1 text-[11px] text-muted-foreground'
+                              >
+                                {label}
+                              </span>
+                            ))}
+                        </div>
+                      ) : null}
+                      <div className='text-muted-foreground mt-3 flex flex-wrap items-center gap-y-1 text-xs'>
+                        {project.dimensions ? <span className='pr-2'>{project.dimensions}</span> : null}
+                        {project.areaM2 ? (
+                          <span className='border-l px-2'>{t('projects.area', { area: project.areaM2 })}</span>
+                        ) : null}
+                        {scaleOf(project) ? <span className='border-l px-2'>{scaleOf(project)}</span> : null}
+                      </div>
+                      <p className='text-muted-foreground mt-2 text-xs'>
+                        {t('projects.completed', { year: project.year })}
+                      </p>
+                      {project.location ? (
+                        <p className='text-muted-foreground mt-2 flex items-start gap-1.5 text-xs'>
+                          <MapPin className='mt-0.5 size-3.5 shrink-0' />
+                          <span>{project.location}</span>
+                        </p>
+                      ) : null}
+                      <span className='text-primary-strong mt-3 inline-flex items-center gap-1 text-xs font-medium'>
+                        {t('projects.viewDetail')}
+                        <span className='transition-transform group-hover:translate-x-0.5'>→</span>
+                      </span>
                     </div>
-                  )}
-                  <div className='min-w-0'>
-                    <p className='group-hover:text-primary text-sm leading-snug font-medium text-pretty transition-colors'>
-                      {project.name}
-                    </p>
-                    <p className='text-muted-foreground mt-1 text-xs'>{project.year}</p>
-                    <span className='text-primary-strong mt-2 inline-flex items-center gap-1.5 text-xs font-medium'>
-                      {t('viewProject')}
-                      <span className='inline-block transition-transform group-hover:translate-x-1'>→</span>
-                    </span>
-                  </div>
-                </button>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </motion.ul>
+                  </button>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </motion.ul>
+        ) : (
+          <motion.div
+            key={resultsKey}
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className='bg-muted/30 mt-4 rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground'
+          >
+            {t('projects.empty')}
+          </motion.div>
+        )}
+
+        {moreCount > 0 ? (
+          <div className='mt-5 text-center'>
+            <Button type='button' variant='outline' size='sm' onClick={() => setShowAllProjects(true)}>
+              {t('projects.showMore', { count: moreCount })}
+            </Button>
+          </div>
+        ) : null}
+
+        <p className='text-muted-foreground mt-5 flex items-start gap-1.5 text-xs'>
+          <CircleCheck className='mt-0.5 size-3.5 shrink-0' />
+          <span>{t('projects.disclaimer')}</span>
+        </p>
       </motion.section>
 
-      <ProjectDetailSheet contractor={contractor} project={selectedProject} onClose={() => setSelectedProject(null)} />
+      <ProjectDetailModal
+        contractor={contractor}
+        project={selectedProject}
+        inviteAction={inviteAction}
+        onClose={() => setSelectedProject(null)}
+      />
     </>
   )
 }
 
-function ProjectDetailSheet({
+/**
+ * Nhãn Loại công trình theo danh mục dùng chung và Quy mô (Số tầng, Tum) theo
+ * phương án đã lưu (ContractorManagement §7). Dự án nhập trước khi có danh mục
+ * chỉ có dòng quy mô dạng chữ — dùng tạm dòng đó.
+ */
+function useProjectLabels() {
+  const t = useTranslations('contractors.firm.projects.detail')
+  const buildingTypes = useCmsCollection('buildingTypes')
+  const floorOptions = useCmsCollection('floorOptions')
+  const typeLabel = (id: string) => buildingTypes.find((type) => type.id === id)?.label ?? id
+  const scaleOf = (project: ContractorProject) => {
+    const floors = floorOptions.find((option) => option.id === project.floorOptionId)?.label
+    const attic = project.hasAttic === undefined ? null : project.hasAttic ? t('attic') : t('noAttic')
+    return [floors ?? (project.floorOptionId ? null : project.scale), attic].filter(Boolean).join(' · ')
+  }
+  return { typeLabel, scaleOf }
+}
+
+/**
+ * Popup "Chi tiết dự án đã thực hiện" (góp ý NT — Review Row #1): KHÔNG còn là
+ * ngăn trượt bên phải mà là MODAL LỚN GIỮA MÀN, nền tối mờ (`DialogOverlay` đã
+ * lo `bg-black/45 backdrop-blur-sm`), chia HAI CỘT — trái là bộ ảnh có nút
+ * chuyển ảnh trước/sau kèm dải ảnh nhỏ, phải là thông tin dự án. Nút "Đóng" và
+ * "Mời báo giá" nằm CỐ ĐỊNH ở đáy popup (`DialogFooter` ngoài vùng cuộn) nên
+ * không bao giờ bị nội dung che.
+ */
+function ProjectDetailModal({
   contractor,
   project,
   inviteAction,
@@ -1422,14 +1354,26 @@ function ProjectDetailSheet({
   const t = useTranslations('contractors.firm.projects.detail')
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
-  const [activeGalleryImage, setActiveGalleryImage] = useState<string | undefined>()
+  const [activeIndex, setActiveIndex] = useState(0)
 
-  const projectType = project?.category ? t(`projectTypes.${project.category}`) : t('notUpdated')
-  const constructionScope = project?.constructionScope
-    ? t(`constructionScopes.${project.constructionScope}`)
-    : (project?.tags?.[1] ?? t('notUpdated'))
+  // Đổi dự án → về ảnh đầu. Mẫu "chỉnh state khi prop đổi" của React (giống
+  // `renderedTab` phía trên): đặt lại ngay trong thân hàm, không dùng effect.
+  const projectId = project?.id
+  const [renderedProjectId, setRenderedProjectId] = useState(projectId)
+  if (projectId !== renderedProjectId) {
+    setRenderedProjectId(projectId)
+    setActiveIndex(0)
+  }
+
+  const { typeLabel, scaleOf } = useProjectLabels()
+  const projectType = project?.buildingTypeId ? typeLabel(project.buildingTypeId) : t('notUpdated')
+  const constructionScope = project?.scope ? t(`constructionScopes.${project.scope}`) : t('notUpdated')
   const contractorRole = project?.contractorRole ? t(`roles.${project.contractorRole}`) : t('roles.contractor')
-  const dimensions = [project?.dimensions, project?.areaM2 ? t('area', { area: project.areaM2 }) : null, project?.scale]
+  const dimensions = [
+    project?.dimensions,
+    project?.areaM2 ? t('area', { area: project.areaM2 }) : null,
+    project ? scaleOf(project) : null
+  ]
     .filter(Boolean)
     .join(' · ')
   const constructionPeriod =
@@ -1440,10 +1384,19 @@ function ProjectDetailSheet({
           to: formatDate(project.constructionEndedAt, locale, { month: '2-digit', year: 'numeric' })
         })
       : t('completedYear', { year: project?.year ?? '' })
-  const gallery = project ? [project.imageUrl, ...(project.galleryUrls ?? [])].filter(Boolean).slice(0, 3) : []
-  const activeImage = activeGalleryImage && gallery.includes(activeGalleryImage) ? activeGalleryImage : gallery[0]
-  const thumbnails = gallery.filter((imageUrl) => imageUrl !== activeImage).slice(0, 2)
-  const sheetInviteAction = isValidElement<{
+
+  // Modal lớn hơn → dùng cả bộ ảnh làm carousel, không cắt còn 3 như ngăn trượt cũ.
+  const gallery: string[] = project
+    ? [project.imageUrl, ...(project.galleryUrls ?? [])].filter((url): url is string => Boolean(url))
+    : []
+  const safeIndex = gallery.length ? Math.min(activeIndex, gallery.length - 1) : 0
+  const activeImage = gallery[safeIndex]
+  const goPrev = () => setActiveIndex((safeIndex - 1 + gallery.length) % gallery.length)
+  const goNext = () => setActiveIndex((safeIndex + 1) % gallery.length)
+
+  // "Mời báo giá" phải đóng modal trước khi điều hướng/mở bộ chọn dự án — nếu
+  // không, khi quay lại màn này modal vẫn treo mở trên nền.
+  const footerInviteAction = isValidElement<{
     onNavigate?: () => void
     onOpenPicker?: () => void
   }>(inviteAction)
@@ -1460,20 +1413,17 @@ function ProjectDetailSheet({
     : inviteAction
 
   return (
-    <Sheet open={Boolean(project)} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className='w-[96vw] gap-0 overflow-hidden sm:max-w-xl lg:w-[34rem] lg:max-w-[34rem]'>
+    <Dialog open={Boolean(project)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showCloseButton={false}
+        className='flex max-h-[calc(100vh-2rem)] w-full max-w-[62rem] flex-col gap-0 overflow-hidden p-0 sm:max-w-[62rem]'
+      >
         {project ? (
           <>
-            <SheetHeader className='border-b px-5 py-4 pr-12'>
-              <SheetTitle className='text-base'>{project.name}</SheetTitle>
-              <SheetDescription className='sr-only'>
-                {t('description', { contractor: contractor.name })}
-              </SheetDescription>
-            </SheetHeader>
-
-            <div className='min-h-0 flex-1 overflow-y-auto px-5 py-4'>
-              <div className='grid grid-cols-[2fr_1fr] grid-rows-2 gap-1.5'>
-                <div className='bg-muted/50 relative row-span-2 aspect-[4/3] overflow-hidden rounded-lg border'>
+            <div className='flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[1.08fr_minmax(0,1fr)] lg:overflow-hidden'>
+              {/* Cột trái — bộ ảnh + carousel + dải ảnh nhỏ. */}
+              <div className='bg-muted/25 flex flex-col gap-3 border-b p-4 lg:overflow-hidden lg:border-r lg:border-b-0'>
+                <div className='bg-muted/50 relative aspect-[4/3] w-full overflow-hidden rounded-xl border lg:aspect-auto lg:min-h-0 lg:flex-1'>
                   <AnimatePresence mode='wait' initial={false}>
                     {activeImage ? (
                       <motion.div
@@ -1486,143 +1436,199 @@ function ProjectDetailSheet({
                       >
                         <RevealPhoto
                           src={activeImage}
-                          alt={t('imageAlt', { project: project.name, index: 1 })}
-                          className='size-full rounded-lg'
-                          sizes='(max-width: 640px) 62vw, 350px'
+                          alt={t('imageAlt', { project: project.name, index: safeIndex + 1 })}
+                          className='size-full'
+                          sizes='(max-width: 1024px) 92vw, 560px'
                         />
                       </motion.div>
                     ) : (
                       <div className='flex size-full items-center justify-center'>
-                        <ImageIcon className='text-muted-foreground/55 size-6' />
+                        <ImageIcon className='text-muted-foreground/55 size-8' />
                       </div>
                     )}
                   </AnimatePresence>
+
+                  {gallery.length > 1 ? (
+                    <>
+                      <button
+                        type='button'
+                        onClick={goPrev}
+                        aria-label={t('prevImage')}
+                        className='absolute top-1/2 left-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                      >
+                        <ChevronLeft className='size-5' />
+                      </button>
+                      <button
+                        type='button'
+                        onClick={goNext}
+                        aria-label={t('nextImage')}
+                        className='absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+                      >
+                        <ChevronRight className='size-5' />
+                      </button>
+                      <span className='absolute right-3 bottom-3 rounded-full bg-black/55 px-2.5 py-1 text-xs font-medium text-white tabular-nums backdrop-blur-sm'>
+                        {safeIndex + 1}/{gallery.length}
+                      </span>
+                    </>
+                  ) : null}
                 </div>
 
-                {[0, 1].map((index) => {
-                  const imageUrl = thumbnails[index]
-                  return imageUrl ? (
-                    <button
-                      key={imageUrl}
-                      type='button'
-                      onClick={() => setActiveGalleryImage(imageUrl)}
-                      className='group aspect-[4/3] overflow-hidden rounded-lg border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-                      aria-label={t('selectImage', { index: index + 2 })}
-                    >
-                      <RevealPhoto
-                        src={imageUrl}
-                        alt={t('imageAlt', { project: project.name, index: index + 2 })}
-                        className='size-full transition-transform duration-200 group-hover:scale-[1.03]'
-                        sizes='(max-width: 640px) 30vw, 170px'
-                      />
-                    </button>
-                  ) : (
-                    <div
-                      key={`${project.id}-placeholder-${index}`}
-                      className='bg-muted/50 flex aspect-[4/3] items-center justify-center rounded-lg border'
-                    >
-                      <ImageIcon className='text-muted-foreground/55 size-6' />
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className='mt-3 flex flex-wrap gap-2'>
-                <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{projectType}</span>
-                <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{constructionScope}</span>
-                {project.verified ? (
-                  <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'>
-                    <CircleCheck className='size-3.5' />
-                    {t('verifiedBadge')}
-                  </span>
+                {gallery.length > 1 ? (
+                  <div className='flex gap-2 overflow-x-auto pb-1'>
+                    {gallery.map((imageUrl, index) => (
+                      <button
+                        key={imageUrl}
+                        type='button'
+                        onClick={() => setActiveIndex(index)}
+                        aria-label={t('selectImage', { index: index + 1 })}
+                        aria-current={index === safeIndex}
+                        className={cn(
+                          'relative aspect-[4/3] w-20 shrink-0 overflow-hidden rounded-lg border transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                          index === safeIndex ? 'border-primary ring-primary/40 ring-2' : 'opacity-70 hover:opacity-100'
+                        )}
+                      >
+                        <RevealPhoto
+                          src={imageUrl}
+                          alt={t('imageAlt', { project: project.name, index: index + 1 })}
+                          className='size-full'
+                          sizes='96px'
+                        />
+                      </button>
+                    ))}
+                  </div>
                 ) : null}
               </div>
 
-              <motion.section
-                initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.08 }}
-                className='mt-5'
-              >
-                <h3 className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>{t('title')}</h3>
-                <dl className='mt-3 grid grid-cols-[8rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-sm'>
-                  <dt className='text-muted-foreground'>{t('projectType')}</dt>
-                  <dd className='font-medium'>{projectType}</dd>
-                  <dt className='text-muted-foreground'>{t('scale')}</dt>
-                  <dd className='font-medium'>{dimensions || t('notUpdated')}</dd>
-                  <dt className='text-muted-foreground'>{t('constructionScope')}</dt>
-                  <dd className='font-medium'>{constructionScope}</dd>
-                  <dt className='text-muted-foreground'>{t('role')}</dt>
-                  <dd className='font-medium'>{contractorRole}</dd>
-                  <dt className='text-muted-foreground'>{t('constructionPeriod')}</dt>
-                  <dd className='font-medium'>{constructionPeriod}</dd>
-                  <dt className='text-muted-foreground'>{t('location')}</dt>
-                  <dd className='font-medium'>{project.location ?? t('notUpdated')}</dd>
-                  <dt className='text-muted-foreground'>{t('mainItems')}</dt>
-                  <dd className='font-medium text-pretty'>{project.mainItems ?? t('mainItemsFallback')}</dd>
-                </dl>
-              </motion.section>
+              {/* Cột phải — thông tin dự án (cuộn riêng ở desktop). */}
+              <div className='flex min-h-0 flex-col lg:overflow-hidden'>
+                <DialogHeader className='border-b px-5 py-4 pr-12 text-left'>
+                  <DialogTitle className='text-base'>{project.name}</DialogTitle>
+                  <DialogDescription className='sr-only'>
+                    {t('description', { contractor: contractor.name })}
+                  </DialogDescription>
+                  <DialogClose asChild>
+                    <button
+                      type='button'
+                      aria-label={t('close')}
+                      className='ring-offset-background focus:ring-ring absolute top-4 right-4 flex size-8 items-center justify-center rounded-md opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden'
+                    >
+                      <X className='size-4' />
+                    </button>
+                  </DialogClose>
+                </DialogHeader>
 
-              {project.verified ? (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
-                  className='border-primary/25 bg-primary/5 mt-5 flex items-start gap-3 rounded-xl border p-3.5'
-                >
-                  <ShieldCheck className='text-primary mt-0.5 size-5 shrink-0' />
-                  <div>
-                    <p className='text-sm font-semibold'>
-                      {t('verifiedTitle', {
-                        date: project.verifiedAt
-                          ? formatDate(project.verifiedAt, locale, {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric'
-                            })
-                          : t('verifiedDateFallback')
-                      })}
-                    </p>
-                    <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('verifiedBody')}</p>
+                <div className='min-h-0 flex-1 px-5 py-4 lg:overflow-y-auto'>
+                  <div className='flex flex-wrap gap-2'>
+                    <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{projectType}</span>
+                    <span className='bg-muted rounded-md px-2.5 py-1 text-xs'>{constructionScope}</span>
+                    {project.verified ? (
+                      <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium'>
+                        <CircleCheck className='size-3.5' />
+                        {t('verifiedBadge')}
+                      </span>
+                    ) : null}
                   </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
-                  className='mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'
-                >
-                  <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                  <div>
-                    <p className='text-sm font-semibold'>{t('selfReportedTitle')}</p>
-                    <p className='mt-1 text-xs leading-relaxed'>{t('selfReportedBody')}</p>
-                  </div>
-                </motion.div>
-              )}
 
-              <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'>
-                <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                <p className='text-xs leading-relaxed'>{t('priceNotice')}</p>
+                  <motion.section
+                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.08 }}
+                    className='mt-5'
+                  >
+                    <h3 className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>
+                      {t('title')}
+                    </h3>
+                    <dl className='mt-3 grid grid-cols-[7.5rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 text-sm'>
+                      <dt className='text-muted-foreground'>{t('projectType')}</dt>
+                      <dd className='font-medium'>{projectType}</dd>
+                      <dt className='text-muted-foreground'>{t('scale')}</dt>
+                      <dd className='font-medium'>{dimensions || t('notUpdated')}</dd>
+                      <dt className='text-muted-foreground'>{t('constructionScope')}</dt>
+                      <dd className='font-medium'>{constructionScope}</dd>
+                      <dt className='text-muted-foreground'>{t('role')}</dt>
+                      <dd className='font-medium'>{contractorRole}</dd>
+                      <dt className='text-muted-foreground'>{t('constructionPeriod')}</dt>
+                      <dd className='font-medium'>{constructionPeriod}</dd>
+                      <dt className='text-muted-foreground'>{t('location')}</dt>
+                      <dd className='font-medium'>{project.location ?? t('notUpdated')}</dd>
+                      <dt className='text-muted-foreground'>{t('mainItems')}</dt>
+                      <dd className='font-medium text-pretty'>{project.mainItems ?? t('mainItemsFallback')}</dd>
+                    </dl>
+                  </motion.section>
+
+                  {project.verified ? (
+                    <motion.div
+                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
+                      className='border-primary/25 bg-primary/5 mt-5 flex items-start gap-3 rounded-xl border p-3.5'
+                    >
+                      <ShieldCheck className='text-primary mt-0.5 size-5 shrink-0' />
+                      <div>
+                        <p className='text-sm font-semibold'>
+                          {t('verifiedTitle', {
+                            date: project.verifiedAt
+                              ? formatDisplayDate(project.verifiedAt, locale)
+                              : t('verifiedDateFallback')
+                          })}
+                        </p>
+                        <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('verifiedBody')}</p>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
+                      className='mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'
+                    >
+                      <CircleAlert className='mt-0.5 size-4 shrink-0' />
+                      <div>
+                        <p className='text-sm font-semibold'>{t('selfReportedTitle')}</p>
+                        <p className='mt-1 text-xs leading-relaxed'>{t('selfReportedBody')}</p>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'>
+                    <CircleAlert className='mt-0.5 size-4 shrink-0' />
+                    <p className='text-xs leading-relaxed'>{t('priceNotice')}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <SheetFooter className='flex-row items-center justify-end border-t bg-background px-5 py-3'>
-              <SheetClose asChild>
-                <Button type='button' variant='outline' size='sm' className='hover:bg-muted/80'>
-                  {t('close')}
-                </Button>
-              </SheetClose>
-              {sheetInviteAction ? (
-                <div className='min-w-36 [&>*]:w-full [&>*]:transition-[filter] [&>*]:hover:brightness-105'>
-                  {sheetInviteAction}
+            {/* `sm:justify-between` để đè `sm:justify-end` mặc định của DialogFooter
+                — nếu không, ở desktop cả nhận diện lẫn hai nút bị dồn về bên phải,
+                nửa trái trống. Cần dàn hai mép: nhận diện trái, nút phải. */}
+            <DialogFooter className='flex-row items-center justify-between gap-3 border-t bg-background px-5 py-3 sm:justify-between'>
+              {/* Nhận diện nhà thầu ở đầu thanh (bên trái): logo + tên + dòng nhỏ
+                  loại hình (`contractor.kind` = "Nhà thầu xây dựng"). Tên co lại
+                  khi hẹp để không đẩy hai nút ra ngoài. */}
+              <div className='flex min-w-0 items-center gap-2.5'>
+                <ContractorLogo contractor={contractor} className='size-9 shrink-0 rounded-lg text-[10px]' />
+                <div className='min-w-0'>
+                  <p className='truncate text-sm font-semibold'>{contractor.name}</p>
+                  <p className='text-muted-foreground truncate text-xs'>{contractor.kind}</p>
                 </div>
-              ) : null}
-            </SheetFooter>
+              </div>
+              <div className='flex shrink-0 items-center gap-2'>
+                <DialogClose asChild>
+                  <Button type='button' variant='outline' size='sm' className='hover:bg-muted/80'>
+                    {t('close')}
+                  </Button>
+                </DialogClose>
+                {footerInviteAction ? (
+                  <div className='min-w-36 [&>*]:w-full [&>*]:transition-[filter] [&>*]:hover:brightness-105'>
+                    {footerInviteAction}
+                  </div>
+                ) : null}
+              </div>
+            </DialogFooter>
           </>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -1684,7 +1690,7 @@ function LegalChecks({
         label: tLegal('fields.establishedAt'),
         value: legal
           ? tLegal('establishedValue', {
-              date: formatDate(legal.establishedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' }),
+              date: formatDisplayDate(legal.establishedAt, locale),
               years: legal.operationYears
             })
           : tLegal('updating')
@@ -1747,9 +1753,7 @@ function LegalChecks({
               <h2 className='text-sm font-semibold'>{tLegal('verification.title')}</h2>
               <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>
                 {tLegal('verification.body', {
-                  date: legal
-                    ? formatDate(legal.verifiedUntil, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
-                    : tLegal('updating')
+                  date: legal ? formatDisplayDate(legal.verifiedUntil, locale) : tLegal('updating')
                 })}
               </p>
             </div>
@@ -1757,9 +1761,7 @@ function LegalChecks({
               <p className='text-muted-foreground flex items-center gap-1 text-[11px] sm:justify-end'>
                 <span>{tLegal('verification.updated')}</span>
                 <span className='font-medium text-foreground'>
-                  {legal
-                    ? formatDate(legal.verifiedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
-                    : tLegal('updating')}
+                  {legal ? formatDisplayDate(legal.verifiedAt, locale) : tLegal('updating')}
                 </span>
               </p>
               <span className='bg-primary mt-1.5 block h-[3px] w-32 rounded-full sm:ml-auto' aria-hidden />
@@ -1822,11 +1824,7 @@ function LegalChecks({
                 <dd className='mt-1 font-medium whitespace-nowrap'>
                   {legal
                     ? tLegal('license.effectiveValue', {
-                        date: formatDate(legal.registrationIssuedAt, locale, {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })
+                        date: formatDisplayDate(legal.registrationIssuedAt, locale)
                       })
                     : tLegal('updating')}
                 </dd>
@@ -1931,13 +1929,7 @@ function LegalChecks({
                     <dd className='font-medium'>{legal?.registrationNumberMasked ?? tLegal('updating')}</dd>
                     <dt className='text-muted-foreground'>{tLegal('license.issuedAt')}</dt>
                     <dd className='font-medium'>
-                      {legal
-                        ? formatDate(legal.registrationIssuedAt, locale, {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })
-                        : tLegal('updating')}
+                      {legal ? formatDisplayDate(legal.registrationIssuedAt, locale) : tLegal('updating')}
                     </dd>
                     <dt className='text-muted-foreground'>{tLegal('license.status')}</dt>
                     <dd className='text-primary-strong font-medium'>{tLegal('license.verified')}</dd>
@@ -1977,13 +1969,7 @@ function LegalChecks({
                       <h3 className='mt-3 text-sm font-semibold'>{tLegal('license.lockedTitle')}</h3>
                       <p className='text-muted-foreground mt-2 text-xs leading-relaxed'>
                         {tLegal('license.lockedBody', {
-                          date: legal
-                            ? formatDate(legal.verifiedUntil, locale, {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                              })
-                            : tLegal('updating')
+                          date: legal ? formatDisplayDate(legal.verifiedUntil, locale) : tLegal('updating')
                         })}
                       </p>
                     </motion.div>
@@ -2065,9 +2051,7 @@ function PartnershipTab({ contractor }: { contractor: Contractor }) {
       icon: CalendarDays,
       label: t('signedAt'),
       // Nhà thầu chưa ký hợp tác thì ngày ký rỗng — `Intl` ném RangeError nếu định dạng.
-      value: partnership.signedAt
-        ? formatDate(partnership.signedAt, locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : '—'
+      value: partnership.signedAt ? formatDisplayDate(partnership.signedAt, locale) : '—'
     },
     { key: 'pages', icon: FileText, label: t('pages'), value: String(partnership.pageCount) },
     { key: 'state', icon: CircleCheck, label: t('state'), value: t('stateVerified'), highlight: true }

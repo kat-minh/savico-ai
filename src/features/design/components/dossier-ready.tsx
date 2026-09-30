@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import type { Locale } from '@/i18n/routing'
 import { useRouter } from '@/i18n/navigation'
 import { siteConfig } from '@/shared/config/site'
-import { EstimateSheet, Photo, PlanDrawing, ProjectReadyOptionsDialog } from '@/shared/components/common'
+import { EstimateSheet, HotlineLink, Photo, PlanDrawing, ProjectReadyOptionsDialog } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { useSiteImage } from '@/shared/cms'
@@ -445,10 +445,10 @@ export function DossierReady({
         <h2 className='text-primary-strong font-semibold text-balance'>{t('ctaTitle')}</h2>
         <div className='flex shrink-0 flex-col gap-3 sm:flex-row'>
           <Button data-call-now asChild size='lg'>
-            <a href={`tel:${contact.hotline.replace(/\s/g, '')}`}>
+            <HotlineLink hotline={contact.hotline}>
               <Phone className='size-4' />
               {t('ctaCall')}
-            </a>
+            </HotlineLink>
           </Button>
           <Button asChild size='lg' variant='outline'>
             <a href={contact.zaloUrl} target='_blank' rel='noreferrer'>

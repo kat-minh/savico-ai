@@ -10,6 +10,13 @@
     "search": "Tìm kiếm",
     "submit": "Gửi",
     "close": "Đóng",
+    "hotlinePopover": {
+      "title": "Hotline BuildX",
+      "hint": "Gọi số này từ điện thoại của bạn, hoặc nhắn Zalo cho BuildX.",
+      "copy": "Sao chép số",
+      "copied": "Đã sao chép",
+      "zalo": "Nhắn Zalo"
+    },
     "confirm": "Xác nhận",
     "back": "Quay lại",
     "next": "Tiếp theo",
@@ -35,7 +42,7 @@
           "bullet1": "Thiết kế & dự toán",
           "bullet2": "Nhận bản vẽ hoàn chỉnh",
           "bullet3": "Dự án sẵn sàng triển khai",
-          "info": "Gói thiết kế từ 399.000 ₫ · còn 1 lượt miễn phí",
+          "info": "Gói thiết kế từ 399.000 ₫",
           "cta": "Thiết kế & dự toán"
         },
         "withDrawing": {
@@ -96,7 +103,9 @@
       "forgotPassword": "Quên mật khẩu?",
       "submit": "Đăng nhập",
       "noAccount": "Chưa có tài khoản?",
-      "signUp": "Đăng ký"
+      "signUp": "Đăng ký",
+      "invalid": "Email hoặc mật khẩu không đúng.",
+      "locked": "Tài khoản đang bị khóa. Vui lòng liên hệ BuildX."
     },
     "social": {
       "or": "hoặc",
@@ -123,18 +132,64 @@
       "agree": "Tôi đồng ý với <terms>Điều khoản sử dụng</terms> và <privacy>Chính sách bảo mật</privacy>",
       "submit": "Đăng ký",
       "success": "Tạo tài khoản thành công. Vui lòng đăng nhập.",
+      "error": "Không tạo được tài khoản. Vui lòng thử lại.",
       "haveAccount": "Đã có tài khoản?",
       "signIn": "Đăng nhập"
     },
     "forgot": {
       "title": "Quên mật khẩu",
-      "subtitle": "Nhập email để nhận liên kết đặt lại mật khẩu",
+      "subtitle": "Nhập email để nhận mã đặt lại mật khẩu",
       "emailLabel": "Email",
       "emailPlaceholder": "ban@congty.com",
-      "submit": "Gửi liên kết đặt lại",
+      "submit": "Gửi mã đặt lại",
       "backToLogin": "Quay lại đăng nhập",
-      "sentTitle": "Đã gửi email",
-      "sentSubtitle": "Chúng tôi đã gửi liên kết đặt lại tới {email}. Vui lòng kiểm tra hộp thư."
+      "requestError": "Không gửi được mã đặt lại. Vui lòng thử lại.",
+      "emailNotFound": "Email này chưa có tài khoản.",
+      "codeTitle": "Nhập mã đặt lại",
+      "codeSubtitle": "Chúng tôi đã gửi mã đặt lại tới {email}. Nhập mã để tiếp tục.",
+      "codeLabel": "Mã đặt lại",
+      "codePlaceholder": "Nhập mã trong email",
+      "codeSubmit": "Xác nhận mã",
+      "codeInvalid": "Mã chỉ gồm các chữ số",
+      "codeError": "Mã không đúng hoặc đã hết hạn. Vui lòng thử lại.",
+      "changeEmail": "Đổi email",
+      "resend": "Gửi lại mã",
+      "resendOk": "Đã gửi lại mã đặt lại.",
+      "passwordTitle": "Đặt mật khẩu mới",
+      "passwordSubtitle": "Chọn mật khẩu mới cho tài khoản của bạn.",
+      "newPasswordLabel": "Mật khẩu mới",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "passwordPlaceholder": "Ít nhất 8 ký tự",
+      "resetSubmit": "Đặt lại mật khẩu",
+      "resetError": "Không đặt lại được mật khẩu. Vui lòng thử lại.",
+      "doneTitle": "Đã đổi mật khẩu",
+      "doneSubtitle": "Mật khẩu đã được cập nhật. Vui lòng đăng nhập lại bằng mật khẩu mới.",
+      "goToLogin": "Đăng nhập"
+    },
+    "verifyEmail": {
+      "title": "Xác minh email để tiếp tục",
+      "subtitle": "Chúng tôi đã gửi mã xác minh tới {email}. Nhập mã để kích hoạt tài khoản.",
+      "codeLabel": "Mã xác minh",
+      "codePlaceholder": "Nhập mã trong email",
+      "submit": "Xác minh",
+      "resend": "Gửi lại mã",
+      "resendOk": "Đã gửi lại mã xác minh.",
+      "codeInvalid": "Mã chỉ gồm các chữ số",
+      "success": "Đã xác minh email. Bạn có thể tiếp tục.",
+      "error": "Mã không đúng hoặc đã hết hạn. Vui lòng thử lại."
+    },
+    "mustChange": {
+      "title": "Đổi mật khẩu để tiếp tục",
+      "subtitle": "Tài khoản của bạn đang dùng mật khẩu tạm do quản trị viên cấp. Hãy đặt mật khẩu mới để bắt đầu sử dụng.",
+      "currentLabel": "Mật khẩu hiện tại",
+      "currentPlaceholder": "Nhập mật khẩu được cấp",
+      "newLabel": "Mật khẩu mới",
+      "newPlaceholder": "Tối thiểu 8 ký tự",
+      "confirmLabel": "Nhập lại mật khẩu mới",
+      "confirmPlaceholder": "Nhập lại mật khẩu mới",
+      "submit": "Đổi mật khẩu",
+      "success": "Đổi mật khẩu thành công.",
+      "error": "Không đổi được mật khẩu. Vui lòng thử lại."
     }
   },
   "errors": {
@@ -500,7 +555,9 @@
     "services": {
       "title": "Chọn gói phù hợp với giai đoạn của bạn",
       "subtitle": "Từ thiết kế – dự toán đến tìm nhà thầu và giám sát, mỗi gói giải quyết một việc rõ ràng.",
-      "viewAll": "Xem tất cả gói",
+      "viewAll": "Tham khảo",
+      "referenceLabel": "Tham khảo:",
+      "referenceLink": "Bảng giá",
       "viewAllMobile": "Tham khảo",
       "ownedLabel": "Gói của bạn - còn {count} lượt",
       "openPackage": "Xem gói thiết kế",
@@ -530,7 +587,8 @@
           "action": "Đăng ký triển khai",
           "usedAtStep": "Dùng ở bước 04–05"
         }
-      }
+      },
+      "titleMobile": "Gói dịch vụ BuildX"
     },
     "dossiers": {
       "eyebrow": "HỒ SƠ MẪU",
@@ -791,14 +849,17 @@
       "notFound": "Không tìm thấy mẫu",
       "notFoundHint": "Mẫu có thể đã bị gỡ. Quay lại thư viện để chọn mẫu khác.",
       "note": "Mẫu tham khảo do BuildX biên soạn. Kết quả thực tế phụ thuộc thông tin dự án của bạn.",
-      "articleNote": "Bài viết mang tính tham khảo. Liên hệ BuildX để được tư vấn theo đúng công trình của bạn."
+      "articleNote": "Bài viết mang tính tham khảo. Liên hệ BuildX để được tư vấn theo đúng công trình của bạn.",
+      "loginRequiredTitle": "Đăng nhập để xem chi tiết mẫu",
+      "loginRequiredHint": "Mẫu này cần tài khoản BuildX để mở bộ ảnh và thông tin chi tiết. Mỗi lần mở dùng 1 lượt tra cứu.",
+      "loginCta": "Đăng nhập"
     },
     "foundation": {
       "eyebrow": "Cẩm nang nền tảng",
-      "kicker": "Nội dung nên đọc trước khi xây nhà",
-      "title": "Cẩm nang bắt buộc cho xây nhà",
-      "description": "Tổng hợp kiến thức nền tảng giúp bạn kiểm soát chất lượng, chi phí và tiến độ từ lúc khởi công đến khi hoàn thiện.",
-      "start": "Bắt đầu xem cẩm nang",
+      "kicker": "Cẩm nang BuildX",
+      "title": "Hiểu rõ từng bước xây nhà",
+      "description": "Từ phần thô đến hoàn thiện, khám phá kiến thức giúp bạn chủ động hơn với công trình của mình.",
+      "start": "Khám phá cẩm nang",
       "stagesTitle": "3 nội dung quan trọng trong quá trình xây nhà",
       "stepLabel": "Bước {order}",
       "stageHeading": "Cẩm nang {stage}",
@@ -821,12 +882,14 @@
       }
     },
     "articles": {
-      "title": "Tất cả bài viết",
+      "eyebrow": "Cẩm nang BuildX",
+      "title": "Khám phá kiến thức xây dựng",
+      "subtitle": "Thông tin hữu ích để bạn chủ động hơn trong từng bước xây nhà.",
       "all": "Tất cả",
       "searchPlaceholder": "Tìm kiếm bài viết…",
       "resultCount": "{count} kết quả",
       "clearFilters": "Xoá bộ lọc",
-      "showMore": "Xem thêm",
+      "showMore": "Xem thêm bài viết",
       "loading": "Đang tải",
       "readMore": "Xem chi tiết",
       "readingTime": "{minutes} phút đọc",
@@ -871,19 +934,19 @@
       "badge": "Thư viện mẫu",
       "close": "Đóng",
       "title": "Bạn muốn làm gì với mẫu này?",
-      "subtitle": "“{name}” — tạo phương án từ mẫu, lưu lại để xem sau, hoặc hỏi kiến trúc sư trước.",
+      "subtitle": "“{name}” — xem để tham khảo, lưu lại cho lần sau, hoặc hỏi kiến trúc sư trước.",
       "later": "Để sau, xem tiếp",
       "create": {
         "imageAlt": "Mẫu thiết kế đang xem",
         "badge": "Lựa chọn chính",
-        "title": "Tạo phương án từ mẫu này",
-        "subtitle": "Dùng mẫu làm cảm hứng / đầu vào cho dự án của bạn.",
+        "title": "Thiết kế ngay",
+        "subtitle": "Bắt đầu một dự án thiết kế & dự toán mới, không dùng mẫu này làm dữ liệu đầu vào.",
         "p1": "Đi vào luồng tạo dự án",
         "p2": "Thiết kế & dự toán theo lô đất của bạn",
         "p3": "Nhận bản vẽ hoàn chỉnh → sẵn sàng triển khai",
         "valuePlan": "Dùng lượt trong gói {plan}",
-        "valueFree": "Còn 1 lượt thiết kế miễn phí",
-        "action": "Tạo phương án từ mẫu này"
+        "valueFree": "gói thiết kế từ 399.000đ",
+        "action": "Thiết kế ngay"
       },
       "save": {
         "imageAlt": "Mẫu thiết kế để lưu vào tài khoản",
@@ -891,7 +954,7 @@
         "subtitle": "Lưu vào tài khoản để quay lại sau.",
         "p1": "Nằm trong “Mẫu đã lưu” của bạn",
         "p2": "So sánh các mẫu đã lưu",
-        "p3": "Tạo phương án hoặc hỏi KTS từ danh sách",
+        "p3": "Bắt đầu thiết kế mới hoặc hỏi KTS từ danh sách",
         "value": "Miễn phí · không tốn lượt tra",
         "action": "Lưu mẫu",
         "savedAction": "Đã lưu",
@@ -903,7 +966,7 @@
         "subtitle": "Kiến trúc sư BuildX tư vấn mẫu này có phù hợp với bạn không.",
         "p1": "Mẫu có phù hợp lô đất & nhu cầu?",
         "p2": "Cần điều chỉnh gì · ước tính chi phí, công năng",
-        "p3": "Sau tư vấn: dùng mẫu hoặc đổi mẫu khác",
+        "p3": "Sau tư vấn: bắt đầu thiết kế mới hoặc chọn mẫu khác",
         "value": "Miễn phí · kiến trúc sư BuildX",
         "action": "Hỏi KTS 1:1"
       }
@@ -934,15 +997,15 @@
       "close": "Đóng",
       "titlePlan": "Bạn đã dùng hết {total} lượt tra cứu của gói {plan}",
       "titleFree": "Bạn đã dùng hết {total} lượt tra cứu hôm nay",
-      "description": "Nâng gói hoặc mua thêm lượt để xem tiếp, hoặc dùng ngay “{name}” để tạo phương án cho dự án của mình.",
+      "description": "Nâng gói hoặc mua thêm lượt để xem tiếp, hoặc bắt đầu một dự án thiết kế & dự toán mới.",
       "chip1": "Nhà phố hiện đại",
       "chip2": "Biệt thự sân vườn",
       "chip3": "Nhà cấp 4",
       "more": "Mở thêm lượt ngay",
-      "useSelected": "Dùng mẫu đã chọn",
+      "useSelected": "Thiết kế ngay",
       "consult": "Hỏi KTS tư vấn mẫu",
-      "footnoteDay": "Hết lượt hôm nay. Bạn vẫn có thể dùng mẫu đã chọn hoặc hỏi KTS; lượt tra cứu miễn phí được làm mới vào ngày mới.",
-      "footnoteMonth": "Hết lượt tra cứu của gói trong tháng này. Mở thêm quyền lợi để xem tiếp, hoặc dùng ngay mẫu đã chọn.",
+      "footnoteDay": "Hết lượt hôm nay. Bạn vẫn có thể bắt đầu thiết kế mới hoặc hỏi KTS; lượt tra cứu miễn phí được làm mới vào ngày mới.",
+      "footnoteMonth": "Hết lượt tra cứu của gói trong tháng này. Mở thêm quyền lợi để xem tiếp, hoặc bắt đầu một dự án thiết kế mới.",
       "later": "Để sau",
       "returnToLibrary": "Quay lại Thư viện mẫu"
     },
@@ -983,7 +1046,7 @@
           "p1": "Chưa có bản vẽ → Thiết kế & dự toán",
           "p2": "Nhận bản vẽ / hồ sơ",
           "p3": "Dự án sẵn sàng triển khai",
-          "value": "Còn 1 lượt thiết kế miễn phí",
+          "value": "gói thiết kế từ 399.000đ",
           "action": "Tạo dự án ngay"
         },
         "architect": {
@@ -1103,7 +1166,7 @@
           "p1": "Tải ảnh lô đất / chụp ảnh hiện trạng",
           "p2": "Hệ thống phân tích hiện trạng",
           "p3": "Thiết kế & dự toán → nhận bản vẽ",
-          "value": "Bắt đầu từ ảnh hiện trạng",
+          "value": "gói thiết kế từ 399.000đ",
           "action": "Chụp ảnh & tạo dự án"
         },
         "browse": {
@@ -1160,6 +1223,7 @@
       "descriptionLabel": "Mô tả (không bắt buộc)",
       "descriptionHint": "Ghi chú riêng về dự án, chỉ bạn nhìn thấy.",
       "descriptionPlaceholder": "Nhập mô tả dự án (nếu có)...",
+      "needPlan": "Bạn cần mua gói thiết kế để tạo hồ sơ thi công. Mời chọn gói ở trang Bảng giá.",
       "submit": "Tạo dự án"
     },
     "input": {
@@ -1167,10 +1231,18 @@
         "title": "Thông tin bổ sung",
         "empty": "Chọn loại công trình để hiển thị các lựa chọn phù hợp"
       },
+      "inactiveSuffix": "(Ngừng hoạt động)",
+      "configChanged": "Cấu hình loại công trình vừa thay đổi. Vui lòng chọn lại các trường đang được đánh dấu.",
+      "typeChange": {
+        "title": "Đổi loại công trình?",
+        "description": "Loại công trình mới có cấu hình khác, các giá trị sau không còn hợp lệ và sẽ bị xóa khỏi form: {fields}.",
+        "confirm": "Đổi loại và xóa giá trị",
+        "cancel": "Giữ loại hiện tại"
+      },
       "landPhoto": {
-        "label": "Ảnh lô đất",
+        "label": "Ảnh hiện trạng",
         "labelApartment": "Ảnh mặt bằng căn hộ hiện trạng",
-        "hint": "Chụp hoặc tải ảnh mặt bằng khu đất (nhìn rõ ranh giới, đủ sáng). AI tự nhận diện hình dạng, tỷ lệ lô đất — không cần nhập kích thước.",
+        "hint": "Chụp hoặc tải ảnh hiện trạng khu đất (nhìn rõ ranh giới, đủ sáng). AI tự nhận diện hình dạng, tỷ lệ khu đất — không cần nhập kích thước.",
         "hintApartment": "Tải ảnh mặt bằng căn hộ (bản vẽ / sơ đồ từ chủ đầu tư) để AI nhận diện các phòng.",
         "cta": "Chụp ảnh hoặc kéo-thả vào đây",
         "constraints": "JPG, PNG, HEIC — tối đa 10MB",
@@ -1319,7 +1391,7 @@
         "interior": "Phần nội thất"
       },
       "sectionTotal": "Tổng {section}:",
-      "viewDetail": "XEM CHI TIẾT",
+      "viewDetail": "Xem chi tiết",
       "downloadXlsx": "Tải bảng dự toán Excel (.xlsx)",
       "breakdownTitle": "Tỷ trọng chi phí",
       "advisoryTitle": "Tư vấn từ BuildX",
@@ -1583,6 +1655,10 @@
   },
   "account": {
     "title": "Tài khoản của tôi",
+    "pending": {
+      "title": "Tính năng đang hoàn thiện",
+      "description": "Phần này sẽ sớm được cập nhật khi hệ thống sẵn sàng. Cảm ơn bạn đã kiên nhẫn chờ."
+    },
     "info": {
       "title": "Thông tin tài khoản",
       "name": "Họ và tên",
@@ -1602,6 +1678,10 @@
     },
     "projects": {
       "title": "Dự án của tôi",
+      "pendingNotice": {
+        "title": "Luồng tạo dự toán (3 bước) chưa nối hệ thống",
+        "description": "Danh sách chỉ hiển thị dự toán thật đã lưu trên hệ thống. Dự án tạo thử ở bước nhập liệu hiện chưa được lưu nên chưa xuất hiện ở đây — sẽ có khi bước tạo được nối API."
+      },
       "step": "Bước {step}/3",
       "empty": {
         "title": "Chưa có dự án nào",
@@ -1773,6 +1853,7 @@
       "title": "Lịch sử tư vấn 1:1",
       "description": "Buổi sắp tới, ghi chú của kiến trúc sư và các buổi đã qua.",
       "quota": "Lượt tư vấn 1:1: {count} lượt còn lại trong {plan} · buổi đầu tiên luôn miễn phí · đổi hoặc hủy lịch trước 24 giờ để được hoàn lượt.",
+      "freeNote": "Tư vấn 1:1 miễn phí — đặt lịch với kiến trúc sư bất cứ lúc nào.",
       "planTier": {
         "basic": "gói BASIC",
         "advanced": "gói PLUS",
@@ -1893,9 +1974,10 @@
       "pro": "Triển khai ngay"
     },
     "ctaBand": {
-      "title": "Bắt đầu hành trình thiết kế ngôi nhà của bạn ngay hôm nay!",
-      "subtitle": "Lựa chọn gói phù hợp và nhận tư vấn từ đội ngũ chuyên gia của BuildX.",
-      "action": "Đăng ký ngay"
+      "title": "Chưa chắc chọn gói nào? Tư vấn miễn phí",
+      "subtitle": "Gọi tổng đài hoặc hỏi trợ lý AI để được gợi ý gói phù hợp với công trình của bạn.",
+      "call": "Gọi tổng đài {hotline}",
+      "chat": "Chat với trợ lý AI"
     },
     "gift": {
       "badge": "Quà tặng đặc biệt",
@@ -2026,6 +2108,7 @@
     "card": {
       "experience": "{years} năm kinh nghiệm",
       "projects": "{count}+ công trình",
+      "company": "tại {company}",
       "viewProfile": "Xem hồ sơ"
     },
     "rail": {
@@ -2033,6 +2116,7 @@
     },
     "profile": {
       "reviews": "({count} đánh giá)",
+      "company": "tại {company}",
       "experience": "{years}+ năm kinh nghiệm",
       "specialtyPrefix": "Chuyên: {value}",
       "bookCta": "Đặt lịch tư vấn",
@@ -2094,6 +2178,10 @@
     }
   },
   "admin": {
+    "mockApiNotice": {
+      "title": "Chưa gắn API",
+      "description": "Màn này đang dùng dữ liệu mẫu (lưu tạm trên trình duyệt), chưa nối API thật."
+    },
     "shell": {
       "brandSuffix": "Khu quản trị",
       "title": "Quản trị",
@@ -2124,7 +2212,8 @@
       "people": "Khách hàng",
       "library": "Thư viện",
       "catalog": "Danh mục công trình",
-      "packages": "Gói dịch vụ"
+      "packages": "Gói dịch vụ",
+      "access": "Nhân sự & phân quyền"
     },
     "charts": {
       "viewChart": "Xem biểu đồ",
@@ -2144,14 +2233,16 @@
     },
     "nav": {
       "dashboard": "Việc cần xử lý",
-      "templates": "Mẫu bản vẽ 2D",
+      "templates": "Thư viện mẫu",
+      "styles": "Phong cách",
+      "constructionScopes": "Phạm vi thi công",
       "articles": "Bài viết",
       "consultants": "Kiến trúc sư",
-      "bookings": "Lịch tư vấn",
+      "bookings": "Yêu cầu tư vấn",
       "invitations": "Lời mời & khảo sát",
       "inspections": "Dự án giám sát",
       "customers": "Tài khoản khách",
-      "planTable": "Gói thiết kế",
+      "planTable": "Gói thiết kế & giám sát",
       "transactions": "Sổ giao dịch",
       "orders": "Đơn hàng & đối soát",
       "discounts": "Mã giảm giá",
@@ -2167,13 +2258,16 @@
       "supervisionStages": "Giai đoạn giám sát",
       "templates3d": "Mẫu nội thất 3D",
       "templateViews": "Lượt xem chi tiết mẫu",
-      "articleLabels": "Nhãn bài viết",
+      "articleLabels": "Danh mục tin tức",
       "testimonials": "Nhận xét khách hàng",
       "handbookSteps": "Các bước Cẩm nang",
       "costGroups": "Nhóm chi phí",
       "costItems": "Hạng mục",
       "materialPrices": "Giá vật tư theo khu vực",
-      "estimateAdvice": "Nội dung tư vấn"
+      "estimateAdvice": "Nội dung tư vấn",
+      "roles": "Vai trò & quyền",
+      "staff": "Tài khoản nhân viên",
+      "assignments": "Phân công giám sát"
     },
     "actions": {
       "create": "Thêm mới",
@@ -2194,8 +2288,10 @@
       "discard": "Bỏ thay đổi",
       "keepEditing": "Soạn tiếp",
       "discardConfirmTitle": "Đóng mà chưa lưu?",
+      "confirmSaveTitle": "Xác nhận lưu thay đổi?",
       "discardConfirmBody": "Những gì bạn vừa nhập trong ngăn kéo này sẽ mất.",
       "view": "Xem chi tiết",
+      "more": "Thao tác",
       "switchStatus": "Chuyển trạng thái",
       "switchStatusTitle": "Chuyển trạng thái “{name}”?",
       "switchStatusBody": "{current} → {next}"
@@ -2203,13 +2299,15 @@
     "feedback": {
       "created": "Đã thêm bản ghi mới.",
       "saved": "Đã lưu. Site công khai cập nhật ngay.",
-      "deleted": "Đã xóa bản ghi."
+      "deleted": "Đã xóa bản ghi.",
+      "apiError": "Máy chủ báo lỗi. Vui lòng thử lại."
     },
     "table": {
       "actions": "Thao tác",
       "searchPlaceholder": "Tìm trong bảng…",
       "empty": "Chưa có bản ghi nào.",
       "noSearchResult": "Không có bản ghi nào khớp \"{query}\".",
+      "noFilterResult": "Không có bản ghi nào phù hợp với bộ lọc đang chọn.",
       "clearSearch": "Xóa từ khóa",
       "total": "{total} bản ghi"
     },
@@ -2221,6 +2319,79 @@
       "sectionIndex": "Mục {index}",
       "name": "Họ tên",
       "maxLength": "Tối đa {max} ký tự."
+    },
+    "rbacStaff": {
+      "title": "Tài khoản nhân viên",
+      "description": "Tạo tài khoản nhân viên, gán vai trò, khóa hoặc buộc đăng xuất. Mật khẩu do hệ thống sinh và chỉ hiển thị một lần khi tạo.",
+      "noName": "(Chưa có tên)",
+      "noRoles": "Chưa có vai trò",
+      "mustChangePassword": "Chưa đổi mật khẩu lần đầu",
+      "passwordChanged": "Đã đổi mật khẩu",
+      "columns": {
+        "name": "Họ tên",
+        "email": "Email",
+        "status": "Trạng thái",
+        "roles": "Vai trò",
+        "firstLogin": "Đăng nhập lần đầu"
+      },
+      "status": {
+        "Active": "Đang hoạt động",
+        "Locked": "Đã khóa"
+      },
+      "actions": {
+        "manageRoles": "Vai trò",
+        "lock": "Khóa tài khoản",
+        "unlock": "Mở khóa",
+        "forceLogout": "Buộc đăng xuất",
+        "revokeRole": "Thu hồi vai trò"
+      },
+      "form": {
+        "passwordNotice": "Hệ thống tự sinh mật khẩu và hiển thị một lần sau khi tạo. Không cần nhập mật khẩu.",
+        "email": "Email",
+        "emailPlaceholder": "nhanvien@bmt.local",
+        "lastName": "Họ",
+        "firstName": "Tên",
+        "roles": "Vai trò",
+        "rolesPlaceholder": "Chọn một hoặc nhiều vai trò nhân viên",
+        "rolesHint": "Chỉ liệt kê vai trò nhân viên; vai trò Khách hàng không gán được cho nhân viên.",
+        "rolesRequired": "Chọn ít nhất một vai trò."
+      },
+      "password": {
+        "title": "Mật khẩu tài khoản vừa tạo",
+        "warning": "Mật khẩu này chỉ hiển thị MỘT LẦN. Hãy sao chép và chuyển cho nhân viên qua kênh riêng ngay bây giờ; đóng hộp này rồi thì không xem lại được.",
+        "label": "Mật khẩu sinh tự động",
+        "copy": "Sao chép",
+        "copied": "Đã sao chép mật khẩu.",
+        "copyFailed": "Không sao chép được. Hãy chọn và sao chép thủ công.",
+        "saved": "Tôi đã lưu mật khẩu"
+      },
+      "confirm": {
+        "lockTitle": "Khóa tài khoản “{name}”?",
+        "lockBody": "Tài khoản bị khóa ngay và mọi phiên đăng nhập bị cắt. Vai trò và phân công vẫn giữ nguyên.",
+        "unlockTitle": "Mở khóa tài khoản “{name}”?",
+        "unlockBody": "Nhân viên đăng nhập lại được với đúng vai trò và phân công như trước khi khóa.",
+        "forceLogoutTitle": "Buộc đăng xuất “{name}”?",
+        "forceLogoutBody": "Cắt mọi phiên đang mở để quyền mới có hiệu lực ngay. Tài khoản vẫn hoạt động, không bị khóa.",
+        "revokeTitle": "Thu hồi vai trò “{role}”?",
+        "revokeBody": "Nếu sau khi thu hồi nhân viên vẫn còn phụ trách gói giám sát mà mất quyền hoàn tất, hệ thống sẽ từ chối."
+      },
+      "rolesDrawer": {
+        "hint": "Quyền của nhân viên là hợp các quyền của tất cả vai trò đang giữ.",
+        "current": "Vai trò đang giữ",
+        "add": "Thêm vai trò",
+        "addPlaceholder": "Chọn vai trò để thêm",
+        "addButton": "Thêm",
+        "noneLeft": "Không còn vai trò nào để thêm.",
+        "noRoles": "Nhân viên chưa giữ vai trò nào."
+      },
+      "feedback": {
+        "locked": "Đã khóa tài khoản và cắt mọi phiên đăng nhập.",
+        "lockedWithAssignments": "Đã khóa tài khoản. Người này còn phụ trách {count} gói giám sát cần chia lại.",
+        "unlocked": "Đã mở khóa tài khoản.",
+        "forcedLogout": "Đã buộc đăng xuất mọi phiên của tài khoản.",
+        "roleGranted": "Đã gán vai trò “{role}”.",
+        "roleRevoked": "Đã thu hồi vai trò “{role}”."
+      }
     },
     "planTier": {
       "basic": "Cơ bản",
@@ -2753,7 +2924,6 @@
       "scanUrl": "Bản scan hợp đồng / thỏa thuận",
       "person": "Người liên hệ",
       "phone": "Điện thoại",
-      "opsNote": "Ghi chú vận hành",
       "noReviews": "Chưa có đánh giá",
       "detailDescription": "Hồ sơ quản trị của nhà thầu. Trạng thái xác minh nhà thầu, dự án, pháp lý và hợp tác là các trạng thái độc lập.",
       "info": "Thông tin nhà thầu",
@@ -2848,7 +3018,14 @@
       "historyBy": "Người thực hiện",
       "historyGroup": "Nhóm dữ liệu",
       "historyAction": "Thao tác",
-      "maxUpperFloors": "Số lầu tối đa (không tính trệt)"
+      "provinceRequired": "Chọn tỉnh / thành phố.",
+      "wardRequired": "Chọn phường / xã.",
+      "openInvitations": "Mở danh sách lời mời",
+      "coordsInvalid": "Cần cập nhật tọa độ",
+      "licenseExpiredWarning": "Giấy phép kinh doanh không còn hiệu lực — hồ sơ pháp lý không còn được hiển thị là đã xác minh. Cần cập nhật thông tin hợp lệ và kiểm duyệt lại.",
+      "delete": "Xóa nhà thầu",
+      "deleteConfirm": "Xóa vĩnh viễn nhà thầu {name}?",
+      "deletedToast": "Đã xóa nhà thầu."
     },
     "discountValidity": {
       "active": "Đang chạy",
@@ -2900,6 +3077,274 @@
       "usedCount": "Số lượt đã dùng",
       "noteHint": "Chỉ admin thấy, không hiện cho khách."
     },
+    "bmtPlans": {
+      "description": "Gói thiết kế (bán theo tháng / năm) và gói giám sát (bán theo công trình). Sửa gói là sửa bản nháp — website chỉ đổi khi bấm Công bố. Gói khách đã mua giữ nguyên phiên bản đã chốt.",
+      "allKinds": "Mọi loại gói",
+      "allSaleStates": "Mọi trạng thái bán",
+      "kinds": {
+        "Design": "Gói thiết kế",
+        "Supervision": "Gói giám sát"
+      },
+      "publishConfirmTitle": "Công bố bản nháp của “{name}”?",
+      "publishConfirmBody": "Bản nháp thành phiên bản công khai và gói chuyển sang Đang bán. Kỳ / gói khách đã mua không đổi.",
+      "stopConfirmTitle": "Ngừng bán “{name}”?",
+      "stopConfirmBody": "Gói biến khỏi website và không tạo được đơn mới. Gói khách đã mua giữ nguyên quyền lợi và thời hạn. Hiện chưa mở bán lại được gói đã ngừng bán.",
+      "publish": "Công bố",
+      "stopSelling": "Ngừng bán",
+      "published": "Đã công bố bản nháp.",
+      "stopped": "Đã ngừng bán gói.",
+      "name": "Tên gói",
+      "code": "Mã gói",
+      "planId": "ID gói",
+      "kind": "Loại gói",
+      "saleState": "Trạng thái bán",
+      "saleStates": {
+        "NotPublished": "Chưa công bố",
+        "OnSale": "Đang bán",
+        "Stopped": "Đã ngừng bán"
+      },
+      "hasDraft": "Có bản nháp #{number} chưa công bố",
+      "revision": "Phiên bản công khai",
+      "revisionNumber": "Phiên bản #{number}",
+      "publishedBlock": "Bản đang công bố",
+      "draftBlock": "Bản nháp",
+      "noRevision": "Không có.",
+      "unlimited": "Không giới hạn",
+      "limited": "Có hạn mức",
+      "limitValue": "{limit} lượt",
+      "serviceDescription": "Mô tả dịch vụ",
+      "descriptionField": "Mô tả gói",
+      "consultationText": "Nội dung tư vấn",
+      "offers": "Lựa chọn mua & giá (VND)",
+      "offerKeys": {
+        "Month": "Theo tháng",
+        "Year": "Theo năm",
+        "ConstructionSite": "Theo công trình"
+      },
+      "displayBenefits": "Quyền lợi hiển thị (bật / tắt)",
+      "on": "Bật",
+      "off": "Tắt",
+      "noBenefits": "Chưa có quyền lợi.",
+      "stoppedNote": "Gói đã ngừng bán: vẫn lưu được bản nháp nhưng hiện chưa công bố lại được.",
+      "draftNote": "Lưu là ghi đè toàn bộ bản nháp; website vẫn hiện bản đang công bố cho tới khi bấm Công bố ở dòng của gói.",
+      "codeHint": "Không trùng gói khác và không đổi được sau khi tạo.",
+      "kindHint": "Chọn một lần lúc tạo, không đổi được sau đó.",
+      "serviceDescriptionHint": "Bắt buộc có nội dung khi Công bố. Chỉ để hiển thị, chốt theo đơn — không tạo lượt hay bộ đếm.",
+      "consultationHint": "Mô tả tự do dịch vụ tư vấn offline; không tạo lượt hay mức tư vấn.",
+      "priceRule": "Giá là số nguyên VND lớn hơn 0.",
+      "quotaSection": "Quyền dạng lượt",
+      "basicSection": "Thông tin cơ bản",
+      "priceQuotaSection": "Giá & hạn mức",
+      "priceRow": "Giá bán",
+      "optional": "tùy chọn",
+      "yearOptionalPlaceholder": "Bỏ trống nếu không bán theo năm",
+      "quotaHint": "Nhập số lượt cho tháng (và năm nếu có bán theo năm), hoặc tick ∞ để không giới hạn. Ô trống nghĩa là gói không có quyền đó. Năm không tự bằng 12 lần tháng.",
+      "limitRule": "Nhập số lượt từ 1, hoặc chọn không giới hạn.",
+      "limitPlaceholder": "Số lượt",
+      "displayBenefitsHint": "Dùng chung cho tháng và năm. Chưa thêm hoặc đang tắt đều nghĩa là không có quyền này. Gói thiết kế cần ít nhất một quyền lợi (dạng lượt hoặc bật / tắt) mới công bố được.",
+      "noBooleanDefinitions": "Danh mục hệ thống chưa có quyền dạng bật / tắt.",
+      "displayText": "Nội dung hiển thị",
+      "sortOrderRule": "Nhập thứ tự là số nguyên.",
+      "supervisionNote": "Gói giám sát không dùng danh mục quyền lợi và không có nội dung tư vấn; công bố cần tên, giá và mô tả dịch vụ.",
+      "snapshotNote": "Đơn đã tạo giữ phiên bản gói lúc đặt — thay đổi đã công bố chỉ áp cho lần mua sau.",
+      "highlightedBadge": "Nổi bật",
+      "cardSection": "Trình bày thẻ gói",
+      "cardNote": "Ảnh bìa, nhãn nổi bật và quà tặng hiển thị trên thẻ gói ngoài website. Có thể để trống.",
+      "coverImage": "Ảnh bìa",
+      "coverImageHint": "Dán URL ảnh thuộc kho ảnh của hệ thống; để trống nếu chưa có.",
+      "isHighlighted": "Gói nổi bật",
+      "highlightLabel": "Nhãn nổi bật",
+      "highlightLabelHint": "Chữ hiển thị trên nhãn khi bật gói nổi bật (ví dụ: Bán chạy).",
+      "giftDescription": "Mô tả quà tặng",
+      "giftConditions": "Điều kiện nhận quà"
+    },
+    "bmtCommerce": {
+      "views": {
+        "orders": "Đơn thanh toán",
+        "purchases": "Gói đã cấp"
+      },
+      "ordersDescription": "Mọi đơn mua gói của khách: chờ, nhận thiếu, hết hạn, đã hủy, đã thanh toán. Trạng thái do hệ thống khớp từ giao dịch ngân hàng — chỉ tra cứu, không xác nhận tay.",
+      "purchasesTitle": "Gói đã cấp",
+      "purchasesDescription": "Mỗi lần mua đã được cấp gói là một dòng. Mở chi tiết để xem hạn, lượt, lịch sử và thao tác hủy / hoàn thành / gỡ gói (cần quyền tương ứng).",
+      "transactionsDescription": "Mọi giao dịch SePay hệ thống đã tiếp nhận, kể cả giao dịch chưa khớp đơn — chỉ đọc, không gán tay.",
+      "allKinds": "Mọi loại gói",
+      "kinds": {
+        "Design": "Thiết kế",
+        "Supervision": "Giám sát"
+      },
+      "offerKeys": {
+        "Month": "Theo tháng",
+        "Year": "Theo năm",
+        "ConstructionSite": "Theo công trình"
+      },
+      "allOrderStates": "Mọi trạng thái đơn",
+      "orderStates": {
+        "Pending": "Chờ thanh toán",
+        "PartiallyPaid": "Nhận thiếu",
+        "Paid": "Đã thanh toán",
+        "Expired": "Hết hạn",
+        "Canceled": "Đã hủy"
+      },
+      "paymentCodePlaceholder": "Tìm mã chuyển khoản",
+      "createdFrom": "Tạo từ ngày",
+      "createdTo": "đến ngày",
+      "paymentCode": "Mã chuyển khoản",
+      "orderingDiscrepancy": "Lệch thứ tự",
+      "orderingDiscrepancyHint": "Khoản tiền đến muộn làm đảo thứ tự với lần mua thiết kế đã cấp — cần xử lý bên ngoài hệ thống.",
+      "buyer": "Người mua",
+      "unknownBuyer": "Chưa xác định đơn",
+      "plan": "Gói",
+      "kind": "Loại gói",
+      "offer": "Lựa chọn mua",
+      "price": "Giá",
+      "received": "Đã nhận",
+      "eligible": "Tiền hợp lệ",
+      "remaining": "Còn thiếu",
+      "extraReceived": "Nhận dư",
+      "transactionCount": "Số giao dịch khớp đơn",
+      "orderState": "Trạng thái đơn",
+      "dispositions": {
+        "Activated": "Đã cấp gói",
+        "SupersededBeforeActivation": "Bị thay thế trước kích hoạt"
+      },
+      "allDispositions": "Mọi kết quả cấp gói",
+      "disposition": "Kết quả cấp gói",
+      "createdAt": "Tạo đơn",
+      "expiresAt": "Hạn thanh toán",
+      "paidAt": "Đủ tiền lúc",
+      "canceledAt": "Hủy lúc",
+      "expiredAt": "Hết hạn lúc",
+      "orderId": "ID đơn",
+      "orderBlock": "Thông tin đơn",
+      "amountBlock": "Số tiền",
+      "fulfillmentBlock": "Cấp gói",
+      "fulfilledAt": "Cấp gói lúc",
+      "appliedPaidAt": "Mốc đủ tiền dùng để cấp",
+      "transactionsBlock": "Giao dịch ngân hàng khớp đơn",
+      "eventsBlock": "Lịch sử thanh toán",
+      "eventAt": "Thời điểm",
+      "eventKind": "Mốc",
+      "eventKinds": {
+        "Created": "Tạo đơn",
+        "Canceled": "Hủy đơn",
+        "Expired": "Hết hạn",
+        "Paid": "Đủ tiền",
+        "Fulfilled": "Cấp gói",
+        "OrderingDiscrepancy": "Lệch thứ tự"
+      },
+      "actor": "Người thực hiện",
+      "system": "Hệ thống",
+      "allEffectiveStates": "Mọi trạng thái hiệu lực",
+      "effectiveState": "Trạng thái hiệu lực",
+      "effectiveStates": {
+        "Active": "Đang hiệu lực",
+        "Expired": "Hết hạn",
+        "CanceledByStaff": "Nhân viên đã hủy",
+        "Superseded": "Bị thay thế",
+        "SupersededBeforeActivation": "Thay thế trước kích hoạt",
+        "Unassigned": "Chưa gán công trình",
+        "ExpiredUnassigned": "Quá hạn gán",
+        "Assigned": "Đã gán công trình",
+        "Completed": "Đã hoàn thành"
+      },
+      "constructionSite": "Công trình",
+      "purchaseBlock": "Gói đã cấp",
+      "periodBlock": "Kỳ thiết kế",
+      "grantBlock": "Gói giám sát",
+      "lifecycleState": "Trạng thái",
+      "periodStates": {
+        "Active": "Đang hiệu lực",
+        "CanceledByStaff": "Nhân viên đã hủy",
+        "Superseded": "Bị thay thế"
+      },
+      "grantStates": {
+        "Unassigned": "Chưa gán",
+        "Assigned": "Đã gán",
+        "CanceledByStaff": "Nhân viên đã hủy",
+        "Completed": "Đã hoàn thành"
+      },
+      "startsAt": "Bắt đầu",
+      "endsAt": "Kết thúc theo lịch",
+      "closedAt": "Đóng lúc",
+      "quotas": "Lượt",
+      "quotaUsage": "đã dùng {used}, đang giữ {reserved} / {limit}",
+      "unlimited": "không giới hạn",
+      "grantedAt": "Cấp lúc",
+      "assignmentDeadline": "Hạn gán công trình",
+      "firstAssignedAt": "Gán lần đầu",
+      "assignedAt": "Gán hiện tại",
+      "historyBlock": "Lịch sử gói",
+      "historyKinds": {
+        "Created": "Tạo đơn",
+        "Canceled": "Hủy đơn",
+        "Expired": "Đơn hết hạn",
+        "Paid": "Đủ tiền",
+        "Fulfilled": "Cấp gói",
+        "OrderingDiscrepancy": "Lệch thứ tự",
+        "Cancel": "Hủy gói",
+        "Restore": "Khôi phục (cũ)",
+        "Complete": "Hoàn thành",
+        "Reopen": "Mở lại",
+        "Unassign": "Gỡ khỏi công trình",
+        "FirstAssigned": "Gán lần đầu",
+        "CurrentAssigned": "Gán hiện tại"
+      },
+      "reason": "Lý do",
+      "lifecycle": {
+        "cancel": "Hủy gói",
+        "cancelTitle": "Hủy hiệu lực gói này?",
+        "cancelBody": "Thao tác cuối cùng, không khôi phục được. Không hoàn tiền, không trả lại lượt đã dùng; hủy gói giám sát kết thúc phân công của gói.",
+        "cancelDone": "Đã hủy gói.",
+        "complete": "Hoàn thành",
+        "completeTitle": "Đánh dấu gói giám sát đã hoàn thành?",
+        "completeBody": "Gói vẫn gắn và vẫn giữ chỗ trên công trình. Có thể mở lại sau.",
+        "completeDone": "Đã hoàn thành gói giám sát.",
+        "reopen": "Mở lại",
+        "reopenTitle": "Mở lại gói giám sát?",
+        "reopenBody": "Gói quay về trạng thái Đã gán công trình.",
+        "reopenDone": "Đã mở lại gói giám sát.",
+        "unassign": "Gỡ khỏi công trình",
+        "unassignTitle": "Gỡ gói giám sát khỏi công trình?",
+        "unassignBody": "Chỉ gỡ được trước hạn gán ban đầu. Gói về Chưa gán, giữ chủ và hạn gán; khách tự gán lại.",
+        "unassignDone": "Đã gỡ gói khỏi công trình."
+      },
+      "filteredByOrder": "Đang lọc giao dịch của đơn {orderId}.",
+      "allMatchStates": "Mọi trạng thái khớp đơn",
+      "providerIdPlaceholder": "Tìm mã giao dịch SePay",
+      "occurredFrom": "Phát sinh từ ngày",
+      "occurredTo": "đến ngày",
+      "occurredAt": "Phát sinh",
+      "receivedAt": "Hệ thống nhận",
+      "providerId": "Mã SePay",
+      "amount": "Số tiền",
+      "transferContent": "Nội dung chuyển khoản",
+      "codeLine": "Mã: {code}",
+      "matchState": "Khớp đơn",
+      "matchStates": {
+        "Pending": "Đang chờ khớp",
+        "Matched": "Đã khớp đơn",
+        "Unmatched": "Không khớp đơn",
+        "IgnoredDirection": "Bỏ qua (tiền ra)",
+        "ConnectionMismatch": "Sai tài khoản nhận"
+      },
+      "processingState": "Xử lý",
+      "processingStates": {
+        "Pending": "Đang chờ",
+        "Retry": "Thử lại",
+        "Completed": "Xong"
+      },
+      "direction": "Chiều tiền",
+      "directions": {
+        "in": "Tiền vào",
+        "out": "Tiền ra"
+      },
+      "code": "Mã thanh toán nhận diện",
+      "referenceCode": "Mã tham chiếu",
+      "receivedAccount": "Tài khoản nhận",
+      "receivedGateway": "Ngân hàng",
+      "receivedSubAccount": "Tài khoản phụ",
+      "attempts": "{count} lần xử lý"
+    },
     "supervisionPackages": {
       "description": "Ba lựa chọn quản lý thi công trên trang Gói giám sát. Chỉ sửa, không thêm/xóa — luồng chọn gói và bảng điều khiển gọi đúng ba gói này. Giá mới chỉ áp cho đơn mới.",
       "tier": "Gói",
@@ -2915,6 +3360,210 @@
       "priceRule": "Giá là số không âm.",
       "inspectionsRule": "Số lượt kiểm tra là số nguyên từ 1."
     },
+    "contractorsAdmin": {
+      "description": "Quản lý hồ sơ nhà thầu: thông tin, năng lực (loại công trình × phạm vi), liên hệ, pháp lý. Hồ sơ mới lưu Ẩn; muốn Hiện cần đủ tên + địa chỉ + toạ độ + ≥1 loại công trình + ≥1 phạm vi.",
+      "name": "Tên nhà thầu",
+      "address": "Địa chỉ",
+      "statusLabel": "Trạng thái",
+      "visible": "Đang hiện",
+      "hidden": "Đang ẩn",
+      "hide": "Ẩn hồ sơ",
+      "show": "Hiện hồ sơ",
+      "createHint": "Tạo với tên trước, rồi mở sửa để nhập đầy đủ hồ sơ.",
+      "requiredForVisible": "Bắt buộc để hiển thị công khai.",
+      "ratingHint": "Điểm do admin nhập, 0–5. Để trống cả điểm và số lượt thì không hiện đánh giá.",
+      "contactNote": "Thông tin liên hệ chỉ admin thấy, không lộ ra trang khách.",
+      "sections": {
+        "general": "Thông tin chung",
+        "location": "Địa chỉ & toạ độ",
+        "capability": "Năng lực",
+        "contact": "Liên hệ (nội bộ)",
+        "legal": "Pháp lý"
+      },
+      "contractorType": "Loại nhà thầu",
+      "shortDescription": "Mô tả ngắn",
+      "introduction": "Giới thiệu",
+      "latitude": "Vĩ độ",
+      "longitude": "Kinh độ",
+      "serviceAreaText": "Khu vực phục vụ",
+      "buildingTypes": "Loại công trình",
+      "scopes": "Phạm vi thi công",
+      "foundedYear": "Năm thành lập",
+      "architectCount": "Số KTS",
+      "engineerCount": "Số kỹ sư",
+      "surveyHours": "Giờ khảo sát (trong)",
+      "warrantyMonths": "Bảo hành (tháng)",
+      "acceptingProjects": "Đang nhận việc",
+      "rating": "Điểm đánh giá",
+      "ratingCount": "Số lượt đánh giá",
+      "contactPerson": "Người liên hệ",
+      "contactPhone": "SĐT liên hệ",
+      "contactEmail": "Email liên hệ",
+      "legalName": "Tên pháp nhân",
+      "taxCode": "Mã số thuế",
+      "representative": "Người đại diện",
+      "registeredAddress": "Địa chỉ đăng ký",
+      "industry": "Ngành nghề",
+      "deleteConfirmTitle": "Xoá nhà thầu \"{name}\"?",
+      "deleteConfirmBody": "Xoá cả hồ sơ, dự án, pháp lý và ảnh của nhà thầu này. Không thể hoàn tác.",
+      "projects": {
+        "title": "Dự án tiêu biểu",
+        "hint": "Mỗi dự án cần một loại công trình, một phạm vi và ít nhất một ảnh.",
+        "add": "Thêm dự án",
+        "editTitle": "Sửa dự án",
+        "empty": "Chưa có dự án nào.",
+        "name": "Tên dự án",
+        "buildingType": "Loại công trình",
+        "scope": "Phạm vi thi công",
+        "images": "Ảnh dự án",
+        "imagesHint": "JPG/PNG/WebP, tối đa 10 MB mỗi ảnh.",
+        "upload": "Tải ảnh",
+        "needImage": "Cần ít nhất một ảnh cho dự án.",
+        "areaM2": "Diện tích (m²)",
+        "floorCount": "Số tầng",
+        "completedYear": "Năm hoàn thành",
+        "locationText": "Địa điểm",
+        "roleText": "Vai trò",
+        "mainWork": "Hạng mục chính",
+        "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
+      }
+    },
+    "constructionScopes": {
+      "description": "Danh mục phạm vi thi công dùng chung cho hồ sơ nhà thầu và dự án tiêu biểu. Tên phải là duy nhất; phạm vi \"Ngừng dùng\" không gắn mới được nhưng giữ liên kết cũ. Không xoá được phạm vi đang có nơi dùng.",
+      "name": "Tên phạm vi",
+      "descriptionLabel": "Mô tả",
+      "sortOrder": "Thứ tự",
+      "status": "Trạng thái",
+      "active": "Đang dùng",
+      "inactive": "Ngừng dùng",
+      "deleteConfirmTitle": "Xoá phạm vi \"{name}\"?",
+      "deleteConfirmBody": "Chỉ xoá được khi chưa có nhà thầu hay dự án nào dùng phạm vi này."
+    },
+    "estimateCatalog": {
+      "groupArchitecture": "Kiến trúc",
+      "groupInterior": "Nội thất",
+      "buildingTypesDescription": "Danh mục loại công trình của Tạo dự toán và thư viện mẫu. Mỗi loại bật / tắt riêng việc chọn số tầng, chọn tum và hai nhóm phong cách. Lưu xong chỉ bản dự toán mới dùng cấu hình mới; bản đã tạo giữ cấu hình cũ.",
+      "architectureDescription": "Phong cách kiến trúc khách chọn khi tạo dự toán. Mỗi phong cách có tên và một ảnh minh họa; gán phong cách cho loại công trình ở màn Loại công trình.",
+      "interiorDescription": "Phong cách nội thất khách chọn khi tạo dự toán. Mỗi phong cách có tên và một ảnh minh họa; gán phong cách cho loại công trình ở màn Loại công trình.",
+      "buildingTypeName": "Tên loại công trình",
+      "floors": "Số tầng",
+      "tum": "Tum",
+      "architectureStyles": "Phong cách kiến trúc",
+      "interiorStyles": "Phong cách nội thất",
+      "applies": "Có áp dụng",
+      "notApplies": "Không áp dụng",
+      "enabledCount": "Bật · {count} phong cách",
+      "filter": {
+        "all": "Tất cả",
+        "yes": "Có áp dụng",
+        "no": "Không áp dụng"
+      },
+      "floorGround": "Trệt",
+      "floorUpper": "Trệt + {count} lầu",
+      "floorsEnabled": "Cho khách chọn số tầng",
+      "floorsEmpty": "Đang bật chọn số tầng — cần ít nhất một số tầng.",
+      "tumEnabled": "Cho khách chọn Có tum / Không tum",
+      "tumHint": "Tum chỉ có cờ bật / tắt, không có danh sách.",
+      "architectureEnabled": "Cho khách chọn phong cách kiến trúc",
+      "architectureEmpty": "Đang bật phong cách kiến trúc — cần gán ít nhất một phong cách.",
+      "interiorEnabled": "Cho khách chọn phong cách nội thất",
+      "interiorEmpty": "Đang bật phong cách nội thất — cần gán ít nhất một phong cách.",
+      "keptWhileDisabled": "Tắt nhóm không xóa danh sách: bật lại là danh sách cũ hiện ra. Khách chỉ thấy nhóm đang bật.",
+      "versionNote": "Danh mục có phiên bản: mỗi lần lưu tạo phiên bản mới cho bản dự toán mới. Nếu người khác vừa lưu, hệ thống báo xung đột — đóng ngăn kéo và mở lại để lấy bản mới nhất.",
+      "styleName": "Tên phong cách",
+      "styleImage": "Ảnh minh họa",
+      "styleImageNote": "Ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Màn chưa có nút tải ảnh: dán URL https của ảnh đã tải lên kho lưu trữ.",
+      "styleAssignHint": "Chỉ hiện loại công trình đang bật nhóm này. Muốn thêm loại đang tắt nhóm, hãy bật ở màn Loại công trình.",
+      "styleAssignLabel": "Áp dụng cho loại công trình",
+      "styleAssignPlaceholder": "Chọn loại công trình",
+      "assignedTypes": "Đang gán cho loại công trình",
+      "typeGroupOff": "{name} (nhóm đang tắt)",
+      "httpsUrl": "Cần URL bắt đầu bằng https://, tối đa 2048 ký tự."
+    },
+    "library": {
+      "libraryTitle": "Thư viện mẫu",
+      "libraryDescription": "Kho mẫu 2D và 3D của thư viện. Lọc theo loại mẫu ở đầu bảng. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
+      "kindAll": "Tất cả",
+      "kind2d": "Bản vẽ 2D",
+      "kind3d": "Nội thất 3D",
+      "description2d": "Mẫu bản vẽ 2D của thư viện. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
+      "description3d": "Mẫu bản vẽ 3D của thư viện. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
+      "publishFlowNote": "Mẫu mới là một bản nháp, khách chưa thấy. Mở \"Quản lý phiên bản\" để thêm ảnh, chọn ảnh đại diện và công bố.",
+      "createNote": "Được lưu nháp khi chưa đủ thông tin. Công bố cần: tên, loại bản vẽ, ba kích thước, loại công trình (và số tầng / tum nếu loại đó bật), ít nhất một ảnh và ảnh đại diện.",
+      "createImagesTitle": "Ảnh mẫu (tùy chọn)",
+      "createImagesHint": "Dán URL ảnh https đã upload (JPG, PNG, WebP) và chọn ảnh bìa. Có thể thêm hoặc sắp xếp lại sau ở phần Ảnh & tệp.",
+      "addImage": "Thêm ảnh",
+      "createImagesPartial": "Đã tạo mẫu nhưng {count} ảnh chưa gắn được. Mở phần Ảnh & tệp để thêm lại.",
+      "name": "Tên mẫu",
+      "untitled": "(Chưa đặt tên)",
+      "draftHint": "Có thể để trống khi lưu nháp; bắt buộc khi công bố.",
+      "drawingKind": "Loại bản vẽ",
+      "noDrawingKind": "Chưa chọn 2D / 3D",
+      "widthM": "Chiều ngang",
+      "lengthM": "Chiều dài",
+      "areaM2": "Diện tích",
+      "areaHint": "Nhập độc lập, không bắt buộc bằng ngang × dài.",
+      "decimal": "{field} phải lớn hơn 0, tối đa hai chữ số thập phân (vd 5.25).",
+      "buildingType": "Loại công trình",
+      "floorCount": "Số tầng",
+      "tum": "Tum",
+      "tumYes": "Có tum",
+      "tumNo": "Không tum",
+      "notApplies": "Không áp dụng",
+      "description": "Mô tả",
+      "catalogUnavailable": "Không đọc được danh mục loại công trình (cần quyền quản lý danh mục dự toán).",
+      "pinnedTypeNote": "Loại công trình đã ghim không còn trong danh mục hiện hành. Chỉ sửa tên, mô tả, kích thước thì giữ nguyên phân loại cũ; đổi phân loại phải chọn theo danh mục hiện hành.",
+      "classification": "Phân loại",
+      "dimensions": "Kích thước",
+      "currentVersion": "Phiên bản hiện hành",
+      "notPublished": "Chưa công bố",
+      "versionN": "Phiên bản {number}",
+      "draft": "Nháp",
+      "drafts": "Nháp",
+      "visibility": "Hiển thị",
+      "shown": "Đang hiện",
+      "hidden": "Đang ẩn",
+      "visibilityNote": "Ẩn không đổi phiên bản; người đã có quyền xem vẫn xem được.",
+      "manageVersions": "Quản lý phiên bản",
+      "version": "Phiên bản",
+      "current": "Hiện hành",
+      "readOnly": "Chỉ xem",
+      "assets": "Tài nguyên",
+      "modifiedAt": "Cập nhật",
+      "versionsHint": "Sửa bản hiện hành là đính chính tại chỗ (giữ số phiên bản). Bản đã bị thay thế chỉ xem. Chỉ xóa được nháp; bản đã công bố dùng Ẩn.",
+      "newDraft": "Tạo nháp từ bản hiện hành",
+      "newDraftConfirm": "Tạo nháp mới từ bản hiện hành?",
+      "newDraftNote": "Nháp sao chép thông tin, phân loại, ảnh, thứ tự và ảnh đại diện. Khách vẫn xem bản hiện hành cho tới khi công bố.",
+      "draftCreated": "Đã tạo nháp mới.",
+      "publish": "Công bố",
+      "publishConfirm": "Công bố nháp này thành phiên bản mới?",
+      "publishNote": "Khách sẽ thấy phiên bản mới; bản trước được giữ và khóa sửa. Trạng thái ẩn / hiện của mẫu không đổi.",
+      "published": "Đã công bố phiên bản mới.",
+      "deleteDraftConfirm": "Xóa bản nháp này?",
+      "editCurrentNote": "Đang sửa phiên bản khách đang xem: thay đổi áp dụng ngay, không tạo phiên bản mới. Phiên bản hiện hành phải giữ đủ nội dung như khi công bố.",
+      "manageAssets": "Ảnh & tệp",
+      "readOnlyVersion": "Phiên bản đã bị thay thế — chỉ xem, không sửa được.",
+      "noAssets": "Chưa có ảnh hay tệp nào.",
+      "asset": "Tài nguyên",
+      "kindImage": "Ảnh",
+      "kindAttachment": "Tệp đính kèm",
+      "cover": "Ảnh đại diện",
+      "setCover": "Đặt làm ảnh đại diện",
+      "moveUp": "Lên trên",
+      "moveDown": "Xuống dưới",
+      "detach": "Gỡ khỏi phiên bản",
+      "detachConfirm": "Gỡ tài nguyên này khỏi phiên bản?",
+      "detachNote": "Tệp ở kho không bị xóa. Phiên bản hiện hành không gỡ được ảnh đại diện hay ảnh cuối cùng.",
+      "addAsset": "Thêm ảnh / tệp",
+      "assetAdded": "Đã thêm vào phiên bản.",
+      "uploadMissing": "Chưa có nút tải tệp: tải tệp lên kho lưu trữ trước rồi dán URL https của tệp vào đây.",
+      "assetKind": "Loại",
+      "assetUrl": "URL tệp",
+      "imageFormat": "Ảnh JPG, PNG hoặc WebP.",
+      "attachmentFormat": "Tệp PDF, DWG hoặc DXF.",
+      "originalName": "Tên tệp hiển thị",
+      "originalNameHint": "Bỏ trống để lấy tên từ URL."
+    },
     "catalogStatus": {
       "active": "Hoạt động",
       "inactive": "Ngừng hoạt động"
@@ -2925,7 +3574,6 @@
       "descriptionField": "Mô tả",
       "status": "Trạng thái",
       "statusHint": "Loại mới mặc định Ngừng hoạt động. Chỉ kích hoạt được khi cấu hình Số tầng và Tum hợp lệ.",
-      "order": "Thứ tự hiển thị",
       "allStatuses": "Tất cả trạng thái",
       "applyFilter": {
         "all": "Tất cả",
@@ -2954,6 +3602,7 @@
       "atticRequired": "Tum bắt buộc",
       "disableWarning": "Chuyển sang Không áp dụng: hồ sơ mới sẽ không còn nhập trường này. Hồ sơ cũ giữ nguyên giá trị đã lưu.",
       "historyNote": "Thay đổi cấu hình chỉ áp dụng cho lần tạo hoặc sửa hồ sơ tiếp theo, không ghi đè dữ liệu cũ.",
+      "removedOptionImpact": "Bỏ phương án “{option}”: {count} hồ sơ dự án đang dùng phương án này.",
       "usage": "Số bản ghi đang dùng",
       "duplicateName": "Tên loại công trình đã tồn tại.",
       "deleteBlocked": "Loại công trình đã được sử dụng — chỉ chuyển được sang Ngừng hoạt động.",
@@ -3401,7 +4050,18 @@
       "orderRule": "Thứ tự là số nguyên từ 1."
     },
     "guideSteps": {
-      "description": "Mỗi bước là một video YouTube trên trang Hướng dẫn. Số bước tự đánh theo thời gian tạo; thumbnail và thời lượng hệ thống lấy từ YouTube. Chỉ bước Hiển thị mới xuất hiện với người dùng.",
+      "description": "Mỗi bước là một video YouTube trên trang Hướng dẫn. Dán URL YouTube, hệ thống tự lấy ảnh đại diện và thời lượng. Công bố thì bước mới hiện với người dùng; kéo lên/xuống để đổi thứ tự.",
+      "preview": "Xem trước",
+      "warning": "Video lỗi",
+      "untitled": "(Chưa có tiêu đề)",
+      "moveUp": "Lên một bậc",
+      "moveDown": "Xuống một bậc",
+      "deleteAsk": "Xóa \"{title}\"? Thao tác không khôi phục được.",
+      "states": {
+        "Draft": "Nháp",
+        "Published": "Đang hiển thị",
+        "Hidden": "Đã ẩn"
+      },
       "step": "Số bước",
       "thumbnail": "Thumbnail",
       "title": "Tiêu đề",
@@ -3540,6 +4200,197 @@
       "duplicate": "Đã có nhãn trùng tên.",
       "inUse": "Còn {count} bài Active dùng nhãn này — đổi nhãn hoặc chuyển các bài đó sang Inactive trước."
     },
+    "rbacRoles": {
+      "title": "Vai trò & quyền",
+      "description": "Tạo và cấu hình vai trò cho nhân viên: chọn quyền cho từng nhóm mà không cần sửa mã nguồn. Vai trò hệ thống (Admin, Khách hàng) không sửa, đổi tên hay xóa được.",
+      "columns": {
+        "name": "Tên vai trò",
+        "kind": "Loại",
+        "memberCount": "Số người giữ",
+        "permissionCount": "Số quyền"
+      },
+      "kind": {
+        "System": "Hệ thống",
+        "Custom": "Tự tạo"
+      },
+      "view": {
+        "code": "Mã vai trò",
+        "noPermissions": "Chưa có quyền nào"
+      },
+      "fields": {
+        "name": "Tên vai trò",
+        "namePlaceholder": "Ví dụ: Nhân viên vận hành gói",
+        "permissions": "Quyền của vai trò",
+        "permissionsHint": "Chọn các quyền cho nhóm nhân viên này. Danh mục quyền do hệ thống định nghĩa.",
+        "permissionsLoading": "Đang tải danh mục quyền…",
+        "requiresAssignment": "Cần phân công",
+        "requiresAssignmentNote": "Quyền gắn nhãn “Cần phân công” chỉ cho thao tác trên tài nguyên được phân công cho người đó (BR-RBAC-010)."
+      },
+      "modules": {
+        "commerce": "Thương mại",
+        "package": "Gói giám sát",
+        "supervision": "Giám sát",
+        "user": "Tài khoản",
+        "role": "Vai trò",
+        "assignment": "Phân công",
+        "audit": "Nhật ký",
+        "plan": "Gói đăng ký",
+        "estimate": "Dự toán",
+        "payment": "Thanh toán",
+        "consultation": "Tư vấn KTS",
+        "news": "Tin tức",
+        "library": "Thư viện mẫu"
+      },
+      "systemLocked": "Vai trò hệ thống không sửa, đổi tên hay xóa được.",
+      "deleteTitle": "Xóa vai trò “{name}”?",
+      "deleteBody": "Chỉ xóa được vai trò không còn ai giữ. Nhật ký cũ vẫn lưu tên vai trò để tra cứu.",
+      "effectiveNoteTitle": "Thay đổi chưa có hiệu lực ngay",
+      "effectiveNote": "Người đang giữ vai trò nhận bộ quyền mới chậm nhất sau {minutes} phút, khi phiên đăng nhập của họ được cấp lại. Muốn có hiệu lực ngay, buộc họ đăng xuất ở màn Tài khoản nhân viên."
+    },
+    "newsArticles": {
+      "description": "Bài tin tức của Cẩm nang. Bài mới luôn là Nháp và được lưu dù thiếu thông tin; chỉ công bố được khi đủ tiêu đề, ảnh đại diện, nội dung và ít nhất một danh mục. Xóa là xóa hẳn, không khôi phục.",
+      "manageCategories": "Quản lý danh mục",
+      "states": {
+        "all": "Tất cả",
+        "Draft": "Nháp",
+        "Published": "Đang công bố",
+        "Hidden": "Đã ẩn"
+      },
+      "title": "Tiêu đề",
+      "untitled": "(Chưa có tiêu đề)",
+      "readingTimeMinutes": "Số phút đọc",
+      "cover": "Ảnh đại diện",
+      "categories": "Danh mục",
+      "categoriesHint": "Chọn một hoặc nhiều danh mục ở bất kỳ cấp nào — chọn danh mục con không cần chọn thêm cha.",
+      "categoryRequired": "Bài đang công bố phải có ít nhất một danh mục.",
+      "pickCategories": "Chọn danh mục",
+      "content": "Nội dung",
+      "noContent": "Bài chưa có nội dung.",
+      "state": "Trạng thái",
+      "firstPublishedAt": "Công bố lần đầu",
+      "createdAt": "Tạo lúc",
+      "modifiedAt": "Sửa lần cuối",
+      "draftHint": "Lưu nháp được dù còn thiếu thông tin. Khách chưa đọc được bài cho tới khi bấm Công bố ở bảng.",
+      "publishedEditHint": "Bài đang công bố: lưu là khách thấy ngay nội dung mới, nên bản sửa phải đủ tiêu đề, ảnh đại diện, nội dung và ít nhất một danh mục.",
+      "publish": "Công bố",
+      "publishTitle": "Công bố “{name}”?",
+      "publishBody": "Bài hiện ngay trên trang Tin tức. Ngày công bố lần đầu được giữ nguyên nếu bài từng công bố.",
+      "published": "Đã công bố bài.",
+      "hide": "Ẩn bài",
+      "hideTitle": "Ẩn “{name}”?",
+      "hideBody": "Bài biến khỏi danh sách công khai và đường dẫn trực tiếp báo không tìm thấy. Có thể công bố lại sau.",
+      "hidden": "Đã ẩn bài.",
+      "deleteTitle": "Xóa hẳn “{name}”?",
+      "deleteBody": "Bài bị xóa vĩnh viễn ở mọi trạng thái, không có thùng rác hay khôi phục. Đường dẫn cũ sẽ báo không tìm thấy.",
+      "missing": "Chưa công bố được — còn thiếu: {fields}.",
+      "parts": {
+        "title": "tiêu đề",
+        "cover": "ảnh đại diện",
+        "category": "danh mục"
+      },
+      "editor": {
+        "edit": "Soạn",
+        "preview": "Xem trước",
+        "count": "{count}/{max} ký tự",
+        "hint": "Ảnh trong bài phải là link https trên kho ảnh của hệ thống. Hệ thống tự lọc thẻ không cho phép khi lưu.",
+        "urlPlaceholder": "Dán link https…",
+        "urlAdd": "Chèn",
+        "imagePlaceholder": "Dán link ảnh https…",
+        "tools": {
+          "bold": "In đậm",
+          "italic": "In nghiêng",
+          "underline": "Gạch chân",
+          "heading2": "Tiêu đề đoạn",
+          "heading3": "Tiêu đề phụ",
+          "paragraph": "Đoạn văn",
+          "bulletList": "Danh sách chấm",
+          "numberList": "Danh sách số",
+          "quote": "Trích dẫn",
+          "link": "Liên kết",
+          "image": "Chèn ảnh (dán link)"
+        }
+      }
+    },
+    "newsCategories": {
+      "description": "Cây danh mục riêng của Tin tức, không giới hạn số cấp. Bấm tên để vào danh mục con. Tên không được trùng trong cùng một cha; chỉ xóa được danh mục không còn danh mục con và không còn bài nào gắn (kể cả bài nháp, bài đã ẩn).",
+      "root": "Danh mục gốc",
+      "order": "Thứ tự",
+      "name": "Tên danh mục",
+      "nameHint": "Tối đa 200 ký tự. Không trùng tên với danh mục khác cùng cha (không phân biệt hoa/thường).",
+      "children": "Danh mục con",
+      "hasChildren": "Có danh mục con",
+      "parent": "Danh mục cha",
+      "parentHint": "Bỏ trống để là danh mục gốc. Không chọn được chính nó hoặc danh mục con của nó. Chuyển cha thì danh mục xuống cuối nhóm mới; bài đã gắn giữ nguyên.",
+      "open": "Xem danh mục con",
+      "moveUp": "Lên trên",
+      "moveDown": "Xuống dưới",
+      "deleteHasChildren": "Còn danh mục con — chuyển hoặc xóa các danh mục con trước.",
+      "deleteTitle": "Xóa danh mục “{name}”?",
+      "deleteBody": "Chỉ xóa được khi không còn bài nào gắn danh mục này, kể cả bài nháp hoặc đã ẩn."
+    },
+    "architects": {
+      "description": "Hồ sơ kiến trúc sư nhận yêu cầu tư vấn. Đủ bảy nhóm thông tin mới lưu được. Không xóa hồ sơ — chỉ Ẩn: hồ sơ ẩn không nhận yêu cầu mới, yêu cầu cũ vẫn giữ để xử lý.",
+      "manageCategories": "Danh mục chuyên môn",
+      "allStatuses": "Tất cả",
+      "shown": "Hiện",
+      "hidden": "Ẩn",
+      "name": "Họ tên",
+      "title": "Chức danh",
+      "avatar": "Ảnh đại diện",
+      "avatarHint": "Link https của ảnh trên kho ảnh hệ thống (cùng kho với ảnh dự toán). Link ở tên miền khác sẽ bị từ chối.",
+      "categories": "Chuyên môn",
+      "categoriesHint": "Chọn ít nhất một chuyên môn. Thêm chuyên môn mới ở nút “Danh mục chuyên môn”.",
+      "noCategories": "Chưa có chuyên môn nào — tạo ở nút “Danh mục chuyên môn” trước.",
+      "categoryRequired": "Chọn ít nhất một chuyên môn.",
+      "experience": "Kinh nghiệm",
+      "years": "{years} năm",
+      "projectCount": "Số công trình",
+      "nonNegative": "Nhập số nguyên từ 0 trở lên.",
+      "status": "Hiển thị",
+      "pickStatus": "Chọn Hiện hoặc Ẩn",
+      "statusRequired": "Chọn Hiện hoặc Ẩn cho hồ sơ.",
+      "intro": "Giới thiệu",
+      "createdAt": "Tạo lúc",
+      "hideWarning": "Khách sẽ không gửi được yêu cầu mới cho KTS này; các yêu cầu đã gửi vẫn giữ để xử lý.",
+      "companyName": "Công ty",
+      "rating": "Điểm đánh giá",
+      "reviewCount": "Số lượt đánh giá"
+    },
+    "architectCategories": {
+      "title": "Danh mục chuyên môn",
+      "description": "Chuyên môn gán cho hồ sơ KTS. Được phép trùng tên. Chỉ xóa được chuyên môn không còn gán cho KTS nào, kể cả KTS đang ẩn.",
+      "name": "Tên chuyên môn",
+      "newPlaceholder": "Tên chuyên môn mới",
+      "nameRequired": "Nhập tên chuyên môn.",
+      "deleteTitle": "Xóa chuyên môn “{name}”?",
+      "deleteBody": "Chuyên môn còn gán cho KTS nào (kể cả KTS đang ẩn) thì không xóa được — bỏ gán khỏi các hồ sơ đó trước."
+    },
+    "consultRequests": {
+      "description": "Yêu cầu tư vấn khách gửi cho kiến trúc sư. Thời gian khách chọn chỉ là mong muốn — gọi số liên lạc trên đơn để thống nhất lịch rồi đánh dấu Đã xử lý. Giờ hiển thị theo giờ Việt Nam.",
+      "statuses": {
+        "all": "Tất cả",
+        "Pending": "Chưa xử lý",
+        "Resolved": "Đã xử lý"
+      },
+      "desiredAt": "Thời gian mong muốn",
+      "customer": "Khách hàng",
+      "contactPhone": "Số liên lạc trên đơn",
+      "architect": "Kiến trúc sư",
+      "message": "Nội dung cần tư vấn",
+      "noMessage": "Khách không ghi nội dung.",
+      "status": "Trạng thái",
+      "statusHint": "Đã liên hệ và xử lý xong thì chọn Đã xử lý. Khách không còn nhu cầu: ghi lý do rồi chọn Đã xử lý. Có thể mở lại khi cần liên hệ lại.",
+      "internalNote": "Ghi chú nội bộ",
+      "internalNoteHint": "Chỉ admin thấy, không gửi cho khách. Để trống là xóa ghi chú.",
+      "createdAt": "Gửi lúc",
+      "modifiedAt": "Cập nhật lúc",
+      "markResolved": "Đánh dấu Đã xử lý",
+      "reopen": "Mở lại",
+      "resolveTitle": "Đánh dấu yêu cầu của {name} là Đã xử lý?",
+      "resolveBody": "Ghi chú nội bộ giữ nguyên. Không gửi email cho khách.",
+      "reopenTitle": "Mở lại yêu cầu của {name}?",
+      "reopenBody": "Yêu cầu quay về Chưa xử lý để liên hệ lại. Ghi chú nội bộ giữ nguyên."
+    },
     "handbookSteps": {
       "description": "Ba bước cố định của Cẩm nang: Phần thô, Phần hoàn thiện, Trang trí nội thất. Chỉ sửa ảnh, tên và mô tả — không thêm, xóa hay đổi thứ tự.",
       "step": "Số bước",
@@ -3625,6 +4476,55 @@
     },
     "pageSections": {
       "plans_brand": "Logo hệ thống (góc trái thanh menu)"
+    },
+    "rbacAssignments": {
+      "title": "Phân công gói giám sát",
+      "description": "Giao từng gói giám sát cho một nhân viên phụ trách, chuyển giao khi cần và gỡ khi thôi phụ trách. Mỗi gói tại một thời điểm chỉ một người phụ trách.",
+      "needsTitle": "Cần chia lại",
+      "needsDescription": "Gói đang gán công trình nhưng chưa có người phụ trách, hoặc người phụ trách đang bị khóa tài khoản. Chọn nhân viên để giao.",
+      "needsEmpty": "Không có gói nào cần chia lại.",
+      "assign": "Phân công",
+      "assignTitle": "Phân công gói giám sát",
+      "transfer": "Chuyển giao",
+      "transferTitle": "Chuyển giao sang nhân viên khác",
+      "remove": "Gỡ",
+      "removeConfirmTitle": "Gỡ phân công này?",
+      "removeConfirmBody": "Người đang phụ trách sẽ mất quyền thao tác trên gói. Nếu gói đang gán, gói sẽ vào danh sách cần chia lại.",
+      "selectStaff": "Nhân viên phụ trách",
+      "selectStaffPlaceholder": "Chọn nhân viên đang hoạt động",
+      "staffRequired": "Chọn một nhân viên.",
+      "noStaff": "Không có nhân viên đang hoạt động.",
+      "activeBadge": "Đang phụ trách",
+      "lockedAssignee": "Tài khoản đang bị khóa",
+      "filters": {
+        "allStaff": "Mọi nhân viên",
+        "activeOnly": "Đang hiệu lực",
+        "allAssignments": "Tất cả phân công"
+      },
+      "columns": {
+        "staff": "Nhân viên",
+        "resource": "Tài nguyên",
+        "effectiveFrom": "Bắt đầu",
+        "effectiveTo": "Kết thúc"
+      },
+      "resourceTypes": {
+        "SupervisionGrant": "Gói giám sát"
+      },
+      "status": {
+        "NoAssignee": "Chưa có người phụ trách",
+        "AssigneeLocked": "Người phụ trách đang bị khóa"
+      },
+      "endReasons": {
+        "Transferred": "Đã chuyển giao",
+        "Removed": "Đã gỡ",
+        "PackageCanceled": "Gói đã hủy",
+        "PackageUnassigned": "Gói đã gỡ khỏi công trình"
+      },
+      "feedback": {
+        "assigned": "Đã phân công gói cho nhân viên.",
+        "transferred": "Đã chuyển giao phân công.",
+        "removed": "Đã gỡ phân công."
+      }
     }
   },
   "contractors": {
@@ -3689,7 +4589,6 @@
       "undecided": "Chưa xác định"
     },
     "sort": {
-      "match": "Phù hợp nhất",
       "distance": "Gần nhất",
       "rating": "Đánh giá cao",
       "survey": "Khảo sát sớm"
@@ -3826,6 +4725,7 @@
         "close": "Hoàn tất"
       },
       "continueWith": "Tiếp tục với {name}",
+      "untitledBrief": "hồ sơ chưa đặt tên",
       "continueShort": "Tiếp tục",
       "continueHint": "Tiếp tục với {name}",
       "switchBrief": "Đổi hồ sơ"
@@ -3985,7 +4885,9 @@
         "p3": "Cung ứng vật liệu, nội thất",
         "p4": "Kiểm soát chất lượng & chi phí",
         "p5": "Nghiệm thu & bàn giao",
-        "action": "Đăng ký triển khai"
+        "action": "Đăng ký triển khai",
+        "titlePro": "Thi công trọn gói cùng BuildX",
+        "needPro": "Cần mua thêm gói PRO để nhận ưu đãi này."
       },
       "expert": {
         "title": "Nói chuyện với chuyên gia",
@@ -3994,6 +4896,7 @@
         "p2": "Gợi ý hướng thiết kế phù hợp ngân sách",
         "p3": "Giải đáp quy trình và cách dùng nền tảng",
         "action": "Đặt lịch tư vấn",
+        "free": "Miễn phí",
         "included": "Đã bao gồm trong gói của bạn",
         "priceFrom": "Từ {price}",
         "viewPricing": "Xem các gói tư vấn"
@@ -4193,12 +5096,10 @@
         "filterLabel": "Lọc theo loại dự án",
         "filters": {
           "all": "Tất cả {count}",
-          "house": "Nhà riêng {count}",
-          "villa": "Biệt thự {count}",
-          "renovation": "Cải tạo {count}",
-          "factory": "Nhà xưởng {count}"
+          "type": "{label} {count}"
         },
         "verifiedBadge": "Đã xác minh",
+        "featuredBadge": "Nổi bật",
         "area": "{area} m²",
         "completed": "Hoàn thành {year}",
         "viewDetail": "Xem chi tiết",
@@ -4209,6 +5110,8 @@
           "description": "Chi tiết dự án do {contractor} thực hiện",
           "imageAlt": "Ảnh {index} của dự án {project}",
           "selectImage": "Chọn ảnh {index} làm ảnh lớn",
+          "prevImage": "Ảnh trước",
+          "nextImage": "Ảnh sau",
           "verifiedBadge": "Đã xác minh",
           "title": "Thông tin công trình",
           "projectType": "Loại công trình",
@@ -4223,17 +5126,14 @@
           "completedYear": "Hoàn thành {year}",
           "notUpdated": "Đang cập nhật",
           "mainItemsFallback": "Thi công các hạng mục theo hồ sơ công trình đã cung cấp.",
-          "projectTypes": {
-            "house": "Nhà phố",
-            "villa": "Biệt thự",
-            "renovation": "Cải tạo",
-            "factory": "Nhà xưởng"
-          },
           "constructionScopes": {
-            "turnkey": "Trọn gói",
-            "structural": "Phần thô",
-            "finishing": "Hoàn thiện"
+            "turnkey": "Thi công trọn gói",
+            "shell": "Phần thô",
+            "finishing": "Hoàn thiện",
+            "interior": "Nội thất"
           },
+          "attic": "Có tum",
+          "noAttic": "Không tum",
           "roles": {
             "general-contractor": "Tổng thầu",
             "contractor": "Nhà thầu thi công"
@@ -4384,7 +5284,7 @@
       "copyCode": "Sao chép mã",
       "copied": "Đã sao chép",
       "remainingInvites": "Bạn còn {count} lượt mời - mời thêm nhà thầu để có nhiều lựa chọn",
-      "inviteMore": "Mời thêm nhà thầu"
+      "inviteMore": "Mời thêm nhà thầu (còn {left})"
     },
     "invitations": {
       "title": "Lời mời báo giá",
@@ -4448,7 +5348,9 @@
       "createMore": "Tạo hồ sơ dự án mới (miễn phí)",
       "buyPlan": "Mua gói thiết kế để có bản vẽ & khối lượng kèm hồ sơ",
       "contracted": "Đã chốt thầu",
-      "untitled": "Hồ sơ chưa đặt tên"
+      "untitled": "Hồ sơ chưa đặt tên",
+      "draft": "Bản nháp",
+      "completeBrief": "Hoàn thiện hồ sơ"
     },
     "projectBar": {
       "label": "Dự án đang chọn",
@@ -4556,6 +5458,9 @@
       "transferred": "Tôi đã chuyển khoản",
       "recording": "Đang ghi nhận…",
       "verifying": "Đang xác nhận…",
+      "autoWaiting": "Đang chờ ngân hàng xác nhận…",
+      "cancel": "Hủy đơn",
+      "cancelling": "Đang hủy…",
       "support": "Cần hỗ trợ?",
       "supportToast": "Đội hỗ trợ BuildX sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
       "supportSubject": "Hỗ trợ đơn hàng {code}",
@@ -4657,11 +5562,11 @@
       "self": {
         "imageAlt": "Bản vẽ thi công và dụng cụ quản lý công trình",
         "title": "Tự quản lý",
-        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; BuildX lưu hồ sơ và tiến độ cơ bản.",
-        "p1": "Dashboard tự quản lý",
-        "p2": "Theo dõi hồ sơ & tiến độ",
-        "p3": "Thi công",
-        "value": "Miễn phí",
+        "subtitle": "Bạn trực tiếp làm việc với nhà thầu; mục này chỉ dùng để so sánh với 2 gói giám sát của BuildX.",
+        "p1": "Bạn tự theo dõi công trình",
+        "p2": "Không đăng ký gói giám sát BuildX",
+        "p3": "Thông tin để so sánh lựa chọn",
+        "value": "Không dùng gói giám sát",
         "action": "Tự quản lý"
       },
       "check": {
@@ -4697,7 +5602,7 @@
       "noInspection": "Không có kỹ sư kiểm tra tại công trình",
       "free": "Miễn phí",
       "choose": "Chọn {tier}",
-      "costNote": "Chi phí giám sát thường chiếm khoảng 0,6–1,3% giá trị công trình. Với công trình 1,5 tỷ, gói CHECK tương đương 0,6% và gói CONTROL tương đương 1,3%.",
+      "costNote": "Chi phí giám sát thường chiếm khoảng 0,6–1,3% giá trị công trình. Với công trình 1,5 tỷ, gói AN TÂM tương đương 0,6% và gói TOÀN DIỆN tương đương 1,3%.",
       "comparison": {
         "title": "So sánh chi tiết 3 lựa chọn",
         "criterion": "Hạng mục",
@@ -4812,7 +5717,7 @@
       },
       "notes": {
         "payment": "Thanh toán qua QR chuyển khoản ngân hàng.",
-        "scope": "Gói tính theo dự án, áp dụng cho nhà ở đến 3 tầng và 300 m² sàn; ngoài phạm vi này tính theo add-on.",
+        "scope": "Gói tính theo dự án, áp dụng cho nhà ở đến 3 tầng và 300 m² sàn; ngoài phạm vi này tính theo dịch vụ thêm.",
         "area": "Khu vực phục vụ chuẩn trong bán kính 30 km từ điểm có kỹ sư; ngoài khu vực tính thêm chi phí di chuyển."
       }
     },

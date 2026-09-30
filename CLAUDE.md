@@ -10,6 +10,34 @@ The UI contract is `docs/MO_TA_GIAO_DIEN.md` (11 screens, mục V). **Read it be
 
 The product is a 3-step flow — **Nhập liệu → Nhận dự toán → Hồ sơ thi công** — wrapped in a public site (trang chủ, Cẩm nang, Hướng dẫn) and an account screen. This folder was rebuilt from the earlier BMT codebase after the client changed requirements; the original is preserved at `../bmt/` and is the place to copy proven code from (estimate tables, PDF service, admin CMS).
 
+## Nghiệp vụ — nguồn sự thật ở `../bmt-documentation`
+
+**BẮT BUỘC: Trước khi implement, sửa hay wiring API cho BẤT KỲ nghiệp vụ nào (đăng nhập, phân quyền, dự toán, gói thuê bao, thanh toán, tư vấn, thư viện, tin tức, nội dung site, thông báo…), phải đọc tài liệu tương ứng trong `../bmt-documentation` rồi mới code.** Đây là repo git riêng, sibling của `savico/`, chứa toàn bộ đặc tả nghiệp vụ cho dự án này. Không suy diễn quy tắc, mã lỗi, trạng thái hay điều kiện — lấy từ tài liệu; chỗ nào tài liệu chưa có thì hỏi người dùng, không tự bịa.
+
+Cấu trúc thư mục (tài liệu đặt tên theo `PREFIX-DOMAIN-NNN`):
+
+| Thư mục         | Tiền tố  | Nội dung                                                                          |
+| --------------- | -------- | --------------------------------------------------------------------------------- |
+| `userstory/`    | `STORY-` | User Story: mục tiêu, luồng chính/phụ/ngoại lệ, Acceptance Criteria               |
+| `businessrule/` | `BR-`    | Business Rule: điều kiện When/Then/Except — quy tắc phải tuân thủ khi code        |
+| `tdd/`          | `TDD-`   | Technical Design: kiến trúc, data model, API nội bộ/ngoài, sequence/state diagram |
+| `systemtest/`   | `ST-`    | System/E2E test theo Acceptance Criteria                                          |
+| `unittest/`     | `UT-`    | Đặc tả unit test theo nhánh/biên/ngoại lệ của Business Rule                       |
+| `database/`     | —        | `database-erd.md` — sơ đồ quan hệ dữ liệu                                         |
+| `discovery/`    | —        | Ghi chú phân tích, coverage, technical design nháp theo tính năng                 |
+| `debt/`         | —        | Nợ kỹ thuật / vấn đề còn treo                                                     |
+| `templates/`    | —        | Mẫu US/BR/TDD/test — theo đúng khi soạn tài liệu mới                              |
+
+Các domain (prefix) hiện có: `AUTH` (xác thực), `RBAC` (phân quyền — chỉ 2 role customer/admin), `PROJ` (tạo dự toán & hồ sơ thi công), `SUB` (gói thuê bao / entitlements / lượt), `PAY` (thanh toán), `CONSULT` (tư vấn), `LIB` (thư viện mẫu), `NEWS` (tin tức), `SITE` (nội dung site), `PUSH` (thông báo).
+
+Quy trình khi làm một nghiệp vụ:
+
+1. Xác định domain (prefix) của tính năng, rồi đọc theo thứ tự: `STORY-<domain>-*` → `BR-<domain>-*` → `TDD-<domain>-*`. Đối chiếu thêm `ST-`/`UT-` khi cần hành vi chi tiết.
+2. Backend thật là .NET REST API: Swagger live tại https://bmt-api.vnzdna.com/swagger/index.html. Tra contract thật ở đây trước khi wiring; theo quy ước `Result<T>` + cookie auth. Chỗ API còn thiếu thì không gọi bừa — ghi note báo BE và giữ mock (xem quy tắc wiring hiện hành của dự án).
+3. Khi tài liệu và code/API mâu thuẫn, dừng lại hỏi người dùng thay vì tự chọn.
+
+Các skill `document-first:*` (draft-user-story, draft-business-rule, draw-\*-diagram, implement-story, verify-business-rules, review-impact…) dùng để soạn/kiểm tra tài liệu theo đúng cấu trúc trên khi được yêu cầu.
+
 ## Commands
 
 ```bash
@@ -58,7 +86,7 @@ Current features: `auth`, `design` (luồng 3 bước), `handbook` (Cẩm nang +
 
 **Admin area**: `app/[locale]/(admin)` is an isolated route group — its layout wraps `AntdProvider` → `ProtectedRoute` → `AdminGuard`, so **Ant Design is only bundled there** and the public site stays Tailwind + shadcn. New admin screens are declarations, not layouts: `ResourceManager` (table + search + drawer form) for collections, `DocumentEditor` for single documents, `OverrideEditor` for the flat key→value documents.
 
-The sidebar splits by **nature of the work**, not by module: *Site content* (copy, images, articles — what visitors read), *System configuration* (plan pricing, quotas, catalogues, unit prices — numbers that drive behaviour) and *Operations* (bookings, projects, users). Mixing them is what makes an admin unusable — plan pricing once sat on the same screen as the plans page copy.
+The sidebar splits by **nature of the work**, not by module: _Site content_ (copy, images, articles — what visitors read), _System configuration_ (plan pricing, quotas, catalogues, unit prices — numbers that drive behaviour) and _Operations_ (bookings, projects, users). Mixing them is what makes an admin unusable — plan pricing once sat on the same screen as the plans page copy.
 
 Site content is organised **by public page**: one menu entry per page, and each editable block of that page is a **submenu item, not a tab** — everything is visible in the sidebar without clicking into a page first. All of them run through the single dynamic route `/admin/content/[page]?tab=<block>`, driven by `features/admin/constants/admin-pages.config.ts`; `contentPanelsOf()` is the single source both the menu and the screen read, so they cannot drift. Adding a page means adding one entry there, not a new route file.
 

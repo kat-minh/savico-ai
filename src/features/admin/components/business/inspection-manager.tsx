@@ -178,7 +178,7 @@ export function InspectionManager() {
                     {owner.name}
                   </Text>
                   {owner.phone ? (
-                    <Text copyable type='secondary' style={{ display: 'block', fontSize: 12 }}>
+                    <Text copyable={{ text: owner.phone }} type='secondary' style={{ display: 'block', fontSize: 12 }}>
                       <PhoneOutlined /> {owner.phone}
                     </Text>
                   ) : null}

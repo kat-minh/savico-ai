@@ -17,7 +17,6 @@ import {
   House,
   Link2,
   Lock,
-  Map as MapIcon,
   MapPin,
   Shield,
   ShieldCheck,
@@ -40,7 +39,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth, useAuthDialogStore } from '@/shared/auth'
-import { isContractorEligible, useCmsCollection, useCmsDocument } from '@/shared/cms'
+import { isContractorEligible, useCmsCollection, useCmsDocument, useSiteImage } from '@/shared/cms'
 import { Photo, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -61,6 +60,7 @@ import {
   START_WINDOWS
 } from '../constants/contractors.constants'
 import { useBriefs, useCreateBrief } from '../hooks/use-brief'
+import { isBriefComplete } from '../services/brief.service'
 import { filterContractors, type ContractorCriteria } from '../services/contractor-list.service'
 import type { Contractor, ContractorSort, SearchRadiusKm } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
@@ -353,15 +353,10 @@ export function ContractorLanding() {
   const createBrief = useCreateBrief()
   const router = useRouter()
 
-  const [sort, setSort] = useState<ContractorSort>('distance')
+  const [sort, setSort] = useState<ContractorSort>('rating')
 
-  /**
-   * CHỖ CHỜ ASSET: Hình S09 vẽ một BẢN ĐỒ minh hoạ (nền xanh nhạt, vòng sóng
-   * ra-đa, 5 ghim vị trí). Ảnh seed trong kho là ảnh chụp phố nên sai hẳn tinh
-   * thần, vì vậy chỉ hiện ảnh khi admin đã thay bằng ảnh thật ở màn "Hình ảnh
-   * site"; chưa thay thì để khung nét đứt như mọi chỗ chờ asset khác.
-   */
-  const mapImage = useCmsDocument('uiAssets')['map.contractors']?.trim()
+  // Banner hero theo sheet góp ý BuildX; admin vẫn thay được ở màn "Hình ảnh site".
+  const mapImage = useSiteImage('map.contractors')
   // Danh bạ do vận hành quản lý ở /admin/contractors; chỉ nhà thầu đạt Quy tắc đề
   // xuất (không Ẩn, đúng khu vực, đủ tiêu chí) mới lên landing.
   const matching = useCmsDocument('contractorMatching')
@@ -398,9 +393,11 @@ export function ContractorLanding() {
    * thanh đáy, dải CTA) đổi thành "Tiếp tục với {tên hồ sơ}" + "Đổi hồ sơ" (góp ý
    * BuildX) — khách có sẵn 5 hồ sơ mà chỉ được mời tạo mới là đi lạc.
    */
-  const currentBrief = hasBrief
-    ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]
-    : undefined
+  // Ưu tiên hồ sơ đã ĐỦ thông tin — hồ sơ nháp rỗng mới sửa gần nhất không được
+  // chiếm chỗ "Tiếp tục với…" (góp ý NT34); chưa có hồ sơ đủ thì mới lấy hồ sơ mới nhất.
+  const briefsByNewest = hasBrief ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) : []
+  const currentBrief = briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
+  const currentBriefName = currentBrief?.name.trim() || t('untitledBrief')
   const openPicker = useProjectPickerStore((s) => s.openPicker)
 
   /**
@@ -594,9 +591,9 @@ export function ContractorLanding() {
                   size='lg'
                   className='h-14 max-w-full min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
                   onClick={continueBrief}
-                  title={t('continueWith', { name: currentBrief.name })}
+                  title={t('continueWith', { name: currentBriefName })}
                 >
-                  <span className='truncate'>{t('continueWith', { name: currentBrief.name })}</span>
+                  <span className='truncate'>{t('continueWith', { name: currentBriefName })}</span>
                 </Button>
               ) : (
                 <Button
@@ -632,25 +629,16 @@ export function ContractorLanding() {
             ) : null}
           </motion.div>
 
-          {/* Hình S09: khối minh hoạ là BẢN ĐỒ vẽ (nền xanh nhạt, vòng sóng
-              ra-đa, 5 ghim vị trí) chứ không phải ảnh chụp; thẻ nhà thầu nổi
-              CHÍNH GIỮA khối, rộng 137/212 = 65% và cao 122/180 = 68% khối.
-              CHỖ CHỜ ASSET: chưa có hình bản đồ nên vẫn dùng ảnh trong kho
-              (`map.contractors`) — admin thay được ở màn "Hình ảnh site". */}
+          {/* Thẻ nhà thầu nổi CHÍNH GIỮA khối ảnh, rộng 137/212 = 65% và cao
+              122/180 = 68% khối (Hình S09). Ảnh là `map.contractors`. */}
           <div className='relative'>
-            {mapImage ? (
-              <Photo
-                src={mapImage}
-                alt=''
-                priority
-                sizes='(max-width: 1024px) 100vw, 700px'
-                className='aspect-[212/180] w-full rounded-3xl border'
-              />
-            ) : (
-              <div className='bg-muted/30 flex aspect-[212/180] w-full items-center justify-center rounded-3xl border border-dashed'>
-                <MapIcon className='text-muted-foreground/50 size-10' />
-              </div>
-            )}
+            <Photo
+              src={mapImage}
+              alt=''
+              priority
+              sizes='(max-width: 1024px) 100vw, 700px'
+              className='aspect-[212/180] w-full rounded-3xl border'
+            />
 
             {/* Thẻ CANH GIỮA khối minh hoạ, rộng 63.4% (số đo trên Hình
                 S09: thẻ 135px trên khối 213px).
@@ -976,7 +964,9 @@ export function ContractorLanding() {
                 thì tách riêng cột lịch khảo sát và XẾP CHỒNG hai nút.
                 Chỉ số trong ảnh chỉ có đánh giá và số dự án tương tự — khoảng
                 cách nằm ở S12 chứ không ở landing. */}
-            <ul id={RANKED_LIST_ID} className='mt-4 divide-y'>
+            {/* Thanh đáy đang hiện thì chừa đệm dưới danh sách — dòng cuối không bị thanh che
+                (góp ý NT34); đệm cũ đặt ở cuối trang, sau dải CTA, nên không có tác dụng. */}
+            <ul id={RANKED_LIST_ID} className={cn('mt-4 divide-y', showStickyNudge && !ctaInView && 'pb-20')}>
               {ranked.length === 0 ? (
                 <li className='text-muted-foreground py-10 text-center text-sm text-pretty'>{t('ranking.empty')}</li>
               ) : null}
@@ -1054,7 +1044,7 @@ export function ContractorLanding() {
           >
             <div className={cn(PAGE_CONTAINER, 'flex items-center justify-between gap-4 py-3')}>
               <p className='min-w-0 truncate text-sm font-medium'>
-                {currentBrief ? t('continueHint', { name: currentBrief.name }) : t('ranking.stickyNudge')}
+                {currentBrief ? t('continueHint', { name: currentBriefName }) : t('ranking.stickyNudge')}
               </p>
               <div className='flex shrink-0 items-center gap-2'>
                 {currentBrief ? (
@@ -1221,12 +1211,13 @@ export function ContractorLanding() {
             className='bg-primary/40 pointer-events-none absolute -top-10 -right-10 size-40 rounded-full blur-3xl'
           />
           <p className='relative font-semibold text-pretty'>
-            {currentBrief ? t('cta.resumeTitle', { name: currentBrief.name }) : t('cta.title')}
+            {currentBrief ? t('cta.resumeTitle', { name: currentBriefName }) : t('cta.title')}
           </p>
           {currentBrief ? (
             <div className='relative flex flex-wrap items-center gap-2'>
               <Button
-                className='bg-background text-primary-strong hover:bg-background/90 border-0 bg-none shadow-sm'
+                variant='outline'
+                className='ring-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent bg-none shadow-none before:hidden after:hidden'
                 onClick={openPicker}
               >
                 {t('switchBrief')}
@@ -1234,9 +1225,9 @@ export function ContractorLanding() {
               <Button
                 className='bg-background text-primary-strong hover:bg-background/90 max-w-72 border-0 bg-none shadow-sm'
                 onClick={continueBrief}
-                title={t('continueWith', { name: currentBrief.name })}
+                title={t('continueWith', { name: currentBriefName })}
               >
-                <span className='truncate'>{t('continueWith', { name: currentBrief.name })}</span>
+                <span className='truncate'>{t('continueWith', { name: currentBriefName })}</span>
               </Button>
             </div>
           ) : (
@@ -1287,7 +1278,6 @@ export function ContractorLanding() {
       <PartnerRegistrationDialog open={partnerDialogOpen} onOpenChange={setPartnerDialogOpen} />
 
       {/* Thanh đáy đang hiện → chừa đúng chiều cao của nó để không che nội dung cuối trang. */}
-      {showStickyNudge && !ctaInView ? <div aria-hidden className='h-16' /> : null}
 
       <ProjectPickerDialog currentProjectId={currentBrief?.id} />
 

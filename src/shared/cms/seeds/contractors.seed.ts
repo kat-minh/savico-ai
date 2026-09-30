@@ -35,7 +35,20 @@ const LEGAL_CHECKS = [
 /** Sheet ghi "Hợp tác SAVICO: tạm thời để trống" — chờ số hợp đồng thật. */
 const NO_PARTNERSHIP = { verified: false, since: '', contractCode: '', signedAt: '', pageCount: 0 }
 
-const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
+/**
+ * Dự án như trong sheet nhập trước khi có epic Quản lý nhà thầu: nhóm lọc cũ
+ * (`category`), phạm vi cũ (`constructionScope`) và thẻ tự do (`tags`). Chỉ là
+ * đầu vào — `withCapability` quy về Loại công trình / Phạm vi thi công rồi bỏ đi.
+ */
+interface SheetProject extends CmsContractorProject {
+  category?: 'house' | 'villa' | 'renovation' | 'factory'
+  constructionScope?: 'turnkey' | 'structural' | 'finishing'
+  tags?: string[]
+}
+
+type SheetContractor = Omit<CmsContractor, 'contact' | 'featuredProjects'> & { featuredProjects: SheetProject[] }
+
+const DIRECTORY: readonly SheetContractor[] = [
   {
     id: 'ctr-abc',
     // Nhà thầu mẫu — ẩn khỏi danh sách, giữ lại vì lời mời mẫu còn trỏ tới.
@@ -528,6 +541,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-thanglongphat',
     name: 'Công ty CP Xây dựng Thăng Long Phát',
+    logoUrl: driveImage('1k2nEzDy4SXby0wy7qPH5KE1ZVPLeVa8v'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.8,
@@ -662,6 +676,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-hongha',
     name: 'Công ty TNHH Kiến trúc Xây dựng Hồng Hà',
+    logoUrl: driveImage('1g-avQFHE87Iy0kFPeTuxKjpfZc3KTjsO'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.6,
@@ -799,6 +814,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-vietbac',
     name: 'Công ty CP Xây dựng Việt Bắc',
+    logoUrl: driveImage('1ucIxacM429sZ2kERHRw72zi6M3T393b7'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.7,
@@ -931,6 +947,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-songhan',
     name: 'Công ty CP Xây dựng Sông Hàn',
+    logoUrl: driveImage('1Qa8-hoPLaHC-GIciwtNMISenjR3vx0Np'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.5,
@@ -1051,6 +1068,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-phatdat',
     name: 'Công ty TNHH Xây dựng Miền Trung Phát Đạt',
+    logoUrl: driveImage('1KMYjLPCfc-S7qNT-5UqysD49Q74BvTbQ'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.3,
@@ -1195,6 +1213,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-cattrang',
     name: 'Công ty CP Xây dựng Cát Trắng',
+    logoUrl: driveImage('1YxJX-YFRWfu76J0-QBMXvgGs2e7YxKnZ'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.9,
@@ -1331,6 +1350,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-binhdinhan',
     name: 'Công ty TNHH Kỹ thuật Xây dựng Bình Định An',
+    logoUrl: driveImage('1LS5GDEgPUJsE1ytIbn9AuOMiCq6h2GXs'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.4,
@@ -1464,6 +1484,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-dainam',
     name: 'Công ty TNHH Xây dựng Đại Nam Phát Triển',
+    logoUrl: driveImage('1xzKJt8xMQT_ft8WcMmRQLm_gZJylwQ45'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.6,
@@ -1589,6 +1610,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-phuongnam',
     name: 'Công ty TNHH Kiến trúc Xây dựng Phương Nam',
+    logoUrl: driveImage('1LKX3Dv9EzerB-ixOAeLbOS2xgsr3fQVA'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.7,
@@ -1723,6 +1745,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-miennamunited',
     name: 'Công ty CP Xây dựng Miền Nam United',
+    logoUrl: driveImage('12o7glq98Iuv46x3tyByEUny_h2CfmNE7'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.5,
@@ -1848,6 +1871,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-cuulongxanh',
     name: 'Công ty TNHH Xây dựng Cửu Long Xanh',
+    logoUrl: driveImage('19bDemro3tfEequtDTVe8xS-Q-gRyahZ4'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.4,
@@ -1979,6 +2003,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
     // Tạm ẩn: sheet chưa có đoạn giới thiệu, năm thành lập, quy mô đội ngũ, văn phòng.
     hidden: true,
     name: 'Công ty TNHH Xây dựng Hải Âu',
+    logoUrl: driveImage('1_DZDjB1rLk1Tsh5DP1OeTfRwb6oTQ0Qf'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.6,
@@ -2131,6 +2156,7 @@ const DIRECTORY: readonly Omit<CmsContractor, 'contact'>[] = [
   {
     id: 'ctr-bmt-decor',
     name: 'Công ty TNHH TMDV BMT Decor',
+    logoUrl: driveImage('1HYtiaj6RRqG0jcf1rjcT-wio_wSkfuz1'),
     kind: 'Nhà thầu xây dựng',
     verified: true,
     rating: 4.7,
@@ -2265,37 +2291,53 @@ const CONTACTS: Record<string, CmsContractorContact> = {
   'ctr-daiviet': { person: 'Võ Đại', phone: '0903 987 654', email: 'info@daivietgroup.vn' }
 }
 
-/** Nhóm lọc cũ của dự án → Loại công trình / Phạm vi thi công theo danh mục mới. */
-const TYPE_OF_CATEGORY: Partial<Record<NonNullable<CmsContractorProject['category']>, string>> = {
+/** Nhóm lọc cũ / thẻ tự do của dự án → Loại công trình / Phạm vi thi công theo danh mục mới. */
+const TYPE_OF_CATEGORY: Partial<Record<NonNullable<SheetProject['category']>, string>> = {
   house: 'townhouse',
   villa: 'villa',
   renovation: 'townhouse'
 }
-const SCOPE_OF_CONSTRUCTION: Record<NonNullable<CmsContractorProject['constructionScope']>, CmsContractorScope> = {
+const SCOPE_OF_CONSTRUCTION: Record<NonNullable<SheetProject['constructionScope']>, CmsContractorScope> = {
   turnkey: 'turnkey',
   structural: 'shell',
   finishing: 'finishing'
+}
+const TYPE_OF_TAG: Record<string, string> = { 'Nhà phố': 'townhouse', 'Biệt thự': 'villa' }
+const SCOPE_OF_TAG: Record<string, CmsContractorScope> = {
+  'Thi công trọn gói': 'turnkey',
+  'Phần thô': 'shell',
+  'Hoàn thiện': 'finishing',
+  'Nội thất': 'interior'
+}
+
+function typeOfSheet(project: SheetProject): string | undefined {
+  if (project.category) return TYPE_OF_CATEGORY[project.category]
+  return project.tags?.map((tag) => TYPE_OF_TAG[tag]).find(Boolean)
+}
+
+function scopeOfSheet(project: SheetProject): CmsContractorScope | undefined {
+  if (project.category === 'renovation') return 'finishing'
+  if (project.constructionScope) return SCOPE_OF_CONSTRUCTION[project.constructionScope]
+  return project.tags?.map((tag) => SCOPE_OF_TAG[tag]).find(Boolean)
 }
 
 /**
  * Điền các trường năng lực của epic Quản lý nhà thầu cho dữ liệu mẫu nhập từ
  * sheet trước khi có epic: Loại công trình và Phạm vi thi công suy từ dự án đã
- * làm, số năm kinh nghiệm từ năm thành lập. Dự án nào đã có giá trị thì giữ.
+ * làm, số năm kinh nghiệm từ năm thành lập. Dự án nào đã có giá trị thì giữ;
+ * các trường cũ của sheet không đi vào dữ liệu.
  */
-function withCapability(contractor: Omit<CmsContractor, 'contact'>): Omit<CmsContractor, 'contact'> {
-  const projects = contractor.featuredProjects.map((project) => ({
-    ...project,
-    buildingTypeId: project.buildingTypeId ?? (project.category ? TYPE_OF_CATEGORY[project.category] : undefined),
-    scope:
-      project.scope ??
-      (project.category === 'renovation'
-        ? 'finishing'
-        : project.constructionScope
-          ? SCOPE_OF_CONSTRUCTION[project.constructionScope]
-          : undefined),
-    featured: project.featured ?? false,
-    hidden: project.hidden ?? false
-  }))
+function withCapability(contractor: SheetContractor): Omit<CmsContractor, 'contact'> {
+  const projects = contractor.featuredProjects.map((sheet): CmsContractorProject => {
+    const { category: _category, constructionScope: _constructionScope, tags: _tags, ...project } = sheet
+    return {
+      ...project,
+      buildingTypeId: project.buildingTypeId ?? typeOfSheet(sheet),
+      scope: project.scope ?? scopeOfSheet(sheet),
+      featured: project.featured ?? false,
+      hidden: project.hidden ?? false
+    }
+  })
   const types = [...new Set(projects.map((project) => project.buildingTypeId).filter((id) => id !== undefined))]
   const scopes = [...new Set(projects.map((project) => project.scope).filter((scope) => scope !== undefined))]
   return {

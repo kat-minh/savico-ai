@@ -29,6 +29,8 @@ export interface ChoiceOption {
   label: string
   /** Ảnh minh họa cho thẻ ảnh chọn nhanh. Bỏ trống khi dùng `compact`. */
   imageUrl?: string
+  /** Giá trị cũ còn giữ trên hồ sơ nhưng không chọn mới được (phương án đã ngừng). */
+  disabled?: boolean
 }
 
 interface ChoiceCardsProps {
@@ -57,6 +59,7 @@ export function ChoiceCards({ options, value, onChange, compact, invalid, classN
             type='button'
             data-compact-choice
             aria-pressed={option.value === value}
+            disabled={option.disabled}
             onClick={() => onChange(option.value)}
             className={cn(
               // Gọn vừa đủ để hàng "Số tầng" (5 nút) và "Tum" (2 nút) nằm chung
@@ -65,7 +68,8 @@ export function ChoiceCards({ options, value, onChange, compact, invalid, classN
               option.value === value
                 ? 'border-primary bg-primary text-primary-foreground'
                 : 'hover:border-primary/50 hover:bg-muted/60',
-              invalid && option.value !== value && 'border-destructive/60'
+              invalid && option.value !== value && 'border-destructive/60',
+              option.disabled && 'cursor-not-allowed opacity-60'
             )}
           >
             {option.label}

@@ -1,3 +1,4 @@
+import { AUTH_ENDPOINTS } from '@/shared/auth/auth.constants'
 import { API_CONFIG } from '@/shared/config/api.config'
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { normalizeApiError } from './api-error'
@@ -46,11 +47,11 @@ interface RetryableConfig extends InternalAxiosRequestConfig {
 }
 
 /**
- * Endpoints that must NOT trigger the refresh-retry flow. A 401 from
- * `/auth/login` means bad credentials (not an expired session), and the
+ * Endpoints that must NOT trigger the refresh-retry flow. A 401 from the login
+ * endpoint means bad credentials (not an expired session), and the
  * refresh/logout endpoints would otherwise fire a pointless refresh.
  */
-const REFRESH_EXEMPT_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout']
+const REFRESH_EXEMPT_PATHS = [AUTH_ENDPOINTS.LOGIN, AUTH_ENDPOINTS.REFRESH, AUTH_ENDPOINTS.LOGOUT]
 
 function isRefreshExempt(url: string | undefined): boolean {
   return Boolean(url) && REFRESH_EXEMPT_PATHS.some((p) => url!.includes(p))

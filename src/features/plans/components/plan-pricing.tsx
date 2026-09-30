@@ -10,9 +10,10 @@ import {
   Building2,
   Check,
   Clock,
-  FileText,
+  Headphones,
   HardHat,
   Info,
+  MessageCircle,
   Minus,
   MousePointerClick,
   QrCode,
@@ -29,9 +30,11 @@ import type { Locale } from '@/i18n/routing'
 import { formatPriceTag } from '@/shared/utils'
 import { giftValueInMillions } from '../services/plan-gift.service'
 import { PlanGiftDialog } from './plan-gift-dialog'
-import type { PlanTier } from '@/shared/cms'
-import { Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
+import { cmsText, useCmsDocument, type PlanTier } from '@/shared/cms'
+import { useChatContextStore } from '@/shared/chat-context'
+import { HotlineLink, Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import { siteConfig } from '@/shared/config/site'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { checkoutConfirmRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
@@ -49,6 +52,13 @@ import type { PlanView } from '../types/plan.types'
 import { usePlans } from '../hooks/use-plans'
 
 const TIERS: readonly PlanTier[] = ['basic', 'advanced', 'pro'] as const
+
+/**
+ * Chu kỳ gói thiết kế gửi kèm khi vào checkout — đơn `POST /payment-orders` cần
+ * `offerKey`. Trang chưa có công tắc chu kỳ (Tháng/Năm) nên mặc định `Month`;
+ * gói mock bỏ qua giá trị này (checkout tự chạy mock).
+ */
+const DESIGN_OFFER_KEY = 'Month'
 
 /**
  * Cả ba giá bắt đầu cùng một nhịp nhưng kết thúc lệch nhau BASIC → PLUS → PRO.
@@ -94,6 +104,10 @@ export function PlanPricing() {
 
 function PlanPricingContent() {
   const t = useTranslations('plans')
+  const settings = useCmsDocument('settings')
+  const hotline = cmsText(settings.hotline, siteConfig.contact.hotline)
+  const setAssistantOpen = useChatContextStore((s) => s.setPanelOpen)
+  const setAssistantSuppressed = useChatContextStore((s) => s.setDockSuppressed)
   const { data: plans, isPending } = usePlans()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.design', { offsetMs: 120 })
 
@@ -136,22 +150,37 @@ function PlanPricingContent() {
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: reduceMotion ? 0.01 : 0.6, delay: reduceMotion ? 0 : 0.55, ease: pricingEase }}
       >
+        {/* Góp ý BuildX (BG07): dải giữa trang không còn đẩy thẳng vào thanh toán gói
+            PLUS — mời tư vấn chọn gói qua tổng đài hoặc trợ lý AI. */}
         <div className='flex items-center gap-4'>
-          {/* Hình S01: dải CTA mở đầu bằng một icon hồ sơ trong ô bo góc. */}
           <span className='bg-card text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border'>
-            <FileText aria-hidden className='plan-document size-5' />
+            <Headphones aria-hidden className='plan-document size-5' />
           </span>
           <div>
             <p className='font-semibold text-pretty'>{t('ctaBand.title')}</p>
             <p className='text-muted-foreground text-sm text-pretty'>{t('ctaBand.subtitle')}</p>
           </div>
         </div>
-        <Button asChild size='lg' className='brand-green-button plan-cta-action'>
-          <Link href={checkoutConfirmRoute('advanced')} onClick={() => rememberCheckoutReturn('advanced')}>
-            {t('ctaBand.action')}
-            <ArrowRight className='plan-cta-arrow size-4' />
-          </Link>
-        </Button>
+        <div className='grid w-full gap-2 sm:flex sm:w-auto sm:gap-3'>
+          <Button asChild size='lg' className='brand-green-button plan-cta-action'>
+            <HotlineLink hotline={hotline}>
+              <Headphones className='size-4' />
+              {t('ctaBand.call', { hotline })}
+            </HotlineLink>
+          </Button>
+          <Button
+            type='button'
+            size='lg'
+            variant='outline'
+            onClick={() => {
+              setAssistantSuppressed(false)
+              setAssistantOpen(true)
+            }}
+          >
+            <MessageCircle className='size-4' />
+            {t('ctaBand.chat')}
+          </Button>
+        </div>
       </motion.section>
 
       {plans ? <ComparisonTable plans={plans} /> : null}
@@ -450,12 +479,12 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         asChild
                         size='sm'
                         variant={plan.popular ? 'default' : 'outline'}
-                        className={cn(
-                          'plan-table-buy text-xs font-bold tracking-wide uppercase',
-                          plan.popular && 'plan-table-buy-popular'
-                        )}
+                        className={cn('plan-table-buy text-xs font-bold', plan.popular && 'plan-table-buy-popular')}
                       >
-                        <Link href={checkoutConfirmRoute(plan.id)} onClick={() => rememberCheckoutReturn(plan.id)}>
+                        <Link
+                          href={checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY)}
+                          onClick={() => rememberCheckoutReturn(plan.id)}
+                        >
                           {plan.ctaLabel || t(`cta.${tier}`)}
                         </Link>
                       </Button>
@@ -1268,12 +1297,12 @@ function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled:
         })
         .finished.catch(() => undefined)
     }
-    if (alive.current) router.push(checkoutConfirmRoute(plan.id))
+    if (alive.current) router.push(checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY))
   }
   return (
-    <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold tracking-wide uppercase'>
+    <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold'>
       <Link
-        href={checkoutConfirmRoute(plan.id)}
+        href={checkoutConfirmRoute(plan.id, undefined, DESIGN_OFFER_KEY)}
         aria-disabled={disabled || pending}
         aria-busy={pending}
         onClick={(e) => void buy(e)}

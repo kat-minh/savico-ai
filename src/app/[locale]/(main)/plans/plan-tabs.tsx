@@ -5,6 +5,7 @@ import { useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
 
+import { usePlans } from '@/features/plans'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useCmsCollection } from '@/shared/cms'
@@ -32,7 +33,11 @@ interface PlanTabsProps {
 export function PlanTabs({ active }: PlanTabsProps) {
   const t = useTranslations('plans.tabs')
   const locale = useLocale() as Locale
-  const plans = useCmsCollection('plans')
+  // Gói THIẾT KẾ đọc từ feature `plans` (BMT API → mock khi rỗng); gói GIÁM SÁT
+  // vẫn đọc kho CMS vì API chưa đủ trường cho thẻ giám sát.
+  const { data: apiPlans } = usePlans()
+  const cmsPlans = useCmsCollection('plans')
+  const designPlans = apiPlans && apiPlans.length > 0 ? apiPlans : cmsPlans
   const supervisionPackages = useCmsCollection('supervisionPackages')
   const router = useRouter()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.tabs')
@@ -89,7 +94,7 @@ export function PlanTabs({ active }: PlanTabsProps) {
     setIsChanging(false)
   }
 
-  const sellingPlans = plans.filter((plan) => plan.status === 'selling')
+  const sellingPlans = designPlans.filter((plan) => plan.status === 'selling')
   const paidSupervision = supervisionPackages.filter((item) => item.price > 0)
   const minPrice = (prices: number[]) => (prices.length ? Math.min(...prices) : 0)
 
