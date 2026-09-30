@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react'
 
 import { usePlans } from '@/features/plans'
+import { useSupervisionPackages } from '@/features/supervision'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useCmsCollection } from '@/shared/cms'
@@ -38,7 +39,7 @@ export function PlanTabs({ active }: PlanTabsProps) {
   const { data: apiPlans } = usePlans()
   const cmsPlans = useCmsCollection('plans')
   const designPlans = apiPlans && apiPlans.length > 0 ? apiPlans : cmsPlans
-  const supervisionPackages = useCmsCollection('supervisionPackages')
+  const supervisionPackages = useSupervisionPackages()
   const router = useRouter()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.tabs')
   const busy = useRef(false)

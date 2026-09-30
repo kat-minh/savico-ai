@@ -23,7 +23,7 @@ import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { useCmsCollection, type SupervisionPackage, type SupervisionTier } from '@/shared/cms'
+import type { SupervisionPackage, SupervisionTier } from '@/shared/cms'
 import { Photo, PricingMotionProvider, pricingEase, usePricingMotion } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { checkoutConfirmRoute } from '@/shared/constants/routes'
@@ -31,6 +31,8 @@ import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { rememberCheckoutReturn } from '@/shared/lib/checkout-return'
 import { formatCurrency } from '@/shared/utils'
+import type { SupervisionPackageView } from '../api/supervision.merge'
+import { useSupervisionPackages } from '../hooks/use-supervision-packages'
 import {
   ADDONS,
   SUPERVISION_COMPARISON,
@@ -70,7 +72,7 @@ export function SupervisionPricing({ projectId }: SupervisionPricingProps) {
 
 function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
   const t = useTranslations('supervision.pricing')
-  const packages = useCmsCollection('supervisionPackages')
+  const packages = useSupervisionPackages()
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('plans.supervision', { offsetMs: 120 })
 
   // Chữ cuối tiêu đề tô cam (Hình S19) — tách ở khoảng trắng cuối như S01.
@@ -233,7 +235,7 @@ function PackageCard({
   onHover,
   onLeave
 }: {
-  item: SupervisionPackage
+  item: SupervisionPackageView
   index: number
   projectId?: string
   active: boolean
@@ -415,7 +417,7 @@ function PackageCard({
           {isFree ? null : (
             <Button asChild size='lg' className={cn('mt-5 w-full', item.recommended && ORANGE_BUTTON)}>
               <Link
-                href={checkoutConfirmRoute(item.id, projectId)}
+                href={checkoutConfirmRoute(item.id, projectId, item.offerKey)}
                 onClick={() => rememberCheckoutReturn(item.id, projectId)}
                 className={cn('supervision-buy group', item.recommended && 'supervision-buy-control')}
               >
@@ -485,7 +487,7 @@ function SupervisionPrice({ value, index }: { value: number; index: number }) {
 }
 
 /** Bảng "So sánh chi tiết 3 lựa chọn". */
-function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage[]; projectId?: string }) {
+function ComparisonTable({ packages, projectId }: { packages: SupervisionPackageView[]; projectId?: string }) {
   const t = useTranslations('supervision.pricing.comparison')
   const tTiers = useTranslations('supervision.tiers')
   const tRows = useTranslations('supervision.pricing.comparison.rows')
@@ -714,7 +716,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                         className={cn('supervision-table-buy', item.recommended && ORANGE_BUTTON)}
                       >
                         <Link
-                          href={checkoutConfirmRoute(item.id, projectId)}
+                          href={checkoutConfirmRoute(item.id, projectId, item.offerKey)}
                           onClick={() => rememberCheckoutReturn(item.id, projectId)}
                         >
                           {tPricing('choose', { tier: byTier(tier)?.name || tTiers(tier) })}
@@ -737,7 +739,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
 /** Bảng "Add-on & phụ phí". */
 function AddonTable() {
   const t = useTranslations('supervision.pricing.addons')
-  const packages = useCmsCollection('supervisionPackages')
+  const packages = useSupervisionPackages()
   const months = packages.find((item) => item.tier === 'check')?.durationMonths ?? 6
 
   return (
@@ -970,7 +972,7 @@ const VALUE_ICONS: Record<SupervisionValueRowKey, typeof ShieldCheck> = {
 function ValueTable() {
   const t = useTranslations('supervision.pricing.value')
   const tTiers = useTranslations('supervision.tiers')
-  const packages = useCmsCollection('supervisionPackages')
+  const packages = useSupervisionPackages()
   const byTier = (tier: SupervisionTier) => packages.find((item) => item.tier === tier)
 
   return (

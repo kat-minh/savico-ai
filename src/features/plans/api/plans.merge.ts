@@ -52,6 +52,7 @@ export interface BmtRevisionView {
 
 /** Phần của `GET /plans` (PublishedPlanItem) mà việc ghép cần. */
 export interface BmtPublishedPlanItem {
+  planId?: string
   code: string
   kind: 'Design' | 'Supervision'
   revision?: BmtRevisionView
@@ -107,6 +108,14 @@ function mergePlan(plan: PlanView, item: BmtPublishedPlanItem): PlanView {
 
   const offers = revision.offers ?? []
   const price = ordered(offers).find((offer) => typeof offer.price === 'number' && offer.price > 0)?.price
+  // Checkout chọn nhánh mua THEO DẠNG ID: UUID → `POST /payment-orders` thật, còn lại →
+  // đơn mock. Nên gói đã có bản bán trên API phải mang `planId` làm `id`, nếu không
+  // thẻ hiện số liệu của API mà bấm mua lại chạy bằng mock. Chỉ đổi khi có offer
+  // `Month` vì trang thiết kế tạo đơn theo Month: thiếu offer đó thì đơn thật sẽ bị
+  // BE từ chối, để lại id mock an toàn hơn.
+  const purchasable = offers.some(
+    (offer) => offer.offerKey === 'Month' && typeof offer.price === 'number' && offer.price > 0
+  )
   const name = text(revision.name)
   const shortLabel = text(revision.highlightLabel)
   const imageUrl = text(revision.coverImageUrl)
@@ -116,6 +125,7 @@ function mergePlan(plan: PlanView, item: BmtPublishedPlanItem): PlanView {
 
   return {
     ...plan,
+    ...(item.planId && purchasable ? { id: item.planId } : {}),
     ...(name ? { name } : {}),
     ...(shortLabel ? { shortLabel } : {}),
     ...(typeof revision.isHighlighted === 'boolean' ? { popular: revision.isHighlighted } : {}),

@@ -2,6 +2,7 @@
 
 import { OrderConfirm, isApiOrderId, type OfferKey, type OrderKind } from '@/features/checkout'
 import { usePlans } from '@/features/plans'
+import { useSupervisionPackages } from '@/features/supervision'
 
 interface ConfirmViewProps {
   productId: string
@@ -26,22 +27,35 @@ function toOfferKey(offer?: string): OfferKey | undefined {
  */
 export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewProps) {
   const { data: plans } = usePlans()
+  const packages = useSupervisionPackages()
 
   const isApi = isApiOrderId(productId)
   const apiPlan = isApi && kind === 'design' ? plans?.find((plan) => plan.id === productId) : undefined
-  const apiProduct = apiPlan
+  // Gói giám sát đến từ API cũng không nằm trong kho CMS mà `OrderConfirm` đọc, nên
+  // dựng bản chụp ở đây như gói thiết kế. Giám sát không có hạn mức — thẻ hiện đúng
+  // các dòng lợi ích của mock.
+  const apiPackage = isApi && kind === 'supervision' ? packages.find((item) => item.id === productId) : undefined
+  const apiProduct = apiPackage
     ? {
-        name: apiPlan.name,
+        name: apiPackage.name,
         tierTag: null,
-        popular: Boolean(apiPlan.popular),
-        price: apiPlan.price,
-        benefits: [
-          `${apiPlan.designCredits} phương án thiết kế`,
-          `${apiPlan.designCredits} lượt chỉnh sửa phương án`,
-          `${apiPlan.libraryCredits} lượt tra cứu thư viện mẫu`
-        ]
+        popular: Boolean(apiPackage.recommended),
+        price: apiPackage.price,
+        benefits: apiPackage.benefits
       }
-    : undefined
+    : apiPlan
+      ? {
+          name: apiPlan.name,
+          tierTag: null,
+          popular: Boolean(apiPlan.popular),
+          price: apiPlan.price,
+          benefits: [
+            `${apiPlan.designCredits} phương án thiết kế`,
+            `${apiPlan.designCredits} lượt chỉnh sửa phương án`,
+            `${apiPlan.libraryCredits} lượt tra cứu thư viện mẫu`
+          ]
+        }
+      : undefined
 
   return (
     <OrderConfirm
