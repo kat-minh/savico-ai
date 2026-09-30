@@ -8,26 +8,21 @@ import { useState } from 'react'
 import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import {
-  attachTemplateAsset,
   createLibraryTemplate,
-  createTemplateAsset,
   getTemplateVersions,
   listAllLibraryTemplates,
   setTemplateVisibility,
   type AdminTemplateItem,
   type AdminVersionItem,
-  type DrawingKind,
-  type VersionCreated
+  type DrawingKind
 } from '../../api/bmt/library.api'
-import { useEstimateCatalog } from '../../hooks/use-estimate-catalog'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 import { useFloorLabel } from '../catalog/use-floor-label'
-import { fileNameOf, resolveMediaType } from './library-assets.helpers'
 import { LibraryContentFields, toTemplateContent } from './library-content-fields'
-import { LibraryCreateImages } from './library-create-images'
+import { useLibraryClassification } from './use-library-classification'
 import { LibraryVersionsDrawer } from './library-versions-drawer'
 
 const { Text } = Typography
@@ -78,53 +73,6 @@ async function loadRows(): Promise<LibraryRow[]> {
 }
 
 /**
- * Sau khi tạo mẫu (đã có `versionId`), gắn các ảnh nhập ở form tạo vào phiên bản
- * đầu: mỗi ảnh = `createTemplateAsset` (lưu URL) → `attachTemplateAsset` (gắn vào
- * cuối, đặt ảnh bìa nếu được chọn). Ảnh đã được form validate (https + đúng định
- * dạng) nên lỗi ở đây chỉ do BE; làm best-effort và ĐẾM số ảnh lỗi thay vì ném để
- * không tạo lại mẫu (mẫu đã tồn tại). Trả về số ảnh gắn hụt.
- */
-async function attachCreateImages(created: VersionCreated, values: Record<string, unknown>): Promise<number> {
-  const rows = (values.images as Array<{ url?: string } | undefined> | undefined) ?? []
-  const items = rows
-    .map((row, index) => ({ index, url: (row?.url ?? '').trim() }))
-    .filter((item) => item.url.length > 0)
-  if (items.length === 0) return 0
-
-  const rawCover = typeof values.coverIndex === 'number' ? values.coverIndex : items[0]!.index
-  const coverIndex = items.some((item) => item.index === rawCover) ? rawCover : items[0]!.index
-
-  let editVersion = created.editVersion
-  let position = 1
-  let failed = 0
-  for (const { index, url } of items) {
-    try {
-      const originalName = fileNameOf(url)
-      const mediaType = resolveMediaType('Image', url, originalName)
-      if (!mediaType) {
-        failed++
-        continue
-      }
-      const { assetId } = await createTemplateAsset(created.templateId, {
-        kind: 'Image',
-        url,
-        originalName,
-        mediaType
-      })
-      const edited = await attachTemplateAsset(created.templateId, created.versionId, assetId, {
-        expectedEditVersion: editVersion,
-        position: position++,
-        setAsCover: index === coverIndex
-      })
-      editVersion = edited.editVersion
-    } catch {
-      failed++
-    }
-  }
-  return failed
-}
-
-/**
  * THƯ VIỆN MẪU BẢN VẼ (STORY-LIB-001, BR-LIB-001) trên BMT API — MỘT màn cho cả
  * mẫu 2D và 3D (chung endpoint `/admin/library/templates`, chỉ khác `drawingKind`).
  * Lọc 2D / 3D bằng Segmented ngay trên bảng thay vì tách hai mục menu. Mỗi mẫu có
@@ -137,7 +85,7 @@ export function LibraryTemplateManager() {
   const format = useFormatter()
   const { message, modal } = App.useApp()
   const floorLabel = useFloorLabel()
-  const { data: catalog } = useEstimateCatalog()
+  const { data: classificationOptions } = useLibraryClassification()
   const [managing, setManaging] = useState<{ row: LibraryRow; ctx: ApiRowContext } | null>(null)
   const [activeKind, setActiveKind] = useState<'all' | DrawingKind>('all')
 
@@ -193,18 +141,14 @@ export function LibraryTemplateManager() {
         }}
         rowKey={(row) => row.template.templateId}
         drawerWidth={640}
-        createValues={() => ({ drawingKind: activeKind === 'all' ? undefined : activeKind, coverIndex: 0 })}
-        onCreate={async (values) => {
-          const created = await createLibraryTemplate(toTemplateContent(values, catalog))
-          const failed = await attachCreateImages(created, values)
-          if (failed > 0) message.warning(l('createImagesPartial', { count: failed }))
-          return created
-        }}
+        createValues={() => ({ drawingKind: activeKind === 'all' ? undefined : activeKind })}
+        // Ảnh và tệp KHÔNG nhập lúc tạo: chúng thuộc section của phiên bản nên chỉ thêm được sau khi mẫu (và nháp
+        // đầu) đã có — mở "Quản lý phiên bản" để tạo section rồi tải tệp lên.
+        onCreate={(values) => createLibraryTemplate(toTemplateContent(values, classificationOptions))}
         renderForm={(form) => (
           <>
             <Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('createNote')} />
             <LibraryContentFields form={form} />
-            <LibraryCreateImages form={form} />
           </>
         )}
         rowActions={(row, ctx): RowAction[] => [

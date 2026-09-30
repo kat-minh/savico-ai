@@ -875,7 +875,12 @@
       "articleNote": "Bài viết mang tính tham khảo. Liên hệ BuildX để được tư vấn theo đúng công trình của bạn.",
       "loginRequiredTitle": "Đăng nhập để xem chi tiết mẫu",
       "loginRequiredHint": "Mẫu này cần tài khoản BuildX để mở bộ ảnh và thông tin chi tiết. Mỗi lần mở dùng 1 lượt tra cứu.",
-      "loginCta": "Đăng nhập"
+      "loginCta": "Đăng nhập",
+      "attachmentsTitle": "Tài liệu đính kèm",
+      "attachmentUnnamed": "Tệp không tên",
+      "attachmentDownload": "Tải về",
+      "attachmentDownloading": "Đang tải…",
+      "attachmentDownloadFailed": "Không tải được tệp. Bạn thử lại giúp nhé."
     },
     "foundation": {
       "eyebrow": "Cẩm nang nền tảng",
@@ -1215,7 +1220,11 @@
       }
     },
     "pageTitle": "Hướng dẫn sử dụng BuildX",
-    "pageSubtitle": "Video 1 phút cho từng bước."
+    "pageSubtitle": "Video 1 phút cho từng bước.",
+    "deepLink": {
+      "unavailable": "Video hướng dẫn này không còn khả dụng.",
+      "backToList": "Xem tất cả hướng dẫn"
+    }
   },
   "design": {
     "steps": {
@@ -2146,6 +2155,15 @@
     "highlights": {
       "designCredits": "{count} phương án thiết kế",
       "libraryCredits": "{count} lượt tra cứu thư viện mẫu"
+    },
+    "cycle": {
+      "label": "Chu kỳ thanh toán",
+      "month": "Tháng",
+      "year": "Năm",
+      "saving": "Tiết kiệm đến {percent}%",
+      "noteMonth": "Thanh toán 1 lần · dùng trong 1 tháng",
+      "noteYear": "Thanh toán 1 lần · dùng trong 1 năm",
+      "unavailable": "Chưa mở bán chu kỳ này"
     }
   },
   "consult": {
@@ -2332,7 +2350,8 @@
       "estimateAdvice": "Nội dung tư vấn",
       "roles": "Vai trò & quyền",
       "staff": "Tài khoản nhân viên",
-      "assignments": "Phân công giám sát"
+      "assignments": "Phân công giám sát",
+      "constructionSites": "Công trình"
     },
     "actions": {
       "create": "Thêm mới",
@@ -3444,7 +3463,10 @@
         "capability": "Năng lực",
         "contact": "Liên hệ (nội bộ)",
         "legal": "Pháp lý",
-        "projects": "Dự án tiêu biểu"
+        "projects": "Dự án tiêu biểu",
+        "images": "Ảnh hồ sơ",
+        "licenses": "Giấy phép",
+        "partnership": "Hợp tác BuildX"
       },
       "contractorType": "Loại nhà thầu",
       "shortDescription": "Mô tả ngắn",
@@ -3493,7 +3515,88 @@
         "mainWork": "Hạng mục chính",
         "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
       },
-      "addressHint": "Chọn một gợi ý để tự điền vĩ độ/kinh độ; vẫn sửa tay được bên dưới."
+      "addressHint": "Chọn một gợi ý để tự điền vĩ độ/kinh độ; vẫn sửa tay được bên dưới.",
+      "files": {
+        "upload": "Tải ảnh lên",
+        "replace": "Đổi tệp",
+        "remove": "Gỡ",
+        "moveLeft": "Dịch lên trước",
+        "moveRight": "Dịch ra sau",
+        "scanView": "Xem bản quét",
+        "scanUploaded": "Đã tải bản quét",
+        "uploadScan": "Tải bản quét",
+        "scanHint": "PDF, JPG hoặc PNG, tối đa 20 MB.",
+        "savedNote": "Ảnh và tệp vừa tải lên chỉ được giữ khi bạn bấm Lưu; bỏ form giữa chừng thì hệ thống tự dọn sau 24 giờ.",
+        "count": "{count}/{max} ảnh",
+        "kind": {
+          "Logo": "Logo",
+          "Cover": "Ảnh bìa",
+          "Office": "Ảnh văn phòng",
+          "Team": "Ảnh đội ngũ"
+        },
+        "kindHint": {
+          "Logo": "Một ảnh. JPG/PNG/WebP, tối đa 10 MB.",
+          "Cover": "Một ảnh. JPG/PNG/WebP, tối đa 10 MB.",
+          "Office": "Bộ ảnh, tối đa 50. JPG/PNG/WebP, 10 MB mỗi ảnh.",
+          "Team": "Bộ ảnh, tối đa 50. JPG/PNG/WebP, 10 MB mỗi ảnh."
+        },
+        "licenses": {
+          "add": "Thêm giấy phép",
+          "empty": "Chưa có giấy phép nào.",
+          "rowTitle": "Giấy phép {n}",
+          "type": "Loại giấy phép",
+          "number": "Số giấy phép",
+          "issuer": "Cơ quan cấp",
+          "issuedOn": "Ngày cấp",
+          "expiresOn": "Ngày hết hạn",
+          "scan": "Bản quét",
+          "remove": "Gỡ giấy phép",
+          "problem": {
+            "licenseType": "Cần nhập loại giấy phép.",
+            "licenseNumber": "Cần nhập số giấy phép.",
+            "dateOrder": "Ngày hết hạn không được trước ngày cấp."
+          },
+          "fixBeforeSave": "Hãy sửa các giấy phép đang báo lỗi trước khi lưu."
+        },
+        "partnership": {
+          "hint": "Thông tin hợp tác BuildX hiện tại. Để trống hết thì hồ sơ không có phần hợp tác.",
+          "startsOn": "Bắt đầu",
+          "endsOn": "Kết thúc",
+          "signedOn": "Ngày ký",
+          "recordCode": "Mã hồ sơ / hợp đồng",
+          "pageCount": "Số trang",
+          "scan": "Bản quét hợp đồng",
+          "dateOrder": "Ngày kết thúc không được trước ngày bắt đầu."
+        }
+      },
+      "errors": {
+        "UnsupportedType": "Định dạng tệp không được chấp nhận. Ảnh nhận JPG, PNG hoặc WebP; bản quét nhận PDF, JPG hoặc PNG.",
+        "TooLarge": "Tệp vượt quá dung lượng cho phép (ảnh 10 MB, bản quét 20 MB).",
+        "StoragePutFailed": "Không đưa được tệp lên kho, bạn thử lại giúp.",
+        "StillValidating": "Hệ thống còn đang kiểm tệp, bạn thử lại sau giây lát.",
+        "Rejected": "Tệp không đạt kiểm tra (sai định dạng hoặc tệp hỏng). Hãy chọn tệp khác.",
+        "Expired": "Lượt tải đã hết hạn, bạn chọn lại tệp.",
+        "InvalidMediaUpload": "Tệp không hợp lệ: sai định dạng, quá dung lượng hoặc nội dung không đúng loại tệp.",
+        "MediaUploadNotReady": "Tệp chưa lên tới kho, bạn thử lại giúp.",
+        "MediaUploadExpired": "Lượt tải đã hết hạn, bạn chọn lại tệp.",
+        "MediaStorageUnavailable": "Kho tệp chưa sẵn sàng. Báo bộ phận kỹ thuật giúp.",
+        "MediaIdempotencyConflict": "Yêu cầu tải bị trùng. Bạn chọn lại tệp.",
+        "MediaUploadLeaseLost": "Lượt kiểm tra tệp bị gián đoạn, bạn thử lại giúp.",
+        "MediaImageNotReady": "Tệp chưa được xác minh xong nên chưa gắn được vào hồ sơ. Bạn thử lại sau giây lát.",
+        "MediaImageGone": "Tệp này đã bị dọn khỏi kho. Bạn tải lại tệp.",
+        "MediaReferenceUnavailable": "Chưa gắn được tệp vào hồ sơ lúc này. Bạn thử lại giúp.",
+        "ContractorVersionConflict": "Hồ sơ vừa được người khác thay đổi. Bạn đóng ngăn kéo, mở lại hồ sơ rồi thử lại.",
+        "ContractorProfileIncomplete": "Hồ sơ chưa đủ thông tin bắt buộc để hiển thị (tên, địa chỉ, toạ độ, ít nhất một loại công trình và một phạm vi).",
+        "InvalidContractorInput": "Dữ liệu hồ sơ chưa hợp lệ. Bạn kiểm tra lại các trường (toạ độ, ngày, đánh giá, định dạng tệp).",
+        "InvalidContractorProject": "Dự án cần có tên, đúng một loại công trình, một phạm vi và ít nhất một ảnh.",
+        "ContractorCategoryUnavailable": "Loại công trình hoặc phạm vi đã chọn không còn dùng được. Bạn chọn lại.",
+        "ContractorFileUnavailable": "Kho tệp đang không sẵn sàng. Báo bộ phận kỹ thuật giúp.",
+        "ContractorAssetInUse": "Tệp này đang được hồ sơ sử dụng nên chưa xoá được.",
+        "ContractorNotFound": "Không tìm thấy hồ sơ nhà thầu (có thể đã bị xoá).",
+        "ContractorProjectNotFound": "Không tìm thấy dự án này trong hồ sơ.",
+        "AccessForbidden": "Chỉ tài khoản quản trị mới quản lý được nhà thầu.",
+        "generic": "Không tải được tệp. Bạn thử lại giúp."
+      }
     },
     "paymentConnections": {
       "description": "Cấu hình tài khoản ngân hàng nhận tiền cho cổng SePay, tách hai môi trường Test/Live. Mỗi môi trường chỉ có một kết nối đang dùng. Secret do vận hành đặt trên máy chủ, không nhập ở đây.",
@@ -3627,8 +3730,8 @@
       "kind3d": "Nội thất 3D",
       "description2d": "Mẫu bản vẽ 2D của thư viện. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
       "description3d": "Mẫu bản vẽ 3D của thư viện. Mỗi mẫu có phiên bản: sửa tại chỗ không tạo phiên bản mới; muốn phát hành bản mới thì tạo nháp, sửa rồi công bố.",
-      "publishFlowNote": "Mẫu mới là một bản nháp, khách chưa thấy. Mở \"Quản lý phiên bản\" để thêm ảnh, chọn ảnh đại diện và công bố.",
-      "createNote": "Được lưu nháp khi chưa đủ thông tin. Công bố cần: tên, loại bản vẽ, ba kích thước, loại công trình (và số tầng / tum nếu loại đó bật), ít nhất một ảnh và ảnh đại diện.",
+      "publishFlowNote": "Mẫu mới là một bản nháp, khách chưa thấy. Mở \"Quản lý phiên bản\" để thêm section, tải ảnh/tệp lên, chọn ảnh đại diện và công bố.",
+      "createNote": "Được lưu nháp khi chưa đủ thông tin. Công bố cần: tên, loại bản vẽ, ba kích thước, loại công trình (và số tầng / tum nếu loại đó bật), phong cách kiến trúc và nội thất (mẫu 3D), ít nhất một section có tệp và một ảnh đại diện. Ảnh và tệp được thêm sau khi tạo, trong \"Quản lý phiên bản\".",
       "createImagesTitle": "Ảnh mẫu (tùy chọn)",
       "createImagesHint": "Dán URL ảnh https đã upload (JPG, PNG, WebP) và chọn ảnh bìa. Có thể thêm hoặc sắp xếp lại sau ở phần Ảnh & tệp.",
       "addImage": "Thêm ảnh",
@@ -3650,7 +3753,7 @@
       "tumNo": "Không tum",
       "notApplies": "Không áp dụng",
       "description": "Mô tả",
-      "catalogUnavailable": "Không đọc được danh mục loại công trình (cần quyền quản lý danh mục dự toán).",
+      "catalogUnavailable": "Không đọc được danh mục loại công trình (cần quyền quản lý thư viện mẫu).",
       "pinnedTypeNote": "Loại công trình đã ghim không còn trong danh mục hiện hành. Chỉ sửa tên, mô tả, kích thước thì giữ nguyên phân loại cũ; đổi phân loại phải chọn theo danh mục hiện hành.",
       "classification": "Phân loại",
       "dimensions": "Kích thước",
@@ -3680,7 +3783,7 @@
       "published": "Đã công bố phiên bản mới.",
       "deleteDraftConfirm": "Xóa bản nháp này?",
       "editCurrentNote": "Đang sửa phiên bản khách đang xem: thay đổi áp dụng ngay, không tạo phiên bản mới. Phiên bản hiện hành phải giữ đủ nội dung như khi công bố.",
-      "manageAssets": "Ảnh & tệp",
+      "manageAssets": "Section & tệp",
       "readOnlyVersion": "Phiên bản đã bị thay thế — chỉ xem, không sửa được.",
       "noAssets": "Chưa có ảnh hay tệp nào.",
       "asset": "Tài nguyên",
@@ -3691,8 +3794,8 @@
       "moveUp": "Lên trên",
       "moveDown": "Xuống dưới",
       "detach": "Gỡ khỏi phiên bản",
-      "detachConfirm": "Gỡ tài nguyên này khỏi phiên bản?",
-      "detachNote": "Tệp ở kho không bị xóa. Phiên bản hiện hành không gỡ được ảnh đại diện hay ảnh cuối cùng.",
+      "detachConfirm": "Gỡ tệp này khỏi phiên bản?",
+      "detachNote": "Tệp ở kho không bị xóa. Phiên bản hiện hành không gỡ được ảnh đại diện hay tệp cuối cùng của một section đang phục vụ khách.",
       "addAsset": "Thêm ảnh / tệp",
       "assetAdded": "Đã thêm vào phiên bản.",
       "uploadMissing": "Chưa có nút tải tệp: tải tệp lên kho lưu trữ trước rồi dán URL https của tệp vào đây.",
@@ -3701,7 +3804,72 @@
       "imageFormat": "Ảnh JPG, PNG hoặc WebP.",
       "attachmentFormat": "Tệp PDF, DWG hoặc DXF.",
       "originalName": "Tên tệp hiển thị",
-      "originalNameHint": "Bỏ trống để lấy tên từ URL."
+      "originalNameHint": "Bỏ trống để lấy tên từ URL.",
+      "architectureStyles": "Phong cách kiến trúc",
+      "interiorStyles": "Phong cách nội thất",
+      "styles3dNote": "Mẫu 3D cần ít nhất một phong cách cho mỗi nhóm mà loại công trình đang bật thì mới công bố được.",
+      "stylesNeedType": "Chọn loại công trình trước để xem các phong cách áp dụng.",
+      "sections": {
+        "intro": "Mọi ảnh và tệp của mẫu nằm trong một section (nhóm nội dung) do bạn tự đặt tên. Section chưa có tệp là \"đang chuẩn bị\" — khách chưa thấy cho tới khi có tệp đầu tiên.",
+        "addPlaceholder": "Tên section (vd: Mặt tiền, Phòng khách)",
+        "add": "Thêm section",
+        "setFirstAsCover": "Tự đặt ảnh đầu tiên được tải lên làm ảnh đại diện nếu phiên bản chưa có",
+        "loading": "Đang tải section…",
+        "empty": "Chưa có section nào. Thêm một section rồi tải tệp vào.",
+        "untitled": "(chưa đặt tên)",
+        "preparing": "Đang chuẩn bị",
+        "fileCount": "{count} tệp",
+        "rename": "Đổi tên",
+        "renameTitle": "Đổi tên section",
+        "nameRequired": "Nhập tên section.",
+        "added": "Đã thêm section.",
+        "renamed": "Đã đổi tên section.",
+        "reordered": "Đã đổi thứ tự.",
+        "reloaded": "Dữ liệu vừa được người khác thay đổi — đã tải lại, bạn thử thao tác một lần nữa.",
+        "uploadSkipped": "Chưa tải vì loạt tải bị dừng.",
+        "file": "Tệp",
+        "noFiles": "Section này chưa có tệp.",
+        "coverSet": "Đã đặt ảnh đại diện.",
+        "detached": "Đã gỡ tệp.",
+        "upload": "Tải tệp lên",
+        "uploadHint": "Ảnh JPG, PNG, WebP tối đa 5 MB; tệp PDF, DWG, DXF. Nhiều tệp được tải lần lượt từng tệp để tránh xung đột phiên bản.",
+        "sectionCount": "Section",
+        "phase": {
+          "waiting": "Đang chờ",
+          "requesting": "Đang xin chỗ tải lên…",
+          "uploading": "Đang tải lên…",
+          "verifying": "Đang xác minh…",
+          "done": "Đã tải xong",
+          "error": "Lỗi"
+        },
+        "errors": {
+          "LibraryVersionConflict": "Phiên bản vừa được người khác sửa. Dữ liệu đã được tải lại.",
+          "LibraryVersionChanged": "Phiên bản vừa thay đổi. Dữ liệu đã được tải lại.",
+          "LibraryVersionReadOnly": "Phiên bản này đã bị thay thế nên chỉ xem, không sửa được.",
+          "LibraryPositionConflict": "Vị trí đã bị chiếm. Dữ liệu đã được tải lại, bạn thử lại nhé.",
+          "IdempotencyConflict": "Yêu cầu trùng với một yêu cầu khác. Bạn tải lại trang rồi thử lại.",
+          "MediaIdempotencyConflict": "Yêu cầu tải lên bị trùng. Bạn chọn lại tệp rồi thử lại.",
+          "InvalidLibraryContent": "Nội dung thư viện chưa hợp lệ.",
+          "LibraryNotFound": "Không tìm thấy mẫu, phiên bản, section hoặc lượt tải này (có thể đã bị xóa).",
+          "LibraryStorageUnavailable": "Kho tệp đính kèm (PDF/DWG/DXF) của thư viện chưa được cấu hình nên chưa tải được tệp này. Ảnh vẫn tải bình thường. Bạn báo kỹ thuật giúp.",
+          "MediaStorageUnavailable": "Kho ảnh đang không sẵn sàng. Bạn báo kỹ thuật giúp.",
+          "InvalidMediaUpload": "Tệp không đạt kiểm tra (định dạng hoặc dung lượng thật không khớp). Bạn chọn tệp khác.",
+          "MediaUploadNotReady": "Tệp chưa lên tới kho. Bạn thử lại giúp.",
+          "MediaUploadExpired": "Lượt tải đã hết hạn. Bạn chọn lại tệp để tải lại.",
+          "MediaUploadLeaseLost": "Việc xác minh tệp bị gián đoạn. Bạn chọn lại tệp để tải lại.",
+          "AccessForbidden": "Bạn không có quyền quản lý thư viện mẫu."
+        },
+        "uploadErrors": {
+          "unsupported": "Chỉ nhận ảnh JPG/PNG/WebP và tệp PDF/DWG/DXF.",
+          "empty": "Tệp rỗng.",
+          "imageTooLarge": "Ảnh vượt quá 5 MB.",
+          "ticketExpired": "Lượt tải đã hết hạn. Bạn chọn lại tệp để tải lại.",
+          "storagePutFailed": "Không đưa được tệp lên kho (mạng hoặc kho từ chối). Bạn thử lại giúp.",
+          "stillValidating": "Hệ thống còn đang xác minh tệp. Bạn tải lại trang sau ít phút để xem kết quả.",
+          "rejected": "Tệp không đạt kiểm tra. Bạn chọn tệp khác."
+        },
+        "publishBlockedTitle": "Chưa công bố được — nội dung còn thiếu"
+      }
     },
     "catalogStatus": {
       "active": "Hoạt động",
@@ -4685,6 +4853,29 @@
       },
       "replace": "Đổi ảnh",
       "remove": "Gỡ ảnh"
+    },
+    "constructionSites": {
+      "description": "Công trình do khách hàng tạo và quản lý. Nhân viên xem để biết gói giám sát nào đang gắn với công trình nào và phân công đúng người.",
+      "readOnlyNote": "Chỉ xem: công trình do khách hàng tự tạo và sửa ở tài khoản của họ, nhân viên không tạo, sửa hay xoá hộ. Bạn chỉ thấy các công trình trong phạm vi quyền của mình.",
+      "site": "Công trình",
+      "address": "Địa chỉ",
+      "owner": "Khách hàng",
+      "email": "Email khách hàng",
+      "coordinates": "Toạ độ",
+      "grants": "Gói giám sát",
+      "noGrants": "Chưa có gói giám sát",
+      "activeGrants": "Gói đang thực hiện",
+      "firstAssignedAt": "Gán lần đầu",
+      "assignedAt": "Gán lúc",
+      "createdAt": "Tạo lúc",
+      "updatedAt": "Cập nhật",
+      "noPermission": "Bạn không có quyền xem công trình này. Nhân viên chỉ xem được công trình của các gói mình đang phụ trách.",
+      "notFound": "Không tìm thấy công trình — có thể đã bị khách hàng xoá.",
+      "grantStates": {
+        "Assigned": "Đang thực hiện",
+        "Completed": "Đã hoàn thành",
+        "CanceledByStaff": "Đã huỷ"
+      }
     }
   },
   "contractors": {
@@ -5304,7 +5495,8 @@
           "selfReportedTitle": "Thông tin do nhà thầu tự khai",
           "selfReportedBody": "BuildX chưa đối chiếu dự án này với ảnh hiện trường và biên bản nghiệm thu.",
           "priceNotice": "Không hiển thị giá trị hợp đồng hay đơn giá - BuildX không lưu và không công bố thông tin giá.",
-          "close": "Đóng"
+          "close": "Đóng",
+          "floors": "{count} tầng"
         }
       },
       "partnership": {

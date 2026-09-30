@@ -1,6 +1,11 @@
 import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
 import type { HandbookArticle, HandbookQuota, HandbookStage, HandbookTemplate } from '../types/handbook.types'
+import type { ArticleListQuery } from './handbook.bmt'
+import type { LibraryFilterQuery, TemplateStyleQuery } from './handbook.library'
+import type { LibraryFilterOptions } from './handbook.library.logic'
+import type { ListNewsCategoriesParams } from './handbook.news'
+import type { NewsCategoryNode, NewsCategoryPage } from './handbook.news.logic'
 
 /**
  * Mock của Cẩm nang. Nội dung (mẫu 2D/3D, bài viết, giai đoạn) đọc thẳng từ kho
@@ -41,7 +46,7 @@ export const mockHandbookApi = {
   },
 
   /** Chỉ bài Active hiện phía khách hàng (BR-134, BR-135). */
-  listArticles: async (topic?: string): Promise<HandbookArticle[]> => {
+  listArticles: async (topic?: string, _query?: ArticleListQuery): Promise<HandbookArticle[]> => {
     await mockDelay()
     const articles = cmsDb.list('handbookArticles').filter(isPublished)
     if (!topic) return articles
@@ -61,5 +66,18 @@ export const mockHandbookApi = {
   getQuota: async (): Promise<HandbookQuota> => {
     await mockDelay()
     return currentQuota()
-  }
+  },
+
+  /**
+   * Mock không có bộ lọc/danh mục từ API: trả "không có dữ liệu" để giao diện dùng tuỳ chọn
+   * tự suy ra từ chính dữ liệu đang hiển thị (đúng như trước khi nối API).
+   */
+  getLibraryFilters: async (_query?: LibraryFilterQuery): Promise<LibraryFilterOptions | null> => null,
+  listTemplateIdsByStyle: async (_query: TemplateStyleQuery): Promise<string[] | null> => null,
+  listNewsCategories: async (_params?: ListNewsCategoriesParams): Promise<NewsCategoryPage> => ({
+    items: [],
+    hasNextPage: false
+  }),
+  getNewsCategory: async (_id: string): Promise<NewsCategoryNode | null> => null,
+  listNewsCategoryTree: async (): Promise<NewsCategoryNode[]> => []
 }

@@ -7,11 +7,27 @@ import {
 } from '../constants/handbook.constants'
 import type {
   HandbookArticle,
+  HandbookArticleWithCategories,
   HandbookFilter,
+  HandbookSectionGroup,
   HandbookTags,
   HandbookTemplate,
+  HandbookTemplateDetail,
   HandbookTemplateKind
 } from '../types/handbook.types'
+
+/**
+ * Các nhóm nội dung (section) của mẫu đến từ API. Mẫu mock (và `HandbookTemplate` nói chung) không
+ * có trường này nên trả mảng rỗng — kiểu gốc ở `shared/cms` không được sửa từ feature này.
+ */
+export function templateSections(template: HandbookTemplate): HandbookSectionGroup[] {
+  return (template as HandbookTemplateDetail).sections ?? []
+}
+
+/** Id các danh mục BMT gắn trực tiếp vào bài; bài mock không có → mảng rỗng. */
+export function articleCategoryIds(article: HandbookArticle): readonly string[] {
+  return (article as HandbookArticleWithCategories).categoryIds ?? []
+}
 
 /** A template matches when every tag the filter specifies is equal on the template. */
 export function matchesTags(tags: HandbookTags, filter: HandbookFilter): boolean {
@@ -121,6 +137,11 @@ export interface LibraryFilter {
   secondary?: string
   /** Từ khóa tìm theo tên và thông số hiển thị trên thẻ. */
   query?: string
+  /**
+   * Chỉ giữ mẫu có id trong tập này — dùng khi BE đã lọc hộ (vd theo phong cách, thứ mà danh
+   * sách mẫu của API không kèm). Không truyền = không giới hạn.
+   */
+  allowedIds?: ReadonlySet<string>
 }
 
 /**
@@ -131,12 +152,13 @@ export interface LibraryFilter {
  */
 export function filterTemplates(
   pool: readonly HandbookTemplate[],
-  { kind, buildingType, secondary, query }: LibraryFilter
+  { kind, buildingType, secondary, query, allowedIds }: LibraryFilter
 ): HandbookTemplate[] {
   const term = normalizeTemplateSearch(query ?? '')
 
   return pool.filter((template) => {
     if (template.kind !== kind) return false
+    if (allowedIds && !allowedIds.has(template.id)) return false
     if (buildingType && template.tags.buildingType !== buildingType) return false
     if (secondary) {
       const matchesSecondary =

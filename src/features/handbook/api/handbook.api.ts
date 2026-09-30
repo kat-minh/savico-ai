@@ -16,6 +16,12 @@ import { mockHandbookApi } from './handbook.mock'
  *     (chi tiết CẦN ĐĂNG NHẬP: access-info → open trừ 1 lượt → library-versions +
  *     assets), `getQuota` (`catalog.detail` của `/me/design-subscription`).
  *
+ *   - Chi tiết mẫu đọc THEO SECTION (`/library-versions/{id}/sections` → tệp từng section):
+ *     ảnh vào trình xem, tệp PDF/DWG/DXF thành dòng tải về.
+ *   - Bộ lọc thư viện (`getLibraryFilters`, `listTemplateIdsByStyle`) và danh mục tin
+ *     (`listNewsCategories`, `getNewsCategory`, `listNewsCategoryTree`) — công khai; không có
+ *     dữ liệu thì mock trả `null`/rỗng để giao diện tự suy tuỳ chọn từ danh sách đang có.
+ *
  * Giữ mock: `listStages` (không có API); lượt TRA lưới của `getQuota` (API chỉ có
  * `catalog.detail`); `/me/library-history` không có màn UI tiêu thụ.
  */
@@ -24,7 +30,12 @@ const BmtHandbookApi = {
   getArticle: bmtHandbookApi.getArticle,
   listTemplates: bmtHandbookApi.listTemplates,
   getTemplate: bmtHandbookApi.getTemplate,
-  getQuota: bmtHandbookApi.getQuota
+  getQuota: bmtHandbookApi.getQuota,
+  getLibraryFilters: bmtHandbookApi.getLibraryFilters,
+  listTemplateIdsByStyle: bmtHandbookApi.listTemplateIdsByStyle,
+  listNewsCategories: bmtHandbookApi.listNewsCategories,
+  getNewsCategory: bmtHandbookApi.getNewsCategory,
+  listNewsCategoryTree: bmtHandbookApi.listNewsCategoryTree
 } satisfies Partial<typeof mockHandbookApi>
 
 export const handbookApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockHandbookApi : { ...mockHandbookApi, ...BmtHandbookApi }

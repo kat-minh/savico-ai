@@ -20,7 +20,38 @@ export type {
   HandbookTopic
 } from '@/shared/cms'
 
-import type { HandbookTags } from '@/shared/cms'
+import type { HandbookArticle, HandbookTags, HandbookTemplate } from '@/shared/cms'
+
+import type { HandbookSectionGroup, HandbookStyleRef } from '../api/handbook.library.logic'
+
+export type {
+  HandbookAttachment,
+  HandbookSectionGroup,
+  HandbookSectionImage,
+  HandbookStyleRef,
+  LibraryFilterOptions
+} from '../api/handbook.library.logic'
+export type { NewsCategoryNode } from '../api/handbook.news.logic'
+
+/**
+ * Chi tiết mẫu từ BMT API. `HandbookTemplate` nằm ở `shared/cms` (dùng chung với trang quản trị
+ * cũ) nên phần chỉ có ở API — nhóm nội dung theo section kèm tệp đính kèm, phong cách — đi kèm
+ * bằng kiểu mở rộng này. Mẫu mock không có các trường đó nên đều tuỳ chọn.
+ */
+export interface HandbookTemplateDetail extends HandbookTemplate {
+  /** Các section đã có tệp, theo thứ tự BE; mỗi nhóm có ảnh và tệp đính kèm (PDF/DWG/DXF). */
+  sections?: HandbookSectionGroup[]
+  architectureStyles?: HandbookStyleRef[]
+  interiorStyles?: HandbookStyleRef[]
+}
+
+/**
+ * Bài viết từ BMT API kèm id các danh mục gắn TRỰC TIẾP. Bộ lọc danh mục cần id (không phải
+ * tên) để khớp cả bài thuộc danh mục con — xem `handbook.news.logic.ts`.
+ */
+export interface HandbookArticleWithCategories extends HandbookArticle {
+  categoryIds?: string[]
+}
 
 /** Tiêu chí lọc, dựng từ dữ liệu Bước 1 bởi lớp app. */
 export type HandbookFilter = HandbookTags

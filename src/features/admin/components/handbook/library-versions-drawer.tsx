@@ -26,12 +26,14 @@ import {
   createTemplateDraft,
   deleteTemplateDraft,
   getTemplateVersions,
+  LibraryValidationError,
   publishTemplateVersion,
   saveTemplateVersion,
   type AdminVersionItem
 } from '../../api/bmt/library.api'
-import { useEstimateCatalog } from '../../hooks/use-estimate-catalog'
-import { LibraryAssetsPanel } from './library-assets-panel'
+import { useLibraryErrorMessage } from './library-error-message'
+import { LibrarySectionsPanel } from './library-sections-panel'
+import { useLibraryClassification } from './use-library-classification'
 import { LibraryContentFields, toContentFormValues, toTemplateContent } from './library-content-fields'
 
 const { Text } = Typography
@@ -57,10 +59,11 @@ export function LibraryVersionsDrawer({
   const l = useTranslations('admin.library')
   const t = useTranslations('admin')
   const format = useFormatter()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const screens = Grid.useBreakpoint()
   const queryClient = useQueryClient()
-  const { data: catalog } = useEstimateCatalog()
+  const { data: classification } = useLibraryClassification()
+  const errorMessage = useLibraryErrorMessage()
   const [form] = Form.useForm()
   const [editing, setEditing] = useState<AdminVersionItem | null>(null)
   const [assetsOf, setAssetsOf] = useState<AdminVersionItem | null>(null)
@@ -85,7 +88,21 @@ export function LibraryVersionsDrawer({
       message.success(success)
       return true
     } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+      if (err instanceof LibraryValidationError && err.messages.length > 0) {
+        // Công bố thiếu nhiều thứ: liệt kê hết (chiều ngang, ảnh đại diện, phong cách…) thay vì chỉ câu đầu.
+        modal.error({
+          title: l('sections.publishBlockedTitle'),
+          content: (
+            <ul style={{ margin: 0, paddingLeft: 20 }}>
+              {err.messages.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          )
+        })
+      } else {
+        message.error(errorMessage(err))
+      }
       return false
     } finally {
       await refresh()
@@ -104,7 +121,13 @@ export function LibraryVersionsDrawer({
     const values = (await form.validateFields().catch(() => null)) as Record<string, unknown> | null
     if (!values) return
     const ok = await run(
-      () => saveTemplateVersion(templateId, editing.versionId, editing.editVersion, toTemplateContent(values, catalog)),
+      () =>
+        saveTemplateVersion(
+          templateId,
+          editing.versionId,
+          editing.editVersion,
+          toTemplateContent(values, classification)
+        ),
       t('feedback.saved')
     )
     if (ok) setEditing(null)
@@ -187,6 +210,12 @@ export function LibraryVersionsDrawer({
               title: l('name'),
               key: 'name',
               render: (_, record) => record.name || <Text type='secondary'>{l('untitled')}</Text>
+            },
+            {
+              title: l('sections.sectionCount'),
+              dataIndex: 'sectionCount',
+              width: 90,
+              render: (value: number | undefined) => value ?? 0
             },
             {
               title: l('assets'),
@@ -314,7 +343,7 @@ export function LibraryVersionsDrawer({
         title={assetsOf ? `${l('manageAssets')} · ${versionLabel(assetsOf)}` : ''}
       >
         {assetsOf && templateId ? (
-          <LibraryAssetsPanel
+          <LibrarySectionsPanel
             templateId={templateId}
             versionId={assetsOf.versionId}
             readOnly={assetsOf.isReadOnly}

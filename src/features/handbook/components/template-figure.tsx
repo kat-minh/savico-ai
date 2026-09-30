@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { Photo, PlanDrawing } from '@/shared/components/common'
 import { cn } from '@/shared/lib/utils'
+import { isProtectedContentUrl } from '../api/handbook.library.logic'
 import type { HandbookFloor, HandbookTemplate } from '../types/handbook.types'
 
 interface TemplateFigureProps {
@@ -55,7 +56,7 @@ export function TemplateFigure({
       return revealOnLoad ? (
         <RevealPhoto className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
       ) : (
-        <Photo className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+        <Picture className={className} src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
       )
     }
     return (
@@ -70,7 +71,7 @@ export function TemplateFigure({
             fit={fit}
           />
         ) : (
-          <Photo className='size-full' src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
+          <Picture className='size-full' src={src} alt={template.name} sizes={sizes} priority={priority} fit={fit} />
         )}
         <span
           aria-hidden
@@ -118,7 +119,7 @@ function RevealPhoto({
   const [loaded, setLoaded] = useState(false)
 
   return (
-    <Photo
+    <Picture
       className={className}
       src={src}
       alt={alt}
@@ -147,4 +148,56 @@ function parseLot(lotSize: string | undefined): { frontage: number; depth: numbe
 /** 5 → "5 000"; dấu cách nghìn theo quy ước ghi kích thước trên bản vẽ. */
 function toMillimetres(metres: number): string {
   return String(Math.round(metres * 1000)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+}
+
+interface PictureProps {
+  src: string
+  alt: string
+  className?: string
+  sizes?: string
+  priority?: boolean
+  fit?: 'cover' | 'contain'
+  imageClassName?: string
+  onLoad?: () => void
+}
+
+/**
+ * Ảnh của mẫu. Ảnh công khai đi qua `Photo` (next/image) như trước. Ảnh lấy từ route nội dung
+ * của BMT API (`/api/v1/library-versions/.../content`) chỉ cấp cho người đã mở mẫu, xác thực
+ * bằng COOKIE PHIÊN — mà `next/image` tải ảnh phía máy chủ Next nên không mang cookie của khách
+ * và sẽ nhận 401/403. Với ảnh loại này dùng thẻ `<img>` thường để chính trình duyệt tải.
+ */
+function Picture({ src, alt, className, sizes, priority, fit = 'cover', imageClassName, onLoad }: PictureProps) {
+  if (!isProtectedContentUrl(src)) {
+    return (
+      <Photo
+        className={className}
+        src={src}
+        alt={alt}
+        sizes={sizes}
+        priority={priority}
+        fit={fit}
+        imageClassName={imageClassName}
+        onLoad={onLoad}
+      />
+    )
+  }
+
+  return (
+    <div className={cn('bg-muted relative overflow-hidden', className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- route nội dung cần cookie phiên, next/image không mang cookie */}
+      <img
+        src={src}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding='async'
+        onLoad={onLoad}
+        className={cn(
+          'absolute inset-0 size-full',
+          fit === 'contain' ? 'object-contain' : 'object-cover',
+          imageClassName
+        )}
+      />
+    </div>
+  )
 }

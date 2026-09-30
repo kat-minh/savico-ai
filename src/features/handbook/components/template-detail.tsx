@@ -45,6 +45,7 @@ import type { HandbookTemplate } from '../types/handbook.types'
 import { ConsultButton } from './consult-button'
 import { FloorSwitcher, resolveFloor } from './floor-switcher'
 import { QuotaBadge } from './quota-badge'
+import { TemplateAttachments } from './template-attachments'
 import { TemplateFigure } from './template-figure'
 import { TemplateInfo } from './template-info'
 import { TemplateDetailCtaPopup } from './template-detail-cta-popup'
@@ -708,6 +709,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
         >
           <div data-detail-info-swap className='space-y-5'>
             <TemplateInfo key={template.id} template={template} transitionActive={inPlaceTransitionActive} />
+            <TemplateAttachments key={`attachments-${template.id}`} template={template} />
             <div
               data-detail-quota-swap
               style={inPlaceTransitionActive ? { viewTransitionName: 'handbook-detail-quota' } : undefined}

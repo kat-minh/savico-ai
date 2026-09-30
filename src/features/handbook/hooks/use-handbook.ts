@@ -1,12 +1,13 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { useAuthStore } from '@/shared/auth'
 import { useCmsCollection } from '@/shared/cms'
 import { env } from '@/shared/config/env'
 import { handbookApi } from '../api/handbook.api'
+import type { ArticleListQuery } from '../api/handbook.bmt'
 import { handbookKeys } from '../api/handbook.keys'
 import { selectPersonalizedTemplates } from '../services/handbook.service'
 import { localDayKey, useHandbookQuotaLedger } from '../store/handbook-quota.store'
@@ -38,11 +39,67 @@ export function useHandbookTemplate(id: string, options?: { enabled?: boolean })
   })
 }
 
-export function useHandbookArticles(topic?: 'architecture' | 'interior') {
+/**
+ * Bài viết. `query` lọc ở phía BE (`categoryId` gồm cả danh mục con, `keyword`); bỏ trống thì lấy
+ * bài mới nhất như trước và để giao diện tự lọc trên danh sách đã tải.
+ */
+export function useHandbookArticles(topic?: 'architecture' | 'interior', query?: ArticleListQuery) {
+  const scope =
+    query?.categoryId || query?.keyword
+      ? `${topic ?? 'all'}:${query?.categoryId ?? ''}:${query?.keyword ?? ''}`
+      : (topic ?? 'all')
   return useQuery({
-    queryKey: handbookKeys.articleList(topic ?? 'all'),
-    queryFn: () => handbookApi.listArticles(topic),
+    queryKey: handbookKeys.articleList(scope),
+    queryFn: () => handbookApi.listArticles(topic, query),
     staleTime: STATIC_CONTENT_STALE_TIME
+  })
+}
+
+/**
+ * Toàn bộ cây danh mục tin công khai (danh sách phẳng). Rỗng khi BE chưa có danh mục hoặc lỗi —
+ * khi đó bộ lọc bài viết dùng nhãn mock.
+ */
+export function useHandbookNewsCategoryTree() {
+  return useQuery({
+    queryKey: handbookKeys.newsCategoryTree(),
+    queryFn: () => handbookApi.listNewsCategoryTree(),
+    staleTime: STATIC_CONTENT_STALE_TIME
+  })
+}
+
+/**
+ * Tuỳ chọn bộ lọc thư viện từ BE (loại công trình, số tầng, phong cách). `null` = không có (mock
+ * hoặc lỗi) → dùng tuỳ chọn suy ra từ danh sách mẫu. Chỉ gọi khi `enabled`.
+ */
+export function useHandbookLibraryFilters(kind: HandbookTemplateKind, enabled = true) {
+  return useQuery({
+    queryKey: handbookKeys.libraryFilters(kind),
+    queryFn: () => handbookApi.getLibraryFilters({ drawingKind: kind === '3d' ? '3D' : '2D' }),
+    staleTime: STATIC_CONTENT_STALE_TIME,
+    enabled
+  })
+}
+
+/**
+ * Mẫu khớp MỘT phong cách nội thất, lọc ở BE. Giữ kết quả cũ trong lúc tải kết quả mới để lưới
+ * không nháy trống khi đổi lựa chọn.
+ */
+export function useHandbookTemplateIdsByInteriorStyle(params: {
+  kind: HandbookTemplateKind
+  interiorStyleId?: string
+  enabled?: boolean
+}) {
+  const { kind, interiorStyleId, enabled = true } = params
+  return useQuery({
+    queryKey: handbookKeys.templateIdsByStyle({ kind, interiorStyleId }),
+    queryFn: () =>
+      handbookApi.listTemplateIdsByStyle({
+        drawingKind: kind === '3d' ? '3D' : '2D',
+        ...(interiorStyleId ? { interiorStyleIds: [interiorStyleId] } : {})
+      }),
+    staleTime: STATIC_CONTENT_STALE_TIME,
+    placeholderData: keepPreviousData,
+    enabled: enabled && Boolean(interiorStyleId)
   })
 }
 

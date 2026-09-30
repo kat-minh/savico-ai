@@ -24,7 +24,12 @@ import {
   HANDBOOK_TEMPLATE_RETURN_SESSION_KEY,
   LIBRARY_PAGE_SIZE
 } from '../constants/handbook.constants'
-import { useHandbookLookupQuota, useHandbookTemplates } from '../hooks/use-handbook'
+import {
+  useHandbookLibraryFilters,
+  useHandbookLookupQuota,
+  useHandbookTemplateIdsByInteriorStyle,
+  useHandbookTemplates
+} from '../hooks/use-handbook'
 import { filterTemplates, pageCount, pageSlice } from '../services/handbook.service'
 import type { HandbookTemplate, HandbookTemplateKind } from '../types/handbook.types'
 import { QuotaBadge } from './quota-badge'
@@ -85,6 +90,32 @@ export function TemplateLibrary() {
   const { data: templates, isPending, isError, refetch } = useHandbookTemplates()
   const lookupQuota = useHandbookLookupQuota()
   const pool = useMemo(() => templates ?? [], [templates])
+
+  // Danh sách mẫu của API KHÔNG kèm phong cách nên bộ lọc phong cách 3D không suy ra được từ chính
+  // dữ liệu đang hiển thị (như mẫu mock). Với mẫu từ API, tuỳ chọn lấy từ `/design-templates/filters`
+  // và việc lọc do BE làm (`interiorStyleIds` — tham số lặp), ở đây chỉ giữ các mẫu BE trả về.
+  const isApiPool = useMemo(() => pool.some((template) => template.source === 'bmt'), [pool])
+  const { data: apiFilters } = useHandbookLibraryFilters(kind, isApiPool && kind === '3d')
+  const apiStyleOptions = useMemo(
+    () =>
+      isApiPool && kind === '3d'
+        ? (apiFilters?.interiorStyles ?? []).map((style) => ({ value: style.styleId, label: style.name }))
+        : [],
+    [apiFilters, isApiPool, kind]
+  )
+  const useApiStyles = apiStyleOptions.length > 0
+  const styleFilterActive = useApiStyles && secondary !== ALL
+  const styleIds = useHandbookTemplateIdsByInteriorStyle({
+    kind,
+    interiorStyleId: styleFilterActive ? secondary : undefined,
+    enabled: styleFilterActive
+  })
+  const allowedIds = useMemo(() => {
+    if (!styleFilterActive) return undefined
+    // BE lỗi (`null`): không áp bộ lọc phía BE thay vì hiện lưới rỗng sai. Chưa có dữ liệu: rỗng.
+    if (styleIds.data === null) return undefined
+    return new Set(styleIds.data ?? [])
+  }, [styleFilterActive, styleIds.data])
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('handbook.library', { offsetMs: 220 })
 
   const gridViewportRef = useRef<HTMLDivElement>(null)
@@ -125,6 +156,7 @@ export function TemplateLibrary() {
   )
 
   const secondaryOptions = useMemo(() => {
+    if (useApiStyles) return apiStyleOptions
     const scoped = pool.filter((template) => template.kind === kind)
     if (kind === '3d') {
       return uniqueOptions(
@@ -138,7 +170,7 @@ export function TemplateLibrary() {
       (template) => template.tags.floorCount,
       (template) => floorCountLabel(template.tags.floorCount, (count) => t('floorOption', { count }))
     )
-  }, [pool, kind, t])
+  }, [apiStyleOptions, pool, kind, t, useApiStyles])
 
   const secondaryPrefix = kind === '2d' ? 'scalePrefix' : 'stylePrefix'
   const secondarySelectedLabel =
@@ -155,10 +187,12 @@ export function TemplateLibrary() {
       filterTemplates(pool, {
         kind,
         buildingType: buildingType === ALL ? undefined : buildingType,
-        secondary: secondary === ALL ? undefined : secondary,
-        query: appliedQuery
+        // Phong cách của mẫu API do BE lọc (`allowedIds`), không so với `tags` (API không có).
+        secondary: secondary === ALL || useApiStyles ? undefined : secondary,
+        query: appliedQuery,
+        allowedIds
       }),
-    [pool, kind, buildingType, secondary, appliedQuery]
+    [pool, kind, buildingType, secondary, appliedQuery, useApiStyles, allowedIds]
   )
 
   const totalPages = pageCount(results.length, LIBRARY_PAGE_SIZE)

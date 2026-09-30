@@ -1,4 +1,4 @@
-import { http } from '@/shared/lib/api'
+import { http, httpClient } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
 
 /**
@@ -7,15 +7,17 @@ import type { PagedResult } from '@/shared/types'
  * Một MẪU (`templateId`, khóa lạc quan `templateVersion`) có nhiều PHIÊN BẢN:
  * nháp (`Draft`) và đã công bố (`Published`). Phiên bản hiện hành là bản khách
  * đang xem; bản đã bị thay thế chỉ đọc. Mỗi phiên bản có khóa lạc quan riêng
- * `editVersion`, tăng sau mỗi lần sửa metadata / tài nguyên / thứ tự / cover.
+ * `editVersion`, tăng sau mỗi lần sửa metadata / section / tệp / thứ tự / cover.
  *
- * Tài nguyên (ảnh, tệp PDF/DWG/DXF) KHÔNG upload qua API: BE chỉ nhận URL https
- * thuộc tên miền kho presign đã cấu hình, rồi gắn vào phiên bản ở một vị trí.
+ * Mọi ảnh và tệp PDF/DWG/DXF thuộc một SECTION của phiên bản (BR-LIB-001 khoản 17) và
+ * được tải lên theo luồng presign riêng của thư viện — xem `library-sections.api.ts` và
+ * `library-upload.ts`. BE KHÔNG còn nhận URL rời: `POST /templates/{id}/assets` và
+ * `PUT …/assets/{assetId}` trả 422 `InvalidLibraryContent`, nên file này không còn hàm
+ * tạo/gắn tài nguyên bằng URL.
  */
 
 export type DrawingKind = '2D' | '3D'
 export type LibraryVersionState = 'Draft' | 'Published'
-export type LibraryAssetKind = 'Image' | 'Attachment'
 
 export interface AdminTemplateItem {
   templateId: string
@@ -27,6 +29,13 @@ export interface AdminTemplateItem {
   currentName?: string | null
   currentPublishedAtUtc?: string | null
   draftCount: number
+}
+
+/** Phong cách kiến trúc / nội thất gắn với mẫu 3D. */
+export interface LibraryStyleRef {
+  styleId: string
+  name: string
+  imageUrl?: string | null
 }
 
 export interface AdminVersionItem {
@@ -50,6 +59,10 @@ export interface AdminVersionItem {
   hasTum?: boolean | null
   coverAssetId?: string | null
   assetCount: number
+  /** Số section của phiên bản (kể cả section đang chuẩn bị). */
+  sectionCount?: number
+  architectureStyles?: LibraryStyleRef[]
+  interiorStyles?: LibraryStyleRef[]
   createdAtUtc: string
   modifiedAtUtc: string
   publishedAtUtc?: string | null
@@ -61,27 +74,6 @@ export interface AdminTemplateVersions {
   isHidden: boolean
   currentVersionId: string | null
   versions: AdminVersionItem[]
-}
-
-export interface AdminVersionAssetItem {
-  assetId: string
-  kind: LibraryAssetKind
-  url: string
-  originalName: string
-  mediaType: string
-  sizeBytes?: number | null
-  position: number
-  isCover: boolean
-}
-
-export interface AdminVersionAssets {
-  versionId: string
-  state: LibraryVersionState
-  editVersion: number
-  isCurrent: boolean
-  isReadOnly: boolean
-  coverAssetId: string | null
-  assets: AdminVersionAssetItem[]
 }
 
 /** Metadata của một phiên bản. Mọi trường được để trống khi lưu nháp. */
@@ -98,6 +90,12 @@ export interface TemplateContent {
   floorCount?: number | null
   /** Bỏ trống khi loại công trình tắt chọn tum — không gửi `false`. */
   hasTum?: boolean | null
+  /**
+   * Phong cách của mẫu 3D. Luôn GỬI MẢNG (kể cả rỗng): bỏ qua hoặc `null` thì BE giữ nguyên
+   * tập cũ, còn mẫu 2D bị từ chối nếu gắn phong cách — nên đổi 3D → 2D phải gửi `[]` rõ ràng.
+   */
+  architectureStyleIds?: string[]
+  interiorStyleIds?: string[]
 }
 
 export interface VersionCreated {
@@ -112,13 +110,7 @@ export interface VersionEdited {
   editVersion: number
 }
 
-export interface NewAsset {
-  kind: LibraryAssetKind
-  url: string
-  originalName: string
-  mediaType: string
-  sizeBytes?: number | null
-}
+import { extractValidationMessages } from './library-sections.logic'
 
 const BASE = '/admin/library/templates'
 /** Trần `pageSize` của BE. */
@@ -169,44 +161,12 @@ export async function getTemplateVersions(templateId: string): Promise<AdminTemp
   }
 }
 
-interface RawVersionAssets extends Partial<Omit<AdminVersionAssets, 'assets'>> {
-  assets?: PagedResult<AdminVersionAssetItem> | null
-}
-
-/**
- * Mọi tài nguyên đã gắn của một phiên bản, theo `position`. Các trang sau gửi
- * `expectedEditVersion` của trang đầu — phiên bản bị sửa giữa chừng thì BE trả
- * 409 và màn tải lại.
- */
-export async function getVersionAssets(templateId: string, versionId: string): Promise<AdminVersionAssets> {
-  const assets: AdminVersionAssetItem[] = []
-  let head: RawVersionAssets | null = null
-  for (let page = 1; ; page++) {
-    const res: RawVersionAssets = await http.get<RawVersionAssets>(
-      `${BASE}/${templateId}/versions/${versionId}/assets`,
-      { params: { pageIndex: page, pageSize: MAX_PAGE, expectedEditVersion: head?.editVersion } }
-    )
-    head ??= res
-    assets.push(...(res.assets?.items ?? []))
-    if (!res.assets?.hasNextPage) break
-  }
-  return {
-    versionId,
-    state: head?.state ?? 'Draft',
-    editVersion: head?.editVersion ?? 0,
-    isCurrent: Boolean(head?.isCurrent),
-    isReadOnly: Boolean(head?.isReadOnly),
-    coverAssetId: head?.coverAssetId ?? null,
-    assets: assets.sort((a, b) => a.position - b.position)
-  }
-}
-
 /** Tạo mẫu cùng nháp đầu tiên — mẫu chưa công khai cho tới khi công bố. */
 export function createLibraryTemplate(content: TemplateContent): Promise<VersionCreated> {
   return http.post<VersionCreated>(BASE, content, idempotent())
 }
 
-/** Sao phiên bản hiện hành thành nháp mới (metadata, phân loại, tài nguyên, cover). */
+/** Sao phiên bản hiện hành thành nháp mới (metadata, phân loại, section, tệp, cover). */
 export function createTemplateDraft(
   templateId: string,
   expectedTemplateVersion: number,
@@ -233,7 +193,7 @@ export function saveTemplateVersion(
   )
 }
 
-/** Chỉ xóa được nháp; bản đã công bố dùng Ẩn. */
+/** Chỉ xóa được nháp; bản đã công bố dùng Ẩn. Xóa nháp kéo theo section và liên kết tệp của nó. */
 export function deleteTemplateDraft(templateId: string, versionId: string, expectedEditVersion: number) {
   return http.delete<void>(`${BASE}/${templateId}/versions/${versionId}`, {
     params: { expectedEditVersion },
@@ -241,22 +201,10 @@ export function deleteTemplateDraft(templateId: string, versionId: string, expec
   })
 }
 
-/** Lưu URL tệp đã upload thành tài nguyên CHƯA gắn của mẫu (không idempotent). */
-export function createTemplateAsset(templateId: string, asset: NewAsset): Promise<{ assetId: string }> {
-  return http.post<{ assetId: string }>(`${BASE}/${templateId}/assets`, asset)
-}
-
-/** Gắn tài nguyên vào phiên bản ở `position` (vị trí trống), tùy chọn đặt làm ảnh đại diện. */
-export function attachTemplateAsset(
-  templateId: string,
-  versionId: string,
-  assetId: string,
-  body: { expectedEditVersion: number; position: number; setAsCover: boolean }
-): Promise<VersionEdited> {
-  return http.put<VersionEdited>(`${BASE}/${templateId}/versions/${versionId}/assets/${assetId}`, body, idempotent())
-}
-
-/** Gỡ tài nguyên khỏi phiên bản — không xóa tệp ở kho. */
+/**
+ * Gỡ tệp khỏi phiên bản — không xóa ở kho. BE từ chối (422 `InvalidLibraryContent`) nếu đó là
+ * tệp cuối của section đang phục vụ khách.
+ */
 export function detachTemplateAsset(
   templateId: string,
   versionId: string,
@@ -269,29 +217,37 @@ export function detachTemplateAsset(
   })
 }
 
-export function reorderTemplateAssets(
-  templateId: string,
-  versionId: string,
-  expectedEditVersion: number,
-  items: { assetId: string; position: number }[]
-): Promise<VersionEdited> {
-  return http.post<VersionEdited>(
-    `${BASE}/${templateId}/versions/${versionId}/reorder`,
-    { expectedEditVersion, items },
-    idempotent()
-  )
+/**
+ * Công bố bị BE từ chối (422 `InvalidLibraryContent`) vì nội dung chưa đủ. Mang ĐẦY ĐỦ các câu tiếng Việt
+ * nói thiếu gì (chiều ngang, ảnh đại diện, phong cách…) — `ApiError` chung chỉ giữ câu đầu tiên.
+ */
+export class LibraryValidationError extends Error {
+  constructor(
+    readonly messages: string[],
+    readonly messageCode: string | undefined
+  ) {
+    super(messages[0] ?? 'InvalidLibraryContent')
+    this.name = 'LibraryValidationError'
+  }
 }
 
-export function publishTemplateVersion(
+export async function publishTemplateVersion(
   templateId: string,
   versionId: string,
   body: { expectedTemplateVersion: number; expectedEditVersion: number; expectedCurrentVersionId: string | null }
 ) {
-  return http.post<{ versionId: string; number: number; templateVersion: number; editVersion: number }>(
+  type Published = { versionId: string; number: number; templateVersion: number; editVersion: number }
+  const res = await httpClient.post<{ value?: Published; messageCode?: string; errors?: unknown }>(
     `${BASE}/${templateId}/versions/${versionId}/publish`,
     body,
-    idempotent()
+    {
+      ...idempotent(),
+      // Chỉ 2xx và 422 được trả về để tự đọc danh sách lỗi; mọi mã khác (401 tự làm mới phiên, 409…) đi đường cũ.
+      validateStatus: (status) => (status >= 200 && status < 300) || status === 422
+    }
   )
+  if (res.status === 422) throw new LibraryValidationError(extractValidationMessages(res.data), res.data?.messageCode)
+  return res.data.value as Published
 }
 
 export function setTemplateVisibility(templateId: string, expectedTemplateVersion: number, isHidden: boolean) {

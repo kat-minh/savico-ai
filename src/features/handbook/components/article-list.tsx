@@ -20,9 +20,10 @@ import {
   HANDBOOK_ARTICLE_LIST_HISTORY_KEY,
   HANDBOOK_CATEGORY_SELECT_EVENT
 } from '../constants/handbook.constants'
+import { articleInChip, chipNodes, descendantsByChip } from '../api/handbook.news.logic'
 import { useArticleLabels } from '../hooks/use-article-labels'
-import { useHandbookArticles } from '../hooks/use-handbook'
-import { sortByNewest } from '../services/handbook.service'
+import { useHandbookArticles, useHandbookNewsCategoryTree } from '../hooks/use-handbook'
+import { articleCategoryIds, sortByNewest } from '../services/handbook.service'
 import type { HandbookArticle, HandbookCategory } from '../types/handbook.types'
 
 const ALL = 'all'
@@ -63,13 +64,20 @@ function matchesSearchPhrase(value: string, query: string): boolean {
 function filterArticles(
   articles: readonly HandbookArticle[],
   category: ArticleFilter,
-  query: string
+  query: string,
+  /** Có = chip là danh mục BMT: khớp theo id, gồm bài thuộc danh mục CON (như `categoryId` ở BE). */
+  descendants?: ReadonlyMap<string, ReadonlySet<string>>
 ): HandbookArticle[] {
   const seenIds = new Set<string>()
   return sortByNewest(articles).filter((article) => {
     if (seenIds.has(article.id)) return false
     seenIds.add(article.id)
-    if (category !== ALL && article.category !== category) return false
+    if (category !== ALL) {
+      const inCategory = descendants
+        ? articleInChip(articleCategoryIds(article), category, descendants)
+        : article.category === category
+      if (!inCategory) return false
+    }
     return matchesSearchPhrase(article.title, query)
   })
 }
@@ -107,7 +115,7 @@ function readArticleListRestoreState(): ArticleListRestoreState | null {
  */
 export function ArticleList() {
   const t = useTranslations('handbook.articles')
-  const { nameOf: labelName, options: labelOptions } = useArticleLabels()
+  const cmsLabels = useArticleLabels()
   const locale = useLocale() as Locale
   const [restoreState] = useState(readArticleListRestoreState)
   const initialCategory = restoreState?.category ?? ALL
@@ -139,9 +147,33 @@ export function ArticleList() {
   const debouncedTerm = useDebouncedValue(term, 250).trim()
   const { data: articles, isPending } = useHandbookArticles()
   const pool = useMemo(() => articles ?? [], [articles])
+
+  // Chip lọc: bài từ BMT API → danh mục tin của BMT (cây công khai); bài mock → nhãn mock như cũ.
+  // Bài API có `categoryIds`; khớp theo id nên bài thuộc danh mục con vẫn vào chip cha, đúng như
+  // `GET /news/articles?categoryId=` ở BE. BE chưa có danh mục thì dùng nhãn mock (không gãy).
+  const { data: categoryTree, isPending: categoryTreePending } = useHandbookNewsCategoryTree()
+  const newsFilter = useMemo(() => {
+    const nodes = categoryTree ?? []
+    const chips = chipNodes(nodes)
+    return { chips, descendants: descendantsByChip(nodes, chips) }
+  }, [categoryTree])
+  const poolIsApi = useMemo(() => pool.some((article) => articleCategoryIds(article).length > 0), [pool])
+  const apiMode = poolIsApi && (newsFilter.chips.length > 0 || categoryTreePending)
+  const labelOptions = useMemo(
+    () => (apiMode ? newsFilter.chips.map((chip) => chip.id) : cmsLabels.options),
+    [apiMode, cmsLabels.options, newsFilter.chips]
+  )
+  const labelName = useCallback(
+    (id: string) =>
+      (apiMode ? newsFilter.chips.find((chip) => chip.id === id)?.name : undefined) ?? cmsLabels.nameOf(id),
+    [apiMode, cmsLabels, newsFilter.chips]
+  )
+  // Chip đã khôi phục từ lịch sử có thể không còn (đổi nguồn nhãn, hoặc danh mục bị xoá) → coi là Tất cả.
+  const activeCategory: ArticleFilter =
+    appliedCategory === ALL || labelOptions.includes(appliedCategory) ? appliedCategory : ALL
   const results = useMemo(
-    () => filterArticles(pool, appliedCategory, appliedQuery),
-    [pool, appliedCategory, appliedQuery]
+    () => filterArticles(pool, activeCategory, appliedQuery, apiMode ? newsFilter.descendants : undefined),
+    [pool, activeCategory, appliedQuery, apiMode, newsFilter.descendants]
   )
   const visible = results.slice(0, visibleCount)
   const hasMore = visible.length < results.length

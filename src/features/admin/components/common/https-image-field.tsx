@@ -6,27 +6,6 @@ import { useTranslations } from 'next-intl'
 
 import { ImagePicker } from './image-upload-button'
 
-/** Trần độ dài URL mà BMT nhận cho ảnh / tệp đã upload. */
-export const UPLOADED_URL_MAX = 2048
-
-/**
- * Luật form: URL tuyệt đối https, tối đa 2048 ký tự — đúng điều kiện BE kiểm.
- * Còn dùng ở các panel thư viện, nơi tệp không phải ảnh (bản vẽ PDF…) vẫn phải
- * dán URL vì nút tải lên hiện chỉ nhận ảnh.
- */
-export function useHttpsUrlRule() {
-  const t = useTranslations('admin.estimateCatalog')
-  return {
-    validator: (_: unknown, value: unknown) => {
-      const url = String(value ?? '').trim()
-      if (!url) return Promise.resolve()
-      return /^https:\/\/\S+$/i.test(url) && url.length <= UPLOADED_URL_MAX
-        ? Promise.resolve()
-        : Promise.reject(new Error(t('httpsUrl')))
-    }
-  }
-}
-
 /**
  * Ô ảnh BẮT BUỘC cho dữ liệu nằm trên BMT API.
  *

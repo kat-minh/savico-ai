@@ -1,8 +1,37 @@
 import { useAuthStore } from '@/shared/auth'
 import { http } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
-import type { HandbookArticle, HandbookFloor, HandbookQuota, HandbookTemplate } from '../types/handbook.types'
+import type {
+  HandbookArticleWithCategories,
+  HandbookFloor,
+  HandbookQuota,
+  HandbookTemplate,
+  HandbookTemplateDetail
+} from '../types/handbook.types'
+import {
+  fetchLibraryFilters,
+  fetchTemplateIdsByStyle,
+  loadVersionContent,
+  type LibraryFilterQuery,
+  type LoadedVersionContent,
+  type TemplateStyleQuery
+} from './handbook.library'
+import {
+  coverImageOf,
+  floorsFromGroups,
+  normalizeStyles,
+  styleLabelOf,
+  type BmtStyleRef,
+  type LibraryFilterOptions
+} from './handbook.library.logic'
 import { mockHandbookApi } from './handbook.mock'
+import {
+  getNewsCategory,
+  listNewsCategories,
+  listNewsCategoryTree,
+  type ListNewsCategoriesParams
+} from './handbook.news'
+import type { NewsCategoryNode, NewsCategoryPage } from './handbook.news.logic'
 
 /**
  * Nối cụm Cẩm nang vào BMT API — GIỮ MOCK LÀM NỀN.
@@ -13,8 +42,11 @@ import { mockHandbookApi } from './handbook.mock'
  *
  * - Bài viết (news): list + detail CÔNG KHAI, render `contentHtml`.
  * - Thư viện mẫu: list CÔNG KHAI; chi tiết CẦN ĐĂNG NHẬP (access-info → open trừ
- *   1 lượt → library-versions + assets). Mẫu API gắn cờ `source: 'bmt'` để trang
- *   chi tiết biết dựng cổng đăng nhập và đọc chi tiết từ đây (không lấy từ pool).
+ *   1 lượt → library-versions → SECTIONS → tệp của từng section). Mẫu API gắn cờ
+ *   `source: 'bmt'` để trang chi tiết biết dựng cổng đăng nhập và đọc chi tiết từ đây
+ *   (không lấy từ pool). Chi tiết theo section nằm ở `handbook.library.ts`.
+ * - Danh mục tin (`/news/categories`) và bộ lọc thư viện (`/design-templates/filters`) là
+ *   công khai; không có dữ liệu thì trả rỗng/`null` để giao diện dùng lựa chọn tự suy ra.
  */
 
 /* ===========================================================================
@@ -102,24 +134,11 @@ interface BmtLibraryVersionDetail {
   coverContentUrl?: string | null
   assetCount: number
   assetsUrl: string
-}
-
-interface BmtLibraryVersionAssetItem {
-  assetId: string
-  kind: 'Image' | 'Attachment'
-  name: string
-  mediaType: string
-  sizeBytes?: number | null
-  position: number
-  isCover: boolean
-  contentUrl: string
-}
-
-interface BmtLibraryVersionAssets {
-  versionId?: string
-  editVersion?: number
-  coverAssetId?: string | null
-  assets?: PagedResult<BmtLibraryVersionAssetItem>
+  /** Thêm ở đợt section (01/10/2026). */
+  sectionsUrl?: string | null
+  sectionCount?: number | null
+  architectureStyles?: BmtStyleRef[] | null
+  interiorStyles?: BmtStyleRef[] | null
 }
 
 interface BmtQuotaBalanceView {
@@ -141,6 +160,12 @@ interface BmtDesignSubscriptionView {
  * ======================================================================== */
 
 const isAuthenticated = () => useAuthStore.getState().isAuthenticated
+
+/** Lọc bài ở phía BE: `categoryId` (gồm danh mục con) và từ khoá tìm theo tiêu đề. */
+export interface ArticleListQuery {
+  categoryId?: string
+  keyword?: string
+}
 
 /** "2 tầng", "2 tầng + tum" — nhãn quy mô gộp thông tin tum (chuỗi dữ liệu, không phải chữ UI). */
 function floorLabelOf(floorCount?: number | null, hasTum?: boolean | null): string {
@@ -164,7 +189,7 @@ function dimensionSpecs(width?: string | null, length?: string | null, area?: st
   return { lotSize, floorArea }
 }
 
-function toArticleSummary(dto: BmtArticleSummary): HandbookArticle {
+function toArticleSummary(dto: BmtArticleSummary): HandbookArticleWithCategories {
   return {
     id: dto.id,
     // Route `/handbook/bai-viet/[slug]` nhận id trực tiếp làm slug.
@@ -178,11 +203,13 @@ function toArticleSummary(dto: BmtArticleSummary): HandbookArticle {
     // Ưu tiên số phút đọc do BE trả; thiếu thì mặc định 3 (danh sách không có nội dung để ước lượng).
     readingMinutes: dto.readingTimeMinutes ?? 3,
     body: [],
-    tags: {}
+    tags: {},
+    // Bộ lọc danh mục khớp theo id (gồm cả danh mục con), không theo tên.
+    categoryIds: dto.categories.map((category) => category.id)
   }
 }
 
-function toArticleDetail(dto: BmtArticleDetail): HandbookArticle {
+function toArticleDetail(dto: BmtArticleDetail): HandbookArticleWithCategories {
   return {
     ...toArticleSummary(dto),
     // Số phút đọc lấy từ BE; thiếu thì ước lượng theo độ dài nội dung.
@@ -224,28 +251,28 @@ function toTemplateSummary(dto: BmtDesignTemplateSummary): HandbookTemplate {
   }
 }
 
-function toTemplateDetail(detail: BmtLibraryVersionDetail, assets: BmtLibraryVersionAssetItem[]): HandbookTemplate {
+function toTemplateDetail(detail: BmtLibraryVersionDetail, content: LoadedVersionContent): HandbookTemplateDetail {
   const kind = detail.drawingKind === '3D' ? '3d' : '2d'
   const { lotSize, floorArea } = dimensionSpecs(detail.widthM, detail.lengthM, detail.areaM2)
   const buildingTypeLabel = detail.buildingTypeName ?? ''
-  const images = assets.filter((asset) => asset.kind === 'Image').sort((a, b) => a.position - b.position)
-  const floors: HandbookFloor[] = images.map((asset, index) => ({
-    id: asset.assetId,
-    label: asset.name || `Ảnh ${index + 1}`,
-    imageUrl: asset.contentUrl
-  }))
-  const coverUrl = detail.coverContentUrl ?? images.find((asset) => asset.isCover)?.contentUrl ?? images[0]?.contentUrl
+  const architectureStyles = normalizeStyles(detail.architectureStyles)
+  const interiorStyles = normalizeStyles(detail.interiorStyles)
+  // Dải "tầng" của trình xem ảnh = mọi ảnh của các section, theo thứ tự section rồi tệp; nhãn là
+  // tên section. Tệp đính kèm (PDF/DWG/DXF) không vào dải này mà nằm ở `sections`.
+  const floors: HandbookFloor[] = floorsFromGroups(content.groups)
+  const coverUrl = detail.coverContentUrl ?? coverImageOf(content.groups) ?? floors[0]?.imageUrl
 
   return {
     id: detail.templateId,
     name: detail.name ?? '',
     kind,
     imageUrl: coverUrl ?? undefined,
-    styleLabel: buildingTypeLabel,
+    // Mẫu 3D: dòng "Phong cách" là phong cách kiến trúc + nội thất (nếu BE có), rơi về loại công trình.
+    styleLabel: kind === '3d' ? styleLabelOf(architectureStyles, interiorStyles, buildingTypeLabel) : buildingTypeLabel,
     specs: {
       buildingTypeLabel,
       floorLabel: floorLabelOf(detail.floorCount, detail.hasTum),
-      ...(kind === '2d' ? { lotSize, floorArea } : { imageCount: images.length })
+      ...(kind === '2d' ? { lotSize, floorArea } : { imageCount: floors.length })
     },
     description: (detail.description ?? '')
       .split('\n')
@@ -263,7 +290,10 @@ function toTemplateDetail(detail: BmtLibraryVersionDetail, assets: BmtLibraryVer
     lotLength: Number(detail.lengthM) || undefined,
     area: Number(detail.areaM2) || undefined,
     versionId: detail.versionId,
-    source: 'bmt'
+    source: 'bmt',
+    sections: content.groups,
+    ...(architectureStyles.length ? { architectureStyles } : {}),
+    ...(interiorStyles.length ? { interiorStyles } : {})
   }
 }
 
@@ -276,13 +306,23 @@ export const bmtHandbookApi = {
    * Danh sách bài viết công khai (`GET /news/articles`). Panel tư vấn (`topic`)
    * không có API nên luôn dùng mock. API rỗng/lỗi → mock.
    */
-  async listArticles(topic?: string): Promise<HandbookArticle[]> {
+  async listArticles(topic?: string, query?: ArticleListQuery): Promise<HandbookArticleWithCategories[]> {
     if (topic) return mockHandbookApi.listArticles(topic)
+    const keyword = query?.keyword?.trim()
+    const filtered = Boolean(query?.categoryId || keyword)
     try {
+      // `categoryId` ở BE gồm bài gắn thẳng vào danh mục VÀ mọi danh mục con, không trùng bài;
+      // id không tồn tại cho trang rỗng (không phải 404).
       const page = await http.get<PagedResult<BmtArticleSummary>>('/news/articles', {
-        params: { pageIndex: 1, pageSize: 100 }
+        params: {
+          pageIndex: 1,
+          pageSize: 100,
+          ...(query?.categoryId ? { categoryId: query.categoryId } : {}),
+          ...(keyword ? { keyword } : {})
+        }
       })
-      if (!page.items.length) return mockHandbookApi.listArticles(topic)
+      // Trang rỗng là kết quả hợp lệ của một bộ lọc; chỉ khi KHÔNG lọc mà rỗng mới về mock.
+      if (!page.items.length) return filtered ? [] : mockHandbookApi.listArticles(topic)
       return page.items.map(toArticleSummary)
     } catch {
       return mockHandbookApi.listArticles(topic)
@@ -290,7 +330,7 @@ export const bmtHandbookApi = {
   },
 
   /** Chi tiết bài viết công khai (`GET /news/articles/{id}`). 404/lỗi → mock. */
-  async getArticle(idOrSlug: string): Promise<HandbookArticle | null> {
+  async getArticle(idOrSlug: string): Promise<HandbookArticleWithCategories | null> {
     try {
       return toArticleDetail(await http.get<BmtArticleDetail>(`/news/articles/${idOrSlug}`))
     } catch {
@@ -319,10 +359,10 @@ export const bmtHandbookApi = {
 
   /**
    * Chi tiết mẫu CẦN ĐĂNG NHẬP: access-info → (nếu chưa mở) open trừ 1 lượt →
-   * library-versions + assets. Chưa đăng nhập / mẫu mock / lỗi → mock (component
+   * library-versions → sections → tệp từng section. Chưa đăng nhập / mẫu mock / lỗi → mock (component
    * dựng cổng đăng nhập trước khi hook này được phép chạy cho mẫu API).
    */
-  async getTemplate(id: string): Promise<HandbookTemplate | null> {
+  async getTemplate(id: string): Promise<HandbookTemplateDetail | null> {
     if (!isAuthenticated()) return mockHandbookApi.getTemplate(id)
     try {
       const access = await http.get<BmtLibraryAccessInfo>(`/design-templates/${id}/access-info`)
@@ -339,11 +379,61 @@ export const bmtHandbookApi = {
       }
 
       const detail = await http.get<BmtLibraryVersionDetail>(`/library-versions/${versionId}`)
-      const assets = await collectAssets(versionId, detail.editVersion)
-      return toTemplateDetail(detail, assets)
+      const content = await loadVersionContent(versionId, detail.editVersion)
+      return toTemplateDetail(detail, content)
     } catch {
       // 404 (mẫu mock/không có ở API), 409 (đổi phiên bản), lỗi bất kỳ → về mock.
       return mockHandbookApi.getTemplate(id)
+    }
+  },
+
+  /**
+   * Tuỳ chọn bộ lọc thư viện từ `GET /design-templates/filters` (công khai). Lỗi → `null` để giao
+   * diện dùng tuỳ chọn suy ra từ chính danh sách mẫu đang có.
+   */
+  async getLibraryFilters(query?: LibraryFilterQuery): Promise<LibraryFilterOptions | null> {
+    try {
+      return await fetchLibraryFilters(query)
+    } catch {
+      return null
+    }
+  },
+
+  /**
+   * `templateId` khớp phong cách (lọc ở BE, tham số lặp). Lỗi → `null`: giao diện không áp bộ
+   * lọc phía BE thay vì hiện lưới rỗng sai.
+   */
+  async listTemplateIdsByStyle(query: TemplateStyleQuery): Promise<string[] | null> {
+    try {
+      return await fetchTemplateIdsByStyle(query)
+    } catch {
+      return null
+    }
+  },
+
+  /** Một trang con trực tiếp của `parentId` (hoặc cấp gốc). Lỗi → trang rỗng. */
+  async listNewsCategories(params?: ListNewsCategoriesParams): Promise<NewsCategoryPage> {
+    try {
+      return await listNewsCategories(params)
+    } catch {
+      return { items: [], hasNextPage: false }
+    }
+  },
+
+  async getNewsCategory(id: string): Promise<NewsCategoryNode | null> {
+    try {
+      return await getNewsCategory(id)
+    } catch {
+      return null
+    }
+  },
+
+  /** Toàn bộ cây danh mục tin dạng danh sách phẳng. Lỗi → rỗng (giao diện dùng nhãn mock). */
+  async listNewsCategoryTree(): Promise<NewsCategoryNode[]> {
+    try {
+      return await listNewsCategoryTree()
+    } catch {
+      return []
     }
   },
 
@@ -369,19 +459,4 @@ export const bmtHandbookApi = {
       return base
     }
   }
-}
-
-/** Gom mọi trang tài nguyên của một phiên bản, giữ khóa lạc quan `expectedEditVersion`. */
-async function collectAssets(versionId: string, editVersion: number): Promise<BmtLibraryVersionAssetItem[]> {
-  const items: BmtLibraryVersionAssetItem[] = []
-  for (let pageIndex = 1; pageIndex <= 20; pageIndex++) {
-    const page = await http.get<BmtLibraryVersionAssets>(`/library-versions/${versionId}/assets`, {
-      params: { pageIndex, pageSize: 100, expectedEditVersion: editVersion }
-    })
-    const assets = page.assets
-    if (!assets) break
-    items.push(...assets.items)
-    if (!assets.hasNextPage) break
-  }
-  return items
 }

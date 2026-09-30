@@ -875,7 +875,12 @@
       "articleNote": "This article is for reference. Contact BuildX for advice on your specific project.",
       "loginRequiredTitle": "Sign in to view template details",
       "loginRequiredHint": "This template needs a BuildX account to open its images and details. Each open uses one lookup credit.",
-      "loginCta": "Sign in"
+      "loginCta": "Sign in",
+      "attachmentsTitle": "Attachments",
+      "attachmentUnnamed": "Unnamed file",
+      "attachmentDownload": "Download",
+      "attachmentDownloading": "Downloading…",
+      "attachmentDownloadFailed": "Could not download the file. Please try again."
     },
     "foundation": {
       "eyebrow": "Core handbook",
@@ -1215,7 +1220,11 @@
       }
     },
     "pageTitle": "How to use BuildX",
-    "pageSubtitle": "A 1-minute video for every step."
+    "pageSubtitle": "A 1-minute video for every step.",
+    "deepLink": {
+      "unavailable": "This guide video is no longer available.",
+      "backToList": "View all guides"
+    }
   },
   "design": {
     "steps": {
@@ -2146,6 +2155,15 @@
     "highlights": {
       "designCredits": "{count} design options",
       "libraryCredits": "{count} template library views"
+    },
+    "cycle": {
+      "label": "Billing cycle",
+      "month": "Monthly",
+      "year": "Yearly",
+      "saving": "Save up to {percent}%",
+      "noteMonth": "Pay once · valid for 1 month",
+      "noteYear": "Pay once · valid for 1 year",
+      "unavailable": "Not on sale for this cycle"
     }
   },
   "consult": {
@@ -2332,7 +2350,8 @@
       "estimateAdvice": "Advisory content",
       "roles": "Roles & permissions",
       "staff": "Staff accounts",
-      "assignments": "Supervision assignments"
+      "assignments": "Supervision assignments",
+      "constructionSites": "Construction sites"
     },
     "actions": {
       "create": "Add new",
@@ -3444,7 +3463,10 @@
         "capability": "Capability",
         "contact": "Contact (internal)",
         "legal": "Legal",
-        "projects": "Featured projects"
+        "projects": "Featured projects",
+        "images": "Profile images",
+        "licenses": "Licenses",
+        "partnership": "BuildX partnership"
       },
       "contractorType": "Contractor type",
       "shortDescription": "Short description",
@@ -3493,7 +3515,88 @@
         "mainWork": "Main work",
         "deleteConfirmTitle": "Delete project \"{name}\"?"
       },
-      "addressHint": "Pick a suggestion to auto-fill latitude/longitude; you can still edit them below."
+      "addressHint": "Pick a suggestion to auto-fill latitude/longitude; you can still edit them below.",
+      "files": {
+        "upload": "Upload image",
+        "replace": "Replace file",
+        "remove": "Remove",
+        "moveLeft": "Move earlier",
+        "moveRight": "Move later",
+        "scanView": "View scan",
+        "scanUploaded": "Scan uploaded",
+        "uploadScan": "Upload scan",
+        "scanHint": "PDF, JPG or PNG, up to 20 MB.",
+        "savedNote": "Files you just uploaded are kept only when you press Save; if you abandon the form the system cleans them up after 24 hours.",
+        "count": "{count}/{max} images",
+        "kind": {
+          "Logo": "Logo",
+          "Cover": "Cover image",
+          "Office": "Office photos",
+          "Team": "Team photos"
+        },
+        "kindHint": {
+          "Logo": "One image. JPG/PNG/WebP, up to 10 MB.",
+          "Cover": "One image. JPG/PNG/WebP, up to 10 MB.",
+          "Office": "A set of up to 50. JPG/PNG/WebP, 10 MB each.",
+          "Team": "A set of up to 50. JPG/PNG/WebP, 10 MB each."
+        },
+        "licenses": {
+          "add": "Add license",
+          "empty": "No licenses yet.",
+          "rowTitle": "License {n}",
+          "type": "License type",
+          "number": "License number",
+          "issuer": "Issuing authority",
+          "issuedOn": "Issued on",
+          "expiresOn": "Expires on",
+          "scan": "Scan",
+          "remove": "Remove license",
+          "problem": {
+            "licenseType": "License type is required.",
+            "licenseNumber": "License number is required.",
+            "dateOrder": "The expiry date cannot be before the issue date."
+          },
+          "fixBeforeSave": "Fix the licenses that show errors before saving."
+        },
+        "partnership": {
+          "hint": "Current BuildX partnership. Leave everything empty for no partnership section.",
+          "startsOn": "Starts",
+          "endsOn": "Ends",
+          "signedOn": "Signed on",
+          "recordCode": "Record / contract code",
+          "pageCount": "Page count",
+          "scan": "Contract scan",
+          "dateOrder": "The end date cannot be before the start date."
+        }
+      },
+      "errors": {
+        "UnsupportedType": "This file type is not accepted. Images: JPG, PNG or WebP; scans: PDF, JPG or PNG.",
+        "TooLarge": "The file exceeds the allowed size (images 10 MB, scans 20 MB).",
+        "StoragePutFailed": "Could not send the file to storage, please retry.",
+        "StillValidating": "The file is still being checked, try again shortly.",
+        "Rejected": "The file failed verification (wrong format or corrupt). Pick another file.",
+        "Expired": "This upload has expired, pick the file again.",
+        "InvalidMediaUpload": "Invalid file: wrong format, too large or the content does not match the file type.",
+        "MediaUploadNotReady": "The file has not reached storage yet, please retry.",
+        "MediaUploadExpired": "This upload has expired, pick the file again.",
+        "MediaStorageUnavailable": "File storage is not ready. Please tell the tech team.",
+        "MediaIdempotencyConflict": "Duplicate upload request. Pick the file again.",
+        "MediaUploadLeaseLost": "The file check was interrupted, please retry.",
+        "MediaImageNotReady": "The file is not verified yet so it cannot be attached. Try again shortly.",
+        "MediaImageGone": "This file has been cleaned up from storage. Upload it again.",
+        "MediaReferenceUnavailable": "Could not attach the file to the profile right now. Please retry.",
+        "ContractorVersionConflict": "The profile was just changed by someone else. Close the drawer, reopen the profile and try again.",
+        "ContractorProfileIncomplete": "The profile is missing required information to be visible (name, address, coordinates, at least one building type and one scope).",
+        "InvalidContractorInput": "The profile data is invalid. Check the fields (coordinates, dates, rating, file types).",
+        "InvalidContractorProject": "A project needs a name, exactly one building type, one scope and at least one image.",
+        "ContractorCategoryUnavailable": "The selected building type or scope is no longer available. Pick again.",
+        "ContractorFileUnavailable": "File storage is unavailable. Please tell the tech team.",
+        "ContractorAssetInUse": "This file is still used by the profile so it cannot be deleted yet.",
+        "ContractorNotFound": "Contractor profile not found (it may have been deleted).",
+        "ContractorProjectNotFound": "This project was not found in the profile.",
+        "AccessForbidden": "Only admin accounts can manage contractors.",
+        "generic": "Could not upload the file. Please retry."
+      }
     },
     "paymentConnections": {
       "description": "Configure the SePay receiving bank accounts, split into Test/Live environments. Each environment has exactly one active connection. Secrets are set on the server by ops, not here.",
@@ -3627,8 +3730,8 @@
       "kind3d": "3D interior",
       "description2d": "2D drawing templates of the library. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
       "description3d": "3D drawing templates of the library. Templates are versioned: editing in place keeps the version; to release a new version, create a draft, edit it and publish.",
-      "publishFlowNote": "A new template is a draft customers cannot see. Open \"Manage versions\" to add images, pick a cover and publish.",
-      "createNote": "Drafts may be incomplete. Publishing requires: name, drawing kind, all three dimensions, building type (plus floors / tum if that type enables them), at least one image and a cover.",
+      "publishFlowNote": "A new template is a draft and invisible to customers. Open \"Manage versions\" to add sections, upload images/files, pick a cover image and publish.",
+      "createNote": "You can save a draft with incomplete data. Publishing needs: a name, drawing type, three dimensions, building type (plus floors / attic if that type uses them), architecture and interior styles (3D templates), at least one section with files, and a cover image. Images and files are added after creating, under \"Manage versions\".",
       "createImagesTitle": "Template images (optional)",
       "createImagesHint": "Paste https URLs of uploaded images (JPG, PNG, WebP) and pick a cover. You can add or reorder them later under Images & files.",
       "addImage": "Add image",
@@ -3650,7 +3753,7 @@
       "tumNo": "Without tum",
       "notApplies": "Not applicable",
       "description": "Description",
-      "catalogUnavailable": "Could not load building types (requires the estimate catalogue permission).",
+      "catalogUnavailable": "Could not load the building type catalog (requires permission to manage the template library).",
       "pinnedTypeNote": "The pinned building type is no longer in the current catalogue. Editing only name, description or dimensions keeps the old classification; changing it requires the current catalogue.",
       "classification": "Classification",
       "dimensions": "Dimensions",
@@ -3680,7 +3783,7 @@
       "published": "New version published.",
       "deleteDraftConfirm": "Delete this draft?",
       "editCurrentNote": "You are editing the version customers see: changes apply immediately without a new version. The current version must stay complete.",
-      "manageAssets": "Images & files",
+      "manageAssets": "Sections & files",
       "readOnlyVersion": "This version has been superseded — view only.",
       "noAssets": "No images or files yet.",
       "asset": "Asset",
@@ -3691,8 +3794,8 @@
       "moveUp": "Move up",
       "moveDown": "Move down",
       "detach": "Remove from version",
-      "detachConfirm": "Remove this asset from the version?",
-      "detachNote": "The stored file is not deleted. The current version cannot lose its cover or its last image.",
+      "detachConfirm": "Remove this file from the version?",
+      "detachNote": "The file in storage is not deleted. The current version cannot lose its cover image or the last file of a section customers can already see.",
       "addAsset": "Add image / file",
       "assetAdded": "Added to the version.",
       "uploadMissing": "No upload button yet: upload the file to storage first, then paste its https URL here.",
@@ -3701,7 +3804,72 @@
       "imageFormat": "JPG, PNG or WebP image.",
       "attachmentFormat": "PDF, DWG or DXF file.",
       "originalName": "Display file name",
-      "originalNameHint": "Leave empty to use the name from the URL."
+      "originalNameHint": "Leave empty to use the name from the URL.",
+      "architectureStyles": "Architecture styles",
+      "interiorStyles": "Interior styles",
+      "styles3dNote": "A 3D template needs at least one style in every group the building type enables before it can be published.",
+      "stylesNeedType": "Pick a building type first to see the applicable styles.",
+      "sections": {
+        "intro": "Every image and file of a template lives in a section (content group) that you name yourself. A section without files is \"in preparation\" and stays hidden from customers until its first file arrives.",
+        "addPlaceholder": "Section name (e.g. Facade, Living room)",
+        "add": "Add section",
+        "setFirstAsCover": "Automatically use the first uploaded image as the cover if the version has none",
+        "loading": "Loading sections…",
+        "empty": "No sections yet. Add a section, then upload files into it.",
+        "untitled": "(untitled)",
+        "preparing": "In preparation",
+        "fileCount": "{count} files",
+        "rename": "Rename",
+        "renameTitle": "Rename section",
+        "nameRequired": "Enter a section name.",
+        "added": "Section added.",
+        "renamed": "Section renamed.",
+        "reordered": "Order updated.",
+        "reloaded": "Someone else just changed this — data was reloaded, please try again.",
+        "uploadSkipped": "Not uploaded because the batch was stopped.",
+        "file": "File",
+        "noFiles": "This section has no files yet.",
+        "coverSet": "Cover image set.",
+        "detached": "File removed.",
+        "upload": "Upload files",
+        "uploadHint": "Images: JPG, PNG, WebP up to 5 MB; files: PDF, DWG, DXF. Multiple files upload one at a time to avoid version conflicts.",
+        "sectionCount": "Sections",
+        "phase": {
+          "waiting": "Waiting",
+          "requesting": "Requesting upload slot…",
+          "uploading": "Uploading…",
+          "verifying": "Verifying…",
+          "done": "Uploaded",
+          "error": "Error"
+        },
+        "errors": {
+          "LibraryVersionConflict": "Someone else just edited this version. Data was reloaded.",
+          "LibraryVersionChanged": "The version just changed. Data was reloaded.",
+          "LibraryVersionReadOnly": "This version has been replaced and is read-only.",
+          "LibraryPositionConflict": "That position is taken. Data was reloaded, please try again.",
+          "IdempotencyConflict": "This request clashes with another one. Reload the page and try again.",
+          "MediaIdempotencyConflict": "The upload request clashed. Pick the file again and retry.",
+          "InvalidLibraryContent": "The library content is not valid.",
+          "LibraryNotFound": "The template, version, section or upload was not found (it may have been deleted).",
+          "LibraryStorageUnavailable": "Library attachment storage (PDF/DWG/DXF) is not configured, so this file cannot be uploaded. Images still work. Please tell the tech team.",
+          "MediaStorageUnavailable": "Image storage is unavailable. Please tell the tech team.",
+          "InvalidMediaUpload": "The file failed verification (its real format or size does not match). Pick another file.",
+          "MediaUploadNotReady": "The file has not reached storage yet. Please retry.",
+          "MediaUploadExpired": "The upload expired. Pick the file again to re-upload.",
+          "MediaUploadLeaseLost": "File verification was interrupted. Pick the file again to re-upload.",
+          "AccessForbidden": "You do not have permission to manage the template library."
+        },
+        "uploadErrors": {
+          "unsupported": "Only JPG/PNG/WebP images and PDF/DWG/DXF files are accepted.",
+          "empty": "The file is empty.",
+          "imageTooLarge": "The image exceeds 5 MB.",
+          "ticketExpired": "The upload expired. Pick the file again to re-upload.",
+          "storagePutFailed": "Could not send the file to storage (network or storage refused). Please retry.",
+          "stillValidating": "The system is still verifying the file. Reload the page in a few minutes to see the result.",
+          "rejected": "The file failed verification. Pick another file."
+        },
+        "publishBlockedTitle": "Cannot publish yet — content is incomplete"
+      }
     },
     "catalogStatus": {
       "active": "Active",
@@ -4685,6 +4853,29 @@
       },
       "replace": "Replace image",
       "remove": "Remove image"
+    },
+    "constructionSites": {
+      "description": "Construction sites are created and managed by customers. Staff view them to see which supervision plan is attached to which site and to assign the right person.",
+      "readOnlyNote": "View only: customers create and edit their own sites from their account, staff never create, edit or delete them on their behalf. You only see sites within your permission scope.",
+      "site": "Site",
+      "address": "Address",
+      "owner": "Customer",
+      "email": "Customer email",
+      "coordinates": "Coordinates",
+      "grants": "Supervision plans",
+      "noGrants": "No supervision plan yet",
+      "activeGrants": "Plans in progress",
+      "firstAssignedAt": "First assigned",
+      "assignedAt": "Assigned at",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "noPermission": "You do not have permission to view this site. Staff can only see sites for the plans they are responsible for.",
+      "notFound": "Site not found — the customer may have deleted it.",
+      "grantStates": {
+        "Assigned": "In progress",
+        "Completed": "Completed",
+        "CanceledByStaff": "Canceled"
+      }
     }
   },
   "contractors": {
@@ -5304,7 +5495,8 @@
           "selfReportedTitle": "Contractor-supplied information",
           "selfReportedBody": "BuildX has not checked this project against site photos and acceptance records.",
           "priceNotice": "Contract values and unit prices are not shown - BuildX does not store or publish pricing information.",
-          "close": "Close"
+          "close": "Close",
+          "floors": "{count} floors"
         }
       },
       "partnership": {
