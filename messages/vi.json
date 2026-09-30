@@ -3424,7 +3424,7 @@
       "hidden": "Đang ẩn",
       "hide": "Ẩn hồ sơ",
       "show": "Hiện hồ sơ",
-      "createHint": "Tạo với tên trước, rồi mở sửa để nhập đầy đủ hồ sơ.",
+      "createHint": "Dự án tiêu biểu thêm được sau khi lưu hồ sơ — mở lại hồ sơ này để thêm.",
       "requiredForVisible": "Bắt buộc để hiển thị công khai.",
       "ratingHint": "Điểm do admin nhập, 0–5. Để trống cả điểm và số lượt thì không hiện đánh giá.",
       "contactNote": "Thông tin liên hệ chỉ admin thấy, không lộ ra trang khách.",
@@ -3433,7 +3433,8 @@
         "location": "Địa chỉ & toạ độ",
         "capability": "Năng lực",
         "contact": "Liên hệ (nội bộ)",
-        "legal": "Pháp lý"
+        "legal": "Pháp lý",
+        "projects": "Dự án tiêu biểu"
       },
       "contractorType": "Loại nhà thầu",
       "shortDescription": "Mô tả ngắn",

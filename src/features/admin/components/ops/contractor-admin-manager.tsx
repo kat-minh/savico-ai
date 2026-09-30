@@ -10,7 +10,8 @@ import { http, isApiError } from '@/shared/lib/api'
 import {
   contractorsAdminApi,
   type AdminContractorDetail,
-  type AdminContractorItem
+  type AdminContractorItem,
+  type ContractorProfileUpdate
 } from '../../api/bmt/contractors.admin.api'
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
 import { AddressAutoComplete } from '../common/address-autocomplete'
@@ -42,6 +43,57 @@ interface FilterOptions {
  * tác chưa quản lý ở bản CRUD này nên giữ nguyên khi lưu (không gửi rỗng để khỏi
  * xoá mất).
  */
+/**
+ * Thân PUT hồ sơ — dùng chung cho cả lúc TẠO và lúc SỬA.
+ *
+ * `prev` là bản chi tiết đã tải (chỉ có khi sửa): PUT thay TOÀN BỘ từng section
+ * nên phải gửi lại giấy phép / hợp tác / ảnh mà form này chưa quản lý, không thì
+ * chúng bị xoá.
+ */
+function buildProfileBody(
+  values: Record<string, unknown>,
+  expectedVersion: number,
+  prev?: AdminContractorDetail
+): ContractorProfileUpdate {
+  return {
+    expectedVersion,
+    profile: {
+      name: String(values.name ?? '').trim(),
+      shortDescription: str(values.shortDescription),
+      introduction: str(values.introduction),
+      contractorType: str(values.contractorType),
+      address: str(values.address),
+      latitude: num(values.latitude),
+      longitude: num(values.longitude),
+      foundedYear: num(values.foundedYear),
+      architectCount: num(values.architectCount),
+      engineerCount: num(values.engineerCount),
+      serviceAreaText: str(values.serviceAreaText),
+      surveyHours: num(values.surveyHours),
+      warrantyMonths: num(values.warrantyMonths),
+      acceptingProjects: Boolean(values.acceptingProjects),
+      rating: num(values.rating),
+      ratingCount: num(values.ratingCount),
+      contactPerson: str(values.contactPerson),
+      contactPhone: str(values.contactPhone),
+      contactEmail: str(values.contactEmail)
+    },
+    buildingTypeIds: (values.buildingTypeIds as string[] | undefined) ?? [],
+    scopeIds: (values.scopeIds as string[] | undefined) ?? [],
+    legal: {
+      ...(prev?.legal ?? {}),
+      legalName: str(values.legalName),
+      taxCode: str(values.taxCode),
+      representative: str(values.representative),
+      registeredAddress: str(values.registeredAddress),
+      industry: str(values.industry)
+    },
+    licenses: prev?.licenses ?? [],
+    partnership: prev?.partnership ?? {},
+    images: prev?.images ?? []
+  }
+}
+
 export function ContractorAdminManager() {
   const t = useTranslations('admin')
   const c = useTranslations('admin.contractorsAdmin')
@@ -76,9 +128,41 @@ export function ContractorAdminManager() {
       fetchPage={({ pageIndex, pageSize }) => contractorsAdminApi.list({ pageIndex, pageSize })}
       rowKey={(item) => item.contractorId}
       drawerWidth={720}
-      createValues={() => ({ name: '' })}
+      createValues={() => ({
+        name: '',
+        contractorType: '',
+        shortDescription: '',
+        introduction: '',
+        address: '',
+        latitude: null,
+        longitude: null,
+        serviceAreaText: '',
+        foundedYear: null,
+        architectCount: null,
+        engineerCount: null,
+        surveyHours: null,
+        warrantyMonths: null,
+        acceptingProjects: false,
+        rating: null,
+        ratingCount: null,
+        contactPerson: '',
+        contactPhone: '',
+        contactEmail: '',
+        buildingTypeIds: [],
+        scopeIds: [],
+        legalName: '',
+        taxCode: '',
+        representative: '',
+        registeredAddress: '',
+        industry: ''
+      })}
       onCreate={async (values) => {
-        await contractorsAdminApi.create(String(values.name ?? '').trim())
+        // API tạo của BE chỉ nhận tên, nhưng người vận hành chỉ thấy MỘT form:
+        // tạo xong gửi luôn phần còn lại bằng PUT với version vừa nhận được.
+        // Hỏng ở bước PUT thì hồ sơ vẫn tồn tại ở trạng thái Ẩn, mở ra sửa tiếp
+        // được — không mất dữ liệu đã nhập ngoài lần bấm đó.
+        const created = await contractorsAdminApi.create(String(values.name ?? '').trim())
+        await contractorsAdminApi.update(created.contractorId, buildProfileBody(values, created.version))
       }}
       toFormValues={async (item) => {
         const d = await contractorsAdminApi.get(item.contractorId)
@@ -115,46 +199,10 @@ export function ContractorAdminManager() {
         }
       }}
       onUpdate={async (values, item) => {
-        const prev = detailRef.current.get(item.contractorId)
-        await contractorsAdminApi.update(item.contractorId, {
-          expectedVersion: Number(values.expectedVersion),
-          profile: {
-            name: String(values.name ?? '').trim(),
-            shortDescription: str(values.shortDescription),
-            introduction: str(values.introduction),
-            contractorType: str(values.contractorType),
-            address: str(values.address),
-            latitude: num(values.latitude),
-            longitude: num(values.longitude),
-            foundedYear: num(values.foundedYear),
-            architectCount: num(values.architectCount),
-            engineerCount: num(values.engineerCount),
-            serviceAreaText: str(values.serviceAreaText),
-            surveyHours: num(values.surveyHours),
-            warrantyMonths: num(values.warrantyMonths),
-            acceptingProjects: Boolean(values.acceptingProjects),
-            rating: num(values.rating),
-            ratingCount: num(values.ratingCount),
-            contactPerson: str(values.contactPerson),
-            contactPhone: str(values.contactPhone),
-            contactEmail: str(values.contactEmail)
-          },
-          buildingTypeIds: (values.buildingTypeIds as string[] | undefined) ?? [],
-          scopeIds: (values.scopeIds as string[] | undefined) ?? [],
-          // PUT thay TOÀN BỘ section legal → merge với bản cũ để không xoá các
-          // trường form này chưa quản lý (establishedDate, workforceSize…).
-          legal: {
-            ...(prev?.legal ?? {}),
-            legalName: str(values.legalName),
-            taxCode: str(values.taxCode),
-            representative: str(values.representative),
-            registeredAddress: str(values.registeredAddress),
-            industry: str(values.industry)
-          },
-          licenses: prev?.licenses ?? [],
-          partnership: prev?.partnership ?? {},
-          images: prev?.images ?? []
-        })
+        await contractorsAdminApi.update(
+          item.contractorId,
+          buildProfileBody(values, Number(values.expectedVersion), detailRef.current.get(item.contractorId))
+        )
       }}
       rowActions={(item, ctx): RowAction[] => {
         const visible = item.status === 'Visible'
@@ -217,20 +265,6 @@ export function ContractorAdminManager() {
         }
       ]}
       renderForm={(form, ctx) => {
-        if (ctx.isNew) {
-          return (
-            <>
-              <Form.Item
-                name='name'
-                label={c('name')}
-                rules={[{ required: true, whitespace: true, message: t('fields.requiredMessage') }]}
-              >
-                <Input />
-              </Form.Item>
-              <Text type='secondary'>{c('createHint')}</Text>
-            </>
-          )
-        }
         return (
           <>
             <Form.Item name='expectedVersion' hidden>
@@ -393,7 +427,16 @@ export function ContractorAdminManager() {
               <Input />
             </Form.Item>
 
-            {ctx.item ? <ContractorProjectsSection form={form} contractorId={ctx.item.contractorId} /> : null}
+            {/* Dự án tiêu biểu cần contractorId nên chỉ thêm được sau khi hồ sơ
+                đã lưu; nói rõ thay vì để trống một khoảng không giải thích. */}
+            {ctx.item ? (
+              <ContractorProjectsSection form={form} contractorId={ctx.item.contractorId} />
+            ) : (
+              <>
+                <Divider titlePlacement='start'>{c('sections.projects')}</Divider>
+                <Text type='secondary'>{c('createHint')}</Text>
+              </>
+            )}
           </>
         )
       }}

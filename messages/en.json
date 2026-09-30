@@ -3424,7 +3424,7 @@
       "hidden": "Hidden",
       "hide": "Hide profile",
       "show": "Show profile",
-      "createHint": "Create with a name first, then open Edit to fill in the full profile.",
+      "createHint": "Featured projects can be added once the profile is saved — reopen it to add them.",
       "requiredForVisible": "Required to be publicly visible.",
       "ratingHint": "Admin-entered score, 0–5. Leave both score and count empty to hide the rating.",
       "contactNote": "Contact details are admin-only and never shown on the public site.",
@@ -3433,7 +3433,8 @@
         "location": "Address & coordinates",
         "capability": "Capability",
         "contact": "Contact (internal)",
-        "legal": "Legal"
+        "legal": "Legal",
+        "projects": "Featured projects"
       },
       "contractorType": "Contractor type",
       "shortDescription": "Short description",
