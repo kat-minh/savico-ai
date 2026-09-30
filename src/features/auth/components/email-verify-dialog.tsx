@@ -51,9 +51,10 @@ export function EmailVerifyDialog() {
   }
 
   async function onResend() {
+    if (!user?.email) return
     setResending(true)
     try {
-      await authApi.resendVerifyCode()
+      await authApi.resendVerifyCode(user.email)
       toast.success(t('resendOk'))
     } catch (error) {
       toast.error(isApiError(error) ? error.message : t('error'))

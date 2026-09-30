@@ -117,8 +117,9 @@ const AuthApi = {
   verifyAccount: (email: string, code: number): Promise<void> =>
     http.post<void>(AUTH_ENDPOINTS.VERIFY_ACCOUNT, { email, code }),
 
-  /** Gửi lại mã xác minh email (theo giới hạn gửi lại của backend). */
-  resendVerifyCode: (): Promise<void> => http.post<void>(AUTH_ENDPOINTS.RESEND_VERIFY_CODE),
+  /** Gửi lại mã xác minh email (`email` là query param, không phải body). */
+  resendVerifyCode: (email: string): Promise<void> =>
+    http.post<void>(AUTH_ENDPOINTS.RESEND_VERIFY_CODE, undefined, { params: { email } }),
 
   /**
    * Đổi mật khẩu (dùng cho luồng bắt buộc đổi lần đầu, BR-RBAC-006). Backend thu

@@ -110,7 +110,7 @@ export const mockAuthApi = {
     if (!Number.isInteger(code) || code <= 0) throw apiError('Mã không đúng (mock).', 400)
   },
 
-  async resendVerifyCode(): Promise<void> {
+  async resendVerifyCode(_email: string): Promise<void> {
     await delay(500)
   },
 
