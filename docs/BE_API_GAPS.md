@@ -481,6 +481,7 @@ Rà soát toàn bộ endpoint đã nối so với Swagger live (133 path / 160 o
 - **KTS**: BE thêm `companyName`, `rating`, `reviewCount` (write + chi tiết + public) — đã nối phía admin; thẻ KTS khách còn mock.
 - **Bài viết**: BE bỏ `summary`, thêm `readingTimeMinutes` — đã cập nhật admin + đọc khách; đã bỏ dòng excerpt ở thẻ bài viết khách.
 - **Hướng dẫn (Guides) — MỚI**: BE ship hẳn cụm video YouTube (`/guides`, `/admin/guides` CRUD + `/publish` `/hide` `/move` + `/video-preview`). **Admin đã nối API thật** (thay kho CMS): nhập URL → BE lấy metadata + preview, publish/ẩn/sắp xếp theo `orderVersion`. **Trang Hướng dẫn KHÁCH (`features/guide`) còn đọc CMS** — nối `GET /guides` là việc customer.
+- **Dự toán — danh sách + xóa (MỚI)**: BE thêm `GET /estimates` (list: estimateId, name, buildingType{id,name}, state, dates) và `POST /estimates/bulk-delete` (Idempotency-Key + `{estimateIds}`). **Màn "Dự án của tôi" đã nối** (`design.bmt.ts`, mock làm nền: DB rỗng → mock; xóa id uuid → API). Còn kẹt để nối TRỌN luồng Thiết kế: **upload ảnh Bước 1** (BE vẫn chưa có) và **lệch model đầu vào Bước 1** (loại công trình enum ↔ {id,name}, thiếu ảnh render/diện tích ở list). `state` = Draft/Processing/Failed/Succeeded (map bước gần đúng).
 
 ### 7.4 Dọn dẹp nhỏ (không chặn)
 
