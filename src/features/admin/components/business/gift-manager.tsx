@@ -1,5 +1,6 @@
 'use client'
 
+import { SwapOutlined } from '@ant-design/icons'
 import { App, Descriptions, Form, Input, InputNumber, Select, Tag, Typography } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -8,8 +9,9 @@ import type { CmsGift } from '@/shared/cms'
 import { formatCurrency } from '@/shared/utils'
 import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
 import { newAdminId } from '../../services/admin.service'
-import { ImageUrlField, StatusSwitch } from '../common/field-kit'
+import { ImageUrlField } from '../common/field-kit'
 import { ResourceManager } from '../common/resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 
 const { Text } = Typography
 
@@ -23,7 +25,7 @@ const { Text } = Typography
 export function GiftManager() {
   const t = useTranslations('admin')
   const locale = useLocale() as Locale
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const { data: plans = [] } = useAdminCollection('plans')
   const { data: orders = [] } = useAdminCollection('orders')
   const save = useSaveAdminItem('gifts')
@@ -63,27 +65,42 @@ export function GiftManager() {
             : null
       }
       deleteConfirm={(item) => t('gifts.deleteConfirm', { title: item.title, count: plansUsing(item).length })}
-      rowActions={(item) => {
+      rowActions={(item): RowAction[] => {
         const next: CmsGift['status'] = item.status === 'active' ? 'hidden' : 'active'
         const using = plansUsing(item)
-        return (
-          <StatusSwitch
-            name={item.title}
-            current={statusLabel(item.status)}
-            next={statusLabel(next)}
-            warning={
-              next === 'hidden' && using.length > 0 ? (
-                <Text type='warning'>
-                  {t('gifts.hideWarning', { plans: using.map((plan) => plan.name).join(', ') })}
-                </Text>
-              ) : null
-            }
-            onConfirm={async () => {
-              await save.mutateAsync({ ...item, status: next })
-              message.success(t('feedback.saved'))
-            }}
-          />
-        )
+        const warning =
+          next === 'hidden' && using.length > 0
+            ? t('gifts.hideWarning', { plans: using.map((plan) => plan.name).join(', ') })
+            : null
+        return [
+          {
+            key: 'status',
+            label: t('actions.switchStatus'),
+            icon: <SwapOutlined />,
+            onClick: () =>
+              modal.confirm({
+                title: t('actions.switchStatusTitle', { name: item.title }),
+                content: (
+                  <div>
+                    <div>
+                      {t('actions.switchStatusBody', { current: statusLabel(item.status), next: statusLabel(next) })}
+                    </div>
+                    {warning ? (
+                      <Text type='warning' style={{ display: 'block', marginTop: 8 }}>
+                        {warning}
+                      </Text>
+                    ) : null}
+                  </div>
+                ),
+                okText: t('actions.confirm'),
+                cancelText: t('actions.cancel'),
+                onOk: async () => {
+                  await save.mutateAsync({ ...item, status: next })
+                  message.success(t('feedback.saved'))
+                }
+              })
+          }
+        ]
       }}
       renderView={(item) => (
         <Descriptions

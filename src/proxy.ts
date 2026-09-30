@@ -32,6 +32,15 @@ function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
  *     authorization is enforced server-side by the API.)
  */
 export default function proxy(request: NextRequest) {
+  // TẠM ẨN tiếng Anh: mọi `/en` và `/en/*` đá về `/vi` tương ứng. Giữ locale
+  // 'en' trong cấu hình để bật lại dễ (chỉ cần bỏ khối này + hiện lại toggle).
+  const { pathname: rawPath } = request.nextUrl
+  if (rawPath === '/en' || rawPath.startsWith('/en/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/vi' + rawPath.slice(3)
+    return NextResponse.redirect(url)
+  }
+
   const response = intlMiddleware(request)
 
   const { pathname } = request.nextUrl

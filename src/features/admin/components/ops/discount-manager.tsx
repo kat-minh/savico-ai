@@ -1,5 +1,6 @@
 'use client'
 
+import { SwapOutlined } from '@ant-design/icons'
 import {
   App,
   Col,
@@ -27,8 +28,8 @@ import { discountUsage, normalizeDiscountCode, type CmsDiscountCode } from '@/sh
 import { formatCurrency } from '@/shared/utils'
 import { useAdminCollection, useSaveAdminItem } from '../../hooks/use-admin-data'
 import { newAdminId, todayKey } from '../../services/admin.service'
-import { StatusSwitch } from '../common/field-kit'
 import { ResourceManager } from '../common/resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { useProductLabel } from './use-product-label'
 
 const { Text } = Typography
@@ -83,7 +84,7 @@ export function DiscountManager() {
   )
 
   const today = todayKey()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const save = useSaveAdminItem('discountCodes')
   const { data: codes = [] } = useAdminCollection('discountCodes')
   const [productFilter, setProductFilter] = useState<string>('all')
@@ -183,18 +184,30 @@ export function DiscountManager() {
           />
         </Space>
       }
-      rowActions={(item) => (
-        <StatusSwitch
-          name={item.code}
-          current={item.enabled ? t('discounts.on') : t('discounts.off')}
-          next={item.enabled ? t('discounts.off') : t('discounts.on')}
-          blockedReason={item.enabled ? null : problemOf(item, item)}
-          onConfirm={async () => {
-            await save.mutateAsync({ ...item, enabled: !item.enabled })
-            message.success(t('feedback.saved'))
-          }}
-        />
-      )}
+      rowActions={(item): RowAction[] => {
+        const blocked = item.enabled ? null : problemOf(item, item)
+        const current = item.enabled ? t('discounts.on') : t('discounts.off')
+        const next = item.enabled ? t('discounts.off') : t('discounts.on')
+        return [
+          {
+            key: 'status',
+            label: t('actions.switchStatus'),
+            icon: <SwapOutlined />,
+            disabled: Boolean(blocked),
+            onClick: () =>
+              modal.confirm({
+                title: t('actions.switchStatusTitle', { name: item.code }),
+                content: t('actions.switchStatusBody', { current, next }),
+                okText: t('actions.confirm'),
+                cancelText: t('actions.cancel'),
+                onOk: async () => {
+                  await save.mutateAsync({ ...item, enabled: !item.enabled })
+                  message.success(t('feedback.saved'))
+                }
+              })
+          }
+        ]
+      }}
       renderView={(item) => (
         <Descriptions
           size='small'

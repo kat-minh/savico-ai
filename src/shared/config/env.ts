@@ -24,7 +24,16 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_USE_MOCK_API: z
     .enum(['true', 'false'])
     .default('false')
-    .transform((v) => v === 'true')
+    .transform((v) => v === 'true'),
+  /**
+   * Khoá VietMap CÔNG KHAI — chỉ để render bản đồ xem trước trong trình duyệt.
+   * Khoá tra toạ độ là biến `VIETMAP_API_KEY` riêng, KHÔNG có tiền tố
+   * NEXT_PUBLIC_ nên chỉ đọc được ở máy chủ (route `/api/geocode`); đừng gộp hai
+   * khoá làm một, gộp là phơi khoá tính phí ra trang web.
+   *
+   * Để trống thì phần bản đồ tự ẩn, app vẫn chạy — nên không đặt `.min(1)`.
+   */
+  NEXT_PUBLIC_VIETMAP_API_KEY: z.string().default('')
 })
 
 const parsed = publicEnvSchema.safeParse({
@@ -33,7 +42,8 @@ const parsed = publicEnvSchema.safeParse({
   NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_USE_MOCK_AUTH: process.env.NEXT_PUBLIC_USE_MOCK_AUTH,
-  NEXT_PUBLIC_USE_MOCK_API: process.env.NEXT_PUBLIC_USE_MOCK_API
+  NEXT_PUBLIC_USE_MOCK_API: process.env.NEXT_PUBLIC_USE_MOCK_API,
+  NEXT_PUBLIC_VIETMAP_API_KEY: process.env.NEXT_PUBLIC_VIETMAP_API_KEY
 })
 
 if (!parsed.success) {

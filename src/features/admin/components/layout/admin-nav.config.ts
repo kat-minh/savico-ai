@@ -1,21 +1,20 @@
 'use client'
 
 import {
-  AimOutlined,
   AppstoreOutlined,
+  BankOutlined,
   BookOutlined,
-  CalculatorOutlined,
+  BuildOutlined,
   CalendarOutlined,
-  DashboardOutlined,
   DollarOutlined,
   FileTextOutlined,
+  HistoryOutlined,
   GiftOutlined,
   OrderedListOutlined,
   PlayCircleOutlined,
   SafetyCertificateOutlined,
   ScheduleOutlined,
   SendOutlined,
-  SettingOutlined,
   SkinOutlined,
   TeamOutlined,
   ThunderboltOutlined,
@@ -50,17 +49,15 @@ import { ADMIN_ROUTES, type AdminRoute } from '@/shared/constants'
  * `key` là hậu tố khóa dịch dưới namespace `admin.nav`.
  */
 export const ADMIN_NAV = [
-  {
-    key: 'overview',
-    icon: DashboardOutlined,
-    items: [{ key: 'dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: DashboardOutlined }]
-  },
+  // Đã ẩn "Tổng quan" (overview/dashboard) khỏi menu theo yêu cầu; route /admin và
+  // trang AdminInbox vẫn còn (vẫn là trang đích khi vào /admin) để bật lại sau.
   {
     key: 'payments',
     icon: DollarOutlined,
     items: [
       { key: 'orders', href: ADMIN_ROUTES.ORDERS, icon: DollarOutlined },
-      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: FileTextOutlined }
+      { key: 'transactions', href: ADMIN_ROUTES.TRANSACTIONS, icon: FileTextOutlined },
+      { key: 'paymentConnections', href: ADMIN_ROUTES.PAYMENT_CONNECTIONS, icon: BankOutlined }
     ]
   },
   {
@@ -73,10 +70,10 @@ export const ADMIN_NAV = [
   {
     key: 'contractorFlow',
     icon: TeamOutlined,
+    // Đã ẩn "Quy tắc đề xuất" (contractorMatching) và "Lịch khảo sát"
+    // (surveySchedule) khỏi menu theo yêu cầu; route và trang vẫn còn để bật lại.
     items: [
       { key: 'contractors', href: ADMIN_ROUTES.CONTRACTORS, icon: TeamOutlined },
-      { key: 'contractorMatching', href: ADMIN_ROUTES.CONTRACTOR_MATCHING, icon: AimOutlined },
-      { key: 'surveySchedule', href: ADMIN_ROUTES.SURVEY_SCHEDULE, icon: ScheduleOutlined },
       { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined }
     ]
   },
@@ -107,7 +104,8 @@ export const ADMIN_NAV = [
     items: [
       { key: 'roles', href: ADMIN_ROUTES.ROLES, icon: SafetyCertificateOutlined },
       { key: 'staff', href: ADMIN_ROUTES.STAFF, icon: TeamOutlined },
-      { key: 'assignments', href: ADMIN_ROUTES.ASSIGNMENTS, icon: ScheduleOutlined }
+      { key: 'assignments', href: ADMIN_ROUTES.ASSIGNMENTS, icon: ScheduleOutlined },
+      { key: 'accessAudit', href: ADMIN_ROUTES.ACCESS_AUDIT, icon: HistoryOutlined }
     ]
   },
   {
@@ -115,7 +113,8 @@ export const ADMIN_NAV = [
     icon: AppstoreOutlined,
     items: [
       { key: 'buildingTypes', href: ADMIN_ROUTES.BUILDING_TYPES, icon: AppstoreOutlined },
-      { key: 'styles', href: ADMIN_ROUTES.STYLES, icon: SkinOutlined }
+      { key: 'styles', href: ADMIN_ROUTES.STYLES, icon: SkinOutlined },
+      { key: 'constructionScopes', href: ADMIN_ROUTES.CONSTRUCTION_SCOPES, icon: BuildOutlined }
     ]
   },
   {
@@ -126,19 +125,12 @@ export const ADMIN_NAV = [
       { key: 'templateViews', href: ADMIN_ROUTES.TEMPLATE_VIEWS, icon: ThunderboltOutlined },
       { key: 'articles', href: ADMIN_ROUTES.ARTICLES, icon: FileTextOutlined },
       { key: 'handbookSteps', href: ADMIN_ROUTES.HANDBOOK_STEPS, icon: OrderedListOutlined },
-      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
-    ]
-  },
-  {
-    key: 'config',
-    icon: SettingOutlined,
-    items: [
-      { key: 'costGroups', href: ADMIN_ROUTES.COST_GROUPS, icon: AppstoreOutlined },
-      { key: 'costItems', href: ADMIN_ROUTES.COST_ITEMS, icon: OrderedListOutlined },
-      { key: 'materialPrices', href: ADMIN_ROUTES.MATERIAL_PRICES, icon: CalculatorOutlined },
-      { key: 'estimateAdvice', href: ADMIN_ROUTES.ESTIMATE_ADVICE, icon: FileTextOutlined }
+      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined },
+      { key: 'testimonials', href: ADMIN_ROUTES.TESTIMONIALS, icon: TeamOutlined }
     ]
   }
+  // Đã ẩn "Cấu hình dự toán" (config: nhóm chi phí, hạng mục, đơn giá vật liệu,
+  // tư vấn dự toán) khỏi menu theo yêu cầu; route và trang vẫn còn để bật lại sau.
 ] as const satisfies readonly {
   key: string
   /** Biểu tượng của hàng cha trong menu gập. */

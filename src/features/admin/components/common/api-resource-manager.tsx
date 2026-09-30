@@ -13,7 +13,6 @@ import {
   Input,
   Space,
   Table,
-  Tooltip,
   type FormInstance,
   type TableProps
 } from 'antd'
@@ -24,6 +23,7 @@ import { isApiError } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
 import { useUnsavedGuard } from '../../hooks/use-unsaved-guard'
 import { AdminPage } from './admin-page'
+import { RowActionsMenu, type RowAction } from './row-actions-menu'
 
 /** Tham số trang gửi cho endpoint danh sách của BMT. */
 export interface ApiPageParams {
@@ -61,8 +61,12 @@ export interface ApiResourceManagerProps<T> {
    */
   toFormValues?: (item: T) => Record<string, unknown> | Promise<Record<string, unknown>>
   onUpdate?: (values: Record<string, unknown>, item: T) => Promise<unknown>
-  /** Nút riêng của từng dòng (công bố, ẩn, xóa, hủy…). */
-  rowActions?: (item: T, ctx: ApiRowContext) => ReactNode
+  /**
+   * Hành động riêng của từng dòng (công bố, ẩn, xóa, hủy…) — trả DANH SÁCH dữ
+   * liệu `RowAction[]`, hiện trong menu "…" kèm icon + chữ. Hành động cần xác nhận
+   * thì tự mở `modal.confirm` trong `onClick`.
+   */
+  rowActions?: (item: T, ctx: ApiRowContext) => RowAction[]
   /** Ngăn kéo "Xem chi tiết" chỉ đọc. */
   renderView?: (item: T, ctx: ApiRowContext) => ReactNode
   /** Khối phía trên bảng (bộ lọc riêng, thẻ số liệu…). */
@@ -180,35 +184,30 @@ export function ApiResourceManager<T>({
     title: t('table.actions'),
     key: 'actions',
     fixed: 'right',
-    render: (_, record) => (
-      <Space size={0}>
-        {rowActions?.(record, ctx)}
-        {renderView ? (
-          <Tooltip title={t('actions.view')}>
-            <Button
-              type='text'
-              size='small'
-              icon={<EyeOutlined />}
-              aria-label={t('actions.view')}
-              onClick={() => setViewing(record)}
-            />
-          </Tooltip>
-        ) : null}
-        {canEdit ? (
-          <Button
-            type='text'
-            size='small'
-            icon={<EditOutlined />}
-            aria-label={t('actions.edit')}
-            onClick={() => {
-              openEditor(record).catch((err: unknown) =>
-                message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-              )
-            }}
-          />
-        ) : null}
-      </Space>
-    )
+    align: 'right',
+    render: (_, record) => {
+      const actions: RowAction[] = [...(rowActions?.(record, ctx) ?? [])]
+      if (renderView) {
+        actions.push({
+          key: 'view',
+          label: t('actions.view'),
+          icon: <EyeOutlined />,
+          onClick: () => setViewing(record)
+        })
+      }
+      if (canEdit) {
+        actions.push({
+          key: 'edit',
+          label: t('actions.edit'),
+          icon: <EditOutlined />,
+          onClick: () =>
+            openEditor(record).catch((err: unknown) =>
+              message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+            )
+        })
+      }
+      return <RowActionsMenu actions={actions} moreLabel={t('actions.more')} />
+    }
   }
 
   const hasActions = Boolean(rowActions || renderView || canEdit)

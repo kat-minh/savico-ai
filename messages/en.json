@@ -166,6 +166,18 @@
       "doneSubtitle": "Your password has been updated. Please sign in again with the new password.",
       "goToLogin": "Sign in"
     },
+    "verifyEmail": {
+      "title": "Verify your email to continue",
+      "subtitle": "We sent a verification code to {email}. Enter it to activate your account.",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "Enter the code from the email",
+      "submit": "Verify",
+      "resend": "Resend code",
+      "resendOk": "Verification code sent again.",
+      "codeInvalid": "The code contains digits only",
+      "success": "Email verified. You can continue.",
+      "error": "The code is wrong or expired. Please try again."
+    },
     "mustChange": {
       "title": "Change your password to continue",
       "subtitle": "Your account is using a temporary password set by an administrator. Set a new password to get started.",
@@ -213,16 +225,104 @@
   },
   "legal": {
     "terms": {
-      "title": "Terms of use"
+      "title": "Terms of use",
+      "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
+      "intro": "These terms govern your use of the BuildX AI platform. By creating an account or using the service, you agree to the terms below.",
+      "sections": [
+        {
+          "title": "1. Acceptance of terms",
+          "body": "By accessing or using the platform you agree to be bound by these Terms of Service and our Privacy Policy."
+        },
+        {
+          "title": "2. Use of the service",
+          "body": "The AI-generated drawings and cost estimates are for reference only; actual results and costs may vary. You are responsible for the accuracy of the information you provide."
+        },
+        {
+          "title": "3. Accounts",
+          "body": "You must provide accurate registration details and keep your credentials secure. You are responsible for activity under your account."
+        },
+        {
+          "title": "4. Intellectual property",
+          "body": "Content, branding and materials on the platform belong to BuildX unless stated otherwise."
+        },
+        {
+          "title": "5. Limitation of liability",
+          "body": "Estimates are indicative. BuildX is not liable for decisions made solely based on AI-generated outputs."
+        },
+        {
+          "title": "6. Contact",
+          "body": "For questions about these terms, please contact us via the channels listed on the contact section."
+        }
+      ]
     },
     "privacy": {
-      "title": "Privacy"
+      "title": "Privacy",
+      "updated": "Last updated: placeholder — final copy provided by BuildX before go-live.",
+      "intro": "This policy explains how we collect, use and protect your personal data in accordance with Vietnam's Decree 13/2023/ND-CP on personal data protection.",
+      "sections": [
+        {
+          "title": "1. Data we collect",
+          "body": "Account details (name, email, phone), floor-plan images you upload for AI processing, and contact/lead form submissions. We do not collect land-title (deed) documents."
+        },
+        {
+          "title": "2. How we use data",
+          "body": "To provide the design and estimate services, respond to your requests, and improve the platform."
+        },
+        {
+          "title": "3. Image data",
+          "body": "Uploaded floor-plan images are used only to generate drawings and renders. They are stored securely and can be deleted on request."
+        },
+        {
+          "title": "4. Data sharing",
+          "body": "We do not sell your personal data. AI processing may involve trusted providers under confidentiality obligations."
+        },
+        {
+          "title": "5. Your rights",
+          "body": "You may request access to, correction of, or deletion of your personal data at any time."
+        },
+        {
+          "title": "6. Contact",
+          "body": "For privacy requests, please contact us via the channels listed on the contact section."
+        }
+      ]
+    },
+    "payment": {
+      "title": "Payments & Refunds",
+      "updated": "Last updated: sample content — BuildX will provide the official text before go-live.",
+      "intro": "This policy explains how you pay for packages on the platform, how we confirm payments and when you are entitled to a refund.",
+      "sections": [
+        {
+          "title": "1. Payment method",
+          "body": "Design and supervision packages are paid by bank transfer using the QR code shown at the Payment step. Keep the transfer note (your order code) unchanged so the system can reconcile it automatically."
+        },
+        {
+          "title": "2. Payment confirmation",
+          "body": "After you transfer, the order waits for confirmation. Packages are usually activated within minutes; if it is not activated within 24 working hours, contact support with your order code."
+        },
+        {
+          "title": "3. Invoices",
+          "body": "E-invoices are issued with the buyer details you entered at the Order confirmation step. You can review orders and invoices under My account."
+        },
+        {
+          "title": "4. When you get a refund",
+          "body": "You are refunded when: you transferred twice or more than the order value; the order was not activated because of a platform error; or you cancel within 7 days of payment without using any of the package's credits."
+        },
+        {
+          "title": "5. When refunds do not apply",
+          "body": "Credits already used (design options, lookups, completed inspections) are not refunded. Gifts bundled with a package cannot be exchanged for cash."
+        },
+        {
+          "title": "6. Refund process",
+          "body": "Send a request through support with your order code and reason. We reply within 2 working days and refund to the paying account within 7–10 working days after approval."
+        },
+        {
+          "title": "7. Contact",
+          "body": "For any payment or refund question, use the contact channels at the bottom of the page."
+        }
+      ]
     },
     "ecommerce": {
       "title": "E-commerce & Partners"
-    },
-    "payment": {
-      "title": "Payments & Refunds"
     }
   },
   "chatbot": {
@@ -293,10 +393,11 @@
       "handbook": "Handbook",
       "consult": "1:1 consultation",
       "faq": "FAQ",
+      "about": "About us",
       "privacy": "Privacy",
-      "ecommerce": "E-commerce & Partners",
       "terms": "Terms of use",
-      "paymentPolicy": "Payments & Refunds"
+      "paymentPolicy": "Payments & Refunds",
+      "ecommerce": "E-commerce & Partners"
     },
     "social": {
       "facebook": "BuildX on Facebook",
@@ -456,12 +557,12 @@
       }
     },
     "services": {
-      "eyebrow": "BUILDX PRICING",
       "title": "Pick the package that fits where you are",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
       "viewAll": "Explore",
       "referenceLabel": "See:",
       "referenceLink": "Pricing",
+      "viewAllMobile": "Explore",
       "ownedLabel": "Your package - {count} uses left",
       "openPackage": "View design plans",
       "openSupervision": "Open my plan",
@@ -491,11 +592,13 @@
           "usedAtStep": "Used in steps 04–05"
         }
       },
-      "titleMobile": "BuildX pricing"
+      "titleMobile": "BuildX packages"
     },
     "dossiers": {
       "eyebrow": "SAMPLE DOSSIERS",
       "title": "Sample library",
+      "tab2d": "2D drawing samples",
+      "tab3d": "3D drawing samples",
       "viewAll": "See all sample dossiers",
       "viewOne": "View sample dossier",
       "items": {
@@ -560,6 +663,7 @@
       "currency": "đ"
     },
     "brands": {
+      "title": "Trusted by",
       "label": "Trusted brands",
       "items": {
         "hoaphat": "Hòa Phát",
@@ -1132,6 +1236,7 @@
       "descriptionLabel": "Description (optional)",
       "descriptionHint": "Private notes about this project — only you can see them.",
       "descriptionPlaceholder": "Add a description (optional)...",
+      "needPlan": "You need a design plan to create a construction dossier. Please pick a plan on the Pricing page.",
       "submit": "Create project"
     },
     "input": {
@@ -1563,6 +1668,46 @@
   },
   "account": {
     "title": "My account",
+    "pending": {
+      "title": "Coming soon",
+      "description": "This section will be available once the system is ready. Thanks for your patience."
+    },
+    "sites": {
+      "title": "My sites",
+      "subtitle": "Manage your construction sites and assign purchased supervision packages to them.",
+      "add": "Add site",
+      "editTitle": "Edit site",
+      "formHint": "Enter the site name and address.",
+      "name": "Site name",
+      "address": "Address",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saved": "Site saved.",
+      "deleted": "Site deleted.",
+      "error": "Something went wrong, please try again.",
+      "noGrant": "No supervision package assigned.",
+      "empty": {
+        "title": "No sites yet",
+        "description": "Add a site to assign supervision packages and track construction."
+      },
+      "deleteConfirmTitle": "Delete site \"{name}\"?",
+      "deleteConfirmBody": "A site with an attached supervision package can't be deleted.",
+      "grantsTitle": "Unassigned supervision packages",
+      "assignBy": "Assign before {date}",
+      "pickSite": "Pick a site",
+      "assign": "Assign",
+      "assignedOk": "Package assigned to the site.",
+      "grantState": {
+        "Assigned": "Assigned",
+        "Completed": "Completed",
+        "CanceledByStaff": "Canceled"
+      },
+      "addressHint": "Type the address then pick a suggestion — coordinates are needed to find nearby contractors.",
+      "coordinatesReady": "Coordinates found for this address.",
+      "needCoordinates": "Please pick the address from the suggestion list to get coordinates."
+    },
     "info": {
       "title": "Account information",
       "name": "Full name",
@@ -1582,6 +1727,10 @@
     },
     "projects": {
       "title": "My projects",
+      "pendingNotice": {
+        "title": "The estimate creation flow (3 steps) isn't connected yet",
+        "description": "This list only shows real estimates saved on the system. Projects created in the input step aren't persisted yet, so they don't appear here — they will once the creation step is wired to the API."
+      },
       "step": "Step {step}/3",
       "empty": {
         "title": "No projects yet",
@@ -2139,6 +2288,7 @@
       "dashboard": "To-do",
       "templates": "Template library",
       "styles": "Styles",
+      "constructionScopes": "Construction scopes",
       "articles": "Articles",
       "consultants": "Architects",
       "bookings": "Consultation requests",
@@ -2147,6 +2297,8 @@
       "customers": "Customer accounts",
       "planTable": "Design & supervision plans",
       "transactions": "Transaction ledger",
+      "paymentConnections": "Payment connections",
+      "accessAudit": "Access audit",
       "orders": "Orders & reconciliation",
       "discounts": "Discount codes",
       "contractors": "Contractors",
@@ -2162,6 +2314,7 @@
       "templates3d": "3D interior templates",
       "templateViews": "Template view limit",
       "articleLabels": "News categories",
+      "testimonials": "Testimonials",
       "handbookSteps": "Handbook steps",
       "costGroups": "Cost groups",
       "costItems": "Cost items",
@@ -2193,6 +2346,7 @@
       "confirmSaveTitle": "Save these changes?",
       "discardConfirmBody": "Everything you just typed in this drawer will be lost.",
       "view": "View details",
+      "more": "Actions",
       "switchStatus": "Change status",
       "switchStatusTitle": "Change status of “{name}”?",
       "switchStatusBody": "{current} → {next}"
@@ -3261,6 +3415,144 @@
       "priceRule": "Price must be 0 or more.",
       "inspectionsRule": "Inspections must be a whole number from 1."
     },
+    "contractorsAdmin": {
+      "description": "Manage contractor profiles: info, capability (building type × scope), contact, legal. New profiles are Hidden; going Visible needs name + address + coordinates + ≥1 building type + ≥1 scope.",
+      "name": "Contractor name",
+      "address": "Address",
+      "statusLabel": "Status",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "hide": "Hide profile",
+      "show": "Show profile",
+      "createHint": "Create with a name first, then open Edit to fill in the full profile.",
+      "requiredForVisible": "Required to be publicly visible.",
+      "ratingHint": "Admin-entered score, 0–5. Leave both score and count empty to hide the rating.",
+      "contactNote": "Contact details are admin-only and never shown on the public site.",
+      "sections": {
+        "general": "General",
+        "location": "Address & coordinates",
+        "capability": "Capability",
+        "contact": "Contact (internal)",
+        "legal": "Legal"
+      },
+      "contractorType": "Contractor type",
+      "shortDescription": "Short description",
+      "introduction": "Introduction",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "serviceAreaText": "Service area",
+      "buildingTypes": "Building types",
+      "scopes": "Construction scopes",
+      "foundedYear": "Founded year",
+      "architectCount": "Architects",
+      "engineerCount": "Engineers",
+      "surveyHours": "Survey within (hours)",
+      "warrantyMonths": "Warranty (months)",
+      "acceptingProjects": "Accepting projects",
+      "rating": "Rating",
+      "ratingCount": "Rating count",
+      "contactPerson": "Contact person",
+      "contactPhone": "Contact phone",
+      "contactEmail": "Contact email",
+      "legalName": "Legal name",
+      "taxCode": "Tax code",
+      "representative": "Representative",
+      "registeredAddress": "Registered address",
+      "industry": "Industry",
+      "deleteConfirmTitle": "Delete contractor \"{name}\"?",
+      "deleteConfirmBody": "Deletes the profile, projects, legal info and images of this contractor. This cannot be undone.",
+      "projects": {
+        "title": "Portfolio projects",
+        "hint": "Each project needs one building type, one scope and at least one image.",
+        "add": "Add project",
+        "editTitle": "Edit project",
+        "empty": "No projects yet.",
+        "name": "Project name",
+        "buildingType": "Building type",
+        "scope": "Scope",
+        "images": "Project images",
+        "imagesHint": "JPG/PNG/WebP, up to 10 MB each.",
+        "upload": "Upload",
+        "needImage": "At least one image is required.",
+        "areaM2": "Area (m²)",
+        "floorCount": "Floors",
+        "completedYear": "Completed year",
+        "locationText": "Location",
+        "roleText": "Role",
+        "mainWork": "Main work",
+        "deleteConfirmTitle": "Delete project \"{name}\"?"
+      },
+      "addressHint": "Pick a suggestion to auto-fill latitude/longitude; you can still edit them below."
+    },
+    "paymentConnections": {
+      "description": "Configure the SePay receiving bank accounts, split into Test/Live environments. Each environment has exactly one active connection. Secrets are set on the server by ops, not here.",
+      "environment": "Environment",
+      "gateway": "Bank",
+      "gatewayHint": "The bank name SePay uses (e.g. Vietcombank).",
+      "accountNumber": "Receiving account",
+      "subAccount": "Virtual account (VA)",
+      "subAccountHint": "Leave blank if not using a virtual account.",
+      "qrBankCode": "QR bank code",
+      "qrBankCodeHint": "Bank code used to build the transfer QR image.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "active": "Active",
+      "noSecret": "No secret",
+      "statusLabel": "Status",
+      "setActive": "Set active",
+      "setActiveConfirmTitle": "Set as the active connection for {env}?",
+      "setActiveConfirmBody": "Only accepts an enabled connection in the same environment with a secret on the server.",
+      "history": "History",
+      "historyTitle": "Operation history",
+      "historyEmpty": "No operations yet.",
+      "secretNote": "The webhook secret is set on the server by ops per secretConfigKeys — not configured on this screen."
+    },
+    "accessAudit": {
+      "description": "Log of every role, permission and assignment change — read-only, append-only. Includes rejected attempts.",
+      "occurredAt": "Time",
+      "actor": "Actor",
+      "action": "Action",
+      "target": "Target",
+      "outcome": "Outcome",
+      "rejectReason": "Reject reason",
+      "before": "Before",
+      "after": "After",
+      "outcomeValues": {
+        "Succeeded": "Succeeded",
+        "Rejected": "Rejected"
+      },
+      "targetTypes": {
+        "Role": "Role",
+        "User": "User",
+        "Assignment": "Assignment"
+      },
+      "actionLabels": {
+        "RoleCreated": "Role created",
+        "RoleUpdated": "Role updated",
+        "RoleDeleted": "Role deleted",
+        "RoleGranted": "Role granted",
+        "RoleRevoked": "Role revoked",
+        "StaffCreated": "Staff created",
+        "StaffFirstPasswordChanged": "First password changed",
+        "StaffLocked": "Account locked",
+        "StaffUnlocked": "Account unlocked",
+        "StaffForceLoggedOut": "Force logged out",
+        "AssignmentCreated": "Assignment created",
+        "AssignmentTransferred": "Assignment transferred",
+        "AssignmentEnded": "Assignment ended"
+      }
+    },
+    "constructionScopes": {
+      "description": "Construction scope catalog shared by contractor profiles and portfolio projects. Names must be unique; an \"Inactive\" scope can't be newly attached but keeps existing links. A scope in use can't be deleted.",
+      "name": "Scope name",
+      "descriptionLabel": "Description",
+      "sortOrder": "Order",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deleteConfirmTitle": "Delete scope \"{name}\"?",
+      "deleteConfirmBody": "Can only be deleted when no contractor or project uses this scope."
+    },
     "estimateCatalog": {
       "groupArchitecture": "Architecture",
       "groupInterior": "Interior",
@@ -3295,7 +3587,9 @@
       "styleName": "Style name",
       "styleImage": "Illustration",
       "styleImageNote": "JPG, PNG or WebP, up to 5 MB. There is no upload button yet: paste the https URL of an image already uploaded to storage.",
-      "styleAssignHint": "Assign this style to building types on the Building types screen.",
+      "styleAssignHint": "Only building types with this group enabled are listed. To add a type whose group is off, enable it on the Building types screen.",
+      "styleAssignLabel": "Applies to building types",
+      "styleAssignPlaceholder": "Select building types",
       "assignedTypes": "Assigned to building types",
       "typeGroupOff": "{name} (group off)",
       "httpsUrl": "Must be a URL starting with https://, up to 2048 characters."
@@ -3870,7 +4164,18 @@
       "orderRule": "Order must be a whole number from 1."
     },
     "guideSteps": {
-      "description": "Each step is a YouTube video on the Guide page. Step numbers follow creation time; thumbnails and durations come from YouTube. Only Visible steps are shown to users.",
+      "description": "Each step is a YouTube video on the Guide page. Paste a YouTube URL and the system fetches the thumbnail and duration. Publish to show a step to users; drag up/down to reorder.",
+      "preview": "Preview",
+      "warning": "Video error",
+      "untitled": "(No title)",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "deleteAsk": "Delete \"{title}\"? This cannot be undone.",
+      "states": {
+        "Draft": "Draft",
+        "Published": "Published",
+        "Hidden": "Hidden"
+      },
       "step": "Step",
       "thumbnail": "Thumbnail",
       "title": "Title",
@@ -3987,6 +4292,18 @@
         "inactive": "An article is no longer Active."
       }
     },
+    "testimonials": {
+      "description": "The reviews in the \"What customers say about BuildX\" strip on the home page: avatar, name, project details and quote. Blank fields fall back to the site default text. Inactive reviews are hidden from the home page.",
+      "name": "Customer name",
+      "meta": "Project details",
+      "metaHint": "For example: Townhouse · 120m² · Buon Ma Thuot.",
+      "quote": "Review text",
+      "avatar": "Avatar",
+      "order": "Order",
+      "orderRule": "Order is a whole number from 1.",
+      "orderHint": "Lower numbers show first on the home page.",
+      "defaultNote": "Default site text — edit to override."
+    },
     "articleLabels": {
       "description": "Article labels and their order in the customer filter. Labels are never deleted — only made Inactive; Inactive labels cannot be used for new articles and are hidden from the filter.",
       "name": "Label name",
@@ -4086,10 +4403,13 @@
         "category": "category"
       },
       "editor": {
-        "edit": "Edit HTML",
+        "edit": "Compose",
         "preview": "Preview",
         "count": "{count}/{max} characters",
         "hint": "Images must be https links on the system image store. Disallowed tags are stripped on save.",
+        "urlPlaceholder": "Paste an https link…",
+        "urlAdd": "Insert",
+        "imagePlaceholder": "Paste an https image link…",
         "tools": {
           "bold": "Bold",
           "italic": "Italic",
@@ -4319,6 +4639,10 @@
         "transferred": "Assignment transferred.",
         "removed": "Assignment removed."
       }
+    },
+    "address": {
+      "noResult": "No matching address",
+      "resolveFailed": "Could not get coordinates for this address, please pick again"
     }
   },
   "contractors": {
@@ -4383,7 +4707,6 @@
       "undecided": "Not decided yet"
     },
     "sort": {
-      "match": "Best match",
       "distance": "Nearest",
       "rating": "Top rated",
       "survey": "Earliest survey"
@@ -4461,13 +4784,11 @@
       "ranking": {
         "stickyNudge": "Create a project brief - free",
         "tabs": {
-          "match": "Best match",
           "distance": "Nearest",
           "rating": "Top rated",
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "bestMatch": "Best match",
         "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
       },
       "safety": {
@@ -5519,6 +5840,7 @@
       }
     },
     "dashboard": {
+      "stageShort": "Stage {index}",
       "title": "Supervision dashboard",
       "breadcrumbProjects": "My projects",
       "lead": "Six fixed stages from legal paperwork to acceptance and handover. Uploading named photos or documents completes a stage and moves the progress thread on; the supervisor then inspects on site and confirms. Confirmed records only change when both sides agree.",
@@ -5734,5 +6056,10 @@
     "checkoutDone": "Order complete",
     "checkoutFailed": "Payment unsuccessful",
     "share": "Shared project dossier"
+  },
+  "address": {
+    "searching": "Searching addresses…",
+    "noResult": "No matching address",
+    "resolveFailed": "Could not get coordinates for this address, please pick again"
   }
 }

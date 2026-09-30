@@ -1,3 +1,4 @@
+export { AddressAutocomplete } from './address-autocomplete'
 export { AmbientAura } from './ambient-aura'
 export { TikTokIcon, ZaloIcon } from './brand-icons'
 export { ScribbleArrow } from './scribble-arrow'
@@ -46,4 +47,3 @@ export {
 } from './reveal'
 export { StartOptions, StartOptionsDialog } from './start-options'
 export { StepDots, type StepStatus } from './step-dots'
-export { ThemeToggle } from './theme-toggle'

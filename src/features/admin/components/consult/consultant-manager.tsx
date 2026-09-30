@@ -11,13 +11,11 @@ import {
   Form,
   Input,
   InputNumber,
-  Popconfirm,
   Row,
   Segmented,
   Select,
   Space,
   Tag,
-  Tooltip,
   Typography
 } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
@@ -33,8 +31,9 @@ import {
   type BmtAdminArchitect,
   type BmtArchitectWrite
 } from '../../api/bmt/consult.api'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
 import { ImageUrlField } from '../common/field-kit'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 import { TableAvatar } from '../common/table-thumb'
 import { ARCHITECT_CATEGORIES_KEY, ArchitectCategoryDrawer } from './architect-category-drawer'
@@ -90,6 +89,7 @@ function toWrite(values: ArchitectFormValues): BmtArchitectWrite {
 export function ConsultantManager() {
   const t = useTranslations('admin')
   const ta = useTranslations('admin.architects')
+  const { modal, message } = App.useApp()
   const locale = useLocale() as Locale
   const queryClient = useQueryClient()
   const [visibility, setVisibility] = useState<VisibilityFilter>('all')
@@ -210,7 +210,58 @@ export function ConsultantManager() {
             expectedVersion: form.expectedVersion ?? item.version
           })
         }}
-        rowActions={(item, ctx) => <VisibilityToggle item={item} ctx={ctx} />}
+        rowActions={(item, ctx) => {
+          const current = item.isVisible ? ta('shown') : ta('hidden')
+          const next = item.isVisible ? ta('hidden') : ta('shown')
+          return [
+            {
+              key: 'visibility',
+              label: t('actions.switchStatus'),
+              icon: <SwapOutlined />,
+              onClick: () =>
+                modal.confirm({
+                  title: t('actions.switchStatusTitle', { name: item.fullName }),
+                  content: (
+                    <div style={{ maxWidth: 300 }}>
+                      <Text>{t('actions.switchStatusBody', { current, next })}</Text>
+                      {item.isVisible ? (
+                        <div style={{ marginTop: 6 }}>
+                          <Text type='warning'>{ta('hideWarning')}</Text>
+                        </div>
+                      ) : null}
+                    </div>
+                  ),
+                  okText: t('actions.confirm'),
+                  cancelText: t('actions.cancel'),
+                  // Danh sách không đủ trường (thiếu `version` và tập category);
+                  // đọc bản chi tiết rồi gửi lại nguyên hồ sơ với `isVisible` đảo.
+                  onOk: async () => {
+                    try {
+                      const detail = await consultAdminApi.getArchitect(item.id)
+                      await consultAdminApi.updateArchitect(item.id, {
+                        fullName: detail.fullName,
+                        title: detail.title,
+                        avatarUrl: detail.avatarUrl,
+                        yearsExperience: detail.yearsExperience,
+                        projectCount: detail.projectCount,
+                        introduction: detail.introduction,
+                        categoryIds: detail.categoryIds,
+                        isVisible: !detail.isVisible,
+                        companyName: detail.companyName ?? null,
+                        rating: detail.rating ?? null,
+                        reviewCount: detail.reviewCount ?? null,
+                        expectedVersion: detail.version
+                      })
+                      await ctx.refresh()
+                      message.success(t('feedback.saved'))
+                    } catch (err) {
+                      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                    }
+                  }
+                })
+            }
+          ] satisfies RowAction[]
+        }}
         renderView={(item) => <ArchitectView item={item} locale={locale} />}
         renderForm={(form) => (
           <>
@@ -375,65 +426,5 @@ function ArchitectView({ item, locale }: { item: BmtAdminArchitect; locale: Loca
         { key: 'created', label: ta('createdAt'), children: formatDisplayDate(item.createdOnUtc, locale) }
       ]}
     />
-  )
-}
-
-/**
- * Ẩn / Hiện nhanh. API chỉ có PUT thay toàn bộ hồ sơ, nên đọc bản chi tiết (lấy
- * `version` và tập category) rồi gửi lại nguyên hồ sơ với `isVisible` đảo.
- */
-function VisibilityToggle({ item, ctx }: { item: BmtAdminArchitect; ctx: ApiRowContext }) {
-  const t = useTranslations('admin')
-  const ta = useTranslations('admin.architects')
-  const { message } = App.useApp()
-  const current = item.isVisible ? ta('shown') : ta('hidden')
-  const next = item.isVisible ? ta('hidden') : ta('shown')
-
-  const toggle = async () => {
-    try {
-      const detail = await consultAdminApi.getArchitect(item.id)
-      await consultAdminApi.updateArchitect(item.id, {
-        fullName: detail.fullName,
-        title: detail.title,
-        avatarUrl: detail.avatarUrl,
-        yearsExperience: detail.yearsExperience,
-        projectCount: detail.projectCount,
-        introduction: detail.introduction,
-        categoryIds: detail.categoryIds,
-        isVisible: !detail.isVisible,
-        // PUT thay toàn bộ hồ sơ — giữ nguyên ba trường tùy chọn.
-        companyName: detail.companyName ?? null,
-        rating: detail.rating ?? null,
-        reviewCount: detail.reviewCount ?? null,
-        expectedVersion: detail.version
-      })
-      await ctx.refresh()
-      message.success(t('feedback.saved'))
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
-  return (
-    <Popconfirm
-      title={t('actions.switchStatusTitle', { name: item.fullName })}
-      description={
-        <div style={{ maxWidth: 300 }}>
-          <Text>{t('actions.switchStatusBody', { current, next })}</Text>
-          {item.isVisible ? (
-            <div style={{ marginTop: 6 }}>
-              <Text type='warning'>{ta('hideWarning')}</Text>
-            </div>
-          ) : null}
-        </div>
-      }
-      okText={t('actions.confirm')}
-      cancelText={t('actions.cancel')}
-      onConfirm={toggle}
-    >
-      <Tooltip title={t('actions.switchStatus')}>
-        <Button type='text' size='small' icon={<SwapOutlined />} aria-label={t('actions.switchStatus')} />
-      </Tooltip>
-    </Popconfirm>
   )
 }

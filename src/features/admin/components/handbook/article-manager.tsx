@@ -10,12 +10,10 @@ import {
   Image,
   Input,
   InputNumber,
-  Popconfirm,
   Segmented,
   Space,
   Spin,
   Tag,
-  Tooltip,
   TreeSelect,
   Typography
 } from 'antd'
@@ -36,7 +34,8 @@ import {
 } from '../../api/bmt/news.api'
 import { buildCategoryTree, categoryPath } from '../../services/news-category.service'
 import { ArticleCategoryDrawer } from './article-category-drawer'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { ImageUrlField } from '../common/field-kit'
 import { StatusTag, type StatusTone } from '../common/status-tag'
 import { TableThumb } from '../common/table-thumb'
@@ -101,6 +100,7 @@ function missingForPublish(item: BmtAdminArticleItem): ('title' | 'cover' | 'cat
 export function ArticleManager() {
   const t = useTranslations('admin')
   const tn = useTranslations('admin.newsArticles')
+  const { modal, message } = App.useApp()
   const locale = useLocale() as Locale
   const [state, setState] = useState<StateFilter>('all')
   const [categoriesOpen, setCategoriesOpen] = useState(false)
@@ -221,7 +221,77 @@ export function ArticleManager() {
         renderForm={(form, { item }) => (
           <ArticleFields form={form} categories={categories} published={item?.state === 'Published'} />
         )}
-        rowActions={(item, ctx) => <ArticleActions item={item} ctx={ctx} />}
+        rowActions={(item, ctx) => {
+          // Công bố / Ẩn / Xóa — mỗi thao tác gửi `version` đang có của dòng.
+          const name = item.title || tn('untitled')
+          const run = async (action: () => Promise<unknown>, done: string) => {
+            try {
+              await action()
+              await ctx.refresh()
+              message.success(done)
+            } catch (err) {
+              message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+            }
+          }
+          const missing = missingForPublish(item)
+          const actions: RowAction[] = []
+
+          if (item.state === 'Published') {
+            actions.push({
+              key: 'hide',
+              label: tn('hide'),
+              icon: <EyeInvisibleOutlined />,
+              onClick: () =>
+                modal.confirm({
+                  title: tn('hideTitle', { name }),
+                  content: <div style={{ maxWidth: 300 }}>{tn('hideBody')}</div>,
+                  okText: tn('hide'),
+                  cancelText: t('actions.cancel'),
+                  onOk: () => run(() => newsAdminApi.hideArticle(item.id, item.version), tn('hidden'))
+                })
+            })
+          } else if (missing.length) {
+            actions.push({
+              key: 'publish',
+              label: tn('missing', { fields: missing.map((key) => tn(`parts.${key}`)).join(', ') }),
+              icon: <SendOutlined />,
+              disabled: true,
+              onClick: () => {}
+            })
+          } else {
+            actions.push({
+              key: 'publish',
+              label: tn('publish'),
+              icon: <SendOutlined />,
+              onClick: () =>
+                modal.confirm({
+                  title: tn('publishTitle', { name }),
+                  content: <div style={{ maxWidth: 300 }}>{tn('publishBody')}</div>,
+                  okText: tn('publish'),
+                  cancelText: t('actions.cancel'),
+                  onOk: () => run(() => newsAdminApi.publishArticle(item.id, item.version), tn('published'))
+                })
+            })
+          }
+
+          actions.push({
+            key: 'delete',
+            label: t('actions.delete'),
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () =>
+              modal.confirm({
+                title: tn('deleteTitle', { name }),
+                content: <div style={{ maxWidth: 300 }}>{tn('deleteBody')}</div>,
+                okText: t('actions.delete'),
+                okButtonProps: { danger: true },
+                cancelText: t('actions.cancel'),
+                onOk: () => run(() => newsAdminApi.deleteArticle(item.id, item.version), t('feedback.deleted'))
+              })
+          })
+
+          return actions
+        }}
         renderView={(item) => <ArticleView id={item.id} categories={categories} />}
       />
       <ArticleCategoryDrawer open={categoriesOpen} onClose={() => setCategoriesOpen(false)} />
@@ -296,72 +366,6 @@ function ArticleFields({
       >
         <HtmlContentEditor maxLength={NEWS_LIMITS.contentHtml} />
       </Form.Item>
-    </>
-  )
-}
-
-/** Công bố / Ẩn / Xóa — mỗi nút gửi `version` đang có của dòng. */
-function ArticleActions({ item, ctx }: { item: BmtAdminArticleItem; ctx: ApiRowContext }) {
-  const t = useTranslations('admin')
-  const tn = useTranslations('admin.newsArticles')
-  const { message } = App.useApp()
-  const name = item.title || tn('untitled')
-
-  const run = async (action: () => Promise<unknown>, done: string) => {
-    try {
-      await action()
-      await ctx.refresh()
-      message.success(done)
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
-  const missing = missingForPublish(item)
-
-  return (
-    <>
-      {item.state === 'Published' ? (
-        <Popconfirm
-          title={tn('hideTitle', { name })}
-          description={<div style={{ maxWidth: 300 }}>{tn('hideBody')}</div>}
-          okText={tn('hide')}
-          cancelText={t('actions.cancel')}
-          onConfirm={() => run(() => newsAdminApi.hideArticle(item.id, item.version), tn('hidden'))}
-        >
-          <Tooltip title={tn('hide')}>
-            <Button type='text' size='small' icon={<EyeInvisibleOutlined />} aria-label={tn('hide')} />
-          </Tooltip>
-        </Popconfirm>
-      ) : missing.length ? (
-        <Tooltip title={tn('missing', { fields: missing.map((key) => tn(`parts.${key}`)).join(', ') })}>
-          <Button type='text' size='small' disabled icon={<SendOutlined />} aria-label={tn('publish')} />
-        </Tooltip>
-      ) : (
-        <Popconfirm
-          title={tn('publishTitle', { name })}
-          description={<div style={{ maxWidth: 300 }}>{tn('publishBody')}</div>}
-          okText={tn('publish')}
-          cancelText={t('actions.cancel')}
-          onConfirm={() => run(() => newsAdminApi.publishArticle(item.id, item.version), tn('published'))}
-        >
-          <Tooltip title={tn('publish')}>
-            <Button type='text' size='small' icon={<SendOutlined />} aria-label={tn('publish')} />
-          </Tooltip>
-        </Popconfirm>
-      )}
-      <Popconfirm
-        title={tn('deleteTitle', { name })}
-        description={<div style={{ maxWidth: 300 }}>{tn('deleteBody')}</div>}
-        okText={t('actions.delete')}
-        okButtonProps={{ danger: true }}
-        cancelText={t('actions.cancel')}
-        onConfirm={() => run(() => newsAdminApi.deleteArticle(item.id, item.version), t('feedback.deleted'))}
-      >
-        <Tooltip title={t('actions.delete')}>
-          <Button type='text' size='small' danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-        </Tooltip>
-      </Popconfirm>
     </>
   )
 }

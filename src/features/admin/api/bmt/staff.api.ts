@@ -197,14 +197,3 @@ export async function unlockStaff(userId: string): Promise<StaffStatus> {
 export function forceLogout(userId: string): Promise<void> {
   return http.post<void>(`${STAFF_BASE}/${userId}/force-logout`)
 }
-
-export const staffAdminApi = {
-  listStaff,
-  listRoles,
-  createStaff,
-  grantRole,
-  revokeRole,
-  lockStaff,
-  unlockStaff,
-  forceLogout
-}

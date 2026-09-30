@@ -13,6 +13,12 @@ import { cn } from '@/shared/lib/utils'
 /** Stable no-op subscribe so `useSyncExternalStore` only distinguishes SSR vs client. */
 const emptySubscribe = () => () => {}
 
+/** Tạm ẩn chọn ngôn ngữ (mặc định tiếng Việt). Đổi thành `true` để bật lại. */
+const SHOW_LANGUAGE_TOGGLE = false
+
+/** Tạm ẩn chọn giao diện (khóa nền sáng — xem `theme-provider`). `true` để bật lại. */
+const SHOW_THEME_TOGGLE = false
+
 const THEME_MODES = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof THEME_MODES)[number]
 const THEME_ICON: Record<ThemeMode, LucideIcon> = { light: Sun, dark: Moon, system: Monitor }
@@ -47,46 +53,56 @@ export function PreferenceSwitches({ className }: { className?: string }) {
   )
   const currentTheme: ThemeMode = mounted && isThemeMode(theme) ? theme : 'system'
 
+  // Cả hai công tắc đang tạm ẩn → không hiện ô rỗng trong dropdown.
+  const hasContent = SHOW_LANGUAGE_TOGGLE || SHOW_THEME_TOGGLE
+  if (!hasContent) return null
+
   return (
     <div className={cn('space-y-3 px-2 py-2', className)}>
-      <Field icon={<Languages className='size-3.5' />} label={tLanguage('label')}>
-        <ToggleGroup
-          type='single'
-          value={activeLocale}
-          disabled={isPending}
-          onValueChange={(value) => {
-            if (!value || value === activeLocale) return
-            // `pathname` from next-intl navigation is already locale-agnostic.
-            startTransition(() => router.replace(pathname, { locale: value as Locale }))
-          }}
-          className='bg-muted grid w-full grid-cols-2 gap-0.5 rounded-lg p-0.5'
-        >
-          {LOCALES.map((locale) => (
-            <ToggleGroupItem key={locale} value={locale} className={segmentClasses}>
-              {tLanguage(locale)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </Field>
-
-      <Field icon={<Sun className='size-3.5' />} label={tTheme('label')}>
-        <ToggleGroup
-          type='single'
-          value={currentTheme}
-          onValueChange={(value) => value && setTheme(value)}
-          className='bg-muted grid w-full grid-cols-3 gap-0.5 rounded-lg p-0.5'
-        >
-          {THEME_MODES.map((mode) => {
-            const Icon = THEME_ICON[mode]
-            return (
-              <ToggleGroupItem key={mode} value={mode} aria-label={tTheme(mode)} className={segmentClasses}>
-                <Icon className='size-3.5' />
-                <span className='truncate'>{tTheme(mode)}</span>
+      {/* Toggle ngôn ngữ TẠM ẨN (mặc định tiếng Việt) — bật lại: đổi cờ thành true. */}
+      {SHOW_LANGUAGE_TOGGLE && (
+        <Field icon={<Languages className='size-3.5' />} label={tLanguage('label')}>
+          <ToggleGroup
+            type='single'
+            value={activeLocale}
+            disabled={isPending}
+            onValueChange={(value) => {
+              if (!value || value === activeLocale) return
+              // `pathname` from next-intl navigation is already locale-agnostic.
+              startTransition(() => router.replace(pathname, { locale: value as Locale }))
+            }}
+            className='bg-muted grid w-full grid-cols-2 gap-0.5 rounded-lg p-0.5'
+          >
+            {LOCALES.map((locale) => (
+              <ToggleGroupItem key={locale} value={locale} className={segmentClasses}>
+                {tLanguage(locale)}
               </ToggleGroupItem>
-            )
-          })}
-        </ToggleGroup>
-      </Field>
+            ))}
+          </ToggleGroup>
+        </Field>
+      )}
+
+      {/* Toggle giao diện TẠM ẨN (khóa nền sáng) — bật lại: đổi cờ thành true. */}
+      {SHOW_THEME_TOGGLE && (
+        <Field icon={<Sun className='size-3.5' />} label={tTheme('label')}>
+          <ToggleGroup
+            type='single'
+            value={currentTheme}
+            onValueChange={(value) => value && setTheme(value)}
+            className='bg-muted grid w-full grid-cols-3 gap-0.5 rounded-lg p-0.5'
+          >
+            {THEME_MODES.map((mode) => {
+              const Icon = THEME_ICON[mode]
+              return (
+                <ToggleGroupItem key={mode} value={mode} aria-label={tTheme(mode)} className={segmentClasses}>
+                  <Icon className='size-3.5' />
+                  <span className='truncate'>{tTheme(mode)}</span>
+                </ToggleGroupItem>
+              )
+            })}
+          </ToggleGroup>
+        </Field>
+      )}
     </div>
   )
 }

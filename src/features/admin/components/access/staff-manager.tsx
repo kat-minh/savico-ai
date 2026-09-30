@@ -24,7 +24,6 @@ import {
   Select,
   Space,
   Tag,
-  Tooltip,
   Typography
 } from 'antd'
 import { useTranslations } from 'next-intl'
@@ -46,7 +45,8 @@ import {
   type StaffItem,
   type StaffRoleRef
 } from '../../api/bmt/staff.api'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 
 const { Text, Paragraph } = Typography
@@ -80,6 +80,7 @@ const fullName = (item: { lastName: string; firstName: string }) => `${item.last
 export function StaffManager() {
   const t = useTranslations('admin')
   const tr = useTranslations('admin.rbacStaff')
+  const { message, modal } = App.useApp()
 
   const [rolesTarget, setRolesTarget] = useState<StaffItem | null>(null)
   const [created, setCreated] = useState<StaffCreated | null>(null)
@@ -168,7 +169,73 @@ export function StaffManager() {
           setCreated(result)
           return result
         }}
-        rowActions={(item, ctx) => <StaffRowActions item={item} ctx={ctx} onManageRoles={() => setRolesTarget(item)} />}
+        rowActions={(item, ctx): RowAction[] => {
+          const isLocked = item.status === 'Locked'
+          return [
+            {
+              key: 'manageRoles',
+              label: tr('actions.manageRoles'),
+              icon: <TeamOutlined />,
+              onClick: () => setRolesTarget(item)
+            },
+            {
+              key: 'lock',
+              label: isLocked ? tr('actions.unlock') : tr('actions.lock'),
+              icon: isLocked ? <UnlockOutlined /> : <LockOutlined />,
+              danger: !isLocked,
+              onClick: () =>
+                modal.confirm({
+                  title: isLocked
+                    ? tr('confirm.unlockTitle', { name: fullName(item) })
+                    : tr('confirm.lockTitle', { name: fullName(item) }),
+                  content: (
+                    <div style={{ maxWidth: 300 }}>{isLocked ? tr('confirm.unlockBody') : tr('confirm.lockBody')}</div>
+                  ),
+                  okText: t('actions.confirm'),
+                  cancelText: t('actions.cancel'),
+                  okButtonProps: { danger: !isLocked },
+                  onOk: async () => {
+                    try {
+                      const status =
+                        item.status === 'Active' ? await lockStaff(item.userId) : await unlockStaff(item.userId)
+                      await ctx.refresh()
+                      if (item.status === 'Active') {
+                        message.success(
+                          status.activeAssignmentCount > 0
+                            ? tr('feedback.lockedWithAssignments', { count: status.activeAssignmentCount })
+                            : tr('feedback.locked')
+                        )
+                      } else {
+                        message.success(tr('feedback.unlocked'))
+                      }
+                    } catch (err) {
+                      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                    }
+                  }
+                })
+            },
+            {
+              key: 'forceLogout',
+              label: tr('actions.forceLogout'),
+              icon: <LogoutOutlined />,
+              onClick: () =>
+                modal.confirm({
+                  title: tr('confirm.forceLogoutTitle', { name: fullName(item) }),
+                  content: <div style={{ maxWidth: 300 }}>{tr('confirm.forceLogoutBody')}</div>,
+                  okText: t('actions.confirm'),
+                  cancelText: t('actions.cancel'),
+                  onOk: async () => {
+                    try {
+                      await forceLogout(item.userId)
+                      message.success(tr('feedback.forcedLogout'))
+                    } catch (err) {
+                      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                    }
+                  }
+                })
+            }
+          ]
+        }}
         renderForm={() => (
           <>
             <Alert type='info' showIcon style={{ marginBottom: 16 }} message={tr('form.passwordNotice')} />
@@ -216,100 +283,6 @@ export function StaffManager() {
       <GeneratedPasswordModal created={created} onClose={() => setCreated(null)} />
 
       <StaffRolesDrawer target={rolesTarget} roles={roleOptions} onClose={() => setRolesTarget(null)} />
-    </>
-  )
-}
-
-/** Các thao tác trên một dòng: quản lý vai trò, khóa / mở khóa, buộc đăng xuất. */
-function StaffRowActions({
-  item,
-  ctx,
-  onManageRoles
-}: {
-  item: StaffItem
-  ctx: ApiRowContext
-  onManageRoles: () => void
-}) {
-  const t = useTranslations('admin')
-  const tr = useTranslations('admin.rbacStaff')
-  const { message } = App.useApp()
-
-  const runLockToggle = async () => {
-    try {
-      const status = item.status === 'Active' ? await lockStaff(item.userId) : await unlockStaff(item.userId)
-      await ctx.refresh()
-      if (item.status === 'Active') {
-        message.success(
-          status.activeAssignmentCount > 0
-            ? tr('feedback.lockedWithAssignments', { count: status.activeAssignmentCount })
-            : tr('feedback.locked')
-        )
-      } else {
-        message.success(tr('feedback.unlocked'))
-      }
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
-  const runForceLogout = async () => {
-    try {
-      await forceLogout(item.userId)
-      message.success(tr('feedback.forcedLogout'))
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
-  const isLocked = item.status === 'Locked'
-
-  return (
-    <>
-      <Tooltip title={tr('actions.manageRoles')}>
-        <Button
-          type='text'
-          size='small'
-          icon={<TeamOutlined />}
-          aria-label={tr('actions.manageRoles')}
-          onClick={onManageRoles}
-        />
-      </Tooltip>
-
-      <Popconfirm
-        title={
-          isLocked
-            ? tr('confirm.unlockTitle', { name: fullName(item) })
-            : tr('confirm.lockTitle', { name: fullName(item) })
-        }
-        description={
-          <div style={{ maxWidth: 300 }}>{isLocked ? tr('confirm.unlockBody') : tr('confirm.lockBody')}</div>
-        }
-        okText={t('actions.confirm')}
-        cancelText={t('actions.cancel')}
-        okButtonProps={{ danger: !isLocked }}
-        onConfirm={runLockToggle}
-      >
-        <Tooltip title={isLocked ? tr('actions.unlock') : tr('actions.lock')}>
-          <Button
-            type='text'
-            size='small'
-            icon={isLocked ? <UnlockOutlined /> : <LockOutlined />}
-            aria-label={isLocked ? tr('actions.unlock') : tr('actions.lock')}
-          />
-        </Tooltip>
-      </Popconfirm>
-
-      <Popconfirm
-        title={tr('confirm.forceLogoutTitle', { name: fullName(item) })}
-        description={<div style={{ maxWidth: 300 }}>{tr('confirm.forceLogoutBody')}</div>}
-        okText={t('actions.confirm')}
-        cancelText={t('actions.cancel')}
-        onConfirm={runForceLogout}
-      >
-        <Tooltip title={tr('actions.forceLogout')}>
-          <Button type='text' size='small' icon={<LogoutOutlined />} aria-label={tr('actions.forceLogout')} />
-        </Tooltip>
-      </Popconfirm>
     </>
   )
 }

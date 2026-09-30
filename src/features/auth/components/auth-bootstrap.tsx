@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 
 import { useCurrentUser } from '../hooks/use-current-user'
+import { EmailVerifyDialog } from './email-verify-dialog'
 import { MustChangePasswordDialog } from './must-change-password-dialog'
 
 /**
@@ -20,6 +21,7 @@ export function AuthBootstrap({ children }: { children: ReactNode }) {
     <>
       {children}
       <MustChangePasswordDialog />
+      <EmailVerifyDialog />
     </>
   )
 }

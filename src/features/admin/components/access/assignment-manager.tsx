@@ -1,8 +1,8 @@
 'use client'
 
-import { SwapOutlined, UserAddOutlined } from '@ant-design/icons'
+import { DeleteOutlined, SwapOutlined, UserAddOutlined } from '@ant-design/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, App, Button, Card, Empty, Form, Modal, Popconfirm, Select, Space, Spin, Tag, Typography } from 'antd'
+import { Alert, App, Button, Card, Empty, Form, Modal, Select, Space, Spin, Tag, Typography } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
@@ -16,7 +16,8 @@ import {
   type BmtNeedsReassignmentItem,
   type BmtStaffItem
 } from '../../api/bmt/assignments.api'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 
 const { Text } = Typography
@@ -45,9 +46,20 @@ function staffLabel(staff: BmtStaffItem): string {
  */
 export function AssignmentManager() {
   const t = useTranslations('admin.rbacAssignments')
+  const tAdmin = useTranslations('admin')
+  const { message, modal } = App.useApp()
+  const queryClient = useQueryClient()
 
   const [staffFilter, setStaffFilter] = useState<string | 'all'>('all')
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>('active')
+  // Dòng đang mở modal Chuyển giao (nâng lên cấp cha để menu "…" chỉ cần mở nó).
+  const [transferItem, setTransferItem] = useState<BmtAssignmentItem | null>(null)
+
+  const invalidate = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: adminKeys.bmt('assignments') }),
+      queryClient.invalidateQueries({ queryKey: adminKeys.bmt('needs-reassignment') })
+    ])
 
   // Danh sách nhân viên: vừa để lọc / chọn người nhận, vừa để tra tên theo id.
   const staffQuery = useQuery({
@@ -70,100 +82,144 @@ export function AssignmentManager() {
   }
 
   return (
-    <ApiResourceManager<BmtAssignmentItem>
-      title={t('title')}
-      description={t('description')}
-      queryKey={adminKeys.bmt('assignments', filters)}
-      fetchPage={({ pageIndex, pageSize }) =>
-        assignmentsAdminApi.listAssignments({ pageIndex, pageSize, resourceType: 'SupervisionGrant', ...filters })
-      }
-      rowKey={(item) => item.id}
-      drawerWidth={520}
-      banner={
-        <Space orientation='vertical' size={16} style={{ width: '100%' }}>
-          <NeedsReassignmentPanel activeStaff={activeStaff} staffLoading={staffQuery.isPending} />
-          <Space wrap>
-            <Select<string | 'all'>
-              value={staffFilter}
-              onChange={setStaffFilter}
-              style={{ minWidth: 240 }}
-              showSearch
-              optionFilterProp='label'
-              loading={staffQuery.isPending}
-              options={[
-                { value: 'all', label: t('filters.allStaff') },
-                ...staff.map((item) => ({ value: item.userId, label: staffLabel(item) }))
-              ]}
-            />
-            <Select<ActiveFilter>
-              value={activeFilter}
-              onChange={setActiveFilter}
-              style={{ minWidth: 180 }}
-              options={[
-                { value: 'active', label: t('filters.activeOnly') },
-                { value: 'all', label: t('filters.allAssignments') }
-              ]}
-            />
-          </Space>
-        </Space>
-      }
-      columns={[
-        {
-          title: t('columns.staff'),
-          key: 'staff',
-          render: (_, item) => {
-            const locked = staffById.get(item.staffUserId)?.status === 'Locked'
-            return (
-              <Space orientation='vertical' size={2}>
-                <Text strong>{nameOf(item.staffUserId, item.staffName)}</Text>
-                {locked ? <StatusTag tone='danger'>{t('lockedAssignee')}</StatusTag> : null}
-              </Space>
-            )
-          }
-        },
-        {
-          title: t('columns.resource'),
-          key: 'resource',
-          render: (_, item) => (
-            <Space orientation='vertical' size={2}>
-              <Tag color='purple'>{t('resourceTypes.SupervisionGrant')}</Tag>
-              <Text copyable style={{ fontSize: 12 }} type='secondary'>
-                {item.resourceId}
-              </Text>
-            </Space>
-          )
-        },
-        {
-          title: t('columns.effectiveFrom'),
-          dataIndex: 'effectiveFromUtc',
-          width: 180,
-          render: (value: string) => <Stamp value={value} />
-        },
-        {
-          title: t('columns.effectiveTo'),
-          key: 'effectiveTo',
-          width: 180,
-          render: (_, item) =>
-            item.effectiveToUtc ? (
-              <Space orientation='vertical' size={2}>
-                <Stamp value={item.effectiveToUtc} />
-                {item.endReason ? (
-                  <Text type='secondary' style={{ fontSize: 12 }}>
-                    {t(`endReasons.${item.endReason}`)}
-                  </Text>
-                ) : null}
-              </Space>
-            ) : (
-              <StatusTag tone='success'>{t('activeBadge')}</StatusTag>
-            )
+    <>
+      <ApiResourceManager<BmtAssignmentItem>
+        title={t('title')}
+        description={t('description')}
+        queryKey={adminKeys.bmt('assignments', filters)}
+        fetchPage={({ pageIndex, pageSize }) =>
+          assignmentsAdminApi.listAssignments({ pageIndex, pageSize, resourceType: 'SupervisionGrant', ...filters })
         }
-      ]}
-      rowActions={(item, ctx) =>
-        item.effectiveToUtc ? null : (
-          <AssignmentRowActions item={item} ctx={ctx} activeStaff={activeStaff} staffLoading={staffQuery.isPending} />
-        )
-      }
-    />
+        rowKey={(item) => item.id}
+        drawerWidth={520}
+        banner={
+          <Space orientation='vertical' size={16} style={{ width: '100%' }}>
+            <NeedsReassignmentPanel activeStaff={activeStaff} staffLoading={staffQuery.isPending} />
+            <Space wrap>
+              <Select<string | 'all'>
+                value={staffFilter}
+                onChange={setStaffFilter}
+                style={{ minWidth: 240 }}
+                showSearch
+                optionFilterProp='label'
+                loading={staffQuery.isPending}
+                options={[
+                  { value: 'all', label: t('filters.allStaff') },
+                  ...staff.map((item) => ({ value: item.userId, label: staffLabel(item) }))
+                ]}
+              />
+              <Select<ActiveFilter>
+                value={activeFilter}
+                onChange={setActiveFilter}
+                style={{ minWidth: 180 }}
+                options={[
+                  { value: 'active', label: t('filters.activeOnly') },
+                  { value: 'all', label: t('filters.allAssignments') }
+                ]}
+              />
+            </Space>
+          </Space>
+        }
+        columns={[
+          {
+            title: t('columns.staff'),
+            key: 'staff',
+            render: (_, item) => {
+              const locked = staffById.get(item.staffUserId)?.status === 'Locked'
+              return (
+                <Space orientation='vertical' size={2}>
+                  <Text strong>{nameOf(item.staffUserId, item.staffName)}</Text>
+                  {locked ? <StatusTag tone='danger'>{t('lockedAssignee')}</StatusTag> : null}
+                </Space>
+              )
+            }
+          },
+          {
+            title: t('columns.resource'),
+            key: 'resource',
+            render: (_, item) => (
+              <Space orientation='vertical' size={2}>
+                <Tag color='purple'>{t('resourceTypes.SupervisionGrant')}</Tag>
+                <Text copyable style={{ fontSize: 12 }} type='secondary'>
+                  {item.resourceId}
+                </Text>
+              </Space>
+            )
+          },
+          {
+            title: t('columns.effectiveFrom'),
+            dataIndex: 'effectiveFromUtc',
+            width: 180,
+            render: (value: string) => <Stamp value={value} />
+          },
+          {
+            title: t('columns.effectiveTo'),
+            key: 'effectiveTo',
+            width: 180,
+            render: (_, item) =>
+              item.effectiveToUtc ? (
+                <Space orientation='vertical' size={2}>
+                  <Stamp value={item.effectiveToUtc} />
+                  {item.endReason ? (
+                    <Text type='secondary' style={{ fontSize: 12 }}>
+                      {t(`endReasons.${item.endReason}`)}
+                    </Text>
+                  ) : null}
+                </Space>
+              ) : (
+                <StatusTag tone='success'>{t('activeBadge')}</StatusTag>
+              )
+          }
+        ]}
+        rowActions={(item): RowAction[] => {
+          // Dòng đã kết thúc hiệu lực thì không còn thao tác.
+          if (item.effectiveToUtc) return []
+          return [
+            { key: 'transfer', label: t('transfer'), icon: <SwapOutlined />, onClick: () => setTransferItem(item) },
+            {
+              key: 'remove',
+              label: t('remove'),
+              icon: <DeleteOutlined />,
+              danger: true,
+              onClick: () =>
+                modal.confirm({
+                  title: t('removeConfirmTitle'),
+                  content: t('removeConfirmBody'),
+                  okText: t('remove'),
+                  okButtonProps: { danger: true },
+                  cancelText: tAdmin('actions.cancel'),
+                  onOk: async () => {
+                    try {
+                      await assignmentsAdminApi.deleteAssignment(item.id)
+                      message.success(t('feedback.removed'))
+                      await invalidate()
+                    } catch (err) {
+                      message.error(isApiError(err) ? err.message : tAdmin('feedback.apiError'))
+                    }
+                  }
+                })
+            }
+          ]
+        }}
+      />
+
+      <StaffPickerModal
+        open={transferItem !== null}
+        title={t('transferTitle')}
+        okText={t('transfer')}
+        confirmLabel={t('selectStaff')}
+        // Chuyển cho chính người đang phụ trách sẽ bị BE từ chối (DuplicateAssignment).
+        options={activeStaff.filter((s) => s.userId !== transferItem?.staffUserId)}
+        loading={staffQuery.isPending}
+        onClose={() => setTransferItem(null)}
+        onSubmit={async (staffUserId) => {
+          if (!transferItem) return
+          await assignmentsAdminApi.transferAssignment(transferItem.id, { toStaffUserId: staffUserId })
+          message.success(t('feedback.transferred'))
+          await invalidate()
+        }}
+      />
+    </>
   )
 }
 
@@ -171,82 +227,6 @@ export function AssignmentManager() {
 function Stamp({ value }: { value?: string | null }) {
   const locale = useLocale() as Locale
   return <>{value ? formatDisplayDateTime(value, locale) : '—'}</>
-}
-
-/** Chuyển giao + Gỡ cho một dòng phân công đang hiệu lực. */
-function AssignmentRowActions({
-  item,
-  ctx,
-  activeStaff,
-  staffLoading
-}: {
-  item: BmtAssignmentItem
-  ctx: ApiRowContext
-  activeStaff: BmtStaffItem[]
-  staffLoading: boolean
-}) {
-  const t = useTranslations('admin.rbacAssignments')
-  const tAdmin = useTranslations('admin')
-  const { message } = App.useApp()
-  const queryClient = useQueryClient()
-  const [transferring, setTransferring] = useState(false)
-  const [removing, setRemoving] = useState(false)
-
-  const invalidate = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: adminKeys.bmt('assignments') }),
-      queryClient.invalidateQueries({ queryKey: adminKeys.bmt('needs-reassignment') })
-    ])
-
-  async function remove() {
-    setRemoving(true)
-    try {
-      await assignmentsAdminApi.deleteAssignment(item.id)
-      message.success(t('feedback.removed'))
-      await invalidate()
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : tAdmin('feedback.apiError'))
-    } finally {
-      setRemoving(false)
-    }
-  }
-
-  return (
-    <Space size={0}>
-      <Button type='text' size='small' icon={<SwapOutlined />} onClick={() => setTransferring(true)}>
-        {t('transfer')}
-      </Button>
-      <Popconfirm
-        title={t('removeConfirmTitle')}
-        description={t('removeConfirmBody')}
-        okText={t('remove')}
-        okButtonProps={{ danger: true, loading: removing }}
-        cancelText={tAdmin('actions.cancel')}
-        onConfirm={remove}
-      >
-        <Button type='text' size='small' danger>
-          {t('remove')}
-        </Button>
-      </Popconfirm>
-      <StaffPickerModal
-        open={transferring}
-        title={t('transferTitle')}
-        okText={t('transfer')}
-        confirmLabel={t('selectStaff')}
-        // Chuyển cho chính người đang phụ trách sẽ bị BE từ chối (DuplicateAssignment);
-        // bỏ luôn khỏi danh sách để đỡ nhầm.
-        options={activeStaff.filter((s) => s.userId !== item.staffUserId)}
-        loading={staffLoading}
-        onClose={() => setTransferring(false)}
-        onSubmit={async (staffUserId) => {
-          await assignmentsAdminApi.transferAssignment(item.id, { toStaffUserId: staffUserId })
-          message.success(t('feedback.transferred'))
-          await invalidate()
-          await ctx.refresh()
-        }}
-      />
-    </Space>
-  )
 }
 
 /** Banner "Cần chia lại": mỗi gói kèm nút Phân công. */

@@ -271,7 +271,7 @@ export function InvitationManager() {
                         <div key={doc.name}>
                           {doc.name}{' '}
                           <Text type='secondary' style={{ fontSize: 12 }}>
-                            ({(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB)
+                            {`(${(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB)`}
                           </Text>
                         </div>
                       ))
@@ -357,7 +357,7 @@ export function InvitationManager() {
                     {record.customerName}
                   </Text>
                 ) : null}
-                <Text copyable type='secondary' style={{ fontSize: 12 }}>
+                <Text copyable={{ text: record.survey.phone }} type='secondary' style={{ fontSize: 12 }}>
                   <PhoneOutlined /> {record.survey.phone}
                 </Text>
               </div>
@@ -375,7 +375,7 @@ export function InvitationManager() {
                     {record.contractorName}
                   </Text>
                   {contact?.phone ? (
-                    <Text copyable type='secondary' style={{ fontSize: 12 }}>
+                    <Text copyable={{ text: contact.phone }} type='secondary' style={{ fontSize: 12 }}>
                       {contact.person} · {contact.phone}
                     </Text>
                   ) : (

@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Alert,
   App,
-  Button,
   Card,
   Checkbox,
   Col,
@@ -48,6 +47,7 @@ import {
 } from '../../api/bmt/plans.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
 import { ImageUrlField } from '../common/field-kit'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag, type StatusTone } from '../common/status-tag'
 import { TableThumb } from '../common/table-thumb'
 
@@ -349,33 +349,27 @@ export function PlanManager() {
             plan.publishedRevision ? t('revisionNumber', { number: plan.publishedRevision.number }) : '—'
         }
       ]}
-      rowActions={(plan, ctx) => (
-        <>
-          {plan.draft && plan.saleState !== 'Stopped' ? (
-            <Tooltip title={t('publish')}>
-              <Button
-                type='text'
-                size='small'
-                icon={<CloudUploadOutlined />}
-                aria-label={t('publish')}
-                onClick={() => confirmAction(plan, 'publish', ctx)}
-              />
-            </Tooltip>
-          ) : null}
-          {plan.saleState === 'OnSale' ? (
-            <Tooltip title={t('stopSelling')}>
-              <Button
-                type='text'
-                size='small'
-                danger
-                icon={<StopOutlined />}
-                aria-label={t('stopSelling')}
-                onClick={() => confirmAction(plan, 'stop', ctx)}
-              />
-            </Tooltip>
-          ) : null}
-        </>
-      )}
+      rowActions={(plan, ctx) => {
+        const actions: RowAction[] = []
+        if (plan.draft && plan.saleState !== 'Stopped') {
+          actions.push({
+            key: 'publish',
+            label: t('publish'),
+            icon: <CloudUploadOutlined />,
+            onClick: () => confirmAction(plan, 'publish', ctx)
+          })
+        }
+        if (plan.saleState === 'OnSale') {
+          actions.push({
+            key: 'stop',
+            label: t('stopSelling'),
+            icon: <StopOutlined />,
+            danger: true,
+            onClick: () => confirmAction(plan, 'stop', ctx)
+          })
+        }
+        return actions
+      }}
       renderView={(plan) => <PlanDetailView planId={plan.planId} />}
       createValues={() => toValues(definitions, 'Design', null) as unknown as Record<string, unknown>}
       onCreate={async (raw) => {

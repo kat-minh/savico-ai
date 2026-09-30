@@ -43,12 +43,19 @@ export function useLogin(redirectTo?: string) {
       // (BR-RBAC-006). Đừng đá vào khu quản trị (toàn 403) — màn buộc đổi mật
       // khẩu ở `AuthBootstrap` sẽ hiện đè lên trang hiện tại và lo phần còn lại.
       if (user.mustChangePassword) return
-      // A pending gated action (download/view) resumes in place; every other
-      // login goes to its redirect target, defaulting to the role's home so
-      // admins land in the isolated admin area rather than the customer shell.
+      // Đá theo VAI TRÒ: admin LUÔN về khu quản trị, không rơi vào trang khách
+      // dù phiên khách có `redirect`/hành động chờ (vd guest bấm link /account
+      // rồi đăng nhập bằng tài khoản admin). Khu admin và khu khách tách biệt.
+      if (user.roles.includes(ROLES.ADMIN)) {
+        // Trang Tổng quan (`/admin`) đã ẩn khỏi menu → đá về mục đầu sidebar
+        // (Đơn hàng) để không rơi vào trang không có trong điều hướng.
+        router.replace(ADMIN_ROUTES.ORDERS)
+        return
+      }
+      // Khách: nối lại hành động đang chờ (tải / xem) tại chỗ → đích `redirect`
+      // (đều là trang khách) → mặc định trang chủ.
       if (pending) pending()
       else if (redirectTo) router.replace(redirectTo)
-      else if (user.roles.includes(ROLES.ADMIN)) router.replace(ADMIN_ROUTES.DASHBOARD)
       else router.replace(ROUTES.HOME)
     },
     onError: (error) => {

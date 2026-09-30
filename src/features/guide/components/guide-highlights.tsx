@@ -38,11 +38,11 @@ export function GuideHighlights({ onCreateProject }: GuideHighlightsProps) {
   const highlights = videos?.slice(0, HOME_GUIDE_HIGHLIGHT_COUNT) ?? []
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-16'>
+    <section className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
       <header className='mb-8 flex flex-wrap items-start justify-between gap-4'>
         <div className='space-y-2'>
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
-          <p className='text-muted-foreground max-w-2xl text-sm text-pretty'>{t('subtitle')}</p>
+          <p className='text-foreground max-w-2xl text-sm text-pretty'>{t('subtitle')}</p>
         </div>
         <Link
           href={ROUTES.GUIDE}

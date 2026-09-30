@@ -72,6 +72,11 @@ export interface CatalogSaved {
   catalogRevisionId?: string
 }
 
+/** `POST /styles` trả kèm `styleId` để gán ngay vào loại công trình sau khi tạo. */
+export interface StyleSaved extends CatalogSaved {
+  styleId: string
+}
+
 const BASE = '/admin/estimate-catalog'
 
 const idempotent = () => ({ headers: { 'Idempotency-Key': crypto.randomUUID() } })
@@ -128,8 +133,8 @@ export function createCatalogStyle(
   expectedCatalogVersion: number,
   group: CatalogStyleGroup,
   input: StyleInput
-): Promise<CatalogSaved> {
-  return http.post<CatalogSaved>(`${BASE}/styles`, { expectedCatalogVersion, group, ...input }, idempotent())
+): Promise<StyleSaved> {
+  return http.post<StyleSaved>(`${BASE}/styles`, { expectedCatalogVersion, group, ...input }, idempotent())
 }
 
 export function updateCatalogStyle(

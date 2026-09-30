@@ -113,6 +113,17 @@
   padding-inline: 24px;
 }
 
+/* `scroll.x='max-content'` khiến bảng chỉ rộng bằng nội dung; khi ÍT cột, bảng
+   hẹp hơn thẻ nên cột "Thao tác" (fixed right) sát mép BẢNG, lơ lửng giữa thẻ.
+   rc-table đặt INLINE `min-width: max-content` lên <table>, nên phải `!important`
+   mới đè được: ép bảng rộng tối thiểu bằng thẻ → cột thao tác luôn nằm sát mép
+   phải; nội dung rộng hơn thẻ thì bảng vẫn nở ra và cuộn ngang như cũ. */
+.admin-table-card .ant-table-content > table,
+.admin-table-card .ant-table-body > table,
+.admin-table-card .ant-table-header > table {
+  min-width: 100% !important;
+}
+
 /* Tiêu đề cột không xuống dòng. "Số tầng ảnh" bị bẻ làm hai dòng khiến cả hàng
    tiêu đề cao gấp đôi trong khi các cột khác vẫn một dòng — nhìn như lỗi. Bảng
    đã bật cuộn ngang (`scroll.x`) nên để tiêu đề đẩy cột rộng ra là an toàn. */
@@ -135,4 +146,67 @@
   .admin-table-card .ant-table-pagination {
     padding-inline: 16px;
   }
+}
+
+/* Trình soạn rich text (TipTap) của bài viết — khung + kiểu chữ khớp bản render
+   trên site. Là vùng contenteditable do mình dựng nên style thẳng ở đây. */
+.admin-richtext {
+  min-height: 260px;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  font:
+    15px/1.6 system-ui,
+    sans-serif;
+  outline: none;
+}
+
+.admin-richtext:focus {
+  border-color: var(--ant-color-primary, #16a34a);
+}
+
+.admin-richtext > * + * {
+  margin-top: 0.6em;
+}
+
+.admin-richtext h2 {
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.admin-richtext h3 {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.admin-richtext ul,
+.admin-richtext ol {
+  padding-inline-start: 1.4em;
+}
+
+.admin-richtext blockquote {
+  border-inline-start: 3px solid var(--admin-border);
+  padding-inline-start: 12px;
+  color: var(--admin-muted);
+}
+
+.admin-richtext img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.admin-richtext a {
+  color: var(--ant-color-primary, #16a34a);
+  text-decoration: underline;
+}
+
+/* Gợi ý rỗng: hiện chữ mờ khi đoạn đầu chưa có nội dung. */
+.admin-richtext p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  color: var(--admin-muted);
+  pointer-events: none;
 }

@@ -21,11 +21,15 @@ export { LibraryTemplateManager } from './components/handbook/library-template-m
 export { ArticleManager } from './components/handbook/article-manager'
 export { ArticleLabelManager } from './components/handbook/article-label-manager'
 export { HandbookStepManager } from './components/handbook/handbook-step-manager'
+export { TestimonialManager } from './components/site/testimonial-manager'
 export { GuideVideoManager } from './components/guide/guide-manager'
 
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
 export { OrderManager } from './components/ops/order-manager'
 export { DiscountManager } from './components/ops/discount-manager'
+export { ContractorAdminManager } from './components/ops/contractor-admin-manager'
+export { AccessAuditManager } from './components/access/access-audit-manager'
+export { PaymentConnectionManager } from './components/business/payment-connection-manager'
 export { ContractorManager } from './components/ops/contractor-manager'
 export { ContractorDetail } from './components/ops/contractor-detail'
 export { ContractorMatchingEditor } from './components/ops/contractor-matching'
@@ -44,6 +48,7 @@ export { StaffManager } from './components/access/staff-manager'
 export { AssignmentManager } from './components/access/assignment-manager'
 
 export { BuildingTypeManager } from './components/catalog/building-type-manager'
+export { ConstructionScopeManager } from './components/catalog/construction-scope-manager'
 export { StyleManager } from './components/catalog/style-manager'
 export { CostGroupManager } from './components/estimate/cost-group-manager'
 export { CostItemManager } from './components/estimate/cost-item-manager'

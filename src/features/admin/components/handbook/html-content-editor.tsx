@@ -9,14 +9,25 @@ import {
   UnderlineOutlined,
   UnorderedListOutlined
 } from '@ant-design/icons'
-import { Button, Input, Segmented, Space, Tooltip, Typography } from 'antd'
-import type { TextAreaRef } from 'antd/es/input/TextArea'
+import Image from '@tiptap/extension-image'
+import { EditorContent, useEditor, type Editor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { Button, Input, Popover, Segmented, Space, Tooltip, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 const { Text } = Typography
 
-/** Thẻ bọc quanh đoạn đang chọn — đúng allowlist backend giữ lại (TDD-NEWS-001). */
+const PREVIEW_STYLE =
+  'body{font:15px/1.6 system-ui,sans-serif;color:#1f1f1f;margin:16px}img{max-width:100%;height:auto;border-radius:6px}blockquote{border-left:3px solid #ccc;margin:0;padding-left:12px;color:#555}'
+
+/** TipTap coi tài liệu rỗng là `<p></p>` — quy về chuỗi rỗng để đếm ký tự / validate. */
+const normalize = (html: string) => (html === '<p></p>' ? '' : html)
+
+/** Thêm https:// nếu người dùng dán link thiếu giao thức. */
+const withHttps = (raw: string) => (/^https?:\/\//i.test(raw) ? raw : `https://${raw}`)
+
+/** Nút định dạng đơn (bật/tắt) — ánh xạ đúng allowlist backend giữ lại (TDD-NEWS-001). */
 type ToolKey =
   | 'bold'
   | 'italic'
@@ -27,31 +38,71 @@ type ToolKey =
   | 'bulletList'
   | 'numberList'
   | 'quote'
-  | 'link'
-  | 'image'
+type Tool = { key: ToolKey; icon: ReactNode; run: (editor: Editor) => void; active: (editor: Editor) => boolean }
 
-const WRAPS: { key: ToolKey; open: string; close: string; icon: ReactNode }[] = [
-  { key: 'bold', open: '<strong>', close: '</strong>', icon: <BoldOutlined /> },
-  { key: 'italic', open: '<em>', close: '</em>', icon: <ItalicOutlined /> },
-  { key: 'underline', open: '<u>', close: '</u>', icon: <UnderlineOutlined /> },
-  { key: 'heading2', open: '<h2>', close: '</h2>', icon: 'H2' },
-  { key: 'heading3', open: '<h3>', close: '</h3>', icon: 'H3' },
-  { key: 'paragraph', open: '<p>', close: '</p>', icon: 'P' },
-  { key: 'bulletList', open: '<ul>\n  <li>', close: '</li>\n</ul>', icon: <UnorderedListOutlined /> },
-  { key: 'numberList', open: '<ol>\n  <li>', close: '</li>\n</ol>', icon: <OrderedListOutlined /> },
-  { key: 'quote', open: '<blockquote>', close: '</blockquote>', icon: '“ ”' },
-  { key: 'link', open: '<a href="https://">', close: '</a>', icon: <LinkOutlined /> },
-  { key: 'image', open: '<img src="https://', close: '" alt="" />', icon: <PictureOutlined /> }
+const TOOLS: Tool[] = [
+  {
+    key: 'bold',
+    icon: <BoldOutlined />,
+    run: (e) => e.chain().focus().toggleBold().run(),
+    active: (e) => e.isActive('bold')
+  },
+  {
+    key: 'italic',
+    icon: <ItalicOutlined />,
+    run: (e) => e.chain().focus().toggleItalic().run(),
+    active: (e) => e.isActive('italic')
+  },
+  {
+    key: 'underline',
+    icon: <UnderlineOutlined />,
+    run: (e) => e.chain().focus().toggleUnderline().run(),
+    active: (e) => e.isActive('underline')
+  },
+  {
+    key: 'heading2',
+    icon: 'H2',
+    run: (e) => e.chain().focus().toggleHeading({ level: 2 }).run(),
+    active: (e) => e.isActive('heading', { level: 2 })
+  },
+  {
+    key: 'heading3',
+    icon: 'H3',
+    run: (e) => e.chain().focus().toggleHeading({ level: 3 }).run(),
+    active: (e) => e.isActive('heading', { level: 3 })
+  },
+  {
+    key: 'paragraph',
+    icon: 'P',
+    run: (e) => e.chain().focus().setParagraph().run(),
+    active: (e) => e.isActive('paragraph')
+  },
+  {
+    key: 'bulletList',
+    icon: <UnorderedListOutlined />,
+    run: (e) => e.chain().focus().toggleBulletList().run(),
+    active: (e) => e.isActive('bulletList')
+  },
+  {
+    key: 'numberList',
+    icon: <OrderedListOutlined />,
+    run: (e) => e.chain().focus().toggleOrderedList().run(),
+    active: (e) => e.isActive('orderedList')
+  },
+  {
+    key: 'quote',
+    icon: '“ ”',
+    run: (e) => e.chain().focus().toggleBlockquote().run(),
+    active: (e) => e.isActive('blockquote')
+  }
 ]
 
-const PREVIEW_STYLE =
-  'body{font:15px/1.6 system-ui,sans-serif;color:#1f1f1f;margin:16px}img{max-width:100%;height:auto;border-radius:6px}blockquote{border-left:3px solid #ccc;margin:0;padding-left:12px;color:#555}'
-
 /**
- * Ô nội dung bài viết dạng HTML (`contentHtml`). API không có upload nên ảnh
- * trong bài là URL https có sẵn trên kho ảnh — chèn bằng nút ảnh rồi dán link.
- * Backend làm sạch HTML theo allowlist khi lưu; bản xem trước chạy trong iframe
- * `sandbox` rỗng nên script của bản nháp không chạy được.
+ * Ô nội dung bài viết dạng RICH TEXT (WYSIWYG) — soạn trực tiếp trên bản render,
+ * không cho gõ HTML thô. Vẫn xuất `contentHtml` giới hạn đúng allowlist backend
+ * (đậm, nghiêng, gạch chân, H2/H3, đoạn, danh sách, trích dẫn, liên kết, ảnh);
+ * backend làm sạch lại khi lưu. API không có upload nên ảnh là URL https có sẵn
+ * trên kho — chèn bằng nút ảnh rồi dán link.
  *
  * Dùng như control của `Form.Item` (nhận `value` / `onChange`).
  */
@@ -65,20 +116,71 @@ export function HtmlContentEditor({
   maxLength: number
 }) {
   const t = useTranslations('admin.newsArticles.editor')
-  const ref = useRef<TextAreaRef>(null)
   const [mode, setMode] = useState<'edit' | 'preview'>('edit')
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [imageOpen, setImageOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+        codeBlock: false,
+        code: false,
+        horizontalRule: false,
+        link: {
+          openOnClick: false,
+          protocols: ['https'],
+          HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' }
+        }
+      }),
+      Image.configure({ inline: false })
+    ],
+    content: value ?? '',
+    editorProps: { attributes: { class: 'admin-richtext' } },
+    onUpdate: ({ editor }) => onChange?.(normalize(editor.getHTML()))
+  })
+
+  // Đồng bộ khi `value` đổi từ bên ngoài (mở bài khác, reset form). Chỉ đặt lại
+  // khi khác nội dung hiện tại để không nhảy con trỏ trong lúc gõ.
+  useEffect(() => {
+    if (!editor) return
+    const next = value ? value : '<p></p>'
+    if (next !== editor.getHTML()) editor.commands.setContent(next, { emitUpdate: false })
+  }, [value, editor])
+
   const html = value ?? ''
 
-  function wrap(open: string, close: string) {
-    const area = ref.current?.resizableTextArea?.textArea
-    const start = area?.selectionStart ?? html.length
-    const end = area?.selectionEnd ?? html.length
-    const next = `${html.slice(0, start)}${open}${html.slice(start, end)}${close}${html.slice(end)}`
-    onChange?.(next)
-    requestAnimationFrame(() => {
-      area?.focus()
-      area?.setSelectionRange(start + open.length, end + open.length)
-    })
+  function applyLink() {
+    if (!editor) return
+    const raw = linkUrl.trim()
+    setLinkOpen(false)
+    setLinkUrl('')
+    if (!raw) {
+      editor.chain().focus().unsetLink().run()
+      return
+    }
+    const href = withHttps(raw)
+    if (editor.state.selection.empty) {
+      editor.chain().focus().insertContent(`<a href="${href}">${href}</a>`).run()
+    } else {
+      editor.chain().focus().extendMarkRange('link').setLink({ href }).run()
+    }
+  }
+
+  function applyImage() {
+    if (!editor) return
+    const raw = imageUrl.trim()
+    setImageOpen(false)
+    setImageUrl('')
+    if (raw)
+      editor
+        .chain()
+        .focus()
+        .setImage({ src: withHttps(raw) })
+        .run()
   }
 
   return (
@@ -93,32 +195,95 @@ export function HtmlContentEditor({
             { value: 'preview', label: t('preview') }
           ]}
         />
-        {mode === 'edit'
-          ? WRAPS.map((item) => (
-              <Tooltip key={item.key} title={t(`tools.${item.key}`)}>
-                <Button size='small' aria-label={t(`tools.${item.key}`)} onClick={() => wrap(item.open, item.close)}>
-                  {item.icon}
+        {mode === 'edit' && editor ? (
+          <>
+            {TOOLS.map((tool) => (
+              <Tooltip key={tool.key} title={t(`tools.${tool.key}`)}>
+                <Button
+                  size='small'
+                  type={tool.active(editor) ? 'primary' : 'default'}
+                  aria-label={t(`tools.${tool.key}`)}
+                  onClick={() => tool.run(editor)}
+                >
+                  {tool.icon}
                 </Button>
               </Tooltip>
-            ))
-          : null}
+            ))}
+            <Popover
+              open={linkOpen}
+              onOpenChange={setLinkOpen}
+              trigger='click'
+              content={
+                <UrlInput
+                  placeholder={t('urlPlaceholder')}
+                  action={t('urlAdd')}
+                  value={linkUrl}
+                  onChange={setLinkUrl}
+                  onSubmit={applyLink}
+                />
+              }
+            >
+              <Button
+                size='small'
+                type={editor.isActive('link') ? 'primary' : 'default'}
+                aria-label={t('tools.link')}
+                icon={<LinkOutlined />}
+              />
+            </Popover>
+            <Popover
+              open={imageOpen}
+              onOpenChange={setImageOpen}
+              trigger='click'
+              content={
+                <UrlInput
+                  placeholder={t('imagePlaceholder')}
+                  action={t('urlAdd')}
+                  value={imageUrl}
+                  onChange={setImageUrl}
+                  onSubmit={applyImage}
+                />
+              }
+            >
+              <Button size='small' aria-label={t('tools.image')} icon={<PictureOutlined />} />
+            </Popover>
+          </>
+        ) : null}
       </div>
-      {mode === 'edit' ? (
-        <Input.TextArea
-          ref={ref}
-          value={html}
-          onChange={(event) => onChange?.(event.target.value)}
-          autoSize={{ minRows: 12, maxRows: 28 }}
-          style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 13 }}
-          placeholder='<p>…</p>'
-        />
-      ) : (
-        <HtmlPreview html={html} title={t('preview')} />
-      )}
+      {mode === 'edit' ? <EditorContent editor={editor} /> : <HtmlPreview html={html} title={t('preview')} />}
       <Text type={html.length > maxLength ? 'danger' : 'secondary'} style={{ fontSize: 12 }}>
         {t('count', { count: html.length.toLocaleString(), max: maxLength.toLocaleString() })} · {t('hint')}
       </Text>
     </Space>
+  )
+}
+
+/** Ô dán URL nhỏ trong Popover cho nút liên kết / ảnh. */
+function UrlInput({
+  placeholder,
+  action,
+  value,
+  onChange,
+  onSubmit
+}: {
+  placeholder: string
+  action: string
+  value: string
+  onChange: (value: string) => void
+  onSubmit: () => void
+}) {
+  return (
+    <Space.Compact style={{ width: 280 }}>
+      <Input
+        autoFocus
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onPressEnter={onSubmit}
+      />
+      <Button type='primary' onClick={onSubmit}>
+        {action}
+      </Button>
+    </Space.Compact>
   )
 }
 

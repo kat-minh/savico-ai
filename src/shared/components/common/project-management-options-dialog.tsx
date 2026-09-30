@@ -103,7 +103,7 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('self.value')}
             order={0}
             actions={
-              <div className='bg-accent text-primary-strong flex h-12 w-full items-center justify-center rounded-xl px-4 text-center text-[15px] font-bold'>
+              <div className='bg-accent text-primary-strong flex h-12 w-full items-center justify-center rounded-full px-4 text-center text-[15px] font-bold'>
                 {t('self.action')}
               </div>
             }
@@ -121,7 +121,7 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('check.value', { price: checkPrice })}
             order={1}
             actions={
-              <Button asChild className='brand-orange-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-orange-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link
                   href={checkoutConfirmRoute(checkId, projectId)}
                   onClick={() => choosePaidPlan(checkId)}
@@ -146,7 +146,7 @@ export function ProjectManagementOptionsDialog({ open, onOpenChange, projectId }
             value={t('control.value', { price: controlPrice })}
             order={2}
             actions={
-              <Button asChild className='brand-orange-button h-12 w-full rounded-xl text-[15px] font-bold'>
+              <Button asChild className='brand-orange-button h-12 w-full rounded-full text-[15px] font-bold'>
                 <Link
                   href={checkoutConfirmRoute(controlId, projectId)}
                   onClick={() => choosePaidPlan(controlId)}

@@ -1,5 +1,5 @@
 import { env } from '@/shared/config/env'
-import { bmtGetPlan, bmtUpdateProfile } from './account.bmt'
+import { bmtGetPlan, bmtGetPurchaseHistory, bmtUpdateProfile } from './account.bmt'
 import { mockAccountApi } from './account.mock'
 
 /**
@@ -10,16 +10,18 @@ import { mockAccountApi } from './account.mock'
  * - `updateProfile` → `GET` + `PUT /users/me`.
  * - `getPlan` → `GET /me/design-subscription` (tư vấn 1:1 miễn phí nên bỏ ô lượt
  *   tư vấn; lượt thiết kế có thể lệch với Bước 1 khi Bước 1 còn mock).
- * - `getPurchaseHistory` giữ mock: giao dịch cần hạng gói cố định (`tier`),
- *   trạng thái hoàn tiền, ghi chú, hóa đơn VAT, gói giám sát; mã đơn dẫn sang
- *   màn thanh toán vẫn đọc đơn mock của `features/checkout`.
+ * - `getPurchaseHistory` → `GET /payment-orders` (đơn mua của chính khách). Đơn
+ *   thật chỉ có tên gói + giá + trạng thái + ngày; hạng gói cố định, hóa đơn VAT,
+ *   hoàn tiền, gói giám sát BE chưa có nên lược bớt (xem `bmtGetPurchaseHistory`).
  */
 const BmtAccountApi = {
   // Hồ sơ là bản ghi phiên đăng nhập: khi auth còn giả (`NEXT_PUBLIC_USE_MOCK_AUTH`)
   // thì không có cookie BMT nào để gọi `/users/me`, nên đi theo mock của auth.
   updateProfile: env.NEXT_PUBLIC_USE_MOCK_AUTH ? mockAccountApi.updateProfile : bmtUpdateProfile,
-  // `/me/design-subscription` cần cookie phiên BMT — auth giả thì không có, đi theo mock.
-  getPlan: env.NEXT_PUBLIC_USE_MOCK_AUTH ? mockAccountApi.getPlan : bmtGetPlan
+  // Các endpoint `/me/*` và `/payment-orders` cần cookie phiên BMT — auth giả thì
+  // không có, nên đi theo mock của auth.
+  getPlan: env.NEXT_PUBLIC_USE_MOCK_AUTH ? mockAccountApi.getPlan : bmtGetPlan,
+  getPurchaseHistory: env.NEXT_PUBLIC_USE_MOCK_AUTH ? mockAccountApi.getPurchaseHistory : bmtGetPurchaseHistory
 } satisfies Partial<typeof mockAccountApi>
 
 export const accountApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockAccountApi : { ...mockAccountApi, ...BmtAccountApi }

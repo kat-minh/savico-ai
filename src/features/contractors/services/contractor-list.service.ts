@@ -27,22 +27,7 @@ export interface ContractorFilters {
   region?: ServiceRegion
 }
 
-/**
- * Điểm "phù hợp nhất": số dự án tương tự là tín hiệu mạnh nhất, rồi tới đánh
- * giá, rồi tới việc nhận khảo sát sớm. Khoảng cách đã bị bán kính lọc trước nên
- * chỉ dùng để phá hòa.
- */
-function matchScore(contractor: Contractor): number {
-  return (
-    contractor.similarProjects * 3 +
-    contractor.rating * 10 +
-    (contractor.surveyWithinHours <= 24 ? 5 : 0) +
-    (contractor.acceptingProjects ? 5 : 0)
-  )
-}
-
 const COMPARATORS: Record<ContractorSort, (a: Contractor, b: Contractor) => number> = {
-  match: (a, b) => matchScore(b) - matchScore(a) || a.distanceKm - b.distanceKm,
   distance: (a, b) => a.distanceKm - b.distanceKm,
   rating: (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount,
   survey: (a, b) => a.surveyWithinHours - b.surveyWithinHours || a.distanceKm - b.distanceKm

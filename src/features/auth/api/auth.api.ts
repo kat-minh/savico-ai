@@ -16,6 +16,7 @@ interface BmtMe {
   phoneNumber?: string | null
   roles?: string[] | null
   mustChangePassword?: boolean
+  isEmailVerified?: boolean
 }
 
 /**
@@ -51,7 +52,9 @@ function toAuthUser(me: BmtMe): AuthUser {
     phone: me.phoneNumber ?? undefined,
     avatarUrl: me.avatar ?? undefined,
     roles: toRoles(me.roles),
-    mustChangePassword: me.mustChangePassword ?? false
+    mustChangePassword: me.mustChangePassword ?? false,
+    // Không có field (BE cũ) → coi như đã xác minh để không chặn nhầm.
+    emailVerified: me.isEmailVerified ?? true
   }
 }
 
@@ -109,6 +112,14 @@ const AuthApi = {
       password: payload.password,
       ...splitName(payload.name)
     }),
+
+  /** Xác minh email bằng mã gửi qua email (STORY-AUTH-001 ALT-01). */
+  verifyAccount: (email: string, code: number): Promise<void> =>
+    http.post<void>(AUTH_ENDPOINTS.VERIFY_ACCOUNT, { email, code }),
+
+  /** Gửi lại mã xác minh email (`email` là query param, không phải body). */
+  resendVerifyCode: (email: string): Promise<void> =>
+    http.post<void>(AUTH_ENDPOINTS.RESEND_VERIFY_CODE, undefined, { params: { email } }),
 
   /**
    * Đổi mật khẩu (dùng cho luồng bắt buộc đổi lần đầu, BR-RBAC-006). Backend thu

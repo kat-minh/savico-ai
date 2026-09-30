@@ -199,7 +199,7 @@ export function PurchaseHistory() {
           buyerName: user?.name ?? receipt.customerName,
           ...(user?.phone ? { buyerPhone: user.phone } : {}),
           buyerEmail: user?.email ?? receipt.customerEmail,
-          planName: t(`tier.${receipt.tier}`),
+          planName: receipt.planName ?? t(`tier.${receipt.tier}`),
           planDetail: t(`receiptDialog.planDetail.${receipt.tier}`),
           subtotal: amount,
           discount: t('receiptDialog.noDiscount'),
@@ -473,7 +473,9 @@ export function PurchaseHistory() {
                         </div>
                       </td>
                       <td className='px-4 py-3'>
-                        <div className='text-xs font-semibold'>{t(`tier.${transaction.tier}`)}</div>
+                        <div className='text-xs font-semibold'>
+                          {transaction.planName ?? t(`tier.${transaction.tier}`)}
+                        </div>
                         {transaction.note ? (
                           <div className='text-muted-foreground mt-0.5 max-w-[230px] text-[11px] text-pretty'>
                             {transaction.note}
@@ -522,7 +524,9 @@ export function PurchaseHistory() {
                   <div className='flex items-start justify-between gap-3'>
                     <div>
                       <p className='font-mono text-xs font-semibold'>#{transaction.id}</p>
-                      <p className='mt-1 text-sm font-semibold'>{t(`tier.${transaction.tier}`)}</p>
+                      <p className='mt-1 text-sm font-semibold'>
+                        {transaction.planName ?? t(`tier.${transaction.tier}`)}
+                      </p>
                     </div>
                     <StatusPill
                       status={transaction.status}
@@ -643,7 +647,7 @@ export function PurchaseHistory() {
 
                     <ReceiptRow label={t('table.plan')}>
                       <div className='space-y-0.5'>
-                        <p className='font-semibold'>{t(`tier.${receipt.tier}`)}</p>
+                        <p className='font-semibold'>{receipt.planName ?? t(`tier.${receipt.tier}`)}</p>
                         <p className='text-muted-foreground text-xs font-normal'>
                           {t(`receiptDialog.planDetail.${receipt.tier}`)}
                         </p>

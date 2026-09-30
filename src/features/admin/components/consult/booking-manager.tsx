@@ -2,7 +2,7 @@
 
 import { CheckOutlined, PhoneOutlined, RollbackOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
-import { App, Button, Descriptions, Form, Input, Popconfirm, Segmented, Select, Spin, Tooltip, Typography } from 'antd'
+import { App, Descriptions, Form, Input, Segmented, Select, Spin, Typography } from 'antd'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -16,7 +16,8 @@ import {
   type BmtConsultationRequestItem,
   type ConsultationRequestStatus
 } from '../../api/bmt/consult.api'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag, type StatusTone } from '../common/status-tag'
 
 const { Text, Paragraph } = Typography
@@ -55,6 +56,7 @@ export function BookingManager() {
   const t = useTranslations('admin')
   const tr = useTranslations('admin.consultRequests')
   const locale = useLocale() as Locale
+  const { modal, message } = App.useApp()
   const [status, setStatus] = useState<StatusFilter>('Pending')
 
   const statusLabel = (value: ConsultationRequestStatus) => tr(`statuses.${value}`)
@@ -97,7 +99,7 @@ export function BookingManager() {
               <Text strong style={{ display: 'block' }}>
                 {record.customerName}
               </Text>
-              <Text copyable type='secondary' style={{ fontSize: 12 }}>
+              <Text copyable={{ text: record.contactPhone }} type='secondary' style={{ fontSize: 12 }}>
                 <PhoneOutlined /> {record.contactPhone}
               </Text>
             </div>
@@ -158,57 +160,44 @@ export function BookingManager() {
           </Form.Item>
         </>
       )}
-      rowActions={(item, ctx) => <StatusToggle item={item} ctx={ctx} />}
+      rowActions={(item, ctx) => {
+        // Đánh dấu Đã xử lý / Mở lại nhanh. PATCH là cập nhật nguyên khối (bắt
+        // buộc có `internalNote`), nên đọc bản chi tiết để giữ nguyên ghi chú.
+        const resolving = item.status === 'Pending'
+        const label = resolving ? tr('markResolved') : tr('reopen')
+        return [
+          {
+            key: 'toggle',
+            label,
+            icon: resolving ? <CheckOutlined /> : <RollbackOutlined />,
+            onClick: () =>
+              modal.confirm({
+                title: resolving
+                  ? tr('resolveTitle', { name: item.customerName })
+                  : tr('reopenTitle', { name: item.customerName }),
+                content: <div style={{ maxWidth: 300 }}>{resolving ? tr('resolveBody') : tr('reopenBody')}</div>,
+                okText: label,
+                cancelText: t('actions.cancel'),
+                onOk: async () => {
+                  try {
+                    const detail = await consultAdminApi.getRequest(item.id)
+                    await consultAdminApi.updateRequest(item.id, {
+                      status: resolving ? 'Resolved' : 'Pending',
+                      internalNote: detail.internalNote ?? null,
+                      expectedVersion: detail.version
+                    })
+                    await ctx.refresh()
+                    message.success(t('feedback.saved'))
+                  } catch (err) {
+                    message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                  }
+                }
+              })
+          }
+        ] satisfies RowAction[]
+      }}
       renderView={(item) => <RequestSummary id={item.id} withNote />}
     />
-  )
-}
-
-/**
- * Đánh dấu Đã xử lý / Mở lại nhanh. PATCH là cập nhật nguyên khối (bắt buộc có
- * `internalNote`), nên đọc bản chi tiết để giữ nguyên ghi chú đang có.
- */
-function StatusToggle({ item, ctx }: { item: BmtConsultationRequestItem; ctx: ApiRowContext }) {
-  const t = useTranslations('admin')
-  const tr = useTranslations('admin.consultRequests')
-  const { message } = App.useApp()
-  const resolving = item.status === 'Pending'
-  const label = resolving ? tr('markResolved') : tr('reopen')
-
-  const toggle = async () => {
-    try {
-      const detail = await consultAdminApi.getRequest(item.id)
-      await consultAdminApi.updateRequest(item.id, {
-        status: resolving ? 'Resolved' : 'Pending',
-        internalNote: detail.internalNote ?? null,
-        expectedVersion: detail.version
-      })
-      await ctx.refresh()
-      message.success(t('feedback.saved'))
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
-  return (
-    <Popconfirm
-      title={
-        resolving ? tr('resolveTitle', { name: item.customerName }) : tr('reopenTitle', { name: item.customerName })
-      }
-      description={<div style={{ maxWidth: 300 }}>{resolving ? tr('resolveBody') : tr('reopenBody')}</div>}
-      okText={label}
-      cancelText={t('actions.cancel')}
-      onConfirm={toggle}
-    >
-      <Tooltip title={label}>
-        <Button
-          type='text'
-          size='small'
-          icon={resolving ? <CheckOutlined /> : <RollbackOutlined />}
-          aria-label={label}
-        />
-      </Tooltip>
-    </Popconfirm>
   )
 }
 

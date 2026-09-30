@@ -225,16 +225,6 @@ export const INTERIOR_RENDER = {
  */
 export const HOME_IMAGE = {
   hero: '/images/placeholder-hero.svg',
-  /**
-   * Ảnh đại diện sáu thẻ "Khách hàng nói về BuildX". Để TRỐNG có chủ đích: chưa
-   * có ảnh thật thì thẻ hiện chữ cái đầu, admin dán URL là ảnh thay vào.
-   */
-  testimonialTuan: '',
-  testimonialHang: '',
-  testimonialBao: '',
-  testimonialNgocAnh: '',
-  testimonialNam: '',
-  testimonialVy: '',
   /** Bốn thẻ "Hồ sơ mẫu" — mỗi thẻ một khóa để admin thay từng ảnh. */
   dossierTownhouse: '/images/placeholder-hero.svg',
   dossierVilla: '/images/placeholder-hero.svg',

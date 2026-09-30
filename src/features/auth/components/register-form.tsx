@@ -71,7 +71,8 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
           if (embedded && onSwitchToLogin) {
             onSwitchToLogin()
           } else {
-            router.push(ROUTES.LOGIN)
+            // Đăng nhập là dialog trên trang chủ, không có route `/login`.
+            router.push(`${ROUTES.HOME}?auth=login`)
           }
         },
         onError: (error) => {
@@ -201,7 +202,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
       {!embedded && (
         <p className='text-muted-foreground mt-6 text-center text-sm'>
           {t('haveAccount')}{' '}
-          <Link href={ROUTES.LOGIN} className='text-foreground font-medium underline underline-offset-4'>
+          <Link href={`${ROUTES.HOME}?auth=login`} className='text-foreground font-medium underline underline-offset-4'>
             {t('signIn')}
           </Link>
         </p>

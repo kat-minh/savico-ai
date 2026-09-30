@@ -35,7 +35,8 @@ export const ROUTES = {
   ACCOUNT_FAVORITES: '/account/favorites',
   ACCOUNT_DOSSIERS: '/account/dossiers',
   ACCOUNT_PURCHASES: '/account/purchases',
-  ACCOUNT_CONSULTATIONS: '/account/consultations'
+  ACCOUNT_CONSULTATIONS: '/account/consultations',
+  ACCOUNT_SITES: '/account/sites'
 } as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
@@ -64,6 +65,7 @@ export const ADMIN_ROUTES = {
   // Vận hành — dữ liệu backend sinh ra, không phải nội dung biên tập
   /** Đơn hàng & đối soát chuyển khoản QR (R10). */
   ORDERS: '/admin/orders',
+  PAYMENT_CONNECTIONS: '/admin/payment-connections',
   /** Danh bạ nhà thầu + xác minh (S12–S15). */
   CONTRACTORS: '/admin/contractors',
   /** Quy tắc đề xuất nhà thầu (spec admin #12). */
@@ -77,6 +79,8 @@ export const ADMIN_ROUTES = {
   /** Bài viết + nhãn bài viết Cẩm nang (epic ArticleManagement, BR-136). */
   ARTICLES: '/admin/articles',
   ARTICLE_LABELS: '/admin/article-labels',
+  /** Lời nhận xét khách hàng ở trang chủ (ảnh đại diện + nội dung). */
+  TESTIMONIALS: '/admin/testimonials',
   /** Các bước trong Cẩm nang + Nhóm cẩm nang (epic HandbookStepManagement). */
   HANDBOOK_STEPS: '/admin/handbook-steps',
   /** Video hướng dẫn của trang Hướng dẫn. */
@@ -104,10 +108,13 @@ export const ADMIN_ROUTES = {
   STAFF: '/admin/staff',
   /** Phân công nhân viên phụ trách gói giám sát (STORY-RBAC-003). */
   ASSIGNMENTS: '/admin/assignments',
+  ACCESS_AUDIT: '/admin/access-audit',
 
   // Danh mục nhập liệu công trình (spec admin #1, #17)
   BUILDING_TYPES: '/admin/building-types',
   STYLES: '/admin/styles',
+  // Danh mục phạm vi thi công (STORY-CTR-003) — dùng cho hồ sơ + dự án nhà thầu.
+  CONSTRUCTION_SCOPES: '/admin/construction-scopes',
   // Giữ để redirect link cũ sau khi gộp phong cách KT + NT về một màn.
   ARCHITECTURE_STYLES: '/admin/architecture-styles',
   INTERIOR_STYLES: '/admin/interior-styles',

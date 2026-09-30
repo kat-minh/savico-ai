@@ -151,7 +151,7 @@ export function JourneyChoiceCard({
               disabled={disabled}
               onClick={onClick}
               className={cn(
-                'group/button mt-3 h-12 w-full rounded-xl text-[16px] font-bold transition-[transform,filter,box-shadow] duration-[180ms] active:scale-[0.985]',
+                'group/button mt-3 h-12 w-full rounded-full text-[16px] font-bold transition-[transform,filter,box-shadow] duration-[180ms] active:scale-[0.985]',
                 orange ? 'brand-orange-button' : 'brand-green-button'
               )}
             >

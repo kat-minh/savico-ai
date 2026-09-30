@@ -148,6 +148,24 @@ export interface CmsArticleLabel {
   order: number
 }
 
+/**
+ * Một lời nhận xét ở dải "Khách hàng nói về BuildX" (trang chủ). Ba trường chữ để TRỐNG nghĩa là
+ * chưa sửa: site dùng bản dịch trong `messages/*.json` (`landing.testimonials.items.<id>`), nên
+ * cả hai ngôn ngữ vẫn có chữ. Ảnh đại diện để trống thì thẻ hiện chữ cái đầu của tên.
+ */
+export interface CmsTestimonial {
+  /** Mã bản ghi. Sáu mã gốc (tuan, hang, bao, ngocanh, nam, vy) khớp khóa bản dịch dự phòng. */
+  id: string
+  name: string
+  /** Dòng phụ dưới tên — loại công trình · diện tích · nơi ở. */
+  meta: string
+  quote: string
+  avatarUrl: string
+  status: 'active' | 'inactive'
+  /** Thứ tự hiện trên trang chủ (nhỏ trước). */
+  order: number
+}
+
 /** Một mục trong thân bài: tiêu đề đánh số + các đoạn văn, có thể kèm ảnh. */
 export interface HandbookArticleSection {
   heading?: string
@@ -902,6 +920,12 @@ export interface CmsTransaction {
   customerEmail: string
   /** Gói được mua / gia hạn — gói thiết kế hoặc gói giám sát. */
   tier: PlanTier | SupervisionTier
+  /**
+   * Tên gói hiển thị lấy thẳng từ đơn hàng thật (`GET /payment-orders`). Ưu tiên
+   * hiện tên này thay cho nhãn theo `tier` khi có, vì đơn thật không kèm hạng gói
+   * cố định. Bản mock để trống → vẫn hiện theo `tier` như cũ.
+   */
+  planName?: string
   /** Số tiền, VND. */
   amount: number
   method: CmsTransactionMethod
