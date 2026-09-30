@@ -26,6 +26,7 @@ export { GuideVideoManager } from './components/guide/guide-manager'
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.
 export { OrderManager } from './components/ops/order-manager'
 export { DiscountManager } from './components/ops/discount-manager'
+export { ContractorAdminManager } from './components/ops/contractor-admin-manager'
 export { ContractorManager } from './components/ops/contractor-manager'
 export { ContractorDetail } from './components/ops/contractor-detail'
 export { ContractorMatchingEditor } from './components/ops/contractor-matching'
