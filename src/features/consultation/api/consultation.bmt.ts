@@ -22,12 +22,15 @@ interface BmtArchitect {
   projectCount: number
   introduction: string
   categories: { id: string; name: string }[]
+  companyName?: string | null
+  rating?: number | null
+  reviewCount?: number | null
 }
 
 /**
- * PublicArchitect → Consultant (type UI). Các trường API chưa có để trống theo
- * đúng thỏa thuận (lấy dữ liệu chức năng, phần trang trí để trống): nơi công
- * tác, headline, điểm đánh giá, số nhận xét, ảnh công trình.
+ * PublicArchitect → Consultant (type UI). BE đã trả `companyName`, `rating`,
+ * `reviewCount` (map vào company / rating / reviewCount). Còn thiếu: headline
+ * và ảnh công trình (works) → để trống.
  */
 function toConsultant(a: BmtArchitect): Consultant {
   return {
@@ -45,8 +48,9 @@ function toConsultant(a: BmtArchitect): Consultant {
           .filter(Boolean)
       : [],
     headline: '',
-    rating: 0,
-    reviewCount: 0,
+    ...(a.companyName ? { company: a.companyName } : {}),
+    rating: a.rating ?? 0,
+    reviewCount: a.reviewCount ?? 0,
     works: [],
     visible: true
   }
