@@ -73,15 +73,15 @@ export function ContractorAdminManager() {
       queryKey={['admin', 'contractors']}
       searchable
       fetchPage={({ pageIndex, pageSize }) => contractorsAdminApi.list({ pageIndex, pageSize })}
-      rowKey={(item) => item.id}
+      rowKey={(item) => item.contractorId}
       drawerWidth={720}
       createValues={() => ({ name: '' })}
       onCreate={async (values) => {
         await contractorsAdminApi.create(String(values.name ?? '').trim())
       }}
       toFormValues={async (item) => {
-        const d = await contractorsAdminApi.get(item.id)
-        detailRef.current.set(item.id, d)
+        const d = await contractorsAdminApi.get(item.contractorId)
+        detailRef.current.set(item.contractorId, d)
         const p = d.profile
         return {
           expectedVersion: d.version,
@@ -114,8 +114,8 @@ export function ContractorAdminManager() {
         }
       }}
       onUpdate={async (values, item) => {
-        const prev = detailRef.current.get(item.id)
-        await contractorsAdminApi.update(item.id, {
+        const prev = detailRef.current.get(item.contractorId)
+        await contractorsAdminApi.update(item.contractorId, {
           expectedVersion: Number(values.expectedVersion),
           profile: {
             name: String(values.name ?? '').trim(),
@@ -164,7 +164,7 @@ export function ContractorAdminManager() {
             icon: visible ? <EyeInvisibleOutlined /> : <EyeOutlined />,
             onClick: async () => {
               try {
-                await contractorsAdminApi.setVisibility(item.id, item.version, !visible)
+                await contractorsAdminApi.setVisibility(item.contractorId, item.version, !visible)
                 message.success(t('feedback.saved'))
                 await ctx.refresh()
               } catch (err) {
@@ -186,7 +186,7 @@ export function ContractorAdminManager() {
                 cancelText: t('actions.cancel'),
                 onOk: async () => {
                   try {
-                    await contractorsAdminApi.remove(item.id, item.version)
+                    await contractorsAdminApi.remove(item.contractorId, item.version)
                     message.success(t('feedback.deleted'))
                     await ctx.refresh()
                   } catch (err) {
@@ -382,7 +382,7 @@ export function ContractorAdminManager() {
               <Input />
             </Form.Item>
 
-            {ctx.item ? <ContractorProjectsSection form={form} contractorId={ctx.item.id} /> : null}
+            {ctx.item ? <ContractorProjectsSection form={form} contractorId={ctx.item.contractorId} /> : null}
           </>
         )
       }}

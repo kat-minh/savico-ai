@@ -163,6 +163,18 @@ export function SitesScreen() {
             </Card>
           ))}
         </div>
+      ) : sites.isError ? (
+        /* Gọi hỏng (hay gặp: 403 vì tài khoản không phải khách hàng) — KHÔNG được
+           rơi vào ô "chưa có công trình", vì đó là nói sai: dữ liệu chưa đọc được
+           chứ không phải rỗng. */
+        <Card>
+          <CardContent className='py-10 text-center'>
+            <p className='font-semibold'>{t('error')}</p>
+            <p className='text-muted-foreground mx-auto mt-1 max-w-md text-sm'>
+              {isApiError(sites.error) ? sites.error.message : ''}
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardContent className='py-10 text-center'>

@@ -26,12 +26,16 @@ export interface RowAction {
 export function RowActionsMenu({ actions, moreLabel }: { actions: RowAction[]; moreLabel: string }) {
   if (actions.length === 0) return null
 
+  // Hành động nguy hiểm (Xoá) LUÔN xuống cuối menu, dù màn khai báo ở đâu — đặt
+  // cạnh "Sửa" thì rất dễ bấm nhầm. Sắp xếp ổn định: thứ tự còn lại giữ nguyên.
+  const ordered = [...actions.filter((a) => !a.danger), ...actions.filter((a) => a.danger)]
+
   return (
     <Dropdown
       trigger={['click']}
       placement='bottomRight'
       menu={{
-        items: actions.map((action) => ({
+        items: ordered.map((action) => ({
           key: action.key,
           label: action.label,
           icon: action.icon,
