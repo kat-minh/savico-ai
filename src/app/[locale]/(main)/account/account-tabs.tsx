@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, CreditCard, FolderOpen, Heart, LayoutGrid } from 'lucide-react'
+import { CalendarDays, CreditCard, FolderOpen, Heart, LayoutGrid, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
@@ -24,6 +24,7 @@ export function AccountNav() {
     { href: ROUTES.ACCOUNT_PROJECTS, icon: LayoutGrid, label: t('projects.title') },
     { href: ROUTES.ACCOUNT_FAVORITES, icon: Heart, label: t('favorites.title') },
     { href: ROUTES.ACCOUNT_DOSSIERS, icon: FolderOpen, label: t('dossiers.title') },
+    { href: ROUTES.ACCOUNT_SITES, icon: MapPin, label: t('sites.title') },
     { href: ROUTES.ACCOUNT_PURCHASES, icon: CreditCard, label: t('purchaseHistory.title') },
     { href: ROUTES.ACCOUNT_CONSULTATIONS, icon: CalendarDays, label: t('consultationHistory.title') }
   ] as const

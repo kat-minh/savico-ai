@@ -1659,6 +1659,42 @@
       "title": "Tính năng đang hoàn thiện",
       "description": "Phần này sẽ sớm được cập nhật khi hệ thống sẵn sàng. Cảm ơn bạn đã kiên nhẫn chờ."
     },
+    "sites": {
+      "title": "Công trình của tôi",
+      "subtitle": "Quản lý công trình và gán gói giám sát đã mua vào đúng công trình.",
+      "add": "Thêm công trình",
+      "editTitle": "Sửa công trình",
+      "formHint": "Nhập tên và địa chỉ công trình.",
+      "name": "Tên công trình",
+      "address": "Địa chỉ",
+      "edit": "Sửa",
+      "delete": "Xoá",
+      "cancel": "Huỷ",
+      "save": "Lưu",
+      "saved": "Đã lưu công trình.",
+      "deleted": "Đã xoá công trình.",
+      "error": "Có lỗi xảy ra, vui lòng thử lại.",
+      "noGrant": "Chưa gán gói giám sát nào.",
+      "empty": {
+        "title": "Chưa có công trình nào",
+        "description": "Thêm công trình để gán gói giám sát và theo dõi thi công."
+      },
+      "deleteConfirmTitle": "Xoá công trình \"{name}\"?",
+      "deleteConfirmBody": "Chỉ xoá được công trình chưa có gói giám sát đang gắn.",
+      "grantsTitle": "Gói giám sát chưa gán",
+      "assignBy": "Cần gán trước {date}",
+      "pickSite": "Chọn công trình",
+      "assign": "Gán",
+      "assignedOk": "Đã gán gói vào công trình.",
+      "grantState": {
+        "Assigned": "Đang gắn",
+        "Completed": "Hoàn thành",
+        "CanceledByStaff": "Đã huỷ"
+      },
+      "addressHint": "Gõ địa chỉ rồi chọn một gợi ý — hệ thống cần toạ độ để tìm nhà thầu quanh công trình.",
+      "coordinatesReady": "Đã xác định được toạ độ của địa chỉ này.",
+      "needCoordinates": "Hãy chọn địa chỉ từ danh sách gợi ý để lấy toạ độ."
+    },
     "info": {
       "title": "Thông tin tài khoản",
       "name": "Họ và tên",
@@ -2244,6 +2280,8 @@
       "customers": "Tài khoản khách",
       "planTable": "Gói thiết kế & giám sát",
       "transactions": "Sổ giao dịch",
+      "paymentConnections": "Kết nối thanh toán",
+      "accessAudit": "Nhật ký quyền",
       "orders": "Đơn hàng & đối soát",
       "discounts": "Mã giảm giá",
       "contractors": "Nhà thầu",
@@ -3426,6 +3464,65 @@
         "roleText": "Vai trò",
         "mainWork": "Hạng mục chính",
         "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
+      },
+      "addressHint": "Chọn một gợi ý để tự điền vĩ độ/kinh độ; vẫn sửa tay được bên dưới."
+    },
+    "paymentConnections": {
+      "description": "Cấu hình tài khoản ngân hàng nhận tiền cho cổng SePay, tách hai môi trường Test/Live. Mỗi môi trường chỉ có một kết nối đang dùng. Secret do vận hành đặt trên máy chủ, không nhập ở đây.",
+      "environment": "Môi trường",
+      "gateway": "Ngân hàng",
+      "gatewayHint": "Tên ngân hàng SePay dùng (vd Vietcombank).",
+      "accountNumber": "Số tài khoản nhận",
+      "subAccount": "Tài khoản ảo (VA)",
+      "subAccountHint": "Bỏ trống nếu không dùng tài khoản ảo.",
+      "qrBankCode": "Mã ngân hàng QR",
+      "qrBankCodeHint": "Mã ngân hàng để dựng ảnh QR chuyển khoản.",
+      "enabled": "Đang bật",
+      "disabled": "Đã tắt",
+      "active": "Đang dùng",
+      "noSecret": "Chưa có secret",
+      "statusLabel": "Trạng thái",
+      "setActive": "Đặt đang dùng",
+      "setActiveConfirmTitle": "Đặt làm kết nối đang dùng cho môi trường {env}?",
+      "setActiveConfirmBody": "Chỉ nhận kết nối đang bật, cùng môi trường và đã có secret trên máy chủ.",
+      "history": "Lịch sử",
+      "historyTitle": "Lịch sử thao tác",
+      "historyEmpty": "Chưa có thao tác nào.",
+      "secretNote": "Secret webhook do vận hành đặt trên máy chủ theo secretConfigKeys — không cấu hình ở màn này."
+    },
+    "accessAudit": {
+      "description": "Nhật ký các lần thay đổi vai trò, quyền và phân công — chỉ đọc, chỉ ghi thêm. Gồm cả lần thao tác bị từ chối.",
+      "occurredAt": "Thời điểm",
+      "actor": "Người thao tác",
+      "action": "Hành động",
+      "target": "Đối tượng",
+      "outcome": "Kết quả",
+      "rejectReason": "Lý do từ chối",
+      "before": "Trước",
+      "after": "Sau",
+      "outcomeValues": {
+        "Succeeded": "Thành công",
+        "Rejected": "Bị từ chối"
+      },
+      "targetTypes": {
+        "Role": "Vai trò",
+        "User": "Người dùng",
+        "Assignment": "Phân công"
+      },
+      "actionLabels": {
+        "RoleCreated": "Tạo vai trò",
+        "RoleUpdated": "Sửa vai trò",
+        "RoleDeleted": "Xoá vai trò",
+        "RoleGranted": "Gán vai trò",
+        "RoleRevoked": "Thu hồi vai trò",
+        "StaffCreated": "Tạo nhân viên",
+        "StaffFirstPasswordChanged": "Đổi mật khẩu lần đầu",
+        "StaffLocked": "Khoá tài khoản",
+        "StaffUnlocked": "Mở khoá tài khoản",
+        "StaffForceLoggedOut": "Buộc đăng xuất",
+        "AssignmentCreated": "Tạo phân công",
+        "AssignmentTransferred": "Chuyển phân công",
+        "AssignmentEnded": "Kết thúc phân công"
       }
     },
     "constructionScopes": {
@@ -4525,6 +4622,10 @@
         "transferred": "Đã chuyển giao phân công.",
         "removed": "Đã gỡ phân công."
       }
+    },
+    "address": {
+      "noResult": "Không tìm thấy địa chỉ phù hợp",
+      "resolveFailed": "Không lấy được toạ độ của địa chỉ này, thử chọn lại"
     }
   },
   "contractors": {
@@ -5938,5 +6039,10 @@
     "checkoutDone": "Hoàn tất đơn hàng",
     "checkoutFailed": "Thanh toán chưa thành công",
     "share": "Hồ sơ dự án được chia sẻ"
+  },
+  "address": {
+    "searching": "Đang tìm địa chỉ…",
+    "noResult": "Không tìm thấy địa chỉ phù hợp",
+    "resolveFailed": "Không lấy được toạ độ của địa chỉ này, thử chọn lại"
   }
 }

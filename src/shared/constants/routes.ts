@@ -34,7 +34,8 @@ export const ROUTES = {
   ACCOUNT_FAVORITES: '/account/favorites',
   ACCOUNT_DOSSIERS: '/account/dossiers',
   ACCOUNT_PURCHASES: '/account/purchases',
-  ACCOUNT_CONSULTATIONS: '/account/consultations'
+  ACCOUNT_CONSULTATIONS: '/account/consultations',
+  ACCOUNT_SITES: '/account/sites'
 } as const
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES]
@@ -63,6 +64,7 @@ export const ADMIN_ROUTES = {
   // Vận hành — dữ liệu backend sinh ra, không phải nội dung biên tập
   /** Đơn hàng & đối soát chuyển khoản QR (R10). */
   ORDERS: '/admin/orders',
+  PAYMENT_CONNECTIONS: '/admin/payment-connections',
   /** Danh bạ nhà thầu + xác minh (S12–S15). */
   CONTRACTORS: '/admin/contractors',
   /** Quy tắc đề xuất nhà thầu (spec admin #12). */
@@ -105,6 +107,7 @@ export const ADMIN_ROUTES = {
   STAFF: '/admin/staff',
   /** Phân công nhân viên phụ trách gói giám sát (STORY-RBAC-003). */
   ASSIGNMENTS: '/admin/assignments',
+  ACCESS_AUDIT: '/admin/access-audit',
 
   // Danh mục nhập liệu công trình (spec admin #1, #17)
   BUILDING_TYPES: '/admin/building-types',

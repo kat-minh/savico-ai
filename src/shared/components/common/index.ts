@@ -1,3 +1,4 @@
+export { AddressAutocomplete } from './address-autocomplete'
 export { AmbientAura } from './ambient-aura'
 export { TikTokIcon, ZaloIcon } from './brand-icons'
 export { ScribbleArrow } from './scribble-arrow'

@@ -12,9 +12,6 @@ import type { PagedResult } from '@/shared/types'
  * (Hidden). `videoWarning` báo khi video lỗi/không truy cập được.
  */
 
-/** Trạng thái guide (BE trả chuỗi tự do; hiện dùng ba giá trị này). */
-export type GuideState = 'Draft' | 'Published' | 'Hidden'
-
 export interface VideoMetadata {
   thumbnailUrl: string
   durationSeconds: number

@@ -89,9 +89,12 @@ export interface ContractorProfileUpdate {
   images: ContractorImageInput[]
 }
 
-/* ===== Response (dựng theo TDD-CTR-001 — verify khi gọi live) ===== */
+/* ===== Response — ĐÃ ĐỐI CHIẾU VỚI API THẬT (gọi live 30/09/2026) =====
+ * Lưu ý khoá chính tên là `contractorId`, KHÔNG phải `id` (cả list lẫn detail);
+ * `legal` và `partnership` trả `null` khi hồ sơ chưa nhập, nên phải nullable —
+ * dùng `?.` khi đọc và `?? {}` khi gửi lại trong body PUT. */
 export interface AdminContractorItem {
-  id: string
+  contractorId: string
   name: string
   status: string // "Hidden" | "Visible"
   address?: string | null
@@ -100,15 +103,14 @@ export interface AdminContractorItem {
 }
 
 export interface AdminContractorDetail {
-  id: string
+  contractorId: string
   profile: ContractorProfileInput
   buildingTypeIds: string[]
   scopeIds: string[]
-  legal: ContractorLegalInput
+  legal: ContractorLegalInput | null
   licenses: ContractorLicenseInput[]
-  partnership: ContractorPartnershipInput
+  partnership: ContractorPartnershipInput | null
   images: ContractorImageInput[]
-  contact?: { person?: string | null; phone?: string | null; email?: string | null }
   status: string
   version: number
   missingFields?: string[]
