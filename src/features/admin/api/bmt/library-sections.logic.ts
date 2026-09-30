@@ -54,16 +54,6 @@ export function checkFile(file: { name: string; size: number }): FileProblem | n
   return null
 }
 
-/** Dung lượng dễ đọc: "850 B", "12,4 KB", "3,2 MB". */
-export function formatFileSize(bytes: number | null | undefined): string {
-  if (typeof bytes !== 'number' || !Number.isFinite(bytes) || bytes < 0) return ''
-  if (bytes < 1024) return `${bytes} B`
-  const kb = bytes / 1024
-  if (kb < 1024) return `${kb.toFixed(kb < 10 ? 1 : 0).replace('.', ',')} KB`
-  const mb = kb / 1024
-  return `${mb.toFixed(mb < 10 ? 1 : 0).replace('.', ',')} MB`
-}
-
 /* ===========================================================================
  * Phiếu upload và kết quả complete
  * ======================================================================== */
@@ -154,66 +144,6 @@ export function nextPosition(positions: readonly number[]): number {
 }
 
 /* ===========================================================================
- * Sắp xếp lên/xuống (hoán đổi vị trí với phần tử kế bên)
- * ======================================================================== */
-
-interface Positioned {
-  position: number
-}
-
-function swapWithNeighbor<T extends Positioned>(items: readonly T[], index: number, direction: -1 | 1): [T, T] | null {
-  const ordered = [...items].sort((a, b) => a.position - b.position)
-  const current = items[index]
-  if (!current) return null
-  const at = ordered.indexOf(current)
-  const other = ordered[at + direction]
-  return other ? [current, other] : null
-}
-
-/**
- * Payload `POST …/sections/reorder`: hoán đổi vị trí của section với section kế bên. BE cho
- * gửi TẬP CON (section không gửi giữ nguyên) và tự dùng vị trí tạm khi ghi, nên hoán đổi hai
- * phần tử không bị `LibraryPositionConflict`.
- */
-export function buildSectionReorder(
-  sections: readonly { sectionId: string; position: number }[],
-  index: number,
-  direction: -1 | 1
-): { items: { sectionId: string; position: number }[] } | null {
-  const pair = swapWithNeighbor(sections, index, direction)
-  if (!pair) return null
-  const [current, other] = pair
-  return {
-    items: [
-      { sectionId: current.sectionId, position: other.position },
-      { sectionId: other.sectionId, position: current.position }
-    ]
-  }
-}
-
-/**
- * Payload `POST …/reorder` của TỆP — từ nay BẮT BUỘC kèm `sectionId` (body): chỉ đổi thứ tự
- * trong một section, không chuyển tệp sang section khác.
- */
-export function buildAssetReorder(
-  assets: readonly { assetId: string; position: number }[],
-  index: number,
-  direction: -1 | 1,
-  sectionId: string
-): { sectionId: string; items: { assetId: string; position: number }[] } | null {
-  const pair = swapWithNeighbor(assets, index, direction)
-  if (!pair) return null
-  const [current, other] = pair
-  return {
-    sectionId,
-    items: [
-      { assetId: current.assetId, position: other.position },
-      { assetId: other.assetId, position: current.position }
-    ]
-  }
-}
-
-/* ===========================================================================
  * Mã lỗi → khoá thông báo
  * ======================================================================== */
 
@@ -245,11 +175,6 @@ export function isLibraryErrorCode(code: string | null | undefined): code is Lib
 /** Phiếu hết hạn (khác bị từ chối vì nội dung): báo "hết hạn" thay vì "tệp không đạt". */
 export function isExpiredFailure(code: string | null | undefined): boolean {
   return code !== undefined && code !== null && /expired/i.test(code)
-}
-
-/** Lỗi do có người vừa sửa phiên bản: màn phải tải lại dữ liệu rồi mới cho thao tác tiếp. */
-export function isVersionConflict(code: string | null | undefined): boolean {
-  return code === 'LibraryVersionConflict' || code === 'LibraryVersionChanged' || code === 'LibraryPositionConflict'
 }
 
 /**

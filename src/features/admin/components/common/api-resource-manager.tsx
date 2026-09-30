@@ -74,6 +74,8 @@ export interface ApiResourceManagerProps<T> {
   extraActions?: ReactNode
   drawerWidth?: number
   pageSize?: number
+  /** Câu lỗi riêng cho màn (ví dụ mã lỗi nghiệp vụ → tiếng Việt); bỏ trống dùng câu của BE. */
+  formatError?: (err: unknown) => string
 }
 
 /**
@@ -103,7 +105,8 @@ export function ApiResourceManager<T>({
   banner,
   extraActions,
   drawerWidth = 560,
-  pageSize: initialPageSize = 10
+  pageSize: initialPageSize = 10,
+  formatError
 }: ApiResourceManagerProps<T>) {
   const t = useTranslations('admin')
   const { message, modal } = App.useApp()
@@ -171,7 +174,7 @@ export function ApiResourceManager<T>({
       message.success(editing.item ? t('feedback.saved') : t('feedback.created'))
       closeEditor()
     } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+      message.error(formatError ? formatError(err) : isApiError(err) ? err.message : t('feedback.apiError'))
     } finally {
       setSaving(false)
     }

@@ -166,19 +166,6 @@ export function createLibraryTemplate(content: TemplateContent): Promise<Version
   return http.post<VersionCreated>(BASE, content, idempotent())
 }
 
-/** Sao phiên bản hiện hành thành nháp mới (metadata, phân loại, section, tệp, cover). */
-export function createTemplateDraft(
-  templateId: string,
-  expectedTemplateVersion: number,
-  baseVersionId: string
-): Promise<VersionCreated> {
-  return http.post<VersionCreated>(
-    `${BASE}/${templateId}/drafts`,
-    { expectedTemplateVersion, baseVersionId },
-    idempotent()
-  )
-}
-
 /** Thay toàn bộ metadata của nháp hoặc phiên bản hiện hành (giữ `versionId`). */
 export function saveTemplateVersion(
   templateId: string,

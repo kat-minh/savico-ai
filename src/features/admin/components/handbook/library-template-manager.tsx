@@ -1,14 +1,14 @@
 'use client'
 
-import { AppstoreOutlined, SwapOutlined } from '@ant-design/icons'
-import { Alert, App, Segmented, Space, Tag, Typography } from 'antd'
-import { useFormatter, useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { DeleteOutlined, SwapOutlined } from '@ant-design/icons'
+import { Alert, App, Checkbox, Form, Segmented, Space, Tag, Typography } from 'antd'
+import { useTranslations } from 'next-intl'
+import { useRef, useState } from 'react'
 
 import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import {
-  createLibraryTemplate,
+  deleteTemplateDraft,
   getTemplateVersions,
   listAllLibraryTemplates,
   setTemplateVisibility,
@@ -16,14 +16,26 @@ import {
   type AdminVersionItem,
   type DrawingKind
 } from '../../api/bmt/library.api'
+import {
+  InitialContentError,
+  createTemplateWithSections,
+  loadEditTarget,
+  normalizeSections,
+  updateTemplateWithSections,
+  type CreateFlowProgress,
+  type EditTarget,
+  type FormSection,
+  type SaveFlowResult
+} from '../../api/bmt/library-create-flow'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
 import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 import { useFloorLabel } from '../catalog/use-floor-label'
-import { LibraryContentFields, toTemplateContent } from './library-content-fields'
+import { LibraryContentFields, toContentFormValues, toTemplateContent } from './library-content-fields'
+import { useLibraryErrorMessage } from './library-error-message'
+import { LibraryInitialSectionsField, newFormSection, newFormSectionKey } from './library-initial-sections-field'
 import { useLibraryClassification } from './use-library-classification'
-import { LibraryVersionsDrawer } from './library-versions-drawer'
 
 const { Text } = Typography
 
@@ -58,7 +70,7 @@ async function mapLimited<T, R>(items: readonly T[], limit: number, fn: (item: T
  */
 async function loadRows(): Promise<LibraryRow[]> {
   const templates = await listAllLibraryTemplates()
-  return mapLimited(templates, CONCURRENCY, async (template) => {
+  const rows = await mapLimited(templates, CONCURRENCY, async (template) => {
     const detail = await getTemplateVersions(template.templateId)
     const shown =
       detail.versions.find((version) => version.isCurrent) ??
@@ -70,6 +82,8 @@ async function loadRows(): Promise<LibraryRow[]> {
       kind: shown?.drawingKind ?? null
     }
   })
+  // BE xóa bản nháp nhưng để lại "vỏ" mẫu không còn phiên bản nào: không có gì để xem/sửa nên không hiện.
+  return rows.filter((row) => row.shown)
 }
 
 /**
@@ -82,12 +96,14 @@ async function loadRows(): Promise<LibraryRow[]> {
 export function LibraryTemplateManager() {
   const t = useTranslations('admin')
   const l = useTranslations('admin.library')
-  const format = useFormatter()
   const { message, modal } = App.useApp()
   const floorLabel = useFloorLabel()
   const { data: classificationOptions } = useLibraryClassification()
-  const [managing, setManaging] = useState<{ row: LibraryRow; ctx: ApiRowContext } | null>(null)
+  // Mẫu đang mở ở form Sửa (đọc lúc mở, dùng lúc Lưu để nối đúng `editVersion`).
+  const editTarget = useRef<EditTarget | null>(null)
   const [activeKind, setActiveKind] = useState<'all' | DrawingKind>('all')
+  const [progress, setProgress] = useState<CreateFlowProgress | null>(null)
+  const libraryError = useLibraryErrorMessage()
 
   const listKey = adminKeys.bmt('library', 'templates', activeKind)
 
@@ -108,6 +124,36 @@ export function LibraryTemplateManager() {
       ? `${version.widthM ?? '?'} × ${version.lengthM ?? '?'} m · ${version.areaM2 ?? '?'} m²`
       : '-'
 
+  /** Gom lỗi + tiến độ dùng chung cho Thêm và Sửa. */
+  async function save(
+    values: Record<string, unknown>,
+    run: (
+      content: ReturnType<typeof toTemplateContent>,
+      sections: FormSection[],
+      publish: boolean
+    ) => Promise<SaveFlowResult>
+  ) {
+    const sections = normalizeSections(
+      Array.isArray(values.sections) ? (values.sections as FormSection[]) : [],
+      (index) => l('createFloorDefault', { index })
+    )
+    const publish = values.publishNow !== false
+    try {
+      const result = await run(toTemplateContent(values, classificationOptions), sections, publish)
+      if (publish && !result.published && result.publishError) {
+        message.warning(`${l('createNotPublished')} ${libraryError(result.publishError)}`, 10)
+      }
+      return result
+    } catch (err) {
+      if (!(err instanceof InitialContentError)) throw err
+      // Mẫu đã lưu một phần: đóng form (để không tạo trùng / gỡ trùng) và chỉ đường mở Sửa để làm tiếp.
+      message.warning(`${l('createImagesPartial', { count: err.missingFiles })} ${libraryError(err.reason)}`, 10)
+      return null
+    } finally {
+      setProgress(null)
+    }
+  }
+
   return (
     <>
       <ApiResourceManager<LibraryRow>
@@ -127,7 +173,6 @@ export function LibraryTemplateManager() {
               ]}
               style={{ marginBottom: 16 }}
             />
-            <Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('publishFlowNote')} />
           </>
         }
         fetchPage={async ({ pageIndex, pageSize, keyword }) => {
@@ -141,23 +186,58 @@ export function LibraryTemplateManager() {
         }}
         rowKey={(row) => row.template.templateId}
         drawerWidth={640}
-        createValues={() => ({ drawingKind: activeKind === 'all' ? undefined : activeKind })}
-        // Ảnh và tệp KHÔNG nhập lúc tạo: chúng thuộc section của phiên bản nên chỉ thêm được sau khi mẫu (và nháp
-        // đầu) đã có — mở "Quản lý phiên bản" để tạo section rồi tải tệp lên.
-        onCreate={(values) => createLibraryTemplate(toTemplateContent(values, classificationOptions))}
-        renderForm={(form) => (
+        createValues={() => ({
+          drawingKind: activeKind === 'all' ? undefined : activeKind,
+          publishNow: true,
+          sections: [newFormSection(l('createFloorDefault', { index: 1 }))]
+        })}
+        formatError={libraryError}
+        // Thêm / Sửa là MỘT form: metadata + hình theo từng tầng + công bố. Các bước nối tiếp phía sau (mẫu →
+        // section → tải tệp → ảnh đại diện → công bố) nằm trong `library-create-flow`; người dùng không thấy.
+        onCreate={(values) =>
+          save(values, (content, sections, publish) =>
+            createTemplateWithSections(content, sections, { publish, onProgress: setProgress })
+          )
+        }
+        toFormValues={async (row) => {
+          const target = await loadEditTarget(row.template.templateId, newFormSectionKey)
+          editTarget.current = target
+          return {
+            ...toContentFormValues(target.version),
+            // Bản nháp chưa công bố thì mặc định công bố khi lưu; bản đang hiển thị sửa tại chỗ.
+            publishNow: !target.version.isCurrent,
+            sections: target.sections.length ? target.sections : [newFormSection(l('createFloorDefault', { index: 1 }))]
+          }
+        }}
+        onUpdate={(values) => {
+          const target = editTarget.current
+          if (!target) return Promise.reject(new Error('LibraryVersionMissing'))
+          return save(values, (content, sections, publish) =>
+            updateTemplateWithSections(target, content, sections, { publish, onProgress: setProgress })
+          )
+        }}
+        renderForm={(form, { item }) => (
           <>
             <Alert type='info' showIcon style={{ marginBottom: 16 }} title={l('createNote')} />
             <LibraryContentFields form={form} />
+            <Form.Item name='sections' noStyle>
+              <LibraryInitialSectionsField disabled={progress !== null} />
+            </Form.Item>
+            {item?.template.currentVersionId ? null : (
+              <Form.Item name='publishNow' valuePropName='checked' extra={l('publishNowHint')}>
+                <Checkbox disabled={progress !== null}>{l('publishNow')}</Checkbox>
+              </Form.Item>
+            )}
+            {progress && progress.total > 0 ? (
+              <Alert
+                type='info'
+                showIcon
+                title={l('createUploading', { done: progress.done, total: progress.total })}
+              />
+            ) : null}
           </>
         )}
         rowActions={(row, ctx): RowAction[] => [
-          {
-            key: 'versions',
-            label: l('manageVersions'),
-            icon: <AppstoreOutlined />,
-            onClick: () => setManaging({ row, ctx })
-          },
           {
             key: 'status',
             label: t('actions.switchStatus'),
@@ -195,6 +275,34 @@ export function LibraryTemplateManager() {
                   }
                 }
               })
+          },
+          {
+            key: 'delete',
+            // BE chỉ xoá được mẫu chưa công bố; mẫu đã công bố thì dùng Ẩn.
+            label: row.template.currentVersionId ? l('deleteDisabled') : t('actions.delete'),
+            icon: <DeleteOutlined />,
+            danger: true,
+            disabled: Boolean(row.template.currentVersionId) || !row.shown,
+            onClick: () =>
+              modal.confirm({
+                title: l('deleteConfirmTitle', { name: row.name ?? l('untitled') }),
+                content: l('deleteConfirmBody'),
+                okText: t('actions.delete'),
+                okButtonProps: { danger: true },
+                cancelText: t('actions.cancel'),
+                onOk: async () => {
+                  try {
+                    if (row.shown) {
+                      await deleteTemplateDraft(row.template.templateId, row.shown.versionId, row.shown.editVersion)
+                    }
+                    message.success(t('feedback.deleted'))
+                  } catch (err) {
+                    message.error(libraryError(err))
+                  } finally {
+                    await ctx.refresh()
+                  }
+                }
+              })
           }
         ]}
         columns={[
@@ -211,48 +319,19 @@ export function LibraryTemplateManager() {
           { title: l('classification'), key: 'classification', render: (_, row) => classification(row.shown) },
           { title: l('dimensions'), key: 'dimensions', render: (_, row) => dimensions(row.shown) },
           {
-            title: l('currentVersion'),
-            key: 'current',
-            render: (_, row) =>
-              row.template.currentVersionId ? (
-                <Space orientation='vertical' size={0}>
-                  <StatusTag tone='success'>{l('versionN', { number: row.template.currentNumber ?? 0 })}</StatusTag>
-                  {row.template.currentPublishedAtUtc ? (
-                    <Text type='secondary' style={{ fontSize: 12 }}>
-                      {format.dateTime(new Date(row.template.currentPublishedAtUtc), { dateStyle: 'short' })}
-                    </Text>
-                  ) : null}
-                </Space>
-              ) : (
-                <StatusTag tone='off'>{l('notPublished')}</StatusTag>
-              )
-          },
-          {
-            title: l('drafts'),
-            key: 'drafts',
-            width: 90,
-            align: 'right',
-            render: (_, row) => row.template.draftCount
-          },
-          {
             title: l('visibility'),
-            key: 'visibility',
-            width: 120,
+            key: 'status',
+            width: 150,
             render: (_, row) =>
-              row.template.isHidden ? (
+              !row.template.currentVersionId ? (
+                <StatusTag tone='warning'>{l('notPublished')}</StatusTag>
+              ) : row.template.isHidden ? (
                 <StatusTag tone='off'>{l('hidden')}</StatusTag>
               ) : (
                 <StatusTag tone='success'>{l('shown')}</StatusTag>
               )
           }
         ]}
-      />
-
-      <LibraryVersionsDrawer
-        templateId={managing?.row.template.templateId ?? null}
-        title={managing ? (managing.row.name ?? l('untitled')) : ''}
-        onClose={() => setManaging(null)}
-        onChanged={() => managing?.ctx.refresh() ?? Promise.resolve()}
       />
     </>
   )

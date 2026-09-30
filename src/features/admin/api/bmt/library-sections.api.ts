@@ -110,20 +110,6 @@ export function renameSection(
   )
 }
 
-/** Đổi thứ tự section: gửi tập con (section không gửi giữ nguyên). */
-export function reorderSections(
-  templateId: string,
-  versionId: string,
-  expectedEditVersion: number,
-  items: { sectionId: string; position: number }[]
-): Promise<VersionEdited> {
-  return http.post<VersionEdited>(
-    `${versionBase(templateId, versionId)}/sections/reorder`,
-    { expectedEditVersion, items },
-    idempotent()
-  )
-}
-
 /** Đặt ảnh đại diện: chỉ nhận ẢNH đã gắn trong một section của đúng phiên bản này. */
 export function setVersionCover(
   templateId: string,
@@ -191,23 +177,6 @@ export async function listSectionAssets(
     coverAssetId: head?.coverAssetId ?? null,
     assets: assets.sort((a, b) => a.position - b.position)
   }
-}
-
-/**
- * Đổi thứ tự tệp TRONG một section: từ nay `sectionId` bắt buộc nằm trong body, và tệp không
- * chuyển được sang section khác bằng route này.
- */
-export function reorderSectionAssets(
-  templateId: string,
-  versionId: string,
-  expectedEditVersion: number,
-  body: { sectionId: string; items: { assetId: string; position: number }[] }
-): Promise<VersionEdited> {
-  return http.post<VersionEdited>(
-    `${versionBase(templateId, versionId)}/reorder`,
-    { expectedEditVersion, ...body },
-    idempotent()
-  )
 }
 
 /* ===========================================================================
