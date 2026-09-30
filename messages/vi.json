@@ -3380,7 +3380,9 @@
       "styleName": "Tên phong cách",
       "styleImage": "Ảnh minh họa",
       "styleImageNote": "Ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Màn chưa có nút tải ảnh: dán URL https của ảnh đã tải lên kho lưu trữ.",
-      "styleAssignHint": "Gán phong cách này cho loại công trình ở màn Loại công trình.",
+      "styleAssignHint": "Chỉ hiện loại công trình đang bật nhóm này. Muốn thêm loại đang tắt nhóm, hãy bật ở màn Loại công trình.",
+      "styleAssignLabel": "Áp dụng cho loại công trình",
+      "styleAssignPlaceholder": "Chọn loại công trình",
       "assignedTypes": "Đang gán cho loại công trình",
       "typeGroupOff": "{name} (nhóm đang tắt)",
       "httpsUrl": "Cần URL bắt đầu bằng https://, tối đa 2048 ký tự."

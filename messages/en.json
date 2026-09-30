@@ -3380,7 +3380,9 @@
       "styleName": "Style name",
       "styleImage": "Illustration",
       "styleImageNote": "JPG, PNG or WebP, up to 5 MB. There is no upload button yet: paste the https URL of an image already uploaded to storage.",
-      "styleAssignHint": "Assign this style to building types on the Building types screen.",
+      "styleAssignHint": "Only building types with this group enabled are listed. To add a type whose group is off, enable it on the Building types screen.",
+      "styleAssignLabel": "Applies to building types",
+      "styleAssignPlaceholder": "Select building types",
       "assignedTypes": "Assigned to building types",
       "typeGroupOff": "{name} (group off)",
       "httpsUrl": "Must be a URL starting with https://, up to 2048 characters."
