@@ -27,7 +27,7 @@ interface QrPaymentProps {
  * Đếm ngược `mm:ss` tới thời điểm hết hạn mã QR, kèm `ratio` là phần thời gian
  * còn lại (0–100) để vẽ thanh tiến độ dọc đáy banner như Hình S04.
  */
-function useCountdown(expiresAt?: string): { label: string; expired: boolean; ratio: number } {
+function useCountdown(expiresAt?: string, serverOffsetMs = 0): { label: string; expired: boolean; ratio: number } {
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -37,7 +37,9 @@ function useCountdown(expiresAt?: string): { label: string; expired: boolean; ra
 
   if (!expiresAt) return { label: '--:--', expired: false, ratio: 0 }
 
-  const remaining = Math.max(0, new Date(expiresAt).getTime() - now)
+  // `serverOffsetMs`: đơn API trả `serverNowUtc`, cộng độ lệch vào giờ máy để đồng hồ máy
+  // khách chạy nhanh/chậm vài phút không làm đếm ngược sai (đơn mock: 0).
+  const remaining = Math.max(0, new Date(expiresAt).getTime() - (now + serverOffsetMs))
   const minutes = Math.floor(remaining / 60_000)
   const seconds = Math.floor((remaining % 60_000) / 1_000)
 
@@ -65,7 +67,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
   const router = useRouter()
 
   const { data: order, isPending } = useOrder(orderId)
-  const { label, expired, ratio } = useCountdown(order?.expiresAt)
+  const { label, expired, ratio } = useCountdown(order?.expiresAt, order?.api?.serverOffsetMs)
   const { rootRef, entranceState, entranceStyle } = usePageEntrance(`checkout.payment.${orderId}`, {
     enabled: !isPending && Boolean(order),
     offsetMs: 90,
@@ -183,6 +185,11 @@ export function QrPayment({ orderId }: QrPaymentProps) {
     router.push(checkoutConfirmRoute(order.product.id, order.projectId))
   }
 
+  const startNewOrder = () => {
+    if (!order) return
+    router.push(checkoutConfirmRoute(order.product.id, order.projectId, order.api?.offerKey))
+  }
+
   const openSupport = () => {
     if (!order) return
     const subject = t('supportSubject', { code: order.id })
@@ -264,7 +271,10 @@ export function QrPayment({ orderId }: QrPaymentProps) {
     )
   }
 
-  const amountLabel = formatPriceTag(order.total, locale)
+  // Đã nhận một phần thì QR và số cần chuyển là phần CÒN THIẾU (BR-PAY-002).
+  const partial = order.api?.state === 'PartiallyPaid'
+  const payable = partial && order.api ? order.api.remainingAmount : order.total
+  const amountLabel = formatPriceTag(payable, locale)
   const verifying = order.status === 'verifying'
   const rows = [
     {
@@ -288,7 +298,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
       copyValue: order.transfer.accountName,
       highlight: false
     },
-    { key: 'amount', label: t('amount'), value: amountLabel, copyValue: String(order.total), highlight: false },
+    { key: 'amount', label: t('amount'), value: amountLabel, copyValue: String(payable), highlight: false },
     {
       key: 'content',
       label: t('content'),
@@ -402,8 +412,13 @@ export function QrPayment({ orderId }: QrPaymentProps) {
                 // Đơn API: `qrPayload` là ẢNH QR do cổng trả về (`qrUrl`) — hiện
                 // thẳng ảnh thay vì tự dựng mã. Không dùng next/image vì miền ảnh
                 // của cổng không khai trong next.config.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={order.transfer.qrPayload} alt='' width={200} height={200} className='size-[200px]' />
+
+                order.transfer.qrPayload ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={order.transfer.qrPayload} alt='' width={200} height={200} className='size-[200px]' />
+                ) : (
+                  <p className='text-muted-foreground px-4 text-center text-sm'>{t('qrMissing')}</p>
+                )
               ) : (
                 <QRCodeCanvas value={order.transfer.qrPayload} size={200} level='M' />
               )}
@@ -411,6 +426,17 @@ export function QrPayment({ orderId }: QrPaymentProps) {
           </div>
 
           <p className='mt-4 text-2xl font-bold tracking-tight'>{amountLabel}</p>
+          {partial && order.api ? (
+            <p
+              role='status'
+              className='bg-brand-orange/10 border-brand-orange/30 mt-2 max-w-sm rounded-lg border px-3 py-2 text-sm'
+            >
+              {t('partialNotice', {
+                received: formatPriceTag(order.api.receivedAmount, locale),
+                remaining: formatPriceTag(order.api.remainingAmount, locale)
+              })}
+            </p>
+          ) : null}
           <p className='text-muted-foreground font-mono text-xs'>#{order.id}</p>
 
           <div className='mt-4 flex flex-wrap justify-center gap-2'>
@@ -503,6 +529,12 @@ export function QrPayment({ orderId }: QrPaymentProps) {
                 <LoaderCircle className='size-4 animate-spin' />
                 {t('verifying')}
               </Button>
+            ) : isApiOrder && expired ? (
+              // Đơn API hết hạn không tạo lại QR được (BE không có endpoint đó, "Tạo lại mã" chỉ
+              // đọc lại cùng đơn): muốn trả tiếp phải tạo đơn MỚI, BE tự đóng đơn cũ.
+              <Button className='flex-1' onClick={startNewOrder}>
+                {t('newOrder')}
+              </Button>
             ) : expired ? (
               <Button className='flex-1' onClick={() => regenerate.mutate()} disabled={regenerate.isPending}>
                 {regenerate.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
@@ -541,7 +573,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
               {t('support')}
             </Button>
             {/* Hủy đơn — chỉ luồng API (mock hết hạn thì tự sang S07). */}
-            {isApiOrder && !expired ? (
+            {isApiOrder && !expired && !partial ? (
               <Button variant='ghost' onClick={() => cancelOrder.mutate()} disabled={cancelOrder.isPending}>
                 {cancelOrder.isPending ? <LoaderCircle className='size-4 animate-spin' /> : null}
                 {cancelOrder.isPending ? t('cancelling') : t('cancel')}

@@ -210,6 +210,16 @@
       "title": "Đã xảy ra lỗi",
       "description": "Một lỗi không mong muốn đã xảy ra khi hiển thị trang này.",
       "action": "Thử lại"
+    },
+    "payment": {
+      "PaymentUnavailable": "Thanh toán tạm thời chưa sẵn sàng. Bạn thử lại sau ít phút nhé.",
+      "PlanNotPurchasable": "Gói này hiện không còn mở bán.",
+      "PendingDesignOrderExists": "Bạn đang có một đơn gói thiết kế chờ thanh toán. Hãy hoàn tất hoặc huỷ đơn đó trước khi tạo đơn mới.",
+      "PaymentOrderCannotCancel": "Không huỷ được đơn này vì hệ thống đã ghi nhận tiền chuyển vào. Bạn hãy chuyển nốt số còn thiếu.",
+      "PaymentOrderVersionConflict": "Đơn vừa có thay đổi. Bạn tải lại trang rồi thử lại.",
+      "AccessForbidden": "Chỉ tài khoản khách hàng mới mua được gói. Tài khoản quản trị không dùng để mua.",
+      "IdempotencyConflict": "Yêu cầu bị trùng. Bạn tải lại trang rồi thử lại.",
+      "PaymentInputInvalid": "Thông tin gói hoặc chu kỳ không hợp lệ. Bạn tải lại trang rồi chọn lại gói."
     }
   },
   "validation": {
@@ -5559,7 +5569,8 @@
       "termsRequired": "Bạn cần đồng ý với điều khoản trước khi thanh toán.",
       "termsRequiredToast": "Vui lòng tích đồng ý điều khoản trước.",
       "missingProduct": "Không tìm thấy gói bạn chọn. Quay lại bảng giá để chọn lại.",
-      "backToPlans": "Về bảng giá"
+      "backToPlans": "Về bảng giá",
+      "loadingProduct": "Đang tải gói…"
     },
     "payment": {
       "title": "Thanh toán",
@@ -5600,7 +5611,10 @@
       "support": "Cần hỗ trợ?",
       "supportToast": "Đội hỗ trợ BuildX sẽ liên hệ với bạn qua số điện thoại đã đăng ký.",
       "supportSubject": "Hỗ trợ đơn hàng {code}",
-      "supportBody": "Tôi cần hỗ trợ với đơn hàng {code}."
+      "supportBody": "Tôi cần hỗ trợ với đơn hàng {code}.",
+      "partialNotice": "Đã nhận {received}, còn thiếu {remaining}. Vui lòng chuyển thêm đúng số còn thiếu theo mã QR này.",
+      "qrMissing": "Mã QR chưa sẵn sàng. Bạn tải lại trang sau ít phút.",
+      "newOrder": "Tạo đơn mới"
     },
     "verifying": {
       "title": "Đang xác nhận chuyển khoản",
@@ -5655,7 +5669,9 @@
       "myProjects": "Vào dự án của tôi",
       "dashboard": "Bảng điều khiển giám sát",
       "dataNote": "Dữ liệu dự án của bạn được lưu riêng và bảo mật trên hệ thống BuildX.",
-      "assignNote": "Đội hỗ trợ sẽ phân công kỹ sư và mở 6 giai đoạn giám sát cho dự án của bạn."
+      "assignNote": "Đội hỗ trợ sẽ phân công kỹ sư và mở 6 giai đoạn giám sát cho dự án của bạn.",
+      "assignNoteApi": "Gói giám sát đã sẵn sàng. Hãy gán gói vào công trình của bạn để bắt đầu; gói cần được gán trong vòng một năm kể từ hôm nay.",
+      "assignSite": "Gán vào công trình"
     }
   },
   "supervision": {

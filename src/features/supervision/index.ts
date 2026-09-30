@@ -11,6 +11,6 @@ export { SupervisionSummary } from './components/supervision-summary'
 
 export { STAGE_KEYS, STAGE_COUNT } from './constants/supervision.constants'
 export { useSupervisionProject } from './hooks/use-supervision'
-export { useSupervisionPackages } from './hooks/use-supervision-packages'
+export { useSupervisionPackageList, useSupervisionPackages } from './hooks/use-supervision-packages'
 export type { SupervisionPackageView } from './api/supervision.merge'
 export type { StageKey, SupervisionProject, SupervisionStage } from './types/supervision.types'

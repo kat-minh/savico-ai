@@ -241,7 +241,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
               </h1>
               {/* Hình S08: dòng dẫn cũng ngắt thành hai dòng. */}
               <p className='text-muted-foreground mt-3.5 text-sm whitespace-pre-line text-pretty'>
-                {isSupervision ? t('assignNote') : t('subtitle')}
+                {isSupervision ? (isApiOrder ? t('assignNoteApi') : t('assignNote')) : t('subtitle')}
               </p>
             </div>
           </div>
@@ -330,6 +330,15 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
                 className='h-13 flex-1 transition-[background-color,transform] hover:bg-muted hover:text-foreground active:scale-[0.98] motion-reduce:transform-none'
               >
                 <Link href={supervisionRoute(order.projectId)}>{t('dashboard')}</Link>
+              </Button>
+            ) : isSupervision && isApiOrder ? (
+              // Gói giám sát mua qua API được cấp ở trạng thái CHƯA GÁN (hạn gán một năm):
+              // việc tiếp theo là gán vào công trình, không phải mở dự án.
+              <Button
+                asChild
+                className='h-13 flex-1 transition-[background-color,transform] hover:bg-muted hover:text-foreground active:scale-[0.98] motion-reduce:transform-none'
+              >
+                <Link href={ROUTES.ACCOUNT_SITES}>{t('assignSite')}</Link>
               </Button>
             ) : (
               <Button

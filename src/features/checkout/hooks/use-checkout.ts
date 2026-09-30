@@ -1,6 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
@@ -11,10 +12,34 @@ import {
   checkoutPaymentRoute,
   checkoutVerifyingRoute
 } from '@/shared/constants/routes'
+import { QUERY_KEY_ROOTS } from '@/shared/constants/query-keys'
 import { isApiError } from '@/shared/lib/api'
 import { checkoutApi } from '../api/checkout.api'
 import { checkoutKeys } from '../api/checkout.keys'
 import type { CreateOrderPayload, Order } from '../types/checkout.types'
+
+/**
+ * Mã lỗi nghiệp vụ của luồng mua gói (TDD-PAY-001) có câu riêng cho khách. BE chỉ trả
+ * `messageCode`; ngoài danh sách này (hoặc lỗi mạng) rơi về câu BE gửi kèm, rồi câu chung.
+ */
+const PAYMENT_ERROR_CODES = [
+  'PaymentUnavailable',
+  'PlanNotPurchasable',
+  'PendingDesignOrderExists',
+  'PaymentOrderCannotCancel',
+  'PaymentOrderVersionConflict',
+  'AccessForbidden',
+  'IdempotencyConflict',
+  'PaymentInputInvalid'
+] as const
+
+type PaymentErrorCode = (typeof PAYMENT_ERROR_CODES)[number]
+
+function paymentErrorMessage(error: unknown, translate: (code: PaymentErrorCode) => string, fallback: string): string {
+  if (!isApiError(error)) return fallback
+  const code = PAYMENT_ERROR_CODES.find((known) => known === error.messageCode)
+  return code ? translate(code) : error.message || fallback
+}
 
 /**
  * Một đơn hàng.
@@ -28,7 +53,8 @@ interface UseOrderOptions {
 }
 
 export function useOrder(orderId: string, { refetchIntervalMs = 3_000 }: UseOrderOptions = {}) {
-  return useQuery({
+  const queryClient = useQueryClient()
+  const query = useQuery({
     queryKey: checkoutKeys.order(orderId),
     queryFn: () => checkoutApi.getOrder(orderId),
     enabled: Boolean(orderId),
@@ -42,6 +68,19 @@ export function useOrder(orderId: string, { refetchIntervalMs = 3_000 }: UseOrde
     // như câu trên màn: "Bạn có thể giữ nguyên trang này".
     refetchIntervalInBackground: true
   })
+
+  // Đơn vừa chuyển sang `paid`: gói, hạn mức và gói giám sát của khách đã đổi. Cache toàn
+  // cục giữ 1 phút nên nếu không làm mới, cổng "Tạo dự án" vẫn thấy "chưa có gói" và đá
+  // khách về bảng giá ngay sau khi họ vừa trả tiền.
+  const paid = query.data?.status === 'paid'
+  useEffect(() => {
+    if (!paid) return
+    for (const root of [QUERY_KEY_ROOTS.account, QUERY_KEY_ROOTS.handbook, QUERY_KEY_ROOTS.site]) {
+      void queryClient.invalidateQueries({ queryKey: [root] })
+    }
+  }, [paid, queryClient])
+
+  return query
 }
 
 interface UseCreateOrderOptions {
@@ -63,7 +102,7 @@ export function useCreateOrder({ beforeNavigate }: UseCreateOrderOptions = {}) {
       router.push(checkoutPaymentRoute(order.id))
     },
     onError: (error) => {
-      toast.error(isApiError(error) ? error.message : t('generic'))
+      toast.error(paymentErrorMessage(error, (code) => t(`payment.${code}`), t('generic')))
     }
   })
 }
@@ -134,7 +173,7 @@ export function useCancelOrder(orderId: string) {
       router.replace(checkoutFailedRoute(order.id))
     },
     onError: (error) => {
-      toast.error(isApiError(error) ? error.message : t('generic'))
+      toast.error(paymentErrorMessage(error, (code) => t(`payment.${code}`), t('generic')))
     }
   })
 }

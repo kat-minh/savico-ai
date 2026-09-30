@@ -1,8 +1,11 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 import { OrderConfirm, isApiOrderId, type OfferKey, type OrderKind } from '@/features/checkout'
 import { usePlans } from '@/features/plans'
-import { useSupervisionPackages } from '@/features/supervision'
+import { useSupervisionPackageList } from '@/features/supervision'
+import { LoadingSpinner } from '@/shared/components/common'
 
 interface ConfirmViewProps {
   productId: string
@@ -20,21 +23,33 @@ function toOfferKey(offer?: string): OfferKey | undefined {
 /**
  * Cầu nối tầng app cho màn Xác nhận đơn (S03).
  *
- * Gói ĐẾN TỪ API (planId là UUID) không nằm trong kho CMS mà `OrderConfirm` đọc,
- * nên ở đây — tầng được phép chạm cả `features/plans` lẫn `features/checkout` —
- * tra gói từ `usePlans()` rồi truyền bản chụp xuống. Gói mock (id không phải
+ * Gói ĐẾN TỪ API (planId là UUID) không nằm trong kho CMS mà `OrderConfirm` đọc, nên ở
+ * đây — tầng được phép chạm cả `features/plans`, `features/supervision` lẫn
+ * `features/checkout` — tra gói rồi truyền bản chụp xuống. Gói mock (id không phải
  * UUID) bỏ qua nhánh này, `OrderConfirm` tự đọc CMS như cũ.
+ *
+ * `kind` KHÔNG suy từ `?project=`: mua gói giám sát không cần công trình (BR-PAY-001
+ * khoản 4), nên khách vào từ tab Bảng giá sẽ không có tham số đó mà vẫn mua giám sát.
+ * Loại đơn lấy từ chính gói: có trong danh sách gói giám sát thì là giám sát.
  */
 export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewProps) {
-  const { data: plans } = usePlans()
-  const packages = useSupervisionPackages()
+  const t = useTranslations('checkout.confirm')
+  const { data: plans, isPending: plansPending } = usePlans()
+  const { packages, isPending: packagesPending } = useSupervisionPackageList()
 
   const isApi = isApiOrderId(productId)
-  const apiPlan = isApi && kind === 'design' ? plans?.find((plan) => plan.id === productId) : undefined
-  // Gói giám sát đến từ API cũng không nằm trong kho CMS mà `OrderConfirm` đọc, nên
-  // dựng bản chụp ở đây như gói thiết kế. Giám sát không có hạn mức — thẻ hiện đúng
-  // các dòng lợi ích của mock.
-  const apiPackage = isApi && kind === 'supervision' ? packages.find((item) => item.id === productId) : undefined
+  const pkg = packages.find((item) => item.id === productId)
+  const resolvedKind: OrderKind = pkg ? 'supervision' : isApi ? 'design' : kind
+
+  const apiPackage = isApi ? pkg : undefined
+  const apiPlan = isApi && !pkg ? plans?.find((plan) => plan.id === productId) : undefined
+
+  // Chờ danh sách gói từ API về mới quyết định — nếu không, màn sẽ nháy "không tìm
+  // thấy gói" trong lúc gói còn đang tải.
+  if (isApi && !apiPackage && !apiPlan && (plansPending || packagesPending)) {
+    return <LoadingSpinner className='py-24' label={t('loadingProduct')} />
+  }
+
   const apiProduct = apiPackage
     ? {
         name: apiPackage.name,
@@ -60,7 +75,7 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
   return (
     <OrderConfirm
       productId={productId}
-      kind={kind}
+      kind={resolvedKind}
       projectId={projectId}
       offerKey={toOfferKey(offer)}
       apiProduct={apiProduct}

@@ -29,14 +29,22 @@ async function fetchPublishedSupervisionPlans(): Promise<BmtSupervisionPlanItem[
  * Các gói giám sát của trang S19 và luồng mua: MOCK (kho CMS) làm nền, BMT API ghi đè
  * từng field nó có (xem `supervision.merge.ts`). Kho CMS đọc đồng bộ nên lần vẽ đầu
  * đã đủ thẻ, dữ liệu API đến sau chỉ đổi những field nó có — không nháy trống.
+ *
+ * `isPending` báo dữ liệu API CHƯA về: màn cần biết gói có phải đến từ API hay không
+ * (như màn xác nhận đơn) phải chờ cờ này, nếu không sẽ tưởng gói không tồn tại.
  */
-export function useSupervisionPackages(): SupervisionPackageView[] {
+export function useSupervisionPackageList(): { packages: SupervisionPackageView[]; isPending: boolean } {
   const base = useCmsCollection('supervisionPackages')
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: supervisionKeys.packages(),
     queryFn: fetchPublishedSupervisionPlans,
     staleTime: 60_000
   })
 
-  return useMemo(() => mergeApiIntoPackages(base, data ?? []), [base, data])
+  const packages = useMemo(() => mergeApiIntoPackages(base, data ?? []), [base, data])
+  return { packages, isPending }
+}
+
+export function useSupervisionPackages(): SupervisionPackageView[] {
+  return useSupervisionPackageList().packages
 }

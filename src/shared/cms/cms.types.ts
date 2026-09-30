@@ -1665,6 +1665,29 @@ export interface CmsOrder {
   paidAt?: string
   /** Ghi chú nội bộ — số tham chiếu sao kê, lý do báo chưa nhận… Khách không thấy. */
   opsNote?: string
+  /**
+   * Chỉ có với đơn từ BMT API (TDD-PAY-001) — mock không có. Giữ những thứ màn thanh
+   * toán cần mà `CmsOrder` không có chỗ: phiên bản để huỷ đơn, số đã nhận / còn thiếu
+   * cho trạng thái thanh toán một phần, và độ lệch đồng hồ để đếm ngược đúng.
+   */
+  api?: CmsOrderApiExtras
+}
+
+export interface CmsOrderApiExtras {
+  /** `expectedVersion` của `POST /payment-orders/{id}/cancel`. */
+  version: number
+  /** Trạng thái gốc của BE — `CmsOrderStatus` gộp Pending và PartiallyPaid làm một. */
+  state: 'Pending' | 'PartiallyPaid' | 'Paid' | 'Expired' | 'Canceled'
+  /** VND. BE trả chuỗi số nguyên; đã đổi sang số. */
+  receivedAmount: number
+  remainingAmount: number
+  extraReceivedAmount: number
+  /** `serverNowUtc − giờ máy khách` lúc nhận đơn (ms). Cộng vào giờ máy khi so với hạn. */
+  serverOffsetMs: number
+  /** Nội dung chuyển khoản; QR giữ nguyên mã này khi cập nhật số tiền. */
+  paymentCode: string
+  /** Lựa chọn giá của đơn — cần để tạo đơn MỚI cùng gói khi đơn này hết hạn. */
+  offerKey?: 'Month' | 'Year' | 'ConstructionSite'
 }
 
 /* ===========================================================================

@@ -210,6 +210,16 @@
       "title": "Something went wrong",
       "description": "An unexpected error occurred while rendering this page.",
       "action": "Try again"
+    },
+    "payment": {
+      "PaymentUnavailable": "Payments are temporarily unavailable. Please try again in a few minutes.",
+      "PlanNotPurchasable": "This plan is no longer on sale.",
+      "PendingDesignOrderExists": "You already have a design plan order awaiting payment. Finish or cancel it before creating a new one.",
+      "PaymentOrderCannotCancel": "This order cannot be canceled because a transfer has already been recorded. Please transfer the remaining amount.",
+      "PaymentOrderVersionConflict": "The order just changed. Reload the page and try again.",
+      "AccessForbidden": "Only customer accounts can buy plans. Admin accounts cannot be used to purchase.",
+      "IdempotencyConflict": "Duplicate request. Reload the page and try again.",
+      "PaymentInputInvalid": "The plan or billing cycle is invalid. Reload the page and pick the plan again."
     }
   },
   "validation": {
@@ -5559,7 +5569,8 @@
       "termsRequired": "Please accept the terms before paying.",
       "termsRequiredToast": "Please tick the terms agreement before continuing.",
       "missingProduct": "We could not find the plan you picked. Go back to pricing and choose again.",
-      "backToPlans": "Back to pricing"
+      "backToPlans": "Back to pricing",
+      "loadingProduct": "Loading plan…"
     },
     "payment": {
       "title": "Payment",
@@ -5600,7 +5611,10 @@
       "support": "Need help?",
       "supportToast": "The BuildX support team will contact you on your registered phone number.",
       "supportSubject": "Support for order {code}",
-      "supportBody": "I need support with order {code}."
+      "supportBody": "I need support with order {code}.",
+      "partialNotice": "Received {received}, {remaining} still due. Please transfer the remaining amount using this QR code.",
+      "qrMissing": "The QR code is not ready yet. Reload the page in a few minutes.",
+      "newOrder": "Create a new order"
     },
     "verifying": {
       "title": "Confirming your transfer",
@@ -5655,7 +5669,9 @@
       "myProjects": "Go to my projects",
       "dashboard": "Supervision dashboard",
       "dataNote": "Your project data is stored privately and securely on BuildX.",
-      "assignNote": "The support team will assign an engineer and open the six supervision stages for your project."
+      "assignNote": "The support team will assign an engineer and open the six supervision stages for your project.",
+      "assignNoteApi": "Your supervision plan is ready. Assign it to one of your construction sites to get started; it must be assigned within one year from today.",
+      "assignSite": "Assign to a site"
     }
   },
   "supervision": {

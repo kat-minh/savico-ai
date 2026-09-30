@@ -19,7 +19,13 @@ export const QUERY_KEY_ROOTS = {
   dashboard: 'dashboard',
   profile: 'profile',
   settings: 'settings',
-  location: 'location'
+  location: 'location',
+  /** Gói đã mua, lịch sử mua (`features/account`). */
+  account: 'account',
+  /** Hạn mức tra cứu thư viện còn lại (`features/handbook`). */
+  handbook: 'handbook',
+  /** Công trình và gói giám sát đã cấp (`features/site`). */
+  site: 'site'
 } as const
 
 export type QueryKeyRoot = (typeof QUERY_KEY_ROOTS)[keyof typeof QUERY_KEY_ROOTS]
