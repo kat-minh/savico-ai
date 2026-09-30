@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  AimOutlined,
   AppstoreOutlined,
   BookOutlined,
   CalendarOutlined,
@@ -67,10 +66,10 @@ export const ADMIN_NAV = [
   {
     key: 'contractorFlow',
     icon: TeamOutlined,
+    // Đã ẩn "Quy tắc đề xuất" (contractorMatching) và "Lịch khảo sát"
+    // (surveySchedule) khỏi menu theo yêu cầu; route và trang vẫn còn để bật lại.
     items: [
       { key: 'contractors', href: ADMIN_ROUTES.CONTRACTORS, icon: TeamOutlined },
-      { key: 'contractorMatching', href: ADMIN_ROUTES.CONTRACTOR_MATCHING, icon: AimOutlined },
-      { key: 'surveySchedule', href: ADMIN_ROUTES.SURVEY_SCHEDULE, icon: ScheduleOutlined },
       { key: 'invitations', href: ADMIN_ROUTES.INVITATIONS, icon: SendOutlined }
     ]
   },
