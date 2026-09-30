@@ -349,7 +349,7 @@ function HeroDossierCard({ skip, skipStar, seq, onCreateProject }: HeroDossierCa
 
       {/* "Xem hồ sơ mẫu": mở hộp thoại Tạo dự án mới (sheet góp ý BuildX) —
           trước đây chỉ cuộn xuống khối "Hồ sơ mẫu" bên dưới. */}
-      <Button type='button' className='brand-green-button h-8.5 w-full rounded-lg text-xs' onClick={onCreateProject}>
+      <Button type='button' className='brand-green-button h-8.5 w-full rounded-full text-xs' onClick={onCreateProject}>
         {t('cta')}
       </Button>
     </motion.div>

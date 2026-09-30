@@ -52,8 +52,8 @@ import { useDwellNudge } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
 import {
-  CONTRACTOR_SORTS,
   EXPERIENCE_LEVELS,
+  LANDING_SORTS,
   MATCHES_PINNED_CONTRACTOR_KEY,
   PROJECT_SCALES,
   RATING_LEVELS,
@@ -931,7 +931,7 @@ export function ContractorLanding() {
                 hở giữa chúng đều ~26px dù chữ dài ngắn khác nhau), không phải
                 dồn về bên trái. */}
             <div className='flex flex-wrap justify-between gap-x-6 gap-y-2 border-b'>
-              {CONTRACTOR_SORTS.map((key) => (
+              {LANDING_SORTS.map((key) => (
                 <button
                   key={key}
                   type='button'

@@ -24,7 +24,7 @@ export {
   SUPERVISION_PACKAGES_SEED,
   SUPERVISION_STAGES_SEED
 } from './plans.seed'
-export { PRIVACY_PAGE_SEED, SITE_SETTINGS_SEED, TERMS_PAGE_SEED } from './site.seed'
+export { PRIVACY_PAGE_SEED, SITE_SETTINGS_SEED, TERMS_PAGE_SEED, TESTIMONIALS_SEED } from './site.seed'
 export { CONTRACTOR_INVITATIONS_SEED } from './invitations.seed'
 export { CONTRACTOR_MATCHING_SEED, CONTRACTORS_SEED, SURVEY_SCHEDULE_SEED } from './contractors.seed'
 export { DISCOUNT_CODES_SEED, ORDERS_SEED } from './commerce.seed'

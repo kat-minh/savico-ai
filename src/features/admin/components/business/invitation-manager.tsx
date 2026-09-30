@@ -271,7 +271,7 @@ export function InvitationManager() {
                         <div key={doc.name}>
                           {doc.name}{' '}
                           <Text type='secondary' style={{ fontSize: 12 }}>
-                            ({(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB)
+                            {`(${(doc.sizeBytes / 1024 / 1024).toFixed(1)} MB)`}
                           </Text>
                         </div>
                       ))

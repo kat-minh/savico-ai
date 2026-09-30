@@ -185,7 +185,7 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
             <Button
               data-create-project-trigger
               size='sm'
-              className='rounded-xl transition-[transform,filter,box-shadow] duration-200'
+              className='rounded-full transition-[transform,filter,box-shadow] duration-200'
               onClick={onCreateProject}
             >
               <Plus data-create-project-plus className='size-4 transition-transform duration-300' />

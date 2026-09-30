@@ -56,19 +56,12 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
 
   return (
     <section id='home-services' className='bg-primary-strong text-primary-foreground relative isolate overflow-hidden'>
-      <div className='relative mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8 lg:py-12'>
+      <div className='relative mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
         <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
           <div className='space-y-2'>
-            {/* Dưới `lg` khối đầu chỉ còn tiêu đề + mô tả: dòng nhãn ẩn, tiêu đề đổi thành
-                "Gói dịch vụ BuildX" (`titleMobile`) thay cho nhãn. Từ `lg` giữ nguyên cả hai. */}
-            <p className='text-primary-foreground/70 hidden text-xs font-semibold tracking-[0.16em] uppercase lg:block'>
-              {t('eyebrow')}
-            </p>
-            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>
-              <span className='lg:hidden'>{t('titleMobile')}</span>
-              <span className='hidden lg:inline'>{t('title')}</span>
-            </h2>
-            <p className='text-primary-foreground/80 max-w-3xl text-sm'>{t('subtitle')}</p>
+            {/* Góp ý BuildX: bỏ nhãn "Bảng giá BuildX" — chỉ còn tiêu đề + mô tả. */}
+            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
+            <p className='text-primary-foreground max-w-3xl text-sm'>{t('subtitle')}</p>
           </div>
 
           {/* Dưới `lg` bỏ "Xem tất cả gói", thay bằng dòng "Tham khảo: Bảng giá" (Responsive case 11). */}
@@ -86,8 +79,10 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
             href={ROUTES.PLANS}
             className='hidden items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline lg:inline-flex'
           >
-            {t('viewAll')}
-            <ArrowRight className='size-4' />
+            <span className='sm:hidden'>{t('viewAllMobile')}</span>
+            <span className='hidden sm:inline'>{t('viewAll')}</span>
+            <ChevronRight className='size-4 lg:hidden' />
+            <ArrowRight className='hidden size-4 lg:block' />
           </Link>
         </header>
 
@@ -115,7 +110,13 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                   )}
                 >
                   <div className='flex flex-wrap items-center justify-between gap-2'>
-                    <Icon className='text-primary size-6 shrink-0' strokeWidth={1.75} />
+                    <Icon
+                      className={cn(
+                        'size-6 shrink-0 transition-colors duration-500 ease-out motion-reduce:transition-none',
+                        isHovered ? 'text-brand-orange' : 'text-primary'
+                      )}
+                      strokeWidth={1.75}
+                    />
                     {isOwned ? (
                       <span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-[11px] font-semibold whitespace-nowrap'>
                         {t('ownedLabel', { count: ownedDesignRemaining })}
@@ -133,7 +134,7 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                   <div className='flex min-h-5 items-end max-sm:hidden'>
                     <span
                       className={cn(
-                        'text-primary text-[11px] font-semibold transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
+                        'text-brand-orange text-[11px] font-semibold transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
                         isHovered ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
                       )}
                     >
@@ -147,8 +148,10 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                     {isOwned ? (
                       <Button
                         asChild
-                        variant={isHovered ? 'default' : 'outline'}
-                        className='h-9 w-full rounded-lg text-xs transition-colors'
+                        className={cn(
+                          'h-9 w-full rounded-full text-xs transition-colors',
+                          isHovered ? 'brand-orange-button' : 'brand-green-button'
+                        )}
                       >
                         {/* Góp ý BuildX: nút đúng với nơi đến — "Xem gói thiết kế" mở Bảng giá. */}
                         <Link href={ROUTES.PLANS}>
@@ -159,8 +162,10 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                     ) : service === 'supervision' && ownsSupervision ? (
                       <Button
                         asChild
-                        variant={isHovered ? 'default' : 'outline'}
-                        className='h-9 w-full rounded-lg text-xs transition-colors'
+                        className={cn(
+                          'h-9 w-full rounded-full text-xs transition-colors',
+                          isHovered ? 'brand-orange-button' : 'brand-green-button'
+                        )}
                       >
                         <Link href={ROUTES.ACCOUNT}>
                           {t('openSupervision')}
@@ -169,8 +174,10 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                       </Button>
                     ) : service === 'turnkey' ? (
                       <Button
-                        variant={isHovered ? 'default' : 'outline'}
-                        className='h-9 w-full rounded-lg text-xs transition-colors'
+                        className={cn(
+                          'h-9 w-full rounded-full text-xs transition-colors',
+                          isHovered ? 'brand-orange-button' : 'brand-green-button'
+                        )}
                         onClick={() => setTurnkeyOpen(true)}
                       >
                         {t(`items.${service}.action`)}
@@ -179,8 +186,10 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                     ) : (
                       <Button
                         asChild
-                        variant={isHovered ? 'default' : 'outline'}
-                        className='h-9 w-full rounded-lg text-xs transition-colors'
+                        className={cn(
+                          'h-9 w-full rounded-full text-xs transition-colors',
+                          isHovered ? 'brand-orange-button' : 'brand-green-button'
+                        )}
                       >
                         <Link href={SERVICE_HREF[service]}>
                           {t(`items.${service}.action`)}

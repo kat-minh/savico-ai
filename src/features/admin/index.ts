@@ -21,6 +21,7 @@ export { LibraryTemplateManager } from './components/handbook/library-template-m
 export { ArticleManager } from './components/handbook/article-manager'
 export { ArticleLabelManager } from './components/handbook/article-label-manager'
 export { HandbookStepManager } from './components/handbook/handbook-step-manager'
+export { TestimonialManager } from './components/site/testimonial-manager'
 export { GuideVideoManager } from './components/guide/guide-manager'
 
 // Vận hành — dữ liệu backend sinh ra, vẫn là màn đứng riêng.

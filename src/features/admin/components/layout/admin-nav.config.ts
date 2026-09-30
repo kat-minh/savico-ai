@@ -125,7 +125,8 @@ export const ADMIN_NAV = [
       { key: 'templateViews', href: ADMIN_ROUTES.TEMPLATE_VIEWS, icon: ThunderboltOutlined },
       { key: 'articles', href: ADMIN_ROUTES.ARTICLES, icon: FileTextOutlined },
       { key: 'handbookSteps', href: ADMIN_ROUTES.HANDBOOK_STEPS, icon: OrderedListOutlined },
-      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined }
+      { key: 'guideVideos', href: ADMIN_ROUTES.GUIDE_VIDEOS, icon: PlayCircleOutlined },
+      { key: 'testimonials', href: ADMIN_ROUTES.TESTIMONIALS, icon: TeamOutlined }
     ]
   }
   // Đã ẩn "Cấu hình dự toán" (config: nhóm chi phí, hạng mục, đơn giá vật liệu,

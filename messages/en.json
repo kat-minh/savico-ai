@@ -477,7 +477,7 @@
       }
     },
     "painPoints": {
-      "title": "BUILDX helps you stay in control at every step",
+      "title": "BuildX helps you stay in control at every step",
       "subtitle": "From budget and design to choosing a contractor and supervising construction.",
       "note": "Sound familiar?",
       "items": {
@@ -505,7 +505,7 @@
     },
     "journey": {
       "title": "A clear journey for your project",
-      "subtitle": "BUILDX stays with you and helps you track your project from start to finish.",
+      "subtitle": "BuildX stays with you and helps you track your project from start to finish.",
       "cta": "Start a project",
       "resumeCta": "Continue project",
       "currentStepBadge": "You're on this step",
@@ -553,12 +553,12 @@
       }
     },
     "services": {
-      "eyebrow": "BUILDX PRICING",
       "title": "Pick the package that fits where you are",
       "subtitle": "From design and estimate to finding a contractor and supervising the build — each package solves one clear job.",
       "viewAll": "Explore",
       "referenceLabel": "See:",
       "referenceLink": "Pricing",
+      "viewAllMobile": "Explore",
       "ownedLabel": "Your package - {count} uses left",
       "openPackage": "View design plans",
       "openSupervision": "Open my plan",
@@ -587,12 +587,13 @@
           "action": "Request a call",
           "usedAtStep": "Used in steps 04–05"
         }
-      },
-      "titleMobile": "BuildX pricing"
+      }
     },
     "dossiers": {
       "eyebrow": "SAMPLE DOSSIERS",
       "title": "Sample library",
+      "tab2d": "2D drawing samples",
+      "tab3d": "3D drawing samples",
       "viewAll": "See all sample dossiers",
       "viewOne": "View sample dossier",
       "items": {
@@ -657,6 +658,7 @@
       "currency": "đ"
     },
     "brands": {
+      "title": "Trusted by",
       "label": "TRUSTED BY",
       "items": {
         "hoaphat": "Hòa Phát",
@@ -671,7 +673,7 @@
       "label": "WHAT CUSTOMERS SAY ABOUT BUILDX",
       "items": {
         "tuan": {
-          "quote": "“I don't know much about construction, so at first it all felt vague. BUILDX made it easier to picture what I'd do and roughly what it would cost.”",
+          "quote": "“I don't know much about construction, so at first it all felt vague. BuildX made it easier to picture what I'd do and roughly what it would cost.”",
           "name": "Minh Tuan",
           "meta": "Townhouse · 120m² · Buon Ma Thuot"
         },
@@ -681,7 +683,7 @@
           "meta": "Villa · 280m² · Dak Lak"
         },
         "bao": {
-          "quote": "“I used to research everything myself, which took a lot of time. BUILDX puts it all in one place, easier to follow and to keep costs in check.”",
+          "quote": "“I used to research everything myself, which took a lot of time. BuildX puts it all in one place, easier to follow and to keep costs in check.”",
           "name": "Quoc Bao",
           "meta": "Villa · 320m² · Da Lat"
         },
@@ -691,12 +693,12 @@
           "meta": "Townhouse · 95m² · Ho Chi Minh City"
         },
         "nam": {
-          "quote": "“My main concern was whether the costs were clear. BUILDX gave me the bigger picture, so decisions felt far less uncertain.”",
+          "quote": "“My main concern was whether the costs were clear. BuildX gave me the bigger picture, so decisions felt far less uncertain.”",
           "name": "Hoang Nam",
           "meta": "Townhouse · 140m² · Binh Duong"
         },
         "vy": {
-          "quote": "“I don't have much time to follow things from the start, so I needed an easy platform. BUILDX keeps me on top of progress and the current stage.”",
+          "quote": "“I don't have much time to follow things from the start, so I needed an easy platform. BuildX keeps me on top of progress and the current stage.”",
           "name": "Thanh Vy",
           "meta": "Villa · 250m² · Can Tho"
         }
@@ -2294,6 +2296,7 @@
       "templates3d": "3D interior templates",
       "templateViews": "Template view limit",
       "articleLabels": "News categories",
+      "testimonials": "Testimonials",
       "handbookSteps": "Handbook steps",
       "costGroups": "Cost groups",
       "costItems": "Cost items",
@@ -4271,6 +4274,18 @@
         "inactive": "An article is no longer Active."
       }
     },
+    "testimonials": {
+      "description": "The reviews in the \"What customers say about BuildX\" strip on the home page: avatar, name, project details and quote. Blank fields fall back to the site default text. Inactive reviews are hidden from the home page.",
+      "name": "Customer name",
+      "meta": "Project details",
+      "metaHint": "For example: Townhouse · 120m² · Buon Ma Thuot.",
+      "quote": "Review text",
+      "avatar": "Avatar",
+      "order": "Order",
+      "orderRule": "Order is a whole number from 1.",
+      "orderHint": "Lower numbers show first on the home page.",
+      "defaultNote": "Default site text — edit to override."
+    },
     "articleLabels": {
       "description": "Article labels and their order in the customer filter. Labels are never deleted — only made Inactive; Inactive labels cannot be used for new articles and are hidden from the filter.",
       "name": "Label name",
@@ -5807,6 +5822,7 @@
       }
     },
     "dashboard": {
+      "stageShort": "Stage {index}",
       "title": "Supervision dashboard",
       "breadcrumbProjects": "My projects",
       "lead": "Six fixed stages from legal paperwork to acceptance and handover. Uploading named photos or documents completes a stage and moves the progress thread on; the supervisor then inspects on site and confirms. Confirmed records only change when both sides agree.",

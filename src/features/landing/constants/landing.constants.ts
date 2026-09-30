@@ -1,5 +1,3 @@
-import type { SiteImageKey } from '@/shared/lib/imagery'
-
 /** 4 tab của khung minh họa sản phẩm ở hero (mục II.2). */
 export const SHOWCASE_TABS = ['floorPlan', 'render3d', 'dossier', 'estimate'] as const
 
@@ -64,22 +62,6 @@ export const HOME_BRAND_LOGOS: Record<(typeof HOME_BRANDS)[number], string> = {
 }
 
 export type HomeBrand = (typeof HOME_BRANDS)[number]
-
-/** Ba đánh giá khách hàng ghim ở trang chủ. */
-/** Tối đa 6 đánh giá (góp ý BuildX), lật theo trang bằng mũi tên. */
-export const HOME_TESTIMONIALS = ['tuan', 'hang', 'bao', 'ngocanh', 'nam', 'vy'] as const
-
-export type HomeTestimonial = (typeof HOME_TESTIMONIALS)[number]
-
-/** Khóa ảnh đại diện của từng đánh giá — admin thay ở màn "Hình ảnh site". */
-export const HOME_TESTIMONIAL_AVATAR = {
-  tuan: 'home.testimonialTuan',
-  hang: 'home.testimonialHang',
-  bao: 'home.testimonialBao',
-  ngocanh: 'home.testimonialNgocAnh',
-  nam: 'home.testimonialNam',
-  vy: 'home.testimonialVy'
-} as const satisfies Record<HomeTestimonial, SiteImageKey>
 
 /**
  * Bốn hồ sơ mẫu ghim ở trang chủ — mỗi loại công trình một thẻ. Ảnh và số liệu

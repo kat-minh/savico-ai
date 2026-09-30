@@ -270,12 +270,11 @@ export function HandbookBrowser() {
       </h1>
 
       <Tabs value={visualTab} onValueChange={selectTab}>
-        {/* Tab gạch chân theo Hình 5 / Hình 11, không dùng kiểu viên thuốc mặc
-            định của shadcn: đây là điều hướng cấp trang, không phải bộ lọc. */}
+        {/* Góp ý BuildX: tab kiểu viên thuốc xanh gradient (cùng nút chọn 2D/3D ở trang chủ); viên xanh là một khối trượt giữa hai tab. */}
         <TabsList
           ref={tabListRef}
           data-entrance-step='1'
-          className='relative h-auto w-full justify-start gap-7 rounded-none border-b bg-transparent p-0'
+          className='bg-muted relative h-auto w-fit justify-start gap-1 rounded-full p-1.5'
         >
           {(['news', 'library'] as const).map((value) => (
             <TabsTrigger
@@ -288,7 +287,7 @@ export function HandbookBrowser() {
               // `flex-none`: TabsTrigger mặc định `flex-1` nên hai tab sẽ chia
               // đôi bề ngang; ở đây chúng phải bám sát mép trái như Hình 5.
               // Underline là indicator dùng chung bên dưới để nó có thể travel.
-              className='data-[state=active]:text-primary text-muted-foreground hover:bg-primary/5 h-auto flex-none rounded-none border-0 bg-transparent px-1 pb-2.5 text-base font-medium transition-[color,background-color,font-weight] hover:font-semibold data-[state=active]:bg-transparent data-[state=active]:shadow-none'
+              className='text-muted-foreground hover:text-foreground data-[state=active]:text-primary-foreground dark:data-[state=active]:text-primary-foreground relative z-10 h-auto flex-none rounded-full border-0 bg-transparent px-7 py-2.5 text-base font-semibold transition-colors data-[state=active]:bg-transparent data-[state=active]:shadow-none dark:data-[state=active]:border-transparent dark:data-[state=active]:bg-transparent'
             >
               {t(`tabs.${value}`)}
             </TabsTrigger>
@@ -298,7 +297,7 @@ export function HandbookBrowser() {
             data-handbook-tab-indicator
             data-opening={entranceState === 'play'}
             aria-hidden='true'
-            className='bg-primary pointer-events-none absolute -bottom-px left-0 h-0.5 w-0 origin-left rounded-full transition-[left,width] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none'
+            className='brand-green-button pointer-events-none absolute top-1.5 bottom-1.5 left-0 w-0 origin-left rounded-full transition-[left,width] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none'
           />
         </TabsList>
 

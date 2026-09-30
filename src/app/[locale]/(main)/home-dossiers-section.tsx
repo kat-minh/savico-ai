@@ -41,6 +41,7 @@ export function HomeDossiersSection() {
 
       return {
         id: template.id,
+        kind: template.kind,
         href: handbookTemplateRoute(template.id),
         title: template.name,
         badge: `${template.kind === '2d' ? '2D' : '3D'} · ${template.styleLabel}`,
