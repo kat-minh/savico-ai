@@ -1675,6 +1675,10 @@
     },
     "projects": {
       "title": "My projects",
+      "pendingNotice": {
+        "title": "The estimate creation flow (3 steps) isn't connected yet",
+        "description": "This list only shows real estimates saved on the system. Projects created in the input step aren't persisted yet, so they don't appear here — they will once the creation step is wired to the API."
+      },
       "step": "Step {step}/3",
       "empty": {
         "title": "No projects yet",
