@@ -17,7 +17,7 @@ import {
   TreeSelect,
   Typography
 } from 'antd'
-import type { FormInstance } from 'antd'
+
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -218,8 +218,8 @@ export function ArticleManager() {
             expectedVersion: form.expectedVersion ?? item.version
           })
         }}
-        renderForm={(form, { item }) => (
-          <ArticleFields form={form} categories={categories} published={item?.state === 'Published'} />
+        renderForm={(_form, { item }) => (
+          <ArticleFields categories={categories} published={item?.state === 'Published'} />
         )}
         rowActions={(item, ctx) => {
           // Công bố / Ẩn / Xóa — mỗi thao tác gửi `version` đang có của dòng.
@@ -300,11 +300,9 @@ export function ArticleManager() {
 }
 
 function ArticleFields({
-  form,
   categories,
   published
 }: {
-  form: FormInstance
   categories: Awaited<ReturnType<typeof newsAdminApi.listAllCategories>>
   published: boolean
 }) {
@@ -327,7 +325,7 @@ function ArticleFields({
           {tn('draftHint')}
         </Paragraph>
       )}
-      <ImageUrlField form={form} name='coverImageUrl' label={tn('cover')} required={published} />
+      <ImageUrlField name='coverImageUrl' label={tn('cover')} required={published} />
       <Form.Item
         name='title'
         label={tn('title')}

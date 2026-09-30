@@ -2367,7 +2367,7 @@
       "total": "{total} records"
     },
     "fields": {
-      "imageUrlHint": "Paste an image URL. The thumbnail on the left tells you whether the link resolves.",
+      "imageUrlHint": "Click Upload image to pick a file. The thumbnail on the left shows the result.",
       "noImage": "No image",
       "requiredMessage": "This field is required.",
       "emailMessage": "Invalid email address.",
@@ -3206,7 +3206,7 @@
       "cardSection": "Plan card presentation",
       "cardNote": "Cover image, highlight label and gift shown on the plan card on the website. All optional.",
       "coverImage": "Cover image",
-      "coverImageHint": "Paste an image URL from the system image store; leave empty if none.",
+      "coverImageHint": "Click Upload image to pick a cover; leave empty if none.",
       "isHighlighted": "Highlighted plan",
       "highlightLabel": "Highlight label",
       "highlightLabelHint": "Text shown on the badge when the plan is highlighted (e.g. Best seller).",
@@ -3586,7 +3586,7 @@
       "versionNote": "The catalogue is versioned: every save creates a new version for new estimates. If someone else just saved, you will get a conflict — close the drawer and reopen it to load the latest.",
       "styleName": "Style name",
       "styleImage": "Illustration",
-      "styleImageNote": "JPG, PNG or WebP, up to 5 MB. There is no upload button yet: paste the https URL of an image already uploaded to storage.",
+      "styleImageNote": "JPG, PNG or WebP, up to 5 MB. Click Upload image and pick a file; the system verifies and stores it.",
       "styleAssignHint": "Only building types with this group enabled are listed. To add a type whose group is off, enable it on the Building types screen.",
       "styleAssignLabel": "Applies to building types",
       "styleAssignPlaceholder": "Select building types",
@@ -4643,6 +4643,23 @@
     "address": {
       "noResult": "No matching address",
       "resolveFailed": "Could not get coordinates for this address, please pick again"
+    },
+    "imageUpload": {
+      "button": "Upload image",
+      "done": "Image uploaded",
+      "errors": {
+        "UnsupportedType": "Only JPG, PNG or WebP images are accepted.",
+        "TooLarge": "The image exceeds the allowed size.",
+        "StoragePutFailed": "Could not send the image to storage, please retry.",
+        "StillValidating": "The image is still being checked, try again shortly.",
+        "MediaUploadExpired": "This upload has expired, pick the image again.",
+        "MediaUploadNotReady": "The image has not reached storage yet, please retry.",
+        "MediaStorageUnavailable": "Image storage is unavailable, please tell the tech team.",
+        "Rejected": "The image failed verification, pick another one.",
+        "generic": "Upload failed, please retry."
+      },
+      "replace": "Replace image",
+      "remove": "Remove image"
     }
   },
   "contractors": {

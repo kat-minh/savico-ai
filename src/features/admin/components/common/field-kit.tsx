@@ -1,10 +1,12 @@
 'use client'
 
 import { DeleteOutlined, PlusOutlined, SwapOutlined } from '@ant-design/icons'
-import { Button, Col, Form, Image, Input, Popconfirm, Row, Space, Tooltip, Typography, type FormInstance } from 'antd'
+import { Button, Col, Form, Input, Popconfirm, Row, Space, Tooltip, Typography } from 'antd'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import type { NamePath } from 'antd/es/form/interface'
+
+import { ImagePicker } from './image-upload-button'
 
 const { Text } = Typography
 
@@ -17,55 +19,24 @@ const { Text } = Typography
  * mọi màn nhập liệu giống nhau.
  */
 
-/** Ô nhập URL ảnh kèm ô xem trước — bắt lỗi dán nhầm link ngay tại chỗ. */
-export function ImageUrlField({
-  form,
-  name,
-  label,
-  required
-}: {
-  form: FormInstance
-  name: NamePath
-  label: string
-  required?: boolean
-}) {
+/**
+ * Ô ảnh cho form quản trị: xem trước + tải lên + gỡ.
+ *
+ * Bỏ ô dán URL từ khi MEDIA bật — người vận hành chọn tệp, backend xác minh rồi
+ * trả URL, form giữ URL đó ngầm.
+ */
+export function ImageUrlField({ name, label, required }: { name: NamePath; label: string; required?: boolean }) {
   const t = useTranslations('admin')
-  const value = Form.useWatch(name, form) as string | undefined
 
   return (
-    <Form.Item label={label} required={required} style={{ marginBottom: 16 }} tooltip={t('fields.imageUrlHint')}>
-      {/* Flex tay chứ không dùng `Space`: item của Space không giãn, ô URL sẽ co
-          lại còn một mẩu và cắt mất phần đuôi link. Canh giữa theo chiều dọc để
-          ô nhập không dính lên mép trên của khung xem trước. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div
-          style={{
-            width: 84,
-            height: 60,
-            flexShrink: 0,
-            borderRadius: 8,
-            overflow: 'hidden',
-            background: 'var(--admin-placeholder)',
-            display: 'grid',
-            placeItems: 'center'
-          }}
-        >
-          {value ? (
-            <Image src={value} alt='' width={84} height={60} style={{ objectFit: 'cover' }} />
-          ) : (
-            <Text type='secondary' style={{ fontSize: 11 }}>
-              {t('fields.noImage')}
-            </Text>
-          )}
-        </div>
-        <Form.Item
-          name={name}
-          rules={required ? [{ required: true, message: t('fields.requiredMessage') }] : undefined}
-          noStyle
-        >
-          <Input placeholder='https://…' style={{ flex: 1 }} />
-        </Form.Item>
-      </div>
+    <Form.Item
+      name={name}
+      label={label}
+      required={required}
+      rules={required ? [{ required: true, message: t('fields.requiredMessage') }] : undefined}
+      style={{ marginBottom: 16 }}
+    >
+      <ImagePicker />
     </Form.Item>
   )
 }

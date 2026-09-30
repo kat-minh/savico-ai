@@ -145,7 +145,7 @@ export function HandbookStepManager() {
             <Form.Item label={t('handbookSteps.step')}>
               <Text strong>{t('handbookSteps.stepN', { index: (form.getFieldValue('order') as number) ?? '' })}</Text>
             </Form.Item>
-            <ImageUrlField form={form} name='imageUrl' label={t('handbookSteps.image')} required />
+            <ImageUrlField name='imageUrl' label={t('handbookSteps.image')} required />
             <Form.Item
               name='title'
               label={t('handbookSteps.name')}

@@ -199,7 +199,7 @@ export function StyleManager() {
           />
         </Space>
       )}
-      renderForm={(form) => (
+      renderForm={() => (
         <>
           <Form.Item name='expectedCatalogVersion' hidden>
             <Input />
@@ -214,7 +214,7 @@ export function StyleManager() {
           >
             <Input showCount maxLength={NAME_MAX + 20} />
           </Form.Item>
-          <HttpsImageField form={form} name='imageUrl' label={c('styleImage')} />
+          <HttpsImageField name='imageUrl' label={c('styleImage')} />
           <Alert type='info' showIcon title={c('styleImageNote')} style={{ marginBottom: 12 }} />
           <Form.Item name='buildingTypeIds' label={c('styleAssignLabel')} extra={c('styleAssignHint')}>
             <Select

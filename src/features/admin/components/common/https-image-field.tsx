@@ -1,15 +1,19 @@
 'use client'
 
-import { Form, Image, Input, Typography, type FormInstance } from 'antd'
+import { Form } from 'antd'
 import type { NamePath } from 'antd/es/form/interface'
 import { useTranslations } from 'next-intl'
 
-const { Text } = Typography
+import { ImagePicker } from './image-upload-button'
 
 /** Trần độ dài URL mà BMT nhận cho ảnh / tệp đã upload. */
 export const UPLOADED_URL_MAX = 2048
 
-/** Luật form: URL tuyệt đối https, tối đa 2048 ký tự — đúng điều kiện BE kiểm. */
+/**
+ * Luật form: URL tuyệt đối https, tối đa 2048 ký tự — đúng điều kiện BE kiểm.
+ * Còn dùng ở các panel thư viện, nơi tệp không phải ảnh (bản vẽ PDF…) vẫn phải
+ * dán URL vì nút tải lên hiện chỉ nhận ảnh.
+ */
 export function useHttpsUrlRule() {
   const t = useTranslations('admin.estimateCatalog')
   return {
@@ -24,46 +28,24 @@ export function useHttpsUrlRule() {
 }
 
 /**
- * Ô URL ảnh bắt buộc có xem trước, cho dữ liệu nằm trên BMT API: BE không nhận
- * tệp mà chỉ nhận URL https thuộc kho presign — màn chưa có nút upload nên
- * người vận hành dán URL đã upload sẵn.
+ * Ô ảnh BẮT BUỘC cho dữ liệu nằm trên BMT API.
+ *
+ * Trước đây màn chưa có nút tải ảnh nên phải bắt người vận hành dán URL https.
+ * Từ khi MEDIA bật (presign 3 bước), ô dán URL đã bỏ: chỉ còn chọn tệp, URL do
+ * backend trả về sau khi xác minh và được giữ ngầm trong form.
  */
-export function HttpsImageField({ form, name, label }: { form: FormInstance; name: NamePath; label: string }) {
+export function HttpsImageField({ name, label }: { name: NamePath; label: string }) {
   const t = useTranslations('admin')
-  const httpsRule = useHttpsUrlRule()
-  const value = Form.useWatch(name, form) as string | undefined
 
   return (
-    <Form.Item label={label} required style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div
-          style={{
-            width: 84,
-            height: 60,
-            flexShrink: 0,
-            borderRadius: 8,
-            overflow: 'hidden',
-            background: 'var(--admin-placeholder)',
-            display: 'grid',
-            placeItems: 'center'
-          }}
-        >
-          {value ? (
-            <Image src={value} alt='' width={84} height={60} style={{ objectFit: 'cover' }} />
-          ) : (
-            <Text type='secondary' style={{ fontSize: 11 }}>
-              {t('fields.noImage')}
-            </Text>
-          )}
-        </div>
-        <Form.Item
-          name={name}
-          rules={[{ required: true, whitespace: true, message: t('fields.requiredMessage') }, httpsRule]}
-          style={{ flex: 1, marginBottom: 0 }}
-        >
-          <Input placeholder='https://…' />
-        </Form.Item>
-      </div>
+    <Form.Item
+      name={name}
+      label={label}
+      required
+      rules={[{ required: true, message: t('fields.requiredMessage') }]}
+      style={{ marginBottom: 16 }}
+    >
+      <ImagePicker />
     </Form.Item>
   )
 }

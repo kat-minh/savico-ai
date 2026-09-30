@@ -197,7 +197,7 @@ export function GiftManager() {
           render: (_, record) => plansUsing(record).length
         }
       ]}
-      renderForm={(form) => (
+      renderForm={() => (
         <>
           <Form.Item
             name='title'
@@ -223,7 +223,7 @@ export function GiftManager() {
           >
             <InputNumber min={1} precision={0} step={1_000_000} suffix='₫' style={{ width: '100%' }} />
           </Form.Item>
-          <ImageUrlField form={form} name='imageUrl' label={t('gifts.image')} required />
+          <ImageUrlField name='imageUrl' label={t('gifts.image')} required />
           <Form.Item
             name='extraOffer'
             label={t('gifts.extraOffer')}

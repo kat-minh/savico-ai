@@ -116,9 +116,9 @@ export function TestimonialManager() {
           )
         }
       ]}
-      renderForm={(form) => (
+      renderForm={() => (
         <>
-          <ImageUrlField form={form} name='avatarUrl' label={t('testimonials.avatar')} />
+          <ImageUrlField name='avatarUrl' label={t('testimonials.avatar')} />
           <Form.Item
             name='name'
             label={t('testimonials.name')}

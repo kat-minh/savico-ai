@@ -2367,7 +2367,7 @@
       "total": "{total} bản ghi"
     },
     "fields": {
-      "imageUrlHint": "Dán link ảnh. Ảnh hiện ở ô bên trái để kiểm tra link có sống không.",
+      "imageUrlHint": "Bấm Tải ảnh lên để chọn tệp. Ảnh hiện ở ô bên trái để kiểm tra.",
       "noImage": "Chưa có ảnh",
       "requiredMessage": "Trường này bắt buộc.",
       "emailMessage": "Email không hợp lệ.",
@@ -3206,7 +3206,7 @@
       "cardSection": "Trình bày thẻ gói",
       "cardNote": "Ảnh bìa, nhãn nổi bật và quà tặng hiển thị trên thẻ gói ngoài website. Có thể để trống.",
       "coverImage": "Ảnh bìa",
-      "coverImageHint": "Dán URL ảnh thuộc kho ảnh của hệ thống; để trống nếu chưa có.",
+      "coverImageHint": "Bấm Tải ảnh lên để chọn ảnh bìa; để trống nếu chưa có.",
       "isHighlighted": "Gói nổi bật",
       "highlightLabel": "Nhãn nổi bật",
       "highlightLabelHint": "Chữ hiển thị trên nhãn khi bật gói nổi bật (ví dụ: Bán chạy).",
@@ -3586,7 +3586,7 @@
       "versionNote": "Danh mục có phiên bản: mỗi lần lưu tạo phiên bản mới cho bản dự toán mới. Nếu người khác vừa lưu, hệ thống báo xung đột — đóng ngăn kéo và mở lại để lấy bản mới nhất.",
       "styleName": "Tên phong cách",
       "styleImage": "Ảnh minh họa",
-      "styleImageNote": "Ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Màn chưa có nút tải ảnh: dán URL https của ảnh đã tải lên kho lưu trữ.",
+      "styleImageNote": "Ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Bấm Tải ảnh lên rồi chọn tệp; hệ thống tự kiểm và lưu ảnh.",
       "styleAssignHint": "Chỉ hiện loại công trình đang bật nhóm này. Muốn thêm loại đang tắt nhóm, hãy bật ở màn Loại công trình.",
       "styleAssignLabel": "Áp dụng cho loại công trình",
       "styleAssignPlaceholder": "Chọn loại công trình",
@@ -4643,6 +4643,23 @@
     "address": {
       "noResult": "Không tìm thấy địa chỉ phù hợp",
       "resolveFailed": "Không lấy được toạ độ của địa chỉ này, thử chọn lại"
+    },
+    "imageUpload": {
+      "button": "Tải ảnh lên",
+      "done": "Đã tải ảnh lên",
+      "errors": {
+        "UnsupportedType": "Chỉ nhận ảnh JPG, PNG hoặc WebP.",
+        "TooLarge": "Ảnh vượt quá dung lượng cho phép.",
+        "StoragePutFailed": "Không đưa được ảnh lên kho, thử lại giúp.",
+        "StillValidating": "Hệ thống còn đang kiểm ảnh, thử lại sau giây lát.",
+        "MediaUploadExpired": "Lượt tải đã hết hạn, chọn lại ảnh.",
+        "MediaUploadNotReady": "Ảnh chưa lên tới kho, thử lại giúp.",
+        "MediaStorageUnavailable": "Kho ảnh đang không sẵn sàng, báo kỹ thuật giúp.",
+        "Rejected": "Ảnh không đạt yêu cầu kiểm tra, chọn ảnh khác.",
+        "generic": "Tải ảnh không thành công, thử lại giúp."
+      },
+      "replace": "Đổi ảnh",
+      "remove": "Gỡ ảnh"
     }
   },
   "contractors": {

@@ -87,7 +87,7 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
   return (
     <>
       <Section title={t('contractors.sections.profile')}>
-        <ImageUrlField form={form} name='logoUrl' label={t('contractors.logo')} />
+        <ImageUrlField name='logoUrl' label={t('contractors.logo')} />
         <Row gutter={16}>
           <Col xs={24} md={14}>
             <Form.Item name='name' label={t('contractors.name')} rules={[required]}>
@@ -165,12 +165,7 @@ export function ContractorFields({ form, openInvitations }: { form: FormInstance
           {t('contractors.photosHint')}
         </Text>
         {PHOTO_SLOTS.map((slot, index) => (
-          <ImageUrlField
-            key={slot}
-            form={form}
-            name={['photos', index, 'url']}
-            label={t(`contractors.photoSlots.${slot}`)}
-          />
+          <ImageUrlField key={slot} name={['photos', index, 'url']} label={t(`contractors.photoSlots.${slot}`)} />
         ))}
       </Section>
 

@@ -820,7 +820,7 @@ function ProjectForm({
           <Input.TextArea rows={2} />
         </Form.Item>
 
-        <ImageUrlField form={form} name='imageUrl' label={t('contractorProjects.cover')} />
+        <ImageUrlField name='imageUrl' label={t('contractorProjects.cover')} />
         <StringListField name='galleryUrls' label={t('contractorProjects.gallery')} placeholder='https://…' />
         <Row gutter={16}>
           <Col xs={24} md={12}>

@@ -263,12 +263,12 @@ export function ConsultantManager() {
           ] satisfies RowAction[]
         }}
         renderView={(item) => <ArchitectView item={item} locale={locale} />}
-        renderForm={(form) => (
+        renderForm={() => (
           <>
             <Form.Item name='expectedVersion' hidden>
               <Input />
             </Form.Item>
-            <ImageUrlField form={form} name='avatarUrl' label={ta('avatar')} required />
+            <ImageUrlField name='avatarUrl' label={ta('avatar')} required />
             <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
               {ta('avatarHint')}
             </Text>

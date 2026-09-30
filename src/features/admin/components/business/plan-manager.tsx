@@ -838,7 +838,7 @@ function PlanFields({
         </>
       )}
 
-      <ImageUrlField form={form} name='coverImageUrl' label={t('coverImage')} />
+      <ImageUrlField name='coverImageUrl' label={t('coverImage')} />
       <Text type='secondary' style={{ display: 'block', marginTop: -8, marginBottom: 16, fontSize: 12 }}>
         {t('coverImageHint')}
       </Text>
