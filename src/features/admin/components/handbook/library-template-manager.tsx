@@ -1,7 +1,7 @@
 'use client'
 
-import { AppstoreOutlined } from '@ant-design/icons'
-import { Alert, App, Button, Segmented, Space, Tag, Tooltip, Typography } from 'antd'
+import { AppstoreOutlined, SwapOutlined } from '@ant-design/icons'
+import { Alert, App, Segmented, Space, Tag, Typography } from 'antd'
 import { useFormatter, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -22,7 +22,7 @@ import {
 import { useEstimateCatalog } from '../../hooks/use-estimate-catalog'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
-import { StatusSwitch } from '../common/field-kit'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 import { useFloorLabel } from '../catalog/use-floor-label'
 import { fileNameOf, resolveMediaType } from './library-assets.helpers'
@@ -135,7 +135,7 @@ export function LibraryTemplateManager() {
   const t = useTranslations('admin')
   const l = useTranslations('admin.library')
   const format = useFormatter()
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const floorLabel = useFloorLabel()
   const { data: catalog } = useEstimateCatalog()
   const [managing, setManaging] = useState<{ row: LibraryRow; ctx: ApiRowContext } | null>(null)
@@ -207,39 +207,52 @@ export function LibraryTemplateManager() {
             <LibraryCreateImages form={form} />
           </>
         )}
-        rowActions={(row, ctx) => (
-          <>
-            <Tooltip title={l('manageVersions')}>
-              <Button
-                type='text'
-                size='small'
-                icon={<AppstoreOutlined />}
-                aria-label={l('manageVersions')}
-                onClick={() => setManaging({ row, ctx })}
-              />
-            </Tooltip>
-            <StatusSwitch
-              name={row.name ?? l('untitled')}
-              current={row.template.isHidden ? l('hidden') : l('shown')}
-              next={row.template.isHidden ? l('shown') : l('hidden')}
-              warning={<Text type='secondary'>{l('visibilityNote')}</Text>}
-              onConfirm={async () => {
-                try {
-                  await setTemplateVisibility(
-                    row.template.templateId,
-                    row.template.templateVersion,
-                    !row.template.isHidden
-                  )
-                  message.success(t('feedback.saved'))
-                } catch (err) {
-                  message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-                } finally {
-                  await ctx.refresh()
+        rowActions={(row, ctx): RowAction[] => [
+          {
+            key: 'versions',
+            label: l('manageVersions'),
+            icon: <AppstoreOutlined />,
+            onClick: () => setManaging({ row, ctx })
+          },
+          {
+            key: 'status',
+            label: t('actions.switchStatus'),
+            icon: <SwapOutlined />,
+            onClick: () =>
+              modal.confirm({
+                title: t('actions.switchStatusTitle', { name: row.name ?? l('untitled') }),
+                content: (
+                  <div>
+                    <div>
+                      {t('actions.switchStatusBody', {
+                        current: row.template.isHidden ? l('hidden') : l('shown'),
+                        next: row.template.isHidden ? l('shown') : l('hidden')
+                      })}
+                    </div>
+                    <Text type='secondary' style={{ display: 'block', marginTop: 8 }}>
+                      {l('visibilityNote')}
+                    </Text>
+                  </div>
+                ),
+                okText: t('actions.confirm'),
+                cancelText: t('actions.cancel'),
+                onOk: async () => {
+                  try {
+                    await setTemplateVisibility(
+                      row.template.templateId,
+                      row.template.templateVersion,
+                      !row.template.isHidden
+                    )
+                    message.success(t('feedback.saved'))
+                  } catch (err) {
+                    message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                  } finally {
+                    await ctx.refresh()
+                  }
                 }
-              }}
-            />
-          </>
-        )}
+              })
+          }
+        ]}
         columns={[
           {
             title: l('name'),

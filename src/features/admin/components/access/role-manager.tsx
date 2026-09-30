@@ -2,22 +2,7 @@
 
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  Alert,
-  App,
-  Button,
-  Checkbox,
-  Descriptions,
-  Drawer,
-  Form,
-  Grid,
-  Input,
-  Popconfirm,
-  Space,
-  Tag,
-  Tooltip,
-  Typography
-} from 'antd'
+import { Alert, App, Button, Checkbox, Descriptions, Drawer, Form, Grid, Input, Space, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
@@ -36,6 +21,7 @@ import {
 import { useUnsavedGuard } from '../../hooks/use-unsaved-guard'
 import { matchesKeyword, pageLocally } from '../../services/local-page.service'
 import { ApiResourceManager } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag } from '../common/status-tag'
 
 const { Text } = Typography
@@ -217,9 +203,54 @@ export function RoleManager() {
             {t('actions.create')}
           </Button>
         }
-        rowActions={(role, ctx) => (
-          <RoleActions role={role} editing={loadingId === role.id} onEdit={openEdit} onDeleted={ctx.refresh} />
-        )}
+        rowActions={(role, ctx): RowAction[] => {
+          // Vai trò `System` bị khóa cả sửa lẫn xóa (BR-RBAC-002).
+          if (role.kind === 'System') {
+            return [
+              { key: 'edit', label: t('actions.edit'), icon: <EditOutlined />, disabled: true, onClick: () => {} },
+              {
+                key: 'delete',
+                label: t('actions.delete'),
+                icon: <DeleteOutlined />,
+                danger: true,
+                disabled: true,
+                onClick: () => {}
+              }
+            ]
+          }
+          return [
+            {
+              key: 'edit',
+              label: t('actions.edit'),
+              icon: <EditOutlined />,
+              disabled: loadingId === role.id,
+              onClick: () => void openEdit(role)
+            },
+            {
+              key: 'delete',
+              label: t('actions.delete'),
+              icon: <DeleteOutlined />,
+              danger: true,
+              onClick: () =>
+                modal.confirm({
+                  title: tr('deleteTitle', { name: role.name }),
+                  content: <div style={{ maxWidth: 300 }}>{tr('deleteBody')}</div>,
+                  okText: t('actions.delete'),
+                  okButtonProps: { danger: true },
+                  cancelText: t('actions.cancel'),
+                  onOk: async () => {
+                    try {
+                      await deleteRole(role.id)
+                      await ctx.refresh()
+                      message.success(t('feedback.deleted'))
+                    } catch (err) {
+                      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+                    }
+                  }
+                })
+            }
+          ]
+        }}
         columns={[
           {
             title: tr('columns.name'),
@@ -308,74 +339,6 @@ export function RoleManager() {
           <RoleFormFields groups={groupByModule(permissions)} loading={permissionsQuery.isPending} />
         </Form>
       </Drawer>
-    </>
-  )
-}
-
-/** Nút sửa / xóa theo dòng. Vai trò `System` bị khóa cả hai (BR-RBAC-002). */
-function RoleActions({
-  role,
-  editing,
-  onEdit,
-  onDeleted
-}: {
-  role: RoleSummary
-  editing: boolean
-  onEdit: (role: RoleSummary) => void | Promise<void>
-  onDeleted: () => Promise<void>
-}) {
-  const t = useTranslations('admin')
-  const tr = useTranslations('admin.rbacRoles')
-  const { message } = App.useApp()
-  const isSystem = role.kind === 'System'
-
-  const remove = async () => {
-    try {
-      await deleteRole(role.id)
-      await onDeleted()
-      message.success(t('feedback.deleted'))
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    }
-  }
-
-  if (isSystem) {
-    return (
-      <>
-        <Tooltip title={tr('systemLocked')}>
-          <Button type='text' size='small' disabled icon={<EditOutlined />} aria-label={t('actions.edit')} />
-        </Tooltip>
-        <Tooltip title={tr('systemLocked')}>
-          <Button type='text' size='small' disabled danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-        </Tooltip>
-      </>
-    )
-  }
-
-  return (
-    <>
-      <Tooltip title={t('actions.edit')}>
-        <Button
-          type='text'
-          size='small'
-          loading={editing}
-          icon={<EditOutlined />}
-          aria-label={t('actions.edit')}
-          onClick={() => void onEdit(role)}
-        />
-      </Tooltip>
-      <Popconfirm
-        title={tr('deleteTitle', { name: role.name })}
-        description={<div style={{ maxWidth: 300 }}>{tr('deleteBody')}</div>}
-        okText={t('actions.delete')}
-        okButtonProps={{ danger: true }}
-        cancelText={t('actions.cancel')}
-        onConfirm={remove}
-      >
-        <Tooltip title={t('actions.delete')}>
-          <Button type='text' size='small' danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-        </Tooltip>
-      </Popconfirm>
     </>
   )
 }

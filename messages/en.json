@@ -2286,6 +2286,7 @@
       "confirmSaveTitle": "Save these changes?",
       "discardConfirmBody": "Everything you just typed in this drawer will be lost.",
       "view": "View details",
+      "more": "Actions",
       "switchStatus": "Change status",
       "switchStatusTitle": "Change status of “{name}”?",
       "switchStatusBody": "{current} → {next}"

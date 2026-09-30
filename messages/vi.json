@@ -2286,6 +2286,7 @@
       "confirmSaveTitle": "Xác nhận lưu thay đổi?",
       "discardConfirmBody": "Những gì bạn vừa nhập trong ngăn kéo này sẽ mất.",
       "view": "Xem chi tiết",
+      "more": "Thao tác",
       "switchStatus": "Chuyển trạng thái",
       "switchStatusTitle": "Chuyển trạng thái “{name}”?",
       "switchStatusBody": "{current} → {next}"

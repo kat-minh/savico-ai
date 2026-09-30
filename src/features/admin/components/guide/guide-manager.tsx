@@ -1,7 +1,7 @@
 'use client'
 
-import { ArrowDownOutlined, ArrowUpOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons'
-import { App, Alert, Button, Form, Image, Input, Popconfirm, Space, Tooltip, Typography, type FormInstance } from 'antd'
+import { ArrowDownOutlined, ArrowUpOutlined, DeleteOutlined, LoadingOutlined, SwapOutlined } from '@ant-design/icons'
+import { App, Alert, Button, Form, Image, Input, Space, Tooltip, Typography, type FormInstance } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
@@ -9,7 +9,7 @@ import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import { guidesAdminApi, type AdminGuide, type GuideVideoPreview } from '../../api/bmt/guides.api'
 import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
-import { StatusSwitch } from '../common/field-kit'
+import type { RowAction } from '../common/row-actions-menu'
 import { StatusTag, type StatusTone } from '../common/status-tag'
 import { TableThumb } from '../common/table-thumb'
 
@@ -53,7 +53,7 @@ const trimOrNull = (value?: string) => {
 export function GuideVideoManager() {
   const t = useTranslations('admin')
   const g = useTranslations('admin.guideSteps')
-  const { message } = App.useApp()
+  const { message, modal } = App.useApp()
   const listKey = adminKeys.bmt('guides')
 
   // `move` cần orderVersion của cả danh sách + id các hàng lân cận → giữ lại từ
@@ -133,53 +133,59 @@ export function GuideVideoManager() {
       }}
       renderForm={(form) => <GuideFields form={form} />}
       renderView={(item) => <GuideView item={item} />}
-      rowActions={(item, ctx) => (
-        <>
-          <Tooltip title={g('moveUp')}>
-            <Button
-              type='text'
-              size='small'
-              icon={<ArrowUpOutlined />}
-              aria-label={g('moveUp')}
-              disabled={rowsRef.current[0]?.id === item.id}
-              onClick={() => move(item, -1, ctx)}
-            />
-          </Tooltip>
-          <Tooltip title={g('moveDown')}>
-            <Button
-              type='text'
-              size='small'
-              icon={<ArrowDownOutlined />}
-              aria-label={g('moveDown')}
-              disabled={rowsRef.current[rowsRef.current.length - 1]?.id === item.id}
-              onClick={() => move(item, 1, ctx)}
-            />
-          </Tooltip>
-          <StatusSwitch
-            name={item.title ?? ''}
-            current={g(`states.${item.state === 'Published' ? 'Published' : 'Hidden'}`)}
-            next={g(`states.${item.state === 'Published' ? 'Hidden' : 'Published'}`)}
-            onConfirm={() =>
-              run(
-                () =>
-                  item.state === 'Published'
-                    ? guidesAdminApi.hide(item.id, item.version)
-                    : guidesAdminApi.publish(item.id, item.version),
-                ctx
-              )
-            }
-          />
-          <Popconfirm
-            title={g('deleteAsk', { title: item.title ?? '' })}
-            okText={t('actions.confirm')}
-            cancelText={t('actions.cancel')}
-            okButtonProps={{ danger: true }}
-            onConfirm={() => run(() => guidesAdminApi.remove(item.id, item.version), ctx, t('feedback.deleted'))}
-          >
-            <Button type='text' size='small' danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-          </Popconfirm>
-        </>
-      )}
+      rowActions={(item, ctx): RowAction[] => [
+        {
+          key: 'moveUp',
+          label: g('moveUp'),
+          icon: <ArrowUpOutlined />,
+          disabled: rowsRef.current[0]?.id === item.id,
+          onClick: () => move(item, -1, ctx)
+        },
+        {
+          key: 'moveDown',
+          label: g('moveDown'),
+          icon: <ArrowDownOutlined />,
+          disabled: rowsRef.current[rowsRef.current.length - 1]?.id === item.id,
+          onClick: () => move(item, 1, ctx)
+        },
+        {
+          key: 'status',
+          label: t('actions.switchStatus'),
+          icon: <SwapOutlined />,
+          onClick: () =>
+            modal.confirm({
+              title: t('actions.switchStatusTitle', { name: item.title ?? '' }),
+              content: t('actions.switchStatusBody', {
+                current: g(`states.${item.state === 'Published' ? 'Published' : 'Hidden'}`),
+                next: g(`states.${item.state === 'Published' ? 'Hidden' : 'Published'}`)
+              }),
+              okText: t('actions.confirm'),
+              cancelText: t('actions.cancel'),
+              onOk: () =>
+                run(
+                  () =>
+                    item.state === 'Published'
+                      ? guidesAdminApi.hide(item.id, item.version)
+                      : guidesAdminApi.publish(item.id, item.version),
+                  ctx
+                )
+            })
+        },
+        {
+          key: 'delete',
+          label: t('actions.delete'),
+          icon: <DeleteOutlined />,
+          danger: true,
+          onClick: () =>
+            modal.confirm({
+              title: g('deleteAsk', { title: item.title ?? '' }),
+              okText: t('actions.confirm'),
+              cancelText: t('actions.cancel'),
+              okButtonProps: { danger: true },
+              onOk: () => run(() => guidesAdminApi.remove(item.id, item.version), ctx, t('feedback.deleted'))
+            })
+        }
+      ]}
       columns={[
         {
           title: g('thumbnail'),

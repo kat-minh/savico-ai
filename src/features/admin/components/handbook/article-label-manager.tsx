@@ -2,7 +2,7 @@
 
 import { ArrowDownOutlined, ArrowUpOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { App, Breadcrumb, Button, Form, Input, Popconfirm, Tag, Tooltip, TreeSelect, Typography } from 'antd'
+import { App, Breadcrumb, Form, Input, Tag, TreeSelect, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
@@ -10,7 +10,8 @@ import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import { NEWS_LIMITS, newsAdminApi, type BmtNewsCategory } from '../../api/bmt/news.api'
 import { buildCategoryTree, selfAndDescendants } from '../../services/news-category.service'
-import { ApiResourceManager, type ApiRowContext } from '../common/api-resource-manager'
+import { ApiResourceManager } from '../common/api-resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 
 const { Text } = Typography
 
@@ -41,6 +42,7 @@ interface CategoryFormValues {
 export function ArticleLabelManager() {
   const t = useTranslations('admin')
   const tc = useTranslations('admin.newsCategories')
+  const { modal, message } = App.useApp()
   const queryClient = useQueryClient()
   const [path, setPath] = useState<Crumb[]>([])
   const parentId = path.at(-1)?.id ?? null
@@ -155,114 +157,83 @@ export function ArticleLabelManager() {
           </>
         )
       }}
-      rowActions={(item, ctx) => (
-        <CategoryActions
-          item={item}
-          ctx={ctx}
-          parentId={parentId}
-          siblings={siblingsRef.current}
-          onOpen={() => setPath([...path, { id: item.id, name: item.name }])}
-          onChanged={refreshTree}
-        />
-      )}
+      rowActions={(item, ctx) => {
+        const siblings = siblingsRef.current
+        const index = siblings.findIndex((sibling) => sibling.id === item.id)
+        const previous = index > 0 ? siblings[index - 1] : undefined
+        const isLast = index < 0 || index >= siblings.length - 1
+
+        const run = async (action: () => Promise<unknown>, done: string) => {
+          try {
+            await action()
+            await Promise.all([ctx.refresh(), refreshTree()])
+            message.success(done)
+          } catch (err) {
+            message.error(isApiError(err) ? err.message : t('feedback.apiError'))
+          }
+        }
+        /** Đặt ngay trước `before`; không có `before` = xuống cuối nhóm. */
+        const moveBefore = (before?: BmtNewsCategory) =>
+          run(
+            () =>
+              newsAdminApi.moveCategory(item.id, {
+                expectedVersion: item.version,
+                expectedParentId: parentId,
+                beforeCategoryId: before?.id,
+                expectedBeforeVersion: before?.version
+              }),
+            t('feedback.saved')
+          )
+
+        const actions: RowAction[] = [
+          {
+            key: 'open',
+            label: tc('open'),
+            icon: <FolderOpenOutlined />,
+            onClick: () => setPath([...path, { id: item.id, name: item.name }])
+          },
+          {
+            key: 'moveUp',
+            label: tc('moveUp'),
+            icon: <ArrowUpOutlined />,
+            disabled: !previous,
+            onClick: () => void moveBefore(previous)
+          },
+          {
+            key: 'moveDown',
+            label: tc('moveDown'),
+            icon: <ArrowDownOutlined />,
+            disabled: isLast,
+            // Xuống một bậc = đứng trước danh mục cách hai bậc (hoặc về cuối nhóm).
+            onClick: () => void moveBefore(siblings[index + 2])
+          },
+          item.hasChildren
+            ? {
+                key: 'delete',
+                label: tc('deleteHasChildren'),
+                icon: <DeleteOutlined />,
+                danger: true,
+                disabled: true,
+                onClick: () => {}
+              }
+            : {
+                key: 'delete',
+                label: t('actions.delete'),
+                icon: <DeleteOutlined />,
+                danger: true,
+                onClick: () =>
+                  modal.confirm({
+                    title: tc('deleteTitle', { name: item.name }),
+                    content: <div style={{ maxWidth: 300 }}>{tc('deleteBody')}</div>,
+                    okText: t('actions.delete'),
+                    okButtonProps: { danger: true },
+                    cancelText: t('actions.cancel'),
+                    onOk: () => run(() => newsAdminApi.deleteCategory(item.id, item.version), t('feedback.deleted'))
+                  })
+              }
+        ]
+        return actions
+      }}
     />
-  )
-}
-
-function CategoryActions({
-  item,
-  ctx,
-  parentId,
-  siblings,
-  onOpen,
-  onChanged
-}: {
-  item: BmtNewsCategory
-  ctx: ApiRowContext
-  parentId: string | null
-  siblings: BmtNewsCategory[]
-  onOpen: () => void
-  onChanged: () => Promise<unknown>
-}) {
-  const t = useTranslations('admin')
-  const tc = useTranslations('admin.newsCategories')
-  const { message } = App.useApp()
-  const [busy, setBusy] = useState(false)
-  const index = siblings.findIndex((sibling) => sibling.id === item.id)
-
-  const run = async (action: () => Promise<unknown>, done: string) => {
-    setBusy(true)
-    try {
-      await action()
-      await Promise.all([ctx.refresh(), onChanged()])
-      message.success(done)
-    } catch (err) {
-      message.error(isApiError(err) ? err.message : t('feedback.apiError'))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  /** Đặt ngay trước `before`; không có `before` = xuống cuối nhóm. */
-  const moveBefore = (before?: BmtNewsCategory) =>
-    run(
-      () =>
-        newsAdminApi.moveCategory(item.id, {
-          expectedVersion: item.version,
-          expectedParentId: parentId,
-          beforeCategoryId: before?.id,
-          expectedBeforeVersion: before?.version
-        }),
-      t('feedback.saved')
-    )
-
-  const previous = index > 0 ? siblings[index - 1] : undefined
-  const isLast = index < 0 || index >= siblings.length - 1
-
-  return (
-    <>
-      <Tooltip title={tc('open')}>
-        <Button type='text' size='small' icon={<FolderOpenOutlined />} aria-label={tc('open')} onClick={onOpen} />
-      </Tooltip>
-      <Tooltip title={tc('moveUp')}>
-        <Button
-          type='text'
-          size='small'
-          icon={<ArrowUpOutlined />}
-          aria-label={tc('moveUp')}
-          disabled={!previous || busy}
-          onClick={() => void moveBefore(previous)}
-        />
-      </Tooltip>
-      <Tooltip title={tc('moveDown')}>
-        <Button
-          type='text'
-          size='small'
-          icon={<ArrowDownOutlined />}
-          aria-label={tc('moveDown')}
-          disabled={isLast || busy}
-          // Xuống một bậc = đứng trước danh mục cách hai bậc (hoặc về cuối nhóm).
-          onClick={() => void moveBefore(siblings[index + 2])}
-        />
-      </Tooltip>
-      {item.hasChildren ? (
-        <Tooltip title={tc('deleteHasChildren')}>
-          <Button type='text' size='small' danger disabled icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-        </Tooltip>
-      ) : (
-        <Popconfirm
-          title={tc('deleteTitle', { name: item.name })}
-          description={<div style={{ maxWidth: 300 }}>{tc('deleteBody')}</div>}
-          okText={t('actions.delete')}
-          okButtonProps={{ danger: true }}
-          cancelText={t('actions.cancel')}
-          onConfirm={() => run(() => newsAdminApi.deleteCategory(item.id, item.version), t('feedback.deleted'))}
-        >
-          <Tooltip title={t('actions.delete')}>
-            <Button type='text' size='small' danger icon={<DeleteOutlined />} aria-label={t('actions.delete')} />
-          </Tooltip>
-        </Popconfirm>
-      )}
-    </>
   )
 }

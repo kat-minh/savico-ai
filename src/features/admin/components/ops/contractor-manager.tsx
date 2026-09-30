@@ -1,11 +1,11 @@
 'use client'
 
 import { EyeOutlined, SafetyCertificateFilled } from '@ant-design/icons'
-import { Avatar, Button, Select, Space, Tag, Tooltip, Typography } from 'antd'
+import { Avatar, Select, Space, Tag, Typography } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { useAuthStore } from '@/shared/auth'
 import type { CmsContractor, CmsServiceRegion } from '@/shared/cms'
 import { adminContractorRoute } from '@/shared/constants'
@@ -23,6 +23,7 @@ import {
   type LegalStatus
 } from '../../services/contractor.service'
 import { ResourceManager } from '../common/resource-manager'
+import type { RowAction } from '../common/row-actions-menu'
 import { ContractorFields, PHOTO_SLOTS, useOpenInvitations } from './contractor-fields'
 
 const { Text } = Typography
@@ -131,6 +132,7 @@ export function useProfileCommit() {
  */
 export function ContractorManager() {
   const t = useTranslations('admin')
+  const router = useRouter()
   const [filters, setFilters] = useState<Filters>({})
   const { data: contractors = [] } = useAdminCollection('contractors')
   const { data: buildingTypes = [] } = useAdminCollection('buildingTypes')
@@ -230,13 +232,14 @@ export function ContractorManager() {
           ])}
         </Space>
       }
-      rowActions={(item) => (
-        <Tooltip title={t('contractors.viewDetail')}>
-          <Link href={adminContractorRoute(item.id)}>
-            <Button type='text' icon={<EyeOutlined />} aria-label={t('contractors.viewDetail')} />
-          </Link>
-        </Tooltip>
-      )}
+      rowActions={(item): RowAction[] => [
+        {
+          key: 'view',
+          label: t('contractors.viewDetail'),
+          icon: <EyeOutlined />,
+          onClick: () => router.push(adminContractorRoute(item.id))
+        }
+      ]}
       columns={[
         {
           title: t('contractors.info'),
