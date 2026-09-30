@@ -58,10 +58,6 @@ export class GeocodeNotConfiguredError extends Error {
   }
 }
 
-export function isGeocodeConfigured(): boolean {
-  return Boolean(process.env.VIETMAP_API_KEY)
-}
-
 async function call<T>(path: string, params: Record<string, string>): Promise<T> {
   const apikey = process.env.VIETMAP_API_KEY
   if (!apikey) throw new GeocodeNotConfiguredError()
