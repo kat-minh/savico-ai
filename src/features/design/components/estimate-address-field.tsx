@@ -113,18 +113,21 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
 
       {resolveFailed ? <p className='text-destructive text-xs'>{t('address.resolveFailed')}</p> : null}
 
-      <LocationMap
-        latitude={location?.latitude ?? null}
-        longitude={location?.longitude ?? null}
-        onChange={(latitude, longitude) => setLocation({ latitude, longitude })}
-      />
+      {/* Chưa chọn địa chỉ cụ thể thì chưa có gì để chỉ trên bản đồ: chỉ hiện sau khi có vị trí. */}
       {location ? (
-        <p className='text-muted-foreground text-xs'>
-          {t('address.coordinates', {
-            lat: location.latitude.toFixed(6),
-            lng: location.longitude.toFixed(6)
-          })}
-        </p>
+        <>
+          <LocationMap
+            latitude={location.latitude}
+            longitude={location.longitude}
+            onChange={(latitude, longitude) => setLocation({ latitude, longitude })}
+          />
+          <p className='text-muted-foreground text-xs'>
+            {t('address.coordinates', {
+              lat: location.latitude.toFixed(6),
+              lng: location.longitude.toFixed(6)
+            })}
+          </p>
+        </>
       ) : (
         <p className='text-muted-foreground text-xs'>{t('address.mapHint')}</p>
       )}

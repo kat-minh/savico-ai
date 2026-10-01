@@ -88,8 +88,8 @@ importers:
         specifier: ^3.31.3
         version: 3.31.3
       '@vietmap/vietmap-gl-js':
-        specifier: 7.0.0-pre.1
-        version: 7.0.0-pre.1(supports-color@7.2.0)
+        specifier: 6.0.1
+        version: 6.0.1(supports-color@7.2.0)
       antd:
         specifier: ^6.6.1
         version: 6.6.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -3464,8 +3464,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vietmap/vietmap-gl-js@7.0.0-pre.1':
-    resolution: {integrity: sha512-1XmMAq1yHYKBu9xWHrD7kejZLxqiaRgwWvgwZ4Sq9LZpeOrLJK7fXBqj2dJ4F2n/Y0FCQuDuwtuHOD1sE7BfKA==}
+  '@vietmap/vietmap-gl-js@6.0.1':
+    resolution: {integrity: sha512-b02ZPv/6HVFnkxlxKBU4B/mguL42cfEXtRBIdgG5qRDMOkE2d5UQ9n2BtYJuR9rZYm1Fcf1Vi1m5gwSn+sil2A==}
 
   abs-svg-path@0.1.1:
     resolution: {integrity: sha512-d8XPSGjfyzlXC3Xx891DJRyZfqk5JU0BJrDQcsWomFIV1/BIzPW5HDH5iDdWpqWaav0YVIEzT1RHTwWr0FFshA==}
@@ -9433,7 +9433,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vietmap/vietmap-gl-js@7.0.0-pre.1(supports-color@7.2.0)':
+  '@vietmap/vietmap-gl-js@6.0.1(supports-color@7.2.0)':
     dependencies:
       express: 4.22.3(supports-color@7.2.0)
       lodash: 4.18.1

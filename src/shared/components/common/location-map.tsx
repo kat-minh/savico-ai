@@ -20,6 +20,21 @@ interface LocationMapProps {
   className?: string
 }
 
+/**
+ * Lấy SDK sau khi `import()`. Bản dựng của VietMap là UMD đặt trong package `"type": "module"`: tuỳ bundler (webpack dev
+ * khác Turbopack production) mà các lớp nằm ở `default`, ngay trên module, hoặc chỉ gắn vào `window.vietmapgl` và module
+ * trống. Thử cả ba nơi thay vì đoán, vì chỉ có một nơi đúng trong mỗi môi trường.
+ */
+function resolveSdk(module: unknown): VietmapGl | null {
+  const hasMap = (value: unknown): value is VietmapGl =>
+    Boolean(value) && typeof (value as { Map?: unknown }).Map === 'function'
+  const fromModule = module as { default?: unknown }
+  if (hasMap(fromModule.default)) return fromModule.default
+  if (hasMap(module)) return module
+  const fromWindow = (window as unknown as { vietmapgl?: unknown }).vietmapgl
+  return hasMap(fromWindow) ? fromWindow : null
+}
+
 /** Tâm mặc định khi chưa có toạ độ: nhìn toàn Việt Nam, không ghim. */
 const VIETNAM_CENTER: [number, number] = [106.0, 16.0]
 const FOCUSED_ZOOM = 16
@@ -55,8 +70,11 @@ export function LocationMap({ latitude, longitude, onChange, className }: Locati
 
     void import('@vietmap/vietmap-gl-js/dist/vietmap-gl').then((module) => {
       if (cancelled || !containerRef.current) return
-      // Bản dựng UMD: tuỳ bundler mà các lớp nằm ở `default` hoặc ngay trên module.
-      const vietmapgl = ((module as unknown as { default?: VietmapGl }).default ?? module) as VietmapGl
+      const vietmapgl = resolveSdk(module)
+      if (!vietmapgl) {
+        console.error('VietMap GL JS không nạp được: không tìm thấy lớp Map')
+        return
+      }
       sdkRef.current = vietmapgl
       const { latitude: lat, longitude: lng } = coordsRef.current
       const hasPin = lat !== null && lng !== null

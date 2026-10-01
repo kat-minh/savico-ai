@@ -1802,7 +1802,7 @@
         "searchFailed": "Chưa tìm được địa chỉ lúc này. Bạn vẫn có thể nhập tay.",
         "noResult": "Không tìm thấy địa chỉ phù hợp",
         "resolveFailed": "Không lấy được vị trí của địa chỉ này, thử chọn lại hoặc bấm lên bản đồ.",
-        "mapHint": "Chọn một gợi ý, hoặc bấm lên bản đồ để đặt ghim đúng vị trí công trình.",
+        "mapHint": "Chọn một địa chỉ trong gợi ý, bản đồ sẽ hiện vị trí để bạn kiểm tra và kéo ghim cho đúng.",
         "coordinates": "Vị trí: {lat}, {lng} — kéo ghim để chỉnh cho đúng."
       },
       "buildingType": {

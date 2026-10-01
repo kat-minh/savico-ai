@@ -8,7 +8,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { Link } from '@/i18n/navigation'
-import { FieldLabel } from '@/shared/components/common'
+import { FieldLabel, SearchableSelect } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
@@ -343,47 +343,38 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   <FieldLabel htmlFor='province' hint={t('province.hint')} required>
                     {t('province.label')}
                   </FieldLabel>
-                  <Select value={draft.provinceCode ?? ''} onValueChange={input.chooseProvince}>
-                    <SelectTrigger
-                      id='province'
-                      className={cn('w-full', invalid('provinceCode') && 'border-destructive')}
-                    >
-                      <SelectValue placeholder={provinces.isPending ? t('loading') : t('province.placeholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(provinces.data?.provinces ?? []).map((province) => (
-                        <SelectItem key={province.code} value={province.code}>
-                          {province.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    id='province'
+                    value={draft.provinceCode ?? ''}
+                    onValueChange={input.chooseProvince}
+                    options={(provinces.data?.provinces ?? []).map((province) => ({
+                      value: province.code,
+                      label: province.name
+                    }))}
+                    placeholder={provinces.isPending ? t('loading') : t('province.placeholder')}
+                    invalid={invalid('provinceCode')}
+                  />
                 </div>
 
                 <div id='field-wardCode' className='space-y-2'>
                   <FieldLabel htmlFor='ward' hint={t('ward.hint')} required>
                     {t('ward.label')}
                   </FieldLabel>
-                  <Select value={draft.wardCode ?? ''} onValueChange={input.chooseWard} disabled={!draft.provinceCode}>
-                    <SelectTrigger id='ward' className={cn('w-full', invalid('wardCode') && 'border-destructive')}>
-                      <SelectValue
-                        placeholder={
-                          !draft.provinceCode
-                            ? t('ward.needProvince')
-                            : wards.isPending
-                              ? t('loading')
-                              : t('ward.placeholder')
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(wards.data ?? []).map((ward) => (
-                        <SelectItem key={ward.code} value={ward.code}>
-                          {ward.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    id='ward'
+                    value={draft.wardCode ?? ''}
+                    onValueChange={input.chooseWard}
+                    disabled={!draft.provinceCode}
+                    options={(wards.data ?? []).map((ward) => ({ value: ward.code, label: ward.name }))}
+                    placeholder={
+                      !draft.provinceCode
+                        ? t('ward.needProvince')
+                        : wards.isPending
+                          ? t('loading')
+                          : t('ward.placeholder')
+                    }
+                    invalid={invalid('wardCode')}
+                  />
                 </div>
 
                 <EstimateAddressField

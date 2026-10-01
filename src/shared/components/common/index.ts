@@ -48,3 +48,4 @@ export {
 export { StartOptions, StartOptionsDialog } from './start-options'
 export { StepDots, type StepStatus } from './step-dots'
 export { LocationMap } from './location-map'
+export { SearchableSelect, type SearchableSelectOption } from './searchable-select'
