@@ -113,10 +113,12 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
     () => (pool && similarSourceTemplate ? selectSimilarTemplates(pool, similarSourceTemplate) : []),
     [pool, similarSourceTemplate]
   )
+  // Ưu tiên `template` khi trùng id: mẫu API trong `pool` chỉ là bản tóm tắt (`floors: []`), nếu lấy từ `pool` trước
+  // thì dải ảnh xem trước (thumbnail) và nút chuyển tầng của mẫu thật biến mất.
   const floorControlsTemplate = useMemo(
     () =>
-      pool?.find((item) => item.id === floorControlsSourceId) ??
       (template?.id === floorControlsSourceId ? template : undefined) ??
+      pool?.find((item) => item.id === floorControlsSourceId) ??
       template,
     [floorControlsSourceId, pool, template]
   )
