@@ -1690,6 +1690,116 @@
       "placeholder": "VD: 0905 123 456",
       "error": "Số điện thoại chưa đúng định dạng (10 số bắt đầu bằng 0 hoặc +84)",
       "submit": "Xác nhận & tiếp tục"
+    },
+    "inputApi": {
+      "loading": "Đang tải…",
+      "loadError": "Không tải được bản dự toán. Bạn thử lại nhé.",
+      "reload": "Tải lại",
+      "groups": {
+        "media": "Hình ảnh & mô tả",
+        "location": "Vị trí công trình",
+        "scope": "Loại công trình & quy mô"
+      },
+      "image": {
+        "label": "Ảnh lô đất / hiện trạng",
+        "hint": "JPG, PNG hoặc WebP, tối đa 5 MB. Cần ít nhất một trong hai: ảnh hoặc mô tả.",
+        "upload": "Tải ảnh lên",
+        "uploading": "Đang tải ảnh…",
+        "replace": "Đổi ảnh",
+        "remove": "Xoá ảnh",
+        "errorType": "Chỉ nhận ảnh JPG, PNG hoặc WebP.",
+        "errorSize": "Ảnh quá lớn (tối đa 5 MB).",
+        "errorUpload": "Không tải được ảnh lên. Bạn thử lại nhé."
+      },
+      "description": {
+        "label": "Mô tả chi tiết",
+        "hint": "Mô tả ngắn công trình bạn muốn (tối đa 500 ký tự). Có thể thay cho ảnh.",
+        "placeholder": "Ví dụ: nhà 2 phòng ngủ, cần gara và sân vườn nhỏ…"
+      },
+      "province": {
+        "label": "Tỉnh / Thành phố",
+        "hint": "Dùng để áp đơn giá theo khu vực.",
+        "placeholder": "Chọn tỉnh / thành phố",
+        "loadError": "Dữ liệu địa chỉ của hệ thống chưa sẵn sàng nên chưa chọn được tỉnh / thành. Bạn thử lại sau ít phút."
+      },
+      "ward": {
+        "label": "Phường / Xã",
+        "hint": "Chọn tỉnh / thành trước.",
+        "placeholder": "Chọn phường / xã",
+        "needProvince": "Chọn tỉnh / thành trước"
+      },
+      "address": {
+        "label": "Số nhà, đường",
+        "hint": "Số nhà và tên đường của công trình.",
+        "placeholder": "Ví dụ: 12 Nguyễn Huệ"
+      },
+      "buildingType": {
+        "label": "Loại công trình",
+        "placeholder": "Chọn loại công trình"
+      },
+      "area": {
+        "label": "Diện tích",
+        "hint": "Lớn hơn 0, tối đa 2 chữ số thập phân, đơn vị m².",
+        "placeholder": "Ví dụ: 70.5",
+        "invalid": "Nhập số lớn hơn 0, tối đa 2 chữ số thập phân.",
+        "unit": "m²"
+      },
+      "floorCount": {
+        "label": "Số tầng",
+        "option": "{count} tầng"
+      },
+      "tum": {
+        "label": "Tum",
+        "yes": "Có tum",
+        "no": "Không tum"
+      },
+      "extra": {
+        "title": "Thông tin bổ sung",
+        "empty": "Chọn loại công trình để chọn phong cách thiết kế.",
+        "none": "Loại công trình này không cần chọn phong cách."
+      },
+      "style": {
+        "architecture": "Kiểu kiến trúc",
+        "architectureHint": "Chọn một kiểu kiến trúc",
+        "interior": "Phong cách nội thất",
+        "interiorHint": "Chọn một phong cách nội thất"
+      },
+      "status": {
+        "pending": "Đang chờ lưu…",
+        "saving": "Đang lưu…",
+        "saved": "Đã lưu",
+        "error": "Chưa lưu được — nội dung bạn nhập vẫn được giữ.",
+        "denied": "Không lưu được thay đổi.",
+        "retry": "Thử lại"
+      },
+      "lock": {
+        "noEdit": "Bạn cần một gói thiết kế đang hoạt động (và còn lượt) để lưu thông tin và nhận dự toán.",
+        "generating": "Dự toán đang được tạo nên không sửa được thông tin lúc này.",
+        "generated": "Dự toán này đã có kết quả nên thông tin đầu vào được khoá.",
+        "plans": "Xem các gói",
+        "next": "Xem kết quả"
+      },
+      "quota": {
+        "none": "Bạn chưa có gói thiết kế.",
+        "unlimited": "Không giới hạn lượt thiết kế.",
+        "plan": "Còn {remaining}/{total} lượt thiết kế"
+      },
+      "missing": {
+        "title": "Còn thiếu thông tin",
+        "fields": {
+          "imageOrDescription": "ảnh hoặc mô tả",
+          "areaM2": "diện tích",
+          "buildingTypeId": "loại công trình",
+          "provinceCode": "tỉnh / thành",
+          "wardCode": "phường / xã",
+          "finishPackage": "gói hoàn thiện",
+          "floorCount": "số tầng",
+          "hasTum": "tum",
+          "architectureStyleId": "kiểu kiến trúc",
+          "interiorStyleId": "phong cách nội thất",
+          "addressDetail": "số nhà, đường"
+        }
+      }
     }
   },
   "account": {

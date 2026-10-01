@@ -1690,6 +1690,116 @@
       "placeholder": "e.g. 0905 123 456",
       "error": "That phone number looks wrong (10 digits starting with 0, or +84)",
       "submit": "Confirm & continue"
+    },
+    "inputApi": {
+      "loading": "Loading…",
+      "loadError": "Couldn't load this estimate. Please try again.",
+      "reload": "Reload",
+      "groups": {
+        "media": "Image & description",
+        "location": "Location",
+        "scope": "Building type & size"
+      },
+      "image": {
+        "label": "Land / current-state photo",
+        "hint": "JPG, PNG or WebP, up to 5 MB. You need at least one of: an image or a description.",
+        "upload": "Upload an image",
+        "uploading": "Uploading…",
+        "replace": "Change image",
+        "remove": "Remove image",
+        "errorType": "Only JPG, PNG or WebP images are accepted.",
+        "errorSize": "The image is too large (max 5 MB).",
+        "errorUpload": "Couldn't upload the image. Please try again."
+      },
+      "description": {
+        "label": "Detailed description",
+        "hint": "Briefly describe what you want (up to 500 characters). Can replace the image.",
+        "placeholder": "E.g. a 2-bedroom house with a garage and a small garden…"
+      },
+      "province": {
+        "label": "Province / City",
+        "hint": "Used to apply regional unit prices.",
+        "placeholder": "Select a province / city",
+        "loadError": "The system's address data isn't ready, so provinces can't be listed yet. Please try again in a few minutes."
+      },
+      "ward": {
+        "label": "Ward / Commune",
+        "hint": "Pick a province first.",
+        "placeholder": "Select a ward / commune",
+        "needProvince": "Pick a province first"
+      },
+      "address": {
+        "label": "House number, street",
+        "hint": "House number and street name of the site.",
+        "placeholder": "E.g. 12 Nguyen Hue"
+      },
+      "buildingType": {
+        "label": "Building type",
+        "placeholder": "Select a building type"
+      },
+      "area": {
+        "label": "Area",
+        "hint": "Greater than 0, up to 2 decimal places, in m².",
+        "placeholder": "E.g. 70.5",
+        "invalid": "Enter a number greater than 0 with at most 2 decimal places.",
+        "unit": "m²"
+      },
+      "floorCount": {
+        "label": "Floors",
+        "option": "{count} floors"
+      },
+      "tum": {
+        "label": "Attic",
+        "yes": "With attic",
+        "no": "No attic"
+      },
+      "extra": {
+        "title": "Additional information",
+        "empty": "Pick a building type to choose design styles.",
+        "none": "This building type doesn't need a style."
+      },
+      "style": {
+        "architecture": "Architecture style",
+        "architectureHint": "Pick one architecture style",
+        "interior": "Interior style",
+        "interiorHint": "Pick one interior style"
+      },
+      "status": {
+        "pending": "Waiting to save…",
+        "saving": "Saving…",
+        "saved": "Saved",
+        "error": "Couldn't save — what you typed is kept.",
+        "denied": "Couldn't save the changes.",
+        "retry": "Retry"
+      },
+      "lock": {
+        "noEdit": "You need an active design plan (with credits left) to save details and get an estimate.",
+        "generating": "The estimate is being generated, so the details can't be edited right now.",
+        "generated": "This estimate already has a result, so its input is locked.",
+        "plans": "See plans",
+        "next": "View result"
+      },
+      "quota": {
+        "none": "You don't have a design plan yet.",
+        "unlimited": "Unlimited design credits.",
+        "plan": "{remaining}/{total} design credits left"
+      },
+      "missing": {
+        "title": "Missing information",
+        "fields": {
+          "imageOrDescription": "image or description",
+          "areaM2": "area",
+          "buildingTypeId": "building type",
+          "provinceCode": "province / city",
+          "wardCode": "ward / commune",
+          "finishPackage": "finish package",
+          "floorCount": "floors",
+          "hasTum": "attic",
+          "architectureStyleId": "architecture style",
+          "interiorStyleId": "interior style",
+          "addressDetail": "house number, street"
+        }
+      }
     }
   },
   "account": {
