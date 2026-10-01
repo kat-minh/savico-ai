@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, Download, FileText, Info, Loader2, Mail, QrCode, ReceiptText } from 'lucide-react'
+import { Download, FileText, Info, Loader2, Mail, QrCode, ReceiptText } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
@@ -15,11 +15,9 @@ import { Button } from '@/shared/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import type { CmsTransaction, CmsTransactionStatus } from '@/shared/cms'
-import { useCmsCollection } from '@/shared/cms'
 import { checkoutPaymentRoute, ROUTES } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatCurrency, formatDisplayDate, formatDisplayDateTime, formatDisplayTime } from '@/shared/utils'
-import { useAccountPlan } from '../hooks/use-account-plan'
 import { usePurchaseHistory } from '../hooks/use-purchase-history'
 
 type FilterStatus = 'all' | 'paid' | 'pending' | 'refunded'
@@ -55,38 +53,6 @@ const STATUS_TONE: Record<CmsTransactionStatus, string> = {
   pending: 'bg-warning/20 text-warning-strong',
   failed: 'bg-destructive/10 text-destructive',
   refunded: 'bg-muted text-muted-foreground'
-}
-
-function UsageRow({
-  label,
-  value,
-  total,
-  delay,
-  reduceMotion
-}: {
-  label: string
-  value: number
-  total: number
-  delay: number
-  reduceMotion: boolean
-}) {
-  const percent = total > 0 ? Math.min(100, Math.round((value / total) * 100)) : 0
-  return (
-    <div className='grid grid-cols-[minmax(0,1fr)_minmax(96px,112px)_56px] items-center gap-3'>
-      <span className='text-muted-foreground truncate text-xs'>{label}</span>
-      <span className='bg-muted h-1.5 overflow-hidden rounded-full'>
-        <motion.span
-          className='bg-primary block h-full rounded-full'
-          initial={reduceMotion ? false : { width: 0 }}
-          animate={{ width: `${percent}%` }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 0.55, delay, ease: revealEase }}
-        />
-      </span>
-      <span className='whitespace-nowrap text-right text-xs font-semibold'>
-        {value} / {total}
-      </span>
-    </div>
-  )
 }
 
 function StatusPill({
@@ -156,15 +122,12 @@ function ReceiptRow({
 
 export function PurchaseHistory() {
   const t = useTranslations('account.purchaseHistory')
-  const tSupervision = useTranslations('supervision.tierAlias')
   const locale = useLocale() as Locale
   const reduceMotion = Boolean(useReducedMotion())
   const { user } = useAuth()
   const setAssistantOpen = useChatContextStore((s) => s.setPanelOpen)
   const setAssistantSuppressed = useChatContextStore((s) => s.setDockSuppressed)
-  const { data: plan, isPending: planPending } = useAccountPlan()
   const { data: history, isPending } = usePurchaseHistory()
-  const supervision = useCmsCollection('supervisionProjects')[0]
   const [filter, setFilter] = useState<FilterStatus>('all')
   const [receipt, setReceipt] = useState<CmsTransaction | null>(null)
   const [resendingReceiptId, setResendingReceiptId] = useState<string | null>(null)
@@ -184,8 +147,6 @@ export function PurchaseHistory() {
     [transactions]
   )
   const visible = filter === 'all' ? transactions : transactions.filter((item) => item.status === filter)
-  const currentStage = supervision?.stages.find((stage) => stage.status !== 'confirmed')?.index ?? 6
-  const designReceipt = transactions.find((item) => item.id === history?.designOrderId)
 
   useEffect(
     () => () => {
@@ -260,13 +221,9 @@ export function PurchaseHistory() {
     }
   }
 
-  if (isPending || planPending) {
+  if (isPending) {
     return (
       <div className='space-y-4'>
-        <div className='grid gap-3 md:grid-cols-2'>
-          <Skeleton className='h-44 rounded-xl' />
-          <Skeleton className='h-44 rounded-xl' />
-        </div>
         <Skeleton className='h-9 w-80 rounded-full' />
         <Skeleton className='h-72 rounded-xl' />
       </div>
@@ -291,151 +248,6 @@ export function PurchaseHistory() {
           <Link href={ROUTES.PLANS}>{t('viewPlans')}</Link>
         </Button>
       </motion.div>
-
-      <div className='grid gap-3 md:grid-cols-2'>
-        {plan ? (
-          <motion.section
-            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.3, delay: 0.08, ease: revealEase }}
-            className='bg-card flex h-full flex-col rounded-xl border p-4'
-          >
-            <div className='flex items-start justify-between gap-3'>
-              <div className='min-w-0'>
-                <div className='flex flex-wrap items-baseline gap-x-2 gap-y-0.5'>
-                  <h3 className='font-semibold'>{plan.name}</h3>
-                  <span className='text-muted-foreground text-[11px]'>{t('designPlanMeta')}</span>
-                </div>
-                {history?.subscription ? (
-                  <p className='text-muted-foreground mt-0.5 text-[11px]'>
-                    {formatDisplayDate(history.subscription.startedAt, locale)}
-                  </p>
-                ) : null}
-              </div>
-              <span className='bg-success/10 text-success inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium'>
-                <CheckCircle2 className='size-3.5' />
-                {t('active')}
-              </span>
-            </div>
-
-            <div className='mt-3.5 space-y-2.5'>
-              <UsageRow
-                label={t('designCredits')}
-                value={plan.design.total - plan.design.remaining}
-                total={plan.design.total}
-                delay={0.16}
-                reduceMotion={reduceMotion}
-              />
-              <UsageRow
-                label={t('libraryCredits')}
-                value={plan.library.total - plan.library.remaining}
-                total={plan.library.total}
-                delay={0.22}
-                reduceMotion={reduceMotion}
-              />
-            </div>
-
-            <div className='mt-3.5 flex flex-1 flex-col justify-end'>
-              <div className='flex flex-wrap items-center justify-between gap-2'>
-                <span className='text-muted-foreground text-[11px]'>
-                  {t('designOrderMeta', {
-                    date: formatDisplayDate(plan.expiresAt, locale),
-                    order: history?.designOrderId ?? '—'
-                  })}
-                </span>
-                {designReceipt ? (
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    className='h-8 text-xs hover:bg-accent/70 motion-reduce:transition-none'
-                    onClick={() => handleOpenReceipt(designReceipt)}
-                  >
-                    <FileText className='size-3.5' />
-                    {t('viewReceipt')}
-                  </Button>
-                ) : null}
-              </div>
-              <Button asChild variant='outline' size='sm' className='mt-2 h-8 w-fit text-xs'>
-                <Link href={ROUTES.PLANS}>{t('upgrade')}</Link>
-              </Button>
-            </div>
-          </motion.section>
-        ) : null}
-
-        {supervision ? (
-          <motion.section
-            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.3, delay: 0.16, ease: revealEase }}
-            className='bg-card flex h-full flex-col rounded-xl border p-4'
-          >
-            <div className='flex items-start justify-between gap-3'>
-              <div className='min-w-0'>
-                <div className='flex flex-wrap items-baseline gap-x-2 gap-y-0.5'>
-                  <h3 className='font-semibold'>{tSupervision(supervision.packageTier)}</h3>
-                  <span className='text-muted-foreground text-[11px]'>
-                    {t('supervisionPlanMeta', { project: supervision.projectName })}
-                  </span>
-                </div>
-              </div>
-              {history?.pendingSupervisionOrderId ? (
-                <span className='bg-warning/20 text-warning-strong inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium'>
-                  <motion.span
-                    className='bg-warning-strong size-1.5 rounded-full'
-                    animate={reduceMotion ? undefined : { opacity: [1, 0.35, 1] }}
-                    transition={reduceMotion ? undefined : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                  {t('pendingPayment')}
-                </span>
-              ) : (
-                <span className='bg-success/10 text-success inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium'>
-                  <CheckCircle2 className='size-3.5' />
-                  {t('active')}
-                </span>
-              )}
-            </div>
-
-            <div className='mt-5 space-y-2.5'>
-              <UsageRow
-                label={t('inspectionCredits')}
-                value={supervision.inspectionsUsed}
-                total={supervision.inspectionsTotal}
-                delay={0.24}
-                reduceMotion={reduceMotion}
-              />
-              <UsageRow
-                label={t('supervisionStage')}
-                value={currentStage}
-                total={6}
-                delay={0.3}
-                reduceMotion={reduceMotion}
-              />
-            </div>
-
-            <div className='mt-4 flex flex-1 items-end justify-between gap-3'>
-              <p className='text-muted-foreground max-w-[72%] text-[11px] leading-relaxed text-pretty'>
-                {t('supervisionOrderMeta', {
-                  date: formatDisplayDate(history?.supervisionExpiresAt ?? supervision.expiresAt, locale),
-                  order: history?.supervisionOrderId ?? '—',
-                  pendingOrder: history?.pendingSupervisionOrderId ?? '—'
-                })}
-              </p>
-              {history?.pendingSupervisionOrderId ? (
-                <Button
-                  asChild
-                  size='sm'
-                  className='h-8 shrink-0 text-xs hover:brightness-[1.06] motion-reduce:transition-none'
-                >
-                  <Link href={checkoutPaymentRoute(history.pendingSupervisionOrderId)}>
-                    <QrCode className='size-3.5' />
-                    {t('continuePayment')}
-                  </Link>
-                </Button>
-              ) : null}
-            </div>
-          </motion.section>
-        ) : null}
-      </div>
 
       <div className='flex flex-wrap items-center gap-2 pt-1'>
         <span className='text-muted-foreground mr-1 text-xs'>{t('filterLabel')}</span>
