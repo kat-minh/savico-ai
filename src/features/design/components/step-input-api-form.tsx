@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, ImagePlus, Loader2, RefreshCw, X } from 'lucide-react'
+import { AlertCircle, ImagePlus, Loader2, Palette, RefreshCw, X } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useRef, useState, type ReactNode } from 'react'
@@ -49,11 +49,29 @@ interface StepInputApiFormProps {
   onSubmit: () => void
 }
 
-function GroupHeading({ index, children }: { index: number; children: ReactNode }) {
+/** Thẻ nhóm trường: số thứ tự + tiêu đề, nội dung chia lưới đều. */
+function SectionCard({ index, title, children }: { index: number; title: string; children: ReactNode }) {
   return (
-    <h2 className='text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.1em] uppercase'>
-      {index} · {children}
-    </h2>
+    <section className='bg-card rounded-2xl border p-5 shadow-xs sm:p-6'>
+      <header className='mb-5 flex items-center gap-3'>
+        <span className='bg-primary/10 text-primary flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold'>
+          {index}
+        </span>
+        <h2 className='text-base font-semibold'>{title}</h2>
+      </header>
+      {children}
+    </section>
+  )
+}
+
+/** Thẻ chọn phong cách (kiến trúc / nội thất) ở cột phải. */
+function StyleCard({ id, title, hint, children }: { id: string; title: string; hint: string; children: ReactNode }) {
+  return (
+    <section id={id} className='bg-card rounded-2xl border p-5 shadow-xs sm:p-6'>
+      <h2 className='text-base font-semibold'>{title}</h2>
+      <p className='text-muted-foreground mt-1 mb-4 text-sm'>{hint}</p>
+      {children}
+    </section>
   )
 }
 
@@ -205,7 +223,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
     : false
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] px-4 pt-2 pb-6 lg:px-8 lg:pt-6'>
+    <div className='mx-auto w-full max-w-[90rem] px-4 pt-2 pb-8 lg:px-8 lg:pt-6'>
       {locked ? (
         <div
           role='alert'
@@ -225,93 +243,90 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
       ) : null}
 
       <fieldset disabled={locked} className='m-0 min-w-0 border-0 p-0'>
-        <div className='grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]'>
-          <div className='bg-card space-y-7 rounded-2xl border p-5'>
-            <section>
-              <GroupHeading index={1}>{t('groups.media')}</GroupHeading>
-              <div className='grid gap-5 md:grid-cols-2'>
-                <div id='field-imageOrDescription' className='space-y-1.5'>
-                  <FieldLabel hint={t('image.hint')}>{t('image.label')}</FieldLabel>
-                  {draft.inputImageUrl ? (
-                    <div className='group relative h-56 overflow-hidden rounded-xl border'>
-                      <Image
-                        src={draft.inputImageUrl}
-                        alt={t('image.label')}
-                        width={800}
-                        height={600}
-                        className='h-56 w-full object-cover'
-                        unoptimized
-                      />
-                      <Button
-                        type='button'
-                        variant='secondary'
-                        size='icon'
-                        aria-label={t('image.remove')}
-                        onClick={() => input.patch({ inputImageUrl: null })}
-                        className='absolute top-2 right-2 rounded-full'
-                      >
-                        <X className='size-4' />
-                      </Button>
-                      {uploading ? (
-                        <span className='bg-background/70 absolute inset-0 flex items-center justify-center'>
-                          <Loader2 className='size-5 animate-spin' />
-                        </span>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <button
-                      type='button'
-                      onClick={() => fileRef.current?.click()}
-                      disabled={uploading}
-                      className={cn(
-                        'text-muted-foreground hover:bg-muted/50 flex h-56 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-sm transition-colors',
-                        invalid('imageOrDescription') && 'border-destructive'
-                      )}
-                    >
-                      {uploading ? <Loader2 className='size-6 animate-spin' /> : <ImagePlus className='size-6' />}
-                      {uploading ? t('image.uploading') : t('image.upload')}
-                    </button>
-                  )}
-                  <input
-                    ref={fileRef}
-                    type='file'
-                    accept={acceptAttribute()}
-                    className='hidden'
-                    onChange={(event) => void pickImage(event.target.files?.[0])}
-                  />
-                  {draft.inputImageUrl ? (
-                    <Button type='button' variant='outline' size='sm' onClick={() => fileRef.current?.click()}>
-                      {t('image.replace')}
-                    </Button>
-                  ) : null}
-                  <p className='text-muted-foreground text-xs'>{t('image.hint')}</p>
-                </div>
-
-                <div className='space-y-2'>
-                  <FieldLabel htmlFor='description' hint={t('description.hint')}>
-                    {t('description.label')}
+        <div className='grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]'>
+          {/* ── Cột TRÁI: ba thẻ xếp dọc, mỗi thẻ chia lưới 2 cột đều nhau ───────────── */}
+          <div className='space-y-6'>
+            <SectionCard index={1} title={t('groups.scope')}>
+              <div className='grid gap-5 sm:grid-cols-2'>
+                <div id='field-buildingTypeId' className='space-y-2'>
+                  <FieldLabel htmlFor='building-type' hint={tInput('buildingType.hint')} required>
+                    {t('buildingType.label')}
                   </FieldLabel>
-                  <Textarea
-                    id='description'
-                    rows={7}
-                    value={draft.description}
-                    placeholder={t('description.placeholder')}
-                    onChange={(event) => {
-                      // Giới hạn theo ký tự Unicode như BE (đếm rune, không đếm UTF-16).
-                      const next = [...event.target.value].slice(0, DESCRIPTION_MAX_LENGTH).join('')
-                      input.patch({ description: next })
-                    }}
-                  />
-                  <p className='text-muted-foreground text-right text-xs'>
-                    {descriptionLength(draft.description)}/{DESCRIPTION_MAX_LENGTH}
-                  </p>
+                  <Select value={draft.buildingTypeId ?? ''} onValueChange={input.chooseBuildingType}>
+                    <SelectTrigger
+                      id='building-type'
+                      className={cn('w-full', invalid('buildingTypeId') && 'border-destructive')}
+                    >
+                      <SelectValue placeholder={t('buildingType.placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {catalog.data.buildingTypes.map((option) => (
+                        <SelectItem key={option.buildingTypeId} value={option.buildingTypeId}>
+                          {option.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-            </section>
 
-            <section className='space-y-4'>
-              <GroupHeading index={2}>{t('groups.location')}</GroupHeading>
-              <div className='grid gap-4 md:grid-cols-2'>
+                <div id='field-areaM2' className='space-y-2'>
+                  <FieldLabel htmlFor='area' hint={t('area.hint')} required>
+                    {t('area.label')}
+                  </FieldLabel>
+                  <div className='relative'>
+                    <Input
+                      id='area'
+                      inputMode='decimal'
+                      value={draft.areaM2}
+                      placeholder={t('area.placeholder')}
+                      aria-invalid={areaError || invalid('areaM2')}
+                      className={cn('pr-10', (areaError || invalid('areaM2')) && 'border-destructive')}
+                      onChange={(event) => input.patch({ areaM2: event.target.value.replace(',', '.') })}
+                    />
+                    <span className='text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm'>
+                      {t('area.unit')}
+                    </span>
+                  </div>
+                  {areaError ? <p className='text-destructive text-xs'>{t('area.invalid')}</p> : null}
+                </div>
+
+                {fields.floors ? (
+                  <div id='field-floorCount' className='space-y-2'>
+                    <FieldLabel hint={tInput('floorCount.hint')} required>
+                      {t('floorCount.label')}
+                    </FieldLabel>
+                    <ChoiceCards
+                      compact
+                      options={floorOptions}
+                      value={draft.floorCount === null ? null : String(draft.floorCount)}
+                      onChange={(value) => input.patch({ floorCount: Number(value) })}
+                      invalid={invalid('floorCount')}
+                    />
+                  </div>
+                ) : null}
+
+                {fields.tum ? (
+                  <div id='field-hasTum' className='space-y-2'>
+                    <FieldLabel hint={tInput('attic.hint')} required>
+                      {t('tum.label')}
+                    </FieldLabel>
+                    <ChoiceCards
+                      compact
+                      options={[
+                        { value: 'yes', label: t('tum.yes') },
+                        { value: 'no', label: t('tum.no') }
+                      ]}
+                      value={draft.hasTum === null ? null : draft.hasTum ? 'yes' : 'no'}
+                      onChange={(value) => input.patch({ hasTum: value === 'yes' })}
+                      invalid={invalid('hasTum')}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </SectionCard>
+
+            <SectionCard index={2} title={t('groups.location')}>
+              <div className='grid gap-5 sm:grid-cols-2'>
                 <div id='field-provinceCode' className='space-y-2'>
                   <FieldLabel htmlFor='province' hint={t('province.hint')} required>
                     {t('province.label')}
@@ -331,14 +346,6 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                       ))}
                     </SelectContent>
                   </Select>
-                  {provinces.isError ? (
-                    <p className='text-destructive text-xs'>
-                      {t('province.loadError')}{' '}
-                      <button type='button' className='font-medium underline' onClick={() => void provinces.refetch()}>
-                        {t('reload')}
-                      </button>
-                    </p>
-                  ) : null}
                 </div>
 
                 <div id='field-wardCode' className='space-y-2'>
@@ -366,127 +373,139 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div id='field-addressDetail' className='space-y-2'>
-                <FieldLabel htmlFor='address-detail' hint={t('address.hint')} required>
-                  {t('address.label')}
-                </FieldLabel>
-                <Input
-                  id='address-detail'
-                  value={draft.addressDetail}
-                  placeholder={t('address.placeholder')}
-                  className={cn(invalid('addressDetail') && 'border-destructive')}
-                  onChange={(event) => input.patch({ addressDetail: event.target.value })}
-                />
-              </div>
-            </section>
-
-            <section className='space-y-5'>
-              <GroupHeading index={3}>{t('groups.scope')}</GroupHeading>
-
-              <div id='field-buildingTypeId' className='space-y-2'>
-                <FieldLabel htmlFor='building-type' hint={tInput('buildingType.hint')} required>
-                  {t('buildingType.label')}
-                </FieldLabel>
-                <Select value={draft.buildingTypeId ?? ''} onValueChange={input.chooseBuildingType}>
-                  <SelectTrigger
-                    id='building-type'
-                    className={cn('w-full', invalid('buildingTypeId') && 'border-destructive')}
-                  >
-                    <SelectValue placeholder={t('buildingType.placeholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {catalog.data.buildingTypes.map((option) => (
-                      <SelectItem key={option.buildingTypeId} value={option.buildingTypeId}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div id='field-areaM2' className='space-y-2'>
-                <FieldLabel htmlFor='area' hint={t('area.hint')} required>
-                  {t('area.label')}
-                </FieldLabel>
-                <div className='relative max-w-xs'>
+                <div id='field-addressDetail' className='space-y-2 sm:col-span-2'>
+                  <FieldLabel htmlFor='address-detail' hint={t('address.hint')} required>
+                    {t('address.label')}
+                  </FieldLabel>
                   <Input
-                    id='area'
-                    inputMode='decimal'
-                    value={draft.areaM2}
-                    placeholder={t('area.placeholder')}
-                    aria-invalid={areaError || invalid('areaM2')}
-                    className={cn('pr-10', (areaError || invalid('areaM2')) && 'border-destructive')}
-                    onChange={(event) => input.patch({ areaM2: event.target.value.replace(',', '.') })}
+                    id='address-detail'
+                    value={draft.addressDetail}
+                    placeholder={t('address.placeholder')}
+                    className={cn(invalid('addressDetail') && 'border-destructive')}
+                    onChange={(event) => input.patch({ addressDetail: event.target.value })}
                   />
-                  <span className='text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm'>
-                    {t('area.unit')}
-                  </span>
                 </div>
-                {areaError ? <p className='text-destructive text-xs'>{t('area.invalid')}</p> : null}
               </div>
-
-              {fields.floors || fields.tum ? (
-                <div className='flex flex-wrap items-start gap-x-6 gap-y-4'>
-                  {fields.floors ? (
-                    <div id='field-floorCount' className='space-y-2'>
-                      <FieldLabel hint={tInput('floorCount.hint')} required>
-                        {t('floorCount.label')}
-                      </FieldLabel>
-                      <ChoiceCards
-                        compact
-                        options={floorOptions}
-                        value={draft.floorCount === null ? null : String(draft.floorCount)}
-                        onChange={(value) => input.patch({ floorCount: Number(value) })}
-                        invalid={invalid('floorCount')}
-                      />
-                    </div>
-                  ) : null}
-                  {fields.tum ? (
-                    <div id='field-hasTum' className='space-y-2'>
-                      <FieldLabel hint={tInput('attic.hint')} required>
-                        {t('tum.label')}
-                      </FieldLabel>
-                      <ChoiceCards
-                        compact
-                        options={[
-                          { value: 'yes', label: t('tum.yes') },
-                          { value: 'no', label: t('tum.no') }
-                        ]}
-                        value={draft.hasTum === null ? null : draft.hasTum ? 'yes' : 'no'}
-                        onChange={(value) => input.patch({ hasTum: value === 'yes' })}
-                        invalid={invalid('hasTum')}
-                      />
-                    </div>
-                  ) : null}
-                </div>
+              {provinces.isError ? (
+                <p className='text-destructive mt-3 text-xs'>
+                  {t('province.loadError')}{' '}
+                  <button type='button' className='font-medium underline' onClick={() => void provinces.refetch()}>
+                    {t('reload')}
+                  </button>
+                </p>
               ) : null}
-            </section>
+            </SectionCard>
+
+            <SectionCard index={3} title={t('groups.media')}>
+              <div className='grid gap-5 md:grid-cols-2'>
+                <div id='field-imageOrDescription' className='space-y-2'>
+                  <FieldLabel hint={t('image.hint')}>{t('image.label')}</FieldLabel>
+                  {draft.inputImageUrl ? (
+                    <div className='group relative h-52 overflow-hidden rounded-xl border'>
+                      <Image
+                        src={draft.inputImageUrl}
+                        alt={t('image.label')}
+                        width={800}
+                        height={600}
+                        className='h-52 w-full object-cover'
+                        unoptimized
+                      />
+                      <div className='absolute top-2 right-2 flex gap-1.5'>
+                        <Button
+                          type='button'
+                          variant='secondary'
+                          size='sm'
+                          className='h-8 rounded-full px-3 text-xs'
+                          onClick={() => fileRef.current?.click()}
+                        >
+                          {t('image.replace')}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='secondary'
+                          size='icon'
+                          aria-label={t('image.remove')}
+                          onClick={() => input.patch({ inputImageUrl: null })}
+                          className='size-8 rounded-full'
+                        >
+                          <X className='size-4' />
+                        </Button>
+                      </div>
+                      {uploading ? (
+                        <span className='bg-background/70 absolute inset-0 flex items-center justify-center'>
+                          <Loader2 className='size-5 animate-spin' />
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <button
+                      type='button'
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className={cn(
+                        'text-muted-foreground hover:bg-muted/50 flex h-52 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed text-sm transition-colors',
+                        invalid('imageOrDescription') && 'border-destructive'
+                      )}
+                    >
+                      {uploading ? <Loader2 className='size-6 animate-spin' /> : <ImagePlus className='size-6' />}
+                      {uploading ? t('image.uploading') : t('image.upload')}
+                    </button>
+                  )}
+                  <input
+                    ref={fileRef}
+                    type='file'
+                    accept={acceptAttribute()}
+                    className='hidden'
+                    onChange={(event) => void pickImage(event.target.files?.[0])}
+                  />
+                  <p className='text-muted-foreground text-xs'>{t('image.hint')}</p>
+                </div>
+
+                <div className='space-y-2'>
+                  <FieldLabel htmlFor='description' hint={t('description.hint')}>
+                    {t('description.label')}
+                  </FieldLabel>
+                  <Textarea
+                    id='description'
+                    value={draft.description}
+                    placeholder={t('description.placeholder')}
+                    className='h-52 resize-none'
+                    onChange={(event) => {
+                      // Giới hạn theo ký tự Unicode như BE (đếm rune, không đếm UTF-16).
+                      const next = [...event.target.value].slice(0, DESCRIPTION_MAX_LENGTH).join('')
+                      input.patch({ description: next })
+                    }}
+                  />
+                  <p className='text-muted-foreground text-right text-xs'>
+                    {descriptionLength(draft.description)}/{DESCRIPTION_MAX_LENGTH}
+                  </p>
+                </div>
+              </div>
+            </SectionCard>
           </div>
 
-          {/* Thông tin bổ sung tách làm HAI thẻ: kiểu kiến trúc và phong cách nội thất (mỗi nhóm bật/tắt riêng theo loại công trình). */}
-          <div className='space-y-5 lg:self-start'>
+          {/* ── Cột PHẢI: phong cách thiết kế, tách HAI thẻ (mỗi nhóm bật/tắt riêng theo loại công trình) ── */}
+          <div className='space-y-6'>
             {!type ? (
-              <aside className='bg-card h-fit rounded-2xl border p-5'>
-                <h2 className='mb-4 font-semibold'>{t('extra.title')}</h2>
-                <div className='text-muted-foreground flex min-h-64 items-center justify-center rounded-xl border border-dashed p-8 text-center text-sm'>
-                  {t('extra.empty')}
-                </div>
-              </aside>
+              <section className='bg-card flex min-h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed p-8 text-center'>
+                <Palette className='text-muted-foreground size-8' strokeWidth={1.5} />
+                <h2 className='text-base font-semibold'>{t('extra.title')}</h2>
+                <p className='text-muted-foreground max-w-xs text-sm text-pretty'>{t('extra.empty')}</p>
+              </section>
             ) : !fields.architecture && !fields.interior ? (
-              <aside className='bg-card h-fit rounded-2xl border p-5'>
-                <h2 className='mb-4 font-semibold'>{t('extra.title')}</h2>
-                <p className='text-muted-foreground text-sm'>{t('extra.none')}</p>
-              </aside>
+              <section className='bg-card rounded-2xl border p-5 shadow-xs sm:p-6'>
+                <h2 className='text-base font-semibold'>{t('extra.title')}</h2>
+                <p className='text-muted-foreground mt-1 text-sm'>{t('extra.none')}</p>
+              </section>
             ) : null}
 
             {fields.architecture ? (
-              <aside id='field-architectureStyleId' className='bg-card h-fit space-y-3 rounded-2xl border p-5'>
-                <h2 className='font-semibold'>{t('style.architecture')}</h2>
-                <FieldLabel hint={tInput('style.hint')} required>
-                  {t('style.architectureHint')}
-                </FieldLabel>
+              <StyleCard
+                id='field-architectureStyleId'
+                title={t('style.architecture')}
+                hint={t('style.architectureHint')}
+              >
                 <ChoiceCards
                   className='grid-cols-2 sm:grid-cols-2'
                   options={styleOptions('architecture')}
@@ -494,15 +513,11 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   onChange={(value) => input.patch({ architectureStyleId: value })}
                   invalid={invalid('architectureStyleId')}
                 />
-              </aside>
+              </StyleCard>
             ) : null}
 
             {fields.interior ? (
-              <aside id='field-interiorStyleId' className='bg-card h-fit space-y-3 rounded-2xl border p-5'>
-                <h2 className='font-semibold'>{t('style.interior')}</h2>
-                <FieldLabel hint={tInput('style.hint')} required>
-                  {t('style.interiorHint')}
-                </FieldLabel>
+              <StyleCard id='field-interiorStyleId' title={t('style.interior')} hint={t('style.interiorHint')}>
                 <ChoiceCards
                   className='grid-cols-2 sm:grid-cols-2'
                   options={styleOptions('interior')}
@@ -510,13 +525,14 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   onChange={(value) => input.patch({ interiorStyleId: value })}
                   invalid={invalid('interiorStyleId')}
                 />
-              </aside>
+              </StyleCard>
             ) : null}
           </div>
         </div>
       </fieldset>
 
-      <div className='mt-6 space-y-2'>
+      {/* ── Khối hành động căn giữa: trường còn thiếu, trạng thái lưu, hạn mức, nút gửi ── */}
+      <div className='mx-auto mt-8 w-full max-w-xl space-y-3'>
         {showErrors && missingLabels.length > 0 ? (
           <p className='text-destructive text-center text-xs'>
             {t('missing.title')}: {missingLabels.join(', ')}
