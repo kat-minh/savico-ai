@@ -4088,7 +4088,22 @@
       "publishedStillHidden": "Published, but the template is still hidden from visitors. Use Change status to show it.",
       "saveNewVersion": "Save and release as a new version",
       "saveNewVersionTitle": "Release a new version?",
-      "saveNewVersionBody": "The current version is kept in history and no longer shown to visitors; the new version replaces it. Visitors who viewed the old one need a new lookup to open the new one. A plain Save edits the current version in place and costs visitors nothing."
+      "saveNewVersionBody": "The current version is kept in history and no longer shown to visitors; the new version replaces it. Visitors who viewed the old one need a new lookup to open the new one. A plain Save edits the current version in place and costs visitors nothing.",
+      "detail": {
+        "floors": "Floors",
+        "version": "Version",
+        "publishedAt": "Published on",
+        "modifiedAt": "Last updated",
+        "assetCount": "Files",
+        "architectureStyles": "Architecture styles",
+        "interiorStyles": "Interior styles",
+        "description": "Description",
+        "sections": "Images and files by section",
+        "noSections": "This template has no sections yet.",
+        "fileCount": "{count} files",
+        "cover": "Cover",
+        "emptySection": "This section has no files yet."
+      }
     },
     "catalogStatus": {
       "active": "Active",

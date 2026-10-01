@@ -4088,7 +4088,22 @@
       "publishedStillHidden": "Đã công bố nhưng mẫu vẫn đang ẩn với khách. Bấm Chuyển trạng thái để hiện mẫu.",
       "saveNewVersion": "Lưu và phát hành phiên bản mới",
       "saveNewVersionTitle": "Phát hành phiên bản mới?",
-      "saveNewVersionBody": "Phiên bản hiện tại được giữ trong lịch sử và không còn hiển thị cho khách; phiên bản mới thay thế nó. Khách đã xem bản cũ cần mở bản mới bằng một lượt tra cứu mới. Nếu bấm Lưu thường, bản hiện tại được sửa trực tiếp và khách không tốn thêm lượt."
+      "saveNewVersionBody": "Phiên bản hiện tại được giữ trong lịch sử và không còn hiển thị cho khách; phiên bản mới thay thế nó. Khách đã xem bản cũ cần mở bản mới bằng một lượt tra cứu mới. Nếu bấm Lưu thường, bản hiện tại được sửa trực tiếp và khách không tốn thêm lượt.",
+      "detail": {
+        "floors": "Số tầng",
+        "version": "Phiên bản",
+        "publishedAt": "Ngày công bố",
+        "modifiedAt": "Cập nhật lần cuối",
+        "assetCount": "Số tệp",
+        "architectureStyles": "Phong cách kiến trúc",
+        "interiorStyles": "Phong cách nội thất",
+        "description": "Mô tả",
+        "sections": "Hình ảnh và tệp theo mục",
+        "noSections": "Mẫu này chưa có mục nào.",
+        "fileCount": "{count} tệp",
+        "cover": "Ảnh đại diện",
+        "emptySection": "Mục này chưa có tệp."
+      }
     },
     "catalogStatus": {
       "active": "Hoạt động",
