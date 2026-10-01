@@ -177,26 +177,23 @@ export function LibraryContentFields({ form }: { form: FormInstance }) {
       <Form.Item name='drawingKind' label={l('drawingKind')}>
         <Select allowClear options={DRAWING_KINDS.map((value) => ({ value, label: value }))} />
       </Form.Item>
-      {/* Mẫu 3D không nhập kích thước (khớp giao diện mock): giá trị đã có trong form vẫn được giữ nguyên. */}
-      {drawingKind === '3D' ? null : (
-        <Row gutter={16}>
-          <Col xs={24} md={8}>
-            <Form.Item name='widthM' label={l('widthM')} rules={[decimalRule(l('widthM'))]}>
-              <Input suffix='m' inputMode='decimal' />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={8}>
-            <Form.Item name='lengthM' label={l('lengthM')} rules={[decimalRule(l('lengthM'))]}>
-              <Input suffix='m' inputMode='decimal' />
-            </Form.Item>
-          </Col>
-          <Col xs={24} md={8}>
-            <Form.Item name='areaM2' label={l('areaM2')} rules={[decimalRule(l('areaM2'))]} extra={l('areaHint')}>
-              <Input suffix='m²' inputMode='decimal' />
-            </Form.Item>
-          </Col>
-        </Row>
-      )}
+      <Row gutter={16}>
+        <Col xs={24} md={8}>
+          <Form.Item name='widthM' label={l('widthM')} rules={[decimalRule(l('widthM'))]}>
+            <Input suffix='m' inputMode='decimal' />
+          </Form.Item>
+        </Col>
+        <Col xs={24} md={8}>
+          <Form.Item name='lengthM' label={l('lengthM')} rules={[decimalRule(l('lengthM'))]}>
+            <Input suffix='m' inputMode='decimal' />
+          </Form.Item>
+        </Col>
+        <Col xs={24} md={8}>
+          <Form.Item name='areaM2' label={l('areaM2')} rules={[decimalRule(l('areaM2'))]} extra={l('areaHint')}>
+            <Input suffix='m²' inputMode='decimal' />
+          </Form.Item>
+        </Col>
+      </Row>
 
       {isError ? <Alert type='warning' showIcon style={{ marginBottom: 16 }} title={l('catalogUnavailable')} /> : null}
       <Form.Item name='buildingTypeId' label={l('buildingType')}>
