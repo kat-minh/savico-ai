@@ -48,6 +48,13 @@ export interface HandbookFloor {
   imageUrl?: string
   /** Khi chưa có ảnh: dựng bản vẽ SVG theo preset này (mẫu 2D). */
   planVariant?: PlanVariant
+  /**
+   * Mục (section) chứa ảnh này khi một mục có NHIỀU ảnh: tab chuyển theo mục, dải ảnh nhỏ hiện các ảnh của mục đang
+   * chọn. Bỏ trống thì mỗi ảnh là một "tầng" riêng như mẫu mock.
+   */
+  groupId?: string
+  /** Nhãn tab của mục (tên mục). */
+  groupLabel?: string
 }
 
 /** Dòng thông số hiện dưới tên mẫu trên thẻ và trong khung "Thông tin bản vẽ". */

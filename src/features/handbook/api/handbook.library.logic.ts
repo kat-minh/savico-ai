@@ -291,8 +291,8 @@ export function buildSectionGroups(
 export function floorsFromGroups(
   groups: readonly HandbookSectionGroup[],
   fallbackLabel: (index: number) => string = (index) => `Ảnh ${index}`
-): { id: string; label: string; imageUrl: string }[] {
-  const floors: { id: string; label: string; imageUrl: string }[] = []
+): { id: string; label: string; imageUrl: string; groupId: string; groupLabel: string }[] {
+  const floors: { id: string; label: string; imageUrl: string; groupId: string; groupLabel: string }[] = []
 
   for (const group of groups) {
     group.images.forEach((image, index) => {
@@ -303,7 +303,13 @@ export function floorsFromGroups(
           : group.images.length > 1 && group.name
             ? `${group.name} ${index + 1}`
             : base
-      floors.push({ id: image.assetId, label, imageUrl: image.imageUrl })
+      floors.push({
+        id: image.assetId,
+        label,
+        imageUrl: image.imageUrl,
+        groupId: group.sectionId,
+        groupLabel: group.name || label
+      })
     })
   }
 
