@@ -3881,7 +3881,8 @@
       "createFloorSavedHint": "A saved section can't be removed — you can rename it or add/remove its images.",
       "deleteConfirmTitle": "Delete template \"{name}\"?",
       "deleteConfirmBody": "An unpublished template is deleted together with its sections and images. This cannot be undone.",
-      "deleteDisabled": "Delete (published — use Show/Hide)"
+      "deleteDisabled": "Delete (published — use Show/Hide)",
+      "publishedStillHidden": "Published, but the template is still hidden from visitors. Use Change status to show it."
     },
     "catalogStatus": {
       "active": "Active",

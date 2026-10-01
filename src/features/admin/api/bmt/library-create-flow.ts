@@ -4,6 +4,7 @@ import {
   getTemplateVersions,
   publishTemplateVersion,
   saveTemplateVersion,
+  setTemplateVisibility,
   type AdminVersionItem,
   type TemplateContent,
   type VersionCreated
@@ -53,6 +54,8 @@ export interface SaveFlowResult {
   published: boolean
   /** Lý do công bố không được (thường là `LibraryValidationError` kèm danh sách thiếu gì). */
   publishError?: unknown
+  /** Đã công bố nhưng mẫu vẫn đang ẩn với khách (không bỏ ẩn được) — người dùng cần bấm Chuyển trạng thái. */
+  stillHidden?: boolean
 }
 
 interface SaveOptions {
@@ -127,9 +130,20 @@ async function tryPublish(
   // và chỉ cần bổ sung phần thiếu.
   try {
     await publishTemplateVersion(templateId, versionId, body)
-    return { published: true }
   } catch (publishError) {
     return { published: false, publishError }
+  }
+
+  // Lần công bố ĐẦU TIÊN của một mẫu mới: "công bố" phải nghĩa là khách thấy được. Công bố chỉ đổi phiên bản hiện
+  // hành, còn cờ ẩn/hiện là của mẫu — nếu mẫu đang ẩn thì phải bỏ ẩn, không thì bảng vẫn báo "Đang ẩn" dù API
+  // công bố trả thành công. Mẫu đã công bố từ trước (sửa / bản mới) giữ nguyên lựa chọn ẩn/hiện của người quản lý.
+  if (body.expectedCurrentVersionId !== null) return { published: true }
+  try {
+    const detail = await getTemplateVersions(templateId)
+    if (detail.isHidden) await setTemplateVisibility(templateId, detail.templateVersion, false)
+    return { published: true }
+  } catch {
+    return { published: true, stillHidden: true }
   }
 }
 

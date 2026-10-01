@@ -143,6 +143,7 @@ export function LibraryTemplateManager() {
       if (publish && !result.published && result.publishError) {
         message.warning(`${l('createNotPublished')} ${libraryError(result.publishError)}`, 10)
       }
+      if (result.stillHidden) message.warning(l('publishedStillHidden'), 10)
       return result
     } catch (err) {
       if (!(err instanceof InitialContentError)) throw err

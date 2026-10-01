@@ -3881,7 +3881,8 @@
       "createFloorSavedHint": "Mục đã lưu không xoá được — bạn có thể đổi tên hoặc thêm/bỏ hình của mục.",
       "deleteConfirmTitle": "Xóa mẫu \"{name}\"?",
       "deleteConfirmBody": "Mẫu chưa công bố sẽ bị xóa cùng các mục và hình đã thêm. Không hoàn tác được.",
-      "deleteDisabled": "Xóa (mẫu đã công bố — dùng Ẩn/hiện)"
+      "deleteDisabled": "Xóa (mẫu đã công bố — dùng Ẩn/hiện)",
+      "publishedStillHidden": "Đã công bố nhưng mẫu vẫn đang ẩn với khách. Bấm Chuyển trạng thái để hiện mẫu."
     },
     "catalogStatus": {
       "active": "Hoạt động",
