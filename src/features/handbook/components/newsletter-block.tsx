@@ -33,7 +33,7 @@ export function NewsletterBlock() {
   const [previewArticleId, setPreviewArticleId] = useState<string | null>(null)
   const [swapVersion, setSwapVersion] = useState(0)
 
-  const { data: articles, isPending } = useHandbookArticles()
+  const { data: articles, isPending } = useHandbookArticles(undefined, undefined, { source: 'mock' })
   const featured = useMemo(() => featuredArticles(articles ?? []), [articles])
   const related = useMemo(
     () => sortByNewest(articles ?? []).filter((article) => !featured.includes(article)),

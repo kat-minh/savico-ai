@@ -127,7 +127,7 @@ export function FoundationBlock() {
   const tArticles = useTranslations('handbook.articles')
 
   const { data: stages, isPending } = useHandbookStages()
-  const { data: articles } = useHandbookArticles()
+  const { data: articles } = useHandbookArticles(undefined, undefined, { source: 'mock' })
 
   const [openStage, setOpenStage] = useState<HandbookStageId | null>(null)
   const [openTopic, setOpenTopic] = useState<string | null>(null)

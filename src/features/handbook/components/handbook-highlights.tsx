@@ -34,7 +34,7 @@ export function HandbookHighlights() {
   const { nameOf: labelName } = useArticleLabels()
   const locale = useLocale() as Locale
 
-  const { data: articles, isPending } = useHandbookArticles()
+  const { data: articles, isPending } = useHandbookArticles(undefined, undefined, { source: 'mock' })
   const latest = useMemo(() => sortByNewest(articles ?? []).slice(0, HOME_HANDBOOK_COUNT), [articles])
   // Chốt mốc "bây giờ" một lần khi mount thay vì gọi `Date.now()` ngay trong
   // JSX của mỗi lần render — nhãn "Mới" không cần cập nhật tức thời tới từng

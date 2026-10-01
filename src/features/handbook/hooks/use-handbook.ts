@@ -7,6 +7,7 @@ import { useAuthStore } from '@/shared/auth'
 import { useCmsCollection } from '@/shared/cms'
 import { env } from '@/shared/config/env'
 import { handbookApi } from '../api/handbook.api'
+import { mockHandbookApi } from '../api/handbook.mock'
 import { LibraryAccessDeniedError, type ArticleListQuery } from '../api/handbook.bmt'
 import { handbookKeys } from '../api/handbook.keys'
 import { selectPersonalizedTemplates } from '../services/handbook.service'
@@ -48,17 +49,22 @@ export function useHandbookTemplate(id: string, options?: { enabled?: boolean })
 }
 
 /**
- * Bài viết. `query` lọc ở phía BE (`categoryId` gồm cả danh mục con, `keyword`); bỏ trống thì lấy
+ * Bài viết (`source: 'mock'` cho các khối trang Cẩm nang chưa lấy API: chỉ danh sách bài viết dưới cùng dùng API). `query` lọc ở phía BE (`categoryId` gồm cả danh mục con, `keyword`); bỏ trống thì lấy
  * bài mới nhất như trước và để giao diện tự lọc trên danh sách đã tải.
  */
-export function useHandbookArticles(topic?: 'architecture' | 'interior', query?: ArticleListQuery) {
-  const scope =
+export function useHandbookArticles(
+  topic?: 'architecture' | 'interior',
+  query?: ArticleListQuery,
+  options?: { source?: 'api' | 'mock' }
+) {
+  const mock = options?.source === 'mock'
+  const base =
     query?.categoryId || query?.keyword
       ? `${topic ?? 'all'}:${query?.categoryId ?? ''}:${query?.keyword ?? ''}`
       : (topic ?? 'all')
   return useQuery({
-    queryKey: handbookKeys.articleList(scope),
-    queryFn: () => handbookApi.listArticles(topic, query),
+    queryKey: handbookKeys.articleList(mock ? `mock:${base}` : base),
+    queryFn: () => (mock ? mockHandbookApi.listArticles(topic) : handbookApi.listArticles(topic, query)),
     staleTime: STATIC_CONTENT_STALE_TIME
   })
 }
