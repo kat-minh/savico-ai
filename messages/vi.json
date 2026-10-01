@@ -2385,7 +2385,8 @@
       "more": "Thao tác",
       "switchStatus": "Chuyển trạng thái",
       "switchStatusTitle": "Chuyển trạng thái “{name}”?",
-      "switchStatusBody": "{current} → {next}"
+      "switchStatusBody": "{current} → {next}",
+      "saveOptions": "Các cách lưu khác"
     },
     "feedback": {
       "created": "Đã thêm bản ghi mới.",
@@ -3888,7 +3889,10 @@
       "deleteConfirmTitle": "Xóa mẫu \"{name}\"?",
       "deleteConfirmBody": "Mẫu chưa công bố sẽ bị xóa cùng các mục và hình đã thêm. Không hoàn tác được.",
       "deleteDisabled": "Xóa (mẫu đã công bố — dùng Ẩn/hiện)",
-      "publishedStillHidden": "Đã công bố nhưng mẫu vẫn đang ẩn với khách. Bấm Chuyển trạng thái để hiện mẫu."
+      "publishedStillHidden": "Đã công bố nhưng mẫu vẫn đang ẩn với khách. Bấm Chuyển trạng thái để hiện mẫu.",
+      "saveNewVersion": "Lưu và phát hành phiên bản mới",
+      "saveNewVersionTitle": "Phát hành phiên bản mới?",
+      "saveNewVersionBody": "Phiên bản hiện tại được giữ trong lịch sử và không còn hiển thị cho khách; phiên bản mới thay thế nó. Khách đã xem bản cũ cần mở bản mới bằng một lượt tra cứu mới. Nếu bấm Lưu thường, bản hiện tại được sửa trực tiếp và khách không tốn thêm lượt."
     },
     "catalogStatus": {
       "active": "Hoạt động",

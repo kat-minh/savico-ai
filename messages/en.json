@@ -2385,7 +2385,8 @@
       "more": "Actions",
       "switchStatus": "Change status",
       "switchStatusTitle": "Change status of “{name}”?",
-      "switchStatusBody": "{current} → {next}"
+      "switchStatusBody": "{current} → {next}",
+      "saveOptions": "More ways to save"
     },
     "feedback": {
       "created": "Record added.",
@@ -3888,7 +3889,10 @@
       "deleteConfirmTitle": "Delete template \"{name}\"?",
       "deleteConfirmBody": "An unpublished template is deleted together with its sections and images. This cannot be undone.",
       "deleteDisabled": "Delete (published — use Show/Hide)",
-      "publishedStillHidden": "Published, but the template is still hidden from visitors. Use Change status to show it."
+      "publishedStillHidden": "Published, but the template is still hidden from visitors. Use Change status to show it.",
+      "saveNewVersion": "Save and release as a new version",
+      "saveNewVersionTitle": "Release a new version?",
+      "saveNewVersionBody": "The current version is kept in history and no longer shown to visitors; the new version replaces it. Visitors who viewed the old one need a new lookup to open the new one. A plain Save edits the current version in place and costs visitors nothing."
     },
     "catalogStatus": {
       "active": "Active",

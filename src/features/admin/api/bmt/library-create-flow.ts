@@ -1,5 +1,7 @@
 import {
   createLibraryTemplate,
+  createTemplateDraft,
+  deleteTemplateDraft,
   detachTemplateAsset,
   getTemplateVersions,
   publishTemplateVersion,
@@ -199,10 +201,15 @@ export interface EditTarget {
   sections: FormSection[]
 }
 
-export async function loadEditTarget(templateId: string, keyOf: (index: number) => string): Promise<EditTarget> {
+export async function loadEditTarget(
+  templateId: string,
+  keyOf: (index: number) => string,
+  versionId?: string
+): Promise<EditTarget> {
   const detail = await getTemplateVersions(templateId)
-  const version =
-    detail.versions.find((item) => item.isCurrent) ?? detail.versions.find((item) => item.state === 'Draft')
+  const version = versionId
+    ? detail.versions.find((item) => item.versionId === versionId)
+    : (detail.versions.find((item) => item.isCurrent) ?? detail.versions.find((item) => item.state === 'Draft'))
   if (!version) throw new Error('LibraryVersionMissing')
 
   const listed = await listSections(templateId, version.versionId)
@@ -299,4 +306,68 @@ export async function updateTemplateWithSections(
     expectedEditVersion: state.editVersion,
     expectedCurrentVersionId: target.currentVersionId
   })
+}
+
+/** Gắn các thay đổi trong form (theo id của bản hiện hành) sang section / tệp tương ứng của bản nháp vừa sao. */
+function mapToDraft(
+  original: readonly FormSection[],
+  edited: readonly FormSection[],
+  draft: readonly FormSection[]
+): FormSection[] {
+  return edited.map((section) => {
+    if (!section.sectionId) return section
+    const index = original.findIndex((item) => item.sectionId === section.sectionId)
+    const source = original[index]
+    const twin = draft[index]
+    if (!source || !twin) throw new Error('LibraryDraftMismatch')
+    const twinOf = (asset: FormAsset): FormAsset => {
+      const found = twin.assets[source.assets.findIndex((item) => item.assetId === asset.assetId)]
+      if (!found) throw new Error('LibraryDraftMismatch')
+      return found
+    }
+    return {
+      ...section,
+      sectionId: twin.sectionId,
+      originalName: twin.originalName,
+      assets: section.assets.map(twinOf),
+      removed: section.removed.map(twinOf)
+    }
+  })
+}
+
+/** Bỏ nháp vừa tạo khi phát hành không thành: không để nháp mồ côi tích lại. Lỗi khi dọn thì bỏ qua. */
+async function discardDraft(templateId: string, versionId: string) {
+  try {
+    const detail = await getTemplateVersions(templateId)
+    const draft = detail.versions.find((item) => item.versionId === versionId)
+    if (draft) await deleteTemplateDraft(templateId, versionId, draft.editVersion)
+  } catch {
+    // Giữ nguyên: nháp thừa không ảnh hưởng khách.
+  }
+}
+
+/**
+ * LƯU VÀ PHÁT HÀNH PHIÊN BẢN MỚI: sao bản hiện hành thành nháp → áp các chỉnh sửa trong form vào nháp → công bố.
+ * Bản cũ không bị sửa: nó chuyển sang lịch sử và thôi hiển thị cho khách; khách đã xem bản cũ phải mở bản mới
+ * bằng một lượt mới (BR-LIB-003 khoản 5). Thất bại ở bất kỳ bước nào thì bỏ nháp vừa tạo và ném lỗi — bản hiện
+ * hành giữ nguyên, form ở lại để sửa tiếp, không có gì được lưu một nửa.
+ */
+export async function releaseNewVersion(
+  target: EditTarget,
+  content: TemplateContent,
+  sections: readonly FormSection[],
+  keyOf: (index: number) => string,
+  onProgress?: (progress: CreateFlowProgress) => void
+): Promise<void> {
+  const { templateId } = target
+  const draft = await createTemplateDraft(templateId, target.templateVersion, target.version.versionId)
+  try {
+    const draftTarget = await loadEditTarget(templateId, keyOf, draft.versionId)
+    const mapped = mapToDraft(target.sections, sections, draftTarget.sections)
+    const result = await updateTemplateWithSections(draftTarget, content, mapped, { publish: true, onProgress })
+    if (!result.published) throw result.publishError ?? new Error('LibraryPublishFailed')
+  } catch (error) {
+    await discardDraft(templateId, draft.versionId)
+    throw error instanceof InitialContentError ? error.reason : error
+  }
 }

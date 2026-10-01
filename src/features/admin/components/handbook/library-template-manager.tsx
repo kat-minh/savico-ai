@@ -21,6 +21,7 @@ import {
   createTemplateWithSections,
   loadEditTarget,
   normalizeSections,
+  releaseNewVersion,
   updateTemplateWithSections,
   type CreateFlowProgress,
   type EditTarget,
@@ -210,9 +211,34 @@ export function LibraryTemplateManager() {
             sections: target.sections.length ? target.sections : [newFormSection(l('createFloorDefault', { index: 1 }))]
           }
         }}
-        onUpdate={(values) => {
+        saveOptions={(row) =>
+          // Chỉ mẫu đã có phiên bản hiện hành mới phát hành được phiên bản MỚI; mẫu nháp thì Lưu + công bố là đủ.
+          row.template.currentVersionId
+            ? [
+                {
+                  key: 'newVersion',
+                  label: l('saveNewVersion'),
+                  confirm: { title: l('saveNewVersionTitle'), content: l('saveNewVersionBody') }
+                }
+              ]
+            : []
+        }
+        onUpdate={(values, _row, mode) => {
           const target = editTarget.current
           if (!target) return Promise.reject(new Error('LibraryVersionMissing'))
+          if (mode === 'newVersion') {
+            const sections = normalizeSections(
+              Array.isArray(values.sections) ? (values.sections as FormSection[]) : [],
+              (index) => l('createFloorDefault', { index })
+            )
+            return releaseNewVersion(
+              target,
+              toTemplateContent(values, classificationOptions),
+              sections,
+              newFormSectionKey,
+              setProgress
+            ).finally(() => setProgress(null))
+          }
           return save(values, (content, sections, publish) =>
             updateTemplateWithSections(target, content, sections, { publish, onProgress: setProgress })
           )

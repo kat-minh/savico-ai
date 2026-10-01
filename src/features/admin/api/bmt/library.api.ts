@@ -180,6 +180,19 @@ export function saveTemplateVersion(
   )
 }
 
+/** Sao phiên bản hiện hành thành nháp mới (metadata, phân loại, section, tệp, ảnh đại diện). */
+export function createTemplateDraft(
+  templateId: string,
+  expectedTemplateVersion: number,
+  baseVersionId: string
+): Promise<VersionCreated> {
+  return http.post<VersionCreated>(
+    `${BASE}/${templateId}/drafts`,
+    { expectedTemplateVersion, baseVersionId },
+    idempotent()
+  )
+}
+
 /** Chỉ xóa được nháp; bản đã công bố dùng Ẩn. Xóa nháp kéo theo section và liên kết tệp của nó. */
 export function deleteTemplateDraft(templateId: string, versionId: string, expectedEditVersion: number) {
   return http.delete<void>(`${BASE}/${templateId}/versions/${versionId}`, {

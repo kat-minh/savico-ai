@@ -1,12 +1,13 @@
 'use client'
 
-import { EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { DownOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   App,
   Button,
   Card,
   Drawer,
+  Dropdown,
   Empty,
   Form,
   Grid,
@@ -60,7 +61,13 @@ export interface ApiResourceManagerProps<T> {
    * cho khóa lạc quan). Bỏ trống `onUpdate` = màn không cho sửa.
    */
   toFormValues?: (item: T) => Record<string, unknown> | Promise<Record<string, unknown>>
-  onUpdate?: (values: Record<string, unknown>, item: T) => Promise<unknown>
+  /** `mode` là khoá của tuỳ chọn ở nút Lưu (xem `saveOptions`); Lưu thường thì không có. */
+  onUpdate?: (values: Record<string, unknown>, item: T, mode?: string) => Promise<unknown>
+  /**
+   * Các cách Lưu khác ngoài Lưu thường (ví dụ "Lưu và phát hành phiên bản mới") — hiện trong mũi tên cạnh nút Lưu
+   * khi SỬA. Có `confirm` thì hỏi xác nhận trước khi lưu.
+   */
+  saveOptions?: (item: T) => { key: string; label: string; confirm?: { title: string; content: string } }[]
   /**
    * Hành động riêng của từng dòng (công bố, ẩn, xóa, hủy…) — trả DANH SÁCH dữ
    * liệu `RowAction[]`, hiện trong menu "…" kèm icon + chữ. Hành động cần xác nhận
@@ -100,6 +107,7 @@ export function ApiResourceManager<T>({
   onCreate,
   toFormValues,
   onUpdate,
+  saveOptions,
   rowActions,
   renderView,
   banner,
@@ -162,13 +170,13 @@ export function ApiResourceManager<T>({
     })
   }
 
-  async function submit() {
+  async function submit(mode?: string) {
     if (!editing) return
     const values = (await form.validateFields().catch(() => null)) as Record<string, unknown> | null
     if (!values) return
     setSaving(true)
     try {
-      if (editing.item) await onUpdate?.(values, editing.item)
+      if (editing.item) await onUpdate?.(values, editing.item, mode)
       else await onCreate?.(values)
       await refresh()
       message.success(editing.item ? t('feedback.saved') : t('feedback.created'))
@@ -180,6 +188,7 @@ export function ApiResourceManager<T>({
     }
   }
 
+  const extraSaves = editing?.item && saveOptions ? saveOptions(editing.item) : []
   const canCreate = Boolean(createValues && onCreate && renderForm)
   const canEdit = Boolean(onUpdate && renderForm)
 
@@ -299,9 +308,38 @@ export function ApiResourceManager<T>({
           extra={
             <Space>
               <Button onClick={requestClose}>{t('actions.cancel')}</Button>
-              <Button type='primary' loading={saving} onClick={submit}>
-                {t('actions.save')}
-              </Button>
+              {extraSaves.length > 0 ? (
+                <Space.Compact>
+                  <Button type='primary' loading={saving} onClick={() => submit()}>
+                    {t('actions.save')}
+                  </Button>
+                  <Dropdown
+                    trigger={['click']}
+                    disabled={saving}
+                    menu={{
+                      items: extraSaves.map((option) => ({ key: option.key, label: option.label })),
+                      onClick: ({ key }) => {
+                        const option = extraSaves.find((item) => item.key === key)
+                        if (!option) return
+                        if (!option.confirm) return void submit(option.key)
+                        modal.confirm({
+                          title: option.confirm.title,
+                          content: option.confirm.content,
+                          okText: option.label,
+                          cancelText: t('actions.cancel'),
+                          onOk: () => submit(option.key)
+                        })
+                      }
+                    }}
+                  >
+                    <Button type='primary' icon={<DownOutlined />} aria-label={t('actions.saveOptions')} />
+                  </Dropdown>
+                </Space.Compact>
+              ) : (
+                <Button type='primary' loading={saving} onClick={() => submit()}>
+                  {t('actions.save')}
+                </Button>
+              )}
             </Space>
           }
         >
