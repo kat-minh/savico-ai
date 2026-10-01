@@ -170,6 +170,10 @@ export interface EstimateResult {
   xlsxUrl: string
   /** Lúc dự toán dựng xong (ISO) — thanh tiến trình ghi "Hoàn thành ngày …". */
   completedAt?: string
+  /** AI báo đây là dữ liệu MẪU (hợp đồng giả `mock-v1`): màn kết quả ghi rõ để khách không tưởng là số thật. */
+  isSample?: boolean
+  /** Ghi chú đi kèm dữ liệu mẫu. */
+  notice?: string
 }
 
 /** Trạng thái màn hình Bước 3 (mục III.4). */

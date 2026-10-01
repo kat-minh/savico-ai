@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl'
 
 import {
   DesignStepLayout,
+  EstimateFailed,
+  EstimateFlowError,
   EstimateResultView,
   GenerationWaiting,
   StepProgress,
@@ -18,7 +20,7 @@ import { ProactiveChatStream } from '@/features/chatbot'
 import { PersonalizedPanel, useHandbookPanelStore, type HandbookFilter } from '@/features/handbook'
 import { useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
-import { designDossierRoute, ROUTES } from '@/shared/constants/routes'
+import { designDossierRoute, designInputRoute, ROUTES } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
 /**
@@ -40,10 +42,18 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
   const { data: project } = useProject(projectId)
-  const { data: result, isSuccess } = useEstimate(projectId, {
+  const {
+    data: result,
+    isSuccess,
+    error: estimateError,
+    refetch
+  } = useEstimate(projectId, {
     readOnly: Boolean(project && project.currentStep >= 2),
     enabled: Boolean(project)
   })
+  // Dự toán thật: chưa gửi AI thì về Bước 1; tác vụ thất bại thì hiện lý do + Thử lại / Sửa thông tin.
+  const flowError = estimateError instanceof EstimateFlowError ? estimateError : null
+  const failed = flowError?.kind === 'failed'
   const [resultVisible, setResultVisible] = useState(() => Boolean(result))
   const panelMinimized = useHandbookPanelStore((s) => s.minimized)
   const setPanelMinimized = useHandbookPanelStore((s) => s.setMinimized)
@@ -96,6 +106,10 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     setPanelMinimized(false)
   }, [resultVisible, setPanelMinimized])
 
+  useEffect(() => {
+    if (flowError?.kind === 'notSubmitted') router.replace(designInputRoute(projectId))
+  }, [flowError, projectId, router])
+
   // Khi AI sinh xong: toast "Dự toán đã sẵn sàng" (mục IV.4).
   useEffect(() => {
     if (!result || resultVisible) return
@@ -126,12 +140,12 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
       />
       <DesignStepLayout
         sidePanel={
-          resultVisible ? undefined : (
+          resultVisible || failed ? undefined : (
             <PersonalizedPanel filter={filter} kind='2d' topic='architecture' filterLabel={filterLabel} />
           )
         }
         sidePanelCollapsed={!resultVisible && panelMinimized}
-        waiting={!resultVisible}
+        waiting={!resultVisible && !failed}
         entranceKey={`design.${projectId}.${result && resultVisible ? 'estimate-result' : 'estimate-waiting'}`}
       >
         {result && resultVisible ? (
@@ -145,6 +159,8 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
             // trước. Mở trực tiếp dossier từ danh sách dự án vẫn vào M09.
             onContinue={() => router.push(`${designDossierRoute(projectId)}?entry=estimate`)}
           />
+        ) : failed ? (
+          <EstimateFailed projectId={projectId} failureCode={flowError?.failureCode} onRetried={() => void refetch()} />
         ) : (
           <GenerationWaiting
             flow='estimate'

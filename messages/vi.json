@@ -1475,7 +1475,8 @@
         "item": "Hạng mục",
         "amount": "Thành tiền"
       },
-      "pageTitleWithProject": "Dự toán: {name} ({id})"
+      "pageTitleWithProject": "Dự toán: {name} ({id})",
+      "sampleNotice": "Đây là dữ liệu mẫu do hệ thống tạo thử, chưa phải kết quả phân tích thật cho công trình của bạn."
     },
     "dossier": {
       "infoTitle": "Thông tin dự án",
@@ -1799,6 +1800,24 @@
           "interiorStyleId": "phong cách nội thất",
           "addressDetail": "số nhà, đường"
         }
+      }
+    },
+    "estimateApi": {
+      "startError": {
+        "unavailable": "Dịch vụ tạo thiết kế chưa sẵn sàng. Bạn thử lại sau ít phút nhé.",
+        "locationChanged": "Dữ liệu địa chỉ vừa được cập nhật. Bạn chọn lại phường / xã rồi thử lại.",
+        "versionConflict": "Thông tin vừa thay đổi. Bạn bấm gửi lại một lần nữa nhé.",
+        "denied": "Bạn cần một gói thiết kế đang hoạt động và còn lượt để nhận dự toán.",
+        "other": "Không gửi được yêu cầu. Bạn thử lại nhé."
+      },
+      "failure": {
+        "title": "Chưa tạo được dự toán",
+        "timeout": "Việc tạo thiết kế mất quá thời gian cho phép nên đã dừng. Bạn có thể thử lại, thông tin bạn nhập vẫn được giữ.",
+        "fileUnavailable": "Hệ thống chưa lấy được tệp kết quả của thiết kế. Bạn thử lại sau ít phút, thông tin bạn nhập vẫn được giữ.",
+        "invalidResult": "Kết quả thiết kế trả về chưa hợp lệ. Bạn thử lại, thông tin bạn nhập vẫn được giữ.",
+        "generic": "Việc tạo dự toán chưa thành công. Bạn có thể sửa thông tin hoặc thử lại, thông tin bạn nhập vẫn được giữ.",
+        "retry": "Thử lại",
+        "edit": "Sửa thông tin"
       }
     }
   },

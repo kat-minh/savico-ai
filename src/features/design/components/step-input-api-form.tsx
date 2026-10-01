@@ -19,6 +19,7 @@ import { acceptAttribute, checkFile, uploadImage } from '@/shared/media'
 import { designKeys } from '../api/design.keys'
 import { estimateInputApi } from '../api/estimate-input.api'
 import { useEstimateInput, type SaveStatus } from '../hooks/use-estimate-input'
+import { startErrorKind, useStartGeneration } from '../hooks/use-start-generation'
 import {
   areaProblem,
   DESCRIPTION_MAX_LENGTH,
@@ -118,6 +119,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
   const t = useTranslations('design.inputApi')
   const tInput = useTranslations('design.input')
   const input = useEstimateInput(projectId)
+  const start = useStartGeneration(projectId)
   const { draft, catalog, provinces, wards, missing } = input
   const quota = useQuery({
     queryKey: [...designKeys.quota(), 'api'],
@@ -207,6 +209,15 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
         if (first) document.getElementById(`field-${first}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
         toast.error(t('missing.title'))
         return
+      }
+      // Gửi AI: giữ một lượt thiết kế và khoá đầu vào. Tác vụ đã chạy / đã xong thì cứ sang Bước 2.
+      try {
+        await start.mutateAsync(fresh.data?.inputVersion)
+      } catch (error) {
+        if (startErrorKind(error) !== 'alreadyRunning') {
+          toast.error(start.messageOf(error))
+          return
+        }
       }
       onSubmit()
     } finally {

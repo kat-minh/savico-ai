@@ -1,10 +1,17 @@
 import { http } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
 
+import {
+  EstimateFlowError,
+  estimateStateKind,
+  mapEstimateContent,
+  stepOfState
+} from '../services/estimate-result.logic'
 import { projectStatus } from '../services/project-list.service'
-import type { DesignStep, Project } from '../types/design.types'
+import type { EstimateResult, Project } from '../types/design.types'
 import type { CreateProjectPayload } from './design.api'
 import { mockDesignApi } from './design.mock'
+import { estimateGenerationApi } from './estimate-generation.api'
 
 /**
  * Nối màn "Dự án của tôi" (danh sách + xóa dự toán) vào BMT API — GIỮ MOCK LÀM
@@ -27,13 +34,6 @@ interface BmtEstimateListItem {
 
 /** id dự toán thật là uuid; id mock có dạng `SVC-YYYY-NNNN`. */
 const isApiEstimateId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id)
-
-/** Bước đang dừng suy từ trạng thái tác vụ AI (BE chưa trả bước rõ ràng). */
-function stepFromState(state: string): DesignStep {
-  if (state === 'Succeeded') return 3
-  if (state === 'Processing' || state === 'Failed') return 2
-  return 1
-}
 
 const idem = () => ({ headers: { 'Idempotency-Key': crypto.randomUUID() } })
 const nowIso = () => new Date().toISOString()
@@ -72,7 +72,7 @@ interface BmtEstimateDetail {
 }
 
 function toProject(item: BmtEstimateListItem): Project {
-  const currentStep = stepFromState(item.state)
+  const currentStep = stepOfState(item.state)
   return {
     id: item.estimateId,
     name: item.name,
@@ -143,7 +143,7 @@ export const bmtDesignApi = {
     if (!isApiEstimateId(projectId)) return mockDesignApi.getProject(projectId)
     try {
       const e = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
-      const step = stepFromState(e.state)
+      const step = stepOfState(e.state)
       return {
         id: e.estimateId,
         name: e.name,
@@ -169,7 +169,7 @@ export const bmtDesignApi = {
         name,
         nameVersion: e.nameVersion
       })
-      const step = stepFromState(e.state)
+      const step = stepOfState(e.state)
       return {
         id: projectId,
         name: res.name,
@@ -186,80 +186,69 @@ export const bmtDesignApi = {
     }
   },
 
-  /* ===========================================================================
-   * Pipeline dự toán AI — thin fns SẴN SÀNG GỌI (TDD-PROJ-001/002/003), CHƯA nối
-   * vào seam vì: (1) DTO input dùng GUID/số vs FE dùng enum (buildingType/style/
-   * floorCount) — cần map/rearchitect UI; (2) DTO dossier/result "chờ AI", BE
-   * chưa chốt shape; (3) cần thread expectedInputVersion/inputVersion mà chữ ký
-   * mock không mang; (4) tệp là binary stream (dựng URL, không bọc Result). Nối
-   * seam khi UI Bước 1–3 đổi sang model GUID + BE chốt dossier.
-   * ======================================================================== */
-  getEstimateDetail: (id: string) => http.get<BmtEstimateDetail>(`/estimates/${id}`),
-  getCatalog: (id: string) => http.get<unknown>(`/estimates/${id}/catalog`),
-  saveInput: (id: string, body: { expectedInputVersion: number; changedFields: string[]; input: BmtEstimateInput }) =>
-    http.put<{ estimateId: string; savedInputVersion: number }>(`/estimates/${id}/input`, body, idem()),
-  listProvinces: () =>
-    http.get<{ datasetVersion: string; provinces: { code: string; name: string }[] }>('/estimate-locations/provinces'),
-  listWards: (provinceCode: string, datasetVersion: string) =>
-    http.get<{ wards: { code: string; name: string }[] }>(`/estimate-locations/provinces/${provinceCode}/wards`, {
-      params: { datasetVersion }
-    }),
-  startGeneration: (id: string, inputVersion: number) =>
-    http.post<{ operationId: string; state: string; acceptedAtUtc: string; deadlineUtc: string }>(
-      `/estimates/${id}/generations`,
-      { inputVersion },
-      idem()
-    ),
-  getGeneration: (id: string, operationId: string) =>
-    http.get<{
-      operationId: string
-      state: string
-      acceptedAtUtc: string
-      deadlineUtc: string
-      settledAtUtc?: string
-      failureCode?: string | null
-      resultUrl?: string | null
-    }>(`/estimates/${id}/generations/${operationId}`),
-  getResult: (id: string) =>
-    http.get<{
-      operationId: string
-      contractVersion: string
-      estimateName: string
-      dossier: unknown
-      exportAvailability: unknown
-    }>(`/estimates/${id}/result`),
-  resultFileUrl: (id: string, fileId: string) => `/api/v1/estimates/${id}/result-files/${fileId}`,
-  requestExport: (id: string, format: 'Pdf' | 'Xlsx') =>
-    http.post<{ exportId: string; state: string; attemptNumber: number }>(
-      `/estimates/${id}/exports`,
-      { format },
-      idem()
-    ),
-  getExport: (id: string, exportId: string) =>
-    http.get<{ exportId: string; state: string; failureCode?: string | null }>(`/estimates/${id}/exports/${exportId}`),
-  exportFileUrl: (id: string, exportId: string) => `/api/v1/estimates/${id}/exports/${exportId}/file`,
-  createShare: (id: string, expiryDate: string) =>
-    http.post<{
-      shareId: string
-      url: string
-      expiryDate: string
-      expiresAtUtc: string
-      state: string
-      requestedExpiryApplied: boolean
-    }>(`/estimates/${id}/shares`, { expiryDate }, idem()),
-  getCurrentShare: (id: string) =>
-    http.get<{ shareId: string; url: string; expiryDate: string; expiresAtUtc: string; state: string } | null>(
-      `/estimates/${id}/shares/current`
-    ),
-  emailShare: (id: string, shareId: string, recipient: string) =>
-    http.post<{ emailRequestId: string; state: string }>(
-      `/estimates/${id}/shares/${shareId}/emails`,
-      { recipient },
-      idem()
-    ),
-  getEmailStatus: (id: string, emailRequestId: string) =>
-    http.get<{ state: string; failureCode?: string | null }>(`/estimates/${id}/emails/${emailRequestId}`),
-  shareQrUrl: (id: string, shareId: string) => `/api/v1/estimates/${id}/shares/${shareId}/qr`,
-  revokeShare: (id: string, shareId: string) =>
-    http.post<{ state: string }>(`/estimates/${id}/shares/${shareId}/revoke`, {}, idem())
+  /**
+   * Chờ kết quả dự toán (Bước 2): đọc trạng thái bản dự toán định kỳ cho tới khi có kết quả hoặc thất bại.
+   * Việc GỬI AI (giữ một lượt) là thao tác riêng ở cuối Bước 1; vào Bước 2 mà chưa gửi thì ném
+   * `EstimateFlowError('notSubmitted')` để quay về Bước 1 — mở lại trang không bao giờ tự tốn thêm lượt.
+   */
+  generateEstimate: (projectId: string, signal?: AbortSignal): Promise<EstimateResult> => {
+    if (!isApiEstimateId(projectId)) return mockDesignApi.generateEstimate(projectId)
+    return waitForEstimate(projectId, signal)
+  },
+
+  getEstimate: (projectId: string, signal?: AbortSignal): Promise<EstimateResult> => {
+    if (!isApiEstimateId(projectId)) return mockDesignApi.getEstimate(projectId)
+    return waitForEstimate(projectId, signal)
+  }
+}
+
+/* ===========================================================================
+ * Chờ và đọc kết quả dự toán thật
+ * ======================================================================== */
+
+/** Hỏi lại trạng thái mỗi 3 giây (AI không có tiến độ phần trăm để hỏi). */
+const POLL_INTERVAL_MS = 3_000
+/** Quá hạn chờ phía khách (BE tự chốt Failed/TimedOut sau 15 phút, đây chỉ là chốt chặn). */
+const MAX_WAIT_MS = 20 * 60_000
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const timer = window.setTimeout(resolve, ms)
+    signal?.addEventListener(
+      'abort',
+      () => {
+        window.clearTimeout(timer)
+        resolve()
+      },
+      { once: true }
+    )
+  })
+}
+
+async function loadEstimateResult(projectId: string, detail: BmtEstimateDetail): Promise<EstimateResult> {
+  const raw = await estimateGenerationApi.getResult(projectId)
+  const mapped = mapEstimateContent(raw.dossier?.content, {
+    projectId,
+    areaM2: Number(detail.input?.areaM2) || 0
+  })
+  return { ...mapped.result, isSample: mapped.isSample, notice: mapped.notice }
+}
+
+async function waitForEstimate(projectId: string, signal?: AbortSignal): Promise<EstimateResult> {
+  const startedAt = Date.now()
+  while (!signal?.aborted) {
+    const detail = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
+    switch (estimateStateKind(detail.state)) {
+      case 'succeeded':
+        return loadEstimateResult(projectId, detail)
+      case 'draft':
+        throw new EstimateFlowError('notSubmitted')
+      case 'failed':
+        throw new EstimateFlowError('failed', detail.failureCode)
+      default:
+        if (Date.now() - startedAt > MAX_WAIT_MS) throw new EstimateFlowError('failed', 'GenerationTimedOut')
+        await sleep(POLL_INTERVAL_MS, signal)
+    }
+  }
+  throw new DOMException('Aborted', 'AbortError')
 }

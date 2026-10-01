@@ -36,6 +36,12 @@ export function EstimateResultView({ result, customerName, projectName, input, o
 
   return (
     <div className='space-y-5'>
+      {result.isSample ? (
+        <p role='note' className='border-warning/40 bg-warning/10 rounded-xl border px-4 py-3 text-sm text-pretty'>
+          {result.notice || t('sampleNotice')}
+        </p>
+      ) : null}
+
       <EstimateTable
         result={result}
         context={{ projectName, address: input?.address ?? '' }}

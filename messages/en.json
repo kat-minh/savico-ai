@@ -1475,7 +1475,8 @@
         "item": "Item",
         "amount": "Amount"
       },
-      "pageTitleWithProject": "Estimate: {name} ({id})"
+      "pageTitleWithProject": "Estimate: {name} ({id})",
+      "sampleNotice": "This is sample data generated for testing, not a real analysis of your building."
     },
     "dossier": {
       "infoTitle": "Project details",
@@ -1799,6 +1800,24 @@
           "interiorStyleId": "interior style",
           "addressDetail": "house number, street"
         }
+      }
+    },
+    "estimateApi": {
+      "startError": {
+        "unavailable": "The design service isn't ready yet. Please try again in a few minutes.",
+        "locationChanged": "The address data was just updated. Please pick the ward / commune again and retry.",
+        "versionConflict": "The details just changed. Please press send once more.",
+        "denied": "You need an active design plan with credits left to get an estimate.",
+        "other": "Couldn't send the request. Please try again."
+      },
+      "failure": {
+        "title": "The estimate couldn't be created",
+        "timeout": "Creating the design took longer than allowed, so it stopped. You can retry; what you entered is kept.",
+        "fileUnavailable": "The system couldn't fetch the design's result files. Please retry in a few minutes; what you entered is kept.",
+        "invalidResult": "The design result returned was invalid. Please retry; what you entered is kept.",
+        "generic": "The estimate wasn't created. You can edit the details or retry; what you entered is kept.",
+        "retry": "Retry",
+        "edit": "Edit details"
       }
     }
   },

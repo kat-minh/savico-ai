@@ -382,7 +382,7 @@ export const mockDesignApi = {
     })
   },
 
-  generateEstimate: async (projectId: string): Promise<EstimateResult> => {
+  generateEstimate: async (projectId: string, _signal?: AbortSignal): Promise<EstimateResult> => {
     await mockDelay(ESTIMATE_DELAY_MS)
     const completedAt = updateStore((store) => {
       // Dự toán đã dựng xong → dự án chuyển sang "Chờ duyệt" (Hình 02), khách
@@ -402,7 +402,7 @@ export const mockDesignApi = {
     }
   },
 
-  getEstimate: async (projectId: string): Promise<EstimateResult> => {
+  getEstimate: async (projectId: string, _signal?: AbortSignal): Promise<EstimateResult> => {
     await mockDelay(150)
     const store = loadStore()
     // Dự án dựng từ trước khi có mốc này: lấy lần cập nhật gần nhất làm ngày hoàn thành.
