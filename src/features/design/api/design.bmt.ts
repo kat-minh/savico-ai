@@ -419,7 +419,7 @@ async function waitForEmail(projectId: string, emailRequestId: string): Promise<
     const status = await estimateGenerationApi.getEmailStatus(projectId, emailRequestId)
     if (status.state === 'Accepted') return 'accepted'
     if (status.state === 'Unknown') return 'unknown'
-    if (status.state === 'Failed') throw new Error(status.failureCode ?? 'EmailFailed')
+    if (status.state === 'Failed') throw new Error('EmailFailed')
     // Hết hạn chờ phía khách: không biết thư đã tới chưa.
     if (Date.now() - startedAt > EMAIL_MAX_WAIT_MS) return 'unknown'
     await sleepMs(EMAIL_POLL_MS)

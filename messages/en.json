@@ -1542,7 +1542,8 @@
           "placeholder": "email@example.com",
           "submit": "Send dossier",
           "sent": "Dossier sent to {email}.",
-          "unknown": "The request to {email} was sent, but we can't tell whether the email arrived. Ask the recipient to check, or send again later."
+          "unknown": "The request to {email} was sent, but we can't tell whether the email arrived. Ask the recipient to check, or send again later.",
+          "failed": "The email couldn't be sent. The mail server rejected it — check the address and try again."
         },
         "setup": {
           "title": "Choose the link's expiry date",

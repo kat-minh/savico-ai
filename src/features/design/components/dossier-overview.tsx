@@ -1,5 +1,6 @@
 'use client'
 
+import { displayProjectId } from '../services/estimate-input.logic'
 import { Eye, FileDown, FileText, Info, Link2, Mail, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { LucideIcon } from 'lucide-react'
@@ -169,7 +170,7 @@ export function DossierOverview({
   // dòng 1 và dòng 2 cạnh nhau chứ không phải "5 dòng trái, 5 dòng phải".
   const leftRows: InfoRow[] = [
     { labelKey: 'customerName', value: info.customerName },
-    { labelKey: 'projectName', value: `${info.projectName} (${info.projectId})` },
+    { labelKey: 'projectName', value: `${info.projectName} (${displayProjectId(info.projectId)})` },
     { labelKey: 'phone', value: info.phone },
     { labelKey: 'address', value: info.address },
     { labelKey: 'createdAt', value: formatDisplayDate(info.createdAt, locale) }
@@ -209,7 +210,7 @@ export function DossierOverview({
   const shares = result ? costShares(result.sections) : null
   const cover = {
     title: info.projectName,
-    subtitle: [info.address, info.projectId].filter(Boolean).join(' · '),
+    subtitle: [info.address, displayProjectId(info.projectId)].filter(Boolean).join(' · '),
     rows: [
       { label: t('info.scale'), value: info.scaleLabel },
       { label: t('info.package'), value: info.packageLabel },

@@ -1542,7 +1542,8 @@
           "placeholder": "email@vidu.com",
           "submit": "Gửi hồ sơ",
           "sent": "Đã gửi hồ sơ tới {email}.",
-          "unknown": "Đã gửi yêu cầu tới {email} nhưng chưa rõ thư đã tới chưa. Bạn nhờ người nhận kiểm tra lại, hoặc gửi lại sau."
+          "unknown": "Đã gửi yêu cầu tới {email} nhưng chưa rõ thư đã tới chưa. Bạn nhờ người nhận kiểm tra lại, hoặc gửi lại sau.",
+          "failed": "Không gửi được thư. Máy chủ thư đã từ chối, bạn kiểm tra lại địa chỉ email rồi thử lại."
         },
         "setup": {
           "title": "Chọn ngày hết hạn của link",

@@ -7,6 +7,7 @@ import type { Locale } from '@/i18n/routing'
 import { siteConfig } from '@/shared/config/site'
 import { formatCurrency, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { COST_SECTIONS } from '../constants/design.constants'
+import { displayProjectId } from '../services/estimate-input.logic'
 import type { DossierPdfData, DossierPdfLabels, DossierPdfSection } from '../services/pdf/dossier-pdf.types'
 import type { CostSection, Dossier, EstimateResult } from '../types/design.types'
 import type { DossierProjectInfo } from '../components/dossier-overview'
@@ -82,7 +83,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
         advisory,
         info: [
           [t('info.customerName'), info.customerName],
-          [t('info.projectName'), `${info.projectName} (${info.projectId})`],
+          [t('info.projectName'), `${info.projectName} (${displayProjectId(info.projectId)})`],
           [t('info.phone'), info.phone],
           [t('info.address'), info.address],
           [t('info.createdAt'), info.createdAt ? formatDisplayDate(info.createdAt, locale) : ''],

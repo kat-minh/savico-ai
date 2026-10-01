@@ -93,6 +93,8 @@ export function DossierShareDialog({
   async function send() {
     if (!email.trim() || sending) return
     setSending(true)
+    // Xoá kết quả của lần gửi trước: nếu không, thông báo cũ vẫn hiện (kèm địa chỉ mới) khi lần này lỗi.
+    setOutcome(undefined)
     try {
       setOutcome(await onSendEmail(email.trim()))
     } catch {

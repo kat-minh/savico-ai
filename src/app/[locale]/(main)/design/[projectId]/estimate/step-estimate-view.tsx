@@ -10,6 +10,7 @@ import {
   EstimateFlowError,
   EstimateResultView,
   GenerationWaiting,
+  displayProjectId,
   isApiEstimateId,
   StepProgress,
   useDesignStore,
@@ -131,7 +132,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
         title={
           result && resultVisible
             ? project
-              ? t('pageTitleWithProject', { name: project.name, id: project.id })
+              ? t('pageTitleWithProject', { name: project.name, id: displayProjectId(project.id) })
               : t('pageTitle')
             : failed
               ? t('pageTitle')

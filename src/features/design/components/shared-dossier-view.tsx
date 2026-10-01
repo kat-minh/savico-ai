@@ -174,14 +174,17 @@ export function SharedDossierView({ token, share }: { token: string; share?: { s
                     {formatCurrency(section.total, locale)}
                   </TableCell>
                 </TableRow>
-                {section.items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className='text-muted-foreground py-2.5 pl-8'>{item.label}</TableCell>
-                    <TableCell className='py-2.5 pr-5 text-right tabular-nums'>
-                      {formatCurrency(item.amount, locale)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {/* Hợp đồng AI chỉ có số tiền theo nhóm thì mỗi nhóm có một hạng mục trùng tên: không lặp lại dòng đó. */}
+                {(section.items.length === 1 && section.items[0]?.amount === section.total ? [] : section.items).map(
+                  (item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className='text-muted-foreground py-2.5 pl-8'>{item.label}</TableCell>
+                      <TableCell className='py-2.5 pr-5 text-right tabular-nums'>
+                        {formatCurrency(item.amount, locale)}
+                      </TableCell>
+                    </TableRow>
+                  )
+                )}
               </Fragment>
             ))}
           </TableBody>

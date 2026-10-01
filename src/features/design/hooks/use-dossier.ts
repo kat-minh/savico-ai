@@ -89,10 +89,16 @@ export function useRevokeShareLink(projectId: string) {
 /** Gửi bộ hồ sơ qua email (mục III.4c). */
 export function useSendDossierEmail(projectId: string) {
   const t = useTranslations('errors')
+  const tShare = useTranslations('design.dossier.share')
 
   return useMutation({
     mutationFn: (email: string) => designApi.sendDossierEmail(projectId, email),
     onError: (error) => {
+      // Thư không gửi được (SMTP từ chối…): nói đúng thay vì câu lỗi chung.
+      if (error instanceof Error && error.message === 'EmailFailed') {
+        toast.error(tShare('email.failed'))
+        return
+      }
       toast.error(isApiError(error) ? error.message : t('generic'))
     }
   })
