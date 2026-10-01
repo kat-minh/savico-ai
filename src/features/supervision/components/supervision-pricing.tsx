@@ -275,7 +275,7 @@ function PackageCard({
 
       <section
         className={cn(
-          'bg-card flex w-full flex-col overflow-hidden rounded-2xl border',
+          'supervision-card @container bg-card flex w-full flex-col overflow-hidden rounded-2xl border',
           item.recommended ? 'border-brand-orange shadow-md' : 'border-border'
         )}
       >
@@ -289,7 +289,7 @@ function PackageCard({
         >
           <h2
             className={cn(
-              'text-2xl font-bold tracking-wide uppercase',
+              'text-[8.3cqw] leading-none font-bold tracking-wide uppercase',
               item.recommended ? 'text-brand-orange' : 'text-primary-strong'
             )}
           >
@@ -297,7 +297,7 @@ function PackageCard({
           </h2>
           <motion.p
             className={cn(
-              'supervision-control-label absolute bottom-0 left-1/2 w-fit -translate-x-1/2 translate-y-1/2 rounded-full px-3.5 py-1 text-center text-[11px] font-semibold tracking-wide whitespace-nowrap uppercase',
+              'supervision-control-label absolute bottom-0 left-1/2 w-fit -translate-x-1/2 translate-y-1/2 rounded-full px-[3.5cqw] py-[1.6cqw] text-center text-[3.6cqw] leading-none font-semibold tracking-wide whitespace-nowrap uppercase',
               item.recommended
                 ? 'bg-brand-orange text-brand-orange-foreground'
                 : 'bg-primary-strong text-primary-foreground'
@@ -334,12 +334,14 @@ function PackageCard({
             </div>
           )}
 
-          <p className='text-muted-foreground mt-4 text-center text-sm text-pretty'>{item.fitLine}</p>
+          <p className='text-muted-foreground mt-4 min-h-[2.75em] text-center text-[4.3cqw] leading-snug text-pretty'>
+            {item.fitLine}
+          </p>
 
           <p className='mt-3 text-center'>
             <span
               className={cn(
-                'text-3xl font-bold tracking-tight',
+                'text-[10cqw] font-bold tracking-tight',
                 item.recommended ? 'text-brand-orange' : 'text-primary-strong'
               )}
             >
@@ -356,9 +358,14 @@ function PackageCard({
                 <SupervisionPrice value={item.price} index={index} />
               )}
             </span>
-            {isFree ? null : (
+            {isFree ? (
+              // Chừa đúng chỗ dòng "/ dự án · tối đa N tháng" của hai gói trả phí để các hàng bên dưới ngang nhau.
+              <span aria-hidden className='block text-[3.9cqw] opacity-0 select-none'>
+                &nbsp;
+              </span>
+            ) : (
               <motion.span
-                className='text-muted-foreground block text-xs'
+                className='text-muted-foreground block text-[3.9cqw]'
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.42, delay: item.recommended ? 3.05 : 2.8 }}
@@ -386,7 +393,7 @@ function PackageCard({
               <li
                 key={benefit}
                 data-upgrade={isFree && benefitIndex === item.benefits.length - 1 ? 'true' : undefined}
-                className='supervision-benefit flex items-start gap-2 text-sm'
+                className='supervision-benefit flex items-start gap-[2cqw] text-[4.1cqw] leading-snug'
                 style={{ '--benefit-index': benefitIndex } as CSSProperties}
               >
                 {/* Cùng `strokeWidth` cho mọi gói: gói Miễn phí là vòng tròn outline (không tô nền),
@@ -395,7 +402,7 @@ function PackageCard({
                   aria-hidden
                   strokeWidth={2}
                   className={cn(
-                    'mt-0.5 size-4.5 shrink-0',
+                    'mt-[0.5cqw] size-[4.3cqw] shrink-0',
                     isFree && 'text-primary',
                     !isFree &&
                       (item.recommended
@@ -413,7 +420,7 @@ function PackageCard({
             gì để "chọn" — nút ở đây chỉ tạo một thao tác thừa.
             Hai nút trả phí đều TÔ ĐẶC — CHECK xanh, CONTROL cam. */}
           {isFree ? null : (
-            <Button asChild size='lg' className={cn('mt-5 w-full', item.recommended && ORANGE_BUTTON)}>
+            <Button asChild size='lg' className={cn('mt-5 w-full font-bold', item.recommended && ORANGE_BUTTON)}>
               <Link
                 href={checkoutConfirmRoute(item.id, projectId)}
                 onClick={() => rememberCheckoutReturn(item.id, projectId)}
@@ -438,7 +445,7 @@ function InspectionBand({ item }: { item: SupervisionPackage }) {
   return (
     <motion.p
       className={cn(
-        'supervision-inspection-band mt-3 rounded-lg px-3 py-2 text-center text-xs font-medium',
+        'supervision-inspection-band mt-3 rounded-lg px-3 py-2 text-center text-[3.9cqw] font-medium',
         !item.inspections && 'bg-muted text-muted-foreground',
         item.inspections &&
           (item.recommended ? 'bg-brand-orange-soft text-brand-orange' : 'bg-accent text-primary-strong')

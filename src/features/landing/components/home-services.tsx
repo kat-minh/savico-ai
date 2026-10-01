@@ -57,14 +57,15 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
   return (
     <section id='home-services' className='bg-primary-strong text-primary-foreground relative isolate overflow-hidden'>
       <div className='relative mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-        <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
+        <header className='flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3'>
           <div className='space-y-2'>
             {/* Góp ý BuildX: bỏ nhãn "Bảng giá BuildX" — chỉ còn tiêu đề + mô tả. */}
             <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
             <p className='text-primary-foreground max-w-3xl text-sm'>{t('subtitle')}</p>
           </div>
 
-          {/* Dưới `lg` bỏ "Xem tất cả gói", thay bằng dòng "Tham khảo: Bảng giá" (Responsive case 11). */}
+          {/* `items-baseline` ở header: mép dưới chữ CTA thẳng hàng với mép dưới chữ hoa của tiêu đề.
+          Dưới `lg` bỏ "Xem tất cả gói", thay bằng dòng "Tham khảo: Bảng giá" (Responsive case 11). */}
           <p className='text-primary-foreground/80 flex items-center gap-1.5 text-sm lg:hidden'>
             {t('referenceLabel')}
             <Link

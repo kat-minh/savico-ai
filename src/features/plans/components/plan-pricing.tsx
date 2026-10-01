@@ -1040,7 +1040,7 @@ function PlanCard({
               </div>
             ) : null}
 
-            <p className='plan-fit text-muted-foreground mt-4 text-center text-[4.6cqw] leading-snug text-pretty'>
+            <p className='plan-fit text-muted-foreground mt-4 text-center text-[4.3cqw] leading-snug text-pretty'>
               {plan.fitLine}
             </p>
 
@@ -1073,7 +1073,7 @@ function PlanCard({
             >
               <p
                 className={cn(
-                  'plan-feature-title text-center text-[4.4cqw] font-bold tracking-wide uppercase',
+                  'plan-feature-title text-center text-[4cqw] font-bold tracking-wide uppercase',
                   plan.popular ? 'text-brand-orange' : 'text-primary-strong'
                 )}
               >
@@ -1084,11 +1084,11 @@ function PlanCard({
                   <li
                     key={feature}
                     style={{ '--line-delay': `${0.2 + delay + i * 0.09}s` } as CSSProperties}
-                    className='plan-feature-line flex items-start gap-[2cqw] text-[4.5cqw] leading-snug'
+                    className='plan-feature-line flex items-start gap-[2cqw] text-[4.1cqw] leading-snug'
                   >
                     <CheckCircle2
                       className={cn(
-                        'mt-[0.6cqw] size-[4.6cqw] shrink-0',
+                        'mt-[0.5cqw] size-[4.3cqw] shrink-0',
                         plan.popular ? 'text-brand-orange' : 'text-primary'
                       )}
                     />
