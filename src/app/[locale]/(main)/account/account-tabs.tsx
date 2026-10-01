@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, CreditCard, FolderOpen, Heart, LayoutGrid, MapPin } from 'lucide-react'
+import { CalendarDays, CreditCard, FolderOpen, LayoutGrid, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
@@ -22,7 +22,7 @@ export function AccountNav() {
   const reduceMotion = useReducedMotion()
   const tabs: Array<{ href: string; icon: LucideIcon; label: string; badge?: string }> = [
     { href: ROUTES.ACCOUNT_PROJECTS, icon: LayoutGrid, label: t('projects.title') },
-    { href: ROUTES.ACCOUNT_FAVORITES, icon: Heart, label: t('favorites.title') },
+    // Tab "Dự án yêu thích" tạm ẩn (route `/account/favorites` vẫn còn, chỉ không hiện trên thanh điều hướng).
     { href: ROUTES.ACCOUNT_DOSSIERS, icon: FolderOpen, label: t('dossiers.title') },
     { href: ROUTES.ACCOUNT_SITES, icon: MapPin, label: t('sites.title') },
     { href: ROUTES.ACCOUNT_PURCHASES, icon: CreditCard, label: t('purchaseHistory.title') },
