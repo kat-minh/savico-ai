@@ -97,7 +97,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-5 lg:py-10 lg:px-8'
     >
       <header data-entrance-step='0' data-entrance-from='right' className='supervision-heading space-y-2 text-center'>
         <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>

@@ -74,7 +74,7 @@ export function StepProgress({
           style={entranceStyle}
           // Dưới `lg`: ba khoảng hở của màn Bước 1 bằng nhau = 24px (khoảng phía trên tiêu đề, `pt-6`):
           // header → tiêu đề 24 · tiêu đề → stepper 24 (`pb-2` + `py-4` của nav) · stepper → nội dung 24.
-          className='mx-auto w-full max-w-[90rem] px-4 pt-6 pb-2 lg:px-8 lg:pb-0'
+          className='mx-auto w-full max-w-[90rem] px-4 pt-5 lg:pt-6 pb-2 lg:px-8 lg:pb-0'
         >
           {back ? (
             <Link

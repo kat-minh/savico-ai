@@ -129,7 +129,7 @@ export function PlanTabs({ active }: PlanTabsProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='plans-tabs-enter mx-auto w-full max-w-[90rem] px-4 pt-8 lg:px-8'
+      className='plans-tabs-enter mx-auto w-full max-w-[90rem] px-4 pt-5 lg:pt-8 lg:px-8'
     >
       <nav
         data-plan-tabs

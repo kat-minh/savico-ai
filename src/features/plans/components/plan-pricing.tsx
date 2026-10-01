@@ -139,7 +139,7 @@ function PlanPricingContent() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 pt-10 pb-5 lg:px-8 lg:pb-10'
     >
       {/* Hình S01: tiêu đề IN HOA cỡ lớn, chữ cuối (tên thương hiệu) tô cam,
           hai bên có hai chiếc lá. Tách chữ cuối ngay tại đây để admin đổi tiêu
@@ -352,7 +352,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
       >
         <table
           data-hovering={hoveredRow || hoveredColumn ? 'true' : undefined}
-          className='plan-comparison-table w-full min-w-[720px] table-fixed border-collapse text-sm'
+          className='plan-comparison-table w-full min-w-[720px] table-fixed text-sm'
           onMouseLeave={() => {
             setHoveredRow(null)
             setHoveredColumn(null)
@@ -471,7 +471,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
             ))}
 
             <tr className='plan-choose-row'>
-              <th className='bg-card sticky left-0 z-10 border-t border-r p-3 text-left text-xs font-medium'>
+              <th className='bg-card sticky left-0 z-10 border-r p-3 text-left text-xs font-medium'>
                 {t('comparison.choosePlanRow')}
               </th>
               {TIERS.map((tier) => {
@@ -480,7 +480,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                   <motion.td
                     key={tier}
                     className={cn(
-                      'plan-choose-cell border-t p-3 text-center',
+                      'plan-choose-cell p-3 text-center',
                       tier === POPULAR_TIER && 'plan-plus-column bg-brand-orange-soft/60'
                     )}
                     initial={{ opacity: 0, y: 9 }}
@@ -542,7 +542,7 @@ function ValueTable() {
         transition={{ duration: reduceMotion ? 0.01 : 0.52, delay: reduceMotion ? 0 : 0.2, ease: pricingEase }}
         className='bg-card mt-5 overflow-x-auto rounded-2xl border'
       >
-        <table className='w-full min-w-[640px] table-fixed border-collapse text-sm'>
+        <table className='plan-value-table w-full min-w-[640px] table-fixed text-sm'>
           <colgroup>
             <col className='w-[28%]' />
             <col className='w-[24%]' />
@@ -570,7 +570,7 @@ function ValueTable() {
                 }}
                 style={{ '--value-row-delay': `${0.32 + index * 0.14}s` } as CSSProperties}
               >
-                <th className='bg-accent/40 sticky left-0 z-10 p-3.5 text-left text-sm font-medium'>
+                <th className='bg-[color-mix(in_srgb,var(--accent)_40%,var(--card))] sticky left-0 z-10 p-3.5 text-left text-sm font-medium'>
                   <span className='text-primary-strong flex items-center gap-2.5'>
                     {(() => {
                       const Icon = VALUE_ROW_ICON[row]

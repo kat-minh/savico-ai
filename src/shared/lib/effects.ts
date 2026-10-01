@@ -12,20 +12,12 @@ export const primaryOverlayBeforeClasses =
 export const primaryOverlayAfterClasses =
   'after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-linear-to-b after:from-white/15 after:from-44% after:via-transparent after:via-50% after:to-black/12 after:to-56% after:mix-blend-overlay'
 
-export const primaryControlEffectClasses = [
-  // Nút chính phủ dải gradient thương hiệu (xanh đậm → xanh chanh) giống bản
-  // deploy SAVICO.
-  'relative isolate overflow-hidden brand-gradient',
-  primaryControlShadowClasses,
-  primaryOverlayBeforeClasses,
-  'before:opacity-50',
-  primaryOverlayAfterClasses
-].join(' ')
+// Nút chính dùng đúng kiểu `.brand-green-button` (globals.css) — gradient logo mượt,
+// KHÔNG phủ lớp before/after: hai lớp đó tạo vệt ngang cắt giữa nút, lệch với nút
+// "Mẫu bản vẽ 2D" ở Thư viện mẫu.
+export const primaryControlEffectClasses = 'relative isolate overflow-hidden brand-green-button'
 
-export const primaryButtonEffectClasses = [
-  'group text-primary-foreground transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)] hover:before:opacity-100',
-  primaryControlEffectClasses
-].join(' ')
+export const primaryButtonEffectClasses = ['group text-primary-foreground', primaryControlEffectClasses].join(' ')
 
 export const activePrimaryControlClasses = [
   'group relative isolate overflow-hidden !bg-primary !text-primary-foreground hover:!bg-primary hover:!text-primary-foreground transition duration-300 ease-[cubic-bezier(0.4,0.36,0,1)]',

@@ -313,7 +313,7 @@ export function GuideBrowser({ onCreateProject }: GuideBrowserProps) {
   const searching = query.length > 0
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:py-10 lg:px-8'>
       {/* Góp ý BuildX: tiêu đề + một dòng mô tả hiện rõ phía trên ô tìm kiếm. */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}

@@ -101,7 +101,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
 
   if (isPending || !order || order.status !== 'paid') {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5 lg:py-8'>
         <CheckoutSteps current='done' animateEntrance={false} />
 
         <div className='grid items-start gap-x-[3.81%] gap-y-6 lg:grid-cols-[25.4%_minmax(0,1fr)]'>
@@ -206,7 +206,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
       data-checkout-done-root
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5 lg:py-8'
     >
       <CheckoutSteps current='done' animateEntrance={false} />
 

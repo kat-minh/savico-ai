@@ -39,14 +39,14 @@ export function GuideHighlights({ onCreateProject }: GuideHighlightsProps) {
 
   return (
     <section className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-      <header className='mb-8 flex flex-wrap items-start justify-between gap-4'>
+      <header className='mb-4 flex flex-wrap items-start justify-between gap-4 lg:mb-8'>
         <div className='space-y-2'>
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
           <p className='text-foreground max-w-2xl text-sm text-pretty'>{t('subtitle')}</p>
         </div>
         <Link
           href={ROUTES.GUIDE}
-          className='text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline'
+          className='text-primary hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
         >
           {t('viewAll')}
           <ChevronRight className='size-4 lg:hidden' />

@@ -42,12 +42,12 @@ export function HomePainPoints() {
   const noteInView = useInView(noteRef, { once: true, amount: 0.3 })
 
   return (
-    <section id='home-pain-points' className='bg-primary-strong text-primary-foreground'>
+    <section id='home-pain-points' className='brand-band'>
       {/* Dưới `lg`: đệm trên 50px (40 + 10 theo góp ý) — KHÔNG đưa về 20px như các cụm khác:
             dải số liệu (`HomeStats`) chờm xuống 38px (`-mb-9.5`) lên đầu khối này, đệm trên
-            thấp hơn thì tiêu đề bị dải đó che. Đệm dưới 50px (trước đây dưới thẻ còn dải
+            thấp hơn thì tiêu đề bị dải đó che. Đệm dưới 20px như các cụm khác (trước đây 50px, dưới thẻ còn dải
             chấm chỉ vị trí + `pb-1` nên trống ~66px). */}
-      <div className='mx-auto w-full max-w-[90rem] px-4 pt-12.5 pb-12.5 lg:px-8 lg:py-12'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 pt-12.5 pb-5 lg:px-8 lg:pt-12 lg:pb-5'>
         <div className='flex flex-wrap items-end justify-between gap-x-10 gap-y-4'>
           <div className='space-y-2'>
             <motion.h2
@@ -74,7 +74,7 @@ export function HomePainPoints() {
           {/* Ghi chú viết tay + mũi tên vẽ tay chỉ xuống dải thẻ (ảnh mockup) —
               vẽ nét SAU CÙNG, đúng thứ tự mở màn của khối. */}
           {/* Hiện ở MỌI khổ màn hình (góp ý #46): dưới `lg` nằm dưới tiêu đề, nghiêng nhẹ hơn. */}
-          <div ref={noteRef} className='max-lg:ml-auto lg:translate-y-2'>
+          <div ref={noteRef} className='max-lg:hidden lg:translate-y-2'>
             <motion.div
               initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
               animate={noteInView ? { opacity: 1, clipPath: 'inset(0 0% 0 0)' } : undefined}
@@ -94,7 +94,7 @@ export function HomePainPoints() {
         {/* Dưới `sm`: danh sách DỌC, thẻ ngang (icon trái · chữ phải, căn trái) như ảnh đề
             xuất — bỏ cuộn ngang và dải chấm. `auto-rows-fr`: 5 thẻ CAO BẰNG NHAU (bằng thẻ
             có mô tả dài nhất); icon nằm trên ô vuông xanh lá nhạt. Cả hai chỉ ở dưới `sm`. Từ `sm` giữ nguyên lưới thẻ dọc cũ. */}
-        <ul className='mt-8 grid auto-rows-fr gap-3 sm:auto-rows-auto sm:grid-cols-2 sm:gap-4 lg:grid-cols-5'>
+        <ul className='mt-4 grid auto-rows-fr gap-3 sm:auto-rows-auto sm:grid-cols-2 sm:gap-4 lg:mt-8 lg:grid-cols-5'>
           {HOME_PAIN_POINTS.map((point, index) => {
             const Icon = PAIN_ICON[point]
             const isHovered = hovered === point

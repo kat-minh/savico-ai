@@ -320,7 +320,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
 
   if (isPending || !contractor) {
     return (
-      <div className={cn(PAGE_CONTAINER, 'space-y-6 py-8')}>
+      <div className={cn(PAGE_CONTAINER, 'space-y-6 py-5 lg:py-8')}>
         <Skeleton className='h-20 rounded-2xl' />
         <Skeleton className='h-96 rounded-2xl' />
       </div>
@@ -399,7 +399,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   ]
 
   return (
-    <div className={cn(PAGE_CONTAINER, 'space-y-4 py-8')}>
+    <div className={cn(PAGE_CONTAINER, 'space-y-4 py-5 lg:py-8')}>
       {/* Xem thử thì chưa có hồ sơ để hiện — để nguyên thanh này là một khung
           chờ xám đứng mãi ở đầu trang. */}
       {preview ? null : (

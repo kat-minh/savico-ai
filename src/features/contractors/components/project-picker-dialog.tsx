@@ -69,10 +69,20 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && close()}>
-      <DialogContent className='sm:max-w-[52rem]'>
-        <DialogHeader className='items-center text-center'>
-          <DialogTitle className='text-2xl'>{t('title')}</DialogTitle>
-          <DialogDescription className='text-pretty'>{t('subtitle', { max: MAX_INVITATIONS })}</DialogDescription>
+      {/* Mobile: bottom-sheet bám đáy màn hình (ngón cái với tới); từ `sm` trở lên
+          trở lại hộp thoại giữa màn hình như cũ. */}
+      <DialogContent
+        className={cn(
+          'top-auto bottom-0 left-0 max-h-[90dvh] w-full max-w-full translate-x-0 translate-y-0 gap-3 rounded-b-none p-4',
+          'sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-[calc(100vh-3rem)] sm:max-w-[52rem] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:gap-4 sm:rounded-2xl sm:p-5'
+        )}
+      >
+        <span aria-hidden className='bg-muted mx-auto -mt-1 h-1 w-10 rounded-full sm:hidden' />
+        <DialogHeader className='gap-1 pr-8 sm:items-center sm:gap-2 sm:pr-0 sm:text-center'>
+          <DialogTitle className='text-lg sm:text-2xl'>{t('title')}</DialogTitle>
+          <DialogDescription className='text-xs text-pretty sm:text-sm'>
+            {t('subtitle', { max: MAX_INVITATIONS })}
+          </DialogDescription>
         </DialogHeader>
 
         {isPending ? (
@@ -85,7 +95,7 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
           <EmptyBriefs onCreate={() => createBrief.mutate()} pending={createBrief.isPending} />
         ) : (
           <>
-            <ul className='max-h-[52vh] space-y-3 overflow-y-auto'>
+            <ul className='max-h-[56dvh] space-y-2.5 overflow-y-auto sm:max-h-[52vh] sm:space-y-3'>
               {summaries.map((summary) => (
                 <li key={summary.brief.id}>
                   <BriefRow
@@ -127,15 +137,20 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
         )}
 
         {summaries?.length ? (
-          <div className='flex flex-wrap items-center justify-between gap-3 border-t pt-4'>
-            <Button variant='outline' onClick={() => createBrief.mutate()} disabled={createBrief.isPending}>
+          <div className='flex flex-col gap-3 border-t pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:pt-4'>
+            <Button
+              variant='outline'
+              className='w-full sm:w-auto'
+              onClick={() => createBrief.mutate()}
+              disabled={createBrief.isPending}
+            >
               <FilePlus2 className='size-4' />
               {t('createMore')}
             </Button>
             <Link
               href={ROUTES.PLANS}
               onClick={close}
-              className='text-primary hover:text-primary/80 text-sm font-medium underline underline-offset-4'
+              className='text-primary hover:text-primary/80 text-center text-sm font-medium text-balance underline underline-offset-4'
             >
               {t('buyPlan')}
             </Link>
@@ -225,7 +240,7 @@ function BriefRow({
     // tìm nhà thầu rồi, để nút "Chọn" ở đấy là mời khách đi vào ngõ cụt.
     <article
       className={cn(
-        'flex flex-wrap items-center gap-4 rounded-xl border p-3 transition-colors',
+        'flex flex-col gap-3 rounded-xl border p-3 transition-colors sm:flex-row sm:items-center sm:gap-4',
         contracted && 'bg-muted/40 opacity-60',
         !contracted && current && 'border-primary bg-primary/5',
         !contracted && !current && 'bg-card'
@@ -234,53 +249,60 @@ function BriefRow({
       {/* Hình 3/4: ảnh bìa nằm ngoài cùng bên trái, khổ ngang ~4:3. Hồ sơ chưa
           có ảnh thì để khung biểu tượng chứ không bỏ trống — bỏ trống làm cả
           dòng lệch so với những dòng có ảnh. */}
-      {brief.coverUrl ? (
-        <Photo className='aspect-4/3 w-28 shrink-0 rounded-lg' src={brief.coverUrl} alt={brief.name} sizes='112px' />
-      ) : (
-        <span className='bg-accent text-primary/50 flex aspect-4/3 w-28 shrink-0 items-center justify-center rounded-lg'>
-          <House className='size-8' strokeWidth={1.25} />
-        </span>
-      )}
+      <div className='flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-4'>
+        {brief.coverUrl ? (
+          <Photo
+            className='aspect-4/3 w-20 shrink-0 rounded-lg sm:w-28'
+            src={brief.coverUrl}
+            alt={brief.name}
+            sizes='(min-width: 640px) 112px, 80px'
+          />
+        ) : (
+          <span className='bg-accent text-primary/50 flex aspect-4/3 w-20 shrink-0 items-center justify-center rounded-lg sm:w-28'>
+            <House className='size-6 sm:size-8' strokeWidth={1.25} />
+          </span>
+        )}
 
-      <div className='min-w-0 flex-1'>
-        {/* Hồ sơ vừa tạo mà chưa điền gì thì `name` rỗng — không có nhãn dự
+        <div className='min-w-0 flex-1'>
+          {/* Hồ sơ vừa tạo mà chưa điền gì thì `name` rỗng — không có nhãn dự
             phòng, dòng chỉ còn mã dự án và trông như bị mất chữ. */}
-        <p className='flex items-center gap-2 font-semibold'>
-          {current ? <CheckCircle2 className='text-primary size-4 shrink-0' /> : null}
-          <span className={cn('truncate', !brief.name.trim() && 'text-muted-foreground font-normal italic')}>
-            {brief.name.trim() || labels.untitled}
-          </span>
-        </p>
-        <p className='text-muted-foreground font-mono text-xs'>{brief.id}</p>
-        <p className='text-muted-foreground truncate text-xs'>
-          {[brief.buildingType, labels.scale, shortAddress(brief)].filter(Boolean).join(' · ')}
-        </p>
-
-        <div className='mt-1.5 flex flex-wrap items-center gap-2'>
-          <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase'>
-            {brief.selfCreated ? labels.selfCreated : labels.fromPlan}
-          </span>
-          <span
-            className={cn(
-              'rounded-md px-2 py-0.5 text-[11px] font-medium',
-              (contracted || invitedCount === 0) && 'bg-muted text-muted-foreground',
-              !contracted && invitedCount > 0 && !full && 'bg-info-soft text-info',
-              !contracted && full && 'bg-accent text-primary-strong'
-            )}
-          >
-            {contracted ? labels.contracted : invitedCount === 0 ? labels.notInvited : labels.invited}
-          </span>
-          {draft ? (
-            <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 text-[11px] font-semibold'>
-              {labels.draft}
+          <p className='flex items-center gap-2 font-semibold'>
+            {current ? <CheckCircle2 className='text-primary size-4 shrink-0' /> : null}
+            <span className={cn('truncate', !brief.name.trim() && 'text-muted-foreground font-normal italic')}>
+              {brief.name.trim() || labels.untitled}
             </span>
-          ) : null}
+          </p>
+          <p className='text-muted-foreground truncate font-mono text-[11px] sm:text-xs'>{brief.id}</p>
+          <p className='text-muted-foreground truncate text-xs'>
+            {[brief.buildingType, labels.scale, shortAddress(brief)].filter(Boolean).join(' · ')}
+          </p>
+
+          <div className='mt-1.5 flex flex-wrap items-center gap-2'>
+            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase'>
+              {brief.selfCreated ? labels.selfCreated : labels.fromPlan}
+            </span>
+            <span
+              className={cn(
+                'rounded-md px-2 py-0.5 text-[11px] font-medium',
+                (contracted || invitedCount === 0) && 'bg-muted text-muted-foreground',
+                !contracted && invitedCount > 0 && !full && 'bg-info-soft text-info',
+                !contracted && full && 'bg-accent text-primary-strong'
+              )}
+            >
+              {contracted ? labels.contracted : invitedCount === 0 ? labels.notInvited : labels.invited}
+            </span>
+            {draft ? (
+              <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+                {labels.draft}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      <div className='flex shrink-0 items-center gap-2'>
+      <div className='flex items-center gap-2 sm:shrink-0'>
         {contracted ? null : draft ? (
-          <Button asChild>
+          <Button asChild className='flex-1 sm:flex-none'>
             <Link href={`${contractorBriefRoute(brief.id)}?focus=${missingGroup}`} onClick={onNavigate}>
               <Pencil className='size-4' />
               {labels.completeBrief}
@@ -290,24 +312,26 @@ function BriefRow({
           // Hình 4: "Đang chọn" là VIÊN NHÃN chứ không phải nút — dòng này đang
           // được chọn sẵn nên chẳng có gì để bấm; dựng thành nút (kể cả nút đã
           // khoá) là mời người ta bấm vào một thứ không phản hồi.
-          <span className='bg-accent text-primary-strong rounded-md px-3 py-2 text-sm font-medium'>
+          <span className='bg-accent text-primary-strong flex-1 rounded-md px-3 py-2 text-center text-sm font-medium sm:flex-none'>
             {labels.current}
           </span>
         ) : full ? (
           // Đủ 3 lời mời thì không còn gì để mời — dẫn thẳng sang màn theo dõi
           // thay vì cho bấm "Chọn" rồi mới báo hết chỗ (R1).
-          <Button asChild variant='outline'>
+          <Button asChild variant='outline' className='flex-1 sm:flex-none'>
             <Link href={contractorInvitationsRoute(brief.id)} onClick={onNavigate}>
               {labels.viewInvites}
             </Link>
           </Button>
         ) : (
           <>
-            <Button onClick={onChoose}>{labels.choose}</Button>
+            <Button className='flex-1 sm:flex-none' onClick={onChoose}>
+              {labels.choose}
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger
                 aria-label={labels.menu}
-                className='text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-md transition-colors'
+                className='text-muted-foreground hover:text-foreground flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors sm:size-8 sm:border-0'
               >
                 <MoreHorizontal className='size-4' />
               </DropdownMenuTrigger>
