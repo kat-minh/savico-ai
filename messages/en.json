@@ -6488,7 +6488,21 @@
       "aheadOfPlan": "Ahead of plan",
       "behindPlan": "Behind plan",
       "stripTitle": "Supervision",
-      "handoverInline": "handover {date}"
+      "handoverInline": "handover {date}",
+      "grants": {
+        "title": "My supervision plans",
+        "status": {
+          "assignable": "Supervision plan not assigned to a site",
+          "assigned": "Under supervision",
+          "completed": "Supervision completed",
+          "canceled": "Plan cancelled",
+          "expired": "Plan expired before assignment"
+        },
+        "site": "Site: {name}",
+        "deadline": "Assign to a site before {date}",
+        "grantedAt": "Purchased on {date}",
+        "assign": "Assign to a site"
+      }
     },
     "stagesShort": {
       "legal": "Legal paperwork",

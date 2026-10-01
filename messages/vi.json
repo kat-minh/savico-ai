@@ -6488,7 +6488,21 @@
       "aheadOfPlan": "Sớm hơn kế hoạch",
       "behindPlan": "Chậm hơn kế hoạch",
       "stripTitle": "Giám sát",
-      "handoverInline": "bàn giao {date}"
+      "handoverInline": "bàn giao {date}",
+      "grants": {
+        "title": "Gói giám sát của tôi",
+        "status": {
+          "assignable": "Gói giám sát chưa gán công trình",
+          "assigned": "Đang giám sát",
+          "completed": "Đã hoàn thành giám sát",
+          "canceled": "Gói đã bị huỷ",
+          "expired": "Gói quá hạn gán công trình"
+        },
+        "site": "Công trình: {name}",
+        "deadline": "Gán vào công trình trước {date}",
+        "grantedAt": "Mua ngày {date}",
+        "assign": "Gán vào công trình"
+      }
     },
     "stagesShort": {
       "legal": "Hồ sơ pháp lý",
