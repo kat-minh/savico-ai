@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
 import { FieldLabel, LocationMap } from '@/shared/components/common'
+import { geocodeApi } from '@/shared/geocode'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
 import { mapsApi } from '../api/maps.api'
@@ -36,12 +37,29 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
   const [resolving, setResolving] = useState(false)
   const [resolveFailed, setResolveFailed] = useState(false)
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const { suggestions, isSearching, failed } = useEstimateAddressSearch(value, context)
+  // Chỉ tìm gợi ý khi danh sách đang mở (đang gõ): ô đổi chữ do kéo ghim thì không tốn thêm một lượt tìm.
+  const { suggestions, isSearching, failed } = useEstimateAddressSearch(open ? value : '', context)
+  // Chỉ kết quả của lần kéo MỚI NHẤT được ghi vào ô: kéo liên tiếp thì các câu trả lời về sau vẫn có thể đến trước.
+  const reverseSeq = useRef(0)
+
+  /** Ghim được kéo / bấm lên bản đồ: đổi vị trí rồi đổi ô số nhà, đường theo địa chỉ tại ghim. */
+  async function movePin(latitude: number, longitude: number) {
+    setLocation({ latitude, longitude })
+    const seq = ++reverseSeq.current
+    try {
+      const found = await geocodeApi.reverse(latitude, longitude)
+      // Không có địa chỉ quanh ghim thì giữ nguyên chữ đang có thay vì xoá trắng.
+      if (seq === reverseSeq.current && found?.name) onChange(found.name)
+    } catch {
+      // Tra địa chỉ lỗi: ghim vẫn đúng chỗ khách chỉ, chỉ là ô chữ không đổi theo.
+    }
+  }
 
   async function pick(refId: string, name: string, display: string) {
     if (blurTimer.current) clearTimeout(blurTimer.current)
     // Giữ số nhà khách đã gõ: gợi ý của VietMap thường chỉ có tên đường.
     onChange(addressWithHouseNumber(value, name || display))
+    reverseSeq.current++
     setOpen(false)
     setResolving(true)
     setResolveFailed(false)
@@ -125,7 +143,7 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
           <LocationMap
             latitude={location.latitude}
             longitude={location.longitude}
-            onChange={(latitude, longitude) => setLocation({ latitude, longitude })}
+            onChange={(latitude, longitude) => void movePin(latitude, longitude)}
           />
           <p className='text-muted-foreground text-xs'>
             {t('address.coordinates', {

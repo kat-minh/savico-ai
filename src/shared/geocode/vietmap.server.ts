@@ -1,4 +1,4 @@
-import type { AddressSuggestion, GeocodedAddress } from './geocode.types'
+import type { AddressSuggestion, GeocodedAddress, ReverseAddress } from './geocode.types'
 
 /**
  * VietMap Maps API — CHỈ CHẠY Ở MÁY CHỦ.
@@ -12,6 +12,7 @@ import type { AddressSuggestion, GeocodedAddress } from './geocode.types'
  * Tài liệu: https://maps.vietmap.vn/docs/map-api/
  * - `GET /api/autocomplete/v4` — gợi ý theo chữ đang gõ, **không kèm toạ độ**.
  * - `GET /api/place/v4` — đổi `ref_id` của một gợi ý lấy `lat`/`lng`.
+ * - `GET /api/reverse/v4` — địa chỉ gần một toạ độ (kéo ghim trên bản đồ).
  *
  * Mỗi lời gọi là MỘT lượt tính tiền, nên chọn xong một địa chỉ tốn hai lượt.
  * Vì thế Place có bộ nhớ đệm bên dưới, còn Autocomplete thì gọi thẳng (chữ gõ
@@ -68,6 +69,24 @@ async function call<T>(path: string, params: Record<string, string>): Promise<T>
   // KHÔNG đưa thân lỗi vào message — tránh lỡ ghi khoá ra log.
   if (!response.ok) throw new VietmapError(response.status)
   return (await response.json()) as T
+}
+
+interface VietmapReverseRow {
+  name: string
+  address: string
+  display: string
+  distance?: number
+}
+
+/** Địa chỉ gần nhất của một toạ độ, hoặc `null` khi quanh đó không có gì. Kết quả đã được VietMap xếp theo khoảng cách. */
+export async function reverse(lat: number, lng: number): Promise<ReverseAddress | null> {
+  const rows = await call<VietmapReverseRow[]>('/reverse/v4', {
+    lat: String(lat),
+    lng: String(lng),
+    display_type: DISPLAY_TYPE
+  })
+  const first = rows.find((row) => row.name || row.display)
+  return first ? { name: first.name ?? '', address: first.address ?? '', display: first.display ?? '' } : null
 }
 
 /** Gợi ý địa chỉ theo chữ đang gõ. Trả tối đa 10 dòng, chưa có toạ độ. */

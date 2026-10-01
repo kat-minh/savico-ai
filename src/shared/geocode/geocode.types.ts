@@ -19,6 +19,15 @@ export interface AddressSuggestion {
   address: string
 }
 
+/** Địa chỉ gần một toạ độ (kéo ghim trên bản đồ). */
+export interface ReverseAddress {
+  /** Số nhà + tên đường. */
+  name: string
+  /** Phường + tỉnh/thành. */
+  address: string
+  display: string
+}
+
 /** Địa chỉ đã chốt, đủ toạ độ để gửi xuống backend. */
 export interface GeocodedAddress {
   display: string

@@ -1,4 +1,4 @@
-import type { AddressSuggestion, GeocodedAddress } from './geocode.types'
+import type { AddressSuggestion, GeocodedAddress, ReverseAddress } from './geocode.types'
 
 /**
  * Gọi route geocode CỦA CHÍNH APP (`/api/geocode/*`), không phải VietMap và cũng
@@ -18,5 +18,9 @@ export const geocodeApi = {
     getJson<AddressSuggestion[]>('/api/geocode/suggest', focus ? { text, focus } : { text }),
 
   /** Tra toạ độ của gợi ý đã chọn. */
-  place: (refId: string) => getJson<GeocodedAddress>('/api/geocode/place', { refId })
+  place: (refId: string) => getJson<GeocodedAddress>('/api/geocode/place', { refId }),
+
+  /** Địa chỉ gần một toạ độ; `null` khi quanh đó không có địa chỉ nào. */
+  reverse: (latitude: number, longitude: number) =>
+    getJson<ReverseAddress | null>('/api/geocode/reverse', { lat: String(latitude), lng: String(longitude) })
 }
