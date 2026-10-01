@@ -14,7 +14,6 @@ import {
   OrderedListOutlined,
   PlayCircleOutlined,
   SafetyCertificateOutlined,
-  ScheduleOutlined,
   SendOutlined,
   SkinOutlined,
   TeamOutlined,
@@ -105,7 +104,7 @@ export const ADMIN_NAV = [
     items: [
       { key: 'roles', href: ADMIN_ROUTES.ROLES, icon: SafetyCertificateOutlined },
       { key: 'staff', href: ADMIN_ROUTES.STAFF, icon: TeamOutlined },
-      { key: 'assignments', href: ADMIN_ROUTES.ASSIGNMENTS, icon: ScheduleOutlined },
+      // Đã ẩn "Phân công giám sát" (assignments) khỏi menu theo yêu cầu; route và trang vẫn còn để bật lại.
       { key: 'accessAudit', href: ADMIN_ROUTES.ACCESS_AUDIT, icon: HistoryOutlined }
     ]
   },
