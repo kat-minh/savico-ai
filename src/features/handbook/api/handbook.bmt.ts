@@ -377,7 +377,7 @@ export const bmtHandbookApi = {
     return { items: page.items.map(toTemplateSummary), totalCount: page.totalCount }
   },
 
-  /** Danh sách mẫu công khai (`GET /design-templates`). API rỗng/lỗi → mock. */
+  /** Danh sách mẫu công khai (`GET /design-templates`). Rỗng/lỗi → danh sách rỗng (không mock). */
   async listTemplates(): Promise<HandbookTemplate[]> {
     try {
       const items: BmtDesignTemplateSummary[] = []
@@ -388,10 +388,10 @@ export const bmtHandbookApi = {
         items.push(...page.items)
         if (!page.hasNextPage) break
       }
-      if (!items.length) return mockHandbookApi.listTemplates()
       return items.map(toTemplateSummary)
     } catch {
-      return mockHandbookApi.listTemplates()
+      // Thư viện lấy từ BE, không dùng mock: lỗi thì hiện thư viện trống thay vì mẫu giả.
+      return []
     }
   },
 

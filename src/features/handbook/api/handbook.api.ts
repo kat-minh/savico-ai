@@ -12,7 +12,7 @@ import { mockHandbookApi } from './handbook.mock'
  *   - Bài viết: `listArticles` (`GET /news/articles`), `getArticle`
  *     (`GET /news/articles/{id}`, kèm `contentHtml`). Panel tư vấn theo `topic`
  *     không có API → luôn mock.
- *   - Thư viện mẫu: lưới `listTemplates` + bộ lọc đang dùng MOCK (xem `BmtHandbookApi`); `getTemplate`
+ *   - Thư viện mẫu: `listTemplates` (`GET /design-templates`, KHÔNG fallback mock), `getTemplate`
  *     (chi tiết CẦN ĐĂNG NHẬP: access-info → open trừ 1 lượt → library-versions +
  *     assets), `getQuota` (`catalog.detail` của `/me/design-subscription`).
  *
@@ -26,17 +26,16 @@ import { mockHandbookApi } from './handbook.mock'
  * Giữ mock: `listStages` (không có API); lượt TRA lưới của `getQuota` (API chỉ có
  * `catalog.detail`); `/me/library-history` không có màn UI tiêu thụ.
  */
-/** id mẫu của BMT API là UUID; id mẫu mock có dạng khác. */
-const isApiTemplateId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id)
-
 const BmtHandbookApi = {
   listArticles: bmtHandbookApi.listArticles,
   getArticle: bmtHandbookApi.getArticle,
-  // Trang /handbook: CHỈ danh sách bài viết (khối dưới cùng) lấy API; lưới thư viện mẫu và bộ lọc của nó dùng mock (BE
-  // chưa đủ dữ liệu). Chi tiết mẫu vẫn theo id: mẫu API (UUID, vd. từ "mẫu liên quan" ở màn dự toán) đọc BE, còn mẫu
-  // mock đọc mock — nên `getTemplate` không chuyển hẳn sang mock.
+  // Trang /handbook: danh sách bài viết (khối dưới cùng) và THƯ VIỆN MẪU (lưới, bộ lọc, chi tiết) lấy BE; các khối còn
+  // lại của trang (nổi bật, nền tảng, bản tin) dùng mock.
+  listTemplates: bmtHandbookApi.listTemplates,
   matchTemplates: bmtHandbookApi.matchTemplates,
-  getTemplate: (id: string) => (isApiTemplateId(id) ? bmtHandbookApi.getTemplate(id) : mockHandbookApi.getTemplate(id)),
+  getTemplate: bmtHandbookApi.getTemplate,
+  getLibraryFilters: bmtHandbookApi.getLibraryFilters,
+  listTemplateIdsByStyle: bmtHandbookApi.listTemplateIdsByStyle,
   getQuota: bmtHandbookApi.getQuota,
   listNewsCategories: bmtHandbookApi.listNewsCategories,
   getNewsCategory: bmtHandbookApi.getNewsCategory,
