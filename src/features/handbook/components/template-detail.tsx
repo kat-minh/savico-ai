@@ -529,7 +529,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
   if (isPending) return <TemplateDetailSkeleton />
   if (isError) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 py-10 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:py-10 lg:px-8'>
         <ErrorState
           title={t('loadError')}
           description={t('loadErrorHint')}
@@ -564,7 +564,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
       data-template-detail
       data-template-detail-id={template.id}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:py-10 lg:px-8'
     >
       <div className='space-y-3'>
         <Breadcrumb data-entrance-step='0' data-detail-breadcrumb>
@@ -1256,7 +1256,7 @@ function TemplateDetailLoginGate() {
   const openAuthDialog = useAuthDialogStore((state) => state.open)
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] px-4 py-16 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:py-16 lg:px-8'>
       <div className='bg-card mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border p-8 text-center'>
         <span className='bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full'>
           <Lock className='size-6' />
@@ -1280,7 +1280,7 @@ function TemplateDetailLocked({ deniedCode }: { deniedCode: string | null }) {
   const needsPlan = deniedCode === 'SubscriptionInactive'
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] px-4 py-16 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:py-16 lg:px-8'>
       <div className='bg-card mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border p-8 text-center'>
         <span className='bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full'>
           <Lock className='size-6' />
@@ -1306,7 +1306,7 @@ function TemplateDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:py-10 lg:px-8'
       aria-hidden='true'
     >
       <div className='space-y-3'>

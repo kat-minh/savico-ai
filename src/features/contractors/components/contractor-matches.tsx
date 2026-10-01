@@ -11,6 +11,7 @@ import { EmptyState, revealContainerVariants, revealEase, revealItemVariants } f
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute, contractorCompareRoute } from '@/shared/constants/routes'
+import { useMediaQuery } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import {
   CONTRACTOR_SORTS,
@@ -144,6 +145,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const t = useTranslations('contractors.matches')
   const tSort = useTranslations('contractors.sort')
   const reduceMotion = useReducedMotion()
+  const isMobile = useMediaQuery('(max-width: 767px)')
 
   const { data: brief } = useBrief(projectId)
   const { data: contractors, isPending } = useContractors(projectId)
@@ -375,7 +377,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-8 lg:px-8'>
+    <div className='mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-5 lg:py-8 lg:px-8'>
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
         initial='hidden'
@@ -442,7 +444,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
               >
                 <ProjectContextBar
                   brief={brief}
-                  condensed={projectBarStuck}
+                  condensed={projectBarStuck && !isMobile}
                   invitedPill={
                     <motion.span
                       title={pillLocked ? t('inviteLimitReached', { max: MAX_INVITATIONS }) : undefined}
@@ -586,7 +588,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         </div>
       </motion.section>
 
-      <div className='order-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'>
+      <div className='order-5 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'>
         <div className='min-w-0 space-y-3'>
           {isPending ? (
             [0, 1, 2].map((i) => <Skeleton key={i} className='h-40 rounded-2xl' />)
@@ -636,7 +638,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className='space-y-4 lg:sticky lg:top-24 lg:self-start'
+          className='min-w-0 space-y-4 lg:sticky lg:top-24 lg:self-start'
         >
           <section id='matches-compare-panel-target' className='bg-card rounded-2xl border p-4'>
             <h2 className='flex items-baseline gap-2 text-sm font-semibold'>
@@ -646,7 +648,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
               </span>
             </h2>
 
-            <ul id='matches-compare-list-target' className='mt-3 min-h-1 space-y-2'>
+            <ul id='matches-compare-list-target' className='mt-3 min-h-1 space-y-2 overflow-x-clip'>
               <AnimatePresence initial={false}>
                 {selected.map((contractor) => (
                   // Thiết kế S12: mỗi nhà thầu đã chọn là một hàng CÓ VIỀN, kèm

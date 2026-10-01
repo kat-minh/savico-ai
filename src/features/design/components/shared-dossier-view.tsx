@@ -129,7 +129,7 @@ export function SharedDossierView({ token, share }: { token: string; share?: { s
 
   if (!data) {
     return (
-      <div className='mx-auto w-full max-w-md px-4 py-24'>
+      <div className='mx-auto w-full max-w-md px-4 py-5 lg:py-24'>
         <EmptyState title={t('invalidTitle')} description={t('invalidDescription')} />
       </div>
     )
@@ -140,7 +140,7 @@ export function SharedDossierView({ token, share }: { token: string; share?: { s
   )
 
   return (
-    <div className='mx-auto w-full max-w-3xl space-y-8 px-4 py-12 lg:px-8'>
+    <div className='mx-auto w-full max-w-3xl space-y-8 px-4 py-5 lg:py-12 lg:px-8'>
       <header className='space-y-2'>
         <p className='text-muted-foreground text-xs tracking-widest uppercase'>{t('eyebrow')}</p>
         <h1 className='text-3xl font-semibold tracking-tight text-balance'>{data.projectName}</h1>

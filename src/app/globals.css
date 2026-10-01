@@ -567,6 +567,19 @@
     filter: brightness(1.06);
   }
 
+  /* Dải nền xanh gradient của các section xen kẽ ở trang chủ (ảnh khách gửi, thư mục
+     `background green-GRADIENT`): xanh lá nhạt ở trên đổ xuống xanh đậm quanh 78% chiều cao
+     rồi giữ phẳng. Hai đầu lấy từ dải màu logo, đổi logo là đổi theo. */
+  .brand-band {
+    background-color: var(--brand-gradient-from);
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--brand-gradient-to) 55%, var(--brand-gradient-from)) 0%,
+      var(--brand-gradient-from) 78%
+    );
+    color: var(--primary-foreground);
+  }
+
   /* Nền xanh rất nhạt nhưng ĐẶC — dùng cho con số 01…05 nằm đè lên viền trên
      của thẻ: `bg-primary/10` trong suốt nên đường viền lòi qua giữa con số. */
   .bg-primary-soft {
@@ -6561,5 +6574,84 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
   }
   .plan-slide[data-popular='true'] .plan-card-enter {
     animation-name: plan-reveal;
+  }
+}
+
+/* =============================================================================
+ * MOBILE — CHỐNG ZOOM KHI FOCUS Ô NHẬP
+ * iOS Safari tự phóng to trang khi focus vào ô có font-size < 16px. Chỉ áp dưới
+ * breakpoint `md` (768px) nên desktop giữ nguyên. Đặt ngoài @layer để thắng cả
+ * utility `text-sm`/`text-xs` của Tailwind lẫn CSS-in-JS của antd (khu admin).
+ * ========================================================================== */
+@media (max-width: 767.98px) {
+  input:not(
+    [type='checkbox'],
+    [type='radio'],
+    [type='range'],
+    [type='color'],
+    [type='file'],
+    [type='button'],
+    [type='submit'],
+    [type='reset'],
+    [type='image']
+  ),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* =============================================================================
+ * MOBILE — DIALOG HIỆN/ẨN KHÔNG PHÓNG TO
+ * Dialog chia sẻ / xem trước mở bằng `design-dialog-open` (scale 0.9 → 1 từ vị trí
+ * nút bấm) nên trên điện thoại trông như bị zoom. Dưới `md` chỉ fade; desktop giữ
+ * nguyên hiệu ứng.
+ * ========================================================================== */
+@keyframes mobile-dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mobile-dialog-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@media (max-width: 767.98px) {
+  [data-preview-dialog][data-state='open'],
+  [data-origin-dialog][data-state='open'] {
+    animation: mobile-dialog-fade-in 200ms ease-out both !important;
+  }
+  [data-preview-dialog][data-state='closed'],
+  [data-origin-dialog][data-state='closed'] {
+    animation: mobile-dialog-fade-out 150ms ease-in both !important;
+  }
+}
+
+/* Hai bảng của trang Bảng giá cuộn ngang trên mobile và có cột đầu `sticky`.
+   `border-collapse` gắn đường kẻ vào lưới của bảng chứ không vào ô, nên khi cột
+   đầu đứng yên thì nền của nó đứng lại còn đường kẻ trôi đi — các vạch chồng lên
+   nhau. `separate` đặt đường kẻ lên từng ô, ô nào dính thì vạch dính theo. Vạch
+   ngang giữa các dòng vì thế nằm trên ô (viền của <tr> không vẽ ở chế độ này). */
+.plan-comparison-table,
+.plan-value-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.plan-comparison-table > tbody > tr:not(:last-child) > :is(th, td),
+.plan-value-table > tbody > tr:not(:last-child) > :is(th, td) {
+  border-bottom: 1px solid var(--border);
+}
+/* Vạch cam của cột nổi bật đặt theo % bề rộng khung, không theo bề rộng bảng
+   (720px) — khi cuộn ngang nó trôi lệch khỏi cột. Cột đã tự có viền cam nhạt. */
+@media (max-width: 767.98px) {
+  .plan-comparison-shell::after {
+    display: none;
   }
 }

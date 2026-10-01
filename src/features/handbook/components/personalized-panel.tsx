@@ -124,8 +124,8 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
         // Panel không bao giờ cao hơn khung nhìn (trừ thanh công cụ + stepper) và
         // tự cuộn bên trong. Để nó dài tự do thì cột phải kéo dài gấp mấy lần cột
         // trái, `sticky` mất tác dụng và người dùng phải cuộn cả trang mới xem hết
-        // mẫu. Áp cho mọi bề rộng, không chỉ desktop.
-        className='bg-card flex max-h-[calc(100svh-11rem)] flex-col overflow-hidden rounded-2xl border lg:flex-row'
+        // mẫu. Chỉ áp từ `lg`: dưới đó panel xếp dọc, tự giãn cao vừa đủ chứa hết thẻ, không cuộn trong.
+        className='bg-card flex flex-col lg:max-h-[calc(100svh-11rem)] overflow-hidden rounded-2xl border lg:flex-row'
       >
         {/* Thanh công cụ bên trái panel — chỉ có ở Bước 3 (Hình 4). Dưới `lg` nó thành THANH NGANG ở đầu
             panel (hai tab chia đều bề ngang): cột dọc 176px cũ chiếm gần nửa màn hình điện thoại nên nội

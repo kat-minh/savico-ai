@@ -18,11 +18,11 @@ import { ResumeProjectLabel } from './resume-project-label'
  * rê chuột và trắng khi thẻ mobile đang mở — đúng như các icon cũ.
  */
 const STEP_ICON: Record<HomeJourneyStep, string> = {
-  project: '/images/journey/project.png',
-  design: '/images/journey/design.png',
-  dossier: '/images/journey/dossier.png',
+  project: '/images/journey/design.png',
+  design: '/images/journey/dossier.png',
+  dossier: '/images/journey/build.png',
   contractor: '/images/journey/contractor.png',
-  build: '/images/journey/build.png'
+  build: '/images/journey/project.png'
 }
 
 const DETAIL_FIELDS = ['youDo', 'savicoDoes', 'youGet'] as const
@@ -104,7 +104,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
 
       <ol
         onMouseLeave={() => setHoverReached(null)}
-        className='mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr)_auto)_minmax(0,1fr)] lg:gap-3'
+        className='mt-4 grid gap-4 lg:mt-8 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr)_auto)_minmax(0,1fr)] lg:gap-3'
       >
         {HOME_JOURNEY_STEPS.map((step, index) => {
           const iconSrc = STEP_ICON[step]
@@ -308,7 +308,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
         // Dưới `sm`: nút ở TRÊN, dòng gợi ý "Chỉ cần 1 tấm ảnh lô đất" ở DƯỚI (xếp dọc). Trước đây `flex-wrap`
         // chỉ xuống dòng khi nhãn nút dài ("Tiếp tục dự án <tên>"); nhãn ngắn "Tạo dự án mới" thì hai phần lọt
         // chung một hàng.
-        className='mt-8 flex flex-col items-center gap-y-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6'
+        className='mt-4 flex flex-col items-center gap-y-3 lg:mt-8 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6'
       >
         {activeProject ? (
           <Button asChild className='brand-green-button h-11 rounded-full px-8 text-base has-[>svg]:px-8'>

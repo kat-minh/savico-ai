@@ -56,58 +56,63 @@ export function HomeTestimonials() {
   const goNext = () => (isDesktop ? setPage((p) => Math.min(pageCount - 1, p + 1)) : scrollTo(active + 1))
 
   return (
-    <section className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-      <div className='flex items-center justify-between gap-4'>
-        {/* Góp ý BuildX: nhãn nhỏ viết hoa đổi thành headline chính, cùng cỡ với các tiêu đề khối phía trên. */}
-        <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('titleMobile')}</h2>
+    <section className='brand-band'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
+        <div className='flex items-center justify-between gap-4'>
+          {/* Góp ý BuildX: nhãn nhỏ viết hoa đổi thành headline chính, cùng cỡ với các tiêu đề khối phía trên. */}
+          <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('titleMobile')}</h2>
 
-        {all.length > 1 ? (
-          <div className='flex items-center gap-2'>
-            <button
-              type='button'
-              aria-label='Previous'
-              disabled={!canPrev}
-              onClick={goPrev}
-              className='hover:bg-accent flex size-8 items-center justify-center rounded-full border disabled:opacity-40'
-            >
-              <ChevronLeft className='size-4' />
-            </button>
-            <button
-              type='button'
-              aria-label='Next'
-              disabled={!canNext}
-              onClick={goNext}
-              className='hover:bg-accent flex size-8 items-center justify-center rounded-full border disabled:opacity-40'
-            >
-              <ChevronRight className='size-4' />
-            </button>
+          {all.length > 1 ? (
+            <div className='flex items-center gap-2'>
+              <button
+                type='button'
+                aria-label='Previous'
+                disabled={!canPrev}
+                onClick={goPrev}
+                className='hover:bg-accent flex size-8 items-center justify-center rounded-full border disabled:opacity-40'
+              >
+                <ChevronLeft className='size-4' />
+              </button>
+              <button
+                type='button'
+                aria-label='Next'
+                disabled={!canNext}
+                onClick={goNext}
+                className='hover:bg-accent flex size-8 items-center justify-center rounded-full border disabled:opacity-40'
+              >
+                <ChevronRight className='size-4' />
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        <ul
+          ref={trackRef}
+          key={isDesktop ? page : 'all'}
+          className='mt-4 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden pb-1 lg:mt-4 lg:grid lg:grid-cols-3 lg:overflow-visible'
+        >
+          {items.map((person, index) => (
+            <TestimonialCard key={person.id} person={person} index={index} />
+          ))}
+        </ul>
+
+        {items.length > 1 ? (
+          <div className='mt-4 flex items-center justify-center gap-2 lg:hidden'>
+            {items.map((person, index) => (
+              <button
+                key={person.id}
+                type='button'
+                aria-label={person.name || person.id}
+                onClick={() => scrollTo(index)}
+                className={cn(
+                  'size-1.5 rounded-full transition-colors',
+                  index === active ? 'bg-primary-foreground' : 'bg-primary-foreground/40'
+                )}
+              />
+            ))}
           </div>
         ) : null}
       </div>
-
-      <ul
-        ref={trackRef}
-        key={isDesktop ? page : 'all'}
-        className='mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden pb-1 lg:mt-4 lg:grid lg:grid-cols-3 lg:overflow-visible'
-      >
-        {items.map((person, index) => (
-          <TestimonialCard key={person.id} person={person} index={index} />
-        ))}
-      </ul>
-
-      {items.length > 1 ? (
-        <div className='mt-4 flex items-center justify-center gap-2 lg:hidden'>
-          {items.map((person, index) => (
-            <button
-              key={person.id}
-              type='button'
-              aria-label={person.name || person.id}
-              onClick={() => scrollTo(index)}
-              className={cn('size-1.5 rounded-full transition-colors', index === active ? 'bg-primary' : 'bg-border')}
-            />
-          ))}
-        </div>
-      ) : null}
     </section>
   )
 }
@@ -133,7 +138,7 @@ function TestimonialCard({ person, index }: { person: CmsTestimonial; index: num
       viewport={{ once: true, amount: amount(0.3) }}
       transition={{ duration: 0.65, delay: index * 0.12, ease: revealEase }}
       whileHover={{ y: -2, transition: { duration: 0.5, ease: revealEase } }}
-      className='bg-card group relative w-[85%] shrink-0 snap-start overflow-hidden rounded-2xl border p-5 shadow-none transition-shadow hover:shadow-lg lg:w-auto lg:shrink'
+      className='bg-card text-card-foreground group relative w-[85%] shrink-0 snap-start overflow-hidden rounded-2xl border p-5 shadow-none transition-shadow hover:shadow-lg lg:w-auto lg:shrink'
     >
       {/* Vạch cam mép DƯỚI — vẽ từ trái sang phải khi rê. */}
       <span className='bg-brand-orange absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 transition-transform duration-700 ease-out group-hover:scale-x-100' />

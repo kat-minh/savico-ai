@@ -117,62 +117,32 @@ export function VideoLightbox({
                 onCloseAutoFocus={(event) => event.preventDefault()}
               >
                 <div
-                  className={cn(
-                    'fixed inset-0 z-50 flex',
-                    isMobile ? 'items-end justify-center' : 'items-center justify-center p-4'
-                  )}
+                  className='fixed inset-0 z-50 flex items-center justify-center p-4'
                   onClick={(event) => {
                     if (event.target === event.currentTarget) closeNow()
                   }}
                 >
                   <motion.div
-                    drag={isMobile ? 'y' : false}
-                    dragConstraints={{ top: 0, bottom: 0 }}
-                    dragElastic={{ top: 0, bottom: 0.4 }}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.y > 120 || info.velocity.y > 700) closeNow()
-                    }}
-                    className={cn(
-                      'bg-background relative shadow-2xl',
-                      isMobile
-                        ? 'h-[100dvh] w-full overflow-hidden rounded-none'
-                        : 'w-full max-w-3xl overflow-visible rounded-2xl p-5'
-                    )}
-                    initial={{
-                      x: dx,
-                      y: isMobile ? '100%' : dy,
-                      scaleX: isMobile ? 1 : initialScaleX,
-                      scaleY: isMobile ? 1 : initialScaleY,
-                      opacity: isMobile ? 1 : 0
-                    }}
+                    className='bg-background relative w-full max-w-3xl overflow-visible rounded-2xl p-5 shadow-2xl'
+                    initial={{ x: dx, y: dy, scaleX: initialScaleX, scaleY: initialScaleY, opacity: 0 }}
                     animate={{ x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1 }}
                     exit={{
-                      x: isMobile ? 0 : dx * 0.06,
-                      y: isMobile ? '100%' : dy * 0.06,
-                      scaleX: isMobile ? 1 : 0.96,
-                      scaleY: isMobile ? 1 : 0.96,
-                      opacity: isMobile ? 1 : 0,
+                      x: dx * 0.06,
+                      y: dy * 0.06,
+                      scaleX: 0.96,
+                      scaleY: 0.96,
+                      opacity: 0,
                       transition: { duration: 0.2, ease: 'easeIn' }
                     }}
                     transition={
-                      reduceMotion
-                        ? { duration: 0 }
-                        : isMobile
-                          ? { type: 'spring', stiffness: 340, damping: 34 }
-                          : { type: 'spring', stiffness: 280, damping: 24, mass: 0.7 }
+                      reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 24, mass: 0.7 }
                     }
                   >
-                    {isMobile ? (
-                      <div aria-hidden className='flex justify-center py-2'>
-                        <span className='bg-muted-foreground/40 h-1 w-10 rounded-full' />
-                      </div>
-                    ) : null}
-
                     <DialogPrimitive.Close asChild>
                       <button
                         type='button'
                         aria-label={t('close')}
-                        className='text-muted-foreground hover:bg-muted absolute top-3 right-3 z-30 flex size-8 items-center justify-center rounded-full transition-colors sm:top-5 sm:right-5'
+                        className='text-muted-foreground hover:bg-muted absolute top-4 right-4 z-30 flex size-8 items-center justify-center rounded-full transition-colors sm:top-5 sm:right-5'
                       >
                         <motion.span
                           whileHover={reduceMotion ? undefined : { rotate: 90 }}
@@ -184,7 +154,7 @@ export function VideoLightbox({
                       </button>
                     </DialogPrimitive.Close>
 
-                    <div className={cn('overflow-hidden', isMobile ? 'h-[calc(100dvh-1rem)]' : 'rounded-xl')}>
+                    <div className='overflow-hidden rounded-xl'>
                       <AnimatePresence mode='wait' initial={false} custom={direction}>
                         <motion.div
                           key={video.id}
@@ -193,15 +163,16 @@ export function VideoLightbox({
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: reduceMotion ? 0 : direction * -44 }}
                           transition={{ duration: reduceMotion ? 0 : 0.24, ease: revealEase }}
-                          className={cn(
-                            isMobile ? 'flex h-[calc(100dvh-1rem)] flex-col overflow-y-auto p-4 pt-0' : 'relative'
-                          )}
+                          className='relative'
                         >
                           <motion.div
                             initial={reduceMotion ? false : { opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: reduceMotion ? 0 : 0.18 }}
-                            className='mb-3 min-w-0 space-y-1 pr-10'
+                            className={cn(
+                              'min-w-0',
+                              isMobile ? 'mb-4 space-y-2 px-10 text-center' : 'mb-3 space-y-1 pr-10'
+                            )}
                           >
                             <DialogPrimitive.Title className='truncate text-lg leading-tight font-semibold'>
                               {video.title}

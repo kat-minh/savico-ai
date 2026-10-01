@@ -254,7 +254,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
 
   if (!product) {
     return (
-      <div className='mx-auto w-full max-w-3xl px-4 py-16 lg:px-8'>
+      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:py-16 lg:px-8'>
         <EmptyState
           title={t('missingProduct')}
           action={
@@ -335,7 +335,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
       data-page-entrance={entranceState}
       data-checkout-confirm-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
     >
       {/* Góp ý BuildX: màn này chỉ có logo để về trang chủ — thêm lối lùi về bảng giá. */}
       <button

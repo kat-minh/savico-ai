@@ -55,13 +55,17 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
   const revealAmount = isMobile ? 'some' : 0.4
 
   return (
-    <section id='home-services' className='bg-primary-strong text-primary-foreground relative isolate overflow-hidden'>
+    <section id='home-services' className='brand-band relative isolate overflow-hidden'>
       <div className='relative mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
         <header className='flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3'>
-          <div className='space-y-2'>
-            {/* Góp ý BuildX: bỏ nhãn "Bảng giá BuildX" — chỉ còn tiêu đề + mô tả. */}
-            <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
-            <p className='text-primary-foreground max-w-3xl text-sm'>{t('subtitle')}</p>
+          <div className='space-y-3'>
+            {/* Góp ý BuildX: bỏ nhãn "Bảng giá BuildX" — chỉ còn tiêu đề + mô tả.
+                `leading-none`/`leading-5`: bỏ khoảng line-height thừa để chữ cách mép
+                section và cách các thẻ đúng 20px thay vì 20px + phần thừa. */}
+            <h2 className='text-2xl leading-none font-bold tracking-tight text-balance lg:text-[1.75rem]'>
+              {t('title')}
+            </h2>
+            <p className='text-primary-foreground max-w-3xl text-sm leading-5'>{t('subtitle')}</p>
           </div>
 
           {/* `items-baseline` ở header: mép dưới chữ CTA thẳng hàng với mép dưới chữ hoa của tiêu đề.
@@ -87,9 +91,9 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
           </Link>
         </header>
 
-        <div className='mt-8'>
+        <div className='mt-5'>
           {/* Dưới `sm`: 4 thẻ thành MỘT HÀNG NGANG cuộn được. Từ `sm` lưới 2 cột, `lg` đủ 4 thẻ một hàng. */}
-          <ul className='-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4'>
+          <ul className='-mx-4 flex scroll-px-4 snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 -mb-2 sm:mx-0 sm:mb-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:scroll-px-0 sm:px-0 sm:pb-0 lg:grid-cols-4'>
             {HOME_SERVICES.map((service, index) => {
               const Icon = SERVICE_ICON[service]
               const isHovered = hovered === service

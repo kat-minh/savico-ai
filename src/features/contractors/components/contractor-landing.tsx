@@ -416,7 +416,7 @@ export function ContractorLanding() {
   // trên ảnh 450px = 41–48px ở khổ thật, còn `space-y-16` (64px) của bản trước
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
-    <div className='space-y-11 pb-14'>
+    <div className='space-y-10 sm:space-y-11 pb-5 lg:pb-14'>
       {/* Hero — banner toàn chiều rộng, cột chữ nền trắng bên trái (góp ý BuildX). */}
       <section className='relative isolate overflow-hidden'>
         {/* Banner phủ kín cả khối, ảnh nằm bên phải; bên trái là nền trắng của trang
@@ -425,7 +425,7 @@ export function ContractorLanding() {
           <Image src={mapImage} alt='' fill priority sizes='100vw' className='object-cover object-right' />
           <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r from-30% via-55% to-transparent' />
         </div>
-        <div className={cn(PAGE_CONTAINER, 'py-14 lg:py-24')}>
+        <div className={cn(PAGE_CONTAINER, 'py-5 lg:py-24')}>
           <div className='max-w-[38rem]'>
             {/* Cỡ chữ hero.
               Đo trên Hình S09 rồi quy theo % bề ngang phần nội dung (424px) →
@@ -449,7 +449,7 @@ export function ContractorLanding() {
               transition={{ duration: 0.28, ease: revealEase }}
             >
               <motion.h1
-                className='text-primary-strong text-4xl leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
+                className='text-primary-strong text-[clamp(1.5rem,7vw,1.875rem)] leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
                 aria-label={t('hero.title')}
               >
                 <motion.span variants={revealItemVariants} className='block'>
@@ -464,17 +464,20 @@ export function ContractorLanding() {
                 chặn bề ngang mới ra đúng ba dòng như ảnh. */}
               <motion.p
                 variants={revealItemVariants}
-                className='text-muted-foreground mt-[26px] max-w-[30rem] text-base leading-[1.65] text-pretty sm:text-lg'
+                className='text-muted-foreground mt-4 max-w-[30rem] text-base leading-[1.65] text-pretty sm:mt-[26px] sm:text-lg'
               >
                 {t('hero.subtitle')}
               </motion.p>
               {/* Hình S09: hai nút cùng cỡ, nút phụ nền trắng viền xanh, và nút
                 chính KHÔNG có mũi tên. */}
-              <motion.div variants={revealItemVariants} className='mt-[38px] flex flex-wrap gap-8'>
+              <motion.div
+                variants={revealItemVariants}
+                className='mt-4 flex flex-col gap-3 sm:mt-[38px] sm:flex-row sm:flex-wrap sm:gap-8'
+              >
                 {currentBrief ? (
                   <Button
                     size='lg'
-                    className='h-14 max-w-full min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
+                    className='h-14 max-w-full min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
                     onClick={continueBrief}
                     title={t('continueWith', { name: currentBriefName })}
                   >
@@ -483,7 +486,7 @@ export function ContractorLanding() {
                 ) : (
                   <Button
                     size='lg'
-                    className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
+                    className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
                     onClick={startBrief}
                     disabled={createBrief.isPending}
                   >
@@ -493,7 +496,7 @@ export function ContractorLanding() {
                 <Button
                   size='lg'
                   variant='outline'
-                  className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
+                  className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base max-sm:bg-card/85'
                   asChild
                 >
                   {/* Dẫn sang trang danh sách nhà thầu đầy đủ (góp ý BuildX); 3 nhà thầu bên
@@ -508,7 +511,7 @@ export function ContractorLanding() {
                   onClick={openPicker}
                   className='text-primary-strong mt-4 inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
                 >
-                  <ArrowLeftRight className='size-4' />
+                  <ArrowLeftRight className='size-4 max-sm:size-5' />
                   {t('switchBrief')}
                 </motion.button>
               ) : null}
@@ -531,7 +534,7 @@ export function ContractorLanding() {
             241…308, 331…428 — chia 424px thành 4 cột đều 106px thì cả bốn cụm
             đều nằm giữa cột của mình, không phải canh trái. */}
       <motion.section
-        className={PAGE_CONTAINER}
+        className={cn(PAGE_CONTAINER, 'max-sm:-mt-3')}
         initial={reduceMotion ? false : { opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.4 }}
@@ -542,7 +545,7 @@ export function ContractorLanding() {
           initial={reduceMotion ? false : 'hidden'}
           whileInView='show'
           viewport={{ once: true, amount: 0.4 }}
-          className='bg-card grid gap-4 rounded-2xl border p-6 sm:grid-cols-2 lg:grid-cols-4'
+          className='bg-card grid grid-cols-1 overflow-hidden rounded-2xl border max-sm:shadow-lg sm:grid-cols-2 sm:gap-4 sm:p-6 lg:grid-cols-4'
         >
           {(
             [
@@ -555,7 +558,7 @@ export function ContractorLanding() {
             <motion.li
               key={item.key}
               variants={revealItemVariants}
-              className='group flex items-center justify-center gap-3'
+              className='group flex items-center gap-3 max-sm:border-t max-sm:px-3.5 max-sm:py-3.5 max-sm:first:border-t-0 sm:justify-center'
             >
               <motion.span
                 aria-hidden
@@ -566,7 +569,7 @@ export function ContractorLanding() {
                 style={{ strokeDasharray: 64 }}
                 className='text-primary shrink-0 transition-[transform,color] duration-200 group-hover:-translate-y-0.5 group-hover:text-brand-orange'
               >
-                <item.icon className='size-7' strokeWidth={1.5} />
+                <item.icon className='size-5 sm:size-7' strokeWidth={1.5} />
               </motion.span>
               <span className='text-sm font-medium text-pretty'>{t(`promises.${item.key}`)}</span>
             </motion.li>
@@ -590,7 +593,9 @@ export function ContractorLanding() {
       >
         <div className='grid gap-6 lg:grid-cols-[31.8%_minmax(0,1fr)] lg:gap-x-[2.8%]'>
           <div>
-            <h2 className='text-foreground text-lg font-bold tracking-wide uppercase'>{t('criteria.title')}</h2>
+            <h2 className='text-foreground text-2xl font-bold tracking-tight text-balance sm:text-lg sm:tracking-wide sm:text-wrap sm:uppercase'>
+              {t('criteria.title')}
+            </h2>
             <ul className='mt-4 space-y-2'>
               {CRITERIA_ITEMS.map((item) => {
                 const open = openCriterion === item.key
@@ -876,7 +881,9 @@ export function ContractorLanding() {
           không có ô vuông nền xanh nhạt; tiêu đề mỗi thẻ màu xanh, ngắt hai
           dòng. */}
       <section className={PAGE_CONTAINER}>
-        <h2 className='text-foreground text-center text-lg font-bold tracking-wide uppercase'>{t('safety.title')}</h2>
+        <h2 className='text-foreground text-center text-2xl font-bold tracking-tight text-balance sm:text-lg sm:tracking-wide sm:text-wrap sm:uppercase'>
+          {t('safety.title')}
+        </h2>
         {/* Số đo trên Hình S09 (phần nội dung 424px): ba thẻ 14…148, 158…288,
             298…436 → mỗi thẻ 135px (31.8%), khe 10px (**2.36%**, bản trước để
             `gap-4` = 1.1% nên ba thẻ dính nhau hơn ảnh).
@@ -929,7 +936,9 @@ export function ContractorLanding() {
           so sánh", trái R1 (tối đa 3 nhà thầu/dự án). Phần chữ của bản mô tả
           thắng ảnh ở chỗ này. */}
       <section className={PAGE_CONTAINER}>
-        <h2 className='text-foreground text-center text-lg font-bold tracking-wide uppercase'>{t('faq.title')}</h2>
+        <h2 className='text-foreground text-center text-2xl font-bold tracking-tight text-balance sm:text-lg sm:tracking-wide sm:text-wrap sm:uppercase'>
+          {t('faq.title')}
+        </h2>
         <motion.dl
           variants={revealContainerVariants}
           initial={reduceMotion ? false : 'hidden'}
@@ -978,7 +987,7 @@ export function ContractorLanding() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.5, ease: revealEase }}
-          className='bg-primary-strong text-primary-foreground relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl px-7 py-6'
+          className='bg-primary-strong text-primary-foreground relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl px-4 py-4 max-sm:flex-col max-sm:items-stretch max-sm:gap-3 sm:px-7 sm:py-6'
         >
           {/* Mục 11: quầng sáng xanh non hiện chậm ở góc phải — thuần trang trí,
               không đụng tới bố cục hay màu nền hiện có. */}
@@ -990,20 +999,20 @@ export function ContractorLanding() {
             transition={{ duration: 1.4, delay: 0.2, ease: revealEase }}
             className='bg-primary/40 pointer-events-none absolute -top-10 -right-10 size-40 rounded-full blur-3xl'
           />
-          <p className='relative font-semibold text-pretty'>
+          <p className='relative text-sm font-bold text-pretty sm:text-base sm:font-semibold'>
             {currentBrief ? t('cta.resumeTitle', { name: currentBriefName }) : t('cta.title')}
           </p>
           {currentBrief ? (
-            <div className='relative flex flex-wrap items-center gap-2'>
+            <div className='relative flex flex-wrap items-center gap-2 max-sm:flex-col max-sm:items-stretch max-sm:gap-3'>
               <Button
                 variant='outline'
-                className='ring-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent bg-none shadow-none before:hidden after:hidden'
+                className='ring-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent bg-none shadow-none before:hidden after:hidden max-sm:h-11 max-sm:w-full max-sm:rounded-full max-sm:px-8 max-sm:text-base'
                 onClick={openPicker}
               >
                 {t('switchBrief')}
               </Button>
               <Button
-                className='bg-background text-primary-strong hover:bg-background/90 max-w-72 border-0 bg-none shadow-sm'
+                className='bg-background text-primary-strong hover:bg-background/90 max-w-72 border-0 bg-none shadow-sm max-sm:h-11 max-sm:w-full max-sm:max-w-none max-sm:rounded-full max-sm:px-8 max-sm:text-base'
                 onClick={continueBrief}
                 title={t('continueWith', { name: currentBriefName })}
               >
@@ -1012,7 +1021,7 @@ export function ContractorLanding() {
             </div>
           ) : (
             <Button
-              className='bg-background text-primary-strong hover:bg-background/90 relative border-0 bg-none shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md'
+              className='bg-background text-primary-strong hover:bg-background/90 relative border-0 bg-none shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md max-sm:h-11 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
               onClick={startBrief}
               disabled={createBrief.isPending}
             >
@@ -1041,7 +1050,7 @@ export function ContractorLanding() {
           className='group bg-brand-orange-soft/70 text-muted-foreground flex flex-wrap items-center justify-between gap-3 rounded-2xl px-7 py-4 text-sm transition-colors duration-300 hover:bg-brand-orange-soft'
         >
           <span className='inline-flex items-center gap-2'>
-            <Handshake className='text-brand-orange size-4' />
+            <Handshake className='text-brand-orange size-6 shrink-0 max-sm:size-5' strokeWidth={1.75} />
             {t('partner.text')}
           </span>
           <button

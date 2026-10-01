@@ -48,8 +48,8 @@ function splitLeadingNumber(value: string): { number: number; suffix: string } |
  * `::before` căn giữa trục dọc, ô đầu ẩn đi. Màn hẹp xếp lưới 2 cột, kẻ ô bằng
  * khe 1px.
  *
- * ★ Số đếm lên từ 0 đúng một lần khi cuộn tới (mục II.2); rê ô nổi vòng tròn
- * xanh nhạt sau icon; bấm ô có đích thì cuộn mượt + sáng viền đích một nhịp.
+ * ★ Số đếm lên từ 0 đúng một lần khi cuộn tới (mục II.2); rê ô đổi màu icon + chữ,
+ * chữ nhỏ đậm hơn; bấm ô có đích thì cuộn mượt + sáng viền đích một nhịp.
  */
 export function HomeStats() {
   const t = useTranslations('landing.stats')
@@ -63,9 +63,9 @@ export function HomeStats() {
       transition={reduceMotion ? { duration: 0 } : { duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
       className='relative z-10 mx-auto -mt-9.5 -mb-9.5 w-full max-w-[90rem] px-4 motion-reduce:transform-none lg:px-8'
     >
-      {/* Điện thoại: lưới 2 cột (góp ý BuildX — 5 dòng dài nối nhau khó đọc), ô
-          cuối chiếm cả hàng; kẻ ô bằng khe 1px trên nền `border`. Từ `lg`: 1 hàng 5 ô. */}
-      <ul className='bg-border grid grid-cols-2 gap-px overflow-hidden rounded-2xl border shadow-lg lg:grid-cols-5 lg:gap-0 lg:bg-card'>
+      {/* Điện thoại: 1 cột dọc, mỗi ô một hàng (icon trái · chữ phải) theo ảnh tham chiếu; ô
+          kẻ hàng bằng `border-t` từ ô thứ hai. Từ `lg`: 1 hàng 5 ô. */}
+      <ul className='bg-card grid grid-cols-1 overflow-hidden rounded-2xl border shadow-lg lg:grid-cols-5'>
         {HOME_STATS.map((stat) => {
           const Icon = STAT_ICON[stat]
           const target = STAT_TARGET[stat]
@@ -100,7 +100,7 @@ function StatCell({ Icon, label, rawValue, parsed, onActivate }: StatCellProps) 
   const { ref, display } = useCountUp(parsed?.number ?? 0, { duration: 1.45, delay: 0.1 })
 
   return (
-    <li className='bg-card relative last:col-span-2 lg:last:col-span-1 lg:before:bg-border lg:before:absolute lg:before:top-1/2 lg:before:left-0 lg:before:h-9 lg:before:w-px lg:before:-translate-y-1/2 lg:before:content-[""] lg:first:before:hidden'>
+    <li className='bg-card relative max-lg:border-t max-lg:first:border-t-0 lg:before:bg-border lg:before:absolute lg:before:top-1/2 lg:before:left-0 lg:before:h-9 lg:before:w-px lg:before:-translate-y-1/2 lg:before:content-[""] lg:first:before:hidden'>
       <div
         role={onActivate ? 'button' : undefined}
         tabIndex={onActivate ? 0 : undefined}
@@ -120,9 +120,9 @@ function StatCell({ Icon, label, rawValue, parsed, onActivate }: StatCellProps) 
           onActivate && 'cursor-pointer'
         )}
       >
-        {/* Icon để TRẦN theo ảnh mockup — không ô nền bo góc; rê ô thì mới nổi
-            vòng tròn xanh nhạt sau lưng icon. */}
-        <span className='group-hover:bg-accent animate-in fade-in-0 slide-in-from-bottom-2 -m-1.5 flex shrink-0 items-center justify-center rounded-full p-1.5 duration-700 ease-out motion-reduce:animate-none'>
+        {/* Icon để TRẦN theo ảnh mockup — không ô nền bo góc; rê ô thì không còn nền
+            nào hiện sau lưng icon. */}
+        <span className='animate-in fade-in-0 slide-in-from-bottom-2 -m-1.5 flex shrink-0 items-center justify-center rounded-full p-1.5 duration-700 ease-out motion-reduce:animate-none'>
           <Icon
             className='text-primary group-hover:text-brand-orange size-6 shrink-0 transition-colors'
             strokeWidth={1.75}
@@ -132,7 +132,7 @@ function StatCell({ Icon, label, rawValue, parsed, onActivate }: StatCellProps) 
           <span className='text-primary-strong group-hover:text-brand-orange animate-in fade-in-0 slide-in-from-bottom-2 text-[0.9375rem] font-bold tabular-nums transition-colors duration-700 ease-out motion-reduce:animate-none'>
             {parsed ? `${display}${parsed.suffix}` : rawValue}
           </span>
-          <span className='text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both text-xs text-pretty delay-100 duration-700 ease-out motion-reduce:animate-none'>
+          <span className='text-muted-foreground group-hover:text-foreground animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both text-xs text-pretty transition-colors group-hover:font-medium delay-100 duration-700 ease-out motion-reduce:animate-none'>
             {label}
           </span>
         </span>

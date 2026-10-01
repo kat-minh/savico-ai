@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  ArrowLeft,
   ArrowRight,
   Armchair,
   BrickWall,
@@ -571,7 +570,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
 
   if (isPending) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:py-8 lg:px-8'>
         <Skeleton className='h-[36rem] rounded-2xl' />
       </div>
     )
@@ -585,24 +584,16 @@ export function BriefForm({ projectId }: BriefFormProps) {
       initial={reduceMotion ? false : returningToGroup ? { opacity: 0, x: -32 } : { opacity: 0, y: 22 }}
       animate={pageTransition === 'back' ? { opacity: 0, x: reduceMotion ? 0 : 36 } : { opacity: 1, x: 0, y: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
     >
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className='flex flex-wrap items-center gap-3'
+        className='flex items-center gap-3'
       >
-        <button
-          type='button'
-          data-brief-navigation
-          onClick={requestBack}
-          // Hình S10: link "Quay lại lựa chọn" màu XANH thương hiệu, không phải chữ mờ.
-          className='text-primary-strong hover:text-primary inline-flex items-center gap-1.5 text-sm font-medium'
-        >
-          <ArrowLeft className='size-4' />
-          {t('back')}
-        </button>
+        {/* Không còn link "Quay lại lựa chọn": nút X bên phải đã làm đúng việc đó, và
+            bỏ link đi thì nhãn miễn phí + nút X nằm gọn trên MỘT hàng, kể cả trên mobile. */}
         <motion.span
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -1605,20 +1596,31 @@ export function BriefSteps({
   animateDoneCheck?: boolean
 }) {
   const t = useTranslations('contractors.brief.steps')
+  // Dòng trạng thái dưới tên nấc dùng chung bản dịch với stepper của luồng tạo dự án.
+  const tStatus = useTranslations('design.steps.status')
   const steps = [t('one'), t('two')]
 
+  // Cùng khung với `StepProgress` của luồng tạo dự án: vòng tròn TRÊN, nhãn + trạng
+  // thái DƯỚI, các nấc chia đều chiều rộng, đường nối chạy qua tâm hai vòng.
   return (
-    <ol className='bg-card mx-auto flex w-[76.4%] min-w-0 items-center rounded-2xl border py-3 pr-[12%] pl-[13.1%]'>
+    <ol className='bg-card relative flex w-full min-w-0 items-start rounded-2xl border px-4 py-4 shadow-sm sm:px-6'>
       {steps.map((label, index) => {
         const step = index + 1
         const done = step < current
         const active = step === current
         return (
-          <li key={label} className='contents'>
-            {/* Đường nối ăn hết chỗ trống giữa hai nấc — vệt xanh phủ lên trên
-                là lớp PHỦ THÊM, đường nối xám gốc vẫn nguyên vẹn bên dưới. */}
+          <li
+            key={label}
+            style={{ zIndex: steps.length - index }}
+            className='relative flex min-w-0 flex-1 flex-col items-center gap-1.5'
+          >
+            {/* Đường nối vẽ bằng nấc SAU, kéo từ tâm nấc trước sang tâm nấc này; vệt
+                xanh phủ lên là lớp PHỦ THÊM, đường xám gốc vẫn nguyên vẹn bên dưới. */}
             {index > 0 ? (
-              <span aria-hidden className='bg-border relative mx-[2.4%] h-0.5 flex-1 overflow-hidden rounded-full'>
+              <span
+                aria-hidden
+                className='bg-border absolute top-[1.125rem] -left-1/2 z-0 h-0.5 w-full overflow-hidden rounded-full'
+              >
                 {typeof progress === 'number' ? (
                   <motion.span
                     initial={false}
@@ -1630,37 +1632,41 @@ export function BriefSteps({
               </span>
             ) : null}
 
-            <span className='flex min-w-0 shrink-0 items-center gap-2'>
-              <span
-                aria-current={active ? 'step' : undefined}
-                className={cn(
-                  'flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
-                  done || active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground border'
-                )}
-              >
-                {done ? (
-                  animateDoneCheck ? (
-                    <motion.span
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.15 * step }}
-                    >
-                      <Check className='size-4' strokeWidth={3} />
-                    </motion.span>
-                  ) : (
-                    <Check className='size-4' strokeWidth={3} />
-                  )
+            <span
+              aria-current={active ? 'step' : undefined}
+              className={cn(
+                'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors',
+                done || active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground border'
+              )}
+            >
+              {done ? (
+                animateDoneCheck ? (
+                  <motion.span
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.15 * step }}
+                  >
+                    <Check className='size-4.5' />
+                  </motion.span>
                 ) : (
-                  step
-                )}
-              </span>
+                  <Check className='size-4.5' />
+                )
+              ) : (
+                step
+              )}
+            </span>
+
+            <span className='min-w-0 px-2 text-center'>
               <span
                 className={cn(
-                  'truncate text-sm',
-                  active ? 'text-foreground font-semibold' : done ? 'text-foreground' : 'text-muted-foreground'
+                  'block truncate text-sm font-semibold',
+                  active ? 'text-primary-strong' : done ? 'text-foreground' : 'text-muted-foreground'
                 )}
               >
                 {label}
+              </span>
+              <span className='text-muted-foreground block truncate text-xs'>
+                {tStatus(done ? 'done' : active ? 'current' : 'pending')}
               </span>
             </span>
           </li>

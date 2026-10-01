@@ -392,10 +392,10 @@ function ActionButtons({ article, onCreateProject, compact = false }: ArticleAct
         whileTap={reduceMotion ? undefined : { y: 0, scale: 0.995 }}
         transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          'inline-flex min-w-0 items-center justify-center gap-2 bg-primary-strong font-bold whitespace-nowrap text-white transition-[background-color,box-shadow] duration-200 ease-out will-change-transform hover:bg-primary-strong',
+          'brand-green-button inline-flex min-w-0 items-center justify-center gap-2 font-bold whitespace-nowrap will-change-transform',
           compact
-            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] shadow-[0_5px_12px_rgba(42,117,63,.14)] hover:shadow-[0_8px_16px_rgba(42,117,63,.18)] max-[899px]:w-full'
-            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px] shadow-[0_8px_18px_rgba(42,117,63,.18)] hover:shadow-[0_11px_22px_rgba(42,117,63,.2)]'
+            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] max-[899px]:w-full'
+            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px]'
         )}
       >
         {t('create')}

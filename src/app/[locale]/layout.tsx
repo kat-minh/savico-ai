@@ -131,8 +131,11 @@ export default async function LocaleLayout({
   // Enable static rendering for this locale segment.
   setRequestLocale(locale)
 
+  // `data-scroll-behavior` trên <html>: `globals.css` bật `scroll-behavior: smooth` cho cả trang, nên
+  // khi đổi trang Next cuộn về đầu bằng hiệu ứng trượt chậm từ chỗ đang đứng. Cờ này bảo Next tạm tắt
+  // smooth đúng lúc chuyển route → nhảy thẳng lên đầu trang; cuộn neo / nút cuộn vẫn mượt.
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-scroll-behavior='smooth' suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: PRICING_SCROLL_RESTORE_SCRIPT }} />
       </head>

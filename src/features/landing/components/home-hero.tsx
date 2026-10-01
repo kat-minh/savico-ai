@@ -146,7 +146,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
             initial={{ opacity: skip ? 1 : 0, y: skip ? 0 : 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={seq(0)}
-            className='text-primary text-xs font-semibold tracking-[0.16em] uppercase'
+            className='text-brand-orange text-xs font-semibold tracking-[0.16em] uppercase'
           >
             {t('eyebrow')}
           </motion.p>
@@ -173,7 +173,7 @@ export function HomeHero({ onCreateProject, onWatchIntro, resumeProject }: HomeH
                 transition={seq(0.9, 0.9)}
                 style={{
                   backgroundImage:
-                    'linear-gradient(to right, var(--color-primary-strong) 50%, color-mix(in oklab, var(--color-foreground) 35%, transparent) 50%)',
+                    'linear-gradient(to right, var(--color-brand-orange) 50%, color-mix(in oklab, var(--color-foreground) 35%, transparent) 50%)',
                   backgroundSize: '200% 100%'
                 }}
                 className='block bg-clip-text text-balance text-transparent lg:text-wrap lg:whitespace-nowrap'

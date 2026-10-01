@@ -200,7 +200,7 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
             ? { duration: 0.35, ease: revealEase }
             : { duration: 0 }
       }
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5 lg:py-8'
     >
       <ProjectContextBar brief={brief} />
 

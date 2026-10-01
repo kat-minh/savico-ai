@@ -101,7 +101,7 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
   }
 
   return (
-    <div className='mx-auto w-full max-w-4xl px-4 py-12 lg:px-8 lg:py-16'>
+    <div className='mx-auto w-full max-w-4xl px-4 py-5 lg:px-8 lg:py-16'>
       <article className='rounded-2xl border bg-white px-6 py-10 shadow-sm sm:px-12' style={{ color: `#${base.c}` }}>
         {groups.map((group, i) => {
           if (group.kind === 'list') {

@@ -60,7 +60,7 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
   return (
     <section className='brand-band'>
       <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-        <header className='mb-8 flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
+        <header className='mb-4 flex flex-wrap items-start justify-between gap-x-10 gap-y-3 lg:mb-8'>
           <div className='space-y-2'>
             {/* Cùng khuôn với "Hướng dẫn sử dụng": tiêu đề + một dòng mô tả, không có dòng nhãn. */}
             <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('titleMobile')}</h2>
@@ -71,7 +71,7 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
 
           <Link
             href={ROUTES.CONSULT}
-            className='inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline'
+            className='hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline'
           >
             {t('viewAll')}
             <ChevronRight className='size-4 lg:hidden' />

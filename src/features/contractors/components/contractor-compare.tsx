@@ -190,7 +190,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
     <motion.div
       animate={leavingBack ? { opacity: 0, x: 20 } : { opacity: 1, x: 0 }}
       transition={{ duration: 0.18, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5 lg:py-8'
     >
       {preview ? null : <ProjectContextBar brief={brief} />}
 

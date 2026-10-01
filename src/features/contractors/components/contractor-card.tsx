@@ -165,7 +165,7 @@ export function ContractorCard({
       <span
         aria-hidden
         className={cn(
-          'border-primary pointer-events-none absolute -inset-px rounded-[inherit] border-l-4 opacity-0 transition-opacity',
+          'bg-primary pointer-events-none absolute inset-y-3 left-0 w-1 rounded-r-full opacity-0 transition-opacity',
           compared && 'opacity-100'
         )}
       />
@@ -233,8 +233,8 @@ export function ContractorCard({
 
         {/* Vạch ngăn dọc giữa các ô, vạch ngang giữa hai hàng — `divide-*` lo cả
             hai, khỏi phải tự đặt border cho từng ô. */}
-        <div className='divide-border mt-3 grid divide-y sm:grid-cols-2 lg:grid-cols-4'>
-          <div className='divide-border grid divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4 lg:grid-cols-4'>
+        <div className='divide-border mt-3 grid grid-cols-[minmax(0,1fr)] divide-y sm:grid-cols-2 lg:grid-cols-4'>
+          <div className='divide-border grid grid-cols-[minmax(0,1fr)] divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4 lg:grid-cols-4'>
             {facts.map((fact) => (
               <Fact
                 key={fact.key}
@@ -247,7 +247,7 @@ export function ContractorCard({
             ))}
           </div>
 
-          <div className='divide-border grid divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4'>
+          <div className='divide-border grid grid-cols-[minmax(0,1fr)] divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4'>
             <Fact
               icon={Clock}
               value={

@@ -197,7 +197,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
   // khung hình với phần còn lại, không nhú ra sau một nhịp (mục 1, mục 4).
   if (isPending || !data || intro === 'checking' || invitationsPending) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 py-5 lg:py-8'>
         <Skeleton className='mx-auto h-96 max-w-[54rem] rounded-2xl' />
       </div>
     )
@@ -232,7 +232,7 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
     <motion.div
       animate={leaving ? { opacity: 0, x: leaving === 'forward' ? -20 : 20 } : { opacity: 1, x: 0 }}
       transition={{ duration: 0.18, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 py-5 lg:py-8'
     >
       {/* Bản mô tả S17 vẫn giữ thanh ngữ cảnh dự án ở đầu trang như S15–S18. */}
       <ProjectContextBar brief={brief} />

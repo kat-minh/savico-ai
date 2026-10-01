@@ -34,7 +34,7 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-2xl px-4 py-12 lg:px-8'>
+      <div className='mx-auto w-full max-w-2xl px-4 py-5 lg:py-12 lg:px-8'>
         <Skeleton className='h-80 rounded-2xl' />
       </div>
     )
@@ -42,7 +42,7 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
 
   return (
     // Hình S07: cột nội dung hẹp, canh giữa.
-    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
       <CheckoutSteps current='payment' error />
 
       <div className='space-y-3 text-center'>
