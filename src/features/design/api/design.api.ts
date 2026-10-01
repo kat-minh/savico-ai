@@ -5,6 +5,9 @@ import { mockDesignApi } from './design.mock'
 export interface CreateProjectPayload {
   name: string
   description?: string
+  /** Vị trí công trình (WGS84): BE bắt buộc cả hai khi tạo dự toán (TDD-PROJ-001). */
+  latitude?: number
+  longitude?: number
 }
 
 /**

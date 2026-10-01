@@ -1803,7 +1803,8 @@
         "noResult": "Không tìm thấy địa chỉ phù hợp",
         "resolveFailed": "Không lấy được vị trí của địa chỉ này, thử chọn lại hoặc bấm lên bản đồ.",
         "mapHint": "Chọn một địa chỉ trong gợi ý, bản đồ sẽ hiện vị trí để bạn kiểm tra và kéo ghim cho đúng.",
-        "coordinates": "Vị trí: {lat}, {lng} — kéo ghim để chỉnh cho đúng."
+        "coordinates": "Vị trí: {lat}, {lng} — kéo ghim để chỉnh cho đúng.",
+        "unconfirmed": "Chọn một dòng trong gợi ý để xác nhận địa chỉ này và có vị trí trên bản đồ."
       },
       "buildingType": {
         "label": "Loại công trình",
@@ -1869,7 +1870,8 @@
           "hasTum": "tum",
           "architectureStyleId": "kiểu kiến trúc",
           "interiorStyleId": "phong cách nội thất",
-          "addressDetail": "số nhà, đường"
+          "addressDetail": "số nhà, đường",
+          "location": "vị trí trên bản đồ (chọn một dòng gợi ý)"
         }
       }
     },

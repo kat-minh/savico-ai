@@ -1803,7 +1803,8 @@
         "noResult": "No matching address",
         "resolveFailed": "Could not get this address location. Pick again or click the map.",
         "mapHint": "Pick an address from the suggestions and the map will show its location for you to check and adjust.",
-        "coordinates": "Location: {lat}, {lng}. Drag the pin to adjust."
+        "coordinates": "Location: {lat}, {lng}. Drag the pin to adjust.",
+        "unconfirmed": "Pick a suggestion to confirm this address and place it on the map."
       },
       "buildingType": {
         "label": "Building type",
@@ -1869,7 +1870,8 @@
           "hasTum": "attic",
           "architectureStyleId": "architecture style",
           "interiorStyleId": "interior style",
-          "addressDetail": "house number, street"
+          "addressDetail": "house number, street",
+          "location": "map location (pick a suggestion)"
         }
       }
     },

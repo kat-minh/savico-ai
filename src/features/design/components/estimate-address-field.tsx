@@ -2,83 +2,77 @@
 
 import { Loader2, MapPin } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { FieldLabel, LocationMap } from '@/shared/components/common'
-import { geocodeApi } from '@/shared/geocode'
 import { Input } from '@/shared/components/ui/input'
 import { cn } from '@/shared/lib/utils'
 import { mapsApi } from '../api/maps.api'
 import { useEstimateAddressSearch } from '../hooks/use-address-search'
-import { useEstimateLocation } from '../hooks/use-estimate-location'
 import { addressWithHouseNumber } from '../services/address.logic'
 
 interface EstimateAddressFieldProps {
-  projectId: string
-  /** Số nhà, đường đang nhập (trường `addressDetail` của đầu vào dự toán). */
+  /** Số nhà, đường ĐÃ XÁC NHẬN (trường `addressDetail` của đầu vào dự toán). */
   value: string
-  onChange: (value: string) => void
+  /** Vị trí đã xác nhận; chưa có thì chưa hiện bản đồ. */
+  latitude: number | null
+  longitude: number | null
   /** Tên phường/xã + tỉnh/thành đã chọn: ghép vào lúc tìm để ưu tiên kết quả đúng khu vực. */
   context: string
-  /** Địa chỉ "phường/xã, tỉnh/thành" của vị trí vừa chọn / kéo ghim tới: form đổi ô tỉnh và phường theo đó. */
-  onRegion?: (address: string) => void
+  /** Khách chọn một dòng gợi ý (đã có toạ độ): form ghi địa chỉ + tỉnh + phường + toạ độ cùng lúc. */
+  onPick: (choice: { text: string; latitude: number; longitude: number; region: string }) => Promise<void>
+  /** Ghim được kéo / bản đồ được bấm. */
+  onPinMove: (latitude: number, longitude: number) => void
+  /** Ô đang có chữ gõ tay chưa được xác nhận bằng một gợi ý (form không cho sang bước sau). */
+  onUnconfirmedChange?: (unconfirmed: boolean) => void
   invalid?: boolean
 }
 
 /**
  * Số nhà, đường của Bước 1 kèm gợi ý địa chỉ (BE `/maps/search`) và bản đồ có ghim.
  *
- * Chọn một gợi ý → tra toạ độ (`/maps/place`), điền số nhà + đường, bản đồ bay tới đó và đặt ghim. Ghim kéo được, bấm
- * lên bản đồ cũng đặt lại ghim, để chỉnh cho đúng chỗ. Gõ tay sửa địa chỉ thì ghim cũ bị bỏ (không còn đúng).
+ * BE bắt buộc vĩ độ/kinh độ và chỉ tin cặp toạ độ lấy từ bản đồ cho đúng địa chỉ đó, nên chữ gõ tay KHÔNG tự đi vào dự
+ * toán: chỉ khi chọn một gợi ý (hoặc kéo ghim) thì địa chỉ mới được ghi, cùng toạ độ. Gõ tay chưa chọn gợi ý thì ô báo
+ * "chọn một dòng gợi ý". Bản đồ chỉ hiện sau khi có vị trí.
  * Danh sách gợi ý nằm trong dòng chảy (không vẽ tuyệt đối) để khỏi bị thẻ nhóm cắt mất.
  */
 export function EstimateAddressField({
-  projectId,
   value,
-  onChange,
+  latitude,
+  longitude,
   context,
-  onRegion,
+  onPick,
+  onPinMove,
+  onUnconfirmedChange,
   invalid
 }: EstimateAddressFieldProps) {
   const t = useTranslations('design.inputApi')
-  const { location, setLocation } = useEstimateLocation(projectId)
+  // `null` = ô đang hiện đúng địa chỉ đã xác nhận; chuỗi = chữ gõ tay chưa xác nhận.
+  const [typed, setTyped] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [resolving, setResolving] = useState(false)
   const [resolveFailed, setResolveFailed] = useState(false)
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const text = typed ?? value
+  const unconfirmed = typed !== null && typed.trim() !== value.trim()
   // Chỉ tìm gợi ý khi danh sách đang mở (đang gõ): ô đổi chữ do kéo ghim thì không tốn thêm một lượt tìm.
-  const { suggestions, isSearching, failed } = useEstimateAddressSearch(open ? value : '', context)
-  // Chỉ kết quả của lần kéo MỚI NHẤT được ghi vào ô: kéo liên tiếp thì các câu trả lời về sau vẫn có thể đến trước.
-  const reverseSeq = useRef(0)
+  const { suggestions, isSearching, failed } = useEstimateAddressSearch(open ? text : '', context)
 
-  /** Ghim được kéo / bấm lên bản đồ: đổi vị trí rồi đổi ô số nhà, đường theo địa chỉ tại ghim. */
-  async function movePin(latitude: number, longitude: number) {
-    setLocation({ latitude, longitude })
-    const seq = ++reverseSeq.current
-    try {
-      const found = await geocodeApi.reverse(latitude, longitude)
-      // Không có địa chỉ quanh ghim thì giữ nguyên chữ đang có thay vì xoá trắng.
-      if (seq === reverseSeq.current && found) {
-        if (found.name) onChange(found.name)
-        if (found.address) onRegion?.(found.address)
-      }
-    } catch {
-      // Tra địa chỉ lỗi: ghim vẫn đúng chỗ khách chỉ, chỉ là ô chữ không đổi theo.
-    }
-  }
+  useEffect(() => {
+    onUnconfirmedChange?.(unconfirmed)
+  }, [onUnconfirmedChange, unconfirmed])
 
   async function pick(refId: string, name: string, display: string, region: string) {
     if (blurTimer.current) clearTimeout(blurTimer.current)
     // Giữ số nhà khách đã gõ: gợi ý của VietMap thường chỉ có tên đường.
-    onChange(addressWithHouseNumber(value, name || display))
-    onRegion?.(region)
-    reverseSeq.current++
+    const chosen = addressWithHouseNumber(text, name || display)
     setOpen(false)
     setResolving(true)
     setResolveFailed(false)
     try {
       const place = await mapsApi.place(refId)
-      setLocation({ latitude: place.latitude, longitude: place.longitude })
+      setTyped(null)
+      await onPick({ text: chosen, latitude: place.latitude, longitude: place.longitude, region })
     } catch {
       setResolveFailed(true)
     } finally {
@@ -94,13 +88,12 @@ export function EstimateAddressField({
       <div className='relative'>
         <Input
           id='address-detail'
-          value={value}
+          value={text}
           placeholder={t('address.placeholder')}
-          className={cn(invalid && 'border-destructive')}
+          className={cn((invalid || unconfirmed) && 'border-destructive')}
           autoComplete='off'
           onChange={(event) => {
-            onChange(event.target.value)
-            setLocation(null)
+            setTyped(event.target.value)
             setResolveFailed(false)
             setOpen(true)
           }}
@@ -114,7 +107,7 @@ export function EstimateAddressField({
         ) : null}
       </div>
 
-      {open && value.trim().length >= 2 ? (
+      {open && text.trim().length >= 2 ? (
         <div
           className='bg-popover overflow-hidden rounded-lg border shadow-xs'
           // Bấm xuống một dòng không được làm ô nhập mất focus: mất focus là danh sách bị gỡ trước khi click kịp tới nút.
@@ -149,25 +142,20 @@ export function EstimateAddressField({
       ) : null}
 
       {resolveFailed ? <p className='text-destructive text-xs'>{t('address.resolveFailed')}</p> : null}
+      {unconfirmed && !open ? <p className='text-destructive text-xs'>{t('address.unconfirmed')}</p> : null}
 
-      {/* Chưa chọn địa chỉ cụ thể thì chưa có gì để chỉ trên bản đồ: chỉ hiện sau khi có vị trí. */}
-      {location ? (
-        <>
-          <LocationMap
-            latitude={location.latitude}
-            longitude={location.longitude}
-            onChange={(latitude, longitude) => void movePin(latitude, longitude)}
-          />
-          <p className='text-muted-foreground text-xs'>
-            {t('address.coordinates', {
-              lat: location.latitude.toFixed(6),
-              lng: location.longitude.toFixed(6)
-            })}
-          </p>
-        </>
-      ) : (
-        <p className='text-muted-foreground text-xs'>{t('address.mapHint')}</p>
-      )}
+      <div id='field-location' className='space-y-2'>
+        {latitude !== null && longitude !== null ? (
+          <>
+            <LocationMap latitude={latitude} longitude={longitude} onChange={onPinMove} />
+            <p className='text-muted-foreground text-xs'>
+              {t('address.coordinates', { lat: latitude.toFixed(6), lng: longitude.toFixed(6) })}
+            </p>
+          </>
+        ) : (
+          <p className='text-muted-foreground text-xs'>{t('address.mapHint')}</p>
+        )}
+      </div>
     </div>
   )
 }

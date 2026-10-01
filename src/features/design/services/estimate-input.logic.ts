@@ -33,6 +33,13 @@ export interface EstimateInputBody {
   architectureStyleId: string | null
   interiorStyleId: string | null
   inputImageUrl: string | null
+  /**
+   * Vị trí công trình (WGS84, độ). BE đã thêm hai trường bắt buộc này (TDD-PROJ-001, 01/10/2026) nhưng có thể chưa triển
+   * khai: chỉ khi `GET` trả khoá `latitude` (xem {@link supportsCoordinates}) thì mới gửi lên, nếu không BE cũ có thể từ
+   * chối tên lạ trong `changedFields`.
+   */
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export type InputField = keyof EstimateInputBody
@@ -69,7 +76,17 @@ export interface EstimateInputDraft {
   architectureStyleId: string | null
   interiorStyleId: string | null
   inputImageUrl: string | null
+  latitude: number | null
+  longitude: number | null
 }
+
+/** BE đã lưu toạ độ cho dự toán này? Bản mới luôn trả khoá `latitude` (số, bắt buộc); bản cũ không có khoá. */
+export function supportsCoordinates(input: object | null | undefined): boolean {
+  return Boolean(input) && 'latitude' in (input as object)
+}
+
+const finiteOrNull = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isFinite(value) ? value : null
 
 /* ===========================================================================
  * Danh mục (snapshot ghim lúc tạo bản)
@@ -245,14 +262,16 @@ export function draftFromInput(input: Partial<EstimateInputBody> | null | undefi
     hasTum: input?.hasTum ?? null,
     architectureStyleId: input?.architectureStyleId ?? null,
     interiorStyleId: input?.interiorStyleId ?? null,
-    inputImageUrl: input?.inputImageUrl ?? null
+    inputImageUrl: input?.inputImageUrl ?? null,
+    latitude: finiteOrNull(input?.latitude),
+    longitude: finiteOrNull(input?.longitude)
   }
 }
 
 const blankToNull = (value: string): string | null => (value.trim() === '' ? null : value.trim())
 
 /** Bản đang nhập → `input` gửi BE (đủ mọi trường, rỗng = null). Mô tả giữ nội dung gốc, chỉ khoảng trắng thì null. */
-export function inputBody(draft: EstimateInputDraft): EstimateInputBody {
+export function inputBody(draft: EstimateInputDraft, withCoordinates = false): EstimateInputBody {
   return {
     buildingTypeId: draft.buildingTypeId,
     areaM2: blankToNull(draft.areaM2),
@@ -266,7 +285,8 @@ export function inputBody(draft: EstimateInputDraft): EstimateInputBody {
     hasTum: draft.hasTum,
     architectureStyleId: draft.architectureStyleId,
     interiorStyleId: draft.interiorStyleId,
-    inputImageUrl: draft.inputImageUrl
+    inputImageUrl: draft.inputImageUrl,
+    ...(withCoordinates ? { latitude: draft.latitude, longitude: draft.longitude } : {})
   }
 }
 
@@ -290,14 +310,27 @@ export function normalizeSaved(input: Partial<EstimateInputBody> | null | undefi
     hasTum: input?.hasTum ?? null,
     architectureStyleId: input?.architectureStyleId ?? null,
     interiorStyleId: input?.interiorStyleId ?? null,
-    inputImageUrl: input?.inputImageUrl ?? null
+    inputImageUrl: input?.inputImageUrl ?? null,
+    latitude: finiteOrNull(input?.latitude),
+    longitude: finiteOrNull(input?.longitude)
   }
 }
 
 /** Trường nào khác bản đã lưu — chính là `changedFields` (trường ngoài danh sách phải khớp bản đã lưu). */
-export function changedFields(saved: EstimateInputBody, draft: EstimateInputDraft): InputField[] {
+export function changedFields(
+  saved: EstimateInputBody,
+  draft: EstimateInputDraft,
+  withCoordinates = false
+): InputField[] {
   const next = inputBody(draft)
-  return INPUT_FIELDS.filter((field) => !sameValue(field, saved[field], next[field]))
+  const changed = INPUT_FIELDS.filter((field) => !sameValue(field, saved[field], next[field]))
+  if (!withCoordinates) return changed
+
+  // Toạ độ luôn đi THEO CẶP: đổi tỉnh/xã/địa chỉ chi tiết thì phải khai cả hai dù cặp mới bằng cặp cũ (BE không tin
+  // toạ độ nằm trong full input mà không khai báo); chỉ một trong hai đổi cũng khai cả hai.
+  const addressChanged = changed.some((field) => ['provinceCode', 'wardCode', 'addressDetail'].includes(field))
+  const coordinatesChanged = saved.latitude !== draft.latitude || saved.longitude !== draft.longitude
+  return addressChanged || coordinatesChanged ? [...changed, 'latitude', 'longitude'] : changed
 }
 
 function sameValue(field: InputField, a: unknown, b: unknown): boolean {
@@ -335,7 +368,11 @@ export function descriptionLength(value: string): number {
  * trình, địa chỉ (tỉnh + xã + số nhà/đường), gói, và các trường mà loại công trình đang chọn bật (số tầng, tum, mỗi nhóm phong
  * cách). BE trả danh sách chính thức trong `missingFields`; hàm này chỉ để tô đỏ ngay khi nhập.
  */
-export function missingFields(draft: EstimateInputDraft, catalog: EstimateCatalog | undefined): string[] {
+export function missingFields(
+  draft: EstimateInputDraft,
+  catalog: EstimateCatalog | undefined,
+  requireCoordinates = false
+): string[] {
   const missing: string[] = []
   if (!draft.inputImageUrl && draft.description.trim() === '') missing.push('imageOrDescription')
   if (draft.areaM2.trim() === '' || areaProblem(draft.areaM2)) missing.push('areaM2')
@@ -343,6 +380,8 @@ export function missingFields(draft: EstimateInputDraft, catalog: EstimateCatalo
   if (!draft.provinceCode) missing.push('provinceCode')
   if (!draft.wardCode) missing.push('wardCode')
   if (draft.addressDetail.trim() === '') missing.push('addressDetail')
+  // Chưa xác định được vị trí trên bản đồ (BE bắt buộc cả vĩ độ và kinh độ).
+  if (requireCoordinates && (draft.latitude === null || draft.longitude === null)) missing.push('location')
   if (!draft.finishPackage) missing.push('finishPackage')
 
   const type = selectedType(catalog, draft)

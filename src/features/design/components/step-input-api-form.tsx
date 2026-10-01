@@ -1,10 +1,10 @@
 'use client'
 
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, ImagePlus, Loader2, Palette, RefreshCw, X } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 import { Link } from '@/i18n/navigation'
@@ -18,6 +18,8 @@ import { cn } from '@/shared/lib/utils'
 import { acceptAttribute, checkFile, uploadImage } from '@/shared/media'
 import { designKeys } from '../api/design.keys'
 import { estimateInputApi } from '../api/estimate-input.api'
+import { useAddressActions } from '../hooks/use-address-actions'
+import { takeAddressSeed } from '../services/address-seed.storage'
 import { useEstimateInput, type SaveStatus } from '../hooks/use-estimate-input'
 import { startErrorKind, useStartGeneration } from '../hooks/use-start-generation'
 import {
@@ -30,7 +32,6 @@ import {
 } from '../services/estimate-input.logic'
 import { ChoiceCards, type ChoiceOption } from './choice-cards'
 import { EstimateAddressField } from './estimate-address-field'
-import { findByName, parseRegion } from '../services/region.logic'
 
 const MISSING_FIELD_KEYS = [
   'imageOrDescription',
@@ -43,7 +44,8 @@ const MISSING_FIELD_KEYS = [
   'hasTum',
   'architectureStyleId',
   'interiorStyleId',
-  'addressDetail'
+  'addressDetail',
+  'location'
 ] as const
 type MissingFieldKey = (typeof MISSING_FIELD_KEYS)[number]
 
@@ -122,31 +124,23 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
   const tInput = useTranslations('design.input')
   const input = useEstimateInput(projectId)
   const start = useStartGeneration(projectId)
-  const { draft, catalog, provinces, wards, missing } = input
-  const queryClient = useQueryClient()
-
-  /**
-   * Địa chỉ "phường/xã, tỉnh/thành" của vị trí vừa chọn → đổi ô tỉnh và phường theo đó. Khớp theo tên đã chuẩn hoá với
-   * danh sách của BE; không khớp thì giữ lựa chọn cũ. Danh sách phường của tỉnh mới được nạp (và đệm) trước khi chọn.
-   */
-  async function applyRegion(address: string) {
-    const region = parseRegion(address)
-    const provinceList = provinces.data
-    const province = findByName(provinceList?.provinces, region.province)
-    if (!provinceList || !province) return
-    const wardList = await queryClient.fetchQuery({
-      queryKey: [...designKeys.locations(), 'wards', province.code, provinceList.datasetVersion],
-      queryFn: () => estimateInputApi.listWards(province.code, provinceList.datasetVersion),
-      staleTime: 30 * 60 * 1000
-    })
-    const ward = findByName(wardList, region.ward)
-    input.patch({
-      provinceCode: province.code,
-      // Phường không khớp: giữ phường cũ nếu vẫn cùng tỉnh, đổi tỉnh thì bỏ (phường cũ thuộc tỉnh khác).
-      wardCode: ward?.code ?? (draft?.provinceCode === province.code ? (draft.wardCode ?? null) : null),
-      locationDatasetVersion: provinceList.datasetVersion
-    })
-  }
+  const { draft, catalog, provinces, wards } = input
+  const address = useAddressActions(input)
+  // Chữ địa chỉ gõ tay chưa chọn gợi ý: chưa có toạ độ cho nó nên chưa cho sang bước sau.
+  const [addressUnconfirmed, setAddressUnconfirmed] = useState(false)
+  // Địa chỉ đã chọn ở cửa sổ Tạo dự án: ghi vào bản nhập MỘT lần khi bản nhập đã nạp xong và còn trống địa chỉ.
+  const seededRef = useRef(false)
+  const ready = Boolean(input.draft)
+  const emptyAddress = input.draft?.addressDetail === ''
+  useEffect(() => {
+    if (!ready || seededRef.current) return
+    seededRef.current = true
+    if (!emptyAddress) return
+    const seed = takeAddressSeed(projectId)
+    if (seed)
+      void address.pick({ text: seed.text, latitude: seed.latitude, longitude: seed.longitude, region: seed.region })
+  }, [address, emptyAddress, projectId, ready])
+  const missing = addressUnconfirmed ? [...input.missing, 'location'] : input.missing
   const quota = useQuery({
     queryKey: [...designKeys.quota(), 'api'],
     queryFn: () => estimateInputApi.getDesignQuota(),
@@ -371,7 +365,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   <SearchableSelect
                     id='province'
                     value={draft.provinceCode ?? ''}
-                    onValueChange={input.chooseProvince}
+                    onValueChange={(provinceCode) => void address.changeRegion({ provinceCode })}
                     options={(provinces.data?.provinces ?? []).map((province) => ({
                       value: province.code,
                       label: province.name
@@ -388,7 +382,9 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   <SearchableSelect
                     id='ward'
                     value={draft.wardCode ?? ''}
-                    onValueChange={input.chooseWard}
+                    onValueChange={(wardCode) =>
+                      void address.changeRegion({ provinceCode: draft.provinceCode ?? '', wardCode })
+                    }
                     disabled={!draft.provinceCode}
                     options={(wards.data ?? []).map((ward) => ({ value: ward.code, label: ward.name }))}
                     placeholder={
@@ -403,17 +399,19 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                 </div>
 
                 <EstimateAddressField
-                  projectId={projectId}
                   value={draft.addressDetail}
-                  onChange={(addressDetail) => input.patch({ addressDetail })}
+                  latitude={draft.latitude}
+                  longitude={draft.longitude}
                   context={[
                     wards.data?.find((ward) => ward.code === draft.wardCode)?.name,
                     provinces.data?.provinces.find((province) => province.code === draft.provinceCode)?.name
                   ]
                     .filter(Boolean)
                     .join(', ')}
-                  onRegion={(address) => void applyRegion(address)}
-                  invalid={invalid('addressDetail')}
+                  onPick={address.pick}
+                  onPinMove={(latitude, longitude) => void address.movePin(latitude, longitude)}
+                  onUnconfirmedChange={setAddressUnconfirmed}
+                  invalid={invalid('addressDetail') || invalid('location')}
                 />
               </div>
               {provinces.isError ? (

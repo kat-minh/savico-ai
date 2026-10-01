@@ -10,7 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { geocodeApi } from '@/shared/geocode'
 import { useCreateProject } from '../hooks/use-projects'
+import { writeAddressSeed } from '../services/address-seed.storage'
+import { EstimateAddressField } from './estimate-address-field'
 import {
   createProjectSchema,
   PROJECT_DESCRIPTION_MAX_LENGTH,
@@ -87,6 +90,10 @@ export function CreateProjectDialog() {
   const dragStartRef = useRef<number | null>(null)
   const [dragY, setDragY] = useState(0)
   const [dragging, setDragging] = useState(false)
+  // Địa chỉ + vị trí công trình: BE bắt buộc toạ độ ngay khi tạo dự toán, lấy từ bản đồ trước khi bấm Tạo.
+  const [place, setPlace] = useState<{ text: string; region: string; latitude: number; longitude: number } | null>(null)
+  const [addressUnconfirmed, setAddressUnconfirmed] = useState(false)
+  const [addressError, setAddressError] = useState(false)
   const schema = useMemo(
     () =>
       createProjectSchema({
@@ -102,6 +109,7 @@ export function CreateProjectDialog() {
   })
 
   const createProject = useCreateProject((projectId) => {
+    if (place) writeAddressSeed(projectId, place)
     const sourceTemplate = consumeProjectTemplateSeed()
     if (sourceTemplate) {
       const buildingType = isBuildingType(sourceTemplate.buildingType) ? sourceTemplate.buildingType : undefined
@@ -123,13 +131,24 @@ export function CreateProjectDialog() {
     window.setTimeout(() => {
       close()
       form.reset()
+      setPlace(null)
+      setAddressError(false)
       setExiting(false)
       router.push(designInputRoute(projectId))
     }, 360)
   })
 
   function onSubmit(values: CreateProjectFormValues) {
-    createProject.mutate({ name: values.name, description: values.description || undefined })
+    if (!place || addressUnconfirmed) {
+      setAddressError(true)
+      return
+    }
+    createProject.mutate({
+      name: values.name,
+      description: values.description || undefined,
+      latitude: place.latitude,
+      longitude: place.longitude
+    })
   }
 
   function onInvalid() {
@@ -161,6 +180,8 @@ export function CreateProjectDialog() {
     clearProjectTemplateSeed()
     close()
     form.reset()
+    setPlace(null)
+    setAddressError(false)
     setDragY(0)
     setDragging(false)
   }
@@ -209,7 +230,7 @@ export function CreateProjectDialog() {
           }
           setDragY(0)
         }}
-        className='sm:max-w-md'
+        className='sm:max-h-[92vh] sm:max-w-lg sm:overflow-y-auto'
       >
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
@@ -282,6 +303,44 @@ export function CreateProjectDialog() {
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+
+              <EstimateAddressField
+                value={place?.text ?? ''}
+                latitude={place?.latitude ?? null}
+                longitude={place?.longitude ?? null}
+                context=''
+                invalid={addressError && (!place || addressUnconfirmed)}
+                onPick={async (choice) => {
+                  setPlace({
+                    text: choice.text,
+                    region: choice.region,
+                    latitude: choice.latitude,
+                    longitude: choice.longitude
+                  })
+                  setAddressError(false)
+                }}
+                onPinMove={(latitude, longitude) => {
+                  // Kéo ghim: dời ngay, rồi đổi chữ địa chỉ theo ghim (không có địa chỉ quanh ghim thì giữ chữ cũ).
+                  setPlace((current) => ({
+                    text: current?.text ?? '',
+                    region: current?.region ?? '',
+                    latitude,
+                    longitude
+                  }))
+                  void geocodeApi
+                    .reverse(latitude, longitude)
+                    .then((found) => {
+                      if (!found?.name) return
+                      setPlace((current) =>
+                        current?.latitude === latitude && current.longitude === longitude
+                          ? { ...current, text: found.name, region: found.address }
+                          : current
+                      )
+                    })
+                    .catch(() => undefined)
+                }}
+                onUnconfirmedChange={setAddressUnconfirmed}
               />
 
               {/* Hình 03: hai nút bằng nhau, chia đôi bề ngang — "Tạo dự án" là

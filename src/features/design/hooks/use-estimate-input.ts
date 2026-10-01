@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { isApiError } from '@/shared/lib/api'
 import { estimateInputApi, type EstimateDetail } from '../api/estimate-input.api'
 import { designKeys } from '../api/design.keys'
+import { readStoredLocation, writeStoredLocation } from '../services/estimate-location.storage'
 import {
   applyBuildingType,
   changedFields,
@@ -13,6 +14,7 @@ import {
   inputBody,
   missingFields,
   normalizeSaved,
+  supportsCoordinates,
   type EstimateInputBody,
   type EstimateInputDraft
 } from '../services/estimate-input.logic'
@@ -83,16 +85,32 @@ export function useEstimateInput(projectId: string) {
   const timerRef = useRef<number | null>(null)
   const chainRef = useRef<Promise<boolean>>(Promise.resolve(true))
   const deniedRef = useRef(false)
+  // BE đã lưu toạ độ cho dự toán này? Quyết định có gửi `latitude`/`longitude` (và khai trong `changedFields`) hay không.
+  const coordinatesRef = useRef(false)
+  const [coordinatesSupported, setCoordinatesSupported] = useState(false)
+  // Đang chờ kết quả bản đồ (tìm toạ độ / tra địa chỉ): KHÔNG lưu, để khỏi gửi địa chỉ mới kèm toạ độ cũ (TDD-PROJ-001).
+  const holdRef = useRef(0)
+  const pendingSaveRef = useRef(false)
+  const holdWaitersRef = useRef<(() => void)[]>([])
 
   // Nạp bản đã lưu vào form MỘT lần; sau đó form là nguồn sự thật, server chỉ xác nhận.
   useEffect(() => {
     if (!detail.data || draftRef.current) return
+    const supported = supportsCoordinates(detail.data.input)
+    coordinatesRef.current = supported
+    setCoordinatesSupported(supported)
     const initial = draftFromInput(detail.data.input)
+    if (!supported) {
+      // BE chưa lưu toạ độ: lấy lại vị trí đã chọn ở trình duyệt này.
+      const stored = readStoredLocation(projectId)
+      initial.latitude = stored?.latitude ?? null
+      initial.longitude = stored?.longitude ?? null
+    }
     draftRef.current = initial
     savedRef.current = normalizeSaved(detail.data.input)
     versionRef.current = detail.data.inputVersion
     setDraft(initial)
-  }, [detail.data])
+  }, [detail.data, projectId])
 
   const wardsProvince = draft?.provinceCode ?? null
   const datasetVersion = provinces.data?.datasetVersion ?? null
@@ -113,13 +131,14 @@ export function useEstimateInput(projectId: string) {
       const current = draftRef.current
       const saved = savedRef.current
       if (!current || !saved || deniedRef.current) return !deniedRef.current
-      const changed = changedFields(saved, current)
+      const withCoordinates = coordinatesRef.current
+      const changed = changedFields(saved, current, withCoordinates)
       if (changed.length === 0) {
         setStatus((previous) => (previous === 'idle' ? previous : 'saved'))
         return true
       }
 
-      const body = inputBody(current)
+      const body = inputBody(current, withCoordinates)
       setStatus('saving')
       try {
         const result = await estimateInputApi.saveInput(projectId, {
@@ -173,6 +192,11 @@ export function useEstimateInput(projectId: string) {
       if (deniedRef.current) return
       if (timerRef.current) window.clearTimeout(timerRef.current)
       setStatus('pending')
+      if (holdRef.current > 0) {
+        // Đang chờ bản đồ: nhớ là còn việc phải lưu, `release` sẽ lên lịch lại.
+        pendingSaveRef.current = true
+        return
+      }
       timerRef.current = window.setTimeout(() => {
         timerRef.current = null
         void enqueueSave()
@@ -182,13 +206,35 @@ export function useEstimateInput(projectId: string) {
   )
 
   /** Lưu NGAY phần còn dở (trước khi sang bước sau). Trả `true` khi đã lưu hết. */
-  const flush = useCallback((): Promise<boolean> => {
+  const flush = useCallback(async (): Promise<boolean> => {
     if (timerRef.current) {
       window.clearTimeout(timerRef.current)
       timerRef.current = null
     }
+    // Chưa xong việc với bản đồ thì đợi xong rồi mới lưu, không lưu dở địa chỉ.
+    if (holdRef.current > 0) await new Promise<void>((resolve) => holdWaitersRef.current.push(resolve))
     return enqueueSave()
   }, [enqueueSave])
+
+  /**
+   * Tạm KHÔNG tự lưu trong lúc chờ kết quả bản đồ. Trả hàm nhả: gọi khi đã có đủ cặp địa chỉ + toạ độ để lưu cùng nhau
+   * (hoặc khi bỏ cuộc). Nhiều lần giữ chồng nhau thì chỉ lưu khi nhả hết.
+   */
+  const hold = useCallback((): (() => void) => {
+    holdRef.current++
+    let released = false
+    return () => {
+      if (released) return
+      released = true
+      holdRef.current = Math.max(0, holdRef.current - 1)
+      if (holdRef.current > 0) return
+      holdWaitersRef.current.splice(0).forEach((resolve) => resolve())
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false
+        scheduleSave()
+      }
+    }
+  }, [scheduleSave])
 
   // Mất mạng → có mạng lại thì tự thử lưu (BR-PROJ-003 khoản 7).
   useEffect(() => {
@@ -210,9 +256,18 @@ export function useEstimateInput(projectId: string) {
     (next: EstimateInputDraft) => {
       draftRef.current = next
       setDraft(next)
+      // BE chưa lưu toạ độ: giữ ở trình duyệt để reload không mất.
+      if (!coordinatesRef.current) {
+        writeStoredLocation(
+          projectId,
+          next.latitude !== null && next.longitude !== null
+            ? { latitude: next.latitude, longitude: next.longitude }
+            : null
+        )
+      }
       scheduleSave()
     },
-    [scheduleSave]
+    [projectId, scheduleSave]
   )
 
   const patch = useCallback(
@@ -243,7 +298,10 @@ export function useEstimateInput(projectId: string) {
     [patch, provinces.data?.datasetVersion]
   )
 
-  const missing = useMemo(() => (draft ? missingFields(draft, catalog.data) : []), [catalog.data, draft])
+  const missing = useMemo(
+    () => (draft ? missingFields(draft, catalog.data, coordinatesSupported) : []),
+    [catalog.data, coordinatesSupported, draft]
+  )
 
   const lock = lockReasonOf(detail.data, deniedCode)
 
@@ -262,6 +320,9 @@ export function useEstimateInput(projectId: string) {
     chooseBuildingType,
     chooseProvince,
     chooseWard,
+    getDraft: () => draftRef.current,
+    hold,
+    coordinatesSupported,
     flush,
     retry: flush
   }

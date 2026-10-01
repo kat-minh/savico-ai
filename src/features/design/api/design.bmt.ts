@@ -127,7 +127,13 @@ export const bmtDesignApi = {
     try {
       const saved = await http.post<{ estimateId: string; inputVersion: number; nameVersion: number }>(
         '/estimates',
-        { name: payload.name },
+        {
+          name: payload.name,
+          // Chỉ gửi khi đã có cả cặp (BE bắt buộc cả hai; BE chưa triển khai thì bỏ qua trường lạ).
+          ...(payload.latitude !== undefined && payload.longitude !== undefined
+            ? { latitude: payload.latitude, longitude: payload.longitude }
+            : {})
+        },
         idem()
       )
       return {
