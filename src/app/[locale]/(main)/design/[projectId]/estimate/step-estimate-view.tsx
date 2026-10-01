@@ -16,6 +16,7 @@ import {
   useDesignStore,
   useEstimate,
   useFloorCountLabel,
+  useMatchCriteria,
   useProject
 } from '@/features/design'
 import { ProactiveChatStream } from '@/features/chatbot'
@@ -44,6 +45,8 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
   const { data: project } = useProject(projectId)
+  // Mẫu thư viện khớp đúng đầu vào đã gửi AI (chỉ dự toán thật); mock/chưa đủ điều kiện thì panel dùng cách cũ.
+  const matchCriteria = useMatchCriteria(projectId)
   const {
     data: result,
     isSuccess,
@@ -145,7 +148,13 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
       <DesignStepLayout
         sidePanel={
           resultVisible || failed ? undefined : (
-            <PersonalizedPanel filter={filter} kind='2d' topic='architecture' filterLabel={filterLabel} />
+            <PersonalizedPanel
+              filter={filter}
+              kind='2d'
+              topic='architecture'
+              filterLabel={filterLabel}
+              matchCriteria={matchCriteria}
+            />
           )
         }
         sidePanelCollapsed={!resultVisible && panelMinimized}

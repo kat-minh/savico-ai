@@ -53,6 +53,19 @@ export interface HandbookArticleWithCategories extends HandbookArticle {
   categoryIds?: string[]
 }
 
+/**
+ * Điều kiện tìm mẫu từ đầu vào dự toán đã gửi AI (`POST /design-templates/matches`). Chỉ chứa trường áp dụng theo cấu hình
+ * danh mục của dự toán; lớp app dựng từ `features/design` vì hai feature không import lẫn nhau.
+ */
+export interface LibraryMatchCriteria {
+  catalogRevisionId: string
+  buildingTypeId: string
+  floorCount?: number
+  hasTum?: boolean
+  architectureStyleId?: string
+  interiorStyleId?: string
+}
+
 /** Tiêu chí lọc, dựng từ dữ liệu Bước 1 bởi lớp app. */
 export type HandbookFilter = HandbookTags
 

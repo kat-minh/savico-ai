@@ -179,6 +179,52 @@ export function stylesFor(
 }
 
 /* ===========================================================================
+ * Tìm mẫu thư viện tham khảo (TDD-LIB-001 — POST /design-templates/matches)
+ * ======================================================================== */
+
+/** Điều kiện tìm mẫu từ đầu vào dự toán đã gửi AI. Trường nhóm tắt thì bỏ hẳn (không tham gia điều kiện). */
+export interface MatchCriteria {
+  catalogRevisionId: string
+  buildingTypeId: string
+  floorCount?: number
+  hasTum?: boolean
+  architectureStyleId?: string
+  interiorStyleId?: string
+}
+
+/**
+ * Dựng điều kiện tìm mẫu từ đầu vào ĐÃ LƯU của dự toán và danh mục ghim của nó. Chỉ lấy trường áp dụng theo cấu hình
+ * loại công trình (tầng/tum/phong cách của nhóm tắt không thành điều kiện, BE cũng bỏ qua). Thiếu revision / loại, hoặc
+ * thiếu một giá trị mà nhóm đang bật yêu cầu → `null`: BE coi đó là request sai (422) nên không gọi.
+ */
+export function matchCriteriaOf(
+  input: Partial<EstimateInputBody> | null | undefined,
+  catalogRevisionId: string | null | undefined,
+  catalog: EstimateCatalog | undefined
+): MatchCriteria | null {
+  const type = catalog?.buildingTypes.find((item) => item.buildingTypeId === input?.buildingTypeId)
+  if (!input || !catalogRevisionId || !type) return null
+
+  const floorCount = type.floorsEnabled ? input.floorCount : undefined
+  const hasTum = type.tumEnabled ? input.hasTum : undefined
+  const architectureStyleId = type.architectureEnabled ? input.architectureStyleId : undefined
+  const interiorStyleId = type.interiorEnabled ? input.interiorStyleId : undefined
+  if (type.floorsEnabled && floorCount == null) return null
+  if (type.tumEnabled && hasTum == null) return null
+  if (type.architectureEnabled && !architectureStyleId) return null
+  if (type.interiorEnabled && !interiorStyleId) return null
+
+  return {
+    catalogRevisionId,
+    buildingTypeId: type.buildingTypeId,
+    ...(floorCount != null ? { floorCount } : {}),
+    ...(hasTum != null ? { hasTum } : {}),
+    ...(architectureStyleId ? { architectureStyleId } : {}),
+    ...(interiorStyleId ? { interiorStyleId } : {})
+  }
+}
+
+/* ===========================================================================
  * Chuyển đổi API ⇄ form
  * ======================================================================== */
 

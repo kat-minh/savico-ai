@@ -6,7 +6,9 @@ import type {
   HandbookFloor,
   HandbookQuota,
   HandbookTemplate,
-  HandbookTemplateDetail
+  HandbookTemplateDetail,
+  HandbookTemplateKind,
+  LibraryMatchCriteria
 } from '../types/handbook.types'
 import {
   fetchLibraryFilters,
@@ -348,6 +350,31 @@ export const bmtHandbookApi = {
       // 404 (bài nháp/ẩn/không tồn tại) hoặc lỗi bất kỳ → về mock để demo không trống.
       return mockHandbookApi.getArticle(idOrSlug)
     }
+  },
+
+  /**
+   * Mẫu khớp thông tin dự toán (`POST /design-templates/matches`, TDD-LIB-001): chỉ đọc, công khai, không tính lượt.
+   * KHÔNG rơi về mock: rỗng nghĩa là chưa có mẫu khớp, lỗi để hook xử lý (lỗi thư viện không được ảnh hưởng AI).
+   * 2D bỏ qua phong cách nên không gửi.
+   */
+  async matchTemplates(
+    criteria: LibraryMatchCriteria,
+    kind: HandbookTemplateKind,
+    pageSize = 6
+  ): Promise<{ items: HandbookTemplate[]; totalCount: number }> {
+    const is3d = kind === '3d'
+    const page = await http.post<PagedResult<BmtDesignTemplateSummary>>('/design-templates/matches', {
+      drawingKind: is3d ? '3D' : '2D',
+      catalogRevisionId: criteria.catalogRevisionId,
+      buildingTypeId: criteria.buildingTypeId,
+      floorCount: criteria.floorCount ?? null,
+      hasTum: criteria.hasTum ?? null,
+      architectureStyleId: is3d ? (criteria.architectureStyleId ?? null) : null,
+      interiorStyleId: is3d ? (criteria.interiorStyleId ?? null) : null,
+      pageIndex: 1,
+      pageSize
+    })
+    return { items: page.items.map(toTemplateSummary), totalCount: page.totalCount }
   },
 
   /** Danh sách mẫu công khai (`GET /design-templates`). API rỗng/lỗi → mock. */

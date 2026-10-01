@@ -1047,7 +1047,16 @@
       "filterLabel3d": "{style} interior ideas for your {building}",
       "fallback2d": "2D plan templates suggested for your project",
       "fallback3d": "Interior templates suggested for your project",
-      "eyebrow": "Personalised handbook"
+      "eyebrow": "Personalised handbook",
+      "matched": {
+        "label": "Library templates related to your project",
+        "title2d": "Matching 2D floor plans",
+        "title3d": "Matching 3D interiors",
+        "count": "({count})",
+        "empty": "No 2D floor plan in the library matches your project yet.",
+        "error": "Couldn't load related templates. Your estimate is still being prepared as normal.",
+        "note": "These are reference templates from the library that match what you entered — not something the AI just generated."
+      }
     },
     "read": {
       "badge": "Read"

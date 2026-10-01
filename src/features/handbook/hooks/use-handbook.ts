@@ -11,7 +11,7 @@ import { LibraryAccessDeniedError, type ArticleListQuery } from '../api/handbook
 import { handbookKeys } from '../api/handbook.keys'
 import { selectPersonalizedTemplates } from '../services/handbook.service'
 import { localDayKey, useHandbookQuotaLedger } from '../store/handbook-quota.store'
-import type { HandbookFilter, HandbookTemplateKind } from '../types/handbook.types'
+import type { HandbookFilter, HandbookTemplateKind, LibraryMatchCriteria } from '../types/handbook.types'
 
 const STATIC_CONTENT_STALE_TIME = 5 * 60 * 1000
 
@@ -292,6 +292,21 @@ export function useHandbookDetailQuota() {
     hasViewed,
     consume
   }
+}
+
+/**
+ * Mẫu thư viện khớp với dự toán đang được AI lập (màn chờ Bước 2). Tách khỏi polling của AI: lỗi ở đây chỉ làm rỗng danh
+ * sách, không đụng tới tác vụ AI. Không tự gọi lại (TDD-LIB-001 chưa chốt tần suất làm mới) — chỉ đổi khi điều kiện đổi.
+ */
+export function useMatchedTemplates(criteria: LibraryMatchCriteria | null | undefined, kind: HandbookTemplateKind) {
+  return useQuery({
+    queryKey: handbookKeys.matched(criteria as LibraryMatchCriteria, kind),
+    queryFn: () => handbookApi.matchTemplates(criteria as LibraryMatchCriteria, kind),
+    enabled: Boolean(criteria),
+    staleTime: STATIC_CONTENT_STALE_TIME,
+    retry: 1,
+    refetchOnWindowFocus: false
+  })
 }
 
 /**

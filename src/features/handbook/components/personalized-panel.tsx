@@ -9,9 +9,16 @@ import { useChatContextStore } from '@/shared/chat-context'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
-import { usePersonalizedTemplates, useHandbookArticles } from '../hooks/use-handbook'
+import { useHandbookArticles, useMatchedTemplates, usePersonalizedTemplates } from '../hooks/use-handbook'
 import { useHandbookPanelStore } from '../store/handbook-panel.store'
-import type { HandbookArticle, HandbookFilter, HandbookPanelTab, HandbookTemplate } from '../types/handbook.types'
+import type {
+  HandbookArticle,
+  HandbookFilter,
+  HandbookPanelTab,
+  HandbookTemplate,
+  HandbookTemplateKind,
+  LibraryMatchCriteria
+} from '../types/handbook.types'
 import { ArticleCard } from './article-card'
 import { ArticleDetailDialog } from './article-detail-dialog'
 import { TemplateCard } from './template-card'
@@ -28,6 +35,11 @@ interface PersonalizedPanelProps {
    * không biết vocabulary của Bước 1.
    */
   filterLabel?: string
+  /**
+   * Điều kiện của dự toán thật đang được AI lập. Có thì lưới mẫu lấy từ `POST /design-templates/matches` (2D và 3D khớp
+   * đúng đầu vào đã gửi AI) thay cho việc chọn ngẫu nhiên theo tag.
+   */
+  matchCriteria?: LibraryMatchCriteria | null
   /** Chủ đề bài viết: kiến trúc (Bước 2) hoặc nội thất (Bước 3). */
   topic: 'architecture' | 'interior'
   longWait?: boolean
@@ -45,6 +57,7 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
   kind,
   topic,
   filterLabel,
+  matchCriteria = null,
   longWait = false
 }: PersonalizedPanelProps) {
   const t = useTranslations('handbook.panel')
@@ -163,7 +176,9 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
               <p className='text-muted-foreground truncate text-xs'>
                 {activeTab === 'articles'
                   ? t('tabs.articles')
-                  : (filterLabel ?? t(kind === '2d' ? 'fallback2d' : 'fallback3d'))}
+                  : matchCriteria
+                    ? t('matched.label')
+                    : (filterLabel ?? t(kind === '2d' ? 'fallback2d' : 'fallback3d'))}
               </p>
             </div>
             <Button variant='ghost' size='icon' aria-label={t('minimize')} onClick={() => setMinimized(true)}>
@@ -191,7 +206,16 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
                 exit={{ opacity: 0 }}
                 transition={{ duration: reduced ? 0 : 0.18 }}
               >
-                {activeTab === 'templates' ? (
+                {activeTab === 'templates' && matchCriteria ? (
+                  <MatchedTemplates
+                    criteria={matchCriteria}
+                    selectedId={selectedTemplateId}
+                    onOpen={(value) => {
+                      setSelectedTemplateId(value.id)
+                      setSelectedTemplate(value)
+                    }}
+                  />
+                ) : activeTab === 'templates' ? (
                   templatesPending ? (
                     <PanelSkeleton />
                   ) : (
@@ -244,6 +268,75 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
     </>
   )
 })
+
+/** Một nhóm mẫu khớp (2D hoặc 3D) kèm tiêu đề và số lượng. Nhóm rỗng không hiện, trừ khi `emptyText` được truyền. */
+function MatchedGroup({
+  kind,
+  criteria,
+  selectedId,
+  onOpen,
+  emptyText
+}: {
+  kind: HandbookTemplateKind
+  criteria: LibraryMatchCriteria
+  selectedId: string | null
+  onOpen: (template: HandbookTemplate) => void
+  emptyText?: string
+}) {
+  const t = useTranslations('handbook.panel.matched')
+  const { data, isPending, isError } = useMatchedTemplates(criteria, kind)
+
+  if (isPending) return <PanelSkeleton />
+  // Lỗi thư viện không được làm hỏng màn chờ AI: chỉ báo nhẹ, không chặn gì.
+  if (isError) return <p className='text-muted-foreground text-sm'>{t('error')}</p>
+  if (!data.items.length) return emptyText ? <p className='text-muted-foreground text-sm'>{emptyText}</p> : null
+
+  return (
+    <section className='space-y-3'>
+      <h3 className='text-sm font-semibold'>
+        {t(kind === '2d' ? 'title2d' : 'title3d')}
+        <span className='text-muted-foreground ml-1.5 font-normal'>{t('count', { count: data.totalCount })}</span>
+      </h3>
+      <div data-handbook-panel-grid className='grid grid-cols-2 gap-3 lg:grid-cols-3'>
+        {data.items.map((template, index) => (
+          <div
+            key={template.id}
+            data-panel-card
+            style={{ '--panel-card-delay': `${index * 65}ms` } as React.CSSProperties}
+          >
+            <TemplateCard template={template} variant='panel' selected={selectedId === template.id} onOpen={onOpen} />
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Mẫu thư viện liên quan tới dự toán đang lập: 2D rồi 3D, đều khớp đúng đầu vào đã gửi AI. Chưa có mẫu 2D khớp thì nói
+ * thẳng thay vì lấp bằng mẫu không liên quan; mẫu 3D chỉ hiện khi có.
+ */
+function MatchedTemplates({
+  criteria,
+  selectedId,
+  onOpen
+}: {
+  criteria: LibraryMatchCriteria
+  selectedId: string | null
+  onOpen: (template: HandbookTemplate) => void
+}) {
+  const t = useTranslations('handbook.panel.matched')
+  return (
+    <div className='space-y-5'>
+      <MatchedGroup kind='2d' criteria={criteria} selectedId={selectedId} onOpen={onOpen} emptyText={t('empty')} />
+      <MatchedGroup kind='3d' criteria={criteria} selectedId={selectedId} onOpen={onOpen} />
+      <p className='text-muted-foreground flex items-center gap-1.5 text-xs'>
+        <Info className='size-3.5 shrink-0' />
+        {t('note')}
+      </p>
+    </div>
+  )
+}
 
 function PanelSkeleton() {
   return (

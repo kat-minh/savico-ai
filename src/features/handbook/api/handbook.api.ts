@@ -16,6 +16,7 @@ import { mockHandbookApi } from './handbook.mock'
  *     (chi tiết CẦN ĐĂNG NHẬP: access-info → open trừ 1 lượt → library-versions +
  *     assets), `getQuota` (`catalog.detail` của `/me/design-subscription`).
  *
+ *   - Mẫu liên quan lúc tạo dự toán: `matchTemplates` (`POST /design-templates/matches`) — không có mock, rỗng là rỗng.
  *   - Chi tiết mẫu đọc THEO SECTION (`/library-versions/{id}/sections` → tệp từng section):
  *     ảnh vào trình xem, tệp PDF/DWG/DXF thành dòng tải về.
  *   - Bộ lọc thư viện (`getLibraryFilters`, `listTemplateIdsByStyle`) và danh mục tin
@@ -29,6 +30,7 @@ const BmtHandbookApi = {
   listArticles: bmtHandbookApi.listArticles,
   getArticle: bmtHandbookApi.getArticle,
   listTemplates: bmtHandbookApi.listTemplates,
+  matchTemplates: bmtHandbookApi.matchTemplates,
   getTemplate: bmtHandbookApi.getTemplate,
   getQuota: bmtHandbookApi.getQuota,
   getLibraryFilters: bmtHandbookApi.getLibraryFilters,

@@ -1,10 +1,12 @@
-import type { HandbookFilter } from '../types/handbook.types'
+import type { HandbookFilter, HandbookTemplateKind, LibraryMatchCriteria } from '../types/handbook.types'
 
 export const handbookKeys = {
   all: ['handbook'] as const,
 
   templates: () => [...handbookKeys.all, 'templates'] as const,
   templateList: (filter: HandbookFilter) => [...handbookKeys.templates(), filter] as const,
+  matched: (criteria: LibraryMatchCriteria, kind: HandbookTemplateKind) =>
+    [...handbookKeys.templates(), 'matched', kind, criteria] as const,
   templateDetail: (id: string) => [...handbookKeys.templates(), 'detail', id] as const,
 
   articles: () => [...handbookKeys.all, 'articles'] as const,

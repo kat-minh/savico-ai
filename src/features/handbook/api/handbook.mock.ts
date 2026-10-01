@@ -1,6 +1,13 @@
 import { cmsDb } from '@/shared/cms'
 import { mockDelay } from '@/shared/lib/mock'
-import type { HandbookArticle, HandbookQuota, HandbookStage, HandbookTemplate } from '../types/handbook.types'
+import type {
+  HandbookArticle,
+  HandbookQuota,
+  HandbookStage,
+  HandbookTemplate,
+  HandbookTemplateKind,
+  LibraryMatchCriteria
+} from '../types/handbook.types'
 import type { ArticleListQuery } from './handbook.bmt'
 import type { LibraryFilterQuery, TemplateStyleQuery } from './handbook.library'
 import type { LibraryFilterOptions } from './handbook.library.logic'
@@ -38,6 +45,11 @@ export const mockHandbookApi = {
     await mockDelay()
     return cmsDb.list('handbookTemplates').filter(isPublished)
   },
+
+  /** Không có "mẫu khớp dự toán" ở chế độ mock: dự toán mock không có danh mục thật để đối chiếu. */
+  matchTemplates: async (
+    ..._args: [criteria: LibraryMatchCriteria, kind: HandbookTemplateKind, pageSize?: number]
+  ): Promise<{ items: HandbookTemplate[]; totalCount: number }> => ({ items: [], totalCount: 0 }),
 
   getTemplate: async (id: string): Promise<HandbookTemplate | null> => {
     await mockDelay()

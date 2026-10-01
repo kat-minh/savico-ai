@@ -1047,7 +1047,16 @@
       "filterLabel3d": "Gợi ý nội thất {style} cho {building} của bạn",
       "fallback2d": "Mẫu bản vẽ 2D gợi ý cho dự án của bạn",
       "fallback3d": "Gợi ý mẫu nội thất cho dự án của bạn",
-      "eyebrow": "Cẩm nang cá nhân hóa"
+      "eyebrow": "Cẩm nang cá nhân hóa",
+      "matched": {
+        "label": "Mẫu thư viện liên quan đến dự án của bạn",
+        "title2d": "Mẫu bản vẽ 2D phù hợp",
+        "title3d": "Mẫu nội thất 3D phù hợp",
+        "count": "({count} mẫu)",
+        "empty": "Chưa có mẫu bản vẽ 2D nào khớp với dự án của bạn.",
+        "error": "Chưa tải được mẫu liên quan. Việc lập dự toán vẫn đang chạy bình thường.",
+        "note": "Đây là mẫu tham khảo trong thư viện khớp thông tin bạn đã nhập, không phải kết quả AI vừa tạo."
+      }
     },
     "read": {
       "badge": "Đã đọc"
