@@ -19,7 +19,9 @@ import { cn } from '@/shared/lib/utils'
 import { designDossierRoute, designEstimateRoute, designInputRoute } from '@/shared/constants/routes'
 import { formatDisplayDate } from '@/shared/utils'
 import { DESIGN_STEPS } from '../constants/design.constants'
+import { useEstimateBrief } from '../hooks/use-estimate-brief'
 import { useProjects } from '../hooks/use-projects'
+import { displayProjectId } from '../services/estimate-input.logic'
 import type { DesignStep, Project } from '../types/design.types'
 import { DeleteProjectDialog, RenameProjectDialog } from './project-menu-dialogs'
 
@@ -48,8 +50,6 @@ interface MyProjectsProps {
  */
 export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
   const t = useTranslations('account.projects')
-  const locale = useLocale() as Locale
-  const tBuilding = useTranslations('design.input.buildingType.options')
   const { data: projects, isPending } = useProjects()
 
   const [renaming, setRenaming] = useState<Project | null>(null)
@@ -105,18 +105,7 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
               >
                 <div className='flex gap-3 p-3'>
                   {/* Ảnh bìa là ảnh lô đất của Bước 1; chưa có thì để khung rỗng. */}
-                  {project.coverUrl ? (
-                    <Photo
-                      className='w-[36%] shrink-0 self-stretch rounded-lg'
-                      src={project.coverUrl}
-                      alt={project.name}
-                      sizes='220px'
-                    />
-                  ) : (
-                    <span className='bg-muted text-muted-foreground/40 flex w-[36%] shrink-0 items-center justify-center self-stretch rounded-lg'>
-                      <House className='size-8' strokeWidth={1.25} />
-                    </span>
-                  )}
+                  <ProjectCover project={project} />
 
                   <div className='flex min-w-0 flex-1 flex-col gap-1'>
                     <div className='flex items-start justify-between gap-2'>
@@ -146,20 +135,12 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
                       </DropdownMenu>
                     </div>
 
-                    <p className='text-muted-foreground font-mono text-sm'>{project.id}</p>
+                    <p className='text-muted-foreground font-mono text-sm'>{displayProjectId(project.id)}</p>
                     {/* Hình S24: "Tạo ngày 12/06/2026 · Nhà phố · 120 m²" — một
                         dòng, ngăn bằng dấu chấm giữa. Hai vế sau chỉ có sau khi
                         khách qua Bước 1 và Bước 2, thiếu vế nào thì bỏ luôn cả
                         dấu ngăn của vế đó. */}
-                    <p className='text-muted-foreground text-sm'>
-                      {[
-                        t('createdAt', { date: formatDisplayDate(project.createdAt, locale) }),
-                        project.buildingType ? tBuilding(project.buildingType) : null,
-                        project.floorArea ? t('floorArea', { area: project.floorArea }) : null
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </p>
+                    <ProjectMeta project={project} />
 
                     {/* Hình S24: nhãn + ba CHẤM có số và tên bước, không phải ba
                       thanh trơn — ba thanh không nói được đang dừng ở bước nào. */}
@@ -247,5 +228,40 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
       <RenameProjectDialog project={renaming} onClose={() => setRenaming(null)} />
       <DeleteProjectDialog project={deleting} onClose={() => setDeleting(null)} />
     </>
+  )
+}
+
+/** Ảnh bìa = ảnh lô đất của Bước 1: dự toán thật đọc từ chi tiết (danh sách không trả ảnh); chưa có thì khung rỗng. */
+function ProjectCover({ project }: { project: Project }) {
+  const brief = useEstimateBrief(project.id)
+  const coverUrl = project.coverUrl ?? brief.coverUrl
+  return coverUrl ? (
+    <Photo className='w-[36%] shrink-0 self-stretch rounded-lg' src={coverUrl} alt={project.name} sizes='220px' />
+  ) : (
+    <span className='bg-muted text-muted-foreground/40 flex w-[36%] shrink-0 items-center justify-center self-stretch rounded-lg'>
+      <House className='size-8' strokeWidth={1.25} />
+    </span>
+  )
+}
+
+/** Hình S24: "Tạo ngày 12/06/2026 · Nhà phố · 120 m²" — thiếu vế nào thì bỏ luôn cả dấu ngăn của vế đó. */
+function ProjectMeta({ project }: { project: Project }) {
+  const t = useTranslations('account.projects')
+  const locale = useLocale() as Locale
+  const tBuilding = useTranslations('design.input.buildingType.options')
+  const brief = useEstimateBrief(project.id)
+  const buildingType = project.buildingTypeLabel ?? (project.buildingType ? tBuilding(project.buildingType) : null)
+  const area = project.floorArea ?? brief.floorArea
+
+  return (
+    <p className='text-muted-foreground text-sm'>
+      {[
+        t('createdAt', { date: formatDisplayDate(project.createdAt, locale) }),
+        buildingType,
+        area ? t('floorArea', { area }) : null
+      ]
+        .filter(Boolean)
+        .join(' · ')}
+    </p>
   )
 }

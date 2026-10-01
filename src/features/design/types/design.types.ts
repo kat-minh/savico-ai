@@ -74,6 +74,8 @@ export interface Project {
    * trên thẻ dự án (Hình S24). `null` khi khách chưa qua Bước 1.
    */
   buildingType?: BuildingType | null
+  /** Tên loại công trình do API trả (danh mục động, không thuộc enum `BuildingType`) — thẻ ưu tiên dùng tên này. */
+  buildingTypeLabel?: string | null
   /**
    * Tổng diện tích sàn AI ước tính (m²), lấy từ kết quả Bước 2. `null` khi
    * chưa chạy dự toán — thẻ khi đó chỉ in ngày tạo và loại công trình.

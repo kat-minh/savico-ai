@@ -1953,10 +1953,6 @@
     },
     "projects": {
       "title": "Dự án của tôi",
-      "pendingNotice": {
-        "title": "Luồng tạo dự toán (3 bước) chưa nối hệ thống",
-        "description": "Danh sách chỉ hiển thị dự toán thật đã lưu trên hệ thống. Dự án tạo thử ở bước nhập liệu hiện chưa được lưu nên chưa xuất hiện ở đây — sẽ có khi bước tạo được nối API."
-      },
       "step": "Bước {step}/3",
       "empty": {
         "title": "Chưa có dự án nào",

@@ -90,8 +90,9 @@ function toProject(item: BmtEstimateListItem): Project {
     status: projectStatus(currentStep),
     // API list chưa trả ảnh render và diện tích sàn → để trống (thẻ tự bớt vế).
     coverUrl: null,
-    // UI dùng enum loại công trình; API trả {id,name} động → chưa map, để null.
+    // UI dùng enum loại công trình; API trả {id,name} động → giữ riêng tên để hiển thị.
     buildingType: null,
+    buildingTypeLabel: item.buildingType?.name ?? null,
     floorArea: null
   }
 }
