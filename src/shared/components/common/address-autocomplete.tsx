@@ -90,7 +90,11 @@ export function AddressAutocomplete({
           sẽ bị cắt mất đáy (và che luôn nút Lưu). Đẩy nội dung xuống thì dialog
           tự cuộn, dùng được ở mọi ngữ cảnh mà không cần portal. */}
       {open && value.trim().length >= 2 ? (
-        <div className='bg-popover mt-1 overflow-hidden rounded-lg border shadow-sm'>
+        <div
+          className='bg-popover mt-1 overflow-hidden rounded-lg border shadow-sm'
+          // Bấm xuống một dòng không được làm ô nhập mất focus (mất focus là danh sách bị gỡ trước khi click kịp tới nút).
+          onMouseDown={(event) => event.preventDefault()}
+        >
           {isSearching ? (
             <p className='text-muted-foreground px-3 py-2.5 text-sm'>{t('searching')}</p>
           ) : suggestions.length ? (

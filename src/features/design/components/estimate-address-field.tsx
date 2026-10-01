@@ -10,6 +10,7 @@ import { cn } from '@/shared/lib/utils'
 import { mapsApi } from '../api/maps.api'
 import { useEstimateAddressSearch } from '../hooks/use-address-search'
 import { useEstimateLocation } from '../hooks/use-estimate-location'
+import { addressWithHouseNumber } from '../services/address.logic'
 
 interface EstimateAddressFieldProps {
   projectId: string
@@ -39,7 +40,8 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
 
   async function pick(refId: string, name: string, display: string) {
     if (blurTimer.current) clearTimeout(blurTimer.current)
-    onChange(name || display)
+    // Giữ số nhà khách đã gõ: gợi ý của VietMap thường chỉ có tên đường.
+    onChange(addressWithHouseNumber(value, name || display))
     setOpen(false)
     setResolving(true)
     setResolveFailed(false)
@@ -82,7 +84,11 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
       </div>
 
       {open && value.trim().length >= 2 ? (
-        <div className='bg-popover overflow-hidden rounded-lg border shadow-xs'>
+        <div
+          className='bg-popover overflow-hidden rounded-lg border shadow-xs'
+          // Bấm xuống một dòng không được làm ô nhập mất focus: mất focus là danh sách bị gỡ trước khi click kịp tới nút.
+          onMouseDown={(event) => event.preventDefault()}
+        >
           {isSearching ? (
             <p className='text-muted-foreground px-3 py-2.5 text-sm'>{t('address.searching')}</p>
           ) : failed ? (
