@@ -47,3 +47,4 @@ export {
 } from './reveal'
 export { StartOptions, StartOptionsDialog } from './start-options'
 export { StepDots, type StepStatus } from './step-dots'
+export { LocationMap } from './location-map'

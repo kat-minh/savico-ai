@@ -1797,7 +1797,13 @@
       "address": {
         "label": "House number, street",
         "hint": "House number and street name of the site.",
-        "placeholder": "E.g. 12 Nguyen Hue"
+        "placeholder": "E.g. 12 Nguyen Hue",
+        "searching": "Searching addresses…",
+        "searchFailed": "Could not search addresses right now. You can still type it in.",
+        "noResult": "No matching address",
+        "resolveFailed": "Could not get this address location. Pick again or click the map.",
+        "mapHint": "Pick a suggestion, or click the map to drop a pin on the building site.",
+        "coordinates": "Location: {lat}, {lng}. Drag the pin to adjust."
       },
       "buildingType": {
         "label": "Building type",

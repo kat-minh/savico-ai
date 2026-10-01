@@ -29,6 +29,7 @@ import {
   visibleFields
 } from '../services/estimate-input.logic'
 import { ChoiceCards, type ChoiceOption } from './choice-cards'
+import { EstimateAddressField } from './estimate-address-field'
 
 const MISSING_FIELD_KEYS = [
   'imageOrDescription',
@@ -385,18 +386,18 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   </Select>
                 </div>
 
-                <div id='field-addressDetail' className='space-y-2 sm:col-span-2'>
-                  <FieldLabel htmlFor='address-detail' hint={t('address.hint')} required>
-                    {t('address.label')}
-                  </FieldLabel>
-                  <Input
-                    id='address-detail'
-                    value={draft.addressDetail}
-                    placeholder={t('address.placeholder')}
-                    className={cn(invalid('addressDetail') && 'border-destructive')}
-                    onChange={(event) => input.patch({ addressDetail: event.target.value })}
-                  />
-                </div>
+                <EstimateAddressField
+                  projectId={projectId}
+                  value={draft.addressDetail}
+                  onChange={(addressDetail) => input.patch({ addressDetail })}
+                  context={[
+                    wards.data?.find((ward) => ward.code === draft.wardCode)?.name,
+                    provinces.data?.provinces.find((province) => province.code === draft.provinceCode)?.name
+                  ]
+                    .filter(Boolean)
+                    .join(', ')}
+                  invalid={invalid('addressDetail')}
+                />
               </div>
               {provinces.isError ? (
                 <p className='text-destructive mt-3 text-xs'>
