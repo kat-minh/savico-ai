@@ -8,10 +8,10 @@ import {
   stepOfState
 } from '../services/estimate-result.logic'
 import { projectStatus } from '../services/project-list.service'
-import type { EstimateResult, Project } from '../types/design.types'
+import type { Dossier, EstimateResult, Project, SharedDossier } from '../types/design.types'
 import type { CreateProjectPayload } from './design.api'
 import { mockDesignApi } from './design.mock'
-import { estimateGenerationApi } from './estimate-generation.api'
+import { estimateGenerationApi, type ExportStatus, type ShareLink } from './estimate-generation.api'
 
 /**
  * Nối màn "Dự án của tôi" (danh sách + xóa dự toán) vào BMT API — GIỮ MOCK LÀM
@@ -199,6 +199,78 @@ export const bmtDesignApi = {
   getEstimate: (projectId: string, signal?: AbortSignal): Promise<EstimateResult> => {
     if (!isApiEstimateId(projectId)) return mockDesignApi.getEstimate(projectId)
     return waitForEstimate(projectId, signal)
+  },
+
+  /**
+   * Bước 3 của dự toán thật: BE không có bước "render hồ sơ" riêng — hồ sơ là kết quả AI cùng tệp xuất. Bộ hồ sơ
+   * "sẵn sàng" khi tệp PDF đã xuất xong (`exportAvailability`); chưa thì `idle` và nút Nhận hồ sơ sẽ yêu cầu xuất.
+   */
+  getDossier: async (projectId: string): Promise<Dossier> => {
+    if (!isApiEstimateId(projectId)) return mockDesignApi.getDossier(projectId)
+    const detail = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
+    if (estimateStateKind(detail.state) !== 'succeeded') return idleDossier(projectId)
+    const [result, share] = await Promise.all([estimateGenerationApi.getResult(projectId), activeShare(projectId)])
+    const pdf = result.exportAvailability?.find(
+      (item) => item.format === 'Pdf' && item.state === 'Ready' && item.exportId
+    )
+    return {
+      ...idleDossier(projectId),
+      status: pdf ? 'ready' : 'idle',
+      pdfUrl: pdf?.exportId ? estimateGenerationApi.exportFileUrl(projectId, pdf.exportId) : null,
+      shareToken: share?.shareId ?? null,
+      shareUrl: share?.url ?? null
+    }
+  },
+
+  /** "Nhận hồ sơ": yêu cầu xuất PDF rồi chờ Ready. Xuất hỏng (không lấy được tệp…) thì ném lỗi để màn chờ hiện Thử lại. */
+  renderDossier: async (projectId: string): Promise<Dossier> => {
+    if (!isApiEstimateId(projectId)) return mockDesignApi.renderDossier(projectId)
+    const started = await estimateGenerationApi.requestExport(projectId, 'Pdf')
+    const done = await waitForExport(projectId, started.exportId)
+    if (done.state !== 'Ready') throw new Error(done.failureCode ?? 'ExportFailed')
+    const share = await activeShare(projectId)
+    return {
+      ...idleDossier(projectId),
+      status: 'ready',
+      pdfUrl: estimateGenerationApi.exportFileUrl(projectId, started.exportId),
+      shareToken: share?.shareId ?? null,
+      shareUrl: share?.url ?? null
+    }
+  },
+
+  /** Tạo (hoặc lấy lại) link chia sẻ còn hiệu lực. Mỗi bản có tối đa một link; ngày hết hạn mặc định 30 ngày. */
+  createShareLink: async (projectId: string): Promise<{ token: string; url?: string }> => {
+    if (!isApiEstimateId(projectId)) return mockDesignApi.createShareLink(projectId)
+    const link = await estimateGenerationApi.createShare(projectId, vietnamDateAfter(DEFAULT_SHARE_DAYS))
+    return { token: link.shareId, url: link.url }
+  },
+
+  /** Gửi link (không đính kèm tệp) tới một email. Chưa có link hiệu lực thì tạo trước. */
+  sendDossierEmail: async (projectId: string, email: string): Promise<void> => {
+    if (!isApiEstimateId(projectId)) return mockDesignApi.sendDossierEmail(projectId, email)
+    const link =
+      (await activeShare(projectId)) ??
+      (await estimateGenerationApi.createShare(projectId, vietnamDateAfter(DEFAULT_SHARE_DAYS)))
+    await estimateGenerationApi.emailShare(projectId, link.shareId, email)
+  },
+
+  /** Xem hồ sơ qua link chia sẻ của BE (`/vi/estimates/shared/{shareId}#token=…`): không đăng nhập, link hỏng → `null`. */
+  getSharedEstimate: async (shareId: string, token: string): Promise<SharedDossier | null> => {
+    try {
+      const shared = await estimateGenerationApi.getShared(shareId, token)
+      const mapped = mapEstimateContent(shared.dossier?.content, { projectId: shareId, areaM2: 0 })
+      return {
+        projectName: shared.estimateName,
+        // DTO chia sẻ không có địa chỉ và ngày tạo: bỏ trống, màn xem tự ẩn.
+        address: '',
+        createdAt: '',
+        sections: mapped.result.sections,
+        grandTotal: mapped.result.grandTotal,
+        estimatedFloorArea: 0
+      }
+    } catch {
+      return null
+    }
   }
 }
 
@@ -251,4 +323,45 @@ async function waitForEstimate(projectId: string, signal?: AbortSignal): Promise
     }
   }
   throw new DOMException('Aborted', 'AbortError')
+}
+
+/* ===========================================================================
+ * Hồ sơ, xuất tệp và chia sẻ của dự toán thật
+ * ======================================================================== */
+
+const idleDossier = (projectId: string): Dossier => ({
+  projectId,
+  status: 'idle',
+  pdfUrl: null,
+  pdfSize: null,
+  shareToken: null,
+  shareUrl: null
+})
+
+/** Ngày hết hạn mặc định của link chia sẻ. */
+const DEFAULT_SHARE_DAYS = 30
+const EXPORT_POLL_MS = 2_000
+const EXPORT_MAX_WAIT_MS = 2 * 60_000
+
+/** `YYYY-MM-DD` theo giờ Việt Nam, sau `days` ngày (BE tính hết hạn theo lịch Asia/Ho_Chi_Minh). */
+function vietnamDateAfter(days: number): string {
+  const target = new Date(Date.now() + days * 86_400_000)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(target)
+}
+
+/** Link chia sẻ đang hiệu lực (Active) của bản, hoặc `null`. */
+async function activeShare(projectId: string): Promise<ShareLink | null> {
+  const share = await estimateGenerationApi.getCurrentShare(projectId)
+  return share && share.state === 'Active' && share.url ? share : null
+}
+
+async function waitForExport(projectId: string, exportId: string): Promise<ExportStatus> {
+  const startedAt = Date.now()
+  for (;;) {
+    const status = await estimateGenerationApi.getExport(projectId, exportId)
+    if (status.state === 'Ready' || status.state === 'Failed') return status
+    if (Date.now() - startedAt > EXPORT_MAX_WAIT_MS)
+      return { ...status, state: 'Failed', failureCode: 'ExportTimedOut' }
+    await sleep(EXPORT_POLL_MS)
+  }
 }

@@ -92,6 +92,15 @@ export const estimateGenerationApi = {
   revokeShare: (estimateId: string, shareId: string) =>
     http.post<{ state: string }>(`/estimates/${estimateId}/shares/${shareId}/revoke`, {}, idempotent()),
 
+  /** Xem hồ sơ qua link chia sẻ — công khai, gửi token ở header `X-Estimate-Share-Token`. */
+  getShared: (shareId: string, token: string) =>
+    http.get<{
+      shareId: string
+      estimateName: string
+      dossier: { content?: unknown; files?: ResultFile[] }
+      exportAvailability?: ExportAvailability[]
+    }>(`/public/estimate-shares/${shareId}`, { headers: { 'X-Estimate-Share-Token': token } }),
+
   shareQrUrl: (estimateId: string, shareId: string) => `/api/v1/estimates/${estimateId}/shares/${shareId}/qr`,
 
   emailShare: (estimateId: string, shareId: string, recipient: string) =>

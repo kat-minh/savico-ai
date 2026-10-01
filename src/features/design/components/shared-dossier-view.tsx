@@ -18,14 +18,14 @@ import { COST_SECTIONS } from '../constants/design.constants'
  * Bản rút gọn: thông tin dự án + toàn bộ bảng dự toán 3 phần. Không hiện số
  * điện thoại hay thao tác chỉnh sửa; người xem muốn làm dự án riêng thì tự tạo.
  */
-export function SharedDossierView({ token }: { token: string }) {
+export function SharedDossierView({ token, share }: { token: string; share?: { shareId: string; token: string } }) {
   const t = useTranslations('design.share')
   const tEstimate = useTranslations('design.estimate')
   const locale = useLocale() as Locale
 
   const { data, isPending } = useQuery({
-    queryKey: [...designKeys.all, 'share', token],
-    queryFn: () => designApi.getSharedDossier(token)
+    queryKey: [...designKeys.all, 'share', share ? `${share.shareId}` : token],
+    queryFn: () => (share ? designApi.getSharedEstimate(share.shareId, share.token) : designApi.getSharedDossier(token))
   })
 
   if (isPending) {
@@ -54,7 +54,7 @@ export function SharedDossierView({ token }: { token: string }) {
         <p className='text-muted-foreground text-xs tracking-widest uppercase'>{t('eyebrow')}</p>
         <h1 className='text-3xl font-semibold tracking-tight text-balance'>{data.projectName}</h1>
         <p className='text-muted-foreground text-sm'>
-          {[data.address, formatDisplayDate(data.createdAt, locale)].filter(Boolean).join(' · ')}
+          {[data.address, data.createdAt ? formatDisplayDate(data.createdAt, locale) : ''].filter(Boolean).join(' · ')}
         </p>
       </header>
 
@@ -66,9 +66,11 @@ export function SharedDossierView({ token }: { token: string }) {
               {formatCurrency(data.grandTotal, locale)}
             </p>
           </div>
-          <p className='text-muted-foreground text-sm'>
-            {t('floorArea', { value: formatNumber(data.estimatedFloorArea, locale) })}
-          </p>
+          {data.estimatedFloorArea > 0 ? (
+            <p className='text-muted-foreground text-sm'>
+              {t('floorArea', { value: formatNumber(data.estimatedFloorArea, locale) })}
+            </p>
+          ) : null}
         </div>
 
         <Table>

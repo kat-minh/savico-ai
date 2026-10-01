@@ -52,9 +52,9 @@ export function useCreateShareLink(projectId: string) {
 
   return useMutation({
     mutationFn: () => designApi.createShareLink(projectId),
-    onSuccess: ({ token }) => {
+    onSuccess: ({ token, url }) => {
       queryClient.setQueryData(designKeys.dossier(projectId), (previous?: Dossier) =>
-        previous ? { ...previous, shareToken: token } : previous
+        previous ? { ...previous, shareToken: token, shareUrl: url ?? null } : previous
       )
     },
     onError: (error) => {

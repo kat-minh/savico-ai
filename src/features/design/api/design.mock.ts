@@ -447,7 +447,7 @@ export const mockDesignApi = {
     )
   },
 
-  createShareLink: async (projectId: string): Promise<{ token: string }> => {
+  createShareLink: async (projectId: string): Promise<{ token: string; url?: string }> => {
     await mockDelay(300)
     updateStore((store) => persistShared(store, projectId))
     return { token: `share-${projectId.toLowerCase()}` }
@@ -456,6 +456,9 @@ export const mockDesignApi = {
   sendDossierEmail: async (_projectId: string, _email: string): Promise<void> => {
     await mockDelay(400)
   },
+
+  /** Mock không có link chia sẻ kiểu BE (`/estimates/shared/{shareId}#token=…`). */
+  getSharedEstimate: async (_shareId: string, _token: string): Promise<SharedDossier | null> => null,
 
   /** Xem hồ sơ qua link chia sẻ (mục III.4c) — đọc từ localStorage. */
   getSharedDossier: async (token: string): Promise<SharedDossier | null> => {

@@ -20,6 +20,8 @@ interface DossierShareDialogProps {
   onOpenChange: (open: boolean) => void
   /** Token chia sẻ do backend cấp; chưa có thì các cửa sổ hiện trạng thái chờ. */
   token: string | null
+  /** Link ĐẦY ĐỦ do BE cấp; có thì dùng nguyên thay vì dựng từ `token`. */
+  url?: string | null
   onSendEmail: (email: string) => Promise<void>
   origin?: { x: number; y: number }
 }
@@ -28,7 +30,7 @@ interface DossierShareDialogProps {
  * Ba thao tác chia sẻ bộ hồ sơ (mục III.4c): tạo link, QR code và gửi email.
  * Gộp một cửa sổ vì cả ba đều xoay quanh cùng một đường dẫn chia sẻ.
  */
-export function DossierShareDialog({ mode, onOpenChange, token, onSendEmail, origin }: DossierShareDialogProps) {
+export function DossierShareDialog({ mode, onOpenChange, token, url, onSendEmail, origin }: DossierShareDialogProps) {
   const t = useTranslations('design.dossier.share')
   const locale = useLocale() as Locale
 
@@ -39,7 +41,7 @@ export function DossierShareDialog({ mode, onOpenChange, token, onSendEmail, ori
 
   // Đường dẫn tuyệt đối chỉ dựng được sau khi mount (cần origin thật).
   const mounted = useMounted()
-  const shareUrl = token && mounted ? `${window.location.origin}/${locale}${shareRoute(token)}` : ''
+  const shareUrl = url ?? (token && mounted ? `${window.location.origin}/${locale}${shareRoute(token)}` : '')
 
   function handleOpenChange(open: boolean) {
     if (!open) {

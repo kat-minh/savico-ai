@@ -101,8 +101,10 @@ export function DossierReady({
   })
 
   const sizeMb = pdf.size ? formatNumber(pdf.size / 1_000_000, locale, { maximumFractionDigits: 1 }) : null
+  // Link do BE cấp (dự toán thật) dùng nguyên; chỉ dự án mock mới tự dựng từ token.
   const shareUrl =
-    dossier.shareToken && mounted ? `${window.location.origin}/${locale}${shareRoute(dossier.shareToken)}` : ''
+    dossier.shareUrl ??
+    (dossier.shareToken && mounted ? `${window.location.origin}/${locale}${shareRoute(dossier.shareToken)}` : '')
 
   const shares = result ? costShares(result.sections) : null
 
@@ -176,7 +178,7 @@ export function DossierReady({
   }
 
   function openShare(mode: Exclude<ShareMode, null>, trigger?: HTMLElement) {
-    if (!dossier.shareToken) onRequestShareLink()
+    if (!dossier.shareToken && !dossier.shareUrl) onRequestShareLink()
     if (trigger) {
       const rect = trigger.getBoundingClientRect()
       setDialogOrigin({
@@ -390,7 +392,7 @@ export function DossierReady({
               variant='outline'
               className='h-12 w-full'
               onClick={() => {
-                if (!dossier.shareToken) onRequestShareLink()
+                if (!dossier.shareToken && !dossier.shareUrl) onRequestShareLink()
                 setLinkExpanded(true)
               }}
             >
@@ -425,6 +427,7 @@ export function DossierReady({
         mode={shareMode}
         onOpenChange={(open) => setShareMode(open ? shareMode : null)}
         token={dossier.shareToken}
+        url={dossier.shareUrl ?? null}
         origin={dialogOrigin}
         onSendEmail={onSendEmail}
       />

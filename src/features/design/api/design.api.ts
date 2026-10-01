@@ -26,7 +26,12 @@ const BmtDesignApi = {
   deleteProject: bmtDesignApi.deleteProject,
   // Dự toán THẬT (id UUID) chờ và đọc kết quả từ BE; dự án mock (SVC-…) vẫn chạy mock.
   generateEstimate: bmtDesignApi.generateEstimate,
-  getEstimate: bmtDesignApi.getEstimate
+  getEstimate: bmtDesignApi.getEstimate,
+  getDossier: bmtDesignApi.getDossier,
+  renderDossier: bmtDesignApi.renderDossier,
+  createShareLink: bmtDesignApi.createShareLink,
+  sendDossierEmail: bmtDesignApi.sendDossierEmail,
+  getSharedEstimate: bmtDesignApi.getSharedEstimate
 } satisfies Partial<typeof mockDesignApi>
 
 export const designApi = env.NEXT_PUBLIC_USE_MOCK_API ? mockDesignApi : { ...mockDesignApi, ...BmtDesignApi }

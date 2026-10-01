@@ -187,6 +187,8 @@ export interface Dossier {
   /** Bytes — hiển thị dung lượng cạnh nút Tải hồ sơ PDF. */
   pdfSize: number | null
   shareToken: string | null
+  /** Link chia sẻ ĐẦY ĐỦ do BE cấp (kèm token trong fragment). Có thì dùng nguyên, không tự dựng từ `shareToken`. */
+  shareUrl?: string | null
 }
 
 /**

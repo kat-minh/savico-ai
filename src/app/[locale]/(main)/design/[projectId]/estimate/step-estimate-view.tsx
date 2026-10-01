@@ -10,6 +10,7 @@ import {
   EstimateFlowError,
   EstimateResultView,
   GenerationWaiting,
+  isApiEstimateId,
   StepProgress,
   useDesignStore,
   useEstimate,
@@ -165,7 +166,8 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
           <GenerationWaiting
             flow='estimate'
             complete={Boolean(result)}
-            expectedMs={9_000}
+            // AI thật không có tiến độ phần trăm để hỏi, thời gian chờ không biết trước: vòng quay chậm hơn bản mock.
+            expectedMs={isApiEstimateId(projectId) ? 60_000 : 9_000}
             province={draft?.addressDetail.provinceName}
             chatStream={<ProactiveChatStream />}
           />
