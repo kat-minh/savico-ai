@@ -20,6 +20,8 @@ interface EstimateAddressFieldProps {
   onChange: (value: string) => void
   /** Tên phường/xã + tỉnh/thành đã chọn: ghép vào lúc tìm để ưu tiên kết quả đúng khu vực. */
   context: string
+  /** Địa chỉ "phường/xã, tỉnh/thành" của vị trí vừa chọn / kéo ghim tới: form đổi ô tỉnh và phường theo đó. */
+  onRegion?: (address: string) => void
   invalid?: boolean
 }
 
@@ -30,7 +32,14 @@ interface EstimateAddressFieldProps {
  * lên bản đồ cũng đặt lại ghim, để chỉnh cho đúng chỗ. Gõ tay sửa địa chỉ thì ghim cũ bị bỏ (không còn đúng).
  * Danh sách gợi ý nằm trong dòng chảy (không vẽ tuyệt đối) để khỏi bị thẻ nhóm cắt mất.
  */
-export function EstimateAddressField({ projectId, value, onChange, context, invalid }: EstimateAddressFieldProps) {
+export function EstimateAddressField({
+  projectId,
+  value,
+  onChange,
+  context,
+  onRegion,
+  invalid
+}: EstimateAddressFieldProps) {
   const t = useTranslations('design.inputApi')
   const { location, setLocation } = useEstimateLocation(projectId)
   const [open, setOpen] = useState(false)
@@ -49,16 +58,20 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
     try {
       const found = await geocodeApi.reverse(latitude, longitude)
       // Không có địa chỉ quanh ghim thì giữ nguyên chữ đang có thay vì xoá trắng.
-      if (seq === reverseSeq.current && found?.name) onChange(found.name)
+      if (seq === reverseSeq.current && found) {
+        if (found.name) onChange(found.name)
+        if (found.address) onRegion?.(found.address)
+      }
     } catch {
       // Tra địa chỉ lỗi: ghim vẫn đúng chỗ khách chỉ, chỉ là ô chữ không đổi theo.
     }
   }
 
-  async function pick(refId: string, name: string, display: string) {
+  async function pick(refId: string, name: string, display: string, region: string) {
     if (blurTimer.current) clearTimeout(blurTimer.current)
     // Giữ số nhà khách đã gõ: gợi ý của VietMap thường chỉ có tên đường.
     onChange(addressWithHouseNumber(value, name || display))
+    onRegion?.(region)
     reverseSeq.current++
     setOpen(false)
     setResolving(true)
@@ -118,7 +131,7 @@ export function EstimateAddressField({ projectId, value, onChange, context, inva
                   <button
                     type='button'
                     className='hover:bg-accent flex w-full items-start gap-2 px-3 py-2 text-left transition-colors'
-                    onClick={() => void pick(item.refId, item.name, item.display)}
+                    onClick={() => void pick(item.refId, item.name, item.display, item.address)}
                   >
                     <MapPin className='text-muted-foreground mt-0.5 size-4 shrink-0' />
                     <span className='min-w-0'>

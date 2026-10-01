@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, ImagePlus, Loader2, Palette, RefreshCw, X } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
@@ -30,6 +30,7 @@ import {
 } from '../services/estimate-input.logic'
 import { ChoiceCards, type ChoiceOption } from './choice-cards'
 import { EstimateAddressField } from './estimate-address-field'
+import { findByName, parseRegion } from '../services/region.logic'
 
 const MISSING_FIELD_KEYS = [
   'imageOrDescription',
@@ -122,6 +123,30 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
   const input = useEstimateInput(projectId)
   const start = useStartGeneration(projectId)
   const { draft, catalog, provinces, wards, missing } = input
+  const queryClient = useQueryClient()
+
+  /**
+   * Địa chỉ "phường/xã, tỉnh/thành" của vị trí vừa chọn → đổi ô tỉnh và phường theo đó. Khớp theo tên đã chuẩn hoá với
+   * danh sách của BE; không khớp thì giữ lựa chọn cũ. Danh sách phường của tỉnh mới được nạp (và đệm) trước khi chọn.
+   */
+  async function applyRegion(address: string) {
+    const region = parseRegion(address)
+    const provinceList = provinces.data
+    const province = findByName(provinceList?.provinces, region.province)
+    if (!provinceList || !province) return
+    const wardList = await queryClient.fetchQuery({
+      queryKey: [...designKeys.locations(), 'wards', province.code, provinceList.datasetVersion],
+      queryFn: () => estimateInputApi.listWards(province.code, provinceList.datasetVersion),
+      staleTime: 30 * 60 * 1000
+    })
+    const ward = findByName(wardList, region.ward)
+    input.patch({
+      provinceCode: province.code,
+      // Phường không khớp: giữ phường cũ nếu vẫn cùng tỉnh, đổi tỉnh thì bỏ (phường cũ thuộc tỉnh khác).
+      wardCode: ward?.code ?? (draft?.provinceCode === province.code ? (draft.wardCode ?? null) : null),
+      locationDatasetVersion: provinceList.datasetVersion
+    })
+  }
   const quota = useQuery({
     queryKey: [...designKeys.quota(), 'api'],
     queryFn: () => estimateInputApi.getDesignQuota(),
@@ -387,6 +412,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   ]
                     .filter(Boolean)
                     .join(', ')}
+                  onRegion={(address) => void applyRegion(address)}
                   invalid={invalid('addressDetail')}
                 />
               </div>
