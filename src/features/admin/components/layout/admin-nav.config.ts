@@ -80,9 +80,9 @@ export const ADMIN_NAV = [
     key: 'supervision',
     icon: SafetyCertificateOutlined,
     items: [
-      { key: 'constructionSites', href: ADMIN_ROUTES.CONSTRUCTION_SITES, icon: EnvironmentOutlined },
-      { key: 'inspections', href: ADMIN_ROUTES.INSPECTIONS, icon: SafetyCertificateOutlined },
-      { key: 'supervisionStages', href: ADMIN_ROUTES.SUPERVISION_STAGES, icon: OrderedListOutlined }
+      { key: 'constructionSites', href: ADMIN_ROUTES.CONSTRUCTION_SITES, icon: EnvironmentOutlined }
+      // Đã ẩn "Dự án giám sát" (inspections) và "Giai đoạn giám sát" (supervisionStages) khỏi menu theo yêu cầu; route
+      // và trang vẫn còn để bật lại.
     ]
   },
   {
