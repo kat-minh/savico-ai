@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Clock, Headset, Landmark, Receipt, RefreshCw, Wallet } from 'lucide-react'
+import { ArrowLeft, Check, Clock, Headset, Landmark, Receipt, RefreshCw, Wallet } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -364,6 +364,14 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
             )}
             {confirmed ? t('confirmedButton') : checkingVisual ? t('checking') : t('refresh')}
           </Button>
+
+          {/* Quay lại mã QR (S04) để quét lại / xem lại thông tin chuyển khoản; bấm bước "Thanh toán" cũng được. */}
+          {confirmed ? null : (
+            <Button variant='outline' className='w-full' onClick={() => void backToPayment()}>
+              <ArrowLeft className='size-4' />
+              {t('backToQr')}
+            </Button>
+          )}
 
           <Button data-verifying-support variant='ghost' className='w-full' onClick={openSupport}>
             <Headset className='size-4' />

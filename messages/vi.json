@@ -219,7 +219,8 @@
       "PaymentOrderVersionConflict": "Đơn vừa có thay đổi. Bạn tải lại trang rồi thử lại.",
       "AccessForbidden": "Chỉ tài khoản khách hàng mới mua được gói. Tài khoản quản trị không dùng để mua.",
       "IdempotencyConflict": "Yêu cầu bị trùng. Bạn tải lại trang rồi thử lại.",
-      "PaymentInputInvalid": "Thông tin gói hoặc chu kỳ không hợp lệ. Bạn tải lại trang rồi chọn lại gói."
+      "PaymentInputInvalid": "Thông tin gói hoặc chu kỳ không hợp lệ. Bạn tải lại trang rồi chọn lại gói.",
+      "viewPurchases": "Xem lịch sử gói"
     }
   },
   "validation": {
@@ -5851,7 +5852,8 @@
       "confirmedButton": "Đã xác nhận",
       "notReceivedToast": "Chưa nhận được tiền — sẽ tự kiểm tra lại.",
       "notSeen": "Tôi đã chuyển nhưng chưa thấy cập nhật",
-      "keepPage": "Bạn có thể giữ nguyên trang này. Hệ thống sẽ tự động cập nhật."
+      "keepPage": "Bạn có thể giữ nguyên trang này. Hệ thống sẽ tự động cập nhật.",
+      "backToQr": "Quay lại mã QR"
     },
     "failed": {
       "title": "Chưa nhận được thanh toán",

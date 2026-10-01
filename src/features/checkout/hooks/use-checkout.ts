@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
 import {
+  ROUTES,
   checkoutDoneRoute,
   checkoutFailedRoute,
   checkoutPaymentRoute,
@@ -102,7 +103,15 @@ export function useCreateOrder({ beforeNavigate }: UseCreateOrderOptions = {}) {
       router.push(checkoutPaymentRoute(order.id))
     },
     onError: (error) => {
-      toast.error(paymentErrorMessage(error, (code) => t(`payment.${code}`), t('generic')))
+      const message = paymentErrorMessage(error, (code) => t(`payment.${code}`), t('generic'))
+      // Đang có đơn chờ thanh toán: đơn đó nằm ở lịch sử gói — kèm nút đưa khách tới đó để hoàn tất hoặc huỷ.
+      if (isApiError(error) && error.messageCode === 'PendingDesignOrderExists') {
+        toast.error(message, {
+          action: { label: t('payment.viewPurchases'), onClick: () => router.push(ROUTES.ACCOUNT_PURCHASES) }
+        })
+        return
+      }
+      toast.error(message)
     }
   })
 }

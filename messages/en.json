@@ -219,7 +219,8 @@
       "PaymentOrderVersionConflict": "The order just changed. Reload the page and try again.",
       "AccessForbidden": "Only customer accounts can buy plans. Admin accounts cannot be used to purchase.",
       "IdempotencyConflict": "Duplicate request. Reload the page and try again.",
-      "PaymentInputInvalid": "The plan or billing cycle is invalid. Reload the page and pick the plan again."
+      "PaymentInputInvalid": "The plan or billing cycle is invalid. Reload the page and pick the plan again.",
+      "viewPurchases": "View plan history"
     }
   },
   "validation": {
@@ -5851,7 +5852,8 @@
       "confirmedButton": "Confirmed",
       "notReceivedToast": "Payment has not arrived yet — we will check again automatically.",
       "notSeen": "I transferred but nothing has updated",
-      "keepPage": "You can leave this page open. It updates automatically."
+      "keepPage": "You can leave this page open. It updates automatically.",
+      "backToQr": "Back to the QR code"
     },
     "failed": {
       "title": "Payment not received",
