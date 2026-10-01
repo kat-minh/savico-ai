@@ -24,6 +24,32 @@ import { usePurchaseHistory } from '../hooks/use-purchase-history'
 
 type FilterStatus = 'all' | 'paid' | 'pending' | 'refunded'
 
+const ORDER_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Đơn chưa xác nhận thanh toán → bay thẳng vào trang QR của đơn đó để chuyển tiếp hoặc huỷ. Chỉ đơn thật
+ * (id là UUID) mới có trang thanh toán; giao dịch mock không có đơn nên không hiện nút.
+ */
+function ContinuePaymentButton({
+  transaction,
+  label,
+  className
+}: {
+  transaction: CmsTransaction
+  label: string
+  className?: string
+}) {
+  if (transaction.status !== 'pending' || !ORDER_ID_RE.test(transaction.id)) return null
+  return (
+    <Button asChild size='sm' className={className}>
+      <Link href={checkoutPaymentRoute(transaction.id)}>
+        <QrCode className='size-3.5' />
+        {label}
+      </Link>
+    </Button>
+  )
+}
+
 const STATUS_TONE: Record<CmsTransactionStatus, string> = {
   paid: 'bg-success/10 text-success',
   pending: 'bg-warning/20 text-warning-strong',
@@ -494,15 +520,22 @@ export function PurchaseHistory() {
                         />
                       </td>
                       <td className='px-4 py-3 text-right'>
-                        <Button
-                          variant='outline'
-                          size='sm'
-                          className='h-8 text-xs hover:bg-accent/70 motion-reduce:transition-none'
-                          onClick={() => handleOpenReceipt(transaction)}
-                        >
-                          <FileText className='size-3.5' />
-                          {t('receipt')}
-                        </Button>
+                        <div className='flex flex-wrap justify-end gap-2'>
+                          <ContinuePaymentButton
+                            transaction={transaction}
+                            label={t('continuePayment')}
+                            className='h-8 text-xs'
+                          />
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='h-8 text-xs hover:bg-accent/70 motion-reduce:transition-none'
+                            onClick={() => handleOpenReceipt(transaction)}
+                          >
+                            <FileText className='size-3.5' />
+                            {t('receipt')}
+                          </Button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
@@ -542,6 +575,7 @@ export function PurchaseHistory() {
                     </div>
                     <p className='shrink-0 text-sm font-semibold'>{formatCurrency(transaction.amount, locale)}</p>
                   </div>
+                  <ContinuePaymentButton transaction={transaction} label={t('continuePayment')} className='w-full' />
                   <Button
                     variant='outline'
                     size='sm'
