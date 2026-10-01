@@ -142,7 +142,7 @@ export function EstimateAddressField({
       ) : null}
 
       {resolveFailed ? <p className='text-destructive text-xs'>{t('address.resolveFailed')}</p> : null}
-      {unconfirmed && !open ? <p className='text-destructive text-xs'>{t('address.unconfirmed')}</p> : null}
+      {unconfirmed ? <p className='text-destructive text-xs'>{t('address.unconfirmed')}</p> : null}
 
       <div id='field-location' className='space-y-2'>
         {latitude !== null && longitude !== null ? (
