@@ -51,7 +51,14 @@ interface RetryableConfig extends InternalAxiosRequestConfig {
  * endpoint means bad credentials (not an expired session), and the
  * refresh/logout endpoints would otherwise fire a pointless refresh.
  */
-const REFRESH_EXEMPT_PATHS = [AUTH_ENDPOINTS.LOGIN, AUTH_ENDPOINTS.REFRESH, AUTH_ENDPOINTS.LOGOUT]
+const REFRESH_EXEMPT_PATHS = [
+  AUTH_ENDPOINTS.LOGIN,
+  AUTH_ENDPOINTS.REFRESH,
+  AUTH_ENDPOINTS.LOGOUT,
+  AUTH_ENDPOINTS.GOOGLE_START,
+  AUTH_ENDPOINTS.GOOGLE_COMPLETE,
+  AUTH_ENDPOINTS.GOOGLE_VERIFY_EMAIL
+]
 
 function isRefreshExempt(url: string | undefined): boolean {
   return Boolean(url) && REFRESH_EXEMPT_PATHS.some((p) => url!.includes(p))

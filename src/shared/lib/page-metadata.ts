@@ -40,6 +40,7 @@ export type PageMetaKey =
   | 'checkoutDone'
   | 'checkoutFailed'
   | 'share'
+  | 'googleCallback'
 
 /**
  * `generateMetadata` cho một trang: tiêu đề riêng theo mẫu "Chủ đề trang | BuildX"

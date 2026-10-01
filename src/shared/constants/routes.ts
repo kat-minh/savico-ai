@@ -25,6 +25,8 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
+  /** Đích Google đưa người dùng về (= `WebReturnUri` của BE); nhận `#attemptId=…&completionCode=…`. */
+  GOOGLE_CALLBACK: '/callback',
 
   // Thiết kế & Dự toán — luồng 3 bước (screens 4–10)
   DESIGN: '/design',

@@ -190,6 +190,31 @@
       "submit": "Đổi mật khẩu",
       "success": "Đổi mật khẩu thành công.",
       "error": "Không đổi được mật khẩu. Vui lòng thử lại."
+    },
+    "google": {
+      "storageUnavailable": "Trình duyệt đang chặn lưu trữ tạm nên chưa đăng nhập Google được. Bạn bật lại lưu trữ (hoặc thoát chế độ riêng tư) rồi thử lại.",
+      "callback": {
+        "working": "Đang hoàn tất đăng nhập bằng Google…",
+        "failedTitle": "Chưa đăng nhập được bằng Google",
+        "retry": "Thử lại với Google",
+        "backHome": "Về trang chủ",
+        "emailTitle": "Xác minh email của bạn",
+        "emailDescription": "Chúng tôi vừa gửi mã 6 số tới {email}. Nhập mã để hoàn tất đăng nhập.",
+        "codeLabel": "Mã xác minh",
+        "codeSubmit": "Xác nhận",
+        "codeInvalid": "Mã gồm đúng 6 chữ số.",
+        "codeWrong": "Mã chưa đúng hoặc đã hết hạn. Bạn kiểm tra lại mã trong email."
+      },
+      "errors": {
+        "cancelled": "Bạn đã huỷ đăng nhập ở Google. Cần đăng nhập thì bấm \"Tiếp tục với Google\" lần nữa.",
+        "expired": "Lượt đăng nhập này không còn hiệu lực (đã hết hạn, đã dùng hoặc mở từ nơi khác). Bạn bắt đầu lại nhé.",
+        "notAllowed": "Không thể đăng nhập Google bằng tài khoản này. Nếu bạn cho rằng đây là nhầm lẫn, hãy liên hệ hỗ trợ.",
+        "conflict": "Không thể hoàn tất liên kết với Google cho tài khoản này. Bạn bắt đầu lại hoặc liên hệ hỗ trợ nếu lỗi tiếp diễn.",
+        "busy": "Tài khoản vừa có thay đổi nên chưa hoàn tất được. Bạn thử đăng nhập lại.",
+        "rateLimited": "Bạn thử quá nhiều lần. Vui lòng chờ ít phút rồi thử lại.",
+        "unavailable": "Đăng nhập Google tạm thời chưa dùng được. Bạn thử lại sau hoặc đăng nhập bằng email.",
+        "generic": "Đã có lỗi khi đăng nhập bằng Google. Bạn thử lại sau ít phút."
+      }
     }
   },
   "errors": {
@@ -6482,7 +6507,8 @@
     "checkoutVerifying": "Đang xác nhận thanh toán",
     "checkoutDone": "Hoàn tất đơn hàng",
     "checkoutFailed": "Thanh toán chưa thành công",
-    "share": "Hồ sơ dự án được chia sẻ"
+    "share": "Hồ sơ dự án được chia sẻ",
+    "googleCallback": "Đăng nhập bằng Google"
   },
   "address": {
     "searching": "Đang tìm địa chỉ…",

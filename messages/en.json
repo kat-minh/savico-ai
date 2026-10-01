@@ -190,6 +190,31 @@
       "submit": "Change password",
       "success": "Password changed successfully.",
       "error": "Could not change the password. Please try again."
+    },
+    "google": {
+      "storageUnavailable": "Your browser is blocking temporary storage, so Google sign-in can't continue. Turn it back on (or leave private mode) and try again.",
+      "callback": {
+        "working": "Finishing your Google sign-in…",
+        "failedTitle": "Couldn't sign in with Google",
+        "retry": "Try Google again",
+        "backHome": "Back to home",
+        "emailTitle": "Verify your email",
+        "emailDescription": "We sent a 6-digit code to {email}. Enter it to finish signing in.",
+        "codeLabel": "Verification code",
+        "codeSubmit": "Confirm",
+        "codeInvalid": "The code is exactly 6 digits.",
+        "codeWrong": "That code is wrong or has expired. Check the code in your email."
+      },
+      "errors": {
+        "cancelled": "You cancelled the sign-in at Google. Press \"Continue with Google\" again whenever you're ready.",
+        "expired": "This sign-in attempt is no longer valid (expired, already used or opened elsewhere). Please start again.",
+        "notAllowed": "Google sign-in isn't available for this account. If you think this is a mistake, contact support.",
+        "conflict": "We couldn't link Google to this account. Start again, or contact support if it keeps happening.",
+        "busy": "The account just changed so the sign-in couldn't finish. Please try again.",
+        "rateLimited": "Too many attempts. Please wait a few minutes and try again.",
+        "unavailable": "Google sign-in is temporarily unavailable. Try again later or sign in with email.",
+        "generic": "Something went wrong signing in with Google. Please try again in a few minutes."
+      }
     }
   },
   "errors": {
@@ -6482,7 +6507,8 @@
     "checkoutVerifying": "Confirming payment",
     "checkoutDone": "Order complete",
     "checkoutFailed": "Payment unsuccessful",
-    "share": "Shared project dossier"
+    "share": "Shared project dossier",
+    "googleCallback": "Sign in with Google"
   },
   "address": {
     "searching": "Searching addresses…",

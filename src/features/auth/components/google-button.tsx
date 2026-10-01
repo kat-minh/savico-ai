@@ -1,9 +1,16 @@
 'use client'
 
+import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
+import { usePathname } from '@/i18n/navigation'
 import { Button } from '@/shared/components/ui/button'
+import { env } from '@/shared/config/env'
+import { ROUTES } from '@/shared/constants/routes'
+import { useStartGoogleLogin } from '../hooks/use-google-login'
+import { returnToOf, safeReturnTo } from '../services/google-login.logic'
 
 /** Google's brand "G" mark (inline so we don't add an icon dependency). */
 function GoogleIcon() {
@@ -30,15 +37,29 @@ function GoogleIcon() {
 }
 
 /**
- * "Continue with Google" button. UI-first: the OAuth handshake is mocked until
- * the backend exposes the Google sign-in endpoint.
+ * "Tiếp tục với Google": xin BE một lượt đăng nhập rồi chuyển cả trang sang Google (không popup). Xong Google/BE đưa về
+ * `/callback` để lấy phiên, rồi quay lại trang khách đang xem (hoặc `redirect` nếu bị đẩy từ route cần đăng nhập).
+ * Hành động đang chờ trong popup (vd. tải/xem) là closure nên không sống qua lần chuyển trang — khách bấm lại sau khi về.
+ * Chế độ mock auth không có BE nên chỉ báo "sắp có".
  */
 export function GoogleButton() {
   const t = useTranslations('auth.social')
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const start = useStartGoogleLogin()
+
+  function onClick() {
+    if (env.NEXT_PUBLIC_USE_MOCK_AUTH) {
+      toast.info(t('soon'))
+      return
+    }
+    const here = pathname === ROUTES.GOOGLE_CALLBACK ? undefined : returnToOf(pathname, window.location.search)
+    start.mutate(safeReturnTo(searchParams.get('redirect')) ?? here)
+  }
 
   return (
-    <Button type='button' variant='outline' className='w-full' onClick={() => toast.info(t('soon'))}>
-      <GoogleIcon />
+    <Button type='button' variant='outline' className='w-full' onClick={onClick} disabled={start.isPending}>
+      {start.isPending ? <Loader2 className='size-4 animate-spin' /> : <GoogleIcon />}
       {t('continueGoogle')}
     </Button>
   )

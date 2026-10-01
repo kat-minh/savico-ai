@@ -29,7 +29,11 @@ export const AUTH_ENDPOINTS = {
   VERIFY_RESET_CODE: '/users/verify_change_password_code',
   VERIFY_ACCOUNT: '/users/verify_account',
   RESEND_VERIFY_CODE: '/users/resend_verify_account_code',
-  ME: '/users/me'
+  ME: '/users/me',
+  /** Đăng nhập Google (web): start → Google → `/callback` → complete (→ verify-email nếu cần). */
+  GOOGLE_START: '/users/google/start',
+  GOOGLE_COMPLETE: '/users/google/complete',
+  GOOGLE_VERIFY_EMAIL: '/users/google/verify-email'
 } as const
 
 /** localStorage key under which the (non-sensitive) auth profile is persisted. */
