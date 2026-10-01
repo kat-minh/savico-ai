@@ -4,9 +4,11 @@ import { AlertCircle, Headset, RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
+import { useRouter } from '@/i18n/navigation'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { ORDER_HOLD_HOURS } from '../constants/checkout.constants'
+import { checkoutConfirmRoute } from '@/shared/constants/routes'
+import { isApiOrderId, ORDER_HOLD_HOURS } from '../constants/checkout.constants'
 import { useOrder, useRegenerateQr } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -28,6 +30,7 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
   const t = useTranslations('checkout.failed')
   const { data: order, isPending } = useOrder(orderId)
   const regenerate = useRegenerateQr(orderId)
+  const router = useRouter()
 
   if (isPending || !order) {
     return (
@@ -72,7 +75,15 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
         <Button
           className='h-13 w-full text-sm font-bold tracking-wide uppercase'
           size='lg'
-          onClick={() => regenerate.mutate()}
+          onClick={() => {
+            // Đơn thật đã hỏng (hết hạn / huỷ) thì BE không tạo lại QR được — "tạo lại" chỉ đọc lại chính đơn đó
+            // và trang QR lại đá về đây. Muốn trả tiếp phải tạo đơn MỚI cho cùng gói; BE tự đóng đơn cũ.
+            if (isApiOrderId(orderId)) {
+              router.push(checkoutConfirmRoute(order.product.id, order.projectId, order.api?.offerKey))
+              return
+            }
+            regenerate.mutate()
+          }}
           disabled={regenerate.isPending}
         >
           <RotateCcw className='size-4' />

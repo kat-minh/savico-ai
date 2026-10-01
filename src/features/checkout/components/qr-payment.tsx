@@ -291,13 +291,6 @@ export function QrPayment({ orderId }: QrPaymentProps) {
       copyValue: order.transfer.accountNumber.replace(/\s/g, ''),
       highlight: false
     },
-    {
-      key: 'holder',
-      label: t('accountName'),
-      value: order.transfer.accountName,
-      copyValue: order.transfer.accountName,
-      highlight: false
-    },
     { key: 'amount', label: t('amount'), value: amountLabel, copyValue: String(payable), highlight: false },
     {
       key: 'content',

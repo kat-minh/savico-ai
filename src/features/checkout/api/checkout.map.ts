@@ -96,11 +96,11 @@ export function mapOrder(detail: BmtPaymentOrderDetail, nowMs: number = Date.now
     expiresAt: detail.expiresAtUtc,
     ...(detail.paidAtUtc ? { paidAt: detail.paidAtUtc } : {}),
     transfer: {
-      // Tên chủ tài khoản không có trong PaymentConnection nên cố định là BUILDX. Nội dung
+      // Tên chủ tài khoản không có trong PaymentConnection nên để trống (trang QR không hiện dòng này). Nội dung
       // chuyển khoản chính là `paymentCode` khi BE không trả riêng.
       bankName: beneficiary.bankCode ?? '',
       accountNumber: beneficiary.accountNumber ?? '',
-      accountName: 'BUILDX',
+      accountName: '',
       content: beneficiary.transferContent || paymentCode,
       qrPayload: detail.qrUrl ?? ''
     },

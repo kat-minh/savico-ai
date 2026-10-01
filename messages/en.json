@@ -5811,7 +5811,6 @@
       "manualBody": "Use the details below if you cannot scan the QR code.",
       "bank": "Bank",
       "accountNumber": "Account number",
-      "accountName": "Account holder",
       "amount": "Amount",
       "content": "Transfer reference",
       "copy": "Copy",
