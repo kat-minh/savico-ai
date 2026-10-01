@@ -133,7 +133,9 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
             ? project
               ? t('pageTitleWithProject', { name: project.name, id: project.id })
               : t('pageTitle')
-            : tWaiting('pageTitle')
+            : failed
+              ? t('pageTitle')
+              : tWaiting('pageTitle')
         }
         subtitle={result && resultVisible ? resultSubtitle || undefined : undefined}
         back={result && resultVisible ? { href: ROUTES.DESIGN, label: tEntry('backToList') } : undefined}
