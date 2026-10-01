@@ -1541,7 +1541,25 @@
           "description": "Nhập địa chỉ email, chúng tôi gửi kèm link xem hồ sơ.",
           "placeholder": "email@vidu.com",
           "submit": "Gửi hồ sơ",
-          "sent": "Đã gửi hồ sơ tới {email}."
+          "sent": "Đã gửi hồ sơ tới {email}.",
+          "unknown": "Đã gửi yêu cầu tới {email} nhưng chưa rõ thư đã tới chưa. Bạn nhờ người nhận kiểm tra lại, hoặc gửi lại sau."
+        },
+        "setup": {
+          "title": "Chọn ngày hết hạn của link",
+          "description": "Người có link xem và tải được hồ sơ không cần đăng nhập, tới hết ngày bạn chọn.",
+          "expiryLabel": "Link dùng được tới hết ngày",
+          "expiryHint": "Tính theo giờ Việt Nam: chọn ngày hôm nay thì link hết hạn lúc 00:00 ngày mai. Bạn thu hồi sớm được bất cứ lúc nào.",
+          "create": "Tạo link"
+        },
+        "qrAlt": "Mã QR của link chia sẻ hồ sơ",
+        "expiry": "Link dùng được tới hết ngày {date}.",
+        "expiryUnknown": "Link đang hiệu lực.",
+        "expiryKept": "Bản này đã có link còn hiệu lực nên giữ nguyên ngày hết hạn cũ. Muốn đổi ngày, bạn thu hồi link rồi tạo lại.",
+        "revoke": {
+          "button": "Thu hồi link",
+          "confirm": "Thu hồi ngay",
+          "cancel": "Huỷ",
+          "done": "Đã thu hồi link. Người có link (kể cả QR hoặc email đã gửi) không xem được hồ sơ nữa."
         }
       },
       "pageTitle": "Hồ sơ thi công",
@@ -1562,7 +1580,18 @@
       "eyebrow": "Hồ sơ được chia sẻ",
       "floorArea": "Diện tích sàn {value} m²",
       "invalidTitle": "Link không còn hiệu lực",
-      "invalidDescription": "Link chia sẻ này đã hết hạn hoặc không tồn tại. Hãy đề nghị người gửi tạo link mới."
+      "invalidDescription": "Link chia sẻ này đã hết hạn hoặc không tồn tại. Hãy đề nghị người gửi tạo link mới.",
+      "imagesTitle": "Hình ảnh thiết kế",
+      "images": {
+        "perspective": "Phối cảnh",
+        "cover": "Ảnh bìa",
+        "floorPlan": "Mặt bằng 2D"
+      },
+      "downloadTitle": "Tải hồ sơ",
+      "downloadPdf": "Tải hồ sơ PDF",
+      "downloadXlsx": "Tải bảng dự toán Excel",
+      "downloading": "Đang chuẩn bị tệp…",
+      "downloadFailed": "Chưa tải được tệp. Bạn thử lại sau ít phút, hoặc link có thể đã hết hạn."
     },
     "help": {
       "label": "Xem hướng dẫn",

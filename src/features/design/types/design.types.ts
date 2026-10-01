@@ -189,6 +189,17 @@ export interface Dossier {
   shareToken: string | null
   /** Link chia sẻ ĐẦY ĐỦ do BE cấp (kèm token trong fragment). Có thì dùng nguyên, không tự dựng từ `shareToken`. */
   shareUrl?: string | null
+  /** Ngày hết hạn của link chia sẻ hiện hành (`YYYY-MM-DD`, giờ Việt Nam). */
+  shareExpiry?: string | null
+  /** Ảnh thật của kết quả AI (route BE, cookie đăng nhập đi kèm): bìa, mặt bằng 2D, phối cảnh. */
+  images?: DossierImages
+}
+
+/** Đường dẫn ảnh kết quả theo vai trò tệp (`cover-image`, `floor-plan-2d`, `perspective`). */
+export interface DossierImages {
+  cover: string | null
+  floorPlan: string | null
+  perspective: string | null
 }
 
 /**
@@ -196,6 +207,8 @@ export interface Dossier {
  * (mục III.4c). Không kèm số điện thoại hay thông tin cá nhân khác.
  */
 export interface SharedDossier {
+  /** Id ảnh kết quả theo vai trò — người xem tải về bằng token của link. */
+  files?: { fileId: string; roleKey: string }[]
   projectName: string
   address: string
   createdAt: string

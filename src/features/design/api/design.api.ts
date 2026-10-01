@@ -30,6 +30,7 @@ const BmtDesignApi = {
   getDossier: bmtDesignApi.getDossier,
   renderDossier: bmtDesignApi.renderDossier,
   createShareLink: bmtDesignApi.createShareLink,
+  revokeShareLink: bmtDesignApi.revokeShareLink,
   sendDossierEmail: bmtDesignApi.sendDossierEmail,
   getSharedEstimate: bmtDesignApi.getSharedEstimate
 } satisfies Partial<typeof mockDesignApi>

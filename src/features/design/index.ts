@@ -37,7 +37,13 @@ export { useProjects, useProject, useCreateProject, useRenameProject, useDeleteP
 export { useDesignQuota } from './hooks/use-design-quota'
 export { useEstimate } from './hooks/use-estimate'
 export { useDownloadEstimate } from './hooks/use-download-estimate'
-export { useDossier, useRenderDossier, useCreateShareLink, useSendDossierEmail } from './hooks/use-dossier'
+export {
+  useDossier,
+  useRenderDossier,
+  useCreateShareLink,
+  useRevokeShareLink,
+  useSendDossierEmail
+} from './hooks/use-dossier'
 export { useDownloadDossier } from './hooks/use-download-dossier'
 export { useAdvisory } from './hooks/use-advisory'
 export { useSaveInput } from './hooks/use-save-input'

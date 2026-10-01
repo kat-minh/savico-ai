@@ -14,6 +14,8 @@ import {
   StepProgress,
   useAdvisory,
   useCreateShareLink,
+  useRevokeShareLink,
+  isApiEstimateId,
   useDesignStore,
   useDossier,
   useEstimate,
@@ -52,6 +54,9 @@ export function StepDossierView({ projectId }: { projectId: string }) {
   const dossier = dossierQuery.data
   const render = useRenderDossier(projectId)
   const createShareLink = useCreateShareLink(projectId)
+  const revokeShareLink = useRevokeShareLink(projectId)
+  // Dự toán THẬT: chủ bản chọn ngày hết hạn và thu hồi link được; dự án mock giữ link tạo sẵn.
+  const manageShare = isApiEstimateId(projectId)
   const sendEmail = useSendDossierEmail(projectId)
   const advisory = useAdvisory(estimate, user?.name ?? '', draft)
   const panelMinimized = useHandbookPanelStore((s) => s.minimized)
@@ -160,10 +165,26 @@ export function StepDossierView({ projectId }: { projectId: string }) {
               fromRender={render.isSuccess}
               filesEntering={flow.phase === 'files'}
               onFilesEntered={flow.finish}
-              onRequestShareLink={() => createShareLink.mutate()}
+              onRequestShareLink={() => createShareLink.mutate(undefined)}
+              onCreateLink={
+                manageShare
+                  ? async (expiryDate) => {
+                      await createShareLink.mutateAsync(expiryDate)
+                    }
+                  : undefined
+              }
+              onRevokeLink={
+                manageShare
+                  ? async () => {
+                      if (dossier?.shareToken) await revokeShareLink.mutateAsync(dossier.shareToken)
+                    }
+                  : undefined
+              }
               onSendEmail={async (email) => {
-                await sendEmail.mutateAsync(email)
-                toast.success(t('share.email.sent', { email }))
+                const outcome = await sendEmail.mutateAsync(email)
+                if (outcome === 'unknown') toast.warning(t('share.email.unknown', { email }))
+                else toast.success(t('share.email.sent', { email }))
+                return outcome
               }}
             />
           ) : (

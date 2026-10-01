@@ -1,3 +1,4 @@
+import { env } from '@/shared/config/env'
 import { http } from '@/shared/lib/api'
 
 /**
@@ -62,7 +63,95 @@ export interface ShareLink {
   requestedExpiryApplied?: boolean
 }
 
+export interface GenerationStatus {
+  operationId: string
+  /** Pending, Succeeded, Failed, TimedOut. */
+  state: string
+  acceptedAtUtc: string
+  deadlineUtc: string
+  settledAtUtc?: string | null
+  failureCode?: string | null
+  /** Route backend của kết quả, chỉ có khi Succeeded. */
+  resultUrl?: string | null
+}
+
+const SHARE_TOKEN_HEADER = 'X-Estimate-Share-Token'
+
+export const sleep = (ms: number): Promise<void> => new Promise((resolve) => window.setTimeout(resolve, ms))
+
+const EXPORT_POLL_MS = 2_000
+const EXPORT_MAX_WAIT_MS = 2 * 60_000
+
+/** Chờ tệp xuất xong (Ready) hoặc hỏng (Failed). Quá hạn chờ thì coi là hỏng `ExportTimedOut`. */
+export async function waitForExport(
+  fetchStatus: () => Promise<ExportStatus>,
+  { signal }: { signal?: AbortSignal } = {}
+): Promise<ExportStatus> {
+  const startedAt = Date.now()
+  for (;;) {
+    const status = await fetchStatus()
+    if (status.state === 'Ready' || status.state === 'Failed') return status
+    if (signal?.aborted) return { ...status, state: 'Failed', failureCode: 'Aborted' }
+    if (Date.now() - startedAt > EXPORT_MAX_WAIT_MS)
+      return { ...status, state: 'Failed', failureCode: 'ExportTimedOut' }
+    await sleep(EXPORT_POLL_MS)
+  }
+}
+
+/* Mã tác vụ AI vừa gửi được nhớ theo phiên: trang chờ hỏi đúng tác vụ đó (`GET …/generations/{id}`) thay vì đoán. */
+const operationKey = (estimateId: string) => `savico.generation.${estimateId}`
+
+export const rememberOperation = (estimateId: string, operationId: string) => {
+  try {
+    sessionStorage.setItem(operationKey(estimateId), operationId)
+  } catch {
+    // Không có sessionStorage: trang chờ rơi về hỏi trạng thái bản dự toán.
+  }
+}
+
+export const recallOperation = (estimateId: string): string | null => {
+  try {
+    return sessionStorage.getItem(operationKey(estimateId))
+  } catch {
+    return null
+  }
+}
+
+export const forgetOperation = (estimateId: string) => {
+  try {
+    sessionStorage.removeItem(operationKey(estimateId))
+  } catch {
+    // Bỏ qua.
+  }
+}
+
+/** Gốc API cho `fetch` thô (tệp nhị phân cần header riêng nên không đi qua Axios `http`). */
+const apiBase = () => env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, '')
+
+/**
+ * Tải một tệp CÔNG KHAI của link chia sẻ thành Blob. Token đi ở header nên không dùng được `<img src>` hay link tải
+ * trực tiếp; không gửi cookie đăng nhập (quyền qua link chỉ gồm xem và tải, BR-PROJ-006 khoản 5).
+ */
+export async function fetchSharedBlob(path: string, token: string): Promise<{ blob: Blob; fileName: string | null }> {
+  const response = await fetch(`${apiBase()}${path}`, { headers: { [SHARE_TOKEN_HEADER]: token }, credentials: 'omit' })
+  if (!response.ok) throw new Error(`SharedFile${response.status}`)
+  const disposition = response.headers.get('Content-Disposition') ?? ''
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1]
+  const plain = /filename="?([^";]+)"?/i.exec(disposition)?.[1]
+  let fileName: string | null = null
+  try {
+    fileName = encoded ? decodeURIComponent(encoded) : (plain ?? null)
+  } catch {
+    fileName = plain ?? null
+  }
+  return { blob: await response.blob(), fileName }
+}
+
 export const estimateGenerationApi = {
+  /** `GET …/generations/{operationId}` — trạng thái đúng tác vụ vừa gửi (kèm mã lỗi khi Failed / TimedOut). */
+  getGeneration: (estimateId: string, operationId: string) =>
+    http.get<GenerationStatus>(`/estimates/${estimateId}/generations/${operationId}`),
+
   /** `POST /estimates/{id}/generations` — giữ một lượt, khoá đầu vào. `key` cố định để bấm đúp không giữ hai lượt. */
   start: (estimateId: string, inputVersion: number, key?: string) =>
     http.post<GenerationStarted>(`/estimates/${estimateId}/generations`, { inputVersion }, idempotent(key)),
@@ -91,6 +180,28 @@ export const estimateGenerationApi = {
 
   revokeShare: (estimateId: string, shareId: string) =>
     http.post<{ state: string }>(`/estimates/${estimateId}/shares/${shareId}/revoke`, {}, idempotent()),
+
+  /** Xuất tệp qua LINK công khai (không AI, không lượt): header token + khoá idempotency. */
+  publicRequestExport: (shareId: string, token: string, format: ExportFormat, key?: string) =>
+    http.post<{ exportId: string; state: string; attemptNumber: number }>(
+      `/public/estimate-shares/${shareId}/exports`,
+      { format },
+      { headers: { [SHARE_TOKEN_HEADER]: token, 'Idempotency-Key': key ?? crypto.randomUUID() } }
+    ),
+
+  publicGetExport: (shareId: string, token: string, exportId: string) =>
+    http.get<ExportStatus>(`/public/estimate-shares/${shareId}/exports/${exportId}`, {
+      headers: { [SHARE_TOKEN_HEADER]: token }
+    }),
+
+  /** Đường dẫn tệp xuất / ảnh kết quả của link công khai (dùng với `fetchSharedBlob`). */
+  publicExportFilePath: (shareId: string, exportId: string) =>
+    `/public/estimate-shares/${shareId}/exports/${exportId}/file`,
+  publicFilePath: (shareId: string, fileId: string) => `/public/estimate-shares/${shareId}/files/${fileId}`,
+
+  /** Trạng thái gửi email: Queued, Accepted (SMTP đã nhận), Unknown (không biết), Failed. */
+  getEmailStatus: (estimateId: string, emailRequestId: string) =>
+    http.get<{ state: string; failureCode?: string | null }>(`/estimates/${estimateId}/emails/${emailRequestId}`),
 
   /** Xem hồ sơ qua link chia sẻ — công khai, gửi token ở header `X-Estimate-Share-Token`. */
   getShared: (shareId: string, token: string) =>

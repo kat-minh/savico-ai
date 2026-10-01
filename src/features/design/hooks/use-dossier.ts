@@ -49,13 +49,36 @@ export function useRenderDossier(projectId: string) {
 export function useCreateShareLink(projectId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('errors')
+  const tShare = useTranslations('design.dossier.share')
 
   return useMutation({
-    mutationFn: () => designApi.createShareLink(projectId),
-    onSuccess: ({ token, url }) => {
+    mutationFn: (expiryDate?: string) => designApi.createShareLink(projectId, expiryDate),
+    onSuccess: ({ token, url, expiryDate, applied }) => {
       queryClient.setQueryData(designKeys.dossier(projectId), (previous?: Dossier) =>
-        previous ? { ...previous, shareToken: token, shareUrl: url ?? null } : previous
+        previous ? { ...previous, shareToken: token, shareUrl: url ?? null, shareExpiry: expiryDate ?? null } : previous
       )
+      // Đã có link còn hiệu lực với ngày khác: BE giữ nguyên ngày cũ (muốn đổi thì thu hồi rồi tạo lại).
+      if (applied === false) toast.info(tShare('expiryKept'))
+    },
+    onError: (error) => {
+      toast.error(isApiError(error) ? error.message : t('generic'))
+    }
+  })
+}
+
+/** Thu hồi link chia sẻ hiện hành (dự toán thật). */
+export function useRevokeShareLink(projectId: string) {
+  const queryClient = useQueryClient()
+  const t = useTranslations('errors')
+  const tShare = useTranslations('design.dossier.share')
+
+  return useMutation({
+    mutationFn: (shareId: string) => designApi.revokeShareLink(projectId, shareId),
+    onSuccess: () => {
+      queryClient.setQueryData(designKeys.dossier(projectId), (previous?: Dossier) =>
+        previous ? { ...previous, shareToken: null, shareUrl: null, shareExpiry: null } : previous
+      )
+      toast.success(tShare('revoke.done'))
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))

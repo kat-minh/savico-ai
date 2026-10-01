@@ -162,3 +162,9 @@ export function mapEstimateContent(content: unknown, context: MapContext): Mappe
     notice: typeof root.notice === 'string' ? root.notice : ''
   }
 }
+
+/** `YYYY-MM-DD` theo giờ Việt Nam, sau `offsetDays` ngày (BE tính hạn link chia sẻ theo lịch Asia/Ho_Chi_Minh). */
+export function vietnamDate(offsetDays = 0): string {
+  const target = new Date(Date.now() + offsetDays * 86_400_000)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(target)
+}

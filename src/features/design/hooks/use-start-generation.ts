@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
 import { isApiError } from '@/shared/lib/api'
-import { estimateGenerationApi } from '../api/estimate-generation.api'
+import { estimateGenerationApi, rememberOperation } from '../api/estimate-generation.api'
 import { estimateInputApi } from '../api/estimate-input.api'
 
 /** Nhóm lỗi khi gửi AI — mỗi nhóm một câu cho khách (khoá `design.estimateApi.startError.<kind>`). */
@@ -51,7 +51,10 @@ export function useStartGeneration(projectId: string) {
     mutationFn: async (knownVersion?: number) => {
       const version = knownVersion ?? (await estimateInputApi.getEstimate(projectId)).inputVersion
       if (keyRef.current?.version !== version) keyRef.current = { version, key: crypto.randomUUID() }
-      return estimateGenerationApi.start(projectId, version, keyRef.current.key)
+      const started = await estimateGenerationApi.start(projectId, version, keyRef.current.key)
+      // Trang chờ hỏi đúng tác vụ này (kèm mã lỗi chính xác khi thất bại).
+      rememberOperation(projectId, started.operationId)
+      return started
     }
   })
 

@@ -1541,7 +1541,25 @@
           "description": "Enter an email address and we'll send the view link.",
           "placeholder": "email@example.com",
           "submit": "Send dossier",
-          "sent": "Dossier sent to {email}."
+          "sent": "Dossier sent to {email}.",
+          "unknown": "The request to {email} was sent, but we can't tell whether the email arrived. Ask the recipient to check, or send again later."
+        },
+        "setup": {
+          "title": "Choose the link's expiry date",
+          "description": "Anyone with the link can view and download the dossier without signing in, until the end of the day you choose.",
+          "expiryLabel": "Link works until the end of",
+          "expiryHint": "Vietnam time: picking today means the link expires at 00:00 tomorrow. You can revoke it early at any time.",
+          "create": "Create link"
+        },
+        "qrAlt": "QR code of the dossier share link",
+        "expiry": "The link works until the end of {date}.",
+        "expiryUnknown": "The link is active.",
+        "expiryKept": "This estimate already has an active link, so its original expiry date is kept. To change the date, revoke the link and create a new one.",
+        "revoke": {
+          "button": "Revoke link",
+          "confirm": "Revoke now",
+          "cancel": "Cancel",
+          "done": "Link revoked. Anyone with it (including the QR or emails already sent) can no longer open the dossier."
         }
       },
       "pageTitle": "Construction dossier",
@@ -1562,7 +1580,18 @@
       "eyebrow": "Shared dossier",
       "floorArea": "Floor area {value} m²",
       "invalidTitle": "This link is no longer valid",
-      "invalidDescription": "The share link has expired or does not exist. Ask the sender for a new one."
+      "invalidDescription": "The share link has expired or does not exist. Ask the sender for a new one.",
+      "imagesTitle": "Design images",
+      "images": {
+        "perspective": "Perspective",
+        "cover": "Cover",
+        "floorPlan": "2D floor plan"
+      },
+      "downloadTitle": "Download the dossier",
+      "downloadPdf": "Download PDF dossier",
+      "downloadXlsx": "Download Excel estimate",
+      "downloading": "Preparing the file…",
+      "downloadFailed": "Couldn't download the file. Try again in a few minutes — the link may also have expired."
     },
     "help": {
       "label": "View guide",

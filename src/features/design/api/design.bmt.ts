@@ -8,10 +8,18 @@ import {
   stepOfState
 } from '../services/estimate-result.logic'
 import { projectStatus } from '../services/project-list.service'
-import type { Dossier, EstimateResult, Project, SharedDossier } from '../types/design.types'
+import type { Dossier, DossierImages, EstimateResult, Project, SharedDossier } from '../types/design.types'
 import type { CreateProjectPayload } from './design.api'
 import { mockDesignApi } from './design.mock'
-import { estimateGenerationApi, type ExportStatus, type ShareLink } from './estimate-generation.api'
+import {
+  estimateGenerationApi,
+  forgetOperation,
+  recallOperation,
+  sleep as sleepMs,
+  waitForExport as pollExport,
+  type ResultFile,
+  type ShareLink
+} from './estimate-generation.api'
 
 /**
  * Nối màn "Dự án của tôi" (danh sách + xóa dự toán) vào BMT API — GIỮ MOCK LÀM
@@ -218,7 +226,9 @@ export const bmtDesignApi = {
       status: pdf ? 'ready' : 'idle',
       pdfUrl: pdf?.exportId ? estimateGenerationApi.exportFileUrl(projectId, pdf.exportId) : null,
       shareToken: share?.shareId ?? null,
-      shareUrl: share?.url ?? null
+      shareUrl: share?.url ?? null,
+      shareExpiry: share ? expiryDateOf(share) : null,
+      images: imagesOf(projectId, result.dossier?.files)
     }
   },
 
@@ -226,32 +236,55 @@ export const bmtDesignApi = {
   renderDossier: async (projectId: string): Promise<Dossier> => {
     if (!isApiEstimateId(projectId)) return mockDesignApi.renderDossier(projectId)
     const started = await estimateGenerationApi.requestExport(projectId, 'Pdf')
-    const done = await waitForExport(projectId, started.exportId)
+    const done = await pollExport(() => estimateGenerationApi.getExport(projectId, started.exportId))
     if (done.state !== 'Ready') throw new Error(done.failureCode ?? 'ExportFailed')
-    const share = await activeShare(projectId)
+    const [share, result] = await Promise.all([activeShare(projectId), estimateGenerationApi.getResult(projectId)])
     return {
       ...idleDossier(projectId),
       status: 'ready',
       pdfUrl: estimateGenerationApi.exportFileUrl(projectId, started.exportId),
       shareToken: share?.shareId ?? null,
-      shareUrl: share?.url ?? null
+      shareUrl: share?.url ?? null,
+      shareExpiry: share ? expiryDateOf(share) : null,
+      images: imagesOf(projectId, result.dossier?.files)
     }
   },
 
-  /** Tạo (hoặc lấy lại) link chia sẻ còn hiệu lực. Mỗi bản có tối đa một link; ngày hết hạn mặc định 30 ngày. */
-  createShareLink: async (projectId: string): Promise<{ token: string; url?: string }> => {
+  /**
+   * Tạo (hoặc lấy lại) link chia sẻ. Chủ bản CHỌN ngày hết hạn (BR-PROJ-006 khoản 1: không có hạn mặc định). Mỗi bản
+   * chỉ một link đang hiệu lực: còn hiệu lực thì BE trả lại chính link đó và `applied=false` nếu ngày chọn khác.
+   */
+  createShareLink: async (
+    projectId: string,
+    expiryDate?: string
+  ): Promise<{ token: string; url?: string; expiryDate?: string | null; applied?: boolean }> => {
     if (!isApiEstimateId(projectId)) return mockDesignApi.createShareLink(projectId)
-    const link = await estimateGenerationApi.createShare(projectId, vietnamDateAfter(DEFAULT_SHARE_DAYS))
-    return { token: link.shareId, url: link.url }
+    if (!expiryDate) throw new Error('ExpiryRequired')
+    const link = await estimateGenerationApi.createShare(projectId, expiryDate)
+    return {
+      token: link.shareId,
+      url: link.url,
+      expiryDate: expiryDateOf(link),
+      applied: link.requestedExpiryApplied !== false
+    }
   },
 
-  /** Gửi link (không đính kèm tệp) tới một email. Chưa có link hiệu lực thì tạo trước. */
-  sendDossierEmail: async (projectId: string, email: string): Promise<void> => {
+  /** Thu hồi link: từ lúc này người có link (kể cả QR/email đã gửi) không xem hay tải được nữa. */
+  revokeShareLink: async (projectId: string, shareId: string): Promise<void> => {
+    if (!isApiEstimateId(projectId)) return
+    await estimateGenerationApi.revokeShare(projectId, shareId)
+  },
+
+  /**
+   * Gửi link (không đính kèm tệp) tới một email, rồi hỏi trạng thái gửi: `accepted` = máy chủ thư đã nhận,
+   * `unknown` = không biết thư đã nhận chưa; `Failed` thì ném lỗi. Phải có link hiện hành còn hiệu lực.
+   */
+  sendDossierEmail: async (projectId: string, email: string): Promise<'accepted' | 'unknown' | void> => {
     if (!isApiEstimateId(projectId)) return mockDesignApi.sendDossierEmail(projectId, email)
-    const link =
-      (await activeShare(projectId)) ??
-      (await estimateGenerationApi.createShare(projectId, vietnamDateAfter(DEFAULT_SHARE_DAYS)))
-    await estimateGenerationApi.emailShare(projectId, link.shareId, email)
+    const link = await activeShare(projectId)
+    if (!link) throw new Error('ShareUnavailable')
+    const queued = await estimateGenerationApi.emailShare(projectId, link.shareId, email)
+    return waitForEmail(projectId, queued.emailRequestId)
   },
 
   /** Xem hồ sơ qua link chia sẻ của BE (`/vi/estimates/shared/{shareId}#token=…`): không đăng nhập, link hỏng → `null`. */
@@ -266,7 +299,8 @@ export const bmtDesignApi = {
         createdAt: '',
         sections: mapped.result.sections,
         grandTotal: mapped.result.grandTotal,
-        estimatedFloorArea: 0
+        estimatedFloorArea: 0,
+        files: (shared.dossier?.files ?? []).map((file) => ({ fileId: file.fileId, roleKey: file.roleKey }))
       }
     } catch {
       return null
@@ -309,13 +343,38 @@ async function loadEstimateResult(projectId: string, detail: BmtEstimateDetail):
 async function waitForEstimate(projectId: string, signal?: AbortSignal): Promise<EstimateResult> {
   const startedAt = Date.now()
   while (!signal?.aborted) {
+    // Biết mã tác vụ vừa gửi (cùng phiên) thì hỏi đúng tác vụ đó: có mã lỗi chính xác. Không biết (mở lại trang, tab
+    // khác) thì hỏi trạng thái bản dự toán.
+    const operationId = recallOperation(projectId)
+    if (operationId) {
+      try {
+        const generation = await estimateGenerationApi.getGeneration(projectId, operationId)
+        if (generation.state === 'Failed' || generation.state === 'TimedOut') {
+          forgetOperation(projectId)
+          throw new EstimateFlowError('failed', generation.failureCode)
+        }
+        if (generation.state === 'Pending') {
+          if (Date.now() - startedAt > MAX_WAIT_MS) throw new EstimateFlowError('failed', 'GenerationTimedOut')
+          await sleep(POLL_INTERVAL_MS, signal)
+          continue
+        }
+        // Succeeded: đọc kết quả qua bản dự toán bên dưới.
+      } catch (error) {
+        if (error instanceof EstimateFlowError) throw error
+        // Mã cũ / không thuộc bản này (404 `GenerationNotFound`): bỏ và hỏi bản dự toán.
+        forgetOperation(projectId)
+      }
+    }
+
     const detail = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
     switch (estimateStateKind(detail.state)) {
       case 'succeeded':
+        forgetOperation(projectId)
         return loadEstimateResult(projectId, detail)
       case 'draft':
         throw new EstimateFlowError('notSubmitted')
       case 'failed':
+        forgetOperation(projectId)
         throw new EstimateFlowError('failed', detail.failureCode)
       default:
         if (Date.now() - startedAt > MAX_WAIT_MS) throw new EstimateFlowError('failed', 'GenerationTimedOut')
@@ -338,15 +397,13 @@ const idleDossier = (projectId: string): Dossier => ({
   shareUrl: null
 })
 
-/** Ngày hết hạn mặc định của link chia sẻ. */
-const DEFAULT_SHARE_DAYS = 30
-const EXPORT_POLL_MS = 2_000
-const EXPORT_MAX_WAIT_MS = 2 * 60_000
+const EMAIL_POLL_MS = 1_500
+const EMAIL_MAX_WAIT_MS = 30_000
 
-/** `YYYY-MM-DD` theo giờ Việt Nam, sau `days` ngày (BE tính hết hạn theo lịch Asia/Ho_Chi_Minh). */
-function vietnamDateAfter(days: number): string {
-  const target = new Date(Date.now() + days * 86_400_000)
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(target)
+/** `expiryDate` của BE là `YYYY-MM-DD` (hoặc đối tượng ngày tuỳ serializer): lấy phần ngày. */
+function expiryDateOf(link: ShareLink): string | null {
+  const value = link.expiryDate as unknown
+  return typeof value === 'string' ? value.slice(0, 10) : null
 }
 
 /** Link chia sẻ đang hiệu lực (Active) của bản, hoặc `null`. */
@@ -355,13 +412,25 @@ async function activeShare(projectId: string): Promise<ShareLink | null> {
   return share && share.state === 'Active' && share.url ? share : null
 }
 
-async function waitForExport(projectId: string, exportId: string): Promise<ExportStatus> {
+/** Chờ trạng thái gửi email: Queued → Accepted | Unknown | Failed. */
+async function waitForEmail(projectId: string, emailRequestId: string): Promise<'accepted' | 'unknown'> {
   const startedAt = Date.now()
   for (;;) {
-    const status = await estimateGenerationApi.getExport(projectId, exportId)
-    if (status.state === 'Ready' || status.state === 'Failed') return status
-    if (Date.now() - startedAt > EXPORT_MAX_WAIT_MS)
-      return { ...status, state: 'Failed', failureCode: 'ExportTimedOut' }
-    await sleep(EXPORT_POLL_MS)
+    const status = await estimateGenerationApi.getEmailStatus(projectId, emailRequestId)
+    if (status.state === 'Accepted') return 'accepted'
+    if (status.state === 'Unknown') return 'unknown'
+    if (status.state === 'Failed') throw new Error(status.failureCode ?? 'EmailFailed')
+    // Hết hạn chờ phía khách: không biết thư đã tới chưa.
+    if (Date.now() - startedAt > EMAIL_MAX_WAIT_MS) return 'unknown'
+    await sleepMs(EMAIL_POLL_MS)
   }
+}
+
+/** Ảnh kết quả theo vai trò tệp của hợp đồng AI (lấy tệp đầu tiên của mỗi vai trò). */
+function imagesOf(projectId: string, files: ResultFile[] | undefined): DossierImages {
+  const urlOf = (role: string) => {
+    const found = files?.filter((file) => file.roleKey === role).sort((a, b) => a.ordinal - b.ordinal)[0]
+    return found ? estimateGenerationApi.resultFileUrl(projectId, found.fileId) : null
+  }
+  return { cover: urlOf('cover-image'), floorPlan: urlOf('floor-plan-2d'), perspective: urlOf('perspective') }
 }

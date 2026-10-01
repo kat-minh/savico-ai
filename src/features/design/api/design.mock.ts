@@ -447,13 +447,19 @@ export const mockDesignApi = {
     )
   },
 
-  createShareLink: async (projectId: string): Promise<{ token: string; url?: string }> => {
+  /** Mock không có ngày hết hạn và không thu hồi được (link tạo sẵn). */
+  revokeShareLink: async (_projectId: string, _shareId: string): Promise<void> => {},
+
+  createShareLink: async (
+    projectId: string,
+    _expiryDate?: string
+  ): Promise<{ token: string; url?: string; expiryDate?: string | null; applied?: boolean }> => {
     await mockDelay(300)
     updateStore((store) => persistShared(store, projectId))
     return { token: `share-${projectId.toLowerCase()}` }
   },
 
-  sendDossierEmail: async (_projectId: string, _email: string): Promise<void> => {
+  sendDossierEmail: async (_projectId: string, _email: string): Promise<'accepted' | 'unknown' | void> => {
     await mockDelay(400)
   },
 

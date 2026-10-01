@@ -20,7 +20,9 @@ import { useDownloadDossier } from '../hooks/use-download-dossier'
 import { costShares } from '../services/estimate.service'
 import type { Dossier, EstimateResult } from '../types/design.types'
 import type { DossierProjectInfo } from './dossier-overview'
-import { DossierShareDialog, type ShareMode } from './dossier-share-dialog'
+import { estimateGenerationApi } from '../api/estimate-generation.api'
+import { ResultImage } from './result-image'
+import { DossierShareDialog, type EmailOutcome, type ShareMode } from './dossier-share-dialog'
 
 interface DossierReadyProps {
   dossier: Dossier
@@ -31,7 +33,10 @@ interface DossierReadyProps {
   advisory: string[]
   /** Gọi khi cần token chia sẻ mà `dossier.shareToken` còn trống. */
   onRequestShareLink: () => void
-  onSendEmail: (email: string) => Promise<void>
+  onSendEmail: (email: string) => Promise<EmailOutcome>
+  /** Dự toán THẬT: tạo link theo ngày chủ bản chọn, thu hồi link. Bỏ trống = dự án mock. */
+  onCreateLink?: (expiryDate: string) => Promise<void>
+  onRevokeLink?: () => Promise<void>
   /** Chỉ true khi render vừa hoàn tất trong phiên hiện tại; project cũ mở lại giữ final state. */
   animateCompletion?: boolean
   fromRender?: boolean
@@ -65,6 +70,8 @@ export function DossierReady({
   advisory,
   onRequestShareLink,
   onSendEmail,
+  onCreateLink,
+  onRevokeLink,
   animateCompletion = false,
   fromRender = false,
   filesEntering = false,
@@ -164,10 +171,21 @@ export function DossierReady({
   /** Ảnh thu nhỏ của từng tệp — dùng lại chính artefact mà hồ sơ chứa. */
   function thumbnail(key: FileKey) {
     switch (key) {
-      case 'exterior':
-        return <Photo className='size-full' src={exteriorImage} alt={t(`files.${key}`)} sizes='140px' />
+      case 'exterior': {
+        // Dự toán thật: ảnh phối cảnh (hoặc ảnh bìa) do AI tạo; dự án mock dùng ảnh mẫu của site.
+        const real = dossier.images?.perspective ?? dossier.images?.cover
+        return real ? (
+          <ResultImage className='size-full' src={real} alt={t(`files.${key}`)} />
+        ) : (
+          <Photo className='size-full' src={exteriorImage} alt={t(`files.${key}`)} sizes='140px' />
+        )
+      }
       case 'architecture':
-        return <Photo className='size-full' src={planImage} alt={t(`files.${key}`)} sizes='140px' fit='contain' />
+        return dossier.images?.floorPlan ? (
+          <ResultImage className='size-full' src={dossier.images.floorPlan} alt={t(`files.${key}`)} fit='contain' />
+        ) : (
+          <Photo className='size-full' src={planImage} alt={t(`files.${key}`)} sizes='140px' fit='contain' />
+        )
       case 'structure':
         // Chưa có bản vẽ kết cấu riêng nên tạm dùng lại nét vẽ kỹ thuật — đúng
         // thể loại hơn là mượn trang bìa. Backend sẽ trả thumbnail thật.
@@ -178,7 +196,7 @@ export function DossierReady({
   }
 
   function openShare(mode: Exclude<ShareMode, null>, trigger?: HTMLElement) {
-    if (!dossier.shareToken && !dossier.shareUrl) onRequestShareLink()
+    if (!onCreateLink && !dossier.shareToken && !dossier.shareUrl) onRequestShareLink()
     if (trigger) {
       const rect = trigger.getBoundingClientRect()
       setDialogOrigin({
@@ -391,7 +409,12 @@ export function DossierReady({
               size='lg'
               variant='outline'
               className='h-12 w-full'
-              onClick={() => {
+              onClick={(event) => {
+                // Dự toán thật chưa có link: hỏi ngày hết hạn trong cửa sổ chia sẻ thay vì tạo ngầm.
+                if (onCreateLink && !dossier.shareUrl) {
+                  openShare('link', event.currentTarget)
+                  return
+                }
                 if (!dossier.shareToken && !dossier.shareUrl) onRequestShareLink()
                 setLinkExpanded(true)
               }}
@@ -430,6 +453,16 @@ export function DossierReady({
         url={dossier.shareUrl ?? null}
         origin={dialogOrigin}
         onSendEmail={onSendEmail}
+        manage={
+          onCreateLink && onRevokeLink
+            ? {
+                expiryDate: dossier.shareExpiry ?? null,
+                onCreate: onCreateLink,
+                onRevoke: onRevokeLink,
+                qrSrc: dossier.shareToken ? estimateGenerationApi.shareQrUrl(info.projectId, dossier.shareToken) : null
+              }
+            : undefined
+        }
       />
 
       <ProjectReadyOptionsDialog
