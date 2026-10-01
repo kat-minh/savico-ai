@@ -92,6 +92,17 @@ interface BmtDesignTemplateSummary {
   publishedAtUtc: string
 }
 
+/**
+ * BE từ chối mở chi tiết mẫu (`access-info.canOpen = false`): chưa có gói / hết hạn (`SubscriptionInactive`) hoặc lý
+ * do khác. Ném lỗi riêng để trang chi tiết dựng màn "cần gói để xem" thay vì rơi về dữ liệu mock rỗng.
+ */
+export class LibraryAccessDeniedError extends Error {
+  constructor(readonly deniedCode: string | null) {
+    super(deniedCode ?? 'LibraryAccessDenied')
+    this.name = 'LibraryAccessDeniedError'
+  }
+}
+
 interface BmtLibraryAccessInfo {
   templateId?: string
   currentVersionId?: string
@@ -369,6 +380,11 @@ export const bmtHandbookApi = {
       const versionId = access.currentVersionId
       if (!versionId) return mockHandbookApi.getTemplate(id)
 
+      // Mẫu đã mở trước đó thì xem lại không cần gói; chưa mở mà BE báo không mở được thì dừng ở đây.
+      if (!access.alreadyOpened && access.canOpen === false) {
+        throw new LibraryAccessDeniedError(access.deniedCode ?? null)
+      }
+
       if (!access.alreadyOpened) {
         // Mở lần đầu: xác nhận dùng 1 lượt kèm editVersion đọc từ access-info.
         await http.post<BmtLibraryOpened>(`/design-templates/${id}/open`, {
@@ -381,7 +397,8 @@ export const bmtHandbookApi = {
       const detail = await http.get<BmtLibraryVersionDetail>(`/library-versions/${versionId}`)
       const content = await loadVersionContent(versionId, detail.editVersion)
       return toTemplateDetail(detail, content)
-    } catch {
+    } catch (error) {
+      if (error instanceof LibraryAccessDeniedError) throw error
       // 404 (mẫu mock/không có ở API), 409 (đổi phiên bản), lỗi bất kỳ → về mock.
       return mockHandbookApi.getTemplate(id)
     }

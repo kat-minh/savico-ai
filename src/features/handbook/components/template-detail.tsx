@@ -38,6 +38,7 @@ import {
   HANDBOOK_DETAIL_CONSULT_PULSE_SESSION_KEY,
   HANDBOOK_TEMPLATE_RETURN_SESSION_KEY
 } from '../constants/handbook.constants'
+import { LibraryAccessDeniedError } from '../api/handbook.bmt'
 import { useHandbookDetailQuota, useHandbookTemplate, useHandbookTemplates } from '../hooks/use-handbook'
 import { selectSimilarTemplates } from '../services/handbook.service'
 import { useHandbookReadStore } from '../store/handbook-read.store'
@@ -520,6 +521,9 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
   )
 
   if (needsLogin) return <TemplateDetailLoginGate />
+  if (initialQuery.error instanceof LibraryAccessDeniedError) {
+    return <TemplateDetailLocked deniedCode={initialQuery.error.deniedCode} />
+  }
   if (isPending) return <TemplateDetailSkeleton />
   if (isError) {
     return (
@@ -1260,6 +1264,37 @@ function TemplateDetailLoginGate() {
         <Button type='button' onClick={() => openAuthDialog('login')}>
           {t('loginCta')}
         </Button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * BE từ chối mở chi tiết mẫu (chưa có gói / gói hết hạn…): nói rõ lý do và chỉ đường, thay vì để khách vào một
+ * trang chi tiết trống. Không dựng nội dung nào của mẫu và không bật popup gợi ý của trang chi tiết.
+ */
+function TemplateDetailLocked({ deniedCode }: { deniedCode: string | null }) {
+  const t = useTranslations('handbook.detail')
+  const needsPlan = deniedCode === 'SubscriptionInactive'
+
+  return (
+    <div className='mx-auto w-full max-w-[90rem] px-4 py-16 lg:px-8'>
+      <div className='bg-card mx-auto flex max-w-md flex-col items-center gap-4 rounded-2xl border p-8 text-center'>
+        <span className='bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full'>
+          <Lock className='size-6' />
+        </span>
+        <h1 className='text-xl font-semibold'>{needsPlan ? t('planRequiredTitle') : t('accessDeniedTitle')}</h1>
+        <p className='text-muted-foreground text-sm'>{needsPlan ? t('planRequiredHint') : t('accessDeniedHint')}</p>
+        <div className='flex w-full flex-col gap-2 sm:flex-row sm:justify-center'>
+          {needsPlan ? (
+            <Button asChild>
+              <Link href={ROUTES.PLANS}>{t('planRequiredCta')}</Link>
+            </Button>
+          ) : null}
+          <Button asChild variant='outline'>
+            <Link href={`${ROUTES.HANDBOOK}?tab=library`}>{t('backToLibrary')}</Link>
+          </Button>
+        </div>
       </div>
     </div>
   )

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/shared/auth'
 import { useCmsCollection } from '@/shared/cms'
 import { env } from '@/shared/config/env'
 import { handbookApi } from '../api/handbook.api'
-import type { ArticleListQuery } from '../api/handbook.bmt'
+import { LibraryAccessDeniedError, type ArticleListQuery } from '../api/handbook.bmt'
 import { handbookKeys } from '../api/handbook.keys'
 import { selectPersonalizedTemplates } from '../services/handbook.service'
 import { localDayKey, useHandbookQuotaLedger } from '../store/handbook-quota.store'
@@ -35,7 +35,9 @@ export function useHandbookTemplate(id: string, options?: { enabled?: boolean })
     queryKey: handbookKeys.templateDetail(id),
     queryFn: () => handbookApi.getTemplate(id),
     staleTime: STATIC_CONTENT_STALE_TIME,
-    enabled: options?.enabled ?? true
+    enabled: options?.enabled ?? true,
+    // BE đã từ chối mở mẫu (chưa có gói…) thì thử lại cũng vậy.
+    retry: (failureCount, error) => !(error instanceof LibraryAccessDeniedError) && failureCount < 2
   })
 }
 

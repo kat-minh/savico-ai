@@ -881,7 +881,13 @@
       "attachmentUnnamed": "Tệp không tên",
       "attachmentDownload": "Tải về",
       "attachmentDownloading": "Đang tải…",
-      "attachmentDownloadFailed": "Không tải được tệp. Bạn thử lại giúp nhé."
+      "attachmentDownloadFailed": "Không tải được tệp. Bạn thử lại giúp nhé.",
+      "planRequiredTitle": "Cần có gói để xem chi tiết mẫu",
+      "planRequiredHint": "Tài khoản của bạn chưa có gói thiết kế đang hoạt động. Mua gói để mở bộ ảnh và thông tin chi tiết của mẫu này.",
+      "planRequiredCta": "Xem các gói",
+      "accessDeniedTitle": "Chưa mở được chi tiết mẫu",
+      "accessDeniedHint": "Hiện chưa thể mở chi tiết mẫu này. Bạn thử lại sau hoặc chọn mẫu khác.",
+      "backToLibrary": "Về thư viện mẫu"
     },
     "foundation": {
       "eyebrow": "Cẩm nang nền tảng",

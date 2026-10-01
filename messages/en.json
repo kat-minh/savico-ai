@@ -881,7 +881,13 @@
       "attachmentUnnamed": "Unnamed file",
       "attachmentDownload": "Download",
       "attachmentDownloading": "Downloading…",
-      "attachmentDownloadFailed": "Could not download the file. Please try again."
+      "attachmentDownloadFailed": "Could not download the file. Please try again.",
+      "planRequiredTitle": "A plan is required to view template details",
+      "planRequiredHint": "Your account has no active design plan. Get a plan to open this template's images and details.",
+      "planRequiredCta": "See plans",
+      "accessDeniedTitle": "Can't open this template yet",
+      "accessDeniedHint": "This template's details can't be opened right now. Try again later or pick another template.",
+      "backToLibrary": "Back to the library"
     },
     "foundation": {
       "eyebrow": "Core handbook",
