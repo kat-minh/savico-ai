@@ -492,12 +492,15 @@ export const bmtHandbookApi = {
     try {
       const sub = await http.get<BmtDesignSubscriptionView | null>('/me/design-subscription')
       const detail = sub?.quotas?.find((quota) => quota.code === 'catalog.detail')
+      // Tài khoản free (chưa có gói / gói không có quyền này) vẫn được 3 lượt xem chi tiết mỗi ngày: giữ số mock cho tới khi
+      // BE có API đếm lượt free, lúc đó thay tại đây. Hết lượt thì trang chi tiết mở popup mời mua gói.
       if (!detail) return base
-      if (detail.isUnlimited) return base
+      if (detail.isUnlimited) return { ...base, detailMode: 'unlimited' }
       return {
         ...base,
         detailTotal: detail.limit ?? base.detailTotal,
-        detailRemaining: detail.available ?? base.detailRemaining
+        detailRemaining: detail.available ?? base.detailRemaining,
+        detailMode: 'plan'
       }
     } catch {
       return base

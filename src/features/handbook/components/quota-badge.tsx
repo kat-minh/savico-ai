@@ -89,6 +89,8 @@ export function QuotaBadge({
   }, [scope, shakeNonce])
 
   if (!data) return null
+  // Gói không giới hạn: không có số lượt để hiện (tài khoản free vẫn hiện số mock 3/ngày).
+  if (scope === 'detail' && data.detailMode === 'unlimited') return null
 
   const Icon = scope === 'lookup' ? Search : Eye
 
@@ -132,7 +134,7 @@ export function QuotaBadge({
       >
         <Eye ref={detailEyeRef} data-detail-quota-eye className='size-4 shrink-0' />
         <span key={remaining} data-quota-number>
-          {t('detailRemaining', { remaining, total })}
+          {t(data.detailMode === 'plan' ? 'detailRemainingPlan' : 'detailRemaining', { remaining, total })}
         </span>
       </p>
     )

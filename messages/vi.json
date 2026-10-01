@@ -861,7 +861,8 @@
       "exhausted": "Hết lượt hôm nay — nâng cấp gói",
       "tooltip": "Mỗi ngày xem chi tiết {total} mẫu — Làm mới lúc 0h · còn {hours} giờ",
       "lookupRemainingMonthly": "Còn {remaining}/{total} lượt tra cứu",
-      "tooltipMonthly": "Gói của bạn có {total} lượt tra cứu thư viện mỗi tháng — tự làm mới vào đầu tháng."
+      "tooltipMonthly": "Gói của bạn có {total} lượt tra cứu thư viện mỗi tháng — tự làm mới vào đầu tháng.",
+      "detailRemainingPlan": "Bạn còn {remaining}/{total} lượt xem chi tiết trong gói hiện tại"
     },
     "info": {
       "planTitle": "Thông tin bản vẽ",
@@ -2022,7 +2023,7 @@
     },
     "purchaseHistory": {
       "title": "Lịch sử mua gói",
-      "description": "Gói đang dùng, lượt còn lại và toàn bộ đơn hàng đã thanh toán.",
+      "description": "Toàn bộ đơn hàng của bạn và trạng thái thanh toán.",
       "viewPlans": "Xem các gói",
       "designPlan": "Gói thiết kế",
       "designPlanMeta": "Gói thiết kế · kích hoạt",

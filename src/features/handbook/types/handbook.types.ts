@@ -79,6 +79,12 @@ export interface HandbookQuota {
   lookupRemaining: number
   lookupTotal: number
   detailRemaining: number
+  /**
+   * Nguồn của hạn mức XEM CHI TIẾT: `mock` = số mock theo ngày (tài khoản free: 3 lượt/ngày, chờ API; khách chưa đăng nhập; chế độ mock); `plan` = lượt
+   * `catalog.detail` thật của gói (đếm theo kỳ gói, không phải theo ngày); `unlimited` = gói không giới hạn — không có
+   * con số để hiện nên huy hiệu ẩn đi.
+   */
+  detailMode?: 'mock' | 'plan' | 'unlimited'
   detailTotal: number
 }
 

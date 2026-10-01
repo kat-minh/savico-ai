@@ -1,6 +1,6 @@
 'use client'
 
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { useAuthStore } from '@/shared/auth'
@@ -31,9 +31,15 @@ export function useHandbookTemplates() {
  * đăng nhập (dựng cổng đăng nhập trước, không lộ nội dung, không trừ lượt).
  */
 export function useHandbookTemplate(id: string, options?: { enabled?: boolean }) {
+  const queryClient = useQueryClient()
   return useQuery({
     queryKey: handbookKeys.templateDetail(id),
-    queryFn: () => handbookApi.getTemplate(id),
+    queryFn: async () => {
+      const template = await handbookApi.getTemplate(id)
+      // Mở mẫu lần đầu trừ 1 lượt `catalog.detail` ở BE: đọc lại số dư để huy hiệu "còn x/y lượt" khớp.
+      void queryClient.invalidateQueries({ queryKey: handbookKeys.quota() })
+      return template
+    },
     staleTime: STATIC_CONTENT_STALE_TIME,
     enabled: options?.enabled ?? true,
     // BE đã từ chối mở mẫu (chưa có gói…) thì thử lại cũng vậy.

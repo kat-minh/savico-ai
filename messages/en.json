@@ -861,7 +861,8 @@
       "exhausted": "No lookups left today — upgrade your plan",
       "tooltip": "View {total} template details each day — resets at midnight · {hours}h remaining",
       "lookupRemainingMonthly": "{remaining}/{total} lookups left",
-      "tooltipMonthly": "Your plan includes {total} template lookups each month — resets at the start of the month."
+      "tooltipMonthly": "Your plan includes {total} template lookups each month — resets at the start of the month.",
+      "detailRemainingPlan": "{remaining}/{total} detail views left on your current plan"
     },
     "info": {
       "planTitle": "Drawing details",
