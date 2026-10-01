@@ -574,7 +574,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
       >
         <table
           data-hovering={hoveredRow || hoveredColumn ? 'true' : undefined}
-          className='supervision-comparison-table w-full min-w-[720px] table-fixed border-collapse text-sm'
+          className='supervision-comparison-table w-full min-w-[720px] table-fixed text-sm'
           onMouseLeave={() => {
             setHoveredRow(null)
             setHoveredColumn(null)
@@ -693,7 +693,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
           </tbody>
 
           <tfoot>
-            <tr className='supervision-choose-row divide-border divide-x border-t'>
+            <tr className='supervision-choose-row divide-border divide-x'>
               <th className='bg-card sticky left-0 z-10 p-3 text-left text-xs font-medium'>{t('choosePlanRow')}</th>
               {SUPERVISION_TIERS.map((tier, index) => {
                 const item = byTier(tier)
@@ -988,11 +988,11 @@ function ValueTable() {
       </motion.h2>
 
       <div className='bg-card mt-5 overflow-x-auto rounded-2xl border'>
-        <table className='w-full min-w-[640px] border-collapse text-sm'>
+        <table className='supervision-value-table w-full min-w-[640px] text-sm'>
           <thead>
             {/* `divide-x` kẻ vạch dọc giữa các cột, giống bảng phụ phí. */}
             <tr className='bg-muted/40 divide-x text-xs'>
-              <th className='border-b p-3 text-left font-medium' />
+              <th className='bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] sticky left-0 z-10 border-b p-3 text-left font-medium' />
               {SUPERVISION_TIERS.map((tier) => (
                 <th
                   key={tier}
@@ -1010,7 +1010,7 @@ function ValueTable() {
             {SUPERVISION_VALUE_ROWS.map((row, index) => (
               <motion.tr
                 key={row}
-                className='supervision-value-row divide-x border-b even:bg-muted/20'
+                className='supervision-value-row divide-x even:bg-muted/20'
                 initial={{ opacity: 0, y: 7 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -1069,7 +1069,7 @@ function GroupRow({ label }: { label: string }) {
         colSpan={SUPERVISION_TIERS.length + 1}
         className='bg-primary text-primary-foreground p-2.5 text-left text-xs font-semibold tracking-wide uppercase'
       >
-        {label}
+        <span className='sticky left-3 inline-block'>{label}</span>
       </th>
     </motion.tr>
   )

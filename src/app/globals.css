@@ -5164,25 +5164,19 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
 .supervision-journey-join {
   will-change: opacity, transform;
 }
-/* Dash phải dài hơn nét dài nhất của icon (khiên, nhà, tệp… ≈ 60–90): với 34 thì sau
-   khi vẽ xong các nét dài chỉ còn từng đoạn đứt nên chi tiết mờ, không đồng đều. */
-/* Vẽ nét bằng cách NỞ DẦN đoạn nét (0 → 120) thay vì trượt `dashoffset` từ 120:
-   nét ngắn (< 120) trượt kiểu cũ chỉ hiện ở đoạn cuối của hoạt ảnh nên như mất hiệu
-   ứng. Trạng thái nghỉ là nét liền, nên nét dài nào cũng không bị đứt đoạn. */
+/* Icon hành trình chỉ HIỆN DẦN (opacity), không "vẽ nét" bằng `stroke-dasharray`
+   nữa: hoạt ảnh vẽ nét để nét dài chỉ hiện từng đoạn nếu hoạt ảnh bị ngắt giữa
+   chừng (tab ẩn, cuộn nhanh, giảm chuyển động) nên icon mất khoảng một nửa. Trạng
+   thái nghỉ và mọi trạng thái trung gian đều là nét liền, đủ 100%. */
 .supervision-journey-icon * {
-  stroke-dasharray: 120 0;
+  stroke-dasharray: none;
   animation: supervision-journey-draw 0.6s calc(var(--journey-delay) + 0.24s) ease-out both;
 }
 @keyframes supervision-journey-draw {
   from {
-    stroke-dasharray: 0 120;
     opacity: 0;
   }
-  1% {
-    opacity: 1;
-  }
   to {
-    stroke-dasharray: 120 0;
     opacity: 1;
   }
 }
@@ -5295,25 +5289,6 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
 }
 .supervision-control-column {
   border-inline-color: color-mix(in srgb, var(--brand-orange) 42%, var(--border));
-}
-.supervision-comparison-shell::after {
-  content: '';
-  position: absolute;
-  z-index: 24;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 24%;
-  pointer-events: none;
-  border-inline: 1px solid color-mix(in srgb, var(--brand-orange) 46%, transparent);
-  transform: scaleY(0);
-  transform-origin: top;
-  animation: supervision-control-rule 0.76s 0.78s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes supervision-control-rule {
-  to {
-    transform: scaleY(1);
-  }
 }
 .supervision-sticky-price {
   display: block;
@@ -6392,40 +6367,26 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
 .plan-plus-column {
   border-inline-color: color-mix(in srgb, var(--brand-orange) 22%, var(--border));
 }
-.plan-comparison-shell::after {
-  content: '';
-  position: absolute;
-  z-index: 24;
-  top: 0;
-  bottom: 0;
-  left: 52%;
-  width: 24%;
-  pointer-events: none;
-  border-inline: 1px solid color-mix(in srgb, var(--brand-orange) 38%, transparent);
-  transform: scaleY(0);
-  transform-origin: top;
-  animation: plan-plus-rule 0.72s 0.8s cubic-bezier(0.2, 0.72, 0.3, 1) forwards;
-}
-@keyframes plan-plus-rule {
-  to {
-    transform: scaleY(1);
-  }
-}
 .plan-pro-group th {
   position: relative;
-  overflow: hidden;
 }
+/* Ánh sáng quét qua dải: chạy bằng `background-position` BÊN TRONG ô, không dịch
+   cả lớp phủ ra ngoài ô. Nhờ vậy ô không cần `overflow` để cắt — mọi giá trị
+   `overflow` khác `visible` đều biến ô thành khung cuộn và làm nhãn `sticky`
+   bên trong chỉ dính theo ô, không dính theo khung cuộn ngang của bảng. */
 .plan-pro-group th::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, transparent 35%, #fff8 50%, transparent 65%);
-  transform: translateX(-130%);
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, #fff8 50%, transparent 65%) no-repeat;
+  background-size: 300% 100%;
+  background-position: 100% 0;
   animation: plan-pro-band-shine 0.9s 0.62s ease-out forwards;
 }
 @keyframes plan-pro-band-shine {
   to {
-    transform: translateX(130%);
+    background-position: 0% 0;
   }
 }
 .plan-pro-gift-cell {
@@ -6648,10 +6609,31 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
 .plan-value-table > tbody > tr:not(:last-child) > :is(th, td) {
   border-bottom: 1px solid var(--border);
 }
-/* Vạch cam của cột nổi bật đặt theo % bề rộng khung, không theo bề rộng bảng
-   (720px) — khi cuộn ngang nó trôi lệch khỏi cột. Cột đã tự có viền cam nhạt. */
-@media (max-width: 767.98px) {
-  .plan-comparison-shell::after {
-    display: none;
-  }
+/* Hai vạch cam của cột nổi bật là VIỀN CỦA CHÍNH CÁC Ô trong cột (trước đây là
+   một lớp phủ `::after` đặt theo % khung nên lệch khỏi cột và trôi khi cuộn
+   ngang). Vạch trái = viền phải của ô liền trước, vạch phải = viền phải của ô cột. */
+.plan-comparison-table :is(th, td):has(+ .plan-plus-column),
+.plan-comparison-table .plan-plus-column {
+  border-right-color: color-mix(in srgb, var(--brand-orange) 45%, var(--border));
+}
+
+/* Bảng "Gói giám sát": cùng cách sửa với bảng của "Gói thiết kế" ở trên. Cuộn ngang
+   + cột đầu `sticky` thì `border-collapse` làm đường kẻ trôi còn nền cột đứng lại
+   (các vạch chồng nhau), nên dùng `separate` và đặt vạch ngang lên từng ô. */
+.supervision-comparison-table,
+.supervision-value-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.supervision-comparison-table > tbody > tr:not(:last-child) > :is(th, td),
+.supervision-value-table > tbody > tr > :is(th, td) {
+  border-bottom: 1px solid var(--border);
+}
+.supervision-comparison-table > tfoot > tr > :is(th, td) {
+  border-top: 1px solid var(--border);
+}
+/* Vạch cam bên trái cột "Giám sát kiểm soát" là viền phải của ô liền trước — vạch
+   thuộc về cột, không còn là lớp phủ `::after` đặt theo % khung nên lệch khi cuộn. */
+.supervision-comparison-table :is(th, td):has(+ .supervision-control-column) {
+  border-right-color: color-mix(in srgb, var(--brand-orange) 46%, var(--border));
 }

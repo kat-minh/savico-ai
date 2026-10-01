@@ -126,7 +126,7 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
 
   return (
     <section id='home-dossiers' className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-      <header className='flex flex-wrap items-start justify-between gap-x-10 gap-y-3'>
+      <header className='flex items-start justify-between gap-x-10 gap-y-3 lg:flex-wrap'>
         <div className='space-y-2'>
           {/* Góp ý BuildX: bỏ chữ "Hồ sơ mẫu", lấy "Danh sách thư viện mẫu" làm tiêu đề; bên dưới là nút chọn 2D/3D. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
@@ -157,10 +157,11 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
         <div className='flex items-center gap-4'>
           <Link
             href={LIBRARY_HREF}
-            className='text-primary hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
+            className='max-lg:h-8 max-lg:shrink-0 text-primary hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
           >
-            {t('viewAll')}
-            <ChevronRight className='size-4 lg:hidden' />
+            {/* Mobile: chỉ còn mũi tên, chữ giữ lại cho trình đọc màn hình. */}
+            <span className='max-lg:sr-only'>{t('viewAll')}</span>
+            <ChevronRight className='size-6 lg:hidden' />
             <ArrowRight className='hidden size-4 lg:block' />
           </Link>
 

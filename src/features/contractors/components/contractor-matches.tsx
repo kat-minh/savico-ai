@@ -438,7 +438,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
             <AnimatePresence mode='wait'>
               <motion.div
                 key={`${projectId}-${projectChangeRevision}`}
-                initial={projectChangeRevision > 0 && !reduceMotion ? { opacity: 0, x: 14, y: -8, skewX: -2 } : false}
+                initial={projectChangeRevision > 0 && !reduceMotion ? { opacity: 0, x: 14, y: -8 } : false}
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ duration: reduceMotion ? 0 : 0.35, ease: revealEase }}
               >

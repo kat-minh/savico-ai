@@ -2127,7 +2127,7 @@
       "from": "from {price}",
       "viewing": "Viewing",
       "view": "View",
-      "new": "NEW",
+      "new": "OFFER",
       "viewingLine": "Viewing:",
       "switchTo": "Switch to {name}"
     },
@@ -5130,7 +5130,6 @@
         "title": "Match on the criteria that matter",
         "area": "Area & radius",
         "type": "Building type",
-        "typeHint": "townhouse / villa / roofed house / garden house / apartment",
         "scale": "Project scale",
         "experience": "Experience on similar projects",
         "rating": "Rating & completed projects",

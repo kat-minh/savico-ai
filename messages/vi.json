@@ -2127,7 +2127,7 @@
       "from": "từ {price}",
       "viewing": "Đang xem",
       "view": "Xem gói",
-      "new": "MỚI",
+      "new": "ƯU ĐÃI",
       "viewingLine": "Đang xem:",
       "switchTo": "Chuyển sang {name}"
     },
@@ -5130,7 +5130,6 @@
         "title": "Tìm đúng người theo đúng tiêu chí",
         "area": "Khu vực & bán kính",
         "type": "Loại công trình",
-        "typeHint": "nhà phố / villa / nhà mái / nhà vườn / căn hộ",
         "scale": "Quy mô công trình",
         "experience": "Kinh nghiệm dự án tương tự",
         "rating": "Đánh giá & số dự án hoàn thành",

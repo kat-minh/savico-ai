@@ -593,7 +593,7 @@ export function ContractorLanding() {
       >
         <div className='grid gap-6 lg:grid-cols-[31.8%_minmax(0,1fr)] lg:gap-x-[2.8%]'>
           <div>
-            <h2 className='text-foreground text-2xl font-bold tracking-tight text-balance sm:text-lg sm:tracking-wide sm:text-wrap sm:uppercase'>
+            <h2 className='text-foreground text-[clamp(1.05rem,5.7vw,1.6rem)] font-bold tracking-tight whitespace-nowrap sm:text-2xl sm:tracking-wide sm:uppercase lg:text-[clamp(0.95rem,1.4vw,1.5rem)]'>
               {t('criteria.title')}
             </h2>
             <ul className='mt-4 space-y-2'>
@@ -636,9 +636,6 @@ export function ContractorLanding() {
                             ) : null}
                           </AnimatePresence>
                         </span>
-                        {item.key === 'type' ? (
-                          <span className='text-muted-foreground block text-xs'>{t('criteria.typeHint')}</span>
-                        ) : null}
                         {/* Dòng tóm tắt lựa chọn — hiện dần dưới tên mục (mục 5). */}
                         <AnimatePresence>
                           {selected ? (
@@ -764,7 +761,7 @@ export function ContractorLanding() {
                 cách nằm ở S12 chứ không ở landing. */}
             {/* Thanh đáy đang hiện thì chừa đệm dưới danh sách — dòng cuối không bị thanh che
                 (góp ý NT34); đệm cũ đặt ở cuối trang, sau dải CTA, nên không có tác dụng. */}
-            <ul id={RANKED_LIST_ID} className={cn('mt-4 divide-y', showStickyNudge && !ctaInView && 'pb-20')}>
+            <ul id={RANKED_LIST_ID} className={cn('mt-4 divide-y', showStickyNudge && !ctaInView && 'pb-40 sm:pb-20')}>
               {ranked.length === 0 ? (
                 <li className='text-muted-foreground py-10 text-center text-sm text-pretty'>{t('ranking.empty')}</li>
               ) : null}
@@ -839,7 +836,7 @@ export function ContractorLanding() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 96, opacity: 0 }}
             transition={{ duration: 0.35, ease: revealEase }}
-            className='pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center px-3 sm:bottom-6 sm:px-6'
+            className='pointer-events-none fixed inset-x-0 bottom-[90px] z-40 flex justify-center px-3 sm:bottom-6 sm:px-6'
           >
             <div className='bg-card pointer-events-auto flex w-full max-w-[570px] items-center justify-between gap-4 rounded-[22px] border px-4 py-3 shadow-lg sm:px-5'>
               <p className='min-w-0 truncate text-sm font-medium'>
