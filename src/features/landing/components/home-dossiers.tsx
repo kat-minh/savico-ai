@@ -126,7 +126,7 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
 
   return (
     <section id='home-dossiers' className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-      <header className='flex items-start justify-between gap-x-10 gap-y-3 lg:flex-wrap'>
+      <header className='flex items-start justify-between gap-x-10 gap-y-3 lg:flex-wrap lg:items-baseline'>
         <div className='space-y-2'>
           {/* Góp ý BuildX: bỏ chữ "Hồ sơ mẫu", lấy "Danh sách thư viện mẫu" làm tiêu đề; bên dưới là nút chọn 2D/3D. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
@@ -154,10 +154,12 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
           ) : null}
         </div>
 
+        {/* Header `items-baseline`: mép dưới chữ "Xem tất cả" thẳng hàng với mép dưới chữ tiêu đề. Link cao `h-7.5` bằng nút mũi tên cạnh nó,
+            nếu không flex căn giữa nó lệch khỏi đường chân chữ mà container dùng để canh baseline. */}
         <div className='flex items-center gap-4'>
           <Link
             href={LIBRARY_HREF}
-            className='max-lg:h-8 max-lg:shrink-0 text-primary hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
+            className='max-lg:h-8 max-lg:shrink-0 text-primary hover:text-brand-orange inline-flex h-7.5 items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
           >
             {/* Mobile: chỉ còn mũi tên, chữ giữ lại cho trình đọc màn hình. */}
             <span className='max-lg:sr-only'>{t('viewAll')}</span>
