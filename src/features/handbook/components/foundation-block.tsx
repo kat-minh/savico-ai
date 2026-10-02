@@ -1106,8 +1106,8 @@ export function FoundationBlock() {
                 />
 
                 {/* Góp ý BuildX: bỏ cột biểu tượng tròn — chữ bắt đầu ngay cạnh ảnh. */}
-                <div className='flex min-w-0 flex-1 items-start gap-3 p-3 pr-12'>
-                  <div className='min-w-0 space-y-1'>
+                <div className='flex min-w-0 flex-1 items-stretch gap-3 p-3 pr-12'>
+                  <div className='flex min-w-0 flex-1 flex-col gap-1'>
                     <p data-step-reveal='label' className='text-muted-foreground text-xs'>
                       {t('stepLabel', { order: stage.order })}
                     </p>
@@ -1127,7 +1127,7 @@ export function FoundationBlock() {
                         data-stage-guide-link
                         href={handbookArticleRoute(stageArticle.slug)}
                         onClick={(event) => event.stopPropagation()}
-                        className='text-primary inline-flex items-center gap-1.5 pt-1 text-xs font-medium hover:font-bold focus-visible:font-bold'
+                        className='text-primary mt-auto inline-flex shrink-0 items-center gap-1.5 self-start pt-1 text-xs font-medium hover:font-bold focus-visible:font-bold'
                       >
                         <span data-stage-guide-text className='relative grid'>
                           <span aria-hidden className='invisible col-start-1 row-start-1 font-bold'>

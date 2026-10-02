@@ -11,7 +11,7 @@ import { Logo } from '@/shared/components/common'
 import { GuestMenu } from '@/shared/components/guest-menu'
 import { Button } from '@/shared/components/ui/button'
 import { ROUTES } from '@/shared/constants/routes'
-import { useMounted, useScrolled } from '@/shared/hooks'
+import { useMounted } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { SiteNavMobile } from './site-nav-mobile'
 import { SITE_NAV } from './site-nav.config'
@@ -40,19 +40,15 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
   // Auth state is client-only; gate on hydration so SSR and first paint match.
   const mounted = useMounted()
   const authed = mounted && isAuthenticated
-  const scrolled = useScrolled()
   const reduceMotion = useReducedMotion()
   const [hidden, setHidden] = useState(false)
   const [pastTitle, setPastTitle] = useState(false)
   const onHome = pathname === ROUTES.HOME
+  const onContractors = pathname === ROUTES.CONTRACTORS || pathname.startsWith(`${ROUTES.CONTRACTORS}/`)
   const onHandbook = pathname === ROUTES.HANDBOOK || pathname.startsWith(`${ROUTES.HANDBOOK}/`)
   const onHandbookArticle = pathname.startsWith(`${ROUTES.HANDBOOK}/bai-viet/`)
-  const onDesign = pathname === ROUTES.DESIGN || pathname.startsWith(`${ROUTES.DESIGN}/`)
-  const autoHideHeader = onHome || onHandbook
 
   useEffect(() => {
-    if (!autoHideHeader) return
-
     let previousY = window.scrollY
     let direction = 0
     let distance = 0
@@ -109,10 +105,10 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', measureBoundary)
     }
-  }, [autoHideHeader, onHome, pathname])
+  }, [onHome, pathname])
 
-  const isHidden = autoHideHeader && hidden
-  const isCompact = (autoHideHeader && pastTitle) || (onDesign && scrolled)
+  const isHidden = hidden
+  const isCompact = pastTitle
 
   useEffect(() => {
     const style = document.documentElement.style
@@ -129,7 +125,7 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
 
   return (
     <header
-      data-scrolled={autoHideHeader ? pastTitle : scrolled}
+      data-scrolled={pastTitle}
       data-handbook={onHandbook}
       data-hidden={isHidden}
       className={cn(
@@ -187,9 +183,8 @@ export function SiteHeader({ UserMenu, onCreateProject }: SiteHeaderProps = {}) 
         </nav>
 
         <div className='ml-auto flex items-center gap-2'>
-          {/* Trang /design đã có MỘT nút "Tạo dự án mới" lớn ở giữa — ẩn nút trên menu để màn
-              hình chỉ còn một chỗ tạo dự án (góp ý Thiết kế & Dự toán). */}
-          {pathname === ROUTES.DESIGN ? null : (
+          {/* Thiết kế và Tìm nhà thầu có nút tạo riêng trong nội dung trang. */}
+          {pathname === ROUTES.DESIGN || onContractors ? null : (
             <Button
               data-create-project-trigger
               size='sm'

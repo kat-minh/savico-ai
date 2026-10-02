@@ -1,7 +1,7 @@
 /**
- * Nội dung bốn trang pháp lý ở chân trang — chép từ bốn file docs Bên A gửi (thư mục
+ * Nội dung năm trang pháp lý ở chân trang — chép từ các file docs Bên A gửi:
  * IMG): Điều khoản sử dụng nền tảng, Chính sách bảo vệ dữ liệu cá nhân, Điều khoản sử
- * dụng AI (trang "TMĐT & Đối tác") và Thanh toán, hủy dịch vụ & hoàn tiền.
+ * dụng AI, Quy chế TMĐT & Đối tác và Thanh toán, hủy dịch vụ & hoàn tiền.
  *
  * Giữ định dạng của file gốc: màu chữ từng đoạn, đậm/nghiêng, cỡ chữ, canh đều/giữa,
  * khung ghi chú (viền + nền). `base` là màu/cỡ chữ thân bài của file (nửa điểm, 21 = 10,5pt);
@@ -11,6 +11,8 @@
  * cấu trúc từng khối. Các ô `[ĐANG CẬP NHẬT]` là chỗ Bên A chưa điền trong file gốc — điền khi có
  * thông tin chính thức (cả hai file).
  */
+import { LEGAL_PARTNERS } from './legal-partners'
+
 export interface LegalRun {
   t: string
   b?: boolean
@@ -43,7 +45,7 @@ export interface LegalDoc {
   blocks: readonly LegalBlock[]
 }
 
-export type LegalDocKey = 'terms' | 'privacy' | 'ecommerce' | 'payment'
+export type LegalDocKey = 'terms' | 'privacy' | 'aiTerms' | 'ecommerce' | 'payment'
 
 export const LEGAL_DOCS: Record<LegalDocKey, LegalDoc> = {
   terms: {
@@ -1123,7 +1125,8 @@ export const LEGAL_DOCS: Record<LegalDocKey, LegalDoc> = {
       { k: 'p', r: [{ t: 'Hotline hỗ trợ: ', b: true, c: '0f172a' }, { t: '[HOTLINE]' }] }
     ]
   },
-  ecommerce: {
+  ecommerce: LEGAL_PARTNERS,
+  aiTerms: {
     base: { c: '2d3748', z: 21 },
     blocks: [
       { k: 'title', a: 'c', r: [{ t: 'ĐIỀU KHOẢN SỬ DỤNG AI BUILD X', b: true, c: '15803d', z: 32 }] },

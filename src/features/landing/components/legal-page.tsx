@@ -77,7 +77,7 @@ function Note({ note, base }: { note: LegalNote; base: LegalDoc['base'] }) {
 }
 
 /**
- * Trang pháp lý (Điều khoản / Quyền riêng tư / TMĐT & Đối tác / Thanh toán & Hoàn tiền).
+ * Trang pháp lý (Điều khoản / Quyền riêng tư / Điều khoản AI / TMĐT & Đối tác / Thanh toán & Hoàn tiền).
  *
  * Nội dung và định dạng lấy từ docs Bên A gửi (`legal-docs.ts`, bản tiếng Anh ở `legal-docs.en.ts`). Màu chữ trong docs được
  * chọn cho nền trắng nên tài liệu nằm trên một "tờ giấy" trắng cố định — không đổi theo

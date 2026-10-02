@@ -1,9 +1,10 @@
 /**
- * Bản TIẾNG ANH của bốn trang pháp lý ở chân trang — dịch từ `legal-docs.ts` (tiếng Việt),
+ * Bản TIẾNG ANH của năm trang pháp lý ở chân trang — dịch từ `legal-docs.ts` (tiếng Việt),
  * giữ nguyên cấu trúc, màu chữ, đậm/nghiêng, cỡ chữ và khung ghi chú của file docs gốc.
  * Bản dịch tham khảo; bản tiếng Việt là bản có giá trị pháp lý. Các ô `[...]` là chỗ Bên A chưa điền.
  */
 import type { LegalDoc, LegalDocKey } from './legal-docs'
+import { LEGAL_PARTNERS_EN } from './legal-partners.en'
 
 export const LEGAL_DOCS_EN: Record<LegalDocKey, LegalDoc> = {
   terms: {
@@ -1085,7 +1086,8 @@ export const LEGAL_DOCS_EN: Record<LegalDocKey, LegalDoc> = {
       { k: 'p', r: [{ t: 'Support hotline: ', b: true, c: '0f172a' }, { t: '[HOTLINE]' }] }
     ]
   },
-  ecommerce: {
+  ecommerce: LEGAL_PARTNERS_EN,
+  aiTerms: {
     base: { c: '2d3748', z: 21 },
     blocks: [
       { k: 'title', a: 'c', r: [{ t: 'BUILD X AI TERMS OF USE', b: true, c: '15803d', z: 32 }] },
