@@ -1017,7 +1017,7 @@ export function FoundationBlock() {
           <Button
             data-foundation-cta
             data-foundation-sequence
-            className='bg-primary-strong hover:bg-primary-strong relative isolate h-11 overflow-hidden rounded-lg px-5 transition-[transform,filter,box-shadow] duration-200 ease-out'
+            className='brand-green-button relative isolate h-11 overflow-hidden rounded-full px-8 text-base has-[>svg]:px-8 transition-[transform,filter,box-shadow] duration-200 ease-out'
             onPointerEnter={() => {
               ctaPointerInsideRef.current = true
               pauseCtaIdle()

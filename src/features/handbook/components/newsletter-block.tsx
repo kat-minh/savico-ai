@@ -350,7 +350,7 @@ export function NewsletterBlock() {
     <section ref={sectionRef} data-newsletter-block className='border-primary/30 bg-card rounded-2xl border p-5'>
       {/* Góp ý BuildX: bỏ dòng phân loại, ngày dời về góc phải cùng hàng tiêu đề. */}
       <header className='relative flex flex-wrap items-baseline justify-between gap-2 pb-3'>
-        <h2 data-newsletter-title className='text-xl font-semibold tracking-tight uppercase'>
+        <h2 data-newsletter-title className='text-foreground text-3xl font-bold tracking-tight text-balance'>
           {t('title')}
         </h2>
         {lead ? (

@@ -166,107 +166,109 @@ export function SiteFooter() {
   return (
     // Nen toi o ca light lan dark (quy uoc xuyen suot, muc I).
     <footer className='bg-footer text-footer-foreground mt-auto'>
-      <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 pt-10 pb-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8 lg:pt-14'>
-        {/* Cot 1 - Thuong hieu */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {/* Dưới `lg` logo phóng 1.4 lần (`zoom` ăn vào bố cục, khác `scale`) để chiếm hơn nửa bề ngang
-              hàng thay vì ~40% như trước; từ `lg` giữ cỡ cũ. */}
-          <div className='max-lg:[zoom:1.4]'>
-            <Logo onDark />
-          </div>
-          <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
-            {cmsText(settings.tagline, t('tagline'))}
-          </p>
-
-          <ul className='mt-5 flex gap-2.5'>
-            {socialLinks.map((item) => (
-              <li key={item.label}>
-                <a
-                  href={item.href}
-                  target='_blank'
-                  rel='noreferrer'
-                  aria-label={item.label}
-                  className={cn(
-                    'footer-social-link',
-                    'bg-brand-orange/15 text-brand-orange flex size-9 items-center justify-center rounded-full',
-                    'hover:bg-brand-orange hover:text-white transition-colors'
-                  )}
-                >
-                  {item.icon}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-
-        {[
-          { title: t('productTitle'), links: FOOTER_PRODUCT_LINKS },
-          { title: t('supportTitle'), links: FOOTER_SUPPORT_LINKS },
-          { title: t('aboutTitle'), links: FOOTER_ABOUT_LINKS }
-        ].map((column, index) => (
+      <div className='footer-brand-bg'>
+        <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 pt-10 pb-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8 lg:pt-14'>
+          {/* Cot 1 - Thuong hieu */}
           <motion.div
-            key={column.title}
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.58, delay: (index + 1) * 0.14, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
           >
-            <LinkColumn
-              onAction={() => setTurnkeyOpen(true)}
-              title={column.title}
-              links={column.links}
-              pendingLabel={pendingLabel}
-            />
-          </motion.div>
-        ))}
+            {/* Dưới `lg` logo phóng 1.4 lần (`zoom` ăn vào bố cục, khác `scale`) để chiếm hơn nửa bề ngang
+              hàng thay vì ~40% như trước; từ `lg` giữ cỡ cũ. */}
+            <div className='footer-logo-tab max-lg:[zoom:1.4]'>
+              <Logo onDark />
+            </div>
+            <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
+              {cmsText(settings.tagline, t('tagline'))}
+            </p>
 
-        {/* Cot 5 - Lien he */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.58, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
-          style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
-        >
-          <ColumnTitle>{t('contactTitle')}</ColumnTitle>
-          <ul className='text-footer-foreground space-y-2.5 text-sm'>
-            <motion.li
-              initial={{ opacity: 0, y: 5 }}
+            <ul className='mt-5 flex gap-2.5'>
+              {socialLinks.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target='_blank'
+                    rel='noreferrer'
+                    aria-label={item.label}
+                    className={cn(
+                      'footer-social-link',
+                      'bg-white/15 text-white flex size-9 items-center justify-center rounded-full',
+                      'hover:bg-brand-orange hover:text-white transition-colors'
+                    )}
+                  >
+                    {item.icon}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {[
+            { title: t('productTitle'), links: FOOTER_PRODUCT_LINKS },
+            { title: t('supportTitle'), links: FOOTER_SUPPORT_LINKS },
+            { title: t('aboutTitle'), links: FOOTER_ABOUT_LINKS }
+          ].map((column, index) => (
+            <motion.div
+              key={column.title}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.42, delay: 0.74, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.58, delay: (index + 1) * 0.14, ease: [0.22, 1, 0.36, 1] }}
             >
-              {t('hotline')}:{' '}
-              <HotlineLink hotline={hotline} className='footer-animated-link relative inline-block transition-colors'>
-                {hotline}
-              </HotlineLink>
-            </motion.li>
-            <motion.li
-              initial={{ opacity: 0, y: 5 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.42, delay: 0.81, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {t('emailLabel')}:{' '}
-              <a href={`mailto:${email}`} className='footer-animated-link relative inline-block transition-colors'>
-                {email}
-              </a>
-            </motion.li>
-            <motion.li
-              initial={{ opacity: 0, y: 5 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.42, delay: 0.88, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {t('addressLabel')}: {cmsText(settings.address, t('address'))}
-            </motion.li>
-          </ul>
-        </motion.div>
+              <LinkColumn
+                onAction={() => setTurnkeyOpen(true)}
+                title={column.title}
+                links={column.links}
+                pendingLabel={pendingLabel}
+              />
+            </motion.div>
+          ))}
+
+          {/* Cot 5 - Lien he */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.58, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
+            style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
+          >
+            <ColumnTitle>{t('contactTitle')}</ColumnTitle>
+            <ul className='text-footer-foreground space-y-2.5 text-sm'>
+              <motion.li
+                initial={{ opacity: 0, y: 5 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.42, delay: 0.74, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {t('hotline')}:{' '}
+                <HotlineLink hotline={hotline} className='footer-animated-link relative inline-block transition-colors'>
+                  {hotline}
+                </HotlineLink>
+              </motion.li>
+              <motion.li
+                initial={{ opacity: 0, y: 5 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.42, delay: 0.81, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {t('emailLabel')}:{' '}
+                <a href={`mailto:${email}`} className='footer-animated-link relative inline-block transition-colors'>
+                  {email}
+                </a>
+              </motion.li>
+              <motion.li
+                initial={{ opacity: 0, y: 5 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.42, delay: 0.88, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {t('addressLabel')}: {cmsText(settings.address, t('address'))}
+              </motion.li>
+            </ul>
+          </motion.div>
+        </div>
       </div>
 
       {/* Hang day - chi con dong ban quyen (anh mockup). */}

@@ -487,8 +487,7 @@ export function ArticleList() {
       className='bg-card scroll-mt-[calc(var(--public-header-offset,64px)+0.75rem)] space-y-5 rounded-2xl border p-5 sm:p-6'
     >
       <header className='space-y-1.5'>
-        <p className='text-primary-strong text-xs font-semibold tracking-[0.14em] uppercase'>{t('eyebrow')}</p>
-        <h2 className='text-primary-strong text-3xl font-bold tracking-tight text-balance'>{t('title')}</h2>
+        <h2 className='text-foreground text-3xl font-bold tracking-tight text-balance'>{t('title')}</h2>
         <p className='text-muted-foreground text-sm'>{t('subtitle')}</p>
       </header>
 

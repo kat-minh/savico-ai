@@ -43,7 +43,7 @@ function SelectedCheckIcon() {
       className='flex size-4 shrink-0 items-center justify-center rounded-full border-[1.5px] border-current'
     >
       <Check
-        className='size-2.5 animate-[firm-check-draw_.45s_ease-out_both] motion-reduce:animate-none'
+        className='size-2.5 animate-[firm-check-draw_.45s_ease-out_backwards] motion-reduce:animate-none'
         strokeWidth={3}
       />
     </motion.span>

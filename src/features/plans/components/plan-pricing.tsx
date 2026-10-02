@@ -404,6 +404,10 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
             <GroupRow label={t('comparison.groups.core')} />
             <CoreRow
               popularTier={POPULAR_TIER}
+              hoveredRow={hoveredRow}
+              onHoverRow={setHoveredRow}
+              hoveredColumn={hoveredColumn}
+              onHoverColumn={setHoveredColumn}
               index={0}
               label={t('comparison.core.designOptions')}
               values={TIERS.map((tier) => t('comparison.core.optionUnit', { count: byTier(tier)?.designCredits ?? 0 }))}
@@ -412,6 +416,10 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                 thư viện) — dòng đó từng được ghép từ số phương án nên in một con số không có thật. */}
             <CoreRow
               popularTier={POPULAR_TIER}
+              hoveredRow={hoveredRow}
+              onHoverRow={setHoveredRow}
+              hoveredColumn={hoveredColumn}
+              onHoverColumn={setHoveredColumn}
               index={1}
               label={t('comparison.core.libraryCredits')}
               values={TIERS.map((tier) =>
@@ -497,7 +505,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         asChild
                         size='sm'
                         variant={plan.popular ? 'default' : 'outline'}
-                        className={cn('plan-table-buy text-xs font-bold', plan.popular && 'plan-table-buy-popular')}
+                        className={cn('text-xs font-bold', !plan.popular && 'bg-card/85')}
                       >
                         <Link
                           href={checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY)}
@@ -631,29 +639,52 @@ function CoreRow({
   label,
   values,
   index,
-  popularTier
+  popularTier,
+  hoveredRow,
+  onHoverRow,
+  hoveredColumn,
+  onHoverColumn
 }: {
   label: string
   values: string[]
   index: number
   popularTier: PlanTier | null
+  hoveredRow: string | null
+  onHoverRow: (row: string) => void
+  hoveredColumn: PlanTier | null
+  onHoverColumn: (tier: PlanTier) => void
 }) {
   const { reduceMotion } = usePricingMotion()
   return (
     <motion.tr
+      data-hovered={hoveredRow === label || undefined}
       className='plan-comparison-row divide-border divide-x'
+      onMouseEnter={() => onHoverRow(label)}
       initial={reduceMotion ? false : { opacity: 0, y: 7 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.18 }}
       transition={{ duration: reduceMotion ? 0.01 : 0.52, delay: 0.28 + index * 0.075, ease: pricingEase }}
     >
-      <th className='bg-card sticky left-0 z-10 px-3 py-2 text-left text-xs font-medium'>{label}</th>
+      <th
+        className={cn(
+          'bg-card sticky left-0 z-10 px-3 py-2 text-left text-xs font-medium transition-colors',
+          hoveredRow === label && 'bg-accent/80 font-semibold'
+        )}
+      >
+        {label}
+      </th>
       {values.map((value, index) => (
         <td
           key={`${label}-${index}`}
+          onMouseEnter={() => {
+            const tier = TIERS[index]
+            if (tier) onHoverColumn(tier)
+          }}
           className={cn(
-            'plan-comparison-cell px-3 py-2 text-center text-xs',
-            TIERS[index] === popularTier && 'plan-plus-column bg-brand-orange-soft/60'
+            'plan-comparison-cell px-3 py-2 text-center text-xs transition-colors',
+            TIERS[index] === popularTier && 'plan-plus-column bg-brand-orange-soft/60',
+            hoveredColumn === TIERS[index] && 'is-column-hovered',
+            hoveredRow === label && hoveredColumn === TIERS[index] && 'is-intersection font-semibold'
           )}
         >
           {value}

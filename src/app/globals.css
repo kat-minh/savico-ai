@@ -2714,13 +2714,15 @@ body main {
   }
 }
 /* M06: nét tick xác minh/so sánh được vẽ sau khi phần tử xuất hiện. */
+/* Chỉ dùng với fill-mode `backwards`: sau khi vẽ xong, nét trở về liền mạch (không dasharray) —
+   giữ dasharray ở trạng thái cuối làm viền huy hiệu (dài hơn nét tích) bị đứt đoạn. */
 @keyframes firm-check-draw {
   from {
-    stroke-dasharray: 48;
-    stroke-dashoffset: 48;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
   }
   to {
-    stroke-dasharray: 48;
+    stroke-dasharray: 100;
     stroke-dashoffset: 0;
   }
 }
@@ -4830,6 +4832,34 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
     opacity: 1;
   }
 }
+.footer-brand-bg {
+  /* Dải xanh logo BuildX (nhạt ở trên → đậm ở dưới) cho phần nội dung footer; hàng bản quyền giữ nền tối. */
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--brand-gradient-to) 55%, var(--brand-gradient-from)),
+    var(--brand-gradient-from)
+  );
+}
+.footer-logo-tab {
+  /* Logo giữ nguyên màu, đặt trên dải trắng: bo tròn đầu bên phải, đầu bên trái tràn hết mép màn hình. */
+  position: relative;
+  display: inline-block;
+  padding: 0.75rem 2.5rem 0.75rem 0;
+  border-radius: 0 9999px 9999px 0;
+  background-color: #fff;
+}
+.footer-logo-tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 100%;
+  bottom: 0;
+  width: 100vw;
+  background-color: #fff;
+}
+.footer-brand-bg {
+  overflow-x: clip;
+}
 .footer-animated-link::after {
   content: '';
   position: absolute;
@@ -6396,26 +6426,6 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
   50% {
     background-color: color-mix(in srgb, var(--brand-orange) 18%, var(--card));
   }
-}
-.plan-table-buy:not(.plan-table-buy-popular) {
-  overflow: hidden;
-  background-image: radial-gradient(
-    circle at center,
-    color-mix(in srgb, var(--primary) 13%, transparent) 0 50%,
-    transparent 51%
-  );
-  background-position: center;
-  background-size: 0 0;
-  background-repeat: no-repeat;
-  transition:
-    color 0.28s ease,
-    border-color 0.28s ease,
-    background-size 0.36s cubic-bezier(0.2, 0.72, 0.3, 1);
-}
-.plan-table-buy:not(.plan-table-buy-popular):hover {
-  transform: none;
-  box-shadow: none;
-  background-size: 220% 220%;
 }
 @media (max-width: 767.98px) {
   .supervision-journey-track {

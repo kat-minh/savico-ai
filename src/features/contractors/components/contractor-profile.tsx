@@ -113,7 +113,10 @@ function DrawnCircleCheck({
       )}
     >
       <Check
-        className={cn('size-2.5 motion-reduce:animate-none', active && 'animate-[firm-check-draw_.45s_ease-out_both]')}
+        className={cn(
+          'size-2.5 motion-reduce:animate-none',
+          active && 'animate-[firm-check-draw_.45s_ease-out_backwards]'
+        )}
         style={{
           animationDelay: `${delay}s`,
           strokeDasharray: 48,
@@ -460,7 +463,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.3 }}
                       >
-                        <BadgeCheck className='text-primary size-5 shrink-0 animate-[firm-check-draw_.5s_ease-out_both] motion-reduce:animate-none' />
+                        <BadgeCheck className='text-primary size-5 shrink-0 animate-[firm-check-draw_.5s_ease-out_backwards] overflow-visible motion-reduce:animate-none' />
                       </motion.span>
                     ) : null}
                     {invited ? (
