@@ -85,9 +85,9 @@ function FooterNavLink({
   )
 }
 
-/** Tieu de cot - chu nho, in hoa, gian chu. */
+/** Tiêu đề cột — in hoa, đậm và giãn chữ. */
 function ColumnTitle({ children }: { children: ReactNode }) {
-  return <h2 className='mb-4 text-xs font-semibold tracking-[0.12em] uppercase'>{children}</h2>
+  return <h2 className='mb-4 text-sm font-bold tracking-[0.12em] uppercase'>{children}</h2>
 }
 
 /** Mot cot lien ket. */
@@ -106,7 +106,7 @@ function LinkColumn({
   return (
     <nav aria-label={title}>
       <ColumnTitle>{title}</ColumnTitle>
-      <ul className='space-y-2.5'>
+      <ul className='space-y-2.5 text-sm leading-5'>
         {links.map((link, index) => (
           <FooterNavLink
             key={link.labelKey}
@@ -175,14 +175,15 @@ export function SiteFooter() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Dưới `lg` logo phóng 1.4 lần (`zoom` ăn vào bố cục, khác `scale`) để chiếm hơn nửa bề ngang
-              hàng thay vì ~40% như trước; từ `lg` giữ cỡ cũ. */}
-            <div className='footer-logo-tab max-lg:[zoom:1.4]'>
-              <Logo onDark />
+            {/* Dải trắng lấy bề ngang theo logo và dòng mô tả, kéo tới cuối chữ AI. */}
+            <div className='inline-flex max-w-full flex-col items-start'>
+              <div className='footer-logo-tab'>
+                <Logo onDark className='h-12 max-w-full max-lg:h-14' />
+              </div>
+              <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
+                {cmsText(settings.tagline, t('tagline'))}
+              </p>
             </div>
-            <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
-              {cmsText(settings.tagline, t('tagline'))}
-            </p>
 
             <ul className='mt-5 flex gap-2.5'>
               {socialLinks.map((item) => (
@@ -235,7 +236,7 @@ export function SiteFooter() {
             style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
           >
             <ColumnTitle>{t('contactTitle')}</ColumnTitle>
-            <ul className='text-footer-foreground space-y-2.5 text-sm'>
+            <ul className='text-footer-foreground space-y-2.5 text-sm leading-5'>
               <motion.li
                 initial={{ opacity: 0, y: 5 }}
                 whileInView={{ opacity: 1, y: 0 }}

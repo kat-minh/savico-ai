@@ -18,8 +18,9 @@ export const ROUTES = {
   CONSULT: '/consult', // Tư vấn 1:1 (mục VIII)
   TERMS: '/terms',
   PRIVACY: '/privacy',
+  AI_TERMS: '/ai-terms', // Điều khoản sử dụng AI
   PAYMENT_POLICY: '/payment-policy', // Chính sách thanh toán và hoàn tiền
-  ECOMMERCE_PARTNERS: '/ecommerce-partners', // TMĐT & Đối tác (Điều khoản sử dụng AI)
+  ECOMMERCE_PARTNERS: '/ecommerce-partners', // Quy chế TMĐT & Đối tác
 
   // Auth
   LOGIN: '/login',

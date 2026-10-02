@@ -66,6 +66,7 @@ export const BUILDING_IMAGE = {
 
 /** Ảnh chủ đề dùng chung cho cẩm nang, hướng dẫn và hồ sơ. */
 export const TOPIC_IMAGE = {
+  articleEnd: '/images/handbook/article-end-villa.png',
   /** Công trường / lô đất — minh họa bước chụp ảnh lô đất. */
   site: photo('photo-1541888946425-d81bb19240f5'),
   /** Kiến trúc sư đang đọc bản vẽ — minh họa nhập liệu, hồ sơ, dự toán. */
@@ -242,7 +243,7 @@ export const HANDBOOK_IMAGE = {
  * BuildX. Thẻ nhà thầu được đặt nổi lên trên bằng CSS.
  */
 export const MAP_IMAGE = {
-  contractors: '/images/contractors/hero-tim-nha-thau.png'
+  contractors: '/images/contractors/banner-tim-nha-thau.png'
 } as const
 
 /**

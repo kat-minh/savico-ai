@@ -74,7 +74,7 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
             {t('referenceLabel')}
             <Link
               href={ROUTES.PLANS}
-              className='text-primary-foreground hover:text-brand-orange inline-flex items-center gap-1 font-medium underline underline-offset-4 transition-colors'
+              className='text-primary-foreground hover:text-primary-foreground focus-visible:text-primary-foreground inline-flex items-center gap-1 font-medium underline underline-offset-4 transition-colors'
             >
               {t('referenceLink')}
               <ChevronRight className='size-4' />
@@ -82,7 +82,7 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
           </p>
           <Link
             href={ROUTES.PLANS}
-            className='hover:text-brand-orange hidden items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline lg:inline-flex'
+            className='hover:text-primary-foreground focus-visible:text-primary-foreground hidden items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline focus-visible:underline lg:inline-flex'
           >
             <span className='sm:hidden'>{t('viewAllMobile')}</span>
             <span className='hidden sm:inline'>{t('viewAll')}</span>

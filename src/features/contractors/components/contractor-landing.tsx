@@ -291,16 +291,10 @@ export function ContractorLanding() {
   // gây hiểu lầm (mục 3).
   const { data: briefs } = useBriefs(isAuthenticated)
   const hasBrief = isAuthenticated && Boolean(briefs?.length)
-  /**
-   * Hồ sơ khách đang làm dở gần nhất. Đã có hồ sơ thì ba lối "Tạo hồ sơ" (hero,
-   * thanh đáy, dải CTA) đổi thành "Tiếp tục với {tên hồ sơ}" + "Đổi hồ sơ" (góp ý
-   * BuildX) — khách có sẵn 5 hồ sơ mà chỉ được mời tạo mới là đi lạc.
-   */
-  // Ưu tiên hồ sơ đã ĐỦ thông tin — hồ sơ nháp rỗng mới sửa gần nhất không được
-  // chiếm chỗ "Tiếp tục với…" (góp ý NT34); chưa có hồ sơ đủ thì mới lấy hồ sơ mới nhất.
+  /** Hồ sơ gần nhất dùng khi chọn nhà thầu hoặc đổi hồ sơ. CTA chính luôn tạo hồ sơ mới. */
+  // Ưu tiên hồ sơ đủ thông tin khi mời nhà thầu; nếu chưa có thì dùng nháp mới nhất.
   const briefsByNewest = hasBrief ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) : []
   const currentBrief = briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
-  const currentBriefName = currentBrief?.name.trim() || t('untitledBrief')
   const openPicker = useProjectPickerStore((s) => s.openPicker)
 
   /**
@@ -374,11 +368,6 @@ export function ContractorLanding() {
   const openContractorDetail = (contractorId: string) => {
     dismissNudge()
     router.push(contractorFirmRoute(CONTRACTOR_PREVIEW_ID, contractorId))
-  }
-
-  const continueBrief = () => {
-    dismissNudge()
-    if (currentBrief) router.push(contractorMatchesRoute(currentBrief.id))
   }
 
   const chooseContractor = (contractorId: string) => {
@@ -474,25 +463,14 @@ export function ContractorLanding() {
                 variants={revealItemVariants}
                 className='mt-4 flex flex-col gap-3 sm:mt-[38px] sm:flex-row sm:flex-wrap sm:gap-8'
               >
-                {currentBrief ? (
-                  <Button
-                    size='lg'
-                    className='h-14 max-w-full min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
-                    onClick={continueBrief}
-                    title={t('continueWith', { name: currentBriefName })}
-                  >
-                    <span className='truncate'>{t('continueWith', { name: currentBriefName })}</span>
-                  </Button>
-                ) : (
-                  <Button
-                    size='lg'
-                    className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
-                    onClick={startBrief}
-                    disabled={createBrief.isPending}
-                  >
-                    {t('hero.createBrief')}
-                  </Button>
-                )}
+                <Button
+                  size='lg'
+                  className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
+                  onClick={startBrief}
+                  disabled={createBrief.isPending}
+                >
+                  {t('hero.createBrief')}
+                </Button>
                 <Button
                   size='lg'
                   variant='outline'
@@ -759,9 +737,8 @@ export function ContractorLanding() {
                 thì tách riêng cột lịch khảo sát và XẾP CHỒNG hai nút.
                 Chỉ số trong ảnh chỉ có đánh giá và số dự án tương tự — khoảng
                 cách nằm ở S12 chứ không ở landing. */}
-            {/* Thanh đáy đang hiện thì chừa đệm dưới danh sách — dòng cuối không bị thanh che
-                (góp ý NT34); đệm cũ đặt ở cuối trang, sau dải CTA, nên không có tác dụng. */}
-            <ul id={RANKED_LIST_ID} className={cn('mt-4 divide-y', showStickyNudge && !ctaInView && 'pb-40 sm:pb-20')}>
+            {/* Thanh nhắc nổi không thay đổi chiều cao danh sách hoặc đẩy dải logo bên dưới. */}
+            <ul id={RANKED_LIST_ID} className='mt-4 divide-y'>
               {ranked.length === 0 ? (
                 <li className='text-muted-foreground py-10 text-center text-sm text-pretty'>{t('ranking.empty')}</li>
               ) : null}
@@ -839,24 +816,16 @@ export function ContractorLanding() {
             className='pointer-events-none fixed inset-x-0 bottom-[90px] z-40 flex justify-center px-3 sm:bottom-6 sm:px-6'
           >
             <div className='bg-card pointer-events-auto flex w-full max-w-[570px] items-center justify-between gap-4 rounded-[22px] border px-4 py-3 shadow-lg sm:px-5'>
-              <p className='min-w-0 truncate text-sm font-medium'>
-                {currentBrief ? t('continueHint', { name: currentBriefName }) : t('ranking.stickyNudge')}
-              </p>
+              <p className='min-w-0 truncate text-sm font-medium'>{t('ranking.stickyNudge')}</p>
               <div className='flex shrink-0 items-center gap-2'>
                 {currentBrief ? (
-                  <>
-                    <Button size='sm' variant='outline' onClick={openPicker}>
-                      {t('switchBrief')}
-                    </Button>
-                    <Button size='sm' onClick={continueBrief}>
-                      {t('continueShort')}
-                    </Button>
-                  </>
-                ) : (
-                  <Button size='sm' onClick={startBrief} disabled={createBrief.isPending}>
-                    {t('hero.createBrief')}
+                  <Button size='sm' variant='outline' onClick={openPicker}>
+                    {t('switchBrief')}
                   </Button>
-                )}
+                ) : null}
+                <Button size='sm' onClick={startBrief} disabled={createBrief.isPending}>
+                  {t('hero.createBrief')}
+                </Button>
                 <button
                   type='button'
                   onClick={dismissNudge}
@@ -996,11 +965,9 @@ export function ContractorLanding() {
             transition={{ duration: 1.4, delay: 0.2, ease: revealEase }}
             className='bg-primary/40 pointer-events-none absolute -top-10 -right-10 size-40 rounded-full blur-3xl'
           />
-          <p className='relative text-sm font-bold text-pretty sm:text-base sm:font-semibold'>
-            {currentBrief ? t('cta.resumeTitle', { name: currentBriefName }) : t('cta.title')}
-          </p>
-          {currentBrief ? (
-            <div className='relative flex flex-wrap items-center gap-2 max-sm:flex-col max-sm:items-stretch max-sm:gap-3'>
+          <p className='relative text-sm font-bold text-pretty sm:text-base sm:font-semibold'>{t('cta.title')}</p>
+          <div className='relative flex flex-wrap items-center gap-2 max-sm:flex-col max-sm:items-stretch max-sm:gap-3'>
+            {currentBrief ? (
               <Button
                 variant='outline'
                 className='ring-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground bg-transparent bg-none shadow-none before:hidden after:hidden max-sm:h-11 max-sm:w-full max-sm:rounded-full max-sm:px-8 max-sm:text-base'
@@ -1008,15 +975,7 @@ export function ContractorLanding() {
               >
                 {t('switchBrief')}
               </Button>
-              <Button
-                className='bg-background text-primary-strong hover:bg-background/90 max-w-72 border-0 bg-none shadow-sm max-sm:h-11 max-sm:w-full max-sm:max-w-none max-sm:rounded-full max-sm:px-8 max-sm:text-base'
-                onClick={continueBrief}
-                title={t('continueWith', { name: currentBriefName })}
-              >
-                <span className='truncate'>{t('continueWith', { name: currentBriefName })}</span>
-              </Button>
-            </div>
-          ) : (
+            ) : null}
             <Button
               className='bg-background text-primary-strong hover:bg-background/90 relative border-0 bg-none shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md max-sm:h-11 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
               onClick={startBrief}
@@ -1035,7 +994,7 @@ export function ContractorLanding() {
                 <span className='relative'>{t('cta.action')}</span>
               </span>
             </Button>
-          )}
+          </div>
         </motion.div>
 
         {/* Mục 12: hiện dần sau dải CTA. */}

@@ -359,6 +359,9 @@
     },
     "ecommerce": {
       "title": "TMĐT & Đối tác"
+    },
+    "aiTerms": {
+      "title": "Điều khoản sử dụng AI"
     }
   },
   "chatbot": {
@@ -400,7 +403,7 @@
     "handbook": "Cẩm nang",
     "guide": "Hướng dẫn",
     "createProject": "Tạo dự án mới",
-    "brandTagline": "Kết nối hành trình xây dựng",
+    "brandTagline": "Số hoá trọn hành trình",
     "account": "Tài khoản của tôi",
     "logout": "Đăng xuất",
     "menu": "Menu",
@@ -431,6 +434,7 @@
       "faq": "Câu hỏi thường gặp",
       "about": "Giới thiệu",
       "privacy": "Quyền riêng tư",
+      "aiTerms": "Điều khoản sử dụng AI",
       "terms": "Điều khoản sử dụng",
       "paymentPolicy": "Thanh toán & Hoàn tiền",
       "ecommerce": "TMĐT & Đối tác"
@@ -5206,7 +5210,7 @@
         "titleLine1": "Tìm đúng nhà thầu",
         "titleLine2": "cho công trình của bạn",
         "subtitle": "Kết nối với mạng lưới nhà thầu uy tín trên BuildX, giúp bạn dễ dàng tìm kiếm, so sánh năng lực và lựa chọn đối tác phù hợp, minh bạch và đáng tin cậy.",
-        "createBrief": "Tạo hồ sơ",
+        "createBrief": "Tạo hồ sơ dự án",
         "bestMatch": "Phù hợp nhất với dự án của bạn",
         "viewContractors": "Xem danh sách nhà thầu",
         "card": {
@@ -5289,7 +5293,7 @@
       },
       "cta": {
         "title": "Đã có hồ sơ thiết kế? Tạo hồ sơ để kết nối với nhà thầu phù hợp ngay.",
-        "action": "Tạo hồ sơ",
+        "action": "Tạo hồ sơ dự án",
         "resumeTitle": "Tiếp tục tìm nhà thầu cho hồ sơ {name}."
       },
       "partner": {

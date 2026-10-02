@@ -359,6 +359,9 @@
     },
     "ecommerce": {
       "title": "E-commerce & Partners"
+    },
+    "aiTerms": {
+      "title": "AI Terms of Use"
     }
   },
   "chatbot": {
@@ -400,7 +403,7 @@
     "handbook": "Handbook",
     "guide": "Guide",
     "createProject": "New project",
-    "brandTagline": "Connecting your build",
+    "brandTagline": "Digitising the entire journey",
     "account": "My account",
     "logout": "Sign out",
     "menu": "Menu",
@@ -431,6 +434,7 @@
       "faq": "FAQ",
       "about": "About us",
       "privacy": "Privacy",
+      "aiTerms": "AI Terms of Use",
       "terms": "Terms of use",
       "paymentPolicy": "Payments & Refunds",
       "ecommerce": "E-commerce & Partners"
@@ -5206,7 +5210,7 @@
         "titleLine1": "Find the right contractor",
         "titleLine2": "for your build",
         "subtitle": "Connect with BuildX's network of trusted contractors — search, compare capability and pick the right partner, transparently and with confidence.",
-        "createBrief": "Create a brief",
+        "createBrief": "Create a project brief",
         "bestMatch": "Best match for your project",
         "viewContractors": "View contractor list",
         "card": {
@@ -5289,7 +5293,7 @@
       },
       "cta": {
         "title": "Already have a design? Create a brief and get matched with the right contractors.",
-        "action": "Create a brief",
+        "action": "Create a project brief",
         "resumeTitle": "Keep finding contractors for {name}."
       },
       "partner": {

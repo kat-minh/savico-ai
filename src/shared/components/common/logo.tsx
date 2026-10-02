@@ -14,7 +14,7 @@ interface LogoProps {
    */
   onDark?: boolean
   /**
-   * Dòng định vị nhỏ dưới logo ("Kết nối hành trình xây dựng"). Chữ do nơi gọi
+   * Dòng định vị nhỏ dưới logo. Chữ do nơi gọi
    * truyền vào: `Logo` dùng được ở cả server lẫn client component nên không tự
    * lấy bản dịch.
    */

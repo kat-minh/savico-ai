@@ -1,13 +1,13 @@
 'use client'
 
-import { ArrowRight, Check, FilePlus2, MoveUpRight, Scale, UserRoundPlus, X, type LucideIcon } from 'lucide-react'
+import { ArrowRight, Check, FilePlus2, Scale, UserRoundPlus, X, type LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { useAuthStore } from '@/shared/auth'
-import { useCmsCollection } from '@/shared/cms'
+import { useCmsCollection, useSiteImage } from '@/shared/cms'
 import { Logo, Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/shared/components/ui/dialog'
@@ -104,6 +104,7 @@ export function ArticleCompactCta({ article, onCreateProject }: ArticleActionPro
 
 export function ArticleEndExperience({ article, articleRef, onCreateProject }: ArticleEndExperienceProps) {
   const t = useTranslations('handbook.articleJourney')
+  const endImage = useSiteImage('topic.articleEnd')
   const reduceMotion = useReducedMotion()
   const endRef = useRef<HTMLElement>(null)
   const [open, setOpen] = useState(false)
@@ -182,58 +183,69 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.18 }}
         transition={{ duration: reduceMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
-        className='border-primary/20 overflow-hidden border-t bg-accent'
+        className='border-primary/20 relative isolate overflow-hidden border-t bg-accent'
       >
-        <div className='grid min-h-[262px] min-[900px]:grid-cols-[minmax(0,1fr)_330px]'>
-          <div className='flex flex-col justify-center px-7 py-7 sm:px-8'>
+        <div className='relative min-h-[350px]'>
+          <div className='pointer-events-none absolute inset-0 -z-10'>
+            <Photo
+              src={endImage}
+              alt={t('end.imageAlt')}
+              sizes='(max-width: 900px) 100vw, 850px'
+              className='absolute inset-y-0 right-0 h-full w-[70%] rounded-none'
+              imageClassName='object-cover object-right'
+            />
+            <Photo
+              src={endImage}
+              alt=''
+              sizes='300px'
+              className='absolute inset-y-0 left-0 h-full w-[30%] scale-110 rounded-none blur-xl'
+            />
+            <div className='absolute inset-0 bg-linear-to-r from-accent/95 from-0% via-accent/90 via-30% to-transparent to-42% max-[899px]:from-accent/95 max-[899px]:via-accent/90 max-[899px]:to-accent/50' />
+            <div
+              className='absolute inset-y-0 left-0 w-[42%] backdrop-blur-[8px]'
+              style={{ maskImage: 'linear-gradient(to right, black 71.43%, transparent 100%)' }}
+            />
+          </div>
+          <div className='relative flex min-h-[270px] flex-col justify-center px-6 pt-8 pb-5 min-[900px]:w-[44%] sm:px-8'>
             <h2 className='text-primary-strong text-[clamp(1.35rem,2.1vw,1.72rem)] font-extrabold tracking-[-0.025em]'>
               {t('end.title')}
             </h2>
-            <p className='mt-2 text-[14px] leading-relaxed text-[#737c77]'>{t('end.subtitle')}</p>
+            <p className='text-muted-foreground mt-2 text-[14px] leading-relaxed'>{t('end.subtitle')}</p>
 
             <ul className='mt-4 space-y-2.5'>
               {[t('end.p1'), t('end.p2'), t('end.p3')].map((item) => (
-                <li key={item} className='flex items-center gap-2.5 text-[14px] text-[#465049]'>
-                  <span className='flex size-[22px] items-center justify-center rounded-full bg-primary-strong text-white'>
+                <li key={item} className='text-foreground flex items-center gap-2.5 text-[14px]'>
+                  <span className='text-primary-foreground flex size-[22px] shrink-0 items-center justify-center rounded-full bg-primary-strong'>
                     <Check className='size-3' strokeWidth={3} />
                   </span>
                   {item}
                 </li>
               ))}
             </ul>
-
-            <div className='mt-5'>
-              <ActionButtons article={article} onCreateProject={createProject} />
-            </div>
           </div>
-
-          <div className='relative hidden overflow-hidden min-[900px]:block'>
-            <Photo
-              src={BUILDING_IMAGE.villa}
-              alt={t('end.imageAlt')}
-              sizes='330px'
-              className='absolute right-0 top-[86px] bottom-0 h-auto w-[82%] rounded-none'
-              imageClassName='object-cover object-center'
-            />
-            <div className='absolute top-[86px] right-0 bottom-0 w-[82%] bg-gradient-to-r from-accent via-transparent to-transparent' />
-
-            <div className='absolute top-7 left-0 z-10 flex flex-col gap-2.5'>
+          <div
+            data-article-end-actions
+            className='relative grid items-center gap-3 px-6 pb-6 min-[900px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[900px]:gap-2'
+          >
+            <ActionButtons article={article} onCreateProject={createProject} bannerRow />
+            <span
+              data-article-handwritten
+              className='mx-auto w-full min-w-0 max-w-[160px] text-center font-[cursive] text-[16px] leading-[1.1] italic'
+            >
+              <span data-article-handwritten-text>{t('end.handwritten')}</span>
+            </span>
+            <div className='flex items-center justify-center gap-1'>
               {[t('end.tag1'), t('end.tag2'), t('end.tag3')].map((tag) => (
                 <span
                   key={tag}
-                  className='flex min-w-[142px] items-center gap-2 rounded-full border border-accent bg-white/96 px-3 py-2 text-[12px] font-bold text-[#465049] shadow-[0_7px_18px_rgba(42,117,63,.1)] backdrop-blur'
+                  className='text-foreground bg-card/95 flex h-[36px] items-center gap-1 whitespace-nowrap rounded-full border border-accent px-1.5 text-[9px] font-bold shadow-sm backdrop-blur'
                 >
-                  <span className='flex size-[20px] shrink-0 items-center justify-center rounded-full bg-primary-strong text-white'>
+                  <span className='text-primary-foreground flex size-[14px] shrink-0 items-center justify-center rounded-full bg-primary-strong'>
                     <Check className='size-3' strokeWidth={3} />
                   </span>
                   {tag}
                 </span>
               ))}
-            </div>
-
-            <div className='absolute left-0 bottom-5 z-10 flex max-w-[205px] items-start gap-1 text-primary-strong'>
-              <span className='font-[cursive] text-[20px] leading-[1.05] italic'>{t('end.handwritten')}</span>
-              <MoveUpRight className='mt-[-10px] size-7 shrink-0' strokeWidth={2} />
             </div>
           </div>
         </div>
@@ -365,9 +377,13 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
   )
 }
 
-function ActionButtons({ article, onCreateProject, compact = false }: ArticleActionProps & { compact?: boolean }) {
+function ActionButtons({
+  article,
+  onCreateProject,
+  compact = false,
+  bannerRow = false
+}: ArticleActionProps & { compact?: boolean; bannerRow?: boolean }) {
   const t = useTranslations('handbook.articleJourney.actions')
-  const reduceMotion = useReducedMotion()
   const completeFromPage = () =>
     writeMemory(article.id, {
       suppressedUntil: null,
@@ -377,54 +393,66 @@ function ActionButtons({ article, onCreateProject, compact = false }: ArticleAct
   return (
     <div
       className={
-        compact
-          ? 'flex flex-wrap items-center gap-2.5 max-[899px]:grid max-[899px]:grid-cols-1'
-          : 'grid gap-3 min-[900px]:grid-cols-3'
+        bannerRow
+          ? 'flex items-center gap-1'
+          : compact
+            ? 'flex flex-wrap items-center gap-2.5 max-[899px]:grid max-[899px]:grid-cols-1'
+            : 'flex flex-wrap gap-3 max-[899px]:grid max-[899px]:grid-cols-1'
       }
     >
-      <motion.button
+      <Button
         type='button'
         onClick={() => {
           completeFromPage()
           onCreateProject?.()
         }}
-        whileHover={reduceMotion ? undefined : { y: -2 }}
-        whileTap={reduceMotion ? undefined : { y: 0, scale: 0.995 }}
-        transition={{ duration: reduceMotion ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
-          'brand-green-button inline-flex min-w-0 items-center justify-center gap-2 font-bold whitespace-nowrap will-change-transform',
+          'brand-green-button group min-w-0 rounded-full font-bold',
           compact
-            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] max-[899px]:w-full'
-            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px]'
+            ? 'h-[42px] w-auto px-4 text-[13px] has-[>svg]:px-4 max-[899px]:w-full'
+            : 'h-[42px] w-auto px-3.5 text-[12px] has-[>svg]:px-3.5 max-[899px]:w-full',
+          bannerRow && 'h-9 gap-1 px-2.5 text-[10px] has-[>svg]:px-2.5 max-[899px]:w-auto'
         )}
       >
         {t('create')}
-        <ArrowRight className={compact ? 'size-3.5' : 'size-4'} />
-      </motion.button>
-      <Link
-        href={ROUTES.CONSULT}
-        onClick={completeFromPage}
+        <ArrowRight
+          className={cn(
+            'transition-transform duration-300 group-hover:translate-x-1',
+            compact ? 'size-3.5' : 'size-4',
+            bannerRow && 'size-3'
+          )}
+        />
+      </Button>
+      <Button
+        asChild
+        variant='outline'
         className={cn(
-          'inline-flex min-w-0 items-center justify-center border border-primary/25 bg-white font-semibold whitespace-nowrap text-primary-strong transition-[background-color,border-color,box-shadow] duration-180 ease-out hover:border-primary/40 hover:bg-accent hover:shadow-[0_5px_14px_rgba(42,117,63,.065)]',
+          'bg-card/85 min-w-0 rounded-full font-semibold',
           compact
-            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] max-[899px]:w-full'
-            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px]'
+            ? 'h-[42px] w-auto px-4 text-[13px] max-[899px]:w-full'
+            : 'h-[42px] w-auto px-3.5 text-[12px] max-[899px]:w-full',
+          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-auto'
         )}
       >
-        {t('architect')}
-      </Link>
-      <Link
-        href={`${ROUTES.CONSULT}?type=legal`}
-        onClick={completeFromPage}
+        <Link href={ROUTES.CONSULT} onClick={completeFromPage}>
+          {t('architect')}
+        </Link>
+      </Button>
+      <Button
+        asChild
+        variant='outline'
         className={cn(
-          'inline-flex min-w-0 items-center justify-center border border-primary/25 bg-white font-semibold whitespace-nowrap text-primary-strong transition-[background-color,border-color,box-shadow] duration-180 ease-out hover:border-primary/40 hover:bg-accent hover:shadow-[0_5px_14px_rgba(42,117,63,.065)]',
+          'bg-card/85 min-w-0 rounded-full font-semibold',
           compact
-            ? 'h-[42px] w-auto rounded-[9px] px-4 text-[13px] max-[899px]:w-full'
-            : 'h-[48px] w-full rounded-[10px] px-3.5 text-[13px]'
+            ? 'h-[42px] w-auto px-4 text-[13px] max-[899px]:w-full'
+            : 'h-[42px] w-auto px-3.5 text-[12px] max-[899px]:w-full',
+          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-auto'
         )}
       >
-        {t('legal')}
-      </Link>
+        <Link href={`${ROUTES.CONSULT}?type=legal`} onClick={completeFromPage}>
+          {t('legal')}
+        </Link>
+      </Button>
     </div>
   )
 }

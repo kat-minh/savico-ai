@@ -22,6 +22,7 @@ export type FooterLinkKey =
   | 'faq'
   | 'terms'
   | 'privacy'
+  | 'aiTerms'
   | 'ecommerce'
   | 'paymentPolicy'
 
@@ -53,6 +54,7 @@ export const FOOTER_SUPPORT_LINKS: readonly FooterLink[] = [
 export const FOOTER_ABOUT_LINKS: readonly FooterLink[] = [
   { labelKey: 'terms', href: ROUTES.TERMS },
   { labelKey: 'privacy', href: ROUTES.PRIVACY },
+  { labelKey: 'aiTerms', href: ROUTES.AI_TERMS },
   { labelKey: 'ecommerce', href: ROUTES.ECOMMERCE_PARTNERS },
   { labelKey: 'paymentPolicy', href: ROUTES.PAYMENT_POLICY }
 ] as const

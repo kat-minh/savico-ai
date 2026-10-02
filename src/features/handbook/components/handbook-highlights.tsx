@@ -52,7 +52,7 @@ export function HandbookHighlights() {
 
             <Link
               href={ROUTES.HANDBOOK}
-              className='max-lg:h-8 max-lg:shrink-0 hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
+              className='max-lg:h-8 max-lg:shrink-0 hover:text-primary-foreground focus-visible:text-primary-foreground inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline focus-visible:underline'
             >
               {/* Mobile: chỉ còn mũi tên, chữ giữ lại cho trình đọc màn hình. */}
               <span className='max-lg:sr-only'>{t('viewAll')}</span>
