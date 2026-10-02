@@ -929,7 +929,9 @@ export function FoundationBlock() {
                   >
                     <span className='bg-primary size-1.5 shrink-0 rounded-full' aria-hidden />
                     <span className='min-w-0 flex-1 text-sm font-medium'>{article.title}</span>
-                    <span className={cn(ARTICLE_META_TEXT, 'flex shrink-0 items-center gap-1.5 text-xs')}>
+                    <span
+                      className={cn(ARTICLE_META_TEXT, 'flex shrink-0 items-center gap-1.5 text-xs whitespace-nowrap')}
+                    >
                       <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>

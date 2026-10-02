@@ -874,7 +874,7 @@ export function TemplateLibrary() {
           data-template-kind-toggle
           data-entrance-step='1'
           data-entrance-order='0'
-          className='bg-muted relative inline-flex rounded-full p-1.5'
+          className='bg-muted relative inline-flex max-w-full flex-nowrap rounded-full p-1.5'
         >
           <span
             data-template-kind-pill
@@ -909,7 +909,9 @@ export function TemplateLibrary() {
               }}
               aria-pressed={kind === option}
               className={cn(
-                'relative z-10 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-200',
+                // `whitespace-nowrap shrink-0`: tuyệt đối không rớt dòng ("Mẫu bản vẽ / 2D") ở màn nhỏ như iPhone;
+                // đệm ngang thu nhỏ ở mobile để cặp nút vẫn vừa một hàng.
+                'relative z-10 shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-200 sm:px-6',
                 kind === option ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >

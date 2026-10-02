@@ -374,7 +374,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
 
               <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>
 
-              <p className={cn(ARTICLE_META_TEXT, 'flex flex-wrap items-center gap-2 text-sm')}>
+              <p className={cn(ARTICLE_META_TEXT, 'flex flex-wrap items-center gap-2 text-sm whitespace-nowrap')}>
                 {/* Một định dạng ngày cho cả Cẩm nang: dd/mm/yyyy (góp ý BuildX). */}
                 {t('updatedAt', {
                   date: formatDisplayDate(article.publishedAt, locale, {

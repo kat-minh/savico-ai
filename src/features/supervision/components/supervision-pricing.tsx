@@ -168,9 +168,10 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
       <Journey />
       <ValueTable />
 
-      {/* Ba ghi chú là BA Ô RIÊNG chứ không phải ba cột trong một mảng nền —
-          mỗi ô một icon tròn viền, đúng dải cuối Hình S19. */}
-      <ul className='grid items-stretch gap-4 sm:grid-cols-3'>
+      {/* Ba ghi chú cùng MỘT kiểu với dải ghi chú của trang Gói thiết kế
+          (`plan-pricing.tsx`): một khối nền nhạt, mỗi dòng một icon tròn nền
+          xanh nhạt + chữ xanh đậm cỡ nhỏ — hai trang không lệch nhau. */}
+      <ul className='bg-accent/30 text-primary-strong grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-xs font-medium md:grid-cols-3'>
         {[
           { icon: QrCode, text: t('notes.payment') },
           { icon: Ruler, text: t('notes.scope') },
@@ -178,14 +179,13 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
         ].map((note, index) => (
           <motion.li
             key={note.text}
-            className='supervision-note-chip bg-muted/40 text-primary-strong flex items-center gap-3 rounded-2xl border p-4 text-sm font-medium'
-            style={{ '--note-delay': `${index * 0.14 + 0.16}s` } as CSSProperties}
+            className='hover:bg-accent/70 flex items-center gap-3 rounded-xl transition-colors duration-300'
             initial={{ opacity: 0, y: 9 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.55 }}
             transition={{ duration: 0.48, delay: index * 0.14, ease: pricingEase }}
           >
-            <span className='supervision-note-icon border-primary/40 text-primary flex size-8 shrink-0 items-center justify-center rounded-full border'>
+            <span className='bg-accent text-primary flex size-8 shrink-0 items-center justify-center rounded-full'>
               <note.icon aria-hidden className='supervision-note-glyph size-4' />
             </span>
             <span className='text-pretty'>{note.text}</span>

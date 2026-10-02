@@ -177,7 +177,7 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
               ref={kindTrackRef}
               role='tablist'
               aria-label={t('title')}
-              className='bg-muted relative mt-3 inline-flex rounded-full p-1.5'
+              className='bg-muted relative mt-3 inline-flex flex-nowrap rounded-full p-1.5'
             >
               <span
                 data-template-kind-pill
@@ -199,7 +199,8 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
                     aria-selected={selected}
                     onClick={() => selectKind(option)}
                     className={cn(
-                      'relative z-10 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-200',
+                      // `whitespace-nowrap shrink-0`: không bao giờ rớt dòng ở màn nhỏ; đệm thu nhỏ ở mobile.
+                      'relative z-10 shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-200 sm:px-6',
                       selected ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >

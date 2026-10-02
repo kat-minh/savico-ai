@@ -3094,6 +3094,10 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   [data-create-dialog-content][data-state='closed'] {
     animation: design-dialog-mobile-close 240ms ease-in both !important;
   }
+  /* Mở xong thì bỏ animation hẳn — bật/tắt kéo sau đó không làm animation mở chạy lại. */
+  [data-create-dialog-content][data-state='open'][data-settled='true'] {
+    animation: none !important;
+  }
   [data-create-dialog-content][data-dragging='true'] {
     animation: none !important;
     translate: -50% calc(-50% + var(--dialog-drag-y, 0px)) !important;

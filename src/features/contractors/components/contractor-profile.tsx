@@ -8,7 +8,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  CircleAlert,
   CircleCheck,
   Clock,
   Download,
@@ -480,10 +479,12 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                   initial='hidden'
                   animate='show'
                   transition={{ delayChildren: 0.4 }}
-                  className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'
+                  // Mobile: lưới 2x2 (4 ô một hàng làm chữ bị cắt "3 d…", "6.9…"); từ `sm` trở lên
+                  // quay về một hàng có vạch ngăn dọc như cũ.
+                  className='divide-border border-border grid min-w-0 grow basis-full grid-cols-2 gap-x-3 gap-y-3 sm:flex sm:gap-0 sm:divide-x sm:border-l lg:basis-0'
                 >
                   {headerFacts.map((fact) => (
-                    <motion.div variants={revealItemVariants} key={fact.key} className='min-w-0 flex-1 px-2.5'>
+                    <motion.div variants={revealItemVariants} key={fact.key} className='min-w-0 flex-1 sm:px-2.5'>
                       <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
                         <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
                         <span className='truncate'>{fact.value}</span>
@@ -1585,25 +1586,7 @@ function ProjectDetailModal({
                         <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('verifiedBody')}</p>
                       </div>
                     </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
-                      className='mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'
-                    >
-                      <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                      <div>
-                        <p className='text-sm font-semibold'>{t('selfReportedTitle')}</p>
-                        <p className='mt-1 text-xs leading-relaxed'>{t('selfReportedBody')}</p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'>
-                    <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                    <p className='text-xs leading-relaxed'>{t('priceNotice')}</p>
-                  </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1749,36 +1732,6 @@ function LegalChecks({
 
     return (
       <div className='space-y-5'>
-        <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-          className='border-primary/25 bg-primary/5 rounded-2xl border p-4 sm:p-5'
-        >
-          <div className='flex flex-col gap-4 sm:flex-row sm:items-center'>
-            <div className='bg-background text-primary flex size-11 shrink-0 items-center justify-center rounded-xl border'>
-              <ShieldCheck className='size-5' />
-            </div>
-            <div className='min-w-0 flex-1'>
-              <h2 className='text-sm font-semibold'>{tLegal('verification.title')}</h2>
-              <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>
-                {tLegal('verification.body', {
-                  date: legal ? formatDisplayDate(legal.verifiedUntil, locale) : tLegal('updating')
-                })}
-              </p>
-            </div>
-            <div className='shrink-0 text-left sm:text-right'>
-              <p className='text-muted-foreground flex items-center gap-1 text-[11px] sm:justify-end'>
-                <span>{tLegal('verification.updated')}</span>
-                <span className='font-medium text-foreground'>
-                  {legal ? formatDisplayDate(legal.verifiedAt, locale) : tLegal('updating')}
-                </span>
-              </p>
-              <span className='bg-primary mt-1.5 block h-[3px] w-32 rounded-full sm:ml-auto' aria-hidden />
-            </div>
-          </div>
-        </motion.section>
-
         <motion.section
           initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

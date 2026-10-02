@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
-import { useAuth } from '@/shared/auth'
+import { useAuth, useAuthDialogStore } from '@/shared/auth'
 import { ImageLightbox, Photo, revealEase, type LightboxPhoto } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -59,6 +59,7 @@ export function ConsultantProfile({
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
   const { isAuthenticated } = useAuth()
+  const openAuthDialog = useAuthDialogStore((s) => s.open)
   const { data: history } = useMyConsultations(isAuthenticated)
   // Khung giờ khách đã đặt với KTS này — hiện "Lịch của bạn" chứ không như bị người khác lấy.
   const myBookings = new Set(
@@ -133,6 +134,17 @@ export function ConsultantProfile({
   )
 
   function openBookingDialog() {
+    // Đặt lịch bắt buộc đăng nhập: khách chưa đăng nhập thì hiện popup, đăng nhập
+    // xong tự mở lại hộp xác nhận với đúng khung giờ đã chọn.
+    if (!isAuthenticated) {
+      openAuthDialog('login', startBooking)
+      return
+    }
+    startBooking()
+  }
+
+  // Tách riêng để action chờ sau đăng nhập không đọc lại `isAuthenticated` cũ (đóng gói lúc chưa đăng nhập).
+  function startBooking() {
     const rect = ctaRef.current?.getBoundingClientRect()
     setBookOrigin(
       rect
