@@ -135,7 +135,7 @@ export function PlanTabs({ active }: PlanTabsProps) {
         data-plan-tabs
         data-entrance-step='0'
         data-entrance-from='soft-scale'
-        className='mx-auto grid w-full max-w-3xl gap-3 sm:grid-cols-2'
+        className='mx-auto grid w-full max-w-3xl auto-rows-fr gap-3 sm:grid-cols-2'
       >
         {tabs.map((tab) => {
           const isActive = tab.key === displayedActive

@@ -4,7 +4,6 @@ import { useCallback, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
-import { usePathname, useRouter } from '@/i18n/navigation'
 import { type AuthDialogMode, useAuthDialogStore } from '@/shared/auth'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
@@ -25,8 +24,6 @@ export function AuthDialog() {
   // lần bị đá về sau đó sẽ không mở popup nữa.
   const searchParams = useSearchParams()
   const authParam = searchParams.get('auth')
-  const router = useRouter()
-  const pathname = usePathname()
 
   // Deep-link support: a redirect from a protected route (or any CTA) lands on a
   // public page with `?auth=login|register` to auto-open the popup. The embedded
@@ -48,13 +45,31 @@ export function AuthDialog() {
       setOpen(next)
       if (next || !authParam) return
 
+      // `history.replaceState` chứ không `router.replace`: chỉ cần bỏ `?auth` khỏi
+      // thanh địa chỉ (Next đồng bộ `useSearchParams` theo history), không cần
+      // điều hướng. `router.replace` làm trang gọi lại máy chủ ngay lúc popup đang
+      // đóng — trang trắng và Radix kẹt `pointer-events: none` trên body.
       const params = new URLSearchParams(searchParams)
       params.delete('auth')
       const query = params.toString()
-      router.replace(query ? `${pathname}?${query}` : pathname)
+      window.history.replaceState(window.history.state, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
     },
-    [authParam, pathname, router, searchParams, setOpen]
+    [authParam, searchParams, setOpen]
   )
+
+  // Lưới an toàn: Radix khóa `body` (`pointer-events: none`) khi popup mở và chỉ
+  // trả lại khi nội dung popup tháo ra. Nếu popup bị tháo giữa chừng (chuyển
+  // route lúc đang đóng) thì cả trang không bấm được nữa — menu, tab đều chết.
+  // Popup đã đóng mà không còn hộp thoại nào mở → trả khóa lại.
+  useEffect(() => {
+    if (isOpen) return
+    const timer = window.setTimeout(() => {
+      if (document.querySelector('[role="dialog"][data-state="open"]')) return
+      if (document.body.style.pointerEvents === 'none') document.body.style.pointerEvents = ''
+      document.body.removeAttribute('data-scroll-locked')
+    }, 500)
+    return () => window.clearTimeout(timer)
+  }, [isOpen])
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>

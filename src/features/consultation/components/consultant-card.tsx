@@ -6,6 +6,7 @@ import { useState, type ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { Photo, revealEase } from '@/shared/components/common'
+import { buttonVariants } from '@/shared/components/ui/button'
 import { consultantRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { findMatchRange } from '../services/consultation.service'
@@ -68,7 +69,7 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
       }}
       whileHover={{ y: -4 }}
       className={cn(
-        'group bg-card hover:border-primary/50 relative h-full rounded-xl border p-3 transition-[border-color,box-shadow] hover:shadow-lg',
+        'group group/card bg-card hover:border-primary/50 relative h-full rounded-xl border p-3 transition-[border-color,box-shadow] hover:shadow-lg',
         className
       )}
     >
@@ -137,23 +138,38 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
 /**
  * "Xem hồ sơ" chỉ là TRANG TRÍ — điều hướng thật do link trong suốt phủ thẻ
  * đảm nhận, nên đây là `<span>` chứ không phải link/nút riêng (lồng thêm một
- * link vào trong link phủ thẻ là HTML không hợp lệ). Rê thẻ (`group-hover`)
- * thì nền xanh đổ đầy từ trái sang, chữ chuyển trắng (mục 10); bấm thẻ thì
- * riêng nút này lún xuống (`pressed` do `ConsultantCard` bơm xuống) — cái
- * thẻ bao quanh đứng yên.
+ * link vào trong link phủ thẻ là HTML không hợp lệ). Bấm thẻ thì riêng nút này
+ * lún xuống (`pressed` do `ConsultantCard` bơm xuống) — cái thẻ bao quanh đứng yên.
+ *
+ * Hai bản theo màn hình, chỉ MOBILE đổi: dưới `md` là nút pill `outline` giống nút
+ * "Đặt lịch" ở trang chủ (rê thẻ → nền xanh đặc); từ `md` trở lên giữ nguyên bản
+ * cũ — viền xanh nhạt bo vuông, nền xanh đổ đầy từ trái sang, chữ chuyển trắng
+ * (mục 10).
  */
 function ViewProfileAffordance({ children, pressed }: { children: ReactNode; pressed: boolean }) {
   return (
-    <motion.span
-      animate={{ scale: pressed ? 0.94 : 1 }}
-      transition={{ duration: 0.15, ease: revealEase }}
-      className='border-primary/60 text-primary relative isolate flex h-8 w-full items-center justify-center overflow-hidden rounded-md border text-xs font-medium'
-    >
-      <span
-        aria-hidden
-        className='bg-primary absolute inset-0 origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100'
-      />
-      <span className='relative z-10 transition-colors duration-300 group-hover:text-white'>{children}</span>
-    </motion.span>
+    <>
+      <motion.span
+        animate={{ scale: pressed ? 0.94 : 1 }}
+        transition={{ duration: 0.15, ease: revealEase }}
+        className={cn(
+          buttonVariants({ variant: 'outline' }),
+          'text-primary group-hover/card:bg-primary group-hover/card:text-primary-foreground group-hover/card:bg-none h-8 w-full text-xs md:hidden'
+        )}
+      >
+        {children}
+      </motion.span>
+      <motion.span
+        animate={{ scale: pressed ? 0.94 : 1 }}
+        transition={{ duration: 0.15, ease: revealEase }}
+        className='border-primary/60 text-primary relative isolate hidden h-8 w-full items-center justify-center overflow-hidden rounded-md border text-xs font-medium md:flex'
+      >
+        <span
+          aria-hidden
+          className='bg-primary absolute inset-0 origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100'
+        />
+        <span className='relative z-10 transition-colors duration-300 group-hover:text-white'>{children}</span>
+      </motion.span>
+    </>
   )
 }

@@ -242,8 +242,8 @@ function PlanPricingContent() {
             </li>
           ))}
         </ul>
-        <p className='plan-notes-disclaimer text-primary-strong flex items-center justify-center gap-2 text-center text-xs font-medium text-pretty'>
-          <Info className='size-3.5 shrink-0' />
+        <p className='plan-notes-disclaimer text-primary-strong flex items-start gap-2 text-left text-xs font-medium text-pretty'>
+          <Info className='mt-0.5 size-3.5 shrink-0' />
           <span>{t('notes.scope')}</span>
         </p>
       </motion.div>
@@ -621,7 +621,7 @@ function GroupRow({ label, highlight = false }: { label: string; highlight?: boo
           highlight ? 'bg-brand-orange text-brand-orange-foreground' : 'bg-primary-strong text-primary-foreground'
         )}
       >
-        {label}
+        <span className='sticky left-3 inline-block'>{label}</span>
       </th>
     </motion.tr>
   )
