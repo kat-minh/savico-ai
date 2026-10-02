@@ -3,7 +3,7 @@
 import { ArrowRight, ChevronLeft, ChevronRight, Files, Layers, Ruler } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { useSiteImage } from '@/shared/cms'
@@ -26,6 +26,14 @@ const LIBRARY_HREF = `${ROUTES.HANDBOOK}?tab=library`
 export type HomeTemplateKind = '2d' | '3d'
 
 const TEMPLATE_KINDS: readonly HomeTemplateKind[] = ['2d', '3d']
+
+/** Vị trí viên thuốc xanh trượt sau nút đang chọn — cùng cơ chế với nút 2D/3D ở Cẩm nang. */
+interface PillStyle {
+  transform: string
+  width: number
+  height: number
+  ready: boolean
+}
 
 /** Loại thông số trên thẻ — quyết định icon đứng trước chữ. */
 export type HomeTemplateFactKind = 'area' | 'lot' | 'floors' | 'images'
@@ -93,6 +101,14 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
   const { ref: trackRef, active, scrollTo } = useScrollSnapIndex<HTMLUListElement>()
   const [edge, setEdge] = useState({ start: true, end: false })
   const [kind, setKind] = useState<HomeTemplateKind>('2d')
+  const [pillStyle, setPillStyle] = useState<PillStyle>({
+    transform: 'translate3d(0,0,0)',
+    width: 0,
+    height: 0,
+    ready: false
+  })
+  const kindTrackRef = useRef<HTMLDivElement>(null)
+  const kindButtonRefs = useRef<Record<HomeTemplateKind, HTMLButtonElement | null>>({ '2d': null, '3d': null })
 
   // Mũi tên mờ đi ở hai đầu hàng: theo dõi vị trí cuộn của chính dải này.
   useEffect(() => {
@@ -108,6 +124,32 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
       window.removeEventListener('resize', update)
     }
   }, [trackRef, items, kind])
+
+  const hasTabs = items !== undefined && items.length > 0
+
+  // Đo nút đang chọn để viên thuốc trượt tới (đổi tab) và bám theo khi đổi cỡ chữ/khổ màn hình.
+  useLayoutEffect(() => {
+    const track = kindTrackRef.current
+    const activeButton = kindButtonRefs.current[kind]
+    if (!track || !activeButton) return
+
+    const updatePill = () => {
+      const trackRect = track.getBoundingClientRect()
+      const activeRect = activeButton.getBoundingClientRect()
+      setPillStyle({
+        transform: `translate3d(${activeRect.left - trackRect.left}px, ${activeRect.top - trackRect.top}px, 0)`,
+        width: activeRect.width,
+        height: activeRect.height,
+        ready: true
+      })
+    }
+
+    updatePill()
+    const observer = new ResizeObserver(updatePill)
+    observer.observe(track)
+    observer.observe(activeButton)
+    return () => observer.disconnect()
+  }, [kind, hasTabs])
 
   const selectKind = (next: HomeTemplateKind) => {
     setKind(next)
@@ -131,19 +173,34 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
           {/* Góp ý BuildX: bỏ chữ "Hồ sơ mẫu", lấy "Danh sách thư viện mẫu" làm tiêu đề; bên dưới là nút chọn 2D/3D. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
           {cards ? (
-            <div role='tablist' aria-label={t('title')} className='bg-muted mt-3 inline-flex rounded-full p-1.5'>
+            <div
+              ref={kindTrackRef}
+              role='tablist'
+              aria-label={t('title')}
+              className='bg-muted relative mt-3 inline-flex rounded-full p-1.5'
+            >
+              <span
+                data-template-kind-pill
+                data-ready={pillStyle.ready}
+                aria-hidden
+                className='brand-green-button pointer-events-none absolute top-0 left-0 rounded-full'
+                style={{ transform: pillStyle.transform, width: pillStyle.width, height: pillStyle.height }}
+              />
               {TEMPLATE_KINDS.map((option) => {
                 const selected = option === kind
                 return (
                   <button
                     key={option}
+                    ref={(node) => {
+                      kindButtonRefs.current[option] = node
+                    }}
                     type='button'
                     role='tab'
                     aria-selected={selected}
                     onClick={() => selectKind(option)}
                     className={cn(
-                      'rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-300',
-                      selected ? 'brand-green-button' : 'text-foreground hover:text-primary'
+                      'relative z-10 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-200',
+                      selected ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     {t(option === '2d' ? 'tab2d' : 'tab3d')}

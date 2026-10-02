@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 
 import { cn } from '@/shared/lib/utils'
@@ -49,6 +51,10 @@ export function Photo({
         sizes={sizes}
         priority={priority}
         onLoad={onLoad}
+        // Ảnh tải xong TRƯỚC khi React gắn `onLoad` (cache, hydrate chậm) thì sự kiện không bắn nữa.
+        ref={(img) => {
+          if (img?.complete && img.naturalWidth > 0) onLoad?.()
+        }}
         className={cn(fit === 'contain' ? 'object-contain' : 'object-cover', imageClassName)}
       />
     </div>

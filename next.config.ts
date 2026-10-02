@@ -34,7 +34,9 @@ const nextConfig: NextConfig = {
       // Kho tệp của backend — Bizfly Simple Storage (TDD-CTR-001/External API).
       // Ảnh thật do admin tải lên (tin tức, hướng dẫn, nhà thầu, thư viện mẫu) trả
       // về từ host này; thiếu nó thì `next/image` ném lỗi và LÀM GÃY CẢ TRANG.
-      { protocol: 'https', hostname: '**.ss.bfcplatform.vn' }
+      { protocol: 'https', hostname: '**.ss.bfcplatform.vn' },
+      // CDN mới của backend (VCCloud): ảnh kiến trúc sư, thumbnail thư viện mẫu… trả về từ host này.
+      { protocol: 'https', hostname: 'bmt-cdn-vnzdna.cdn.vccloud.vn' }
       // Add CDN / asset hosts served by the backend here.
       // { protocol: 'https', hostname: 'cdn.example.com' },
     ]

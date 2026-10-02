@@ -99,7 +99,9 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
             <h3 className='truncate font-semibold'>
               <HighlightedText text={consultant.name} query={query} />
             </h3>
-            <p className='text-muted-foreground text-xs'>{consultant.title}</p>
+            <p className='text-muted-foreground truncate text-xs' title={consultant.title}>
+              {consultant.title}
+            </p>
             {consultant.company && (
               <p className='text-muted-foreground/80 truncate text-[11px]' title={consultant.company}>
                 {t('company', { company: consultant.company })}
@@ -107,13 +109,16 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
             )}
           </div>
 
-          <div className='pointer-events-auto flex flex-wrap gap-1.5'>
+          {/* Khung chuyên môn cao CỐ ĐỊNH (tối đa 2 hàng): dữ liệu API có nhiều/ít chip, tên dài ngắn khác nhau nhưng
+              mọi thẻ vẫn cao bằng nhau. Mỗi chip một dòng, cắt "…", rê chuột xem đủ tên. */}
+          <div className='pointer-events-auto flex h-[3.25rem] flex-wrap content-start gap-1.5 overflow-hidden'>
             {consultant.specialties.map((specialty) => (
               <button
                 key={specialty.id}
                 type='button'
                 onClick={() => onSelectSpecialty?.(specialty.id)}
-                className='bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground relative z-10 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors'
+                title={specialty.label}
+                className='bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground relative z-10 max-w-full truncate rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap transition-colors'
               >
                 <HighlightedText text={specialty.label} query={query} />
               </button>
@@ -126,7 +131,9 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
             {t('projects', { count: consultant.projectCount })}
           </p>
 
-          <p className='text-muted-foreground line-clamp-2 text-xs leading-relaxed'>{consultant.headline}</p>
+          <p className='text-muted-foreground line-clamp-2 min-h-[2.5rem] text-xs leading-relaxed'>
+            {consultant.headline}
+          </p>
 
           <ViewProfileAffordance pressed={pressed}>{t('viewProfile')}</ViewProfileAffordance>
         </div>

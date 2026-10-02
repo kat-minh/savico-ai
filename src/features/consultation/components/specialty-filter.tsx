@@ -147,7 +147,9 @@ export function SpecialtyFilter({
           align='start'
           sideOffset={6}
           onCloseAutoFocus={(event) => event.preventDefault()}
-          style={{ width: 'var(--radix-select-trigger-width)' }}
+          // Tên chuyên môn từ API có thể rất dài: bảng rộng bằng nút nhưng tối thiểu 16rem, tối đa 22rem; mỗi dòng cao cố định 32px
+          // và cắt "…" (rê chuột xem đủ) để dải nền trượt theo chỉ số dòng không bao giờ lệch.
+          style={{ minWidth: 'max(var(--radix-select-trigger-width), 16rem)', maxWidth: 'min(22rem, 92vw)' }}
           className='specialty-panel bg-popover text-popover-foreground z-50 overflow-hidden rounded-md border shadow-lg'
         >
           <SelectPrimitive.Viewport className='relative p-1'>
@@ -193,11 +195,15 @@ function SpecialtyRow({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.12, delay: index * 0.025 }}
         className={cn(
-          'relative flex h-8 cursor-pointer items-center gap-2 rounded-sm px-2 text-sm outline-none select-none',
+          'relative flex h-8 min-w-0 cursor-pointer items-center gap-2 rounded-sm px-2 text-sm outline-none select-none',
           !selected && 'hover:bg-muted focus:bg-muted data-[highlighted]:bg-muted'
         )}
       >
-        <SelectPrimitive.ItemText>{label}</SelectPrimitive.ItemText>
+        <SelectPrimitive.ItemText>
+          <span className='block min-w-0 truncate' title={label}>
+            {label}
+          </span>
+        </SelectPrimitive.ItemText>
         <span className='ml-auto flex size-3.5 shrink-0 items-center justify-center'>
           <AnimatePresence initial={false}>
             {selected ? (

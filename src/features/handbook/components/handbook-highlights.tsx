@@ -10,7 +10,9 @@ import { Link } from '@/i18n/navigation'
 import { revealEase, RevealPhoto } from '@/shared/components/common'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
+import { cn } from '@/shared/lib/utils'
 import { formatDisplayDate } from '@/shared/utils'
+import { ARTICLE_META_ICON, ARTICLE_META_TEXT } from '../constants/article-meta'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { HOME_HANDBOOK_COUNT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
@@ -101,18 +103,18 @@ export function HandbookHighlights() {
                         <span className='group-hover:text-primary-strong line-clamp-2 font-bold transition-colors'>
                           {article.title}
                         </span>
-                        <span className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
+                        <span className={cn(ARTICLE_META_TEXT, 'flex flex-wrap items-center gap-x-4 gap-y-1 text-xs')}>
                           <span className='flex items-center gap-1.5'>
-                            <Tag className='text-primary/70 size-3.5' />
+                            <Tag className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                             {labelName(article.category)}
                           </span>
                           <span className='flex items-center gap-1.5 border-l pl-4'>
-                            <CalendarDays className='text-primary/70 size-3.5' />
+                            <CalendarDays className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                             {formatDisplayDate(article.publishedAt, locale)}
                           </span>
                           {/* Thời gian đọc nằm cùng hàng ngày đăng (góp ý BuildX) — bớt một dòng dưới thẻ. */}
                           <span className='flex items-center gap-1.5 border-l pl-4'>
-                            <Clock className='text-primary/70 size-3.5' />
+                            <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                             {t('readTime', { minutes: article.readingMinutes })}
                           </span>
                         </span>

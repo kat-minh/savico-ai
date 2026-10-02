@@ -30,6 +30,7 @@ import { ROUTES, handbookArticleRoute } from '@/shared/constants/routes'
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDisplayDate } from '@/shared/utils'
+import { ARTICLE_META_ICON, ARTICLE_META_TEXT } from '../constants/article-meta'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { useHandbookArticle, useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { selectRelatedArticles } from '../services/handbook.service'
@@ -373,7 +374,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
 
               <h1 className='text-3xl font-semibold tracking-tight text-balance'>{article.title}</h1>
 
-              <p className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
+              <p className={cn(ARTICLE_META_TEXT, 'flex flex-wrap items-center gap-2 text-sm')}>
                 {/* Một định dạng ngày cho cả Cẩm nang: dd/mm/yyyy (góp ý BuildX). */}
                 {t('updatedAt', {
                   date: formatDisplayDate(article.publishedAt, locale, {
@@ -383,7 +384,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
                   })
                 })}
                 <span aria-hidden>·</span>
-                <Clock className='size-4' />
+                <Clock className={cn(ARTICLE_META_ICON, 'size-4')} />
                 {t('readingTime', { minutes: article.readingMinutes })}
               </p>
             </header>
@@ -515,7 +516,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
                         <span className='group-hover:text-primary line-clamp-2 block text-sm font-medium transition-colors'>
                           {item.title}
                         </span>
-                        <span className='text-muted-foreground block text-xs'>
+                        <span className={cn(ARTICLE_META_TEXT, 'block text-xs')}>
                           {[
                             stages?.find((s) => s.id === item.stage)?.title,
                             t('readingTime', { minutes: item.readingMinutes })

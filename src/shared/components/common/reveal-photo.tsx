@@ -51,6 +51,10 @@ export function RevealPhoto({
         sizes={sizes}
         priority={priority}
         onLoad={() => setLoaded(true)}
+        // Ảnh đã tải xong trước khi hydrate thì `onLoad` không bắn lại — nhận biết qua `complete`.
+        ref={(img) => {
+          if (img?.complete && img.naturalWidth > 0) setLoaded(true)
+        }}
         onError={onError}
         className={cn(
           'object-cover transition-[opacity,filter,transform] duration-500 ease-out',

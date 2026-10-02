@@ -13,6 +13,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { handbookTopicIcon } from '@/shared/lib/handbook-icons'
+import { ARTICLE_META_ICON, ARTICLE_META_TEXT } from '../constants/article-meta'
 import { useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, countArticlesByTopic } from '../services/handbook.service'
 import type { HandbookStage, HandbookStageId } from '../types/handbook.types'
@@ -928,8 +929,8 @@ export function FoundationBlock() {
                   >
                     <span className='bg-primary size-1.5 shrink-0 rounded-full' aria-hidden />
                     <span className='min-w-0 flex-1 text-sm font-medium'>{article.title}</span>
-                    <span className='text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs'>
-                      <Clock className='size-3.5' />
+                    <span className={cn(ARTICLE_META_TEXT, 'flex shrink-0 items-center gap-1.5 text-xs')}>
+                      <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
                     <span
@@ -1016,7 +1017,7 @@ export function FoundationBlock() {
           <Button
             data-foundation-cta
             data-foundation-sequence
-            className='bg-primary-strong hover:bg-primary-strong relative isolate h-11 overflow-hidden rounded-lg px-5 transition-[transform,filter,box-shadow] duration-200 ease-out'
+            className='brand-green-button relative isolate h-11 overflow-hidden rounded-full px-8 text-base has-[>svg]:px-8 transition-[transform,filter,box-shadow] duration-200 ease-out'
             onPointerEnter={() => {
               ctaPointerInsideRef.current = true
               pauseCtaIdle()

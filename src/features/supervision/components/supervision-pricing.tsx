@@ -9,7 +9,6 @@ import {
   FileText,
   House,
   ImageIcon,
-  Info,
   MapPin,
   Minus,
   QrCode,
@@ -156,25 +155,8 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
         ))}
       </ul>
 
-      <p className='supervision-cost-note text-muted-foreground mx-auto flex max-w-3xl items-start justify-center gap-2 text-center text-sm'>
-        {/* Góp ý BuildX: đoạn này từng lặp 2 lần (thêm một bản trong tooltip) — nay chỉ còn một. */}
-        <Info className='mt-0.5 size-4 shrink-0' />
-        <motion.span
-          className='text-pretty'
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 0.7, delay: 0.22, ease: 'easeOut' }}
-        >
-          {t('costNote')}
-        </motion.span>
-      </p>
-
       <ComparisonTable packages={packages} projectId={projectId} />
 
-      {/* Hai khối cao BẰNG NHAU (lưới giãn mặc định). Khối nguyên tắc ít chữ
-          hơn nên phần dôi ra được chia đều cho ba gạch đầu dòng thay vì dồn
-          thành một mảng trống ở đáy — xem `ScopeRules`. */}
       {/* Tỉ lệ 59% / 39% đo từ ảnh S19: bảng phụ phí có ba cột nên cần bề
           ngang, khối nguyên tắc chỉ là ba dòng chữ. Chia đôi 50/50 làm bảng bên
           trái bị bó, chữ trong ô xuống dòng lắt nhắt. */}
@@ -196,7 +178,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
         ].map((note, index) => (
           <motion.li
             key={note.text}
-            className='supervision-note-chip bg-muted/40 text-muted-foreground flex items-start gap-3 rounded-2xl border p-4 text-sm'
+            className='supervision-note-chip bg-muted/40 text-primary-strong flex items-center gap-3 rounded-2xl border p-4 text-sm font-medium'
             style={{ '--note-delay': `${index * 0.14 + 0.16}s` } as CSSProperties}
             initial={{ opacity: 0, y: 9 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -422,11 +404,15 @@ function PackageCard({
             gì để "chọn" — nút ở đây chỉ tạo một thao tác thừa.
             Hai nút trả phí đều TÔ ĐẶC — CHECK xanh, CONTROL cam. */}
           {isFree ? null : (
-            <Button asChild size='lg' className={cn('mt-5 w-full font-bold', item.recommended && ORANGE_BUTTON)}>
+            <Button
+              asChild
+              size='lg'
+              className={cn('mt-5 h-[11cqw] w-full text-[5cqw] font-bold', item.recommended && ORANGE_BUTTON)}
+            >
               <Link
                 href={checkoutConfirmRoute(item.id, projectId, item.offerKey)}
                 onClick={() => rememberCheckoutReturn(item.id, projectId)}
-                className={cn('supervision-buy group', item.recommended && 'supervision-buy-control')}
+                className={cn('supervision-buy group justify-between', item.recommended && 'supervision-buy-control')}
               >
                 {t('choose', { tier: item.name || tTiers(item.tier) })}
                 <ArrowRight className='size-4 transition-transform duration-300 group-hover:translate-x-1.5' />
@@ -633,6 +619,8 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                 const item = byTier(tier)
                 return item?.inspections ? String(item.inspections) : '—'
               })}
+              hoveredRow={hoveredRow}
+              onHoverRow={setHoveredRow}
               hoveredColumn={hoveredColumn}
               onHoverColumn={setHoveredColumn}
             />
@@ -645,6 +633,8 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                   ? t('values.unlimited')
                   : t('values.months', { count: item?.durationMonths ?? 0 })
               })}
+              hoveredRow={hoveredRow}
+              onHoverRow={setHoveredRow}
               hoveredColumn={hoveredColumn}
               onHoverColumn={setHoveredColumn}
             />
@@ -653,6 +643,8 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
               priceRow
               label={tRows('price')}
               values={SUPERVISION_TIERS.map((tier) => byTier(tier)?.price ?? 0)}
+              hoveredRow={hoveredRow}
+              onHoverRow={setHoveredRow}
               hoveredColumn={hoveredColumn}
               onHoverColumn={setHoveredColumn}
             />
@@ -828,7 +820,7 @@ function ScopeRules() {
     <motion.section
       ref={ref}
       data-seen={seen || undefined}
-      className='supervision-scope bg-info-soft flex h-full flex-col rounded-2xl border p-5'
+      className='supervision-scope bg-info-soft flex flex-col self-start rounded-2xl border p-5'
       initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.35 }}
@@ -838,10 +830,7 @@ function ScopeRules() {
         <ShieldCheck className='supervision-scope-icon size-5 shrink-0' strokeWidth={1.75} />
         {t('title')}
       </h2>
-      {/* `flex-1` + `justify-between`: chỗ dôi ra so với bảng phụ phí bên cạnh
-          được rải đều giữa ba dòng, nên khối trông đầy chứ không phải ba dòng
-          dính đỉnh rồi bỏ trống nửa dưới. */}
-      <ul className='mt-3 flex flex-1 flex-col justify-between gap-3'>
+      <ul className='mt-3 flex flex-col gap-3'>
         {[t('r1'), t('r2'), t('r3')].map((rule, index) => (
           <motion.li
             key={rule}
@@ -1087,6 +1076,8 @@ function CoreRow({
   values,
   index,
   priceRow = false,
+  hoveredRow,
+  onHoverRow,
   hoveredColumn,
   onHoverColumn
 }: {
@@ -1094,13 +1085,17 @@ function CoreRow({
   values: Array<string | number>
   index: number
   priceRow?: boolean
+  hoveredRow: string | null
+  onHoverRow: (row: string) => void
   hoveredColumn: SupervisionTier | null
   onHoverColumn: (tier: SupervisionTier) => void
 }) {
   const [pricesStarted, setPricesStarted] = useState(false)
   return (
     <motion.tr
+      data-hovered={hoveredRow === label || undefined}
       className='supervision-comparison-row divide-border divide-x'
+      onMouseEnter={() => onHoverRow(label)}
       initial={{ opacity: 0, y: 7 }}
       whileInView={{ opacity: 1, y: 0 }}
       onViewportEnter={() => {
@@ -1109,7 +1104,14 @@ function CoreRow({
       viewport={{ once: true, amount: 0.18 }}
       transition={{ duration: 0.52, delay: 0.28 + index * 0.075, ease: pricingEase }}
     >
-      <th className='bg-card sticky left-0 z-10 p-3 text-left text-xs font-medium'>{label}</th>
+      <th
+        className={cn(
+          'bg-card sticky left-0 z-10 p-3 text-left text-xs font-medium transition-colors',
+          hoveredRow === label && 'bg-accent/80 font-semibold'
+        )}
+      >
+        {label}
+      </th>
       {/* `values` xếp theo SUPERVISION_TIERS nên ô cuối luôn là cột CONTROL. */}
       {values.map((value, index) => (
         <td
@@ -1121,7 +1123,8 @@ function CoreRow({
           className={cn(
             'supervision-comparison-cell p-3 text-center text-xs font-medium',
             SUPERVISION_TIERS[index] === 'control' && 'supervision-control-column bg-brand-orange-soft/60',
-            hoveredColumn === SUPERVISION_TIERS[index] && 'is-column-hovered'
+            hoveredColumn === SUPERVISION_TIERS[index] && 'is-column-hovered',
+            hoveredRow === label && hoveredColumn === SUPERVISION_TIERS[index] && 'is-intersection font-semibold'
           )}
         >
           {priceRow ? <SupervisionTablePrice value={Number(value)} index={index} started={pricesStarted} /> : value}

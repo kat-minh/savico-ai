@@ -192,6 +192,9 @@ function Picture({ src, alt, className, sizes, priority, fit = 'cover', imageCla
         loading={priority ? 'eager' : 'lazy'}
         decoding='async'
         onLoad={onLoad}
+        ref={(img) => {
+          if (img?.complete && img.naturalWidth > 0) onLoad?.()
+        }}
         className={cn(
           'absolute inset-0 size-full',
           fit === 'contain' ? 'object-contain' : 'object-cover',
