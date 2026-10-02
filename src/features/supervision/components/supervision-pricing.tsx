@@ -196,7 +196,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
         ].map((note, index) => (
           <motion.li
             key={note.text}
-            className='supervision-note-chip bg-muted/40 text-muted-foreground flex items-start gap-3 rounded-2xl border p-4 text-sm'
+            className='supervision-note-chip bg-muted/40 text-primary-strong flex items-center gap-3 rounded-2xl border p-4 text-sm font-medium'
             style={{ '--note-delay': `${index * 0.14 + 0.16}s` } as CSSProperties}
             initial={{ opacity: 0, y: 9 }}
             whileInView={{ opacity: 1, y: 0 }}

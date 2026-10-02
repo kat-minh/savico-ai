@@ -13,6 +13,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { handbookTopicIcon } from '@/shared/lib/handbook-icons'
+import { ARTICLE_META_ICON, ARTICLE_META_TEXT } from '../constants/article-meta'
 import { useHandbookArticles, useHandbookStages } from '../hooks/use-handbook'
 import { articlesOfTopic, countArticlesByTopic } from '../services/handbook.service'
 import type { HandbookStage, HandbookStageId } from '../types/handbook.types'
@@ -928,8 +929,8 @@ export function FoundationBlock() {
                   >
                     <span className='bg-primary size-1.5 shrink-0 rounded-full' aria-hidden />
                     <span className='min-w-0 flex-1 text-sm font-medium'>{article.title}</span>
-                    <span className='text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs'>
-                      <Clock className='size-3.5' />
+                    <span className={cn(ARTICLE_META_TEXT, 'flex shrink-0 items-center gap-1.5 text-xs')}>
+                      <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
                     <span

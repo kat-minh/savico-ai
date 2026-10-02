@@ -10,7 +10,9 @@ import { Photo } from '@/shared/components/common'
 import { Badge } from '@/shared/components/ui/badge'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { handbookArticleRoute } from '@/shared/constants/routes'
+import { cn } from '@/shared/lib/utils'
 import { formatDisplayDate } from '@/shared/utils'
+import { ARTICLE_META_ICON, ARTICLE_META_TEXT } from '../constants/article-meta'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { HANDBOOK_ARTICLE_LIST_HISTORY_KEY, HANDBOOK_CATEGORY_SELECT_EVENT } from '../constants/handbook.constants'
 import { useHandbookArticles } from '../hooks/use-handbook'
@@ -387,7 +389,7 @@ export function NewsletterBlock() {
                   <span data-newsletter-lead-part>
                     <Badge variant='secondary'>{labelName(displayedLead.category)}</Badge>
                   </span>
-                  <span data-newsletter-lead-number className='text-primary/75 text-3xl font-black'>
+                  <span data-newsletter-lead-number className='text-primary-strong text-3xl font-black'>
                     {displayedLeadNumber}
                   </span>
                 </div>
@@ -399,13 +401,10 @@ export function NewsletterBlock() {
                 <p data-newsletter-lead-part className='text-muted-foreground text-sm leading-relaxed'>
                   {displayedLead.excerpt}
                 </p>
-                <p
-                  data-newsletter-lead-part
-                  className='text-foreground/80 flex items-center gap-2 text-xs font-semibold'
-                >
+                <p data-newsletter-lead-part className={cn(ARTICLE_META_TEXT, 'flex items-center gap-2 text-xs')}>
                   {formatDisplayDate(displayedLead.publishedAt, locale, { weekday: true })}
                   <span aria-hidden>·</span>
-                  <Clock className='size-3.5' />
+                  <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                   {t('readingTime', { minutes: displayedLead.readingMinutes })}
                 </p>
               </div>
@@ -423,7 +422,10 @@ export function NewsletterBlock() {
                   onBlur={() => stopSupportingPreview(article)}
                   className='group flex h-full gap-2 rounded-xl border p-2.5 transition-[transform,border-color,background-color] duration-200 ease-out'
                 >
-                  <span data-newsletter-supporting-number className='text-primary/70 text-xl leading-none font-black'>
+                  <span
+                    data-newsletter-supporting-number
+                    className='text-primary-strong text-xl leading-none font-black'
+                  >
                     {String(index + 2).padStart(2, '0')}
                   </span>
                   <div data-newsletter-supporting-image className='shrink-0'>
@@ -431,8 +433,8 @@ export function NewsletterBlock() {
                   </div>
                   <span className='min-w-0 space-y-1'>
                     <span className='line-clamp-3 block text-sm font-medium'>{article.title}</span>
-                    <span className='text-foreground/80 flex items-center gap-1 text-xs font-semibold'>
-                      <Clock className='size-3' />
+                    <span className={cn(ARTICLE_META_TEXT, 'flex items-center gap-1 text-xs')}>
+                      <Clock className={cn(ARTICLE_META_ICON, 'size-3')} />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
                   </span>
@@ -501,10 +503,7 @@ function RelatedRow({ article }: { article: HandbookArticle }) {
         </span>
         <span className='block text-xs'>
           <span className='text-primary'>{labelName(article.category)}</span>
-          <span className='text-foreground/80 font-semibold'>
-            {' '}
-            · {t('readingTime', { minutes: article.readingMinutes })}
-          </span>
+          <span className={ARTICLE_META_TEXT}> · {t('readingTime', { minutes: article.readingMinutes })}</span>
         </span>
       </span>
       <ArrowRight

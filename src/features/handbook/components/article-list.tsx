@@ -20,6 +20,7 @@ import {
   HANDBOOK_ARTICLE_LIST_HISTORY_KEY,
   HANDBOOK_CATEGORY_SELECT_EVENT
 } from '../constants/handbook.constants'
+import { ARTICLE_META_ICON, ARTICLE_META_TEXT } from '../constants/article-meta'
 import { articleInChip, chipNodes, descendantsByChip } from '../api/handbook.news.logic'
 import { useArticleLabels } from '../hooks/use-article-labels'
 import { useHandbookArticles, useHandbookNewsCategoryTree } from '../hooks/use-handbook'
@@ -605,13 +606,13 @@ export function ArticleList() {
                     <h3 className='group-hover/card:text-primary line-clamp-2 text-base leading-snug font-semibold transition-colors duration-200'>
                       <HighlightText text={article.title} query={appliedQuery} />
                     </h3>
-                    <div className='text-muted-foreground mt-auto flex items-center gap-4 pt-1 text-xs'>
+                    <div className={cn(ARTICLE_META_TEXT, 'mt-auto flex items-center gap-4 pt-1 text-xs')}>
                       <span className='inline-flex items-center gap-1.5'>
-                        <CalendarDays className='size-3.5' aria-hidden />
+                        <CalendarDays className={cn(ARTICLE_META_ICON, 'size-3.5')} aria-hidden />
                         {formatDisplayDate(article.publishedAt, locale)}
                       </span>
                       <span className='inline-flex items-center gap-1.5'>
-                        <Clock className='size-3.5' aria-hidden />
+                        <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} aria-hidden />
                         {t('readingTime', { minutes: article.readingMinutes })}
                       </span>
                       {/* Chữ "Đọc bài" hiện hẳn trên thẻ (góp ý TT08), không chỉ mũi tên. */}
