@@ -106,12 +106,12 @@ export function HandbookHighlights() {
                             <Tag className='text-primary/70 size-3.5' />
                             {labelName(article.category)}
                           </span>
-                          <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <span className='flex items-center gap-1.5 border-l pl-4 whitespace-nowrap'>
                             <CalendarDays className='text-primary/70 size-3.5' />
                             {formatDisplayDate(article.publishedAt, locale)}
                           </span>
                           {/* Thời gian đọc nằm cùng hàng ngày đăng (góp ý BuildX) — bớt một dòng dưới thẻ. */}
-                          <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <span className='flex items-center gap-1.5 border-l pl-4 whitespace-nowrap'>
                             <Clock className='text-primary/70 size-3.5' />
                             {t('readTime', { minutes: article.readingMinutes })}
                           </span>

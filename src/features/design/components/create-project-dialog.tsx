@@ -43,6 +43,9 @@ const DESIGN_STYLES = [
   'level4-modern'
 ] as const
 
+/** Ngón tay phải trượt xuống quá ngưỡng này (px) mới tính là kéo popup. */
+const DRAG_START_THRESHOLD = 8
+
 function isBuildingType(value: string | undefined): value is BuildingType {
   return Boolean(value && (BUILDING_TYPES as readonly string[]).includes(value))
 }
@@ -108,6 +111,8 @@ export function CreateProjectDialog() {
     defaultValues: { name: '', description: '' }
   })
 
+  const resetForm = form.reset
+
   const createProject = useCreateProject((projectId) => {
     if (place) writeAddressSeed(projectId, place)
     const sourceTemplate = consumeProjectTemplateSeed()
@@ -160,9 +165,10 @@ export function CreateProjectDialog() {
 
   useEffect(() => {
     if (!open) return
+    resetForm()
     const timer = window.setTimeout(() => nameRef.current?.focus(), 280)
     return () => window.clearTimeout(timer)
-  }, [open])
+  }, [open, resetForm])
 
   function resizeDescription() {
     const textarea = descriptionRef.current
@@ -179,7 +185,9 @@ export function CreateProjectDialog() {
   function cancel() {
     clearProjectTemplateSeed()
     close()
-    form.reset()
+    // Không `form.reset()` ở đây: xóa chữ + render lại cả form giữa lúc popup đang
+    // chạy animation đóng làm nó khựng/giật (rõ nhất trên mobile). Form được reset
+    // lúc mở lại (effect bên dưới).
     setPlace(null)
     setAddressError(false)
     setDragY(0)
@@ -209,25 +217,47 @@ export function CreateProjectDialog() {
             '--dialog-drag-y': `${dragY}px`
           } as CSSProperties
         }
+        // Animation mở chạy xong thì đánh dấu `data-settled` (CSS tắt hẳn animation từ đó):
+        // nếu không, mỗi lần `data-dragging` bật/tắt, animation trượt-lên lại chạy từ đầu
+        // và popup "nhảy lên rồi hiện lại". Gắn thẳng vào DOM nên không tốn render.
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget && event.currentTarget.dataset.state === 'open') {
+            event.currentTarget.dataset.settled = 'true'
+          }
+        }}
         onPointerDown={(event) => {
           if (event.pointerType !== 'touch') return
           if ((event.target as HTMLElement).closest('input, textarea, button, a')) return
+          // Chỉ ghi nhận điểm bắt đầu: chạm đơn thuần (tap) KHÔNG được coi là kéo.
           dragStartRef.current = event.clientY
-          setDragging(true)
-          event.currentTarget.setPointerCapture(event.pointerId)
         }}
         onPointerMove={(event) => {
           if (dragStartRef.current === null) return
-          setDragY(Math.max(0, event.clientY - dragStartRef.current))
+          const delta = event.clientY - dragStartRef.current
+          if (!dragging) {
+            if (delta < DRAG_START_THRESHOLD) return
+            setDragging(true)
+            event.currentTarget.setPointerCapture(event.pointerId)
+          }
+          setDragY(Math.max(0, delta))
         }}
         onPointerUp={(event) => {
           if (dragStartRef.current === null) return
-          event.currentTarget.releasePointerCapture(event.pointerId)
           dragStartRef.current = null
+          if (!dragging) return
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId)
+          }
           setDragging(false)
           if (dragY > 120) {
             cancel()
           }
+          setDragY(0)
+        }}
+        onPointerCancel={() => {
+          dragStartRef.current = null
+          if (!dragging) return
+          setDragging(false)
           setDragY(0)
         }}
         className='sm:max-h-[92vh] sm:max-w-lg sm:overflow-y-auto'

@@ -42,7 +42,15 @@ export function ConsultantRail({ consultants, activeId, isPending }: ConsultantR
   const [, startSelectionTransition] = useTransition()
   const query = useDebouncedValue(term, 250)
 
-  const results = useMemo(() => sortConsultants(filterConsultants(consultants, { query })), [consultants, query])
+  // Thứ tự gốc (nhóm theo chuyên môn) — dùng để tính chiều trượt của hồ sơ khi đổi người.
+  const baseResults = useMemo(() => sortConsultants(filterConsultants(consultants, { query })), [consultants, query])
+  // KTS đang chọn được đưa LÊN ĐẦU danh sách: trên mobile danh sách dài, chọn người ở cuối mà
+  // vẫn phải cuộn xuống mới thấy mình đang chọn ai. Dùng `visualActiveId` (optimistic) nên hàng
+  // nhảy lên ngay lúc bấm; mỗi hàng có `layout` nên tự trượt chứ không nhảy cóc.
+  const results = useMemo(() => {
+    const active = baseResults.find((item) => item.id === visualActiveId)
+    return active ? [active, ...baseResults.filter((item) => item.id !== visualActiveId)] : baseResults
+  }, [baseResults, visualActiveId])
 
   const activeRef = useRef<HTMLLIElement>(null)
   useEffect(() => {
@@ -88,8 +96,8 @@ export function ConsultantRail({ consultants, activeId, isPending }: ConsultantR
                     <Link
                       href={consultantRoute(consultant.id)}
                       onClick={() => {
-                        const currentIndex = results.findIndex((item) => item.id === visualActiveId)
-                        const nextIndex = results.findIndex((item) => item.id === consultant.id)
+                        const currentIndex = baseResults.findIndex((item) => item.id === visualActiveId)
+                        const nextIndex = baseResults.findIndex((item) => item.id === consultant.id)
                         setProfileDirection(nextIndex >= currentIndex ? 1 : -1)
                         startSelectionTransition(() => setVisualActiveId(consultant.id))
                       }}

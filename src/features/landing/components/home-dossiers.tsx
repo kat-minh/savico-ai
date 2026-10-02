@@ -131,7 +131,11 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
           {/* Góp ý BuildX: bỏ chữ "Hồ sơ mẫu", lấy "Danh sách thư viện mẫu" làm tiêu đề; bên dưới là nút chọn 2D/3D. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
           {cards ? (
-            <div role='tablist' aria-label={t('title')} className='bg-muted mt-3 inline-flex rounded-full p-1.5'>
+            <div
+              role='tablist'
+              aria-label={t('title')}
+              className='bg-muted mt-3 inline-flex flex-nowrap rounded-full p-1.5'
+            >
               {TEMPLATE_KINDS.map((option) => {
                 const selected = option === kind
                 return (
@@ -142,7 +146,8 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
                     aria-selected={selected}
                     onClick={() => selectKind(option)}
                     className={cn(
-                      'rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-300',
+                      // `whitespace-nowrap shrink-0`: không bao giờ rớt dòng ở màn nhỏ; đệm thu nhỏ ở mobile.
+                      'shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-300 sm:px-6',
                       selected ? 'brand-green-button' : 'text-foreground hover:text-primary'
                     )}
                   >

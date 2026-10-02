@@ -401,7 +401,7 @@ export function NewsletterBlock() {
                 </p>
                 <p
                   data-newsletter-lead-part
-                  className='text-foreground/80 flex items-center gap-2 text-xs font-semibold'
+                  className='text-foreground/80 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold whitespace-nowrap'
                 >
                   {formatDisplayDate(displayedLead.publishedAt, locale, { weekday: true })}
                   <span aria-hidden>·</span>
@@ -431,7 +431,7 @@ export function NewsletterBlock() {
                   </div>
                   <span className='min-w-0 space-y-1'>
                     <span className='line-clamp-3 block text-sm font-medium'>{article.title}</span>
-                    <span className='text-foreground/80 flex items-center gap-1 text-xs font-semibold'>
+                    <span className='text-foreground/80 flex items-center gap-1 text-xs font-semibold whitespace-nowrap'>
                       <Clock className='size-3' />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
@@ -501,7 +501,7 @@ function RelatedRow({ article }: { article: HandbookArticle }) {
         </span>
         <span className='block text-xs'>
           <span className='text-primary'>{labelName(article.category)}</span>
-          <span className='text-foreground/80 font-semibold'>
+          <span className='text-foreground/80 font-semibold whitespace-nowrap'>
             {' '}
             · {t('readingTime', { minutes: article.readingMinutes })}
           </span>
