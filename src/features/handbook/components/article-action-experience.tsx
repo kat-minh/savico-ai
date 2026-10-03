@@ -183,30 +183,24 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.18 }}
         transition={{ duration: reduceMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
-        className='border-primary/20 relative isolate overflow-hidden border-t bg-accent'
+        className='border-primary/20 relative isolate overflow-hidden border-t bg-card'
       >
         <div className='relative min-h-[350px]'>
           <div className='pointer-events-none absolute inset-0 -z-10'>
             <Photo
               src={endImage}
               alt={t('end.imageAlt')}
-              sizes='(max-width: 900px) 100vw, 850px'
-              className='absolute inset-y-0 right-0 h-full w-[70%] rounded-none'
+              sizes='(max-width: 899px) 100vw, 595px'
+              className='absolute inset-y-0 right-0 h-full w-full rounded-none min-[900px]:w-[70%] min-[900px]:[mask-image:linear-gradient(to_right,transparent,black_20%)]'
               imageClassName='object-cover object-right'
             />
-            <Photo
-              src={endImage}
-              alt=''
-              sizes='300px'
-              className='absolute inset-y-0 left-0 h-full w-[30%] scale-110 rounded-none blur-xl'
-            />
-            <div className='absolute inset-0 bg-linear-to-r from-accent/95 from-0% via-accent/90 via-30% to-transparent to-42% max-[899px]:from-accent/95 max-[899px]:via-accent/90 max-[899px]:to-accent/50' />
             <div
-              className='absolute inset-y-0 left-0 w-[42%] backdrop-blur-[8px]'
-              style={{ maskImage: 'linear-gradient(to right, black 71.43%, transparent 100%)' }}
+              className='absolute inset-0 backdrop-blur-[2px]'
+              style={{ maskImage: 'linear-gradient(to right, black 25%, transparent 64%)' }}
             />
+            <div className='absolute inset-0 bg-linear-to-r from-card from-0% via-card/90 via-32% to-transparent to-67% max-[899px]:from-card/98 max-[899px]:via-card/95 max-[899px]:via-65% max-[899px]:to-card/65' />
           </div>
-          <div className='relative flex min-h-[270px] flex-col justify-center px-6 pt-8 pb-5 min-[900px]:w-[44%] sm:px-8'>
+          <div className='relative flex min-h-[270px] flex-col justify-center px-6 pt-8 pb-5 min-[900px]:w-[40%] sm:px-8'>
             <h2 className='text-primary-strong text-[clamp(1.35rem,2.1vw,1.72rem)] font-extrabold tracking-[-0.025em]'>
               {t('end.title')}
             </h2>
@@ -230,7 +224,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
             <ActionButtons article={article} onCreateProject={createProject} bannerRow />
             <span
               data-article-handwritten
-              className='mx-auto w-full min-w-0 max-w-[160px] text-center font-[cursive] text-[16px] leading-[1.1] italic'
+              className='font-hand mx-auto w-full min-w-0 max-w-[160px] text-center text-[18px] leading-[1.25]'
             >
               <span data-article-handwritten-text>{t('end.handwritten')}</span>
             </span>

@@ -406,13 +406,26 @@ export function ContractorLanding() {
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
     <div className='space-y-10 sm:space-y-11 pb-5 lg:pb-14'>
-      {/* Hero — banner toàn chiều rộng, cột chữ nền trắng bên trái (góp ý BuildX). */}
-      <section className='relative isolate overflow-hidden'>
-        {/* Banner phủ kín cả khối, ảnh nằm bên phải; bên trái là nền trắng của trang
-            cho cột chữ, tan dần vào ảnh — cùng cách dựng với hero trang chủ. */}
+      {/* Hero — ảnh phủ toàn banner, lớp blur bên trái tan dần trên ảnh. */}
+      <section data-contractor-hero className='relative isolate overflow-hidden'>
+        {/* Không chia cột ảnh: chỉ mask lớp blur, giữ ảnh gốc liền mạch. */}
         <div aria-hidden className='absolute inset-0 -z-10'>
-          <Image src={mapImage} alt='' fill priority sizes='100vw' className='object-cover object-right' />
-          <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r from-30% via-55% to-transparent' />
+          <Image
+            src={mapImage}
+            alt=''
+            fill
+            priority
+            sizes='100vw'
+            className='object-cover object-right lg:object-[right_30%]'
+          />
+          <div className='absolute inset-0 hidden lg:left-[15%] lg:block [mask-image:linear-gradient(to_right,transparent,black_30%)]'>
+            <Image src={mapImage} alt='' fill priority sizes='85vw' className='object-cover object-[right_40%]' />
+          </div>
+          <div
+            data-contractor-hero-blur
+            className='absolute inset-0 backdrop-blur-[8px] [mask-image:linear-gradient(to_right,black_20%,transparent_65%)] lg:[mask-image:linear-gradient(to_right,black_12%,transparent_45%)]'
+          />
+          <div className='from-background/95 via-background/85 absolute inset-0 bg-gradient-to-r from-15% via-45% to-transparent to-85% lg:from-background/90 lg:from-0% lg:via-background/70 lg:via-30% lg:to-50%' />
         </div>
         <div className={cn(PAGE_CONTAINER, 'py-5 lg:py-24')}>
           <div className='max-w-[38rem]'>
@@ -438,7 +451,7 @@ export function ContractorLanding() {
               transition={{ duration: 0.28, ease: revealEase }}
             >
               <motion.h1
-                className='text-primary-strong text-[clamp(1.5rem,7vw,1.875rem)] leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
+                className='text-primary-strong text-[clamp(1.05rem,5.4vw,1.875rem)] leading-[1.15] font-bold tracking-tight text-balance sm:text-4xl lg:text-[2.2rem]'
                 aria-label={t('hero.title')}
               >
                 <motion.span variants={revealItemVariants} className='block'>
@@ -453,7 +466,7 @@ export function ContractorLanding() {
                 chặn bề ngang mới ra đúng ba dòng như ảnh. */}
               <motion.p
                 variants={revealItemVariants}
-                className='text-muted-foreground mt-4 max-w-[30rem] text-base leading-[1.65] text-pretty sm:mt-[26px] sm:text-lg'
+                className='text-muted-foreground mt-4 max-w-[30rem] text-base text-pretty sm:mt-[26px]'
               >
                 {t('hero.subtitle')}
               </motion.p>
@@ -461,20 +474,18 @@ export function ContractorLanding() {
                 chính KHÔNG có mũi tên. */}
               <motion.div
                 variants={revealItemVariants}
-                className='mt-4 flex flex-col gap-3 sm:mt-[38px] sm:flex-row sm:flex-wrap sm:gap-8'
+                className='mt-4 flex flex-col gap-3 sm:mt-[38px] sm:flex-row sm:flex-wrap'
               >
                 <Button
-                  size='lg'
-                  className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
+                  className='h-11 rounded-full px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
                   onClick={startBrief}
                   disabled={createBrief.isPending}
                 >
                   {t('hero.createBrief')}
                 </Button>
                 <Button
-                  size='lg'
                   variant='outline'
-                  className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base max-sm:bg-card/85'
+                  className='border-primary text-primary-strong bg-card/85 h-11 rounded-full px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
                   asChild
                 >
                   {/* Dẫn sang trang danh sách nhà thầu đầy đủ (góp ý BuildX); 3 nhà thầu bên
@@ -901,7 +912,7 @@ export function ContractorLanding() {
           Nội dung câu 3 CỐ Ý khác ảnh: ảnh trả lời "gửi đến nhiều nhà thầu để
           so sánh", trái R1 (tối đa 3 nhà thầu/dự án). Phần chữ của bản mô tả
           thắng ảnh ở chỗ này. */}
-      <section className={PAGE_CONTAINER}>
+      <section id='faq' className={cn(PAGE_CONTAINER, 'scroll-mt-24')}>
         <h2 className='text-foreground text-center text-2xl font-bold tracking-tight text-balance sm:text-lg sm:tracking-wide sm:text-wrap sm:uppercase'>
           {t('faq.title')}
         </h2>

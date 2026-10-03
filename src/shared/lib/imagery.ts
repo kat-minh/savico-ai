@@ -235,7 +235,9 @@ export const HOME_IMAGE = {
 
 /** Banner đầu trang Cẩm nang "Hiểu rõ từng bước xây nhà" — ảnh khách gửi (góp ý CN02). */
 export const HANDBOOK_IMAGE = {
-  banner: '/images/handbook/banner.webp'
+  banner: '/images/handbook/banner.webp',
+  /** Banner đầu tab Thư viện mẫu — cùng khung với `banner` của tab Tin tức. */
+  libraryBanner: '/images/handbook/thu-vien-mau-banner.png'
 } as const
 
 /**

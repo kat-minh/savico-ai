@@ -229,53 +229,67 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [newlyInvitedIds, setNewlyInvitedIds] = useState<Set<string>>(() => new Set())
   const [projectChangeRevision, setProjectChangeRevision] = useState(0)
   const projectBarRef = useRef<HTMLDivElement>(null)
-  const projectBarTriggerRef = useRef<number | null>(null)
+  const projectBarContentRef = useRef<HTMLDivElement>(null)
+  const projectBarAnchorRef = useRef<HTMLSpanElement>(null)
   const [projectBarStuck, setProjectBarStuck] = useState(false)
+  const [projectBarSize, setProjectBarSize] = useState({ projectId: '', width: 0, height: 0 })
+
+  useEffect(() => {
+    const content = projectBarContentRef.current
+    if (!content) return
+
+    const measure = () => {
+      const width = content.offsetWidth
+      const height = content.offsetHeight
+      setProjectBarSize((current) => {
+        // Giữ chiều cao mở rộng trong luồng trang khi nội dung sticky thu nhỏ.
+        // Nếu không, scroll anchoring kéo scrollY lùi qua ngưỡng, làm thanh
+        // mở/thu liên tục dù người dùng đã dừng cuộn.
+        const nextHeight =
+          current.projectId === projectId && current.width === width ? Math.max(current.height, height) : height
+        return current.projectId === projectId && current.width === width && current.height === nextHeight
+          ? current
+          : { projectId, width, height: nextHeight }
+      })
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(content)
+    return () => observer.disconnect()
+  }, [projectId, preview, projectChangeRevision])
 
   useEffect(() => {
     let frame = 0
     const update = () => {
       frame = 0
-      const trigger = projectBarTriggerRef.current
-      if (trigger === null) return
+      const anchor = projectBarAnchorRef.current
+      const bar = projectBarRef.current
+      if (!anchor || !bar) return
+      // Mốc nằm trong luồng trang, không lấy offsetTop của chính phần sticky.
+      const naturalTop = anchor.getBoundingClientRect().top + window.scrollY
+      const stickyTop = Number.parseFloat(window.getComputedStyle(bar).top) || 0
+      const collapseAt = Math.max(8, naturalTop - stickyTop)
+      // Chỉ nở khi đã cuộn lên đủ chiều cao đầy đủ của thanh. Hai ngưỡng
+      // cách nhau theo kích thước thực tế, tránh nở/thu lại khi cuộn nhẹ.
+      const expandAt = Math.max(0, collapseAt - bar.offsetHeight)
       setProjectBarStuck((current) => {
-        // So sánh với một mốc scroll tuyệt đối, không đo lại chính thanh sticky
-        // đang co giãn. Khoảng trễ 12px chỉ áp dụng khi cuộn ngược để mỗi chiều
-        // đi qua vùng chuyển tiếp đúng một lần.
-        const next = current ? window.scrollY >= trigger - 12 : window.scrollY >= trigger
+        const next = current ? window.scrollY > expandAt : window.scrollY >= collapseAt
         return current === next ? current : next
       })
-    }
-    const measure = () => {
-      let node: HTMLElement | null = projectBarRef.current
-      if (!node) return
-      let naturalTop = 0
-      while (node) {
-        naturalTop += node.offsetTop
-        node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null
-      }
-      // Khi bắt đầu cuộn, site header thu từ 64px xuống 48px. Trừ trước
-      // phần chênh 16px để mốc này trùng lúc thanh chạm `top-14`.
-      projectBarTriggerRef.current = Math.max(8, naturalTop - 72)
-      update()
     }
     const schedule = () => {
       if (frame) return
       frame = window.requestAnimationFrame(update)
     }
-    const scheduleMeasure = () => {
-      if (frame) window.cancelAnimationFrame(frame)
-      frame = window.requestAnimationFrame(measure)
-    }
-    measure()
+    update()
     window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', scheduleMeasure)
+    window.addEventListener('resize', schedule)
     return () => {
       if (frame) window.cancelAnimationFrame(frame)
       window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', scheduleMeasure)
+      window.removeEventListener('resize', schedule)
     }
-  }, [])
+  }, [projectId, preview])
 
   useEffect(() => {
     if (window.sessionStorage.getItem(MATCHES_PROJECT_CHANGED_KEY) === projectId) {
@@ -377,7 +391,8 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-5 lg:py-8 lg:px-8'>
+    <div className='relative mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-5 lg:py-8 lg:px-8'>
+      <span ref={projectBarAnchorRef} data-project-bar-anchor aria-hidden className='absolute top-5 h-0 lg:top-8' />
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
         initial='hidden'
@@ -427,6 +442,8 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         <>
           <motion.div
             ref={projectBarRef}
+            data-project-bar-slot
+            style={{ minHeight: projectBarSize.projectId === projectId ? projectBarSize.height : undefined }}
             initial={reduceMotion ? false : { opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.4, ease: revealEase }}
@@ -437,6 +454,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
           >
             <AnimatePresence mode='wait'>
               <motion.div
+                ref={projectBarContentRef}
                 key={`${projectId}-${projectChangeRevision}`}
                 initial={projectChangeRevision > 0 && !reduceMotion ? { opacity: 0, x: 14, y: -8 } : false}
                 animate={{ opacity: 1, x: 0, y: 0 }}

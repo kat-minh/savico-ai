@@ -82,6 +82,9 @@ export function AccountMenu({
   const t = useTranslations('nav')
   const initials = initialsOf(user.name)
   const isAdmin = user.roles?.includes(ROLES.ADMIN) ?? false
+  // Mục nào hiện ra cũng nhận độ trễ kế tiếp, nên bỏ/thêm mục không để hụt một nhịp.
+  let staggerIndex = 0
+  const nextStagger = () => staggerClass(staggerIndex++)
 
   return (
     <DropdownMenu onOpenChange={onOpenChange}>
@@ -110,35 +113,27 @@ export function AccountMenu({
         className='w-64 data-[state=closed]:duration-100 data-[state=closed]:slide-out-to-top-1 data-[state=open]:duration-200'
       >
         {resumeProject ? (
-          <>
-            <DropdownMenuItem asChild className={staggerClass(0)}>
-              <Link href={resumeProject.href}>
-                <ArrowRight className='text-primary' />
-                <span className='flex flex-col'>
-                  <span className='font-medium'>{t('resumeProject')}</span>
-                  <span className='text-muted-foreground font-mono text-xs'>{resumeProject.id}</span>
-                </span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className={staggerClass(1)} />
-          </>
+          <DropdownMenuItem asChild className={nextStagger()}>
+            <Link href={resumeProject.href}>
+              <ArrowRight className='text-primary' />
+              <span className='flex flex-col'>
+                <span className='font-medium'>{t('resumeProject')}</span>
+                <span className='text-muted-foreground font-mono text-xs'>{resumeProject.id}</span>
+              </span>
+            </Link>
+          </DropdownMenuItem>
         ) : null}
         <DropdownMenuLabel className='flex flex-col'>
-          <span className={cn('truncate text-sm font-medium', staggerClass(resumeProject ? 2 : 0))}>{user.name}</span>
-          <span
-            className={cn('text-muted-foreground truncate text-xs font-normal', staggerClass(resumeProject ? 3 : 1))}
-          >
-            {user.email}
-          </span>
+          <span className={cn('truncate text-sm font-medium', nextStagger())}>{user.name}</span>
+          <span className={cn('text-muted-foreground truncate text-xs font-normal', nextStagger())}>{user.email}</span>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className={staggerClass(resumeProject ? 4 : 2)} />
-        <DropdownMenuItem asChild className={staggerClass(resumeProject ? 5 : 3)}>
+        <DropdownMenuItem asChild className={nextStagger()}>
           <Link href={ROUTES.DESIGN}>
             <LayoutDashboard />
             {t('design')}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className={staggerClass(resumeProject ? 6 : 4)}>
+        <DropdownMenuItem asChild className={nextStagger()}>
           <Link href={ROUTES.ACCOUNT}>
             <UserRound />
             {t('account')}
@@ -146,22 +141,19 @@ export function AccountMenu({
         </DropdownMenuItem>
         {/* Lối vào khu quản trị — chỉ hiện với vai trò admin (mục X). */}
         {isAdmin ? (
-          <DropdownMenuItem asChild className={staggerClass(resumeProject ? 7 : 5)}>
+          <DropdownMenuItem asChild className={nextStagger()}>
             <Link href={ADMIN_ROUTES.DASHBOARD}>
               <ShieldCheck />
               {t('admin')}
             </Link>
           </DropdownMenuItem>
         ) : null}
-        <DropdownMenuSeparator className={staggerClass(resumeProject ? (isAdmin ? 8 : 7) : isAdmin ? 6 : 5)} />
         {/* Ngôn ngữ + giao diện là tuỳ chọn cá nhân nên nằm trong menu tài khoản,
             không chiếm chỗ thường trực trên thanh công cụ. */}
-        <PreferenceSwitches className={staggerClass(resumeProject ? (isAdmin ? 9 : 8) : isAdmin ? 7 : 6)} />
-        <DropdownMenuSeparator className={staggerClass(resumeProject ? (isAdmin ? 10 : 9) : isAdmin ? 8 : 7)} />
-        <DropdownMenuItem
-          onClick={onLogout}
-          className={staggerClass(resumeProject ? (isAdmin ? 11 : 10) : isAdmin ? 9 : 8)}
-        >
+        <PreferenceSwitches className={nextStagger()} />
+        {/* Menu chỉ có MỘT đường kẻ ngang: tách "Đăng xuất" khỏi phần còn lại. */}
+        <DropdownMenuSeparator className={nextStagger()} />
+        <DropdownMenuItem onClick={onLogout} className={nextStagger()}>
           <LogOut />
           {t('logout')}
         </DropdownMenuItem>
