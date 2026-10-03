@@ -57,20 +57,21 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
   return (
     <section id='home-services' className='brand-band relative isolate overflow-hidden'>
       <div className='relative mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-        <header className='flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3'>
-          <div className='space-y-3'>
+        <header className='grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 gap-y-3 lg:gap-x-10'>
+          <div className='contents'>
             {/* Góp ý BuildX: bỏ nhãn "Bảng giá BuildX" — chỉ còn tiêu đề + mô tả.
                 `leading-none`/`leading-5`: bỏ khoảng line-height thừa để chữ cách mép
                 section và cách các thẻ đúng 20px thay vì 20px + phần thừa. */}
             <h2 className='text-2xl leading-none font-bold tracking-tight text-balance lg:text-[1.75rem]'>
               {t('title')}
             </h2>
-            <p className='text-primary-foreground max-w-3xl text-sm leading-5'>{t('subtitle')}</p>
+            <p className='text-primary-foreground col-span-2 row-start-2 max-w-3xl text-sm leading-5'>
+              {t('subtitle')}
+            </p>
           </div>
 
-          {/* `items-baseline` ở header: mép dưới chữ CTA thẳng hàng với mép dưới chữ hoa của tiêu đề.
-          Dưới `lg` bỏ "Xem tất cả gói", thay bằng dòng "Tham khảo: Bảng giá" (Responsive case 11). */}
-          <p className='text-primary-foreground/80 flex items-center gap-1.5 text-sm lg:hidden'>
+          {/* CTA nằm trên hàng tiêu đề; mô tả luôn ở hàng tiếp theo. */}
+          <p className='text-primary-foreground/80 col-start-2 row-start-1 flex items-center gap-1.5 text-sm lg:hidden'>
             {t('referenceLabel')}
             <Link
               href={ROUTES.PLANS}
@@ -82,7 +83,7 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
           </p>
           <Link
             href={ROUTES.PLANS}
-            className='hover:text-primary-foreground focus-visible:text-primary-foreground hidden items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline focus-visible:underline lg:inline-flex'
+            className='hover:text-primary-foreground focus-visible:text-primary-foreground col-start-2 row-start-1 hidden items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline focus-visible:underline lg:inline-flex'
           >
             <span className='sm:hidden'>{t('viewAllMobile')}</span>
             <span className='hidden sm:inline'>{t('viewAll')}</span>

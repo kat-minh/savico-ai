@@ -60,18 +60,18 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
   return (
     <section className='brand-band'>
       <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-        <header className='mb-4 flex items-start justify-between gap-x-10 gap-y-3 lg:mb-8 lg:flex-wrap'>
-          <div className='space-y-2'>
+        <header className='mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 gap-y-2 lg:mb-8 lg:gap-x-10'>
+          <div className='contents'>
             {/* Cùng khuôn với "Hướng dẫn sử dụng": tiêu đề + một dòng mô tả, không có dòng nhãn. */}
             <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('titleMobile')}</h2>
-            <p className='text-primary-foreground max-w-2xl text-sm text-pretty'>
+            <p className='text-primary-foreground col-span-2 row-start-2 max-w-2xl text-sm text-pretty'>
               {t('title')}. {t('subtitle')}
             </p>
           </div>
 
           <Link
             href={ROUTES.CONSULT}
-            className='max-lg:h-8 max-lg:shrink-0 hover:text-primary-foreground focus-visible:text-primary-foreground inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline focus-visible:underline'
+            className='max-lg:h-8 max-lg:shrink-0 hover:text-primary-foreground focus-visible:text-primary-foreground col-start-2 row-start-1 inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 transition-colors hover:underline focus-visible:underline'
           >
             {/* Mobile: chỉ còn mũi tên, chữ giữ lại cho trình đọc màn hình. */}
             <span className='max-lg:sr-only'>{t('viewAll')}</span>

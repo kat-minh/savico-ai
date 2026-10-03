@@ -6648,31 +6648,16 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
   border-right-color: color-mix(in srgb, var(--brand-orange) 46%, var(--border));
 }
 
-/* Chữ viết tay ở giữa hai nhóm CTA cuối bài: kính mờ và ánh màu thương hiệu. */
+/* Slogan viết trực tiếp trên ảnh, chỉ giữ ánh màu chữ và nét gạch chân. */
 [data-article-handwritten] {
   position: relative;
-  padding: 9px 8px 13px;
-  border: 1px solid color-mix(in oklab, var(--card) 65%, transparent);
-  border-radius: 16px;
-  background: color-mix(in oklab, var(--card) 68%, transparent);
-  backdrop-filter: blur(12px) saturate(1.15);
-  box-shadow:
-    0 1px 0 color-mix(in oklab, var(--card) 75%, transparent) inset,
-    0 4px 16px color-mix(in oklab, var(--primary-strong) 10%, transparent);
-  transition:
-    background-color 350ms ease,
-    box-shadow 350ms ease;
-}
-
-[data-article-handwritten]:hover {
-  background: color-mix(in oklab, var(--card) 82%, transparent);
-  box-shadow: 0 6px 20px color-mix(in oklab, var(--primary-strong) 16%, transparent);
+  padding-bottom: 9px;
 }
 
 [data-article-handwritten]::after {
   content: '';
   position: absolute;
-  bottom: 6px;
+  bottom: 0;
   left: 25%;
   width: 50%;
   height: 2px;
@@ -6709,8 +6694,5 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
 @media (prefers-reduced-motion: reduce) {
   [data-article-handwritten-text] {
     animation: none;
-  }
-  [data-article-handwritten] {
-    transition: none;
   }
 }

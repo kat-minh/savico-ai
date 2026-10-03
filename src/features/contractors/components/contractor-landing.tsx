@@ -406,13 +406,26 @@ export function ContractorLanding() {
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
     <div className='space-y-10 sm:space-y-11 pb-5 lg:pb-14'>
-      {/* Hero — banner toàn chiều rộng, cột chữ nền trắng bên trái (góp ý BuildX). */}
-      <section className='relative isolate overflow-hidden'>
-        {/* Banner phủ kín cả khối, ảnh nằm bên phải; bên trái là nền trắng của trang
-            cho cột chữ, tan dần vào ảnh — cùng cách dựng với hero trang chủ. */}
+      {/* Hero — ảnh phủ toàn banner, lớp blur bên trái tan dần trên ảnh. */}
+      <section data-contractor-hero className='relative isolate overflow-hidden'>
+        {/* Không chia cột ảnh: chỉ mask lớp blur, giữ ảnh gốc liền mạch. */}
         <div aria-hidden className='absolute inset-0 -z-10'>
-          <Image src={mapImage} alt='' fill priority sizes='100vw' className='object-cover object-right' />
-          <div className='from-background via-background/85 absolute inset-0 bg-gradient-to-r from-30% via-55% to-transparent' />
+          <Image
+            src={mapImage}
+            alt=''
+            fill
+            priority
+            sizes='100vw'
+            className='object-cover object-right lg:object-[right_30%]'
+          />
+          <div className='absolute inset-0 hidden lg:left-[15%] lg:block [mask-image:linear-gradient(to_right,transparent,black_30%)]'>
+            <Image src={mapImage} alt='' fill priority sizes='85vw' className='object-cover object-[right_40%]' />
+          </div>
+          <div
+            data-contractor-hero-blur
+            className='absolute inset-0 backdrop-blur-[8px] [mask-image:linear-gradient(to_right,black_20%,transparent_65%)] lg:[mask-image:linear-gradient(to_right,black_12%,transparent_45%)]'
+          />
+          <div className='from-background/95 via-background/85 absolute inset-0 bg-gradient-to-r from-15% via-45% to-transparent to-85% lg:from-background/90 lg:from-0% lg:via-background/70 lg:via-30% lg:to-50%' />
         </div>
         <div className={cn(PAGE_CONTAINER, 'py-5 lg:py-24')}>
           <div className='max-w-[38rem]'>

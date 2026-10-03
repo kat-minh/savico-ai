@@ -47,7 +47,7 @@ export function HandbookHighlights() {
     <section className='brand-band'>
       <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
         <header>
-          <div className='flex items-center justify-between gap-x-10 gap-y-3 lg:flex-wrap'>
+          <div className='grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 lg:gap-x-10'>
             <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
 
             <Link
