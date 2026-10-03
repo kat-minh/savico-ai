@@ -71,7 +71,7 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
 
   if (isPending) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:px-8'>
         <Skeleton className='h-24 rounded-2xl' />
         <Skeleton className='h-40 rounded-2xl' />
         <Skeleton className='h-96 rounded-2xl' />
@@ -81,7 +81,7 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
 
   if (!project) {
     return (
-      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:py-16 lg:px-8'>
+      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:px-8'>
         <EmptyState
           title={t('empty.title')}
           description={t('empty.body')}
@@ -96,7 +96,7 @@ export function SupervisionDashboard({ projectId, stageIndex }: SupervisionDashb
   }
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:py-8 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:px-8'>
       <nav className='text-muted-foreground flex flex-wrap items-center gap-2 text-sm'>
         <Link href={ROUTES.ACCOUNT_PROJECTS} className='hover:text-foreground'>
           {t('breadcrumbProjects')}

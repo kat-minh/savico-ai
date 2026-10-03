@@ -15,7 +15,7 @@ import { checkoutConfirmRoute, checkoutDoneRoute, checkoutFailedRoute } from '@/
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatPriceTag } from '@/shared/utils'
-import { isApiOrderId, QR_TTL_MINUTES } from '../constants/checkout.constants'
+import { isApiOrderId, orderDisplayCode, QR_TTL_MINUTES } from '../constants/checkout.constants'
 import { useCancelOrder, useMarkTransferred, useOrder, useRegenerateQr } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -192,14 +192,14 @@ export function QrPayment({ orderId }: QrPaymentProps) {
 
   const openSupport = () => {
     if (!order) return
-    const subject = t('supportSubject', { code: order.id })
-    const body = t('supportBody', { code: order.id })
+    const subject = t('supportSubject', { code: orderDisplayCode(order) })
+    const body = t('supportBody', { code: orderDisplayCode(order) })
     window.location.href = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'>
         <CheckoutSteps current='payment' clickableCompletedSteps={[]} />
 
         <section className='relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border p-4 pb-7'>
@@ -307,7 +307,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
       data-page-entrance={entranceState}
       data-checkout-payment-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'
     >
       <CheckoutSteps
         current='payment'
@@ -430,7 +430,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
               })}
             </p>
           ) : null}
-          <p className='text-muted-foreground font-mono text-xs'>#{order.id}</p>
+          <p className='text-muted-foreground font-mono text-xs'>#{orderDisplayCode(order)}</p>
 
           <div className='mt-4 flex flex-wrap justify-center gap-2'>
             <Button data-payment-minor-action variant='outline' size='sm' onClick={downloadQr}>
@@ -442,7 +442,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
               data-copied={copiedKeys.has('order') ? 'true' : 'false'}
               variant='outline'
               size='sm'
-              onClick={() => void copy('order', order.id, order.id)}
+              onClick={() => void copy('order', orderDisplayCode(order), orderDisplayCode(order))}
             >
               {copiedKeys.has('order') ? <Check className='size-4' /> : <Copy className='size-4' />}
               {copiedKeys.has('order') ? t('copied') : t('copyOrder')}

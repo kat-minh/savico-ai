@@ -30,7 +30,8 @@ function initialsOf(name: string): string {
 
 /** "Mở tiếp dự án" — dự án dở gần nhất, tìm và tính route ở lớp app (mục II.2). */
 export interface ResumeProjectLink {
-  id: string
+  /** Tên dự án — hiện cạnh nhãn, không hiện mã (uuid). */
+  name: string
   href: string
 }
 
@@ -116,9 +117,9 @@ export function AccountMenu({
           <DropdownMenuItem asChild className={nextStagger()}>
             <Link href={resumeProject.href}>
               <ArrowRight className='text-primary' />
-              <span className='flex flex-col'>
-                <span className='font-medium'>{t('resumeProject')}</span>
-                <span className='text-muted-foreground font-mono text-xs'>{resumeProject.id}</span>
+              <span className='flex min-w-0 items-center gap-1 font-medium' title={resumeProject.name}>
+                <span className='shrink-0'>{t('resumeProject')}</span>
+                <span className='truncate'>{resumeProject.name}</span>
               </span>
             </Link>
           </DropdownMenuItem>

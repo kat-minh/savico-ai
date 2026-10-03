@@ -53,6 +53,8 @@ interface OrderConfirmProps {
   productId: string
   kind: OrderKind
   projectId?: string
+  /** Tên dự án đang mua cho — tầng app tra từ `features/design`; chưa có thì không hiện dòng "Cho dự án". */
+  projectName?: string
   /** Khóa offer gửi kèm khi tạo đơn API (`Month` / `Year` / `ConstructionSite`). */
   offerKey?: OfferKey
   /**
@@ -97,7 +99,7 @@ function AnimatedCheckoutTotal({ value, locale }: { value: number; locale: Local
   )
 }
 
-export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct }: OrderConfirmProps) {
+export function OrderConfirm({ productId, kind, projectId, projectName, offerKey, apiProduct }: OrderConfirmProps) {
   const t = useTranslations('checkout.confirm')
   const tPlans = useTranslations('plans.tiers')
   const tPlanTags = useTranslations('plans.tierTags')
@@ -254,7 +256,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
 
   if (!product) {
     return (
-      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:py-16 lg:px-8'>
+      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:px-8'>
         <EmptyState
           title={t('missingProduct')}
           action={
@@ -335,7 +337,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
       data-page-entrance={entranceState}
       data-checkout-confirm-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'
     >
       {/* Góp ý BuildX: màn này chỉ có logo để về trang chủ — thêm lối lùi về bảng giá. */}
       <button
@@ -595,8 +597,8 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
                   </span>
                 ) : null}
               </div>
-              {projectId ? (
-                <p className='text-muted-foreground mt-0.5 text-xs'>{t('forProject', { project: projectId })}</p>
+              {projectName ? (
+                <p className='text-muted-foreground mt-0.5 text-xs'>{t('forProject', { project: projectName })}</p>
               ) : null}
 
               {/* Hình S03: mỗi dòng quyền lợi có ICON RIÊNG (bảng màu · ô bút chì ·

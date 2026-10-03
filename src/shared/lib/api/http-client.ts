@@ -1,4 +1,5 @@
 import { AUTH_ENDPOINTS } from '@/shared/auth/auth.constants'
+import { hasSessionMarker } from '@/shared/auth/session-marker'
 import { API_CONFIG } from '@/shared/config/api.config'
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { normalizeApiError } from './api-error'
@@ -73,7 +74,16 @@ httpClient.interceptors.response.use(
     // Attempt one transparent refresh + retry on expired session. Auth
     // endpoints are exempt so a login failure never masquerades as a session
     // expiry.
-    if (status === 401 && originalRequest && !originalRequest._retry && !isRefreshExempt(originalRequest.url)) {
+    // Khách (chưa có phiên) bị 401 là bình thường, không có gì để refresh. Nếu vẫn
+    // refresh thì lệnh refresh thất bại về muộn sẽ gọi `onUnauthorized` và xóa mất
+    // phiên người dùng vừa đăng nhập xong → phải đăng nhập lần hai.
+    if (
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isRefreshExempt(originalRequest.url) &&
+      hasSessionMarker()
+    ) {
       originalRequest._retry = true
 
       // Single-flight: concurrent 401s share one refresh call. `onUnauthorized`

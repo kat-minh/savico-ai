@@ -135,6 +135,7 @@ function LinkColumn({
  */
 export function SiteFooter() {
   const t = useTranslations('footer')
+  const tNav = useTranslations('nav')
   const year = new Date().getFullYear()
   const { contact, social } = siteConfig
   // Noi dung lien he / mang xa hoi do admin sua (muc X). Chua sua thi roi ve
@@ -181,7 +182,7 @@ export function SiteFooter() {
                 <Logo onDark className='h-12 max-w-full max-lg:h-14' />
               </div>
               <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
-                {cmsText(settings.tagline, t('tagline'))}
+                {cmsText(settings.tagline, tNav('brandTagline'))}
               </p>
             </div>
 

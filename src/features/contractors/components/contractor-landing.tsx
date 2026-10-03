@@ -405,7 +405,7 @@ export function ContractorLanding() {
   // trên ảnh 450px = 41–48px ở khổ thật, còn `space-y-16` (64px) của bản trước
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
-    <div className='space-y-10 sm:space-y-11 pb-5 lg:pb-14'>
+    <div className='space-y-10 sm:space-y-11 pb-5'>
       {/* Hero — ảnh phủ toàn banner, lớp blur bên trái tan dần trên ảnh. */}
       <section data-contractor-hero className='relative isolate overflow-hidden'>
         {/* Không chia cột ảnh: chỉ mask lớp blur, giữ ảnh gốc liền mạch. */}

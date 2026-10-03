@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 
+import { useProject } from '@/features/design'
 import { OrderConfirm, isApiOrderId, type OfferKey, type OrderKind } from '@/features/checkout'
 import { usePlans } from '@/features/plans'
 import { useSupervisionPackageList } from '@/features/supervision'
@@ -36,6 +37,8 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
   const t = useTranslations('checkout.confirm')
   const { data: plans, isPending: plansPending } = usePlans()
   const { packages, isPending: packagesPending } = useSupervisionPackageList()
+  // Chỉ hiện TÊN dự án, không bao giờ hiện mã (uuid) — chưa tải xong thì ẩn dòng này.
+  const { data: project } = useProject(projectId ?? '')
 
   const isApi = isApiOrderId(productId)
   const pkg = packages.find((item) => item.id === productId)
@@ -96,6 +99,7 @@ export function ConfirmView({ productId, kind, projectId, offer }: ConfirmViewPr
       productId={productId}
       kind={resolvedKind}
       projectId={projectId}
+      projectName={project?.name}
       offerKey={offerKey}
       apiProduct={apiProduct}
     />

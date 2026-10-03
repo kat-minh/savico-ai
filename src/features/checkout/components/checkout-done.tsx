@@ -16,7 +16,7 @@ import { contractorMatchesRoute, ROUTES, supervisionRoute } from '@/shared/const
 import { usePageEntrance } from '@/shared/hooks'
 import { clearHandbookQuotaReturn, readHandbookQuotaReturn } from '@/shared/lib'
 import { formatCurrency } from '@/shared/utils'
-import { isApiOrderId } from '../constants/checkout.constants'
+import { isApiOrderId, orderDisplayCode } from '../constants/checkout.constants'
 import { routeForStatus, useOrder } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -101,7 +101,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
 
   if (isPending || !order || order.status !== 'paid') {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5 lg:py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5'>
         <CheckoutSteps current='done' animateEntrance={false} />
 
         <div className='grid items-start gap-x-[3.81%] gap-y-6 lg:grid-cols-[25.4%_minmax(0,1fr)]'>
@@ -206,7 +206,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
       data-checkout-done-root
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5 lg:py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5'
     >
       <CheckoutSteps current='done' animateEntrance={false} />
 
@@ -302,7 +302,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
                       t(order.api?.offerKey === 'Year' ? 'validityYear' : 'validityMonth')
                     : t('noExpiry')}
               </span>
-              <span className='font-mono opacity-70'>#{order.id}</span>
+              <span className='font-mono opacity-70'>#{orderDisplayCode(order)}</span>
             </div>
           </section>
 
@@ -409,7 +409,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
           <dl className='divide-border divide-y rounded-xl border'>
             <div className='flex items-center justify-between gap-4 px-4 py-3'>
               <dt className='text-muted-foreground text-sm'>{t('receiptOrderCode')}</dt>
-              <dd className='font-mono text-sm font-semibold'>#{order.id}</dd>
+              <dd className='font-mono text-sm font-semibold'>#{orderDisplayCode(order)}</dd>
             </div>
             <div className='flex items-center justify-between gap-4 px-4 py-3'>
               <dt className='text-muted-foreground text-sm'>{t('receiptPlan')}</dt>

@@ -88,7 +88,8 @@ export const PRIVACY_PAGE_SEED: CmsStaticPage = {
  */
 export const SITE_SETTINGS_SEED: CmsSiteSettings = {
   brandName: 'BuildX',
-  tagline: 'Thiết kế & dự toán xây nhà bằng AI',
+  // Rỗng để footer lấy `nav.brandTagline` — cùng slogan với header, đúng cả hai ngôn ngữ.
+  tagline: '',
   hotline: '0934 888 881',
   email: 'hello@savico.ai',
   address: '54 Trần Minh Quyền, phường Vườn Lài, TP. HCM',

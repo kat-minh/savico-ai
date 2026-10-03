@@ -96,7 +96,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-5 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-5 lg:px-8'
     >
       <header data-entrance-step='0' data-entrance-from='right' className='supervision-heading space-y-2 text-center'>
         <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>
@@ -247,7 +247,7 @@ function PackageCard({
     >
       {item.recommended ? (
         <motion.span
-          className='supervision-control-label supervision-control-label-top bg-brand-orange text-brand-orange-foreground absolute -top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 rounded-full px-4 py-1 text-xs font-semibold tracking-wide uppercase whitespace-nowrap'
+          className='supervision-control-label supervision-control-label-top bg-brand-orange text-brand-orange-foreground absolute -top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 rounded-full px-4 py-1 text-sm font-semibold tracking-wide uppercase whitespace-nowrap'
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1.86, ease: pricingEase }}
@@ -281,7 +281,7 @@ function PackageCard({
           </h2>
           <motion.p
             className={cn(
-              'supervision-control-label absolute bottom-0 left-1/2 w-fit -translate-x-1/2 translate-y-1/2 rounded-full px-[3.5cqw] py-[1.6cqw] text-center text-[3.6cqw] leading-none font-semibold tracking-wide whitespace-nowrap uppercase',
+              'supervision-control-label absolute bottom-0 left-1/2 w-fit -translate-x-1/2 translate-y-1/2 rounded-full px-[3.5cqw] py-[1.6cqw] text-center text-sm leading-none font-semibold tracking-wide whitespace-nowrap uppercase',
               item.recommended
                 ? 'bg-brand-orange text-brand-orange-foreground'
                 : 'bg-primary-strong text-primary-foreground'
@@ -318,7 +318,7 @@ function PackageCard({
             </div>
           )}
 
-          <p className='text-muted-foreground mt-4 min-h-[2.75em] text-center text-[4.3cqw] leading-snug text-pretty'>
+          <p className='text-muted-foreground mt-4 min-h-[2.75em] text-center text-sm leading-snug text-pretty'>
             {item.fitLine}
           </p>
 
@@ -344,12 +344,12 @@ function PackageCard({
             </span>
             {isFree ? (
               // Chừa đúng chỗ dòng "/ dự án · tối đa N tháng" của hai gói trả phí để các hàng bên dưới ngang nhau.
-              <span aria-hidden className='block text-[3.9cqw] opacity-0 select-none'>
+              <span aria-hidden className='block text-sm opacity-0 select-none'>
                 &nbsp;
               </span>
             ) : (
               <motion.span
-                className='text-muted-foreground block text-[3.9cqw]'
+                className='text-muted-foreground block text-sm'
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.42, delay: item.recommended ? 3.05 : 2.8 }}
@@ -377,7 +377,7 @@ function PackageCard({
               <li
                 key={benefit}
                 data-upgrade={isFree && benefitIndex === item.benefits.length - 1 ? 'true' : undefined}
-                className='supervision-benefit flex items-start gap-[2cqw] text-[4.1cqw] leading-snug'
+                className='supervision-benefit flex items-start gap-[2cqw] text-sm leading-snug'
                 style={{ '--benefit-index': benefitIndex } as CSSProperties}
               >
                 {/* Cùng `strokeWidth` cho mọi gói: gói Miễn phí là vòng tròn outline (không tô nền),
@@ -433,7 +433,7 @@ function InspectionBand({ item }: { item: SupervisionPackage }) {
   return (
     <motion.p
       className={cn(
-        'supervision-inspection-band mt-3 rounded-lg px-3 py-2 text-center text-[3.9cqw] font-medium',
+        'supervision-inspection-band mt-3 rounded-lg px-3 py-2 text-center text-sm font-medium',
         !item.inspections && 'bg-muted text-muted-foreground',
         item.inspections &&
           (item.recommended ? 'bg-brand-orange-soft text-brand-orange' : 'bg-accent text-primary-strong')
@@ -516,7 +516,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
   return (
     <section className='supervision-comparison'>
       <motion.h2
-        className='text-primary-strong text-center text-xl font-semibold tracking-tight'
+        className='text-primary-strong text-center text-2xl font-bold tracking-tight'
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.7 }}
@@ -535,19 +535,19 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.26, ease: pricingEase }}
           >
-            <span className='px-3 py-2 text-center text-xs font-semibold tracking-wide uppercase'>
+            <span className='px-3 py-2 text-center text-sm font-semibold tracking-wide uppercase'>
               {t('criterion')}
             </span>
             {SUPERVISION_TIERS.map((tier) => (
               <span
                 key={tier}
                 className={cn(
-                  'border-l px-3 py-2 text-center text-xs font-bold uppercase',
+                  'border-l px-3 py-2 text-center text-sm font-bold uppercase',
                   tier === 'control' && 'supervision-control-column bg-brand-orange-soft text-brand-orange'
                 )}
               >
                 {byTier(tier)?.name || tTiers(tier)}
-                <small className='text-muted-foreground mt-0.5 block text-[10px] font-medium normal-case'>
+                <small className='text-muted-foreground mt-0.5 block text-sm font-medium normal-case'>
                   {formatCurrency(byTier(tier)?.price ?? 0, locale)}
                 </small>
               </span>
@@ -581,7 +581,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
           </colgroup>
           <thead className='supervision-comparison-head bg-card z-20'>
             <tr className='divide-border divide-x'>
-              <th className='bg-card text-primary-strong sticky left-0 z-10 border-b px-3 py-2.5 text-center text-xs font-semibold tracking-wide uppercase'>
+              <th className='bg-card text-primary-strong sticky left-0 z-10 border-b px-3 py-2.5 text-center text-sm font-semibold tracking-wide uppercase'>
                 {t('criterion')}
               </th>
               {SUPERVISION_TIERS.map((tier) => (
@@ -602,7 +602,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                   >
                     {byTier(tier)?.name || tTiers(tier)}
                   </span>
-                  <span className='supervision-sticky-price text-muted-foreground mt-0.5 text-[10px] font-medium'>
+                  <span className='supervision-sticky-price text-muted-foreground mt-0.5 text-sm font-medium'>
                     {formatCurrency(byTier(tier)?.price ?? 0, locale)}
                   </span>
                 </th>
@@ -665,7 +665,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                   >
                     <th
                       className={cn(
-                        'bg-card sticky left-0 z-10 px-3 py-2 text-left text-xs font-medium transition-colors',
+                        'bg-card sticky left-0 z-10 px-3 py-2 text-left text-sm font-medium transition-colors',
                         hoveredRow === row.key && 'bg-accent/80 font-semibold'
                       )}
                     >
@@ -676,7 +676,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                         key={tier}
                         onMouseEnter={() => setHoveredColumn(tier)}
                         className={cn(
-                          'supervision-comparison-cell px-3 py-2 text-center text-xs',
+                          'supervision-comparison-cell px-3 py-2 text-center text-sm',
                           tier === 'control' && 'supervision-control-column bg-brand-orange-soft/60',
                           hoveredColumn === tier && 'is-column-hovered',
                           hoveredRow === row.key && hoveredColumn === tier && 'is-intersection font-semibold'
@@ -693,7 +693,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
 
           <tfoot>
             <tr className='supervision-choose-row divide-border divide-x'>
-              <th className='bg-card sticky left-0 z-10 p-3 text-left text-xs font-medium'>{t('choosePlanRow')}</th>
+              <th className='bg-card sticky left-0 z-10 p-3 text-left text-sm font-medium'>{t('choosePlanRow')}</th>
               {SUPERVISION_TIERS.map((tier, index) => {
                 const item = byTier(tier)
                 return (
@@ -712,7 +712,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                       <Button
                         asChild
                         size='sm'
-                        className={cn('supervision-table-buy', item.recommended && ORANGE_BUTTON)}
+                        className={cn('supervision-table-buy text-sm', item.recommended && ORANGE_BUTTON)}
                       >
                         <Link
                           href={checkoutConfirmRoute(item.id, projectId, item.offerKey)}
@@ -722,7 +722,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                         </Link>
                       </Button>
                     ) : (
-                      <span className='text-muted-foreground text-xs'>—</span>
+                      <span className='text-muted-foreground text-sm'>—</span>
                     )}
                   </motion.td>
                 )
@@ -753,7 +753,7 @@ function AddonTable() {
       transition={{ duration: 0.56, ease: pricingEase }}
     >
       <motion.h2
-        className='text-primary-strong text-center text-base font-bold'
+        className='text-primary-strong text-center text-2xl font-bold'
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -770,7 +770,7 @@ function AddonTable() {
             {/* `divide-x` trên hàng kẻ vạch DỌC giữa các ô — bảng phụ phí ở
                 Hình S19 có lưới đủ cả ngang lẫn dọc, khác bảng so sánh phía trên
                 chỉ kẻ ngang. */}
-            <tr className='text-muted-foreground divide-x text-[11px] tracking-wide uppercase'>
+            <tr className='text-muted-foreground divide-x text-sm tracking-wide uppercase'>
               <th className='border-b p-2 text-left font-bold'>{t('item')}</th>
               <th className='border-b p-2 text-center font-bold'>{t('price')}</th>
               <th className='border-b p-2 text-center font-bold'>{t('note')}</th>
@@ -786,9 +786,9 @@ function AddonTable() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.42, delay: 0.26 + index * 0.09, ease: pricingEase }}
               >
-                <td className='p-2 text-xs font-medium'>{key === 'extend' ? t('extend', { months }) : t(key)}</td>
-                <td className='p-2 text-center text-xs font-medium'>{t(`${key}Price`)}</td>
-                <td className='text-muted-foreground p-2 text-center text-xs'>{t(`${key}Note`)}</td>
+                <td className='p-2 text-sm font-medium'>{key === 'extend' ? t('extend', { months }) : t(key)}</td>
+                <td className='p-2 text-center text-sm font-medium'>{t(`${key}Price`)}</td>
+                <td className='text-muted-foreground p-2 text-center text-sm'>{t(`${key}Note`)}</td>
               </motion.tr>
             ))}
           </tbody>
@@ -826,7 +826,7 @@ function ScopeRules() {
       viewport={{ once: true, amount: 0.35 }}
       transition={{ duration: 0.56, delay: 0.28, ease: pricingEase }}
     >
-      <h2 className='text-primary-strong flex items-center gap-2.5 text-base font-semibold'>
+      <h2 className='text-primary-strong flex items-center gap-2.5 text-2xl font-bold'>
         <ShieldCheck className='supervision-scope-icon size-5 shrink-0' strokeWidth={1.75} />
         {t('title')}
       </h2>
@@ -878,7 +878,7 @@ function Journey() {
       className='supervision-journey bg-card relative rounded-2xl border p-5'
     >
       <motion.h2
-        className='text-primary-strong text-lg font-semibold tracking-wide uppercase'
+        className='text-primary-strong text-2xl font-bold tracking-wide uppercase'
         initial={{ opacity: 0, y: 8 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.7 }}
@@ -939,7 +939,7 @@ function JourneyCard({ step, number, delay }: { step: JourneyStepKey; number: nu
       transition={{ duration: 0.44, delay, ease: pricingEase }}
     >
       <motion.span
-        className='bg-primary text-primary-foreground absolute -top-3.5 flex size-7 items-center justify-center rounded-full text-xs font-semibold'
+        className='bg-primary text-primary-foreground absolute -top-3.5 flex size-7 items-center justify-center rounded-full text-sm font-semibold'
         initial={{ scale: 0.55 }}
         whileInView={{ scale: 1 }}
         viewport={{ once: true }}
@@ -952,7 +952,7 @@ function JourneyCard({ step, number, delay }: { step: JourneyStepKey; number: nu
           thay vì chỗ lồi chỗ lõm. */}
       <p className='flex min-h-9 items-center text-sm leading-tight font-medium text-pretty'>{t(step)}</p>
       <Icon aria-hidden className='supervision-journey-icon text-primary my-3 size-8 shrink-0' strokeWidth={1.5} />
-      <p className='text-muted-foreground text-[11px] leading-snug text-pretty'>{t(`${step}Body`)}</p>
+      <p className='text-muted-foreground text-sm leading-snug text-pretty'>{t(`${step}Body`)}</p>
     </motion.div>
   )
 }
@@ -974,7 +974,7 @@ function ValueTable() {
   return (
     <section className='supervision-value'>
       <motion.h2
-        className='text-primary-strong text-center text-xl font-semibold tracking-wide uppercase'
+        className='text-primary-strong text-center text-2xl font-bold tracking-wide uppercase'
         initial={{ opacity: 0, y: 8 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.65 }}
@@ -987,7 +987,7 @@ function ValueTable() {
         <table className='supervision-value-table w-full min-w-[640px] text-sm'>
           <thead>
             {/* `divide-x` kẻ vạch dọc giữa các cột, giống bảng phụ phí. */}
-            <tr className='bg-muted/40 divide-x text-xs'>
+            <tr className='bg-muted/40 divide-x text-sm'>
               <th className='bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] sticky left-0 z-10 border-b p-3 text-left font-medium' />
               {SUPERVISION_TIERS.map((tier) => (
                 <th
@@ -1030,7 +1030,7 @@ function ValueTable() {
                 {SUPERVISION_TIERS.map((tier, tierIndex) => (
                   <td
                     key={tier}
-                    className={cn('p-3.5 text-center text-xs text-pretty', tier === 'control' && CONTROL_COLUMN)}
+                    className={cn('p-3.5 text-center text-sm text-pretty', tier === 'control' && CONTROL_COLUMN)}
                   >
                     <motion.span
                       initial={{ opacity: 0, x: 5 }}
@@ -1063,7 +1063,7 @@ function GroupRow({ label }: { label: string }) {
     >
       <th
         colSpan={SUPERVISION_TIERS.length + 1}
-        className='bg-primary text-primary-foreground p-2.5 text-left text-xs font-semibold tracking-wide uppercase'
+        className='bg-primary text-primary-foreground p-2.5 text-left text-sm font-semibold tracking-wide uppercase'
       >
         <span className='sticky left-3 inline-block'>{label}</span>
       </th>
@@ -1106,7 +1106,7 @@ function CoreRow({
     >
       <th
         className={cn(
-          'bg-card sticky left-0 z-10 p-3 text-left text-xs font-medium transition-colors',
+          'bg-card sticky left-0 z-10 p-3 text-left text-sm font-medium transition-colors',
           hoveredRow === label && 'bg-accent/80 font-semibold'
         )}
       >
@@ -1121,7 +1121,7 @@ function CoreRow({
             if (tier) onHoverColumn(tier)
           }}
           className={cn(
-            'supervision-comparison-cell p-3 text-center text-xs font-medium',
+            'supervision-comparison-cell p-3 text-center text-sm font-medium',
             SUPERVISION_TIERS[index] === 'control' && 'supervision-control-column bg-brand-orange-soft/60',
             hoveredColumn === SUPERVISION_TIERS[index] && 'is-column-hovered',
             hoveredRow === label && hoveredColumn === SUPERVISION_TIERS[index] && 'is-intersection font-semibold'
