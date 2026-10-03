@@ -451,7 +451,7 @@ export function ContractorLanding() {
               transition={{ duration: 0.28, ease: revealEase }}
             >
               <motion.h1
-                className='text-primary-strong text-[clamp(1.5rem,7vw,1.875rem)] leading-[1.14] font-bold tracking-tight text-balance sm:text-[2.875rem]'
+                className='text-primary-strong text-[clamp(1.05rem,5.4vw,1.875rem)] leading-[1.15] font-bold tracking-tight text-balance sm:text-4xl lg:text-[2.2rem]'
                 aria-label={t('hero.title')}
               >
                 <motion.span variants={revealItemVariants} className='block'>
@@ -466,7 +466,7 @@ export function ContractorLanding() {
                 chặn bề ngang mới ra đúng ba dòng như ảnh. */}
               <motion.p
                 variants={revealItemVariants}
-                className='text-muted-foreground mt-4 max-w-[30rem] text-base leading-[1.65] text-pretty sm:mt-[26px] sm:text-lg'
+                className='text-muted-foreground mt-4 max-w-[30rem] text-base text-pretty sm:mt-[26px]'
               >
                 {t('hero.subtitle')}
               </motion.p>
@@ -474,20 +474,18 @@ export function ContractorLanding() {
                 chính KHÔNG có mũi tên. */}
               <motion.div
                 variants={revealItemVariants}
-                className='mt-4 flex flex-col gap-3 sm:mt-[38px] sm:flex-row sm:flex-wrap sm:gap-8'
+                className='mt-4 flex flex-col gap-3 sm:mt-[38px] sm:flex-row sm:flex-wrap'
               >
                 <Button
-                  size='lg'
-                  className='h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base'
+                  className='h-11 rounded-full px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
                   onClick={startBrief}
                   disabled={createBrief.isPending}
                 >
                   {t('hero.createBrief')}
                 </Button>
                 <Button
-                  size='lg'
                   variant='outline'
-                  className='border-primary text-primary-strong h-14 min-w-[12.5rem] px-8 text-base hover:-translate-y-0.5 active:translate-y-0 max-sm:h-11 max-sm:min-w-0 max-sm:rounded-full max-sm:px-8 max-sm:text-base max-sm:bg-card/85'
+                  className='border-primary text-primary-strong bg-card/85 h-11 rounded-full px-8 text-base hover:-translate-y-0.5 active:translate-y-0'
                   asChild
                 >
                   {/* Dẫn sang trang danh sách nhà thầu đầy đủ (góp ý BuildX); 3 nhà thầu bên
@@ -914,7 +912,7 @@ export function ContractorLanding() {
           Nội dung câu 3 CỐ Ý khác ảnh: ảnh trả lời "gửi đến nhiều nhà thầu để
           so sánh", trái R1 (tối đa 3 nhà thầu/dự án). Phần chữ của bản mô tả
           thắng ảnh ở chỗ này. */}
-      <section className={PAGE_CONTAINER}>
+      <section id='faq' className={cn(PAGE_CONTAINER, 'scroll-mt-24')}>
         <h2 className='text-foreground text-center text-2xl font-bold tracking-tight text-balance sm:text-lg sm:tracking-wide sm:text-wrap sm:uppercase'>
           {t('faq.title')}
         </h2>

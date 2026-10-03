@@ -100,7 +100,7 @@ export function HandbookHighlights() {
                         ) : null}
                       </div>
                       <span className='flex flex-1 flex-col gap-2 p-4'>
-                        <span className='group-hover:text-primary-strong line-clamp-2 font-bold transition-colors'>
+                        <span className='group-hover:text-brand-orange line-clamp-2 font-bold transition-colors'>
                           {article.title}
                         </span>
                         <span className={cn(ARTICLE_META_TEXT, 'flex flex-wrap items-center gap-x-4 gap-y-1 text-xs')}>

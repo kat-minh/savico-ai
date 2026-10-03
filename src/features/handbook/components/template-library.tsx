@@ -13,7 +13,8 @@ import {
   type PointerEvent as ReactPointerEvent
 } from 'react'
 
-import { EmptyState, ErrorState } from '@/shared/components/common'
+import { useSiteImage } from '@/shared/cms'
+import { EmptyState, ErrorState, Photo } from '@/shared/components/common'
 import { Input } from '@/shared/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/shared/components/ui/select'
 import { Skeleton } from '@/shared/components/ui/skeleton'
@@ -69,6 +70,70 @@ interface PillStyle {
 
 export function TemplateLibrary() {
   const t = useTranslations('handbook.library')
+  const bannerImage = useSiteImage('handbook.libraryBanner')
+  const bannerRef = useRef<HTMLElement>(null)
+
+  // Mở banner giống tab Tin tức (foundation-block): viền hiện dần, ảnh phóng nhẹ rồi
+  // rõ lên, chữ trượt lên lần lượt. Phát một lần khi banner vào khung nhìn.
+  useLayoutEffect(() => {
+    const section = bannerRef.current
+    if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const ease = 'cubic-bezier(0.22, 1, 0.36, 1)'
+    const animations: Animation[] = []
+    const run = (node: Element, keyframes: Keyframe[], options: KeyframeAnimationOptions) => {
+      const animation = node.animate(keyframes, { easing: ease, fill: 'both', ...options })
+      animations.push(animation)
+      void animation.finished.then(() => animation.cancel()).catch(() => undefined)
+    }
+
+    const play = () => {
+      const borderColor = getComputedStyle(section).borderColor
+      run(section, [{ borderColor: 'transparent' }, { borderColor }], { duration: 220 })
+      const hero = section.querySelector('.foundation-hero-motion')
+      if (hero) {
+        run(
+          hero,
+          [
+            { opacity: 0, transform: 'scale(1.035)' },
+            { opacity: 1, transform: 'scale(1)' }
+          ],
+          { duration: 680, delay: 160 }
+        )
+      }
+      section.querySelectorAll('[data-library-banner-sequence]').forEach((node, index) => {
+        run(
+          node,
+          [
+            { opacity: 0, transform: 'translateY(8px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+          ],
+          { duration: 280, delay: 520 + index * 85 }
+        )
+      })
+    }
+
+    const rect = section.getBoundingClientRect()
+    let observer: IntersectionObserver | null = null
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      play()
+    } else {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry?.isIntersecting) return
+          observer?.disconnect()
+          play()
+        },
+        { threshold: 0.08 }
+      )
+      observer.observe(section)
+    }
+
+    return () => {
+      observer?.disconnect()
+      animations.forEach((animation) => animation.cancel())
+    }
+  }, [])
   const tDetail = useTranslations('handbook.detail')
 
   const [kind, setKind] = useState<HandbookTemplateKind>('2d')
@@ -863,6 +928,42 @@ export function TemplateLibrary() {
       tabIndex={-1}
       onKeyDown={handleKeyDown}
     >
+      {/* Banner đồng bộ với tab Tin tức (foundation-block): cùng khung viền, bo góc, khoảng đệm,
+          ảnh phủ nền, phía trái mờ dần để chữ nằm trên nền ảnh. */}
+      <section ref={bannerRef} data-library-banner className='border-primary/40 bg-card rounded-2xl border p-5'>
+        <div className='relative isolate overflow-hidden rounded-xl'>
+          <Photo
+            className='foundation-hero-motion absolute inset-0 -z-10 size-full transition-[filter] duration-300 motion-reduce:!filter-none'
+            imageClassName='object-[70%_center]'
+            src={bannerImage}
+            alt=''
+            priority
+            sizes='(max-width: 1440px) 100vw, 1400px'
+          />
+          <div
+            aria-hidden
+            className='bg-background/80 md:from-background md:via-background/70 absolute inset-0 -z-10 md:bg-transparent md:bg-gradient-to-r md:to-transparent'
+          />
+          {/* Cao tối thiểu bằng banner tab Tin tức (378px) — tab đó có thêm kicker và nút nên cao hơn. */}
+          <div className='flex flex-col justify-center px-6 py-10 sm:px-10 md:min-h-[23.625rem] md:py-14 lg:px-12'>
+            <div className='max-w-2xl space-y-3'>
+              <h2
+                data-library-banner-sequence
+                className='text-primary-strong text-2xl leading-[1.2] font-bold tracking-tight whitespace-pre-line sm:text-3xl lg:text-4xl'
+              >
+                {t('bannerTitle')}
+              </h2>
+              <p
+                data-library-banner-sequence
+                className='text-foreground/75 max-w-md text-sm leading-relaxed sm:text-base'
+              >
+                {t('bannerDescription')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div
         data-template-toolbar
         data-entrance-step='0'

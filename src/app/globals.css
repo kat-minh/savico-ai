@@ -802,7 +802,9 @@
   }
 
   [data-handbook-foundation]:hover .foundation-hero-motion,
-  [data-handbook-foundation]:focus-within .foundation-hero-motion {
+  [data-handbook-foundation]:focus-within .foundation-hero-motion,
+  [data-library-banner]:hover .foundation-hero-motion,
+  [data-library-banner]:focus-within .foundation-hero-motion {
     filter: brightness(1.05);
   }
 
@@ -4042,7 +4044,9 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
     transform: none !important;
   }
   [data-handbook-foundation]:hover .foundation-hero-motion,
-  [data-handbook-foundation]:focus-within .foundation-hero-motion {
+  [data-handbook-foundation]:focus-within .foundation-hero-motion,
+  [data-library-banner]:hover .foundation-hero-motion,
+  [data-library-banner]:focus-within .foundation-hero-motion {
     filter: none !important;
   }
   [data-foundation-cta-arrow][data-nudge='true'] {
@@ -6329,32 +6333,6 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
     flex: 0 0 calc(100vw - 72px);
     scroll-snap-align: center;
   }
-}
-.plan-comparison-head {
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s cubic-bezier(0.2, 0.72, 0.3, 1),
-    box-shadow 0.22s ease;
-}
-.plan-comparison-shell[data-stuck='true'] .plan-comparison-head {
-  transform: translateY(2px);
-  box-shadow: 0 9px 18px -14px color-mix(in srgb, var(--foreground) 48%, transparent);
-}
-.plan-sticky-price {
-  display: block;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-3px);
-  transition:
-    max-height 0.26s ease,
-    opacity 0.22s ease,
-    transform 0.26s cubic-bezier(0.2, 0.72, 0.3, 1);
-}
-.plan-comparison-shell[data-stuck='true'] .plan-sticky-price {
-  max-height: 18px;
-  opacity: 1;
-  transform: none;
 }
 .plan-comparison-cell,
 .plan-comparison-row > th {

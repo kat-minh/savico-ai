@@ -753,7 +753,7 @@ function AddonTable() {
       transition={{ duration: 0.56, ease: pricingEase }}
     >
       <motion.h2
-        className='text-primary-strong text-center text-base font-semibold'
+        className='text-primary-strong text-center text-base font-bold'
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -771,9 +771,9 @@ function AddonTable() {
                 Hình S19 có lưới đủ cả ngang lẫn dọc, khác bảng so sánh phía trên
                 chỉ kẻ ngang. */}
             <tr className='text-muted-foreground divide-x text-[11px] tracking-wide uppercase'>
-              <th className='border-b p-2 text-left font-medium'>{t('item')}</th>
-              <th className='border-b p-2 text-center font-medium'>{t('price')}</th>
-              <th className='border-b p-2 text-center font-medium'>{t('note')}</th>
+              <th className='border-b p-2 text-left font-bold'>{t('item')}</th>
+              <th className='border-b p-2 text-center font-bold'>{t('price')}</th>
+              <th className='border-b p-2 text-center font-bold'>{t('note')}</th>
             </tr>
           </thead>
           <tbody>

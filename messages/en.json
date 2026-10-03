@@ -834,6 +834,8 @@
       "imageCount": "{count} 3D images"
     },
     "library": {
+      "bannerTitle": "Explore floor plan templates\nthat fit your home",
+      "bannerDescription": "From townhouses and villas to apartments, in many styles and layouts. Easy to search by what you need.",
       "kind": {
         "2d": "2D floor plans",
         "3d": "3D templates"
@@ -2265,7 +2267,7 @@
       "understood": "Got it",
       "conditionsLabel": "Terms",
       "imageSlot": "Gift photo — awaiting client asset",
-      "extraTitle": "+ Extra offer"
+      "extraTitle": "Extra offer"
     },
     "comparison": {
       "title": "Compare the three packages",

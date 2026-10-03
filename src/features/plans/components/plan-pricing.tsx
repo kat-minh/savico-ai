@@ -20,7 +20,7 @@ import {
   Wallet,
   type LucideIcon
 } from 'lucide-react'
-import { animate, AnimatePresence, motion, useInView, useMotionValue } from 'motion/react'
+import { animate, motion, useInView, useMotionValue } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import {
   Fragment,
@@ -265,9 +265,6 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
   const tValues = useTranslations('plans.comparison.values')
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [hoveredColumn, setHoveredColumn] = useState<PlanTier | null>(null)
-  const [headerStuck, setHeaderStuck] = useState(false)
-  const [headerBounds, setHeaderBounds] = useState({ left: 0, width: 0 })
-  const tableRef = useRef<HTMLDivElement>(null)
   const { reduceMotion } = usePricingMotion()
 
   const byTier = (tier: PlanTier) => plans.find((plan) => plan.tier === tier)
@@ -277,24 +274,6 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
     const gift = byTier(tier)?.gift
     return gift ? `${gift.title} ${t('gift.valuePrefix')} ${formatPriceTag(gift.value, locale)}` : ''
   }
-
-  useEffect(() => {
-    const update = () => {
-      const rect = tableRef.current?.getBoundingClientRect()
-      setHeaderStuck(Boolean(rect && rect.top <= 66 && rect.bottom > 118))
-      if (rect)
-        setHeaderBounds((current) =>
-          current.left === rect.left && current.width === rect.width ? current : { left: rect.left, width: rect.width }
-        )
-    }
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update)
-    return () => {
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
-    }
-  }, [])
 
   return (
     <section className='plan-comparison'>
@@ -310,40 +289,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
         {t('comparison.title')}
       </motion.h2>
 
-      <AnimatePresence>
-        {headerStuck ? (
-          <motion.div
-            className='plan-comparison-floating-head bg-card fixed top-16 z-40 hidden grid-cols-[28%_24%_24%_24%] overflow-hidden rounded-b-xl border shadow-md md:grid'
-            style={{ left: headerBounds.left, width: headerBounds.width }}
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.26, ease: pricingEase }}
-          >
-            <span className='px-3 py-2 text-center text-xs font-semibold tracking-wide uppercase'>
-              {t('comparison.criterion')}
-            </span>
-            {TIERS.map((tier) => (
-              <span
-                key={tier}
-                className={cn(
-                  'border-l px-3 py-2 text-center text-xs font-bold uppercase',
-                  tier === POPULAR_TIER && 'bg-brand-orange-soft text-brand-orange'
-                )}
-              >
-                {byTier(tier)?.name ?? t(`tiers.${tier}`)}
-                <small className='text-muted-foreground mt-0.5 block text-[10px] font-medium normal-case'>
-                  {byTier(tier) ? formatPriceTag(byTier(tier)!.price, locale) : ''}
-                </small>
-              </span>
-            ))}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
       <motion.div
-        ref={tableRef}
-        data-stuck={headerStuck || undefined}
         className='plan-comparison-shell bg-card relative mt-5 rounded-2xl border shadow-[inset_-18px_0_20px_-24px_var(--foreground)]'
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -390,9 +336,6 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                     )}
                   >
                     {byTier(tier)?.name ?? t(`tiers.${tier}`)}
-                  </span>
-                  <span className='plan-sticky-price text-muted-foreground mt-0.5 text-[10px] font-medium'>
-                    {byTier(tier) ? formatPriceTag(byTier(tier)!.price, locale) : ''}
                   </span>
                 </th>
               ))}
@@ -1173,16 +1116,11 @@ function PlanCard({
                 className='plan-gift border-brand-orange/30 bg-brand-orange-soft/60 hover:bg-brand-orange-soft mt-4 w-full rounded-xl border p-2.5 text-left transition-colors'
               >
                 <span className='flex items-center gap-2'>
-                  {/* CHỖ CHỜ ASSET: ảnh hộp quà của khách. Còn trống thì dùng icon
-                    cùng khung để bố cục không nhảy khi ảnh về. */}
-                  {/* Ảnh hộp quà trong bản mô tả to bằng ~36% bề rộng thẻ, không
-                    phải một icon nhỏ. Giữ nguyên khung này khi khách gửi ảnh thật. */}
+                  {/* Ảnh hộp quà trong bản mô tả to bằng ~36% bề rộng thẻ, không phải một
+                    icon nhỏ. Khối này luôn là icon hộp quà; ảnh quà (`gift.imageUrl`) chỉ
+                    hiện trong popup sau khi bấm. */}
                   <span className='plan-gift-bounce bg-card flex size-[34cqw] shrink-0 items-center justify-center overflow-hidden rounded-lg'>
-                    {plan.gift.imageUrl ? (
-                      <Photo src={plan.gift.imageUrl} alt='' className='plan-gift-icon size-[34cqw]' sizes='120px' />
-                    ) : (
-                      <Gift aria-hidden className='plan-gift-icon text-brand-orange size-[22cqw]' />
-                    )}
+                    <Gift aria-hidden className='plan-gift-icon text-brand-orange size-[22cqw]' />
                   </span>
 
                   <span className='min-w-0 flex-1 text-center'>

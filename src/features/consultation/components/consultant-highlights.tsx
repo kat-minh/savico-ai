@@ -157,7 +157,7 @@ function ConsultantHighlightCard({
           <Button
             asChild
             variant='outline'
-            className='text-primary group-hover/card:bg-primary group-hover/card:bg-none group-hover/card:text-primary-foreground h-8 w-full rounded-full text-xs transition-colors'
+            className='text-primary group-hover/card:text-primary-foreground hover:text-primary-foreground group-hover/card:border-transparent hover:border-transparent group-hover/card:bg-[linear-gradient(to_top,var(--brand-gradient-from),var(--brand-gradient-to))] hover:bg-[linear-gradient(to_top,var(--brand-gradient-from),var(--brand-gradient-to))] h-8 w-full rounded-full text-xs transition-colors'
           >
             <Link href={consultantRoute(consultant.id)}>{t('book')}</Link>
           </Button>

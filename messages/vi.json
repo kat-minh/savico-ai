@@ -834,6 +834,8 @@
       "imageCount": "{count} ảnh 3D"
     },
     "library": {
+      "bannerTitle": "Khám phá các mẫu bản vẽ\nphù hợp cho ngôi nhà của bạn",
+      "bannerDescription": "Từ nhà phố, biệt thự đến căn hộ, đa dạng phong cách và công năng. Dễ dàng tìm kiếm theo nhu cầu.",
       "kind": {
         "2d": "Mẫu bản vẽ 2D",
         "3d": "Mẫu bản vẽ 3D"
@@ -2265,7 +2267,7 @@
       "understood": "Tôi đã hiểu",
       "conditionsLabel": "Điều kiện áp dụng",
       "imageSlot": "Ảnh bộ quà tặng — chờ khách gửi",
-      "extraTitle": "+ Ưu đãi thêm"
+      "extraTitle": "Ưu đãi thêm"
     },
     "comparison": {
       "title": "So sánh chi tiết 3 gói",

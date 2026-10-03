@@ -18,7 +18,7 @@ import type {
 /* ===========================================================================
  * ẢNH BA THẺ GÓI — theo sheet góp ý BuildX (tab "Hình ảnh website", hình 01–03),
  * đặt ở `public/images/plans/`: basic.webp · plus.webp · pro.webp. Ảnh quà tặng
- * (`gift.imageUrl`) vẫn chờ khách gửi.
+ * (`gift.imageUrl`): gift-sanitary.png.
  *
  * Tỉ lệ khung ảnh thẻ là 16:10; khung ảnh quà là ô vuông 56px.
  * ======================================================================== */
@@ -150,9 +150,8 @@ export const GIFTS_SEED: CmsGift[] = [
     title: 'Bộ thiết bị vệ sinh châu Âu',
     description: 'Trọn bộ thiết bị vệ sinh nhập khẩu châu Âu cho một căn nhà.',
     value: 100_000_000,
-    imageUrl: '',
-    extraOffer:
-      'Phí gói 3.990.000đ sẽ được khấu trừ vào giá trị hợp đồng khi ký hợp đồng thi công trọn gói cùng BuildX.',
+    imageUrl: '/images/plans/gift-sanitary.png',
+    extraOffer: 'Khấu trừ 3.990.000đ vào giá trị hợp đồng khi đáp ứng điều kiện chương trình.',
     status: 'active'
   }
 ]
