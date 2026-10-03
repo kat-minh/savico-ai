@@ -286,7 +286,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
   if (isPending) return <ArticleDetailSkeleton />
   if (isError) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:py-10 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
         <ErrorState
           title={t('loadError')}
           description={t('loadErrorHint')}
@@ -303,7 +303,7 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:px-8'
     >
       <Breadcrumb data-entrance-step='0' data-article-breadcrumb>
         <BreadcrumbList>
@@ -566,7 +566,7 @@ function ArticleDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:px-8'
       aria-hidden='true'
     >
       <Skeleton className='handbook-skeleton animate-none h-4 w-72 max-w-[78%]' />

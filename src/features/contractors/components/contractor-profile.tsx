@@ -14,10 +14,8 @@ import {
   Eye,
   FileCheck2,
   FileText,
-  Handshake,
   ImageIcon,
   Loader2,
-  Lock,
   Map as MapIcon,
   MapPin,
   Maximize2,
@@ -322,7 +320,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
 
   if (isPending || !contractor) {
     return (
-      <div className={cn(PAGE_CONTAINER, 'space-y-6 py-5 lg:py-8')}>
+      <div className={cn(PAGE_CONTAINER, 'space-y-6 py-5')}>
         <Skeleton className='h-20 rounded-2xl' />
         <Skeleton className='h-96 rounded-2xl' />
       </div>
@@ -331,7 +329,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
 
   const areas = contractor.serviceAreas.slice(0, 3).join(', ')
 
-  /** Dải chỉ số trong thẻ nhận diện — giá trị ở trên, chú thích nhỏ ở dưới. */
+  /** Dải chỉ số trong thẻ nhận diện — xem thử chưa chọn dự án nên ẩn khoảng cách. */
   const headerFacts = [
     {
       key: 'similar',
@@ -381,7 +379,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
       ),
       hint: tCommon('surveyLabel')
     }
-  ]
+  ].filter((fact) => fact.key !== 'distance' || !preview)
 
   /** Ba dòng "Thông tin hoạt động" ở cột phải — nhãn nhỏ ở trên, giá trị ở dưới. */
   const activityRows = [
@@ -401,7 +399,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   ]
 
   return (
-    <div className={cn(PAGE_CONTAINER, 'space-y-4 py-5 lg:py-8')}>
+    <div className={cn(PAGE_CONTAINER, 'space-y-4 py-5')}>
       {/* Xem thử thì chưa có hồ sơ để hiện — để nguyên thanh này là một khung
           chờ xám đứng mãi ở đầu trang. */}
       {preview ? null : (
@@ -456,22 +454,26 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                 <div className='min-w-0 grow basis-52 px-4 lg:grow-0 lg:basis-[25%]'>
                   <div className='flex flex-wrap items-center gap-2'>
                     <h1 className='min-w-0 text-xl font-semibold tracking-tight text-balance'>{contractor.name}</h1>
-                    {contractor.verified ? (
-                      <motion.span
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.3 }}
-                      >
-                        <BadgeCheck className='text-primary size-5 shrink-0 animate-[firm-check-draw_.5s_ease-out_backwards] overflow-visible motion-reduce:animate-none' />
-                      </motion.span>
-                    ) : null}
                     {invited ? (
                       <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
                         {tCommon('invited')}
                       </span>
                     ) : null}
                   </div>
-                  <p className='text-muted-foreground mt-1 text-sm'>{contractor.kind}</p>
+                  {/* Dấu xác minh đứng cùng hàng với loại nhà thầu, không rơi xuống hàng riêng khi tên dài. */}
+                  <p className='text-muted-foreground mt-1 flex min-w-0 items-center gap-1.5 text-sm whitespace-nowrap'>
+                    {contractor.verified ? (
+                      <motion.span
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', bounce: 0.6, duration: 0.4, delay: 0.3 }}
+                        className='flex shrink-0'
+                      >
+                        <BadgeCheck className='text-primary size-4 shrink-0 animate-[firm-check-draw_.5s_ease-out_backwards] overflow-visible motion-reduce:animate-none' />
+                      </motion.span>
+                    ) : null}
+                    <span className='truncate'>{contractor.kind}</span>
+                  </p>
                 </div>
 
                 <motion.div
@@ -540,25 +542,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               ) : null}
               {tab === 'legal' ? (
                 <div className='px-4 pt-4 pb-5 sm:px-5 sm:pt-5 sm:pb-6'>
-                  <LegalChecks
-                    contractor={contractor}
-                    detailed
-                    scanUnlocked={invited}
-                    inviteAction={
-                      <InviteButton
-                        projectId={projectId}
-                        contractorId={contractorId}
-                        contractor={contractor}
-                        preview={preview}
-                        invited={invited}
-                        inviteLocked={inviteLocked}
-                        navigating={navigatingInvite}
-                        onNavigate={() => setNavigatingInvite(true)}
-                        onOpenPicker={openPicker}
-                        size='sm'
-                      />
-                    }
-                  />
+                  <LegalChecks contractor={contractor} detailed />
                 </div>
               ) : null}
             </motion.div>
@@ -577,7 +561,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                   {tab === 'overview' ? (
                     <>
                       <IntroCard contractor={contractor} onOpenPhoto={setActivePhotoIndex} />
-                      <PartnershipSummary contractor={contractor} />
                       <LegalChecks contractor={contractor} />
                     </>
                   ) : null}
@@ -683,11 +666,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               {inCompare ? t('inCompare') : t('addToCompare')}
             </Button>
           </div>
-
-          <p className='text-muted-foreground bg-muted/50 flex items-start gap-2 rounded-xl p-3 text-xs leading-relaxed'>
-            <Lock className='mt-0.5 size-3.5 shrink-0' />
-            <span>{t('contactLocked')}</span>
-          </p>
         </motion.aside>
       </div>
 
@@ -1046,45 +1024,6 @@ function PhotoLightbox({
 }
 
 /**
- * Dải "Đối tác hợp tác cùng SAVICO" — bản tóm tắt dùng ở tab Tổng quan (S13) và
- * mở đầu tab Hợp tác SAVICO (S14). Một khối, hai chỗ dùng, khỏi lệch nội dung.
- */
-function PartnershipSummary({ contractor }: { contractor: Contractor }) {
-  const t = useTranslations('contractors.firm.partnership')
-  const { partnership } = contractor
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.4, ease: revealEase }}
-      className='bg-card flex flex-wrap items-center gap-4 rounded-2xl border p-4'
-    >
-      <span className='bg-primary/10 text-primary flex size-14 shrink-0 items-center justify-center rounded-full'>
-        <Handshake className='size-6' />
-      </span>
-      <div className='min-w-0 flex-1'>
-        <h2 className='text-base font-semibold'>{t('title')}</h2>
-        <p className='text-muted-foreground mt-1 text-sm text-pretty'>{t('body', { name: contractor.name })}</p>
-        <div className='mt-2.5 flex flex-wrap gap-2 text-xs'>
-          <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1'>
-            <ShieldCheck className='size-3.5' />
-            {t('verified')}
-          </span>
-          {partnership.since ? (
-            <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1.5 rounded-md px-2.5 py-1'>
-              <CalendarDays className='size-3.5' />
-              {t('since', { since: partnership.since })}
-            </span>
-          ) : null}
-        </div>
-      </div>
-    </motion.section>
-  )
-}
-
-/**
  * Tab "Dự án đã thực hiện" (epic ContractorManagement §2, §7, §12): tổng số và số
  * đã xác minh đếm từ chính danh sách dự án đang hiển thị, lọc theo Loại công
  * trình trong danh mục dùng chung, badge Đã xác minh / Nổi bật trên thẻ. Tab
@@ -1228,12 +1167,6 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
                         </div>
                       )}
                       <div className='absolute top-2 left-2 flex flex-wrap gap-1.5'>
-                        {project.verified ? (
-                          <span className='bg-background/95 text-primary-strong inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
-                            <CircleCheck className='size-3.5' />
-                            {t('projects.verifiedBadge')}
-                          </span>
-                        ) : null}
                         {project.featured ? (
                           <span className='bg-background/95 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
                             <Star className='size-3.5' />
@@ -1267,7 +1200,7 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
                       <div className='text-muted-foreground mt-3 flex flex-wrap items-center gap-y-1 text-xs'>
                         {project.dimensions ? <span className='pr-2'>{project.dimensions}</span> : null}
                         {project.areaM2 ? (
-                          <span className='border-l px-2'>{t('projects.area', { area: project.areaM2 })}</span>
+                          <span className='pr-2'>{t('projects.area', { area: project.areaM2 })}</span>
                         ) : null}
                         {scaleOf(project) ? <span className='border-l px-2'>{scaleOf(project)}</span> : null}
                       </div>
@@ -1308,11 +1241,6 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
             </Button>
           </div>
         ) : null}
-
-        <p className='text-muted-foreground mt-5 flex items-start gap-1.5 text-xs'>
-          <CircleCheck className='mt-0.5 size-3.5 shrink-0' />
-          <span>{t('projects.disclaimer')}</span>
-        </p>
       </motion.section>
 
       <ProjectDetailModal
@@ -1626,23 +1554,12 @@ function ProjectDetailModal({
 }
 
 /** Khối "Năng lực & xác minh" — bốn mục đã được SAVICO đối chiếu. */
-function LegalChecks({
-  contractor,
-  detailed = false,
-  scanUnlocked = false,
-  inviteAction
-}: {
-  contractor: Contractor
-  detailed?: boolean
-  scanUnlocked?: boolean
-  inviteAction?: React.ReactNode
-}) {
+function LegalChecks({ contractor, detailed = false }: { contractor: Contractor; detailed?: boolean }) {
   const t = useTranslations('contractors.firm')
   const tLegal = useTranslations('contractors.firm.legal')
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
   const [hasEnteredViewport, setHasEnteredViewport] = useState(false)
-  const [licenseOpen, setLicenseOpen] = useState(false)
   const checks = [...contractor.legalChecks]
   const fallbackChecks = [
     t('team', { count: contractor.teamSize }),
@@ -1703,30 +1620,6 @@ function LegalChecks({
         key: 'workforce',
         label: tLegal('fields.capacity'),
         value: legal?.workforce ?? t('team', { count: contractor.teamSize })
-      }
-    ]
-
-    const commitments = [
-      {
-        key: 'warranty',
-        icon: ShieldCheck,
-        title: tLegal('commitments.warrantyTitle', { months: legal?.warrantyMonths ?? contractor.warrantyMonths }),
-        body: tLegal('commitments.warrantyBody', { months: 12 })
-      },
-      {
-        key: 'contract',
-        icon: FileCheck2,
-        title: tLegal('commitments.contractTitle'),
-        body: legal?.usesSavicoContract === false ? tLegal('commitments.updating') : tLegal('commitments.contractBody')
-      },
-      {
-        key: 'insurance',
-        icon: BadgeCheck,
-        title: tLegal('commitments.insuranceTitle'),
-        body:
-          legal?.hasConstructionInsurance === false
-            ? tLegal('commitments.updating')
-            : tLegal('commitments.insuranceBody')
       }
     ]
 
@@ -1793,162 +1686,8 @@ function LegalChecks({
                 </dd>
               </div>
             </dl>
-            <div className='flex items-center gap-2 sm:justify-end'>
-              <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium'>
-                <CircleCheck className='size-3.5' />
-                {verified ? tLegal('license.verified') : tLegal('identity.pending')}
-              </span>
-              <Button
-                type='button'
-                variant='outline'
-                size='sm'
-                onClick={() => setLicenseOpen(true)}
-                className='hover:border-primary/40 hover:bg-primary/10 hover:text-primary-strong transition-colors'
-              >
-                <Eye className='size-3.5' />
-                {tLegal('license.view')}
-              </Button>
-            </div>
-          </div>
-          <p className='text-muted-foreground mt-2 flex items-start gap-1.5 text-[11px]'>
-            <Lock className='mt-0.5 size-3 shrink-0' />
-            {tLegal('license.privacy')}
-          </p>
-        </motion.section>
-
-        <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: reduceMotion ? 0 : 0.34, ease: revealEase }}
-        >
-          <h2 className='mb-3 text-base font-semibold'>{tLegal('commitments.title')}</h2>
-          <ul className='grid gap-3 md:grid-cols-3'>
-            {commitments.map((item) => (
-              <motion.li
-                key={item.key}
-                whileHover={reduceMotion ? undefined : { y: -3 }}
-                transition={{ duration: 0.18, ease: revealEase }}
-                className='bg-card flex items-start gap-3 rounded-2xl border p-4 hover:shadow-[0_10px_24px_-20px_rgba(42,117,63,0.55)]'
-              >
-                <item.icon className='text-primary mt-0.5 size-4 shrink-0' />
-                <div>
-                  <h3 className='text-sm font-semibold'>{item.title}</h3>
-                  <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{item.body}</p>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
-        </motion.section>
-
-        <motion.section
-          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: reduceMotion ? 0 : 0.34, ease: revealEase }}
-        >
-          <h2 className='mb-3 text-base font-semibold'>{tLegal('cooperation.title')}</h2>
-          <div className='bg-card flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border p-4 text-xs'>
-            <span className='inline-flex items-center gap-1.5'>
-              <CircleCheck className='text-primary size-3.5' />
-              {tLegal('cooperation.verified')}
-            </span>
-            {contractor.partnership.since ? (
-              <span>{tLegal('cooperation.since', { since: contractor.partnership.since })}</span>
-            ) : null}
-            <span>
-              {tLegal('cooperation.rank', {
-                rank: legal?.cooperationRank ?? 0,
-                percent: legal?.cooperationPercent ?? 0
-              })}
-            </span>
-            <span>{tLegal('cooperation.complaints', { count: legal?.complaintCount ?? 0 })}</span>
           </div>
         </motion.section>
-
-        <Dialog open={licenseOpen} onOpenChange={setLicenseOpen}>
-          <DialogContent className='gap-0 overflow-hidden p-0 sm:max-w-lg'>
-            <DialogHeader className='border-b px-5 py-4 pr-12'>
-              <DialogTitle className='text-sm'>{tLegal('license.documentTitle')}</DialogTitle>
-              <DialogDescription className='sr-only'>{tLegal('license.dialogBody')}</DialogDescription>
-            </DialogHeader>
-
-            <div className='bg-muted/35 relative min-h-80 overflow-hidden p-5 sm:min-h-96'>
-              {scanUnlocked ? (
-                <div className='bg-background mx-auto max-w-sm rounded-lg border p-5 shadow-sm'>
-                  <div className='flex items-center gap-3 border-b pb-4'>
-                    <div className='bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg'>
-                      <FileCheck2 className='size-5' />
-                    </div>
-                    <div>
-                      <p className='text-sm font-semibold'>{tLegal('license.scanUnlocked')}</p>
-                      <p className='text-primary-strong mt-1 text-xs'>{tLegal('license.verified')}</p>
-                    </div>
-                  </div>
-                  <dl className='mt-4 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-3 text-xs'>
-                    <dt className='text-muted-foreground'>{tLegal('fields.legalName')}</dt>
-                    <dd className='font-medium'>{legal?.legalName ?? contractor.name}</dd>
-                    <dt className='text-muted-foreground'>{tLegal('license.number')}</dt>
-                    <dd className='font-medium'>{legal?.registrationNumberMasked ?? tLegal('updating')}</dd>
-                    <dt className='text-muted-foreground'>{tLegal('license.issuedAt')}</dt>
-                    <dd className='font-medium'>
-                      {legal ? formatDisplayDate(legal.registrationIssuedAt, locale) : tLegal('updating')}
-                    </dd>
-                    <dt className='text-muted-foreground'>{tLegal('license.status')}</dt>
-                    <dd className='text-primary-strong font-medium'>{tLegal('license.verified')}</dd>
-                  </dl>
-                </div>
-              ) : (
-                <>
-                  <div className='pointer-events-none absolute inset-5 overflow-hidden rounded-lg border bg-background p-6 opacity-55 blur-[2px]'>
-                    <div className='bg-muted h-5 w-2/3 rounded' />
-                    <div className='mt-5 space-y-3'>
-                      <div className='bg-muted h-3 w-full rounded' />
-                      <div className='bg-muted h-3 w-5/6 rounded' />
-                      <div className='bg-muted h-3 w-11/12 rounded' />
-                    </div>
-                    <div className='mt-7 grid grid-cols-2 gap-5'>
-                      <div className='space-y-3'>
-                        <div className='bg-muted h-3 w-3/4 rounded' />
-                        <div className='bg-muted h-3 w-full rounded' />
-                        <div className='bg-muted h-3 w-4/5 rounded' />
-                      </div>
-                      <div className='space-y-3'>
-                        <div className='bg-muted h-3 w-2/3 rounded' />
-                        <div className='bg-muted h-3 w-full rounded' />
-                        <div className='bg-muted h-3 w-5/6 rounded' />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className='absolute inset-0 flex items-center justify-center p-8'>
-                    <motion.div
-                      initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: reduceMotion ? 0 : 0.22, delay: reduceMotion ? 0 : 0.08 }}
-                      className='bg-background w-full max-w-xs rounded-xl border p-5 text-center shadow-[0_14px_36px_-18px_rgba(42,117,63,0.45)]'
-                    >
-                      <Lock className='text-primary mx-auto size-5' />
-                      <h3 className='mt-3 text-sm font-semibold'>{tLegal('license.lockedTitle')}</h3>
-                      <p className='text-muted-foreground mt-2 text-xs leading-relaxed'>
-                        {tLegal('license.lockedBody', {
-                          date: legal ? formatDisplayDate(legal.verifiedUntil, locale) : tLegal('updating')
-                        })}
-                      </p>
-                    </motion.div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <DialogFooter className='border-t bg-background px-5 py-3'>
-              <Button type='button' variant='outline' size='sm' onClick={() => setLicenseOpen(false)}>
-                {tLegal('license.close')}
-              </Button>
-              {!scanUnlocked && inviteAction ? <div className='min-w-32 [&>*]:w-full'>{inviteAction}</div> : null}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     )
   }
@@ -2022,8 +1761,6 @@ function PartnershipTab({ contractor }: { contractor: Contractor }) {
 
   return (
     <div className='space-y-5'>
-      <PartnershipSummary contractor={contractor} />
-
       <section className='bg-card rounded-2xl border p-4'>
         <h3 className='text-base font-semibold'>{t('scanTitle')}</h3>
 
@@ -2088,11 +1825,6 @@ function PartnershipTab({ contractor }: { contractor: Contractor }) {
                 </div>
               ))}
             </dl>
-
-            <p className='text-primary-strong bg-primary/10 mt-4 flex items-start gap-2 rounded-xl p-3 text-xs leading-relaxed'>
-              <CircleCheck className='mt-0.5 size-4 shrink-0' />
-              <span>{t('checked')}</span>
-            </p>
 
             <div className='mt-4 space-y-2.5'>
               <Button className='h-11 w-full' disabled={!hasScan}>

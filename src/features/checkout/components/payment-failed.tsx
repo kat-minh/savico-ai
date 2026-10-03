@@ -8,7 +8,7 @@ import { useRouter } from '@/i18n/navigation'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { checkoutConfirmRoute } from '@/shared/constants/routes'
-import { isApiOrderId, ORDER_HOLD_HOURS } from '../constants/checkout.constants'
+import { isApiOrderId, orderDisplayCode, ORDER_HOLD_HOURS } from '../constants/checkout.constants'
 import { useOrder, useRegenerateQr } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -34,7 +34,7 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-2xl px-4 py-5 lg:py-12 lg:px-8'>
+      <div className='mx-auto w-full max-w-2xl px-4 py-5 lg:px-8'>
         <Skeleton className='h-80 rounded-2xl' />
       </div>
     )
@@ -42,7 +42,7 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
 
   return (
     // Hình S07: cột nội dung hẹp, canh giữa.
-    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
       <CheckoutSteps current='payment' error />
 
       <div className='space-y-3 text-center'>
@@ -96,7 +96,7 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
       </div>
 
       <p className='text-muted-foreground text-center text-xs'>
-        {t('holdNote', { code: order.id, hours: ORDER_HOLD_HOURS })}
+        {t('holdNote', { code: orderDisplayCode(order), hours: ORDER_HOLD_HOURS })}
       </p>
     </div>
   )

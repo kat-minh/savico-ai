@@ -28,7 +28,7 @@ function UserMenu({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) 
   const active = useActiveProject()
   if (!user) return null
 
-  const resumeProject = active ? { id: active.id, href: resumeProjectRoute(active) } : null
+  const resumeProject = active ? { name: active.name, href: resumeProjectRoute(active) } : null
 
   return (
     <AccountMenu

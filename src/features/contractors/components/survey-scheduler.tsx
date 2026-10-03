@@ -324,7 +324,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
 
   if (!contractor) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5 lg:py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5'>
         <Skeleton className='h-20 rounded-2xl' />
         <Skeleton className='h-96 rounded-2xl' />
       </div>
@@ -378,7 +378,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
           x: leavingBack ? 20 : 0
         }}
         transition={{ duration: leavingBack ? 0.18 : 0.45, ease: revealEase }}
-        className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5 lg:py-8'
+        className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5'
       >
         <ProjectContextBar brief={brief} />
 

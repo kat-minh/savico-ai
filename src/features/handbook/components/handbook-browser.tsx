@@ -263,7 +263,7 @@ export function HandbookBrowser() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-4 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-4 px-4 py-5 lg:px-8'
     >
       <h1 data-entrance-step='0' className='text-3xl font-semibold tracking-tight'>
         {t('title')}

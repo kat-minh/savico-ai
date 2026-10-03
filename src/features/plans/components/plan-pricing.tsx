@@ -139,7 +139,7 @@ function PlanPricingContent() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 pt-10 pb-5 lg:px-8 lg:pb-10'
+      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 pt-5 pb-5 lg:px-8'
     >
       {/* Hình S01: tiêu đề IN HOA cỡ lớn, chữ cuối (tên thương hiệu) tô cam,
           hai bên có hai chiếc lá. Tách chữ cuối ngay tại đây để admin đổi tiêu
@@ -222,7 +222,7 @@ function PlanPricingContent() {
         }}
         viewport={{ once: true, amount: 0.18 }}
       >
-        <ul className='bg-accent/30 text-primary-strong grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-xs font-medium md:grid-cols-3'>
+        <ul className='bg-accent/30 text-primary-strong grid gap-x-8 gap-y-4 rounded-2xl border p-5 text-sm font-medium md:grid-cols-3'>
           {(
             [
               { key: 'payment', icon: QrCode },
@@ -242,7 +242,7 @@ function PlanPricingContent() {
             </li>
           ))}
         </ul>
-        <p className='plan-notes-disclaimer text-primary-strong flex items-start gap-2 text-left text-xs font-medium text-pretty'>
+        <p className='plan-notes-disclaimer text-primary-strong flex items-start gap-2 text-left text-sm font-medium text-pretty'>
           <Info className='mt-0.5 size-3.5 shrink-0' />
           <span>{t('notes.scope')}</span>
         </p>
@@ -280,7 +280,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
       {/* Hình S01: riêng tiêu đề bảng so sánh viết thường (chỉ "GIÁ TRỊ KHÁCH
           HÀNG NHẬN ĐƯỢC" phía dưới mới IN HOA). */}
       <motion.h2
-        className='plan-comparison-title text-primary-strong text-center text-xl font-bold tracking-wide'
+        className='plan-comparison-title text-primary-strong text-center text-2xl font-bold tracking-wide'
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.7 }}
@@ -316,7 +316,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
             <tr className='divide-border divide-x'>
               {/* Hình S01: ô đầu bảng ghi "HẠNG MỤC" IN HOA và CĂN GIỮA ô (đo trên
                   ảnh: tâm chữ trùng tâm cột đầu), khác với các dòng bên dưới căn trái. */}
-              <th className='bg-card sticky left-0 z-10 border-b px-3 py-2.5 text-center text-xs font-semibold tracking-wide uppercase'>
+              <th className='bg-card sticky left-0 z-10 border-b px-3 py-2.5 text-center text-sm font-semibold tracking-wide uppercase'>
                 {t('comparison.criterion')}
               </th>
               {TIERS.map((tier) => (
@@ -390,7 +390,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                   >
                     <th
                       className={cn(
-                        'bg-card sticky left-0 z-10 px-3 py-2 text-left text-xs font-medium transition-colors',
+                        'bg-card sticky left-0 z-10 px-3 py-2 text-left text-sm font-medium transition-colors',
                         hoveredRow === row && 'bg-accent/80 font-semibold'
                       )}
                     >
@@ -401,7 +401,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         key={tier}
                         onMouseEnter={() => setHoveredColumn(tier)}
                         className={cn(
-                          'px-3 py-2 text-center text-xs transition-colors',
+                          'px-3 py-2 text-center text-sm transition-colors',
                           'plan-comparison-cell',
                           tier === POPULAR_TIER && 'plan-plus-column bg-brand-orange-soft/60',
                           hoveredColumn === tier && 'is-column-hovered',
@@ -422,7 +422,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
             ))}
 
             <tr className='plan-choose-row'>
-              <th className='bg-card sticky left-0 z-10 border-r p-3 text-left text-xs font-medium'>
+              <th className='bg-card sticky left-0 z-10 border-r p-3 text-left text-sm font-medium'>
                 {t('comparison.choosePlanRow')}
               </th>
               {TIERS.map((tier) => {
@@ -448,7 +448,7 @@ function ComparisonTable({ plans }: { plans: PlanView[] }) {
                         asChild
                         size='sm'
                         variant={plan.popular ? 'default' : 'outline'}
-                        className={cn('text-xs font-bold', !plan.popular && 'bg-card/85')}
+                        className={cn('text-sm font-bold', !plan.popular && 'bg-card/85')}
                       >
                         <Link
                           href={checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY)}
@@ -481,7 +481,7 @@ function ValueTable() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.8 }}
         transition={{ duration: reduceMotion ? 0.01 : 0.55, ease: pricingEase }}
-        className='text-primary-strong text-center text-xl font-bold tracking-wide uppercase'
+        className='text-primary-strong text-center text-2xl font-bold tracking-wide uppercase'
       >
         {t('title')}
       </motion.h2>
@@ -533,7 +533,7 @@ function ValueTable() {
                 {TIERS.map((tier, cellIndex) => (
                   <td
                     key={tier}
-                    className='plan-value-cell p-3.5 text-center text-xs text-pretty'
+                    className='plan-value-cell p-3.5 text-center text-sm text-pretty'
                     style={{ '--value-cell-index': cellIndex } as CSSProperties}
                   >
                     {t(`cells.${row}.${tier}`)}
@@ -566,9 +566,9 @@ function GroupRow({ label, highlight = false }: { label: string; highlight?: boo
       <th
         colSpan={TIERS.length + 1}
         className={cn(
-          // Hình S01: dải nhóm là một vạch MỎNG, chữ nhỏ; xanh đậm chứ không
+          // Dải nhóm dùng cùng cỡ chữ 14px với nội dung bảng; xanh đậm chứ không
           // phải xanh chính của nút.
-          'px-3 py-1.5 text-left text-[11px] font-semibold tracking-wide uppercase',
+          'px-3 py-1.5 text-left text-sm font-semibold tracking-wide uppercase',
           highlight ? 'bg-brand-orange text-brand-orange-foreground' : 'bg-primary-strong text-primary-foreground'
         )}
       >
@@ -610,7 +610,7 @@ function CoreRow({
     >
       <th
         className={cn(
-          'bg-card sticky left-0 z-10 px-3 py-2 text-left text-xs font-medium transition-colors',
+          'bg-card sticky left-0 z-10 px-3 py-2 text-left text-sm font-medium transition-colors',
           hoveredRow === label && 'bg-accent/80 font-semibold'
         )}
       >
@@ -624,7 +624,7 @@ function CoreRow({
             if (tier) onHoverColumn(tier)
           }}
           className={cn(
-            'plan-comparison-cell px-3 py-2 text-center text-xs transition-colors',
+            'plan-comparison-cell px-3 py-2 text-center text-sm transition-colors',
             TIERS[index] === popularTier && 'plan-plus-column bg-brand-orange-soft/60',
             hoveredColumn === TIERS[index] && 'is-column-hovered',
             hoveredRow === label && hoveredColumn === TIERS[index] && 'is-intersection font-semibold'
@@ -951,7 +951,7 @@ function PlanCard({
         {/* Đo trên ảnh S01: ruy-băng cao 8,1% bề rộng thẻ, nhô lên khỏi mép thẻ
           2,0% và cách chữ tên gói 4,5%. */}
         {plan.popular ? (
-          <span className='plan-popular plan-shine bg-brand-orange text-brand-orange-foreground absolute -top-[2cqw] left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-[1.5cqw] rounded-full px-[4cqw] py-[2.25cqw] text-[3.6cqw] leading-none font-semibold tracking-wide whitespace-nowrap uppercase'>
+          <span className='plan-popular plan-shine bg-brand-orange text-brand-orange-foreground absolute -top-[2cqw] left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-[1.5cqw] rounded-full px-[4cqw] py-[2.25cqw] text-sm leading-none font-semibold tracking-wide whitespace-nowrap uppercase'>
             <Star className='size-[3.4cqw]' />
             {t('popular')}
           </span>
@@ -997,7 +997,7 @@ function PlanCard({
             </h2>
             <span
               className={cn(
-                'plan-tag absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full px-[3.5cqw] py-[1.6cqw] text-[3.6cqw] leading-none font-semibold tracking-wide whitespace-nowrap uppercase',
+                'plan-tag absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full px-[3.5cqw] py-[1.6cqw] text-sm leading-none font-semibold tracking-wide whitespace-nowrap uppercase',
                 // Hình S01: viên nhãn là nền ĐẶC (xanh đậm hơn dải nền / cam), không phải nền mờ.
                 plan.popular
                   ? 'plan-shine bg-brand-orange text-brand-orange-foreground'
@@ -1033,7 +1033,7 @@ function PlanCard({
               </div>
             ) : null}
 
-            <p className='plan-fit text-muted-foreground mt-4 text-center text-[4.3cqw] leading-snug text-pretty'>
+            <p className='plan-fit text-muted-foreground mt-4 text-center text-sm leading-snug text-pretty'>
               {plan.fitLine}
             </p>
 
@@ -1051,7 +1051,7 @@ function PlanCard({
               )}
               <span
                 className={cn(
-                  'text-muted-foreground block text-[3.9cqw] transition-opacity duration-300',
+                  'text-muted-foreground block text-sm transition-opacity duration-300',
                   pricesDone ? 'opacity-100' : 'opacity-0'
                 )}
               >
@@ -1072,7 +1072,7 @@ function PlanCard({
             >
               <p
                 className={cn(
-                  'plan-feature-title text-center text-[4cqw] font-bold tracking-wide uppercase',
+                  'plan-feature-title text-center text-sm font-bold tracking-wide uppercase',
                   plan.popular ? 'text-brand-orange' : 'text-primary-strong'
                 )}
               >
@@ -1083,7 +1083,7 @@ function PlanCard({
                   <li
                     key={feature}
                     style={{ '--line-delay': `${0.2 + delay + i * 0.09}s` } as CSSProperties}
-                    className='plan-feature-line flex items-start gap-[2cqw] text-[4.1cqw] leading-snug'
+                    className='plan-feature-line flex items-start gap-[2cqw] text-sm leading-snug'
                   >
                     <CheckCircle2
                       className={cn(
@@ -1124,10 +1124,10 @@ function PlanCard({
                   </span>
 
                   <span className='min-w-0 flex-1 text-center'>
-                    <span className='text-primary-strong block text-[3.6cqw] font-bold tracking-wide uppercase'>
+                    <span className='text-primary-strong block text-sm font-bold tracking-wide uppercase'>
                       {t('gift.badge')}
                     </span>
-                    <span className='text-muted-foreground mt-0.5 block text-[3.3cqw] leading-snug text-pretty'>
+                    <span className='text-muted-foreground mt-0.5 block text-sm leading-snug text-pretty'>
                       {plan.gift.title} {t('gift.valuePrefix')}
                     </span>
                     <span className='plan-gift-value plan-shine text-brand-orange block text-[5.4cqw] font-extrabold tracking-tight whitespace-nowrap uppercase'>
@@ -1138,7 +1138,7 @@ function PlanCard({
                   </span>
                 </span>
 
-                <span className='text-muted-foreground mt-2 block text-center text-[3.1cqw] leading-snug text-pretty'>
+                <span className='text-muted-foreground mt-2 block text-center text-sm leading-snug text-pretty'>
                   {plan.gift.conditionsShort}
                 </span>
               </motion.button>

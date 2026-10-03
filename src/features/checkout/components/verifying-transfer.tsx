@@ -14,6 +14,7 @@ import { checkoutDoneRoute, checkoutFailedRoute, checkoutPaymentRoute } from '@/
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatCurrency } from '@/shared/utils'
+import { orderDisplayCode } from '../constants/checkout.constants'
 import { useOrder } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -232,14 +233,14 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
 
   const openSupport = () => {
     if (!order) return
-    const subject = tPayment('supportSubject', { code: order.id })
-    const body = tPayment('supportBody', { code: order.id })
+    const subject = tPayment('supportSubject', { code: orderDisplayCode(order) })
+    const body = tPayment('supportBody', { code: orderDisplayCode(order) })
     window.location.href = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
         <CheckoutSteps current='payment' animateEntrance={false} />
 
         <div className='space-y-3 text-center'>
@@ -268,7 +269,7 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
   }
 
   const rows = [
-    { icon: Receipt, label: t('orderCode'), value: `#${order.id}` },
+    { icon: Receipt, label: t('orderCode'), value: `#${orderDisplayCode(order)}` },
     { icon: Wallet, label: t('amount'), value: formatCurrency(order.total, locale) },
     { icon: Landmark, label: t('content'), value: order.transfer.content }
   ]
@@ -280,7 +281,7 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
       data-checkout-verifying-root
       data-confirmed={confirmed ? 'true' : 'false'}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'
+      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'
     >
       <CheckoutSteps
         current='payment'

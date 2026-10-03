@@ -32,7 +32,7 @@ export function DesignEntry({ openCreateProject = false }: { openCreateProject?:
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:space-y-8 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:space-y-8 lg:px-8'
     >
       <header data-entrance-step='0' className='flex flex-col items-center gap-5 py-0 text-center lg:py-4'>
         <div className='space-y-1'>
