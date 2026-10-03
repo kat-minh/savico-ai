@@ -66,7 +66,7 @@ export function ConsultantDirectory({ preferredSpecialtyId }: ConsultantDirector
   )
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-10 lg:px-8'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:py-10 lg:px-8'>
       {/*
         AnimatePresence riêng để CHẮN không cho `initial={false}` của
         <ConsultTransition> (chuyển cảnh route bọc ngoài) lan xuống context và
@@ -144,7 +144,7 @@ export function ConsultantDirectory({ preferredSpecialtyId }: ConsultantDirector
       <p className='text-center text-sm font-medium'>{t('lead')}</p>
 
       {isPending ? (
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className='h-52 w-full rounded-xl' />
           ))}
@@ -152,7 +152,7 @@ export function ConsultantDirectory({ preferredSpecialtyId }: ConsultantDirector
       ) : results.length === 0 ? (
         <EmptyState title={t('empty.title')} description={t('empty.description')} />
       ) : (
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           <AnimatePresence>
             {results.map((consultant, index) => (
               <ConsultantCard

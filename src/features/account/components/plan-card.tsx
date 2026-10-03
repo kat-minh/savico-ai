@@ -63,7 +63,9 @@ export function PlanCard({ designAllowance }: PlanCardProps = {}) {
 
   return (
     <section className='bg-accent/60 border-primary/25 rounded-xl border p-4'>
-      <h2 className='text-primary-strong text-[11px] font-semibold tracking-wide uppercase'>{t('title')}</h2>
+      <h2 className='text-primary-strong max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
+        {t('title')}
+      </h2>
 
       {/* Icon vương miện bên trái, tên gói và hạn dùng bên phải — Hình S24. */}
       <div className='mt-3 flex items-center gap-3'>

@@ -169,7 +169,7 @@ export const PersonalizedPanel = memo(function PersonalizedPanel({
           <header className='flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3'>
             <div className='min-w-0'>
               {/* Hình 1: dòng nhãn nhỏ màu thương hiệu nằm trên tiêu đề panel. */}
-              <p className='text-primary truncate text-[0.7rem] font-semibold tracking-wide uppercase'>
+              <p className='text-primary truncate max-md:text-xs text-[0.7rem] font-semibold tracking-wide uppercase'>
                 {t('eyebrow')}
               </p>
               <h2 className='truncate text-base font-semibold'>{t('title')}</h2>

@@ -543,7 +543,7 @@ function OptionCard({
                     delay: completionMode ? 2.9 : revealDelay + 0.35
                   }
             }
-            className='bg-brand-orange text-brand-orange-foreground absolute -top-2 left-1/2 z-10 inline-flex -translate-x-1/2 items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-bold tracking-wide whitespace-nowrap uppercase'
+            className='bg-brand-orange text-brand-orange-foreground absolute -top-2 left-1/2 z-10 inline-flex -translate-x-1/2 items-center justify-center gap-1.5 rounded-full px-4 py-1.5 max-md:text-xs text-[11px] font-bold tracking-wide whitespace-nowrap uppercase'
           >
             <Star className='size-3 fill-current' />
             {t('popular')}
@@ -571,7 +571,7 @@ function OptionCard({
             và câu dẫn cũng canh giữa. Thẻ 1 tiêu đề màu chữ thường, thẻ 2 màu
             cam, thẻ 3 màu xanh thương hiệu. */}
           {highlighted ? null : (
-            <span className='text-muted-foreground mx-auto rounded-md border px-2.5 py-0.5 text-[11px] font-medium tracking-wide uppercase'>
+            <span className='text-muted-foreground mx-auto rounded-md border px-2.5 py-0.5 max-md:text-xs text-[11px] font-medium tracking-wide uppercase'>
               {t('option', { index })}
             </span>
           )}
@@ -705,7 +705,9 @@ function OptionCard({
                 {/* CHỖ CHỜ ASSET: hộp quà 3D của khách. */}
                 <Gift className='text-brand-orange mt-0.5 size-10 shrink-0' strokeWidth={1.75} />
                 <div className='min-w-0 flex-1'>
-                  <p className='text-brand-orange text-[11px] font-bold tracking-wide uppercase'>{t('exclusive')}</p>
+                  <p className='text-brand-orange max-md:text-xs text-[11px] font-bold tracking-wide uppercase'>
+                    {t('exclusive')}
+                  </p>
                   <p className='mt-0.5 text-xs leading-relaxed text-pretty'>
                     {gift.title} {tGift('valuePrefix')}{' '}
                     <span className='text-brand-orange font-extrabold uppercase'>
@@ -718,7 +720,7 @@ function OptionCard({
                   </p>
                 </div>
               </div>
-              <p className='text-muted-foreground mt-2 text-[10px] leading-relaxed text-pretty italic'>
+              <p className='text-muted-foreground mt-2 max-md:text-xs text-[10px] leading-relaxed text-pretty italic'>
                 {gift.conditions}
               </p>
               {giftNote ? <p className='text-brand-orange mt-1 text-xs font-semibold'>{giftNote}</p> : null}

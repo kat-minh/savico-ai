@@ -69,15 +69,9 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && close()}>
-      {/* Mobile: bottom-sheet bám đáy màn hình (ngón cái với tới); từ `sm` trở lên
-          trở lại hộp thoại giữa màn hình như cũ. */}
-      <DialogContent
-        className={cn(
-          'top-auto bottom-0 left-0 max-h-[90dvh] w-full max-w-full translate-x-0 translate-y-0 gap-3 rounded-b-none p-4',
-          'sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-[calc(100vh-3rem)] sm:max-w-[52rem] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:gap-4 sm:rounded-2xl sm:p-5'
-        )}
-      >
-        <span aria-hidden className='bg-muted mx-auto -mt-1 h-1 w-10 rounded-full sm:hidden' />
+      {/* Giữ cùng quy tắc với các popup khác: hộp thoại luôn có khoảng cách hai bên
+          và căn giữa; nội dung tự cuộn khi danh sách dài hơn viewport. */}
+      <DialogContent className='max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[52rem] gap-3 rounded-2xl p-4 overscroll-contain sm:gap-4 sm:p-5'>
         <DialogHeader className='gap-1 pr-8 sm:items-center sm:gap-2 sm:pr-0 sm:text-center'>
           <DialogTitle className='text-lg sm:text-2xl'>{t('title')}</DialogTitle>
           <DialogDescription className='text-xs text-pretty sm:text-sm'>
@@ -272,18 +266,18 @@ function BriefRow({
               {brief.name.trim() || labels.untitled}
             </span>
           </p>
-          <p className='text-muted-foreground truncate font-mono text-[11px] sm:text-xs'>{brief.id}</p>
+          <p className='text-muted-foreground truncate font-mono max-md:text-xs text-[11px] sm:text-xs'>{brief.id}</p>
           <p className='text-muted-foreground truncate text-xs'>
             {[brief.buildingType, labels.scale, shortAddress(brief)].filter(Boolean).join(' · ')}
           </p>
 
           <div className='mt-1.5 flex flex-wrap items-center gap-2'>
-            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase'>
+            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
               {brief.selfCreated ? labels.selfCreated : labels.fromPlan}
             </span>
             <span
               className={cn(
-                'rounded-md px-2 py-0.5 text-[11px] font-medium',
+                'rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium',
                 (contracted || invitedCount === 0) && 'bg-muted text-muted-foreground',
                 !contracted && invitedCount > 0 && !full && 'bg-info-soft text-info',
                 !contracted && full && 'bg-accent text-primary-strong'
@@ -292,7 +286,7 @@ function BriefRow({
               {contracted ? labels.contracted : invitedCount === 0 ? labels.notInvited : labels.invited}
             </span>
             {draft ? (
-              <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+              <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                 {labels.draft}
               </span>
             ) : null}

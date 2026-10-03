@@ -29,7 +29,7 @@ import { ProactiveChatStream } from '@/features/chatbot'
 import { PersonalizedPanel, useHandbookPanelStore, type HandbookFilter } from '@/features/handbook'
 import { useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
-import { designDossierRoute } from '@/shared/constants/routes'
+import { designDossierRoute, designEstimateRoute } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
 /**
@@ -38,6 +38,7 @@ import { useProjectChatContext } from '../use-project-chat-context'
  */
 export function StepDossierView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.dossier')
+  const tCommon = useTranslations('common')
   const tWaiting = useTranslations('design.progress.dossier')
   const tInput = useTranslations('design.input')
   const floorLabel = useFloorCountLabel()
@@ -146,6 +147,7 @@ export function StepDossierView({ projectId }: { projectId: string }) {
         current={3}
         currentDone={showingFiles && flow.phase !== 'files'}
         title={renderActive ? tWaiting('pageTitle') : t('pageTitle')}
+        previousStep={{ href: designEstimateRoute(projectId), label: tCommon('back') }}
         entranceKey={`design.${projectId}.step3`}
         animateEntrance={false}
       />

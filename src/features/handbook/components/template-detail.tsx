@@ -564,9 +564,16 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
       data-template-detail
       data-template-detail-id={template.id}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 py-5 lg:py-10 lg:px-8'
     >
       <div className='space-y-3'>
+        <Link
+          href={ROUTES.HANDBOOK}
+          className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium transition-colors lg:hidden'
+        >
+          <ArrowLeft className='size-4' />
+          {t('breadcrumbRoot')}
+        </Link>
         <Breadcrumb data-entrance-step='0' data-detail-breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -1306,7 +1313,7 @@ function TemplateDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 py-5 lg:py-10 lg:px-8'
       aria-hidden='true'
     >
       <div className='space-y-3'>

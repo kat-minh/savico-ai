@@ -220,7 +220,7 @@ export function HomeJourney({ onCreateProject, activeProject }: HomeJourneyProps
                 </div>
 
                 {isCurrent ? (
-                  <span className='bg-primary/10 text-primary-strong mt-2 self-start rounded-full px-2.5 py-1 text-[11px] font-semibold sm:mt-0 sm:self-auto'>
+                  <span className='bg-primary/10 text-primary-strong mt-2 self-start rounded-full px-2.5 py-1 max-md:text-xs text-[11px] font-semibold sm:mt-0 sm:self-auto'>
                     {t('currentStepBadge')}
                   </span>
                 ) : null}

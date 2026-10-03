@@ -78,7 +78,7 @@ function StatusPill({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium',
+        'inline-flex items-center gap-1 rounded-full px-2 py-1 max-md:text-xs text-[11px] font-medium',
         STATUS_TONE[status]
       )}
     >
@@ -280,7 +280,7 @@ export function PurchaseHistory() {
           >
             <div className='hidden overflow-x-auto md:block'>
               <table className='w-full min-w-[720px] border-collapse text-left'>
-                <thead className='bg-muted/50 text-muted-foreground text-[11px] uppercase'>
+                <thead className='bg-muted/50 text-muted-foreground max-md:text-xs text-[11px] uppercase'>
                   <tr>
                     <th className='px-4 py-3 font-medium'>{t('table.code')}</th>
                     <th className='px-4 py-3 font-medium'>{t('table.date')}</th>
@@ -315,7 +315,7 @@ export function PurchaseHistory() {
                           {transaction.planName ?? t(`tier.${transaction.tier}`)}
                         </div>
                         {transaction.note ? (
-                          <div className='text-muted-foreground mt-0.5 max-w-[230px] text-[11px] text-pretty'>
+                          <div className='text-muted-foreground mt-0.5 max-w-[230px] max-md:text-xs text-[11px] text-pretty'>
                             {transaction.note}
                           </div>
                         ) : null}
@@ -426,7 +426,7 @@ export function PurchaseHistory() {
             ? { duration: 0 }
             : { duration: 0.26, delay: 0.12 + Math.min(visible.length, 6) * 0.055, ease: revealEase }
         }
-        className='text-muted-foreground flex items-start gap-1.5 px-0.5 text-[11px] leading-relaxed'
+        className='text-muted-foreground flex items-start gap-1.5 px-0.5 max-md:text-xs text-[11px] leading-relaxed'
       >
         <Info className='mt-0.5 size-3.5 shrink-0' />
         {t('paymentNote')}
@@ -468,7 +468,7 @@ export function PurchaseHistory() {
                       <span className='bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-full'>
                         <ReceiptText className='size-4' />
                       </span>
-                      <p className='text-[11px] font-bold tracking-[0.12em] uppercase'>
+                      <p className='max-md:text-xs text-[11px] font-bold tracking-[0.12em] uppercase'>
                         {t('receiptDialog.receiptHeading', { code: receipt.id })}
                       </p>
                     </div>
@@ -534,7 +534,7 @@ export function PurchaseHistory() {
                   </dl>
                 </div>
 
-                <p className='text-muted-foreground mt-3 text-[11px] leading-relaxed text-pretty'>
+                <p className='text-muted-foreground mt-3 max-md:text-xs text-[11px] leading-relaxed text-pretty'>
                   {t('receiptDialog.note', { code: receipt.id })}
                 </p>
               </div>

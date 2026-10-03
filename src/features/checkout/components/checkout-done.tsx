@@ -101,7 +101,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
 
   if (isPending || !order || order.status !== 'paid') {
     return (
-      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5 lg:py-8'>
+      <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 lg:space-y-8 py-5 lg:py-8'>
         <CheckoutSteps current='done' animateEntrance={false} />
 
         <div className='grid items-start gap-x-[3.81%] gap-y-6 lg:grid-cols-[25.4%_minmax(0,1fr)]'>
@@ -206,7 +206,7 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
       data-checkout-done-root
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-8 py-5 lg:py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 lg:space-y-8 py-5 lg:py-8'
     >
       <CheckoutSteps current='done' animateEntrance={false} />
 
@@ -255,8 +255,10 @@ export function CheckoutDone({ orderId }: CheckoutDoneProps) {
             className='bg-primary text-primary-foreground rounded-2xl p-6'
           >
             <div className='flex items-center justify-between gap-2'>
-              <p className='text-[11px] font-semibold tracking-wide uppercase opacity-80'>{t('planTitle')}</p>
-              <span className='bg-primary-foreground/15 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium'>
+              <p className='max-md:text-xs text-[11px] font-semibold tracking-wide uppercase opacity-80'>
+                {t('planTitle')}
+              </p>
+              <span className='bg-primary-foreground/15 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 max-md:text-xs text-[11px] font-medium'>
                 <ShieldCheck className='size-3' />
                 {t('activated')}
               </span>

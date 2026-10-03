@@ -12,6 +12,7 @@ import { PasswordInput } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
+import { useRequiredMessage } from '@/shared/hooks'
 import { isApiError } from '@/shared/lib/api'
 import { useChangePassword } from '../hooks/use-change-password'
 import { createChangePasswordSchema, type ChangePasswordFormValues } from '../schemas/change-password.schema'
@@ -27,17 +28,18 @@ import { createChangePasswordSchema, type ChangePasswordFormValues } from '../sc
 export function MustChangePasswordDialog() {
   const t = useTranslations('auth.mustChange')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const open = useAuthStore((s) => Boolean(s.user?.mustChangePassword))
   const changePassword = useChangePassword()
 
   const schema = useMemo(
     () =>
       createChangePasswordSchema({
-        required: tv('required'),
+        required,
         passwordMin: tv('passwordMin', { min: 8 }),
         passwordMismatch: tv('passwordMismatch')
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<ChangePasswordFormValues>({

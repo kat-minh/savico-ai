@@ -42,8 +42,14 @@ export function PaymentFailed({ orderId }: PaymentFailedProps) {
 
   return (
     // Hình S07: cột nội dung hẹp, canh giữa.
-    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
-      <CheckoutSteps current='payment' error />
+    <div className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:py-8 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
+      <CheckoutSteps
+        current='payment'
+        error
+        onPreviousStep={() => {
+          router.push(checkoutConfirmRoute(order.product.id, order.projectId, order.api?.offerKey))
+        }}
+      />
 
       <div className='space-y-3 text-center'>
         <span className='bg-destructive/10 text-destructive mx-auto flex size-20 items-center justify-center rounded-full'>

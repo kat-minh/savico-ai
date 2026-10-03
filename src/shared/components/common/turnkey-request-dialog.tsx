@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { useGetProvinces } from '@/shared/hooks'
+import { useGetProvinces, useRequiredMessage } from '@/shared/hooks'
 import {
   TURNKEY_NOTE_MAX_LENGTH,
   createTurnkeyRequestSchema,
@@ -43,6 +43,7 @@ interface TurnkeyRequestDialogProps {
 export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialogProps) {
   const t = useTranslations('contractors.start')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
 
   const user = useAuthStore((s) => s.user)
   const { provinces, isLoadingProvinces } = useGetProvinces()
@@ -50,14 +51,14 @@ export function TurnkeyRequestDialog({ open, onOpenChange }: TurnkeyRequestDialo
   const schema = useMemo(
     () =>
       createTurnkeyRequestSchema({
-        nameRequired: tv('required'),
-        phoneRequired: tv('required'),
+        nameRequired: required('fullName'),
+        phoneRequired: required('phone'),
         phoneInvalid: tv('phone'),
         emailInvalid: tv('email'),
-        provinceRequired: tv('required'),
+        provinceRequired: required('province'),
         noteMaxLength: tv('maxLength', { max: TURNKEY_NOTE_MAX_LENGTH })
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<TurnkeyRequestFormValues>({

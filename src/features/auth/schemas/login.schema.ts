@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 /** Resolved, localized validation messages injected into the schema. */
 export interface LoginSchemaMessages {
-  required: string
+  emailRequired: string
   email: string
   passwordMin: string
 }
@@ -16,7 +16,7 @@ export interface LoginSchemaMessages {
  */
 export function createLoginSchema(m: LoginSchemaMessages) {
   return z.object({
-    email: z.string().min(1, { message: m.required }).email({ message: m.email }),
+    email: z.string().min(1, { message: m.emailRequired }).email({ message: m.email }),
     password: z.string().min(8, { message: m.passwordMin }),
     // Default is supplied by the form's `defaultValues` to keep Zod's
     // input/output types aligned for `zodResolver`.

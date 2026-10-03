@@ -340,7 +340,7 @@ function DossierCard({ item, index }: { item: HomeTemplateItem; index: number })
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: revealAmount }}
             transition={{ duration: 0.35, delay: order * 0.1 + 0.25, ease: revealEase }}
-            className='bg-brand-orange text-brand-orange-foreground absolute bottom-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'
+            className='bg-brand-orange text-brand-orange-foreground absolute bottom-3 left-3 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'
           >
             {item.badge}
           </motion.span>

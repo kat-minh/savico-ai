@@ -45,7 +45,7 @@ export function PlanCycleToggle({ value, onChange, saving }: PlanCycleToggleProp
               {cycle === 'Year' && saving ? (
                 <span
                   className={cn(
-                    'rounded-full px-2 py-0.5 text-[11px] font-bold',
+                    'rounded-full px-2 py-0.5 max-md:text-xs text-[11px] font-bold',
                     active ? 'bg-primary-foreground/20' : 'bg-brand-orange/15 text-brand-orange'
                   )}
                 >

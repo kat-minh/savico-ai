@@ -180,7 +180,7 @@ function GuideCompletionSection({ video, onCreateProject, onBrowseGuides }: EndC
               initial={reduceMotion ? false : { opacity: 0, x: 10, y: 4 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.32, delay: reduceMotion ? 0 : 0.22 }}
-              className='absolute right-[21px] bottom-[2px] z-20 flex h-[61px] w-[244px] items-center gap-3 rounded-[15px] border border-border/80 bg-background/98 px-3.5 py-2.5 text-[11px] leading-[1.35] font-bold text-primary-strong shadow-[0_20px_38px_-17px_rgba(0,0,0,.38)] backdrop-blur'
+              className='absolute right-[21px] bottom-[2px] z-20 flex h-[61px] w-[244px] items-center gap-3 rounded-[15px] border border-border/80 bg-background/98 px-3.5 py-2.5 max-md:text-xs text-[11px] leading-[1.35] font-bold text-primary-strong shadow-[0_20px_38px_-17px_rgba(0,0,0,.38)] backdrop-blur'
             >
               <span className='bg-brand-orange text-brand-orange-foreground flex size-[31px] shrink-0 items-center justify-center rounded-full'>
                 <ArrowUp className='size-[15px]' strokeWidth={2.6} />
@@ -400,7 +400,7 @@ function EndCardOption({
           </motion.div>
 
           {badge ? (
-            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 z-10 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide uppercase shadow-sm'>
+            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 z-10 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-bold tracking-wide uppercase shadow-sm'>
               {badge}
             </span>
           ) : null}

@@ -32,6 +32,7 @@ import { useAuth } from '@/shared/auth'
 import { surveyBookableDays, useCmsDocument } from '@/shared/cms'
 import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
+import { useRequiredMessage } from '@/shared/hooks'
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const t = useTranslations('contractors.survey')
   const tCommon = useTranslations('contractors.common')
   const tValidation = useTranslations('validation')
+  const required = useRequiredMessage()
   const locale = useLocale() as Locale
   const router = useRouter()
   const { user } = useAuth()
@@ -153,14 +155,14 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const schema = useMemo(
     () =>
       createSurveySchema({
-        dateRequired: tValidation('required'),
-        slotRequired: tValidation('required'),
-        phoneRequired: tValidation('required'),
+        dateRequired: required('date'),
+        slotRequired: required('timeSlot'),
+        phoneRequired: required('phone'),
         phoneInvalid: tValidation('phone'),
         emailInvalid: tValidation('email'),
         noteMaxLength: tValidation('maxLength', { max: SURVEY_NOTE_MAX_LENGTH })
       }),
-    [tValidation]
+    [required, tValidation]
   )
 
   const form = useForm<SurveyFormValues>({
@@ -628,7 +630,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                                       </motion.button>
                                       {isEarliest && !active ? (
                                         <>
-                                          <span className='bg-primary text-primary-foreground pointer-events-none absolute -top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'>
+                                          <span className='bg-primary text-primary-foreground pointer-events-none absolute -top-2 left-2 rounded-full px-1.5 py-0.5 max-md:text-xs text-[10px] font-semibold'>
                                             {t('earliestSlot')}
                                           </span>
                                           <motion.span

@@ -228,11 +228,11 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
             >
               <span data-article-handwritten-text>{t('end.handwritten')}</span>
             </span>
-            <div className='flex items-center justify-center gap-1'>
+            <div className='flex items-center justify-center gap-1 max-[899px]:grid max-[899px]:grid-cols-3 max-[899px]:gap-2'>
               {[t('end.tag1'), t('end.tag2'), t('end.tag3')].map((tag) => (
                 <span
                   key={tag}
-                  className='text-foreground bg-card/95 flex h-[36px] items-center gap-1 whitespace-nowrap rounded-full border border-accent px-1.5 text-[9px] font-bold shadow-sm backdrop-blur'
+                  className='text-foreground bg-card/95 flex h-[36px] items-center gap-1 whitespace-nowrap rounded-full border border-accent px-1.5 text-[10px] font-bold shadow-sm backdrop-blur max-[899px]:w-full max-[899px]:min-w-0 max-[899px]:justify-center'
                 >
                   <span className='text-primary-foreground flex size-[14px] shrink-0 items-center justify-center rounded-full bg-primary-strong'>
                     <Check className='size-3' strokeWidth={3} />
@@ -250,7 +250,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
           showCloseButton={false}
           className='max-h-[calc(100dvh-20px)] w-[min(1080px,calc(100vw-24px))] max-w-[1080px] gap-0 overflow-x-hidden overflow-y-auto rounded-[24px] border-0 bg-background p-0 shadow-2xl sm:max-w-[1080px] max-[899px]:inset-x-0 max-[899px]:bottom-0 max-[899px]:top-auto max-[899px]:flex max-[899px]:h-[90dvh] max-[899px]:max-h-[90dvh] max-[899px]:w-full max-[899px]:max-w-full max-[899px]:translate-x-0 max-[899px]:translate-y-0 max-[899px]:flex-col max-[899px]:overflow-hidden max-[899px]:rounded-b-none max-[899px]:rounded-t-[24px]'
         >
-          <div className='relative shrink-0 bg-background px-5 pt-5 sm:px-6 max-[899px]:pt-12 max-[899px]:pb-3'>
+          <div className='relative shrink-0 bg-background px-5 pt-5 sm:px-6 max-[899px]:px-4 max-[899px]:pt-12 max-[899px]:pb-3'>
             <motion.div
               initial={reduceMotion ? false : { opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -278,9 +278,9 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               initial={reduceMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.3, delay: reduceMotion ? 0 : 0.04 }}
-              className='mx-auto max-w-[820px] pt-1 text-center min-[900px]:pt-2 max-[899px]:px-14'
+              className='mx-auto max-w-[820px] pt-1 text-center min-[900px]:pt-2 max-[899px]:w-full max-[899px]:max-w-none'
             >
-              <DialogTitle className='text-foreground text-[clamp(1.5rem,2.25vw,2.1rem)] leading-[1.15] font-extrabold tracking-[-0.025em]'>
+              <DialogTitle className='text-foreground text-[clamp(1.5rem,2.25vw,2.1rem)] leading-[1.15] font-extrabold tracking-[-0.025em] max-[899px]:line-clamp-2 max-[899px]:text-[clamp(1.25rem,5.75vw,1.5rem)]'>
                 {t('popup.title')}
               </DialogTitle>
               <DialogDescription className='text-muted-foreground mt-2 text-[clamp(.9rem,1.2vw,1rem)] leading-relaxed'>
@@ -354,7 +354,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
             />
           </div>
 
-          <div className='flex shrink-0 justify-end bg-background px-5 pt-4 pb-4 sm:px-6 max-[899px]:border-t max-[899px]:border-border/70 max-[899px]:pt-3'>
+          <div className='flex shrink-0 justify-end bg-background px-5 pt-4 pb-4 sm:px-6 max-[899px]:hidden'>
             <button
               type='button'
               onClick={() => handleOpenChange(false)}
@@ -386,7 +386,7 @@ function ActionButtons({
     <div
       className={
         bannerRow
-          ? 'flex items-center gap-1'
+          ? 'flex items-center gap-1 max-[899px]:grid max-[899px]:grid-cols-3 max-[899px]:gap-2'
           : compact
             ? 'flex flex-wrap items-center gap-2.5 max-[899px]:grid max-[899px]:grid-cols-1'
             : 'flex flex-wrap gap-3 max-[899px]:grid max-[899px]:grid-cols-1'
@@ -403,7 +403,7 @@ function ActionButtons({
           compact
             ? 'h-[42px] w-auto px-4 text-[13px] has-[>svg]:px-4 max-[899px]:w-full'
             : 'h-[42px] w-auto px-3.5 text-[12px] has-[>svg]:px-3.5 max-[899px]:w-full',
-          bannerRow && 'h-9 gap-1 px-2.5 text-[10px] has-[>svg]:px-2.5 max-[899px]:w-auto'
+          bannerRow && 'h-9 gap-1 px-2.5 text-[10px] has-[>svg]:px-2.5 max-[899px]:w-full'
         )}
       >
         {t('create')}
@@ -423,7 +423,7 @@ function ActionButtons({
           compact
             ? 'h-[42px] w-auto px-4 text-[13px] max-[899px]:w-full'
             : 'h-[42px] w-auto px-3.5 text-[12px] max-[899px]:w-full',
-          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-auto'
+          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-full'
         )}
       >
         <Link href={ROUTES.CONSULT} onClick={completeFromPage}>
@@ -438,7 +438,7 @@ function ActionButtons({
           compact
             ? 'h-[42px] w-auto px-4 text-[13px] max-[899px]:w-full'
             : 'h-[42px] w-auto px-3.5 text-[12px] max-[899px]:w-full',
-          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-auto'
+          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-full'
         )}
       >
         <Link href={`${ROUTES.CONSULT}?type=legal`} onClick={completeFromPage}>
@@ -513,7 +513,7 @@ function PopupCard({
             imageClassName='transition-transform duration-[180ms] ease-out group-hover:scale-[1.025]'
           />
           {badge ? (
-            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 rounded-full px-3 py-1 text-[11px] font-bold uppercase'>
+            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-bold uppercase'>
               {badge}
             </span>
           ) : null}

@@ -1,8 +1,10 @@
 import { z } from 'zod'
 
+import type { RequiredMessage } from '@/shared/hooks'
+
 /** Resolved, localized validation messages injected into the schema. */
 export interface CreateProjectSchemaMessages {
-  required: string
+  required: RequiredMessage
   maxLength: string
 }
 
@@ -15,7 +17,11 @@ export const PROJECT_DESCRIPTION_MAX_LENGTH = 300
  */
 export function createProjectSchema(m: CreateProjectSchemaMessages) {
   return z.object({
-    name: z.string().trim().min(1, { message: m.required }).max(PROJECT_NAME_MAX_LENGTH, { message: m.maxLength }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: m.required('projectName') })
+      .max(PROJECT_NAME_MAX_LENGTH, { message: m.maxLength }),
     description: z.string().trim().max(PROJECT_DESCRIPTION_MAX_LENGTH, { message: m.maxLength })
   })
 }

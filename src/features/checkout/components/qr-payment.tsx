@@ -63,6 +63,7 @@ function useCountdown(expiresAt?: string, serverOffsetMs = 0): { label: string; 
  */
 export function QrPayment({ orderId }: QrPaymentProps) {
   const t = useTranslations('checkout.payment')
+  const tCommon = useTranslations('common')
   const locale = useLocale() as Locale
   const router = useRouter()
 
@@ -199,7 +200,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:py-8 lg:px-8'>
         <CheckoutSteps current='payment' clickableCompletedSteps={[]} />
 
         <section className='relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border p-4 pb-7'>
@@ -307,10 +308,12 @@ export function QrPayment({ orderId }: QrPaymentProps) {
       data-page-entrance={entranceState}
       data-checkout-payment-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:py-8 lg:px-8'
     >
       <CheckoutSteps
         current='payment'
+        onPreviousStep={() => void backToConfirm()}
+        previousStepLabel={tCommon('back')}
         clickableCompletedSteps={['confirm']}
         onCompletedStep={(step) => {
           if (step === 'confirm') void backToConfirm()
@@ -452,7 +455,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
           <ol data-payment-guide className='mt-5 space-y-2 border-t pt-4 text-left'>
             {[t('guide1'), t('guide2'), t('guide3')].map((step, index) => (
               <li key={step} data-payment-guide-step className='flex items-start gap-2.5 text-sm'>
-                <span className='bg-primary text-primary-foreground mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold'>
+                <span className='bg-primary text-primary-foreground mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full max-md:text-xs text-[11px] font-semibold'>
                   {index + 1}
                 </span>
                 <span className='text-pretty'>{step}</span>
@@ -485,7 +488,12 @@ export function QrPayment({ orderId }: QrPaymentProps) {
                     )}
                   >
                     <div className='min-w-0 flex-1'>
-                      <dt className={cn('text-muted-foreground text-[11px]', row.highlight && 'text-warning-strong')}>
+                      <dt
+                        className={cn(
+                          'text-muted-foreground max-md:text-xs text-[11px]',
+                          row.highlight && 'text-warning-strong'
+                        )}
+                      >
                         {row.label}
                       </dt>
                       <dd className={cn('truncate font-medium', row.highlight && 'text-warning-strong font-semibold')}>

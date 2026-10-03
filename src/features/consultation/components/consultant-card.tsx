@@ -69,7 +69,7 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
       }}
       whileHover={{ y: -4 }}
       className={cn(
-        'group group/card bg-card hover:border-primary/50 relative h-full rounded-xl border p-3 transition-[border-color,box-shadow] hover:shadow-lg',
+        'group group/card bg-card hover:border-primary/50 relative h-full min-w-0 rounded-xl border p-3 transition-[border-color,box-shadow] hover:shadow-lg',
         className
       )}
     >
@@ -103,7 +103,7 @@ export function ConsultantCard({ consultant, className, query, onSelectSpecialty
               {consultant.title}
             </p>
             {consultant.company && (
-              <p className='text-muted-foreground/80 truncate text-[11px]' title={consultant.company}>
+              <p className='text-muted-foreground/80 truncate max-md:text-xs text-[11px]' title={consultant.company}>
                 {t('company', { company: consultant.company })}
               </p>
             )}

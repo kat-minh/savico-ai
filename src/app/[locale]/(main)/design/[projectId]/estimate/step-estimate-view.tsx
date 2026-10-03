@@ -36,6 +36,7 @@ import { useProjectChatContext } from '../use-project-chat-context'
  */
 export function StepEstimateView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.estimate')
+  const tCommon = useTranslations('common')
   const tWaiting = useTranslations('design.progress.estimate')
   const tInput = useTranslations('design.input')
   const floorLabel = useFloorCountLabel()
@@ -143,6 +144,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
         }
         subtitle={result && resultVisible ? resultSubtitle || undefined : undefined}
         back={result && resultVisible ? { href: ROUTES.DESIGN, label: tEntry('backToList') } : undefined}
+        previousStep={{ href: designInputRoute(projectId), label: tCommon('back') }}
         entranceKey={`design.${projectId}.step2`}
       />
       <DesignStepLayout

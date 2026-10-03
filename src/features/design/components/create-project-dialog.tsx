@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { useRequiredMessage } from '@/shared/hooks'
 import { geocodeApi } from '@/shared/geocode'
 import { useCreateProject } from '../hooks/use-projects'
 import { writeAddressSeed } from '../services/address-seed.storage'
@@ -78,6 +79,7 @@ function normalizeTemplateStyle(
 export function CreateProjectDialog() {
   const t = useTranslations('design.createProject')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const tCommon = useTranslations('common')
 
   const open = useDesignStore((s) => s.isCreateDialogOpen)
@@ -100,10 +102,10 @@ export function CreateProjectDialog() {
   const schema = useMemo(
     () =>
       createProjectSchema({
-        required: tv('required'),
+        required,
         maxLength: tv('maxLength', { max: PROJECT_NAME_MAX_LENGTH })
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<CreateProjectFormValues>({

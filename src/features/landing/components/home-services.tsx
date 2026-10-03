@@ -124,7 +124,7 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                       strokeWidth={1.75}
                     />
                     {isOwned ? (
-                      <span className='bg-primary/10 text-primary rounded-full px-2 py-1 text-[11px] font-semibold whitespace-nowrap'>
+                      <span className='bg-primary/10 text-primary rounded-full px-2 py-1 max-md:text-xs text-[11px] font-semibold whitespace-nowrap'>
                         {t('ownedLabel', { count: ownedDesignRemaining })}
                       </span>
                     ) : null}
@@ -140,7 +140,7 @@ export function HomeServices({ ownedDesignRemaining, ownsSupervision = false }: 
                   <div className='flex min-h-5 items-end max-sm:hidden'>
                     <span
                       className={cn(
-                        'text-brand-orange text-[11px] font-semibold transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
+                        'text-brand-orange max-md:text-xs text-[11px] font-semibold transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none',
                         isHovered ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
                       )}
                     >

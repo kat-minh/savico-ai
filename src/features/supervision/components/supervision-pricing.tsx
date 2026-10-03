@@ -96,7 +96,7 @@ function SupervisionPricingContent({ projectId }: SupervisionPricingProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-12 px-4 py-5 lg:py-10 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-12 px-4 py-5 lg:py-10 lg:px-8'
     >
       <header data-entrance-step='0' data-entrance-from='right' className='supervision-heading space-y-2 text-center'>
         <h1 className='text-primary-strong flex items-center justify-center gap-3 text-3xl font-bold tracking-tight uppercase sm:text-4xl'>
@@ -547,7 +547,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                 )}
               >
                 {byTier(tier)?.name || tTiers(tier)}
-                <small className='text-muted-foreground mt-0.5 block text-[10px] font-medium normal-case'>
+                <small className='text-muted-foreground mt-0.5 block max-md:text-xs text-[10px] font-medium normal-case'>
                   {formatCurrency(byTier(tier)?.price ?? 0, locale)}
                 </small>
               </span>
@@ -602,7 +602,7 @@ function ComparisonTable({ packages, projectId }: { packages: SupervisionPackage
                   >
                     {byTier(tier)?.name || tTiers(tier)}
                   </span>
-                  <span className='supervision-sticky-price text-muted-foreground mt-0.5 text-[10px] font-medium'>
+                  <span className='supervision-sticky-price text-muted-foreground mt-0.5 max-md:text-xs text-[10px] font-medium'>
                     {formatCurrency(byTier(tier)?.price ?? 0, locale)}
                   </span>
                 </th>
@@ -770,7 +770,7 @@ function AddonTable() {
             {/* `divide-x` trên hàng kẻ vạch DỌC giữa các ô — bảng phụ phí ở
                 Hình S19 có lưới đủ cả ngang lẫn dọc, khác bảng so sánh phía trên
                 chỉ kẻ ngang. */}
-            <tr className='text-muted-foreground divide-x text-[11px] tracking-wide uppercase'>
+            <tr className='text-muted-foreground divide-x max-md:text-xs text-[11px] tracking-wide uppercase'>
               <th className='border-b p-2 text-left font-bold'>{t('item')}</th>
               <th className='border-b p-2 text-center font-bold'>{t('price')}</th>
               <th className='border-b p-2 text-center font-bold'>{t('note')}</th>
@@ -952,7 +952,7 @@ function JourneyCard({ step, number, delay }: { step: JourneyStepKey; number: nu
           thay vì chỗ lồi chỗ lõm. */}
       <p className='flex min-h-9 items-center text-sm leading-tight font-medium text-pretty'>{t(step)}</p>
       <Icon aria-hidden className='supervision-journey-icon text-primary my-3 size-8 shrink-0' strokeWidth={1.5} />
-      <p className='text-muted-foreground text-[11px] leading-snug text-pretty'>{t(`${step}Body`)}</p>
+      <p className='text-muted-foreground max-md:text-xs text-[11px] leading-snug text-pretty'>{t(`${step}Body`)}</p>
     </motion.div>
   )
 }
