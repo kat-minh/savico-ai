@@ -2,7 +2,9 @@
 
 import { CheckCircle2, FilePlus2, FileText, House, Inbox, MoreHorizontal, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
+import { env } from '@/shared/config/env'
 import { Link, useRouter } from '@/i18n/navigation'
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
@@ -25,8 +27,10 @@ import { cn } from '@/shared/lib/utils'
 import { MATCHES_PROJECT_CHANGED_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBriefSummaries } from '../hooks/use-brief-summaries'
 import { useCreateBrief } from '../hooks/use-brief'
+import { useSelectedProject } from '../hooks/use-selected-project'
 import { briefReadiness, isBriefComplete, shortAddress } from '../services/brief.service'
 import { useProjectPickerStore } from '../store/project-picker.store'
+import { useProjectSelectionStore } from '../store/project-selection.store'
 import type { ProjectBriefSummary } from '../types/contractor.types'
 
 interface ProjectPickerDialogProps {
@@ -57,11 +61,21 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
   const router = useRouter()
   const open = useProjectPickerStore((s) => s.open)
   const close = useProjectPickerStore((s) => s.closePicker)
+  const selectProject = useProjectSelectionStore((s) => s.selectProject)
+  const { userId } = useSelectedProject()
 
-  const { data: summaries, isPending } = useBriefSummaries()
+  const { data: summaries, isPending, isError, refetch } = useBriefSummaries(open)
   const createBrief = useCreateBrief()
 
   function choose(projectId: string) {
+    const brief = summaries?.find((summary) => summary.brief.id === projectId)?.brief
+    if (!userId || !brief) return
+    try {
+      selectProject(userId, brief)
+    } catch {
+      toast.error(t('saveSelectionError'))
+      return
+    }
     window.sessionStorage.setItem(MATCHES_PROJECT_CHANGED_KEY, projectId)
     close()
     router.push(contractorMatchesRoute(projectId))
@@ -81,11 +95,16 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
         <DialogHeader className='gap-1 pr-8 sm:items-center sm:gap-2 sm:pr-0 sm:text-center'>
           <DialogTitle className='text-lg sm:text-2xl'>{t('title')}</DialogTitle>
           <DialogDescription className='text-xs text-pretty sm:text-sm'>
-            {t('subtitle', { max: MAX_INVITATIONS })}
+            {env.NEXT_PUBLIC_USE_MOCK_API ? t('subtitle', { max: MAX_INVITATIONS }) : t('apiSubtitle')}
           </DialogDescription>
         </DialogHeader>
 
-        {isPending ? (
+        {isError ? (
+          <div role='alert'>
+            <p>{t('loadSelectionError')}</p>
+            <Button onClick={() => void refetch()}>{t('retrySelection')}</Button>
+          </div>
+        ) : isPending ? (
           <div className='space-y-3'>
             {[0, 1].map((index) => (
               <Skeleton key={index} className='h-24 rounded-xl' />
@@ -109,7 +128,10 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
                       selfCreated: tCommon('selfCreated'),
                       fromPlan: t('fromPlan'),
                       notInvited: t('notInvited'),
-                      invited: t('invitedCount', { used: summary.invitedCount, max: MAX_INVITATIONS }),
+                      invited: t('invitedCount', {
+                        used: summary.invitedCount,
+                        max: summary.invitationLimit ?? MAX_INVITATIONS
+                      }),
                       contracted: t('contracted'),
                       choose: t('choose'),
                       current: t('current'),
@@ -190,7 +212,9 @@ function EmptyBriefs({ onCreate, pending }: { onCreate: () => void; pending: boo
         </Button>
       </div>
 
-      <p className='text-muted-foreground text-xs'>{t('emptyFootnote', { max: MAX_INVITATIONS })}</p>
+      <p className='text-muted-foreground text-xs'>
+        {env.NEXT_PUBLIC_USE_MOCK_API ? t('emptyFootnote', { max: MAX_INVITATIONS }) : t('apiEmptyFootnote')}
+      </p>
     </div>
   )
 }
@@ -229,7 +253,7 @@ function BriefRow({
 }) {
   const { brief, invitedCount } = summary
   const contracted = brief.status === 'contracted'
-  const full = invitedCount >= MAX_INVITATIONS
+  const full = invitedCount >= (summary.invitationLimit ?? MAX_INVITATIONS)
   // Thiếu trường bắt buộc = "Bản nháp": không cho "Chọn" (trang Đề xuất sẽ ghép nhà
   // thầu trên dữ liệu rỗng) mà dẫn về đúng nhóm còn thiếu của Bước 1 (góp ý NT30).
   const draft = !contracted && !isBriefComplete(brief)
@@ -264,15 +288,13 @@ function BriefRow({
         )}
 
         <div className='min-w-0 flex-1'>
-          {/* Hồ sơ vừa tạo mà chưa điền gì thì `name` rỗng — không có nhãn dự
-            phòng, dòng chỉ còn mã dự án và trông như bị mất chữ. */}
+          {/* Hồ sơ chưa có tên dùng nhãn dự phòng để dòng vẫn nhận diện được. */}
           <p className='flex items-center gap-2 font-semibold'>
             {current ? <CheckCircle2 className='text-primary size-4 shrink-0' /> : null}
             <span className={cn('truncate', !brief.name.trim() && 'text-muted-foreground font-normal italic')}>
               {brief.name.trim() || labels.untitled}
             </span>
           </p>
-          <p className='text-muted-foreground truncate font-mono text-[11px] sm:text-xs'>{brief.id}</p>
           <p className='text-muted-foreground truncate text-xs'>
             {[brief.buildingType, labels.scale, shortAddress(brief)].filter(Boolean).join(' · ')}
           </p>

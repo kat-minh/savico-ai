@@ -25,6 +25,12 @@ import type { PagedResult } from '@/shared/types'
 export interface ContractorProfileInput {
   name: string
   address?: string | null
+  provinceCode?: string | null
+  provinceName?: string | null
+  wardCode?: string | null
+  wardName?: string | null
+  locationDatasetVersion?: string | null
+  addressDetail?: string | null
   latitude?: number | null
   longitude?: number | null
   shortDescription?: string | null

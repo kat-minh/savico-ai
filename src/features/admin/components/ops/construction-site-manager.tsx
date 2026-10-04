@@ -1,8 +1,10 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Alert, Descriptions, List, Spin, Typography } from 'antd'
-import { useFormatter, useTranslations } from 'next-intl'
+import { Alert, Button, Descriptions, List, Spin, Typography } from 'antd'
+import { useState } from 'react'
+import { LocationMap } from '@/shared/components/common'
+import { useFormatter, useLocale, useTranslations } from 'next-intl'
 
 import type { ApiError } from '@/shared/types'
 import { constructionSitesAdminApi } from '../../api/bmt/construction-sites.admin.api'
@@ -10,6 +12,8 @@ import {
   activeGrantCount,
   classifySiteError,
   formatCoordinates,
+  formatSiteDecimal,
+  type AdminSiteAttachment,
   grantTone,
   isKnownGrantState,
   mapLink,
@@ -64,7 +68,7 @@ export function ConstructionSiteManager() {
         }
       }}
       rowKey={(item) => item.constructionSiteId}
-      drawerWidth={640}
+      drawerWidth={800}
       renderView={(item) => <SiteDetail item={item} />}
       columns={[
         {
@@ -124,6 +128,7 @@ export function ConstructionSiteManager() {
 /** Chi tiết một công trình: hiện ngay bản của danh sách, bản chi tiết (có thể mới hơn) thay thế khi về. */
 function SiteDetail({ item }: { item: AdminConstructionSite }) {
   const c = useTranslations('admin.constructionSites')
+  const locale = useLocale()
   const format = useFormatter()
   const detail = useQuery({
     queryKey: ['admin', 'construction-sites', item.constructionSiteId],
@@ -144,19 +149,71 @@ function SiteDetail({ item }: { item: AdminConstructionSite }) {
   const coordinates = formatCoordinates(site.latitude, site.longitude)
   const link = mapLink(site.latitude, site.longitude)
 
+  if (detail.isPending) return <Spin size='small' />
+  if (detail.isError)
+    return (
+      <Alert
+        type='warning'
+        showIcon
+        title={c(errorKind === 'noPermission' ? 'noPermission' : errorKind === 'notFound' ? 'notFound' : 'loadError')}
+        action={<Button onClick={() => void detail.refetch()}>{c('retry')}</Button>}
+      />
+    )
+
   return (
     <div className='flex flex-col gap-4'>
-      {detail.isPending ? <Spin size='small' /> : null}
-      {errorKind === 'noPermission' ? <Alert type='warning' showIcon title={c('noPermission')} /> : null}
-      {errorKind === 'notFound' ? <Alert type='warning' showIcon title={c('notFound')} /> : null}
-
       <Descriptions
         size='small'
         column={1}
         bordered
         items={[
           { key: 'name', label: c('site'), children: site.name || '—' },
-          { key: 'address', label: c('address'), children: site.address || '—' },
+          { key: 'province', label: c('province'), children: site.provinceName || '—' },
+          { key: 'ward', label: c('ward'), children: site.wardName || '—' },
+          { key: 'street', label: c('street'), children: site.profile.addressDetail || '—' },
+          { key: 'area', label: c('area'), children: `${formatSiteDecimal(site.profile.areaM2, locale)} m²` },
+          { key: 'condition', label: c('condition'), children: site.conditionName || '—' },
+          { key: 'budget', label: c('budget'), children: `${formatSiteDecimal(site.budgetVnd, locale)} ₫` },
+          { key: 'start', label: c('plannedStart'), children: c(`startOptions.${site.plannedStart}`) },
+          { key: 'type', label: c('buildingType'), children: site.buildingTypeName || '—' },
+          {
+            key: 'floors',
+            label: c('floors'),
+            children:
+              site.profile.floorCount === null
+                ? c('notApplicable')
+                : c('floorCount', { count: site.profile.floorCount })
+          },
+          {
+            key: 'tum',
+            label: c('tum'),
+            children: site.profile.hasTum === null ? c('notApplicable') : c(site.profile.hasTum ? 'hasTum' : 'noTum')
+          },
+          {
+            key: 'architecture',
+            label: c('architecture'),
+            children: site.profile.architectureStyleId === null ? c('notApplicable') : site.architectureStyleName || '—'
+          },
+          {
+            key: 'interior',
+            label: c('interior'),
+            children: site.profile.interiorStyleId === null ? c('notApplicable') : site.interiorStyleName || '—'
+          },
+          {
+            key: 'source',
+            label: c('source'),
+            children: site.sourceEstimateId ? (
+              <div className='flex min-w-0 flex-col gap-1'>
+                <Text>{c('fromEstimate')}</Text>
+                <Text copyable style={{ wordBreak: 'break-all' }}>
+                  {site.sourceEstimateId}
+                </Text>
+                <Text type='secondary'>{c('sourceNote')}</Text>
+              </div>
+            ) : (
+              c('independent')
+            )
+          },
           { key: 'owner', label: c('owner'), children: site.owner?.fullName || '—' },
           {
             key: 'email',
@@ -183,6 +240,29 @@ function SiteDetail({ item }: { item: AdminConstructionSite }) {
           { key: 'updatedAt', label: c('updatedAt'), children: dateTime(site.updatedAtUtc) }
         ]}
       />
+
+      {coordinates ? (
+        <section aria-label={c('map')} className='space-y-2'>
+          <Text strong>{c('map')}</Text>
+          <LocationMap latitude={site.latitude} longitude={site.longitude} />
+        </section>
+      ) : null}
+      <section aria-label={c('files')} className='space-y-2'>
+        <Text strong>
+          {c('files')} ({site.files.length})
+        </Text>
+        <List
+          size='small'
+          bordered
+          dataSource={site.files}
+          locale={{ emptyText: c('noFiles') }}
+          renderItem={(file) => (
+            <List.Item>
+              <SiteFile siteId={site.constructionSiteId} file={file} />
+            </List.Item>
+          )}
+        />
+      </section>
 
       <div>
         <Text strong>{c('grants')}</Text>
@@ -214,6 +294,51 @@ function SiteDetail({ item }: { item: AdminConstructionSite }) {
           )}
         />
       </div>
+    </div>
+  )
+}
+
+function SiteFile({ siteId, file }: { siteId: string; file: AdminSiteAttachment }) {
+  const c = useTranslations('admin.constructionSites')
+  const format = useFormatter()
+  const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
+  async function download() {
+    if (busy) return
+    setBusy(true)
+    setFailed(false)
+    try {
+      const blob = await constructionSitesAdminApi.download(siteId, file.id)
+      if (blob.size !== file.sizeBytes) throw new Error('IncompleteDownload')
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = file.originalName.replace(/[\\/\x00-\x1f]/g, '_')
+      anchor.click()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      setFailed(true)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <div className='flex w-full min-w-0 flex-col gap-2'>
+      <div className='flex items-start justify-between gap-3'>
+        <div className='min-w-0'>
+          <Text style={{ wordBreak: 'break-word' }}>{file.originalName}</Text>
+          <div>
+            <Text type='secondary'>
+              {c(`fileGroups.${file.attachmentGroup}`)} ·{' '}
+              {format.number(file.sizeBytes / 1_000_000, { maximumFractionDigits: 2 })} MB
+            </Text>
+          </div>
+        </div>
+        <Button loading={busy} onClick={() => void download()}>
+          {c('download')}
+        </Button>
+      </div>
+      {failed ? <Alert type='error' showIcon title={c('downloadError')} /> : null}
     </div>
   )
 }

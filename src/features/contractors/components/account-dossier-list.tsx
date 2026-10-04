@@ -4,6 +4,7 @@ import { ArrowRight, House, Info, Plus, Search } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 
+import { env } from '@/shared/config/env'
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { revealEase } from '@/shared/components/common'
@@ -47,8 +48,12 @@ function DossierRow({
   const { brief, invitedCount } = summary
   const { data: invitations, isPending } = useInvitations(brief.id)
 
-  const orderedInvitations = [...(invitations ?? [])].sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
-  const latestVersion = orderedInvitations[0]?.dossierVersion ?? 'v1'
+  const orderedInvitations = [...(invitations ?? [])].sort(
+    (a, b) => Date.parse(b.updatedAt ?? b.sentAt) - Date.parse(a.updatedAt ?? a.sentAt)
+  )
+  const latestVersion = env.NEXT_PUBLIC_USE_MOCK_API
+    ? (orderedInvitations[0]?.dossierVersion ?? 'v1')
+    : `v${brief.version ?? 1}`
   const detailHref = contractorInvitationsRoute(brief.id)
   const completed =
     orderedInvitations.length > 0 && orderedInvitations.every((invitation) => invitation.status === 'done')
@@ -117,7 +122,10 @@ function DossierRow({
                   <span className='truncate'>{invitation.contractorName}</span>
                 </span>
                 <span className={cn('truncate', STATUS_TONE[invitation.status])}>
-                  {t(`status.${invitation.status}`)} · {formatDisplayDateTime(invitation.updatedAt, locale)}
+                  {t(`status.${invitation.status}`)}
+                  {env.NEXT_PUBLIC_USE_MOCK_API
+                    ? ` · ${formatDisplayDateTime(invitation.updatedAt ?? invitation.sentAt, locale)}`
+                    : ''}
                 </span>
               </div>
             ))

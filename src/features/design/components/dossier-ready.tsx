@@ -3,6 +3,7 @@
 import { ArrowRight, Check, Download, Link2, Mail, MessageCircle, Phone, QrCode, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { toast } from 'sonner'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
@@ -208,9 +209,13 @@ export function DossierReady({
   }
 
   async function downloadPdf() {
-    await pdf.download()
-    setDownloaded(true)
-    window.setTimeout(() => setDownloaded(false), 900)
+    try {
+      await pdf.download()
+      setDownloaded(true)
+      window.setTimeout(() => setDownloaded(false), 900)
+    } catch {
+      toast.error(t('exportError'))
+    }
   }
 
   async function copyShareLink() {

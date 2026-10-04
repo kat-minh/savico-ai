@@ -1,9 +1,12 @@
+import type { ContractorSearchFilters } from '@/shared/contractors'
+
 /** Query-key factory cho feature `contractors` (S09–S18). */
 export const contractorKeys = {
   all: ['contractors'] as const,
 
   /** Danh sách nhà thầu đề xuất cho một dự án (S12). */
-  list: (projectId: string) => [...contractorKeys.all, 'list', projectId] as const,
+  list: (projectId: string, filters: ContractorSearchFilters = {}) =>
+    [...contractorKeys.all, 'list', projectId, filters] as const,
   /** Hồ sơ một nhà thầu (S13, S14). */
   detail: (contractorId: string) => [...contractorKeys.all, 'detail', contractorId] as const,
   /** Chi tiết một dự án trong hồ sơ nhà thầu (S13, hộp thoại dự án). */
@@ -12,10 +15,11 @@ export const contractorKeys = {
 
   briefs: () => [...contractorKeys.all, 'brief'] as const,
   /** Danh sách hồ sơ dự án của tài khoản (S09 — nút "Xem nhà thầu"). */
-  briefList: () => [...contractorKeys.briefs(), 'list'] as const,
-  briefSummaries: () => [...contractorKeys.briefs(), 'summaries'] as const,
+  briefList: (userId?: string) => [...contractorKeys.briefs(), 'list', ...(userId ? [userId] : [])] as const,
+  briefSummaries: (userId?: string) => [...contractorKeys.briefs(), 'summaries', ...(userId ? [userId] : [])] as const,
   /** Hồ sơ dự án đang dựng / đã lưu (S10, S11). */
-  brief: (projectId: string) => [...contractorKeys.briefs(), projectId] as const,
+  brief: (projectId: string, userId?: string) =>
+    [...contractorKeys.briefs(), projectId, ...(userId ? [userId] : [])] as const,
 
   invitations: () => [...contractorKeys.all, 'invitations'] as const,
   /** Lời mời báo giá đã gửi của một dự án (S18). */

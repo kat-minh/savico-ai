@@ -92,15 +92,15 @@ function SaveIndicator({
 }) {
   const t = useTranslations('design.inputApi.status')
   if (status === 'idle') return null
-  if (status === 'error' || status === 'denied') {
+  if (status === 'error' || status === 'denied' || status === 'conflict') {
     return (
       <p className='text-destructive flex flex-wrap items-center justify-center gap-2 text-xs' role='status'>
         <AlertCircle className='size-3.5' />
-        {status === 'denied' ? (message ?? t('denied')) : t('error')}
-        {status === 'error' ? (
+        {status === 'conflict' ? t('conflict') : status === 'denied' ? (message ?? t('denied')) : t('error')}
+        {status === 'error' || status === 'conflict' ? (
           <button type='button' onClick={onRetry} className='inline-flex items-center gap-1 font-medium underline'>
             <RefreshCw className='size-3' />
-            {t('retry')}
+            {status === 'conflict' ? t('reloadSaved') : t('retry')}
           </button>
         ) : null}
       </p>
@@ -149,6 +149,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
 
   const [showErrors, setShowErrors] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -181,6 +182,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
   const fields = visibleFields(type)
   const lockReason = input.lock
   const locked = lockReason !== null
+  const disabled = locked || submitting
   const invalid = (field: string) => showErrors && missing.includes(field)
   const areaError = draft.areaM2 !== '' && areaProblem(draft.areaM2) !== null
 
@@ -216,14 +218,22 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
   }
 
   async function handleSubmit() {
+    if (submittingRef.current || uploading || locked) return
+    submittingRef.current = true
     setShowErrors(true)
     setSubmitting(true)
+    let releaseEdits: (() => void) | undefined
     try {
       const saved = await input.flush()
       if (!saved) return
+      releaseEdits = input.freezeEdits()
       // BE là nguồn chính thức về trường còn thiếu.
       const fresh = await input.detail.refetch()
-      const serverMissing = fresh.data?.missingFields ?? []
+      if (fresh.isError || !fresh.data) {
+        toast.error(t('loadError'))
+        return
+      }
+      const serverMissing = fresh.data.missingFields ?? []
       if (missing.length > 0 || serverMissing.length > 0) {
         const first = missing[0] ?? serverMissing[0]
         if (first) document.getElementById(`field-${first}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -241,6 +251,8 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
       }
       onSubmit()
     } finally {
+      releaseEdits?.()
+      submittingRef.current = false
       setSubmitting(false)
     }
   }
@@ -273,7 +285,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
         </div>
       ) : null}
 
-      <fieldset disabled={locked} className='m-0 min-w-0 border-0 p-0'>
+      <fieldset disabled={disabled} className='m-0 min-w-0 border-0 p-0'>
         <div className='grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]'>
           {/* ── Cột TRÁI: ba thẻ xếp dọc, mỗi thẻ chia lưới 2 cột đều nhau ───────────── */}
           <div className='space-y-6'>
@@ -283,7 +295,11 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   <FieldLabel htmlFor='building-type' hint={tInput('buildingType.hint')} required>
                     {t('buildingType.label')}
                   </FieldLabel>
-                  <Select value={draft.buildingTypeId ?? ''} onValueChange={input.chooseBuildingType}>
+                  <Select
+                    disabled={disabled}
+                    value={draft.buildingTypeId ?? ''}
+                    onValueChange={input.chooseBuildingType}
+                  >
                     <SelectTrigger
                       id='building-type'
                       className={cn('w-full', invalid('buildingTypeId') && 'border-destructive')}
@@ -364,6 +380,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                   </FieldLabel>
                   <SearchableSelect
                     id='province'
+                    disabled={disabled}
                     value={draft.provinceCode ?? ''}
                     onValueChange={(provinceCode) => void address.changeRegion({ provinceCode })}
                     options={(provinces.data?.provinces ?? []).map((province) => ({
@@ -385,7 +402,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                     onValueChange={(wardCode) =>
                       void address.changeRegion({ provinceCode: draft.provinceCode ?? '', wardCode })
                     }
-                    disabled={!draft.provinceCode}
+                    disabled={disabled || !draft.provinceCode}
                     options={(wards.data ?? []).map((ward) => ({ value: ward.code, label: ward.name }))}
                     placeholder={
                       !draft.provinceCode
@@ -399,6 +416,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
                 </div>
 
                 <EstimateAddressField
+                  disabled={disabled}
                   value={draft.addressDetail}
                   latitude={draft.latitude}
                   longitude={draft.longitude}

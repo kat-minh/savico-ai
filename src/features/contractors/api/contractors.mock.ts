@@ -1,3 +1,4 @@
+import type { ContractorSearchFilters } from '@/shared/contractors'
 import {
   cmsDb,
   isActiveSurvey,
@@ -218,7 +219,11 @@ export const mockContractorsApi = {
    * kiện và năng lực khớp hồ sơ đang chọn. Hồ sơ thuộc loại công trình không
    * được hỗ trợ thì không có đề xuất. Bán kính và tab vùng lọc tiếp ở giao diện.
    */
-  listContractors: async (projectId: string): Promise<Contractor[]> => {
+  listContractors: async (
+    projectId: string,
+    filters: ContractorSearchFilters = {},
+    _signal?: AbortSignal
+  ): Promise<Contractor[]> => {
     await mockDelay(250)
     const rules = cmsDb.getDocument('contractorMatching')
     const brief = loadStore().briefs[projectId]
@@ -235,6 +240,7 @@ export const mockContractorsApi = {
     return cmsDb
       .list('contractors')
       .filter((contractor) => isContractorEligible(contractor, rules, today, context))
+      .filter((contractor) => !filters.region || contractor.region === filters.region)
       .map(publicProfile)
   },
 

@@ -50,6 +50,7 @@ import {
   START_WINDOWS
 } from '../constants/contractors.constants'
 import { useBriefs, useCreateBrief } from '../hooks/use-brief'
+import { useSelectedProject } from '../hooks/use-selected-project'
 import { isBriefComplete } from '../services/brief.service'
 import { filterContractors, type ContractorCriteria } from '../services/contractor-list.service'
 import type { Contractor, ContractorSort, SearchRadiusKm } from '../types/contractor.types'
@@ -57,6 +58,7 @@ import { ContractorLogo } from './contractor-logo'
 import { PartnerRegistrationDialog } from './partner-registration-dialog'
 import { ProjectPickerDialog } from './project-picker-dialog'
 import { useProjectPickerStore } from '../store/project-picker.store'
+import { useProjectSelectionStore } from '../store/project-selection.store'
 
 /**
  * Bề ngang phần nội dung của S09.
@@ -291,11 +293,25 @@ export function ContractorLanding() {
   // gây hiểu lầm (mục 3).
   const { data: briefs } = useBriefs(isAuthenticated)
   const hasBrief = isAuthenticated && Boolean(briefs?.length)
-  /** Hồ sơ gần nhất dùng khi chọn nhà thầu hoặc đổi hồ sơ. CTA chính luôn tạo hồ sơ mới. */
-  // Ưu tiên hồ sơ đủ thông tin khi mời nhà thầu; nếu chưa có thì dùng nháp mới nhất.
+  // Ưu tiên dự án người dùng đã chọn; khi chưa có thì dùng hồ sơ đủ thông tin mới nhất.
+  const { userId, selectedProject } = useSelectedProject()
+  const clearSelectedProject = useProjectSelectionStore((s) => s.clearSelectedProject)
   const briefsByNewest = hasBrief ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) : []
-  const currentBrief = briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
+  const savedBrief = briefsByNewest.find(
+    (brief) => brief.id === selectedProject?.id && brief.status !== 'contracted' && isBriefComplete(brief)
+  )
+  const currentBrief = savedBrief ?? briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
   const openPicker = useProjectPickerStore((s) => s.openPicker)
+
+  useEffect(() => {
+    if (isAuthenticated && userId && selectedProject && briefs && !savedBrief) {
+      try {
+        clearSelectedProject(userId)
+      } catch {
+        // An unavailable browser store must not prevent rendering the live project list.
+      }
+    }
+  }, [isAuthenticated, userId, selectedProject, briefs, savedBrief, clearSelectedProject])
 
   /**
    * Bộ lọc tiêu chí (mục 5) — mọi tiêu chí đều lọc THẬT `ranked`: danh sách bên

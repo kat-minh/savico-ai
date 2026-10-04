@@ -67,11 +67,12 @@ import { useCountUp, usePastElement } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { mergeProjectDetail } from '../api/contractors.logic'
+import { env } from '@/shared/config/env'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor, useContractorProject } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
-import { isInvited, remainingInvites } from '../services/contractor-list.service'
+import { isInvited } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import type { Contractor, ContractorPhoto, ContractorProject } from '../types/contractor.types'
 import { MATCHES_LAST_VIEWED_KEY } from './contractor-matches'
@@ -182,7 +183,10 @@ function InviteButton({
   const t = useTranslations('contractors.firm')
   const tCommon = useTranslations('contractors.common')
 
-  if (!contractor.acceptingProjects) {
+  const { limit } = useInvitations(projectId)
+  const rfq = useTranslations('contractors.rfq')
+
+  if (env.NEXT_PUBLIC_USE_MOCK_API && !contractor.acceptingProjects) {
     return (
       <Button size={size} className='w-full opacity-50' disabled>
         <Send className='size-4' />
@@ -213,9 +217,14 @@ function InviteButton({
 
   if (inviteLocked) {
     return (
-      <Button size={size} className='w-full' disabled title={tCommon('inviteFull', { max: MAX_INVITATIONS })}>
+      <Button
+        size={size}
+        className='w-full'
+        disabled
+        title={limit === undefined ? rfq('quotaUnavailable') : tCommon('inviteFull', { max: limit })}
+      >
         <Send className='size-4' />
-        {tCommon('inviteFull', { max: MAX_INVITATIONS })}
+        {limit === undefined ? tCommon('invite') : tCommon('inviteFull', { max: limit })}
       </Button>
     )
   }
@@ -255,15 +264,15 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   const preview = projectId === CONTRACTOR_PREVIEW_ID
 
   const { data: brief } = useBrief(projectId)
-  const { data: contractor, isPending } = useContractor(contractorId)
-  const { data: invitations } = useInvitations(projectId)
+  const { data: contractor, isPending, isError, refetch } = useContractor(contractorId)
+  const { data: invitations, remaining } = useInvitations(projectId)
 
   const compareIds = useContractorsStore((s) => s.compareIds)
   const toggleCompare = useContractorsStore((s) => s.toggleCompare)
 
   const sent = invitations ?? []
   const invited = isInvited(sent, contractorId)
-  const inviteLocked = remainingInvites(sent) === 0
+  const inviteLocked = remaining === 0
   const inCompare = compareIds.includes(contractorId)
   const compareLocked = !inCompare && compareIds.length >= MAX_INVITATIONS
   const reduceMotion = useReducedMotion()
@@ -320,6 +329,14 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
     setRenderedTab(tab)
   }
 
+  if (isError)
+    return (
+      <div className='mx-auto max-w-5xl space-y-3 p-6'>
+        <p role='alert'>{t('loadFailed')}</p>
+        <Button onClick={() => void refetch()}>{t('retry')}</Button>
+      </div>
+    )
+
   if (isPending || !contractor) {
     return (
       <div className={cn(PAGE_CONTAINER, 'space-y-6 py-5 lg:py-8')}>
@@ -347,16 +364,19 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
     {
       key: 'distance',
       icon: MapPin,
-      value: (
-        <CountedMetric
-          value={Math.round(contractor.distanceKm * 10)}
-          format={(value) =>
-            tCommon('distanceShort', {
-              km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 })
-            })
-          }
-        />
-      ),
+      value:
+        contractor.distanceKnown === false ? (
+          tCommon('distanceUnknown')
+        ) : (
+          <CountedMetric
+            value={Math.round(contractor.distanceKm * 10)}
+            format={(value) =>
+              tCommon('distanceShort', {
+                km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 })
+              })
+            }
+          />
+        ),
       hint: tCommon('distanceSuffix')
     },
     {

@@ -26,6 +26,8 @@ interface EstimateAddressFieldProps {
   /** Ô đang có chữ gõ tay chưa được xác nhận bằng một gợi ý (form không cho sang bước sau). */
   onUnconfirmedChange?: (unconfirmed: boolean) => void
   invalid?: boolean
+  required?: boolean
+  disabled?: boolean
 }
 
 /**
@@ -44,7 +46,9 @@ export function EstimateAddressField({
   onPick,
   onPinMove,
   onUnconfirmedChange,
-  invalid
+  invalid,
+  required = true,
+  disabled = false
 }: EstimateAddressFieldProps) {
   const t = useTranslations('design.inputApi')
   // `null` = ô đang hiện đúng địa chỉ đã xác nhận; chuỗi = chữ gõ tay chưa xác nhận.
@@ -56,13 +60,14 @@ export function EstimateAddressField({
   const text = typed ?? value
   const unconfirmed = typed !== null && typed.trim() !== value.trim()
   // Chỉ tìm gợi ý khi danh sách đang mở (đang gõ): ô đổi chữ do kéo ghim thì không tốn thêm một lượt tìm.
-  const { suggestions, isSearching, failed } = useEstimateAddressSearch(open ? text : '', context)
+  const { suggestions, isSearching, failed } = useEstimateAddressSearch(open && !disabled ? text : '', context)
 
   useEffect(() => {
-    onUnconfirmedChange?.(unconfirmed)
-  }, [onUnconfirmedChange, unconfirmed])
+    onUnconfirmedChange?.(unconfirmed || resolving)
+  }, [onUnconfirmedChange, unconfirmed, resolving])
 
   async function pick(refId: string, name: string, display: string, region: string) {
+    if (disabled || resolving) return
     if (blurTimer.current) clearTimeout(blurTimer.current)
     // Giữ số nhà khách đã gõ: gợi ý của VietMap thường chỉ có tên đường.
     const chosen = addressWithHouseNumber(text, name || display)
@@ -82,12 +87,13 @@ export function EstimateAddressField({
 
   return (
     <div id='field-addressDetail' className='space-y-2 sm:col-span-2'>
-      <FieldLabel htmlFor='address-detail' hint={t('address.hint')} required>
+      <FieldLabel htmlFor='address-detail' hint={t('address.hint')} required={required}>
         {t('address.label')}
       </FieldLabel>
       <div className='relative'>
         <Input
           id='address-detail'
+          disabled={disabled}
           value={text}
           placeholder={t('address.placeholder')}
           className={cn((invalid || unconfirmed) && 'border-destructive')}
@@ -107,7 +113,7 @@ export function EstimateAddressField({
         ) : null}
       </div>
 
-      {open && text.trim().length >= 2 ? (
+      {open && !disabled && text.trim().length >= 2 ? (
         <div
           className='bg-popover overflow-hidden rounded-lg border shadow-xs'
           // Bấm xuống một dòng không được làm ô nhập mất focus: mất focus là danh sách bị gỡ trước khi click kịp tới nút.
@@ -123,6 +129,7 @@ export function EstimateAddressField({
                 <li key={item.refId}>
                   <button
                     type='button'
+                    disabled={disabled || resolving}
                     className='hover:bg-accent flex w-full items-start gap-2 px-3 py-2 text-left transition-colors'
                     onClick={() => void pick(item.refId, item.name, item.display, item.address)}
                   >
@@ -147,7 +154,7 @@ export function EstimateAddressField({
       <div id='field-location' className='space-y-2'>
         {latitude !== null && longitude !== null ? (
           <>
-            <LocationMap latitude={latitude} longitude={longitude} onChange={onPinMove} />
+            <LocationMap latitude={latitude} longitude={longitude} onChange={disabled ? undefined : onPinMove} />
             <p className='text-muted-foreground text-xs'>
               {t('address.coordinates', { lat: latitude.toFixed(6), lng: longitude.toFixed(6) })}
             </p>

@@ -310,7 +310,7 @@ export const mockDesignApi = {
     })
   },
 
-  createProject: async (payload: CreateProjectPayload): Promise<Project> => {
+  createProject: async (payload: CreateProjectPayload, _key?: string): Promise<Project> => {
     await mockDelay()
     return updateStore((store) => {
       const now = new Date().toISOString()

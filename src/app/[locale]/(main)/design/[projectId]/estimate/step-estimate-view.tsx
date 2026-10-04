@@ -11,7 +11,7 @@ import {
   EstimateResultView,
   GenerationWaiting,
   displayProjectId,
-  isApiEstimateId,
+  DesignLoadError,
   StepProgress,
   useDesignStore,
   useEstimate,
@@ -23,6 +23,7 @@ import { ProactiveChatStream } from '@/features/chatbot'
 import { PersonalizedPanel, useHandbookPanelStore, type HandbookFilter } from '@/features/handbook'
 import { useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
+import { env } from '@/shared/config/env'
 import { designDossierRoute, designInputRoute, ROUTES } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
@@ -44,7 +45,8 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
   const router = useRouter()
   const { user } = useAuth()
   const draft = useDesignStore((s) => s.drafts[projectId])
-  const { data: project } = useProject(projectId)
+  const projectQuery = useProject(projectId)
+  const project = projectQuery.data
   // Mẫu thư viện khớp đúng đầu vào đã gửi AI (chỉ dự toán thật); mock/chưa đủ điều kiện thì panel dùng cách cũ.
   const matchCriteria = useMatchCriteria(projectId)
   const {
@@ -126,6 +128,16 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
     if (isSuccess && resultVisible) toast.success(t('readyToast'))
   }, [isSuccess, resultVisible, t])
 
+  if (projectQuery.isError || (estimateError && !flowError))
+    return (
+      <DesignLoadError
+        onRetry={() => {
+          void projectQuery.refetch()
+          void refetch()
+        }}
+      />
+    )
+
   return (
     <>
       <StepProgress
@@ -179,7 +191,7 @@ export function StepEstimateView({ projectId }: { projectId: string }) {
             flow='estimate'
             complete={Boolean(result)}
             // AI thật không có tiến độ phần trăm để hỏi, thời gian chờ không biết trước: vòng quay chậm hơn bản mock.
-            expectedMs={isApiEstimateId(projectId) ? 60_000 : 9_000}
+            indeterminate={!env.NEXT_PUBLIC_USE_MOCK_API}
             province={draft?.addressDetail.provinceName}
             chatStream={<ProactiveChatStream />}
           />

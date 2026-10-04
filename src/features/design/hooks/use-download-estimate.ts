@@ -2,10 +2,11 @@
 
 import { useCallback, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+import { env } from '@/shared/config/env'
 
-import { estimateGenerationApi, waitForExport } from '../api/estimate-generation.api'
+import { estimateGenerationApi, waitForExport, downloadEstimateExport } from '../api/estimate-generation.api'
 import { COST_SECTIONS } from '../constants/design.constants'
-import { isApiEstimateId } from '../services/estimate-input.logic'
 import {
   buildEstimateSheet,
   ESTIMATE_XLSX_COLUMNS,
@@ -35,22 +36,13 @@ export function useDownloadEstimate(result: EstimateResult | undefined, context:
 
     setPending(true)
     try {
-      // Dự toán thật: ưu tiên tệp Excel do BE xuất (nội dung giữ như lúc AI tạo). Xuất hỏng thì rơi về dựng tại chỗ từ
-      // chính dữ liệu đang hiển thị để khách vẫn có tệp.
-      if (isApiEstimateId(result.projectId)) {
-        try {
-          const started = await estimateGenerationApi.requestExport(result.projectId, 'Xlsx')
-          const done = await waitForExport(() => estimateGenerationApi.getExport(result.projectId, started.exportId))
-          if (done.state === 'Ready') {
-            const anchor = document.createElement('a')
-            anchor.href = estimateGenerationApi.exportFileUrl(result.projectId, started.exportId)
-            anchor.download = fileName
-            anchor.click()
-            return
-          }
-        } catch {
-          // Rơi về dựng tại chỗ.
-        }
+      // API thật chỉ cung cấp tệp của kết quả nguồn, không tự dựng Excel khi xuất hỏng.
+      if (!env.NEXT_PUBLIC_USE_MOCK_API) {
+        const started = await estimateGenerationApi.requestExport(result.projectId, 'Xlsx')
+        const done = await waitForExport(() => estimateGenerationApi.getExport(result.projectId, started.exportId))
+        if (done.state !== 'Ready') throw new Error(done.failureCode ?? 'ExportFailed')
+        await downloadEstimateExport(result.projectId, started.exportId, fileName)
+        return
       }
 
       if (remoteUrl) {
@@ -92,6 +84,9 @@ export function useDownloadEstimate(result: EstimateResult | undefined, context:
         sheet: labels.sheet,
         columns: ESTIMATE_XLSX_COLUMNS
       }).toFile(fileName)
+    } catch (error) {
+      toast.error(t('exportError'))
+      throw error
     } finally {
       setPending(false)
     }

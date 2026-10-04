@@ -1,5 +1,6 @@
 import { env } from '@/shared/config/env'
-import { http } from '@/shared/lib/api'
+import { http, httpClient } from '@/shared/lib/api'
+import { generationSchema } from '../schemas/estimate-api.schema'
 
 /**
  * Gửi AI, kết quả, xuất tệp và chia sẻ của bản dự toán THẬT (TDD-PROJ-002/003) — mỏng, chỉ khai kiểu và gọi.
@@ -13,7 +14,7 @@ export interface GenerationStarted {
   /** `Pending` khi vừa tiếp nhận. */
   state: string
   acceptedAtUtc: string
-  deadlineUtc: string
+  deadlineUtc: string | null
 }
 
 export interface ResultFile {
@@ -68,7 +69,7 @@ export interface GenerationStatus {
   /** Pending, Succeeded, Failed, TimedOut. */
   state: string
   acceptedAtUtc: string
-  deadlineUtc: string
+  deadlineUtc: string | null
   settledAtUtc?: string | null
   failureCode?: string | null
   /** Route backend của kết quả, chỉ có khi Succeeded. */
@@ -91,9 +92,8 @@ export async function waitForExport(
   for (;;) {
     const status = await fetchStatus()
     if (status.state === 'Ready' || status.state === 'Failed') return status
-    if (signal?.aborted) return { ...status, state: 'Failed', failureCode: 'Aborted' }
-    if (Date.now() - startedAt > EXPORT_MAX_WAIT_MS)
-      return { ...status, state: 'Failed', failureCode: 'ExportTimedOut' }
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+    if (Date.now() - startedAt > EXPORT_MAX_WAIT_MS) throw new Error('ExportPollingTimeout')
     await sleep(EXPORT_POLL_MS)
   }
 }
@@ -149,17 +149,20 @@ export async function fetchSharedBlob(path: string, token: string): Promise<{ bl
 
 export const estimateGenerationApi = {
   /** `GET …/generations/{operationId}` — trạng thái đúng tác vụ vừa gửi (kèm mã lỗi khi Failed / TimedOut). */
-  getGeneration: (estimateId: string, operationId: string) =>
-    http.get<GenerationStatus>(`/estimates/${estimateId}/generations/${operationId}`),
+  getGeneration: async (estimateId: string, operationId: string, signal?: AbortSignal): Promise<GenerationStatus> =>
+    generationSchema.parse(await http.get<unknown>(`/estimates/${estimateId}/generations/${operationId}`, { signal })),
 
   /** `POST /estimates/{id}/generations` — giữ một lượt, khoá đầu vào. `key` cố định để bấm đúp không giữ hai lượt. */
-  start: (estimateId: string, inputVersion: number, key?: string) =>
-    http.post<GenerationStarted>(`/estimates/${estimateId}/generations`, { inputVersion }, idempotent(key)),
+  start: async (estimateId: string, inputVersion: number, key?: string): Promise<GenerationStarted> =>
+    generationSchema.parse(
+      await http.post<unknown>(`/estimates/${estimateId}/generations`, { inputVersion }, idempotent(key))
+    ),
 
-  getResult: (estimateId: string) => http.get<EstimateResultRaw>(`/estimates/${estimateId}/result`),
+  getResult: (estimateId: string, signal?: AbortSignal) =>
+    http.get<EstimateResultRaw>(`/estimates/${estimateId}/result`, { signal }),
 
   /** Đường dẫn tệp kết quả (ảnh, bản vẽ, PDF, Excel) — BE chuyển tiếp nội dung, dùng được trong `<img src>`. */
-  resultFileUrl: (estimateId: string, fileId: string) => `/api/v1/estimates/${estimateId}/result-files/${fileId}`,
+  resultFileUrl: (estimateId: string, fileId: string) => `${apiBase()}/estimates/${estimateId}/result-files/${fileId}`,
 
   requestExport: (estimateId: string, format: ExportFormat, key?: string) =>
     http.post<{ exportId: string; state: string; attemptNumber: number }>(
@@ -171,7 +174,8 @@ export const estimateGenerationApi = {
   getExport: (estimateId: string, exportId: string) =>
     http.get<ExportStatus>(`/estimates/${estimateId}/exports/${exportId}`),
 
-  exportFileUrl: (estimateId: string, exportId: string) => `/api/v1/estimates/${estimateId}/exports/${exportId}/file`,
+  exportFileUrl: (estimateId: string, exportId: string) =>
+    `${apiBase()}/estimates/${estimateId}/exports/${exportId}/file`,
 
   createShare: (estimateId: string, expiryDate: string) =>
     http.post<ShareLink>(`/estimates/${estimateId}/shares`, { expiryDate }, idempotent()),
@@ -186,11 +190,15 @@ export const estimateGenerationApi = {
     http.post<{ exportId: string; state: string; attemptNumber: number }>(
       `/public/estimate-shares/${shareId}/exports`,
       { format },
-      { headers: { [SHARE_TOKEN_HEADER]: token, 'Idempotency-Key': key ?? crypto.randomUUID() } }
+      {
+        withCredentials: false,
+        headers: { [SHARE_TOKEN_HEADER]: token, 'Idempotency-Key': key ?? crypto.randomUUID() }
+      }
     ),
 
   publicGetExport: (shareId: string, token: string, exportId: string) =>
     http.get<ExportStatus>(`/public/estimate-shares/${shareId}/exports/${exportId}`, {
+      withCredentials: false,
       headers: { [SHARE_TOKEN_HEADER]: token }
     }),
 
@@ -210,9 +218,9 @@ export const estimateGenerationApi = {
       estimateName: string
       dossier: { content?: unknown; files?: ResultFile[] }
       exportAvailability?: ExportAvailability[]
-    }>(`/public/estimate-shares/${shareId}`, { headers: { 'X-Estimate-Share-Token': token } }),
+    }>(`/public/estimate-shares/${shareId}`, { withCredentials: false, headers: { 'X-Estimate-Share-Token': token } }),
 
-  shareQrUrl: (estimateId: string, shareId: string) => `/api/v1/estimates/${estimateId}/shares/${shareId}/qr`,
+  shareQrUrl: (estimateId: string, shareId: string) => `${apiBase()}/estimates/${estimateId}/shares/${shareId}/qr`,
 
   emailShare: (estimateId: string, shareId: string, recipient: string) =>
     http.post<{ emailRequestId: string; state: string }>(
@@ -220,4 +228,32 @@ export const estimateGenerationApi = {
       { recipient },
       idempotent()
     )
+}
+
+/** Tải tệp của chủ sở hữu qua cookie/refresh hiện có; tên tệp lấy từ backend. */
+export async function downloadEstimateExport(
+  estimateId: string,
+  exportId: string,
+  fallbackName: string
+): Promise<void> {
+  const response = await httpClient.get<Blob>(`/estimates/${estimateId}/exports/${exportId}/file`, {
+    responseType: 'blob'
+  })
+  const disposition: string = response.headers['content-disposition'] ?? ''
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1]
+  const plain = /filename="?([^";]+)"?/i.exec(disposition)?.[1]
+  let name = plain ?? fallbackName
+  if (encoded) {
+    try {
+      name = decodeURIComponent(encoded)
+    } catch {
+      /* Giữ tên dự phòng. */
+    }
+  }
+  const url = URL.createObjectURL(response.data)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = name
+  anchor.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }

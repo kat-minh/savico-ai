@@ -1,11 +1,7 @@
-/**
- * Logic thuần của màn CÔNG TRÌNH (phía nhân viên) — không gọi mạng, không import alias,
- * để kiểm được bằng `node --experimental-strip-types` không cần backend.
- *
- * Nguồn hợp đồng: TDD-SITE-001 ("Phạm vi xem của khách và nhân viên") + TDD-SITE-002
- * (toạ độ), STORY-SITE-002, BR-SITE-003. Swagger không mô tả response; ví dụ JSON chính
- * thức chỉ có GET chi tiết, nên dòng danh sách được suy ra cùng dạng. Mọi field đều đọc
- * phòng thủ: BE thêm/bớt field không được làm sập màn.
+import { z } from 'zod'
+
+/** DTO quản trị chỉ đọc theo TDD-SITE-003/005 và Response.StaffConstructionSiteItem.
+ * Kiểm cấu trúc phần hồ sơ tại ranh giới API, không tự bù dữ liệu thiếu bằng số 0.
  */
 
 /** Trạng thái một gói giám sát gắn với công trình (TDD-SITE-001). */
@@ -27,7 +23,48 @@ export interface SiteGrant {
   assignedAtUtc: string | null
 }
 
-export interface AdminConstructionSite {
+const expandedSiteSchema = z.object({
+  profile: z.object({
+    areaM2: z.string().regex(/^\d+(?:\.\d{1,2})?$/),
+    addressDetail: z.string(),
+    floorCount: z.number().int().positive().nullable(),
+    hasTum: z.boolean().nullable(),
+    architectureStyleId: z.string().uuid().nullable(),
+    interiorStyleId: z.string().uuid().nullable()
+  }),
+  conditionName: z.string(),
+  budgetVnd: z.string().regex(/^\d+$/),
+  plannedStart: z.enum(['ASAP', 'Within1To3Months', 'Within3To6Months', 'Undecided']),
+  provinceName: z.string(),
+  wardName: z.string(),
+  sourceEstimateId: z.string().uuid().nullable(),
+  buildingTypeName: z.string(),
+  architectureStyleName: z.string().nullable(),
+  interiorStyleName: z.string().nullable(),
+  files: z.array(
+    z.object({
+      id: z.string().uuid(),
+      attachmentGroup: z.enum(['Drawing', 'ConditionPhoto']),
+      originalName: z.string(),
+      mediaType: z.string(),
+      sizeBytes: z.number().int().nonnegative(),
+      createdAtUtc: z.string()
+    })
+  )
+})
+
+export type AdminSiteAttachment = z.infer<typeof expandedSiteSchema>['files'][number]
+
+/** Giữ chính xác số tiền/diện tích decimal của backend, kể cả lớn hơn MAX_SAFE_INTEGER. */
+export function formatSiteDecimal(value: string, locale: string): string {
+  const [whole = '0', fraction] = value.split('.')
+  const grouped = new Intl.NumberFormat(locale).format(BigInt(whole))
+  const separator =
+    new Intl.NumberFormat(locale).formatToParts(1.1).find((part) => part.type === 'decimal')?.value ?? '.'
+  return fraction ? `${grouped}${separator}${fraction}` : grouped
+}
+
+export interface AdminConstructionSite extends z.infer<typeof expandedSiteSchema> {
   constructionSiteId: string
   name: string
   address: string
@@ -64,6 +101,7 @@ export function normalizeSite(raw: unknown): AdminConstructionSite {
   const r = record(raw) ?? {}
   const owner = record(r.owner)
   return {
+    ...expandedSiteSchema.parse(raw),
     constructionSiteId: text(r.constructionSiteId) || text(r.id),
     name: text(r.name),
     address: text(r.address),

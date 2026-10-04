@@ -2,9 +2,13 @@ import { env } from '@/shared/config/env'
 import type { Invitation, ProjectBrief, SurveyRequest } from '../types/contractor.types'
 import { bmtContractorsApi } from './contractors.bmt'
 import { mockContractorsApi } from './contractors.mock'
+import { constructionBriefsApi } from './construction-briefs.api'
 
 /** Dữ liệu ghi xuống khi lưu Bước 1 (S10). */
-export type SaveBriefPayload = Omit<ProjectBrief, 'id' | 'createdAt' | 'updatedAt' | 'status'>
+export type SaveBriefPayload = Omit<
+  ProjectBrief,
+  'id' | 'userId' | 'ownershipVersion' | 'createdAt' | 'updatedAt' | 'status'
+>
 
 /**
  * "Tạo hồ sơ từ gói" (S09, ★ mục 9) — sinh hồ sơ bằng dữ liệu đã có từ dự án
@@ -23,22 +27,21 @@ export interface SurveyRequestDetail {
   invitations: Invitation[]
 }
 
-/**
- * Chức năng đã nối BMT API. Hàm nào API chưa đáp ứng đủ giao diện thì KHÔNG
- * khai ở đây — vẫn chạy bản mock kể cả khi tắt `NEXT_PUBLIC_USE_MOCK_API`
- * (danh sách thiếu gửi BE: `docs/BE_API_GAPS.md`).
- *
- * Đã nối: `listContractors` (`GET /contractors`), `getContractor`
- * (`GET /contractors/{id}`), `getContractorProject`
- * (`GET /contractors/{id}/projects/{projectId}`) — STORY-CTR-004. Luồng cũ (mời/khảo sát/đánh giá/so
- * sánh/hồ sơ gửi thầu) không có API → giữ mock.
- */
+/** SITE and public directory API. RFQ uses quotationRequestsApi directly; legacy batch/survey APIs are mock-only. */
+function legacyQuotationUnavailable(): Promise<never> {
+  return Promise.reject(new Error('UseQuotationRequestsApi'))
+}
 const BmtContractorsApi = {
+  ...constructionBriefsApi,
+  listInvitations: legacyQuotationUnavailable,
+  createInvitations: legacyQuotationUnavailable,
+  getSurveyRequest: legacyQuotationUnavailable,
+  listSlots: legacyQuotationUnavailable,
   listContractors: bmtContractorsApi.listContractors,
   getContractor: bmtContractorsApi.getContractor,
   getContractorProject: bmtContractorsApi.getContractorProject
 } satisfies Partial<typeof mockContractorsApi>
 
 export const contractorsApi = env.NEXT_PUBLIC_USE_MOCK_API
-  ? mockContractorsApi
+  ? { ...mockContractorsApi, ...constructionBriefsApi }
   : { ...mockContractorsApi, ...BmtContractorsApi }

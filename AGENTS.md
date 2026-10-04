@@ -8,7 +8,46 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 The UI contract is `docs/MO_TA_GIAO_DIEN.md` (11 screens, mục V). **Read it before changing any screen** — code comments reference it by section number (e.g. `mục III.2, trường 4`). `docs/TRANG_THAI_DUNG_KHUNG.md` maps each screen to its route + components and tracks what is still stubbed.
 
-The product is a 3-step flow — **Nhập liệu → Nhận dự toán → Hồ sơ thi công** — wrapped in a public site (trang chủ, Cẩm nang, Hướng dẫn) and an account screen. This folder was rebuilt from the earlier BMT codebase after the client changed requirements; the original is preserved at `../bmt/` and is the place to copy proven code from (estimate tables, PDF service, admin CMS).
+The product is a 3-step flow — **Nhập liệu → Nhận dự toán → Hồ sơ thi công** — wrapped in a public site (trang chủ, Cẩm nang, Hướng dẫn) and an account screen. This is the current frontend source in the BMT workspace; the backend and feature documentation are sibling repositories described below.
+
+## Workspace và quy trình triển khai
+
+Các đường dẫn trong mục này tính từ gốc `savico-ai/`.
+
+| Thành phần         | Đường dẫn               | Vai trò                                                                      |
+| ------------------ | ----------------------- | ---------------------------------------------------------------------------- |
+| Frontend hiện tại  | `./`                    | Next.js, React, TypeScript; triển khai màn hình và API client                |
+| Backend            | `../bmt-be/`            | .NET REST API; đọc endpoint, DTO, validator và handler để đối chiếu contract |
+| Tài liệu tính năng | `../bmt-documentation/` | User Story, Business Rule, TDD, đặc tả Unit Test/System Test                 |
+
+Không dùng `../bmt/` hoặc `savico/` làm đường dẫn source cũ mặc định. Chỉ tái sử dụng code lịch sử khi đã xác minh vị trí và mức độ phù hợp. Đọc hướng dẫn áp dụng trong mỗi repository trước khi làm việc tại đó; yêu cầu nối API frontend không mặc nhiên bao gồm sửa backend.
+
+### Skill bắt buộc theo phạm vi
+
+- Triển khai hoặc sửa tính năng frontend: đọc [savico-implement-feature](.claude/skills/savico-implement-feature/SKILL.md).
+- Thêm/sửa API client, nối backend hoặc thay mock: đọc [savico-integrate-api](.claude/skills/savico-integrate-api/SKILL.md). Tính năng có nối API áp dụng cả hai, dùng lại kết quả đọc tài liệu trong cùng tác vụ.
+- Soạn tài liệu và báo cáo: đọc `../bmt-be/.claude/skills/vietnamese-clear-writing/SKILL.md` hoặc bản đồng bộ `.codex` và áp dụng cùng skill chuyên môn.
+- Skill chuẩn nằm trong `.claude/skills/`; `.agents/skills` và `.codex/skills` liên kết tới cùng thư mục cho Codex. Nếu phiên chưa liệt kê skill, đọc trực tiếp đường dẫn trên. Không kết luận thiếu skill chỉ vì chưa được tự động nạp.
+- Khi sửa quy trình chung, cập nhật cả AGENTS.md và CLAUDE.md; giữ nội dung tương đương, trừ tên công cụ ở phần mở đầu.
+
+### Bắt buộc đọc bmt-documentation trước khi code
+
+Quy định áp dụng cho implement tính năng, sửa hành vi và thêm/sửa/tích hợp API. Đọc [quy trình đầy đủ](.claude/skills/savico-implement-feature/references/documentation-workflow.md), không dùng kết quả tìm kiếm thay cho nội dung tài liệu.
+
+1. Tìm tài liệu bằng mã và nội dung tính năng trong `userstory/`, `businessrule/`, `tdd/`, `unittest/`, `systemtest/`. Mã thường có dạng `STORY-`, `BR-`, `TDD-`, `UT-`, `ST-`. `templates/` chỉ chứa mẫu, không phải nghiệp vụ thật; đọc thêm `database/`, `discovery/`, `debt/` khi liên quan.
+2. Khi triển khai tính năng, đọc hết TDD của tính năng trước khi viết code, cùng Story, BR và đặc tả test liên quan. Đi theo tham chiếu và tìm tham chiếu ngược, kiểm tra section/AC đích và theo dõi nguồn đã đọc để tránh vòng lặp. Không mở rộng phạm vi triển khai chỉ vì tài liệu dẫn sang tính năng khác.
+3. Đối chiếu tài liệu với backend source và OpenAPI của môi trường đích. Swagger từng được cấu hình tại `https://bmt-api.vnzdna.com/swagger/index.html`; phải xác minh trước khi dùng. Không suy diễn endpoint, DTO, role/permission, trạng thái, mã lỗi hay hạn mức từ mock hoặc nhãn UI.
+4. Trước khi sửa code, tóm tắt nguồn đã đọc, AC/BR, contract, phần dùng chung và điểm thiếu/mâu thuẫn. Yêu cầu rõ ràng của người dùng được ưu tiên; chỉ hỏi quyết định chưa có căn cứ và tạm dừng phần phụ thuộc, tiếp tục phần độc lập.
+5. Backend chưa có API thì báo rõ, không tạo endpoint giả hoặc âm thầm fallback sang mock trong chế độ API thật. Phân biệt đã code, chạy mock và kiểm chứng API thật khi bàn giao.
+
+Tài liệu giao diện vẫn là `docs/MO_TA_GIAO_DIEN.md`; đọc trước khi sửa màn hình và đối chiếu `docs/TRANG_THAI_DUNG_KHUNG.md`. Khi được giao soạn/sửa tài liệu nghiệp vụ, đọc hướng dẫn và template trong `bmt-documentation/`; không mặc định dùng kho MCP Document First thay cho thư mục này.
+
+### Bắt buộc thông báo khi thay đổi hoặc xoá giao diện
+
+- Trước khi thêm, sửa, ẩn hoặc xoá thành phần giao diện, thông báo màn hình/route, phần bị tác động, lý do và hành vi trước → sau. Bao gồm trường nhập, nút, nội dung, điều hướng và điều kiện hiển thị.
+- Không xoá trường, nút hoặc màn hình chỉ vì backend thiếu API/dữ liệu. Báo chênh lệch và phương án xử lý; giữ luồng hiện có khi yêu cầu chỉ là nối API.
+- Thay đổi đã được giao rõ thì thông báo rồi thực hiện, không yêu cầu duyệt lại. Nếu cần xoá hoặc đổi luồng ngoài phạm vi đã giao, đưa phương án cụ thể và hỏi trước khi thực hiện phần đó.
+- Bàn giao phải nêu thay đổi giao diện thực tế và phần đã xoá/ẩn; nếu không thay đổi giao diện thì ghi rõ.
 
 ## Commands
 

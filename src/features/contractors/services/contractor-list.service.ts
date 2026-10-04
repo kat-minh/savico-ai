@@ -27,10 +27,12 @@ export interface ContractorFilters {
   region?: ServiceRegion
 }
 
+const distanceScore = (c: Contractor) => (c.distanceKnown === false ? Number.POSITIVE_INFINITY : c.distanceKm)
+
 const COMPARATORS: Record<ContractorSort, (a: Contractor, b: Contractor) => number> = {
-  distance: (a, b) => a.distanceKm - b.distanceKm,
+  distance: (a, b) => distanceScore(a) - distanceScore(b),
   rating: (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount,
-  survey: (a, b) => a.surveyWithinHours - b.surveyWithinHours || a.distanceKm - b.distanceKm
+  survey: (a, b) => a.surveyWithinHours - b.surveyWithinHours || distanceScore(a) - distanceScore(b)
 }
 
 /**
@@ -96,7 +98,9 @@ export function filterContractors(
   criteria: ContractorCriteria = {}
 ): Contractor[] {
   return contractors
-    .filter((c) => c.distanceKm <= filters.radiusKm)
+    .filter(
+      (c) => !Number.isFinite(filters.radiusKm) || (c.distanceKnown !== false && c.distanceKm <= filters.radiusKm)
+    )
     .filter((c) => !filters.region || c.region === filters.region)
     .filter((c) => matchesCriteria(c, criteria))
     .sort(COMPARATORS[filters.sort])
@@ -106,11 +110,11 @@ export function filterContractors(
  * R1 — còn được mời bao nhiêu nhà thầu nữa. Đủ 3 thì mọi nút "Mời báo giá" ở
  * S12/S13/S15 phải khóa lại, không chỉ ẩn ô đếm ở S18.
  */
-export function remainingInvites(invitations: readonly Invitation[]): number {
+export function remainingInvites(invitations: readonly Pick<Invitation, 'contractorId'>[]): number {
   return Math.max(0, MAX_INVITATIONS - invitations.length)
 }
 
 /** Nhà thầu này đã được mời cho dự án đang xét chưa. */
-export function isInvited(invitations: readonly Invitation[], contractorId: string): boolean {
+export function isInvited(invitations: readonly Pick<Invitation, 'contractorId'>[], contractorId: string): boolean {
   return invitations.some((invitation) => invitation.contractorId === contractorId)
 }

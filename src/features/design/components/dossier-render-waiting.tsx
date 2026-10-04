@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertCircle, Check, Lightbulb } from 'lucide-react'
+import { env } from '@/shared/config/env'
+import { AlertCircle, Check, Lightbulb, Loader2 } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
@@ -69,7 +70,7 @@ export function DossierRenderWaiting({
   const completing = flow.phase === 'completing' && !flow.error
 
   useEffect(() => {
-    if (!completing || !reduced) return
+    if (!completing || (!reduced && env.NEXT_PUBLIC_USE_MOCK_API)) return
     const timer = window.setTimeout(onComplete, 0)
     return () => window.clearTimeout(timer)
   }, [completing, onComplete, reduced])
@@ -79,6 +80,23 @@ export function DossierRenderWaiting({
     const timer = window.setInterval(() => setTip((current) => (current + 1) % 3), 9_000)
     return () => window.clearInterval(timer)
   }, [flow.error])
+
+  if (!env.NEXT_PUBLIC_USE_MOCK_API)
+    return (
+      <div role='status' data-generation-waiting className='flex flex-col items-center gap-4 py-8 text-center'>
+        {flow.error ? (
+          <AlertCircle className='text-destructive size-12' />
+        ) : (
+          <Loader2 aria-hidden className='text-primary size-12 animate-spin' />
+        )}
+        <p className='text-sm'>{flow.error ? t('error') : t('processing')}</p>
+        {flow.error ? (
+          <Button variant='outline' onClick={onRetry}>
+            {t('retry')}
+          </Button>
+        ) : null}
+      </div>
+    )
 
   return (
     <div

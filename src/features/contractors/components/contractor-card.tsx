@@ -15,6 +15,7 @@ import { contractorFirmRoute, contractorInvitationsRoute, contractorInviteRoute 
 import { useCountUp } from '@/shared/hooks/use-count-up'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
+import { useInvitations } from '../hooks/use-invitations'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import type { Contractor, ContractorSort } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
@@ -67,6 +68,8 @@ export function ContractorCard({
 }: ContractorCardProps) {
   const t = useTranslations('contractors.common')
   const tMatches = useTranslations('contractors.matches')
+  const rfq = useTranslations('contractors.rfq')
+  const { limit, isError, siteRequired } = useInvitations(projectId)
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
 
@@ -123,12 +126,17 @@ export function ContractorCard({
     {
       key: 'distance',
       icon: MapPin,
-      value: (
-        <AnimatedMetric
-          value={Math.round(contractor.distanceKm * 10)}
-          format={(value) => t('distanceShort', { km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 }) })}
-        />
-      ),
+      value:
+        contractor.distanceKnown === false ? (
+          t('distanceUnknown')
+        ) : (
+          <AnimatedMetric
+            value={Math.round(contractor.distanceKm * 10)}
+            format={(value) =>
+              t('distanceShort', { km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 }) })
+            }
+          />
+        ),
       hint: t('distanceSuffix')
     },
     {
@@ -286,7 +294,18 @@ export function ContractorCard({
             </Link>
           </Button>
         ) : inviteLocked ? (
-          <Button disabled title={tMatches('inviteLimitReached', { max: MAX_INVITATIONS })}>
+          <Button
+            disabled
+            title={
+              siteRequired
+                ? rfq('siteRequired')
+                : isError
+                  ? rfq('quotaUnavailable')
+                  : limit === undefined
+                    ? rfq('loading')
+                    : tMatches('inviteLimitReached', { max: limit })
+            }
+          >
             <Send className='size-4' />
             {t('invite')}
           </Button>

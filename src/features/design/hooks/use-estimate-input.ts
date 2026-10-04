@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { isApiError } from '@/shared/lib/api'
 import { estimateInputApi, type EstimateDetail } from '../api/estimate-input.api'
 import { designKeys } from '../api/design.keys'
-import { readStoredLocation, writeStoredLocation } from '../services/estimate-location.storage'
 import {
   applyBuildingType,
   changedFields,
@@ -14,7 +13,6 @@ import {
   inputBody,
   missingFields,
   normalizeSaved,
-  supportsCoordinates,
   type EstimateInputBody,
   type EstimateInputDraft
 } from '../services/estimate-input.logic'
@@ -29,7 +27,7 @@ const STATIC_STALE = 60 * 60 * 1000
  * - `error`: lưu hỏng (mạng / máy chủ) — nội dung vẫn giữ, có Thử lại và tự thử khi có mạng
  * - `denied`: BE từ chối vì quyền / gói / lượt / đang khoá đầu vào — không tự thử lại (khoản 7 phần Except)
  */
-export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error' | 'denied'
+export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error' | 'denied' | 'conflict'
 
 /** Vì sao form không sửa được (BR-PROJ-005: AI đang chạy hoặc đã có kết quả thì khoá đầu vào). */
 export type LockReason = 'noEdit' | 'generating' | 'generated' | null
@@ -50,14 +48,14 @@ function lockReasonOf(detail: EstimateDetail | undefined, deniedCode: string | n
  * state; tự lưu bằng `PUT /estimates/{id}/input`.
  *
  * Mỗi lần lưu gửi ĐỦ mọi trường kèm `changedFields` = trường khác bản đã lưu. Các lần lưu chạy NỐI TIẾP (mỗi lần
- * tăng `inputVersion`), gặp `InputVersionConflict` thì đọc lại phiên bản rồi thử đúng một lần nữa.
+ * tăng `inputVersion`). Xung đột phiên bản giữ nội dung đang nhập và chặn ghi đến khi khách chủ động tải bản đã lưu.
  */
 export function useEstimateInput(projectId: string) {
   const queryClient = useQueryClient()
 
   const detail = useQuery({
     queryKey: designKeys.estimateDetail(projectId),
-    queryFn: () => estimateInputApi.getEstimate(projectId),
+    queryFn: ({ signal }) => estimateInputApi.getEstimate(projectId, signal),
     staleTime: Infinity,
     refetchOnWindowFocus: false
   })
@@ -85,9 +83,14 @@ export function useEstimateInput(projectId: string) {
   const timerRef = useRef<number | null>(null)
   const chainRef = useRef<Promise<boolean>>(Promise.resolve(true))
   const deniedRef = useRef(false)
-  // BE đã lưu toạ độ cho dự toán này? Quyết định có gửi `latitude`/`longitude` (và khai trong `changedFields`) hay không.
-  const coordinatesRef = useRef(false)
-  const [coordinatesSupported, setCoordinatesSupported] = useState(false)
+  const coordinatesSupported = true
+  const conflictRef = useRef(false)
+  const editsFrozenRef = useRef(false)
+  const autoRetryRef = useRef(false)
+  const requestRef = useRef<{
+    key: string
+    body: { expectedInputVersion: number; changedFields: string[]; input: EstimateInputBody }
+  } | null>(null)
   // Đang chờ kết quả bản đồ (tìm toạ độ / tra địa chỉ): KHÔNG lưu, để khỏi gửi địa chỉ mới kèm toạ độ cũ (TDD-PROJ-001).
   const holdRef = useRef(0)
   const pendingSaveRef = useRef(false)
@@ -96,16 +99,7 @@ export function useEstimateInput(projectId: string) {
   // Nạp bản đã lưu vào form MỘT lần; sau đó form là nguồn sự thật, server chỉ xác nhận.
   useEffect(() => {
     if (!detail.data || draftRef.current) return
-    const supported = supportsCoordinates(detail.data.input)
-    coordinatesRef.current = supported
-    setCoordinatesSupported(supported)
     const initial = draftFromInput(detail.data.input)
-    if (!supported) {
-      // BE chưa lưu toạ độ: lấy lại vị trí đã chọn ở trình duyệt này.
-      const stored = readStoredLocation(projectId)
-      initial.latitude = stored?.latitude ?? null
-      initial.longitude = stored?.longitude ?? null
-    }
     draftRef.current = initial
     savedRef.current = normalizeSaved(detail.data.input)
     versionRef.current = detail.data.inputVersion
@@ -126,47 +120,74 @@ export function useEstimateInput(projectId: string) {
    * tiếp). Trả `true` nếu đã lưu hết.
    */
   const saveAll = useCallback(async (): Promise<boolean> => {
-    let retried = false
     for (;;) {
+      if (holdRef.current > 0) await new Promise<void>((resolve) => holdWaitersRef.current.push(resolve))
+      autoRetryRef.current = false
       const current = draftRef.current
       const saved = savedRef.current
-      if (!current || !saved || deniedRef.current) return !deniedRef.current
-      const withCoordinates = coordinatesRef.current
+      if (!current || !saved || deniedRef.current || conflictRef.current) return false
+      const withCoordinates = true
       const changed = changedFields(saved, current, withCoordinates)
-      if (changed.length === 0) {
+      if (changed.length === 0 && !requestRef.current) {
         setStatus((previous) => (previous === 'idle' ? previous : 'saved'))
         return true
       }
 
       const body = inputBody(current, withCoordinates)
-      setStatus('saving')
-      try {
-        const result = await estimateInputApi.saveInput(projectId, {
+      const addressChanged = changed.some((field) => ['provinceCode', 'wardCode', 'addressDetail'].includes(field))
+      if (!requestRef.current && addressChanged && (body.latitude === null || body.longitude === null)) {
+        setStatus('error')
+        return false
+      }
+      requestRef.current ??= {
+        key: crypto.randomUUID(),
+        body: {
           expectedInputVersion: versionRef.current,
           changedFields: changed,
           input: body
-        })
-        savedRef.current = body
-        versionRef.current = result.savedInputVersion
+        }
+      }
+      const request = requestRef.current
+      setStatus('saving')
+      try {
+        const receipt = await estimateInputApi.saveInput(projectId, request.body, request.key)
+        // GET là nguồn chính thức cho dữ liệu chuẩn hóa; không đoán từ body gửi lên.
+        const fresh = await estimateInputApi.getEstimate(projectId)
+        if (fresh.inputVersion !== receipt.savedInputVersion) {
+          conflictRef.current = true
+          requestRef.current = null
+          setStatus('conflict')
+          return false
+        }
+        const confirmed = normalizeSaved(fresh.input)
+        const latest = draftRef.current ?? current
+        const editedWhileSaving = changedFields(request.body.input, latest, true)
+        const reconciled = draftFromInput(fresh.input)
+        for (const field of editedWhileSaving) Object.assign(reconciled, { [field]: latest[field] })
+        savedRef.current = confirmed
+        versionRef.current = fresh.inputVersion
+        requestRef.current = null
+        draftRef.current = reconciled
+        setDraft(reconciled)
+        queryClient.setQueryData(designKeys.estimateDetail(projectId), fresh)
         setErrorMessage(null)
-        retried = false
-        // Vòng sau kiểm lại: còn khác bản vừa lưu thì lưu tiếp, hết thì báo "Đã lưu".
       } catch (error) {
+        autoRetryRef.current = isApiError(error) && (error.status === 0 || error.status >= 500)
         if (isApiError(error)) {
-          if (error.messageCode === 'InputVersionConflict' && !retried) {
-            const fresh = await estimateInputApi.getEstimate(projectId)
-            savedRef.current = normalizeSaved(fresh.input)
-            versionRef.current = fresh.inputVersion
-            queryClient.setQueryData(designKeys.estimateDetail(projectId), fresh)
-            retried = true
-            continue
+          const code = error.messageCode ?? error.code
+          if (code === 'InputVersionConflict') {
+            requestRef.current = null
+            conflictRef.current = true
+            setStatus('conflict')
+            return false
           }
+          // Không tự thử lại dữ liệu sai, hạn mức hoặc dataset đã thay đổi.
+          if (error.status > 0 && error.status < 500) requestRef.current = null
           // Quyền / gói / lượt / đang khoá: không tự thử lại để vượt khoá (BR-PROJ-003 phần Except).
-          const locked =
-            error.messageCode === 'GenerationInProgress' || error.messageCode === 'EstimateAlreadyGenerated'
-          if (error.status === 403 || locked) {
+          const locked = code === 'GenerationInProgress' || code === 'EstimateAlreadyGenerated'
+          if (error.status === 403 || code === 'QuotaUnavailable' || locked) {
             deniedRef.current = true
-            setDeniedCode(error.messageCode ?? 'AccessForbidden')
+            setDeniedCode(code ?? 'AccessForbidden')
             setErrorMessage(error.message)
             setStatus('denied')
             return false
@@ -189,7 +210,7 @@ export function useEstimateInput(projectId: string) {
 
   const scheduleSave = useCallback(
     (delay: number = AUTOSAVE_DELAY_MS) => {
-      if (deniedRef.current) return
+      if (deniedRef.current || conflictRef.current) return
       if (timerRef.current) window.clearTimeout(timerRef.current)
       setStatus('pending')
       if (holdRef.current > 0) {
@@ -239,7 +260,7 @@ export function useEstimateInput(projectId: string) {
   // Mất mạng → có mạng lại thì tự thử lưu (BR-PROJ-003 khoản 7).
   useEffect(() => {
     const onOnline = () => {
-      if (status === 'error') void flush()
+      if (status === 'error' && autoRetryRef.current) void flush()
     }
     window.addEventListener('online', onOnline)
     return () => window.removeEventListener('online', onOnline)
@@ -254,20 +275,12 @@ export function useEstimateInput(projectId: string) {
 
   const update = useCallback(
     (next: EstimateInputDraft) => {
+      if (editsFrozenRef.current) return
       draftRef.current = next
       setDraft(next)
-      // BE chưa lưu toạ độ: giữ ở trình duyệt để reload không mất.
-      if (!coordinatesRef.current) {
-        writeStoredLocation(
-          projectId,
-          next.latitude !== null && next.longitude !== null
-            ? { latitude: next.latitude, longitude: next.longitude }
-            : null
-        )
-      }
       scheduleSave()
     },
-    [projectId, scheduleSave]
+    [scheduleSave]
   )
 
   const patch = useCallback(
@@ -303,7 +316,35 @@ export function useEstimateInput(projectId: string) {
     [catalog.data, coordinatesSupported, draft]
   )
 
+  const reloadSaved = useCallback(async () => {
+    try {
+      const fresh = await estimateInputApi.getEstimate(projectId)
+      const loaded = draftFromInput(fresh.input)
+      savedRef.current = normalizeSaved(fresh.input)
+      versionRef.current = fresh.inputVersion
+      draftRef.current = loaded
+      requestRef.current = null
+      conflictRef.current = false
+      deniedRef.current = false
+      setDeniedCode(null)
+      setDraft(loaded)
+      setStatus('idle')
+      queryClient.setQueryData(designKeys.estimateDetail(projectId), fresh)
+      // Không tự gửi PUT sau tải lại: khách xem bản hiện hành trước khi sửa tiếp.
+    } catch (error) {
+      setErrorMessage(isApiError(error) ? error.message : null)
+    }
+  }, [projectId, queryClient])
+
   const lock = lockReasonOf(detail.data, deniedCode)
+
+  /** Giữ nguyên bản vừa lưu trong lúc kiểm tra và gửi Generate. */
+  const freezeEdits = useCallback(() => {
+    editsFrozenRef.current = true
+    return () => {
+      editsFrozenRef.current = false
+    }
+  }, [])
 
   return {
     detail,
@@ -322,8 +363,9 @@ export function useEstimateInput(projectId: string) {
     chooseWard,
     getDraft: () => draftRef.current,
     hold,
+    freezeEdits,
     coordinatesSupported,
     flush,
-    retry: flush
+    retry: conflictRef.current ? reloadSaved : flush
   }
 }

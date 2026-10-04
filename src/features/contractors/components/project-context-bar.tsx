@@ -10,6 +10,7 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { contractorBriefRoute, contractorInvitationsRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
+import { env } from '@/shared/config/env'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useInvitations } from '../hooks/use-invitations'
 import { shortAddress } from '../services/brief.service'
@@ -46,9 +47,10 @@ interface ProjectContextBarProps {
 export function ProjectContextBar({ brief, condensed = false, invitedPill, extra }: ProjectContextBarProps) {
   const t = useTranslations('contractors.common')
   const tBar = useTranslations('contractors.projectBar')
+  const rfq = useTranslations('contractors.rfq')
   const tScale = useTranslations('contractors.scale')
   const openPicker = useProjectPickerStore((s) => s.openPicker)
-  const { data: invitations } = useInvitations(brief?.id ?? '')
+  const { data: invitations, limit, isError, siteRequired } = useInvitations(brief?.id ?? '')
 
   if (!brief) {
     return <Skeleton className='h-20 w-full rounded-2xl' />
@@ -131,17 +133,23 @@ export function ProjectContextBar({ brief, condensed = false, invitedPill, extra
 
       <div className='flex flex-wrap items-center gap-3'>
         {extra}
-        {invitedPill ?? (
-          <span
-            className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap',
-              invitedCount >= MAX_INVITATIONS
-                ? 'bg-brand-orange-soft text-brand-orange'
-                : 'bg-accent text-primary-strong'
-            )}
-          >
-            {tBar('invited', { used: invitedCount, max: MAX_INVITATIONS })}
+        {!env.NEXT_PUBLIC_USE_MOCK_API && limit === undefined ? (
+          <span role='status' className='text-muted-foreground text-xs'>
+            {siteRequired ? rfq('siteRequired') : isError ? rfq('quotaUnavailable') : rfq('loading')}
           </span>
+        ) : (
+          (invitedPill ?? (
+            <span
+              className={cn(
+                'rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap',
+                invitedCount >= (limit ?? Infinity)
+                  ? 'bg-brand-orange-soft text-brand-orange'
+                  : 'bg-accent text-primary-strong'
+              )}
+            >
+              {tBar('invited', { used: invitedCount, max: limit ?? MAX_INVITATIONS })}
+            </span>
+          ))
         )}
         <Link
           href={contractorInvitationsRoute(brief.id)}

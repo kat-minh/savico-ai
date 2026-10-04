@@ -21,7 +21,7 @@ import { COMPARE_CRITERIA, MAX_INVITATIONS, MIN_COMPARE } from '../constants/con
 import { useBrief } from '../hooks/use-brief'
 import { useContractors } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
-import { remainingInvites } from '../services/contractor-list.service'
+import { isInvited } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import type { Contractor } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
@@ -94,7 +94,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
 
   const { data: brief } = useBrief(projectId)
   const { data: contractors, isPending } = useContractors(projectId)
-  const { data: invitations } = useInvitations(projectId)
+  const { data: invitations, remaining } = useInvitations(projectId)
 
   const compareIds = useContractorsStore((s) => s.compareIds)
   const toggleCompare = useContractorsStore((s) => s.toggleCompare)
@@ -129,11 +129,12 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
   const rows = compareIds
     .map((id) => (contractors ?? []).find((contractor) => contractor.id === id))
     .filter((contractor): contractor is Contractor => Boolean(contractor))
-  const room = remainingInvites(invitations ?? [])
+  const room = remaining
 
   const togglePick = (contractorId: string) =>
     setPicked((current) => {
       if (current.includes(contractorId)) return current.filter((id) => id !== contractorId)
+      if (isInvited(invitations ?? [], contractorId)) return current
       if (current.length >= room) {
         setExceedShakeId(contractorId)
         window.setTimeout(() => setExceedShakeId(null), 450)
@@ -167,8 +168,9 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
       return
     }
     if (picked.length === 0) return
-    startInviteQueue(picked)
-    const first = picked[0]
+    const eligible = picked.filter((id) => !isInvited(invitations ?? [], id)).slice(0, room)
+    startInviteQueue(eligible, projectId)
+    const first = eligible[0]
     if (first) router.push(contractorInviteRoute(projectId, first))
   }
 
@@ -461,6 +463,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                                 variant={isPicked ? 'default' : 'outline'}
                                 className={cn('h-11 w-full', !isPicked && 'border-primary/50 text-primary-strong')}
                                 onClick={() => togglePick(contractor.id)}
+                                disabled={isInvited(invitations ?? [], contractor.id)}
                                 title={
                                   !isPicked && picked.length >= room ? t('exceedRoom', { count: room }) : undefined
                                 }

@@ -43,7 +43,8 @@ export function RenameProjectDialog({ project, onClose }: RenameProjectDialogPro
     () =>
       createProjectSchema({
         required: tv('required'),
-        maxLength: tv('maxLength', { max: PROJECT_NAME_MAX_LENGTH })
+        maxLength: tv('maxLength', { max: PROJECT_NAME_MAX_LENGTH }),
+        descriptionMaxLength: tv('maxLength', { max: 500 })
       }),
     [tv]
   )

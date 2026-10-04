@@ -29,7 +29,7 @@ import { toast } from 'sonner'
 import { useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { useAuth } from '@/shared/auth'
-import { surveyBookableDays, useCmsDocument } from '@/shared/cms'
+import { CONSULT_SESSION_TIMES, surveyBookableDays, useCmsDocument } from '@/shared/cms'
 import { revealEase } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -47,11 +47,21 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/
 import { contractorCompareRoute, contractorInviteRoute, contractorMatchesRoute } from '@/shared/constants/routes'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
+import { env } from '@/shared/config/env'
+import { contractorInviteSentRoute } from '@/shared/constants/routes'
+import { isApiError } from '@/shared/lib/api'
+import { readQuotationAttempt } from '../api/quotation-requests.api'
+import { useSubmitQuotation } from '../hooks/use-quotations'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor } from '../hooks/use-contractors'
 import { useInvitations, useSendInvitations, useSurveySlots } from '../hooks/use-invitations'
-import { SURVEY_NOTE_MAX_LENGTH, createSurveySchema, type SurveyFormValues } from '../schemas/survey.schema'
+import {
+  SURVEY_NOTE_MAX_LENGTH,
+  createSurveySchema,
+  createQuotationSurveySchema,
+  type SurveyFormValues
+} from '../schemas/survey.schema'
 import { fullAddress } from '../services/brief.service'
 import { remainingInvites } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
@@ -90,6 +100,15 @@ function toDateKey(date: Date): string {
  */
 export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProps) {
   const t = useTranslations('contractors.survey')
+  const rfq = useTranslations('contractors.rfq')
+  const real = !env.NEXT_PUBLIC_USE_MOCK_API
+  const quotation = useSubmitQuotation(projectId)
+  const [uncertain, setUncertain] = useState(false)
+  const [clockNow, setClockNow] = useState(Date.now)
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(Date.now()), 30000)
+    return () => window.clearInterval(timer)
+  }, [])
   const tCommon = useTranslations('contractors.common')
   const tValidation = useTranslations('validation')
   const locale = useLocale() as Locale
@@ -101,9 +120,9 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const [leavingBack, setLeavingBack] = useState(false)
   const [flightOrigin, setFlightOrigin] = useState({ x: 0, y: 0 })
 
-  const { data: brief } = useBrief(projectId)
-  const { data: contractor } = useContractor(contractorId)
-  const { data: invitations } = useInvitations(projectId)
+  const { data: brief, error: briefError } = useBrief(projectId)
+  const { data: contractor, error: contractorError } = useContractor(contractorId)
+  const { data: invitations, limit, remaining, error: invitationError } = useInvitations(projectId)
   const send = useSendInvitations(projectId, {
     navigateDelayMs: reduceMotion ? 0 : 1200,
     errorMessage: t('sendFailed'),
@@ -111,7 +130,10 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
     onError: () => setSendPhase('returning')
   })
 
-  const inviteQueue = useContractorsStore((s) => s.inviteQueue)
+  const storedQueue = useContractorsStore((s) => s.inviteQueue)
+  const queueProjectId = useContractorsStore((s) => s.queueProjectId)
+  const queueUserId = useContractorsStore((s) => s.queueUserId)
+  const inviteQueue = real && (queueProjectId !== projectId || queueUserId !== user?.id) ? [] : storedQueue
   const queueIndex = useContractorsStore((s) => s.queueIndex)
   const pendingBookings = useContractorsStore((s) => s.pendingBookings)
   const addBooking = useContractorsStore((s) => s.addBooking)
@@ -128,8 +150,6 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const windowDays = schedule.windowDays
   const days = useMemo(() => surveyBookableDays(schedule), [schedule])
 
-  const selectable = useMemo(() => new Set(days.map(toDateKey)), [days])
-
   const firstDay = days[0]
   /**
    * Mời nhiều nhà thầu: ngày vừa chọn cho nhà thầu TRƯỚC được giữ làm gợi ý
@@ -137,7 +157,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
    * chứ không phải state riêng, nên vẫn đúng dù trang này có dựng lại hay không
    * khi chuyển sang nhà thầu kế tiếp.
    */
-  const preferredDate = pendingBookings[pendingBookings.length - 1]?.date
+  const preferredDate = real && inviteQueue.length === 0 ? undefined : pendingBookings[pendingBookings.length - 1]?.date
   const initialDay = preferredDate ? new Date(`${preferredDate}T00:00:00`) : firstDay
   /* Lần mời đầu không tự chọn ngày. Chỉ hàng đợi nhiều nhà thầu mới kế thừa ngày vừa chọn. */
   const [date, setDate] = useState(() => preferredDate ?? '')
@@ -145,22 +165,46 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   const [month, setMonth] = useState(() =>
     initialDay ? new Date(initialDay.getFullYear(), initialDay.getMonth(), 1) : new Date()
   )
-  const { data: slots, isPending: slotsPending } = useSurveySlots(contractorId, date)
+  const selectable = useMemo(() => {
+    if (!real) return new Set(days.map(toDateKey))
+    const dates = new Set<string>()
+    for (let n = 0; n < 42; n++) {
+      const day = new Date(
+        month.getFullYear(),
+        month.getMonth(),
+        n - ((new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7) + 1
+      )
+      if (
+        toDateKey(day) >= new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(clockNow))
+      )
+        dates.add(toDateKey(day))
+    }
+    return dates
+  }, [days, month, real, clockNow])
+  const mockSlots = useSurveySlots(real ? '' : contractorId, date)
+  const slots = real
+    ? [...CONSULT_SESSION_TIMES.morning, ...CONSULT_SESSION_TIMES.afternoon].map((time) => ({
+        id: time,
+        label: time,
+        available: Date.parse(`${date}T${time}:00+07:00`) > clockNow
+      }))
+    : mockSlots.data
+  const slotsPending = real ? false : mockSlots.isPending
 
   /** Nhà thầu kế tiếp trong hàng đợi trượt vào từ phải; lần đầu thì trượt lên (mục 3). */
   const isQueueAdvance = queueIndex > 0
 
   const schema = useMemo(
     () =>
-      createSurveySchema({
+      (real ? createQuotationSurveySchema : createSurveySchema)({
         dateRequired: tValidation('required'),
         slotRequired: tValidation('required'),
         phoneRequired: tValidation('required'),
-        phoneInvalid: tValidation('phone'),
+        phoneInvalid: real ? rfq('phoneInvalid') : tValidation('phone'),
         emailInvalid: tValidation('email'),
-        noteMaxLength: tValidation('maxLength', { max: SURVEY_NOTE_MAX_LENGTH })
+        noteMaxLength: tValidation('maxLength', { max: real ? 5000 : SURVEY_NOTE_MAX_LENGTH })
       }),
-    [tValidation]
+    [tValidation, real, rfq]
   )
 
   const form = useForm<SurveyFormValues>({
@@ -173,6 +217,25 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
       note: ''
     }
   })
+
+  useEffect(() => {
+    if (!real || !user?.id) return
+    const attempt = readQuotationAttempt(projectId, contractorId)
+    if (!attempt) return
+    const local = new Date(attempt.body.desiredAt).toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' })
+    const storedDate = local.slice(0, 10)
+    form.reset({
+      date: storedDate,
+      slotId: local.slice(11, 16),
+      phone: attempt.body.contactPhone ?? user.phone ?? '',
+      email: user.email ?? '',
+      note: attempt.body.surveyNote ?? ''
+    })
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restore a pending server submission after hydration
+    setDate(storedDate)
+    setMonth(new Date(`${storedDate}T00:00:00`))
+    setUncertain(true)
+  }, [projectId, contractorId, user?.id, user?.phone, user?.email, form, real])
 
   /**
    * Ảnh S16 vẽ khối liên hệ ở dạng CHỈ ĐỌC kèm nút "Chỉnh sửa" — thông tin này
@@ -255,7 +318,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
     wasReadyRef.current = isReadyToSubmit
   }, [isReadyToSubmit])
 
-  const room = remainingInvites(invitations ?? []) - pendingBookings.length
+  const room = real ? remaining : remainingInvites(invitations ?? []) - pendingBookings.length
   const inQueue = inviteQueue.length > 1
   const cameFromCompare = inviteQueue.length > 0
   const isLastOfQueue = !inQueue || queueIndex >= inviteQueue.length - 1
@@ -287,6 +350,49 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   }
 
   const onSubmit = (values: SurveyFormValues) => {
+    if (real) {
+      quotation.mutate(
+        {
+          contractorId,
+          desiredAt: `${values.date}T${values.slotId}:00+07:00`,
+          contactPhone: values.phone,
+          surveyNote: values.note.trim() || null
+        },
+        {
+          onSuccess: (receipt) => {
+            addBooking({ contractorId, ...values })
+            setUncertain(false)
+            const next = inviteQueue[queueIndex + 1]
+            if (next) {
+              advanceQueue()
+              router.push(contractorInviteRoute(projectId, next))
+            } else {
+              clearQueue()
+              clearCompare()
+              router.push(contractorInviteSentRoute(projectId, receipt.id))
+            }
+          },
+          onError: (error) => {
+            setUncertain(Boolean(readQuotationAttempt(projectId, contractorId)))
+            const code = (
+              [
+                'QuotationAlreadyInvited',
+                'QuotationLimitReached',
+                'QuotationContractorUnavailable',
+                'QuotationTimeNotFuture',
+                'QuotationContactRequired',
+                'QuotationIdempotencyConflict',
+                'AccessForbidden',
+                'ConstructionSiteNotFound',
+                'DependencyUnavailable'
+              ] as const
+            ).find((item) => isApiError(error) && item === error.code)
+            toast.error(code ? rfq(`errors.${code}`) : rfq('sendFailed'))
+          }
+        }
+      )
+      return
+    }
     const booking: SurveyBooking = { contractorId, ...values }
     // Lọc trùng theo nhà thầu: quay lại đặt lại lịch cho cùng một bên thì thay
     // lịch cũ chứ không gửi hai lời mời cho họ.
@@ -322,6 +428,14 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
     )
   }
 
+  if (real && (briefError || contractorError || invitationError))
+    return (
+      <div className='mx-auto max-w-5xl p-6'>
+        <p role='alert'>{rfq('loadFailed')}</p>
+        <Button onClick={() => window.location.reload()}>{rfq('retry')}</Button>
+      </div>
+    )
+
   if (!contractor) {
     return (
       <div className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5 lg:py-8'>
@@ -356,7 +470,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
   ]
 
   const selectedDate = date ? new Date(`${date}T00:00:00`) : null
-  const dayIsFull = Boolean(date && slots?.length && slots.every((slot) => !slot.available))
+  const dayIsFull = !real && Boolean(date && slots?.length && slots.every((slot) => !slot.available))
   const nearestAvailableDay = dayIsFull
     ? (days.find((day) => toDateKey(day) > date) ?? days.find((day) => toDateKey(day) !== date))
     : undefined
@@ -423,458 +537,471 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
 
         {room <= 0 ? (
           <p className='border-destructive/40 text-destructive rounded-xl border px-4 py-3 text-sm'>
-            {t('limitReached', { max: MAX_INVITATIONS })}
+            {t('limitReached', { max: limit ?? MAX_INVITATIONS })}
           </p>
         ) : null}
 
+        {real && !brief?.constructionSiteId ? (
+          <p role='alert' className='text-destructive'>
+            {rfq('siteRequired')}
+          </p>
+        ) : null}
+        {uncertain ? (
+          <p role='alert' className='text-destructive'>
+            {rfq('uncertain')}
+          </p>
+        ) : null}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className='space-y-5'>
-            <motion.div
-              key={contractorId}
-              initial={isQueueAdvance ? { opacity: 0, x: 32 } : { opacity: 0, y: 24 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ duration: 0.4, ease: revealEase }}
-              className='bg-card rounded-2xl border'
-            >
-              {/* Dải nhận diện nhà thầu. */}
-              <div className='flex flex-wrap items-center gap-y-4 border-b px-5 py-4'>
-                <ContractorLogo contractor={contractor} className='size-16 shrink-0 rounded-xl' />
+            <fieldset disabled={real && (uncertain || quotation.isPending)} className='contents'>
+              <motion.div
+                key={contractorId}
+                initial={isQueueAdvance ? { opacity: 0, x: 32 } : { opacity: 0, y: 24 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.4, ease: revealEase }}
+                className='bg-card rounded-2xl border'
+              >
+                {/* Dải nhận diện nhà thầu. */}
+                <div className='flex flex-wrap items-center gap-y-4 border-b px-5 py-4'>
+                  <ContractorLogo contractor={contractor} className='size-16 shrink-0 rounded-xl' />
 
-                <div className='min-w-0 grow basis-52 px-4 lg:grow-0 lg:basis-[28%]'>
-                  <p className='flex items-center gap-1.5 font-semibold'>
-                    <span className='truncate'>{contractor.name}</span>
-                    {contractor.verified ? <BadgeCheck className='text-primary size-4 shrink-0' /> : null}
-                  </p>
-                  <p className='mt-1 flex items-center gap-1.5 text-sm'>
-                    <Star className='text-warning size-4 shrink-0 fill-current' />
-                    {formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}/5
-                    <span className='text-muted-foreground'>
-                      {tCommon('reviewCount', { count: contractor.reviewCount })}
-                    </span>
-                  </p>
-                </div>
-
-                <div className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'>
-                  {facts.map((fact) => (
-                    <div key={fact.key} className='min-w-0 flex-1 px-3'>
-                      <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
-                        <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
-                        <span className='truncate'>{fact.value}</span>
-                      </p>
-                      <p className='text-muted-foreground mt-1 truncate pl-5.5 text-xs'>{fact.hint}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className='grid lg:grid-cols-[39%_minmax(0,1fr)]'>
-                {/* Cột trái: lịch tháng. */}
-                <section className='border-b p-5 lg:border-r lg:border-b-0'>
-                  <h2 className='font-semibold'>{t('dateTitle')}</h2>
-                  <p className='text-muted-foreground mt-1 text-sm'>{t('dateHint', { days: windowDays })}</p>
-
-                  <FormField
-                    control={form.control}
-                    name='date'
-                    render={({ field }) => (
-                      <FormItem className='mt-4'>
-                        <MonthCalendar
-                          locale={locale}
-                          month={month}
-                          onMonthChange={setMonth}
-                          value={field.value}
-                          selectable={selectable}
-                          onSelect={(key) => {
-                            field.onChange(key)
-                            setDate(key)
-                            form.setValue('slotId', '')
-                          }}
-                          prevLabel={t('prevMonth')}
-                          nextLabel={t('nextMonth')}
-                          firstAvailableDate={firstDay}
-                          windowDays={windowDays}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <ul className='text-muted-foreground mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs'>
-                    <li className='flex items-center gap-2'>
-                      <span aria-hidden className='bg-accent size-3 rounded-full' />
-                      {t('available')}
-                    </li>
-                    <li className='flex items-center gap-2'>
-                      <span aria-hidden className='bg-muted size-3 rounded-full' />
-                      {t('unavailable')}
-                    </li>
-                  </ul>
-                </section>
-
-                {/* Cột phải: khung giờ, dòng lưu ý, ghi chú. */}
-                <div className='min-w-0 space-y-4 p-5'>
-                  <div>
-                    <h2 className='font-semibold'>
-                      {t('slotTitle')} <span className='font-normal'>({t('slotOffice')})</span>
-                    </h2>
-                    {selectedDate ? (
-                      <AnimatePresence mode='wait'>
-                        <motion.p
-                          key={date}
-                          initial={{ opacity: 0, x: 8, y: -4 }}
-                          animate={{ opacity: 1, x: 0, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className='text-muted-foreground mt-1 text-sm capitalize'
-                        >
-                          {formatDisplayDate(date, locale, { weekday: true })}
-                        </motion.p>
-                      </AnimatePresence>
-                    ) : null}
+                  <div className='min-w-0 grow basis-52 px-4 lg:grow-0 lg:basis-[28%]'>
+                    <p className='flex items-center gap-1.5 font-semibold'>
+                      <span className='truncate'>{contractor.name}</span>
+                      {contractor.verified ? <BadgeCheck className='text-primary size-4 shrink-0' /> : null}
+                    </p>
+                    <p className='mt-1 flex items-center gap-1.5 text-sm'>
+                      <Star className='text-warning size-4 shrink-0 fill-current' />
+                      {formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}/5
+                      <span className='text-muted-foreground'>
+                        {tCommon('reviewCount', { count: contractor.reviewCount })}
+                      </span>
+                    </p>
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name='slotId'
-                    render={({ field }) => {
-                      const earliestId = slots?.find((slot) => slot.available)?.id
-                      return (
-                        <FormItem>
-                          {!date ? (
-                            <div>
+                  <div className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'>
+                    {facts.map((fact) => (
+                      <div key={fact.key} className='min-w-0 flex-1 px-3'>
+                        <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
+                          <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
+                          <span className='truncate'>{fact.value}</span>
+                        </p>
+                        <p className='text-muted-foreground mt-1 truncate pl-5.5 text-xs'>{fact.hint}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className='grid lg:grid-cols-[39%_minmax(0,1fr)]'>
+                  {/* Cột trái: lịch tháng. */}
+                  <section className='border-b p-5 lg:border-r lg:border-b-0'>
+                    <h2 className='font-semibold'>{t('dateTitle')}</h2>
+                    <p className='text-muted-foreground mt-1 text-sm'>
+                      {real ? rfq('dateHint') : t('dateHint', { days: windowDays })}
+                    </p>
+
+                    <FormField
+                      control={form.control}
+                      name='date'
+                      render={({ field }) => (
+                        <FormItem className='mt-4'>
+                          <MonthCalendar
+                            locale={locale}
+                            month={month}
+                            onMonthChange={setMonth}
+                            value={field.value}
+                            selectable={selectable}
+                            onSelect={(key) => {
+                              field.onChange(key)
+                              setDate(key)
+                              form.setValue('slotId', '')
+                            }}
+                            prevLabel={t('prevMonth')}
+                            nextLabel={t('nextMonth')}
+                            firstAvailableDate={firstDay}
+                            windowDays={windowDays}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <ul className='text-muted-foreground mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs'>
+                      <li className='flex items-center gap-2'>
+                        <span aria-hidden className='bg-accent size-3 rounded-full' />
+                        {t('available')}
+                      </li>
+                      <li className='flex items-center gap-2'>
+                        <span aria-hidden className='bg-muted size-3 rounded-full' />
+                        {t('unavailable')}
+                      </li>
+                    </ul>
+                  </section>
+
+                  {/* Cột phải: khung giờ, dòng lưu ý, ghi chú. */}
+                  <div className='min-w-0 space-y-4 p-5'>
+                    <div>
+                      <h2 className='font-semibold'>
+                        {t('slotTitle')} <span className='font-normal'>({t('slotOffice')})</span>
+                      </h2>
+                      {selectedDate ? (
+                        <AnimatePresence mode='wait'>
+                          <motion.p
+                            key={date}
+                            initial={{ opacity: 0, x: 8, y: -4 }}
+                            animate={{ opacity: 1, x: 0, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className='text-muted-foreground mt-1 text-sm capitalize'
+                          >
+                            {formatDisplayDate(date, locale, { weekday: true })}
+                          </motion.p>
+                        </AnimatePresence>
+                      ) : null}
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name='slotId'
+                      render={({ field }) => {
+                        const earliestId = slots?.find((slot) => slot.available)?.id
+                        return (
+                          <FormItem>
+                            {!date ? (
+                              <div>
+                                <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
+                                  {Array.from({ length: 8 }, (_, index) => (
+                                    <div
+                                      key={index}
+                                      aria-hidden
+                                      className='bg-muted/45 h-12 rounded-lg border opacity-55'
+                                    />
+                                  ))}
+                                </div>
+                                <p className='text-muted-foreground mt-2 text-xs'>{t('chooseDateForSlots')}</p>
+                              </div>
+                            ) : slotsPending ? (
                               <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
-                                {Array.from({ length: 8 }, (_, index) => (
-                                  <div
-                                    key={index}
-                                    aria-hidden
-                                    className='bg-muted/45 h-12 rounded-lg border opacity-55'
-                                  />
+                                {Array.from({ length: 8 }, (_, i) => (
+                                  <Skeleton key={i} className='h-12 rounded-lg' />
                                 ))}
                               </div>
-                              <p className='text-muted-foreground mt-2 text-xs'>{t('chooseDateForSlots')}</p>
-                            </div>
-                          ) : slotsPending ? (
-                            <div className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'>
-                              {Array.from({ length: 8 }, (_, i) => (
-                                <Skeleton key={i} className='h-12 rounded-lg' />
-                              ))}
-                            </div>
-                          ) : (
-                            <AnimatePresence mode='wait'>
-                              <motion.ul
-                                key={date}
-                                initial='hidden'
-                                animate='show'
-                                exit={{ opacity: 0, y: 6 }}
-                                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
-                                className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'
-                              >
-                                {slots?.map((slot) => {
-                                  const active = field.value === slot.id
-                                  const isEarliest = slot.id === earliestId
-                                  const isBusyShake = busySlotShake === slot.id
-                                  return (
-                                    <motion.li
-                                      key={slot.id}
-                                      variants={{ hidden: { opacity: 0, y: -6 }, show: { opacity: 1, y: 0 } }}
-                                      className='relative'
-                                    >
-                                      <motion.button
-                                        type='button'
-                                        onClick={() => {
-                                          if (!slot.available) {
-                                            setBusySlotShake(slot.id)
-                                            window.setTimeout(() => setBusySlotShake(null), 400)
-                                            return
-                                          }
-                                          field.onChange(slot.id)
-                                          if (!slotChosenOnce) setSlotChosenOnce(true)
-                                        }}
-                                        animate={isBusyShake ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
-                                        transition={{ duration: 0.35 }}
-                                        className={cn(
-                                          'relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-lg border px-3 text-sm transition-colors',
-                                          active && 'border-primary bg-accent/60 text-primary-strong font-medium',
-                                          !active && slot.available && 'hover:border-primary/40',
-                                          !slot.available && 'text-muted-foreground cursor-not-allowed opacity-60'
-                                        )}
+                            ) : (
+                              <AnimatePresence mode='wait'>
+                                <motion.ul
+                                  key={date}
+                                  initial='hidden'
+                                  animate='show'
+                                  exit={{ opacity: 0, y: 6 }}
+                                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
+                                  className='grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4'
+                                >
+                                  {slots?.map((slot) => {
+                                    const active = field.value === slot.id
+                                    const isEarliest = slot.id === earliestId
+                                    const isBusyShake = busySlotShake === slot.id
+                                    return (
+                                      <motion.li
+                                        key={slot.id}
+                                        variants={{ hidden: { opacity: 0, y: -6 }, show: { opacity: 1, y: 0 } }}
+                                        className='relative'
                                       >
-                                        <span className='relative'>
-                                          {slot.label}
-                                          {!slot.available ? (
+                                        <motion.button
+                                          type='button'
+                                          onClick={() => {
+                                            if (!slot.available) {
+                                              setBusySlotShake(slot.id)
+                                              window.setTimeout(() => setBusySlotShake(null), 400)
+                                              return
+                                            }
+                                            field.onChange(slot.id)
+                                            if (!slotChosenOnce) setSlotChosenOnce(true)
+                                          }}
+                                          animate={isBusyShake ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+                                          transition={{ duration: 0.35 }}
+                                          className={cn(
+                                            'relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-lg border px-3 text-sm transition-colors',
+                                            active && 'border-primary bg-accent/60 text-primary-strong font-medium',
+                                            !active && slot.available && 'hover:border-primary/40',
+                                            !slot.available && 'text-muted-foreground cursor-not-allowed opacity-60'
+                                          )}
+                                        >
+                                          <span className='relative'>
+                                            {slot.label}
+                                            {!slot.available ? (
+                                              <motion.span
+                                                aria-hidden
+                                                initial={{ scaleX: 0 }}
+                                                animate={{ scaleX: 1 }}
+                                                transition={{ duration: 0.35, delay: 0.12 }}
+                                                className='bg-current absolute inset-x-0 top-1/2 h-px origin-left'
+                                              />
+                                            ) : null}
+                                          </span>
+                                          {/* Vòng tròn xanh đặc, dấu tick trắng — `fill` ăn
+                                          vào vòng tròn, nét tick giữ màu chữ. */}
+                                          <AnimatePresence>
+                                            {active ? (
+                                              <motion.span
+                                                key='tick'
+                                                initial={{ scale: 0, opacity: 0 }}
+                                                animate={{ scale: 1, opacity: 1 }}
+                                                exit={{ scale: 0, opacity: 0 }}
+                                                transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                                              >
+                                                <CircleCheck className='fill-primary text-primary-foreground absolute top-1 right-1 size-4 shrink-0' />
+                                              </motion.span>
+                                            ) : null}
+                                          </AnimatePresence>
+                                        </motion.button>
+                                        {isEarliest && !active ? (
+                                          <>
+                                            <span className='bg-primary text-primary-foreground pointer-events-none absolute -top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'>
+                                              {t('earliestSlot')}
+                                            </span>
                                             <motion.span
                                               aria-hidden
-                                              initial={{ scaleX: 0 }}
-                                              animate={{ scaleX: 1 }}
-                                              transition={{ duration: 0.35, delay: 0.12 }}
-                                              className='bg-current absolute inset-x-0 top-1/2 h-px origin-left'
+                                              initial={{ opacity: 0.6, scale: 1 }}
+                                              animate={{ opacity: 0, scale: 1.08 }}
+                                              transition={{ duration: 1, delay: 0.4 }}
+                                              className='border-primary pointer-events-none absolute inset-0 rounded-lg border-2'
                                             />
-                                          ) : null}
-                                        </span>
-                                        {/* Vòng tròn xanh đặc, dấu tick trắng — `fill` ăn
-                                          vào vòng tròn, nét tick giữ màu chữ. */}
-                                        <AnimatePresence>
-                                          {active ? (
-                                            <motion.span
-                                              key='tick'
-                                              initial={{ scale: 0, opacity: 0 }}
-                                              animate={{ scale: 1, opacity: 1 }}
-                                              exit={{ scale: 0, opacity: 0 }}
-                                              transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
-                                            >
-                                              <CircleCheck className='fill-primary text-primary-foreground absolute top-1 right-1 size-4 shrink-0' />
-                                            </motion.span>
-                                          ) : null}
-                                        </AnimatePresence>
-                                      </motion.button>
-                                      {isEarliest && !active ? (
-                                        <>
-                                          <span className='bg-primary text-primary-foreground pointer-events-none absolute -top-2 left-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold'>
-                                            {t('earliestSlot')}
-                                          </span>
-                                          <motion.span
-                                            aria-hidden
-                                            initial={{ opacity: 0.6, scale: 1 }}
-                                            animate={{ opacity: 0, scale: 1.08 }}
-                                            transition={{ duration: 1, delay: 0.4 }}
-                                            className='border-primary pointer-events-none absolute inset-0 rounded-lg border-2'
-                                          />
-                                        </>
-                                      ) : null}
-                                    </motion.li>
-                                  )
-                                })}
-                              </motion.ul>
+                                          </>
+                                        ) : null}
+                                      </motion.li>
+                                    )
+                                  })}
+                                </motion.ul>
+                              </AnimatePresence>
+                            )}
+                            <FormMessage />
+                            <AnimatePresence>
+                              {busySlotShake ? (
+                                <motion.p
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className='text-destructive mt-1.5 overflow-hidden text-xs'
+                                >
+                                  {real ? rfq('errors.QuotationTimeNotFuture') : t('slotBusyClick')}
+                                </motion.p>
+                              ) : null}
                             </AnimatePresence>
-                          )}
-                          <FormMessage />
-                          <AnimatePresence>
-                            {busySlotShake ? (
-                              <motion.p
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className='text-destructive mt-1.5 overflow-hidden text-xs'
-                              >
-                                {t('slotBusyClick')}
-                              </motion.p>
-                            ) : null}
-                          </AnimatePresence>
-                        </FormItem>
-                      )
-                    }}
-                  />
+                          </FormItem>
+                        )
+                      }}
+                    />
 
-                  <AnimatePresence>
-                    {dayIsFull && nearestAvailableDay ? (
-                      <motion.button
-                        type='button'
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.3, ease: revealEase }}
-                        onClick={jumpToAvailableDay}
-                        className='border-primary/30 bg-accent/40 text-primary-strong w-full rounded-xl border p-3 text-left text-sm'
-                      >
-                        {t('dayFull', {
-                          date: formatDisplayDate(toDateKey(nearestAvailableDay), locale, { weekday: true })
-                        })}
-                      </motion.button>
-                    ) : null}
-                  </AnimatePresence>
+                    <AnimatePresence>
+                      {dayIsFull && nearestAvailableDay ? (
+                        <motion.button
+                          type='button'
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -6 }}
+                          transition={{ duration: 0.3, ease: revealEase }}
+                          onClick={jumpToAvailableDay}
+                          className='border-primary/30 bg-accent/40 text-primary-strong w-full rounded-xl border p-3 text-left text-sm'
+                        >
+                          {t('dayFull', {
+                            date: formatDisplayDate(toDateKey(nearestAvailableDay), locale, { weekday: true })
+                          })}
+                        </motion.button>
+                      ) : null}
+                    </AnimatePresence>
 
-                  {/* Trượt xuống lần đầu sau khi chọn giờ, rồi đứng yên (mục 5) —
+                    {/* Trượt xuống lần đầu sau khi chọn giờ, rồi đứng yên (mục 5) —
                     `y` chỉ nhận dãy keyframe đúng lần đổi từ chưa chọn sang đã
                     chọn, các lần re-render sau target vẫn là 0 nên không lặp lại. */}
-                  <AnimatePresence>
-                    {slotChosenOnce ? (
-                      <motion.p
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.35, ease: revealEase }}
-                        className='text-info-foreground bg-info-soft flex items-start gap-2.5 rounded-xl p-3 text-sm'
-                      >
-                        <Info className='text-info mt-0.5 size-4 shrink-0' />
-                        <span>
-                          {t('workingHours')}
-                          <br />
-                          {t('callAhead')}
-                        </span>
-                      </motion.p>
-                    ) : null}
-                  </AnimatePresence>
+                    <AnimatePresence>
+                      {slotChosenOnce ? (
+                        <motion.p
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.35, ease: revealEase }}
+                          className='text-info-foreground bg-info-soft flex items-start gap-2.5 rounded-xl p-3 text-sm'
+                        >
+                          <Info className='text-info mt-0.5 size-4 shrink-0' />
+                          <span>
+                            {real ? rfq('timeHint') : t('workingHours')}
+                            <br />
+                            {real ? rfq('supportHint') : t('callAhead')}
+                          </span>
+                        </motion.p>
+                      ) : null}
+                    </AnimatePresence>
 
-                  <FormField
-                    control={form.control}
-                    name='note'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('noteTitle')}</FormLabel>
-                        <FormControl>
-                          <Textarea rows={2} placeholder={t('notePlaceholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name='note'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('noteTitle')}</FormLabel>
+                          <FormControl>
+                            <Textarea rows={2} placeholder={t('notePlaceholder')} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Địa điểm khảo sát + liên hệ nhận xác nhận. */}
-              {/* Hàng cuối KHÔNG có vạch dọc: ảnh S16 chỉ kẻ vạch ngăn ở khối
+                {/* Địa điểm khảo sát + liên hệ nhận xác nhận. */}
+                {/* Hàng cuối KHÔNG có vạch dọc: ảnh S16 chỉ kẻ vạch ngăn ở khối
                 lịch/khung giờ phía trên, tới hàng này thì hai cột chạy liền. */}
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.35, ease: revealEase }}
-                className='grid border-t lg:grid-cols-[39%_minmax(0,1fr)]'
-              >
-                <section className='group border-b p-5 lg:border-b-0'>
-                  <h2 className='font-semibold'>{t('locationTitle')}</h2>
-                  <p className='bg-muted/40 text-muted-foreground mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm'>
-                    <MapPin className='text-primary size-4 shrink-0 transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-110' />
-                    <span className='truncate'>{brief ? fullAddress(brief) : ''}</span>
-                  </p>
-                </section>
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.35, ease: revealEase }}
+                  className='grid border-t lg:grid-cols-[39%_minmax(0,1fr)]'
+                >
+                  <section className='group border-b p-5 lg:border-b-0'>
+                    <h2 className='font-semibold'>{t('locationTitle')}</h2>
+                    <p className='bg-muted/40 text-muted-foreground mt-3 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm'>
+                      <MapPin className='text-primary size-4 shrink-0 transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-110' />
+                      <span className='truncate'>{brief ? fullAddress(brief) : ''}</span>
+                    </p>
+                  </section>
 
-                <section className='min-w-0 p-5'>
-                  <h2 className='font-semibold'>{t('contactTitle')}</h2>
+                  <section className='min-w-0 p-5'>
+                    <h2 className='font-semibold'>{t('contactTitle')}</h2>
 
-                  {/* Ô chỉ đọc và ô nhập DÙNG CHUNG một khung: cùng chiều cao, cùng
+                    {/* Ô chỉ đọc và ô nhập DÙNG CHUNG một khung: cùng chiều cao, cùng
                     icon, nên hàng này luôn thẳng hàng với "Địa điểm khảo sát"
                     bên trái dù đang xem hay đang sửa. Đổi sang cặp input có nhãn
                     riêng thì cả hàng tụt xuống và lệch hẳn so với ảnh S16. */}
-                  <div className='mt-3 flex flex-wrap items-center gap-3'>
-                    {/* Viền loé xanh một lần khi vào chế độ nhập (mục 8) — công tắc
+                    <div className='mt-3 flex flex-wrap items-center gap-3'>
+                      {/* Viền loé xanh một lần khi vào chế độ nhập (mục 8) — công tắc
                       ring qua CSS thay vì nội suy `box-shadow` bằng JS, vì màu
                       lấy từ biến CSS (`--color-ring`) không nội suy được. */}
-                    <motion.div
-                      animate={contactError && editingContact ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
-                      transition={{ duration: 0.35 }}
-                      className={cn(
-                        'bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-1 rounded-lg border px-3 py-2.5 text-sm ring-0 ring-ring transition-shadow duration-700',
-                        contactFlash && 'ring-2'
-                      )}
-                    >
-                      <span className='flex min-w-0 flex-1 items-center gap-2'>
-                        <Phone aria-hidden className='text-primary size-4 shrink-0' />
-                        {editingContact ? (
-                          <FormField
-                            control={form.control}
-                            name='phone'
-                            render={({ field }) => (
-                              <FormItem className='min-w-0 flex-1'>
-                                <FormControl>
-                                  <input
-                                    inputMode='tel'
-                                    aria-label={t('phone')}
-                                    placeholder={t('phone')}
-                                    className='text-foreground w-full bg-transparent outline-hidden'
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        ) : (
-                          <span className='flex min-w-0 items-center gap-1.5 truncate'>
-                            {contactPhone || t('contactMissing')}
-                            <AnimatePresence>
-                              {contactJustSaved ? (
-                                <motion.span
-                                  initial={{ scale: 0, opacity: 0 }}
-                                  animate={{ scale: 1, opacity: 1 }}
-                                  exit={{ scale: 0, opacity: 0 }}
-                                  transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
-                                >
-                                  <Check className='text-primary size-3.5 shrink-0' />
-                                </motion.span>
-                              ) : null}
-                            </AnimatePresence>
-                          </span>
-                        )}
-                      </span>
-
-                      <span className='flex min-w-0 flex-1 items-center gap-2'>
-                        <Mail aria-hidden className='text-primary size-4 shrink-0' />
-                        {editingContact ? (
-                          <FormField
-                            control={form.control}
-                            name='email'
-                            render={({ field }) => (
-                              <FormItem className='min-w-0 flex-1'>
-                                <FormControl>
-                                  <input
-                                    inputMode='email'
-                                    aria-label={t('email')}
-                                    placeholder={t('email')}
-                                    className='text-foreground w-full bg-transparent outline-hidden'
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        ) : (
-                          <span className='truncate'>{contactEmail || t('contactMissing')}</span>
-                        )}
-                      </span>
-                    </motion.div>
-
-                    {editingContact ? (
                       <motion.div
-                        initial={{ opacity: 0, x: 8, y: -6 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className='flex items-center gap-2'
+                        animate={contactError && editingContact ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+                        transition={{ duration: 0.35 }}
+                        className={cn(
+                          'bg-muted/40 text-muted-foreground flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-1 rounded-lg border px-3 py-2.5 text-sm ring-0 ring-ring transition-shadow duration-700',
+                          contactFlash && 'ring-2'
+                        )}
                       >
-                        <Button type='button' onClick={saveContactWithFeedback}>
-                          {t('saveContact')}
-                        </Button>
+                        <span className='flex min-w-0 flex-1 items-center gap-2'>
+                          <Phone aria-hidden className='text-primary size-4 shrink-0' />
+                          {editingContact ? (
+                            <FormField
+                              control={form.control}
+                              name='phone'
+                              render={({ field }) => (
+                                <FormItem className='min-w-0 flex-1'>
+                                  <FormControl>
+                                    <input
+                                      inputMode='tel'
+                                      aria-label={t('phone')}
+                                      placeholder={t('phone')}
+                                      className='text-foreground w-full bg-transparent outline-hidden'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          ) : (
+                            <span className='flex min-w-0 items-center gap-1.5 truncate'>
+                              {contactPhone || t('contactMissing')}
+                              <AnimatePresence>
+                                {contactJustSaved ? (
+                                  <motion.span
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: 'spring', bounce: 0.6, duration: 0.35 }}
+                                  >
+                                    <Check className='text-primary size-3.5 shrink-0' />
+                                  </motion.span>
+                                ) : null}
+                              </AnimatePresence>
+                            </span>
+                          )}
+                        </span>
+
+                        <span className='flex min-w-0 flex-1 items-center gap-2'>
+                          <Mail aria-hidden className='text-primary size-4 shrink-0' />
+                          {editingContact && !real ? (
+                            <FormField
+                              control={form.control}
+                              name='email'
+                              render={({ field }) => (
+                                <FormItem className='min-w-0 flex-1'>
+                                  <FormControl>
+                                    <input
+                                      inputMode='email'
+                                      aria-label={t('email')}
+                                      placeholder={t('email')}
+                                      className='text-foreground w-full bg-transparent outline-hidden'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          ) : (
+                            <span className='truncate'>{contactEmail || t('contactMissing')}</span>
+                          )}
+                        </span>
+                      </motion.div>
+
+                      {editingContact ? (
+                        <motion.div
+                          initial={{ opacity: 0, x: 8, y: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className='flex items-center gap-2'
+                        >
+                          <Button type='button' onClick={saveContactWithFeedback}>
+                            {t('saveContact')}
+                          </Button>
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            aria-label={t('cancelEdit')}
+                            title={t('cancelEdit')}
+                            onClick={cancelContactEdit}
+                          >
+                            <X className='size-4' />
+                          </Button>
+                        </motion.div>
+                      ) : (
                         <Button
                           type='button'
-                          variant='ghost'
-                          aria-label={t('cancelEdit')}
-                          title={t('cancelEdit')}
-                          onClick={cancelContactEdit}
+                          variant='outline'
+                          className='border-primary/50 text-primary-strong'
+                          onClick={openContactEditor}
                         >
-                          <X className='size-4' />
+                          <Pencil className='size-4' />
+                          {t('editContact')}
                         </Button>
-                      </motion.div>
-                    ) : (
-                      <Button
-                        type='button'
-                        variant='outline'
-                        className='border-primary/50 text-primary-strong'
-                        onClick={openContactEditor}
-                      >
-                        <Pencil className='size-4' />
-                        {t('editContact')}
-                      </Button>
-                    )}
-                  </div>
+                      )}
+                    </div>
 
-                  {/* Lỗi để DƯỚI hàng, không nhét vào trong khung — nhét vào là
+                    {/* Lỗi để DƯỚI hàng, không nhét vào trong khung — nhét vào là
                     khung cao lên và hàng lại lệch. */}
-                  {contactError ? <p className='text-destructive mt-2 text-sm'>{contactError}</p> : null}
-                  <AnimatePresence>
-                    {contactJustSaved ? (
-                      <motion.p
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className='text-primary-strong mt-2 flex items-center gap-1.5 text-xs font-medium'
-                      >
-                        <CircleCheck className='size-3.5' />
-                        {t('contactUpdated')}
-                      </motion.p>
-                    ) : null}
-                  </AnimatePresence>
-                </section>
+                    {contactError ? <p className='text-destructive mt-2 text-sm'>{contactError}</p> : null}
+                    <AnimatePresence>
+                      {contactJustSaved ? (
+                        <motion.p
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className='text-primary-strong mt-2 flex items-center gap-1.5 text-xs font-medium'
+                        >
+                          <CircleCheck className='size-3.5' />
+                          {t('contactUpdated')}
+                        </motion.p>
+                      ) : null}
+                    </AnimatePresence>
+                  </section>
+                </motion.div>
               </motion.div>
-            </motion.div>
-
+            </fieldset>
             {/* Hai nút nằm NGOÀI thẻ. Bản mô tả S16 còn nút "Đề xuất ghi chú" nhưng
               khách đã bỏ: nó chỉ chép nguyên placeholder vào ô ghi chú, tức là
               gửi cho nhà thầu đúng cái câu mẫu khách chưa đọc. */}
@@ -886,6 +1013,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                     variant='outline'
                     className='border-primary/50 text-primary-strong min-w-32'
                     onClick={requestCancel}
+                    disabled={quotation.isPending}
                   >
                     {t('cancel')}
                   </Button>
@@ -902,18 +1030,32 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
                         setFlightOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
                       }}
                       disabled={
-                        room <= 0 || send.isPending || advancingQueue || sendPhase !== 'idle' || !date || !slotIdValue
+                        ((room <= 0 || invitations?.some((item) => item.contractorId === contractorId)) &&
+                          !uncertain) ||
+                        (real && (!brief?.constructionSiteId || Boolean(invitationError))) ||
+                        quotation.isPending ||
+                        send.isPending ||
+                        advancingQueue ||
+                        sendPhase !== 'idle' ||
+                        !date ||
+                        !slotIdValue
                       }
                       className={cn(!(date && slotIdValue) && 'opacity-60')}
                     >
-                      {send.isPending || advancingQueue ? <Loader2 className='size-4 animate-spin' /> : null}
-                      {send.isPending || advancingQueue ? t('sending') : isLastOfQueue ? t('submit') : t('submitNext')}
+                      {send.isPending || quotation.isPending || advancingQueue ? (
+                        <Loader2 className='size-4 animate-spin' />
+                      ) : null}
+                      {send.isPending || quotation.isPending || advancingQueue
+                        ? t('sending')
+                        : isLastOfQueue
+                          ? t('submit')
+                          : t('submitNext')}
                     </Button>
                   </motion.span>
                 </div>
                 <p className='text-muted-foreground flex items-center gap-2 text-xs'>
                   <Lock className='size-3.5' />
-                  {t('privacy')}
+                  {real ? rfq('privacy') : t('privacy')}
                 </p>
               </div>
             </div>
@@ -1038,6 +1180,8 @@ function MonthCalendar({
   windowDays: number
 }) {
   const t = useTranslations('contractors.survey')
+  const rfq = useTranslations('contractors.rfq')
+  const real = !env.NEXT_PUBLIC_USE_MOCK_API
   const reduceMotion = useReducedMotion()
   const weekdays = t.raw('weekdays') as string[]
 
@@ -1219,7 +1363,9 @@ function MonthCalendar({
                       <span className={cn('relative z-10', active && 'text-primary-foreground')}>{day.getDate()}</span>
                     </motion.button>
                   </TooltipTrigger>
-                  {!canPick ? <TooltipContent>{t('dateHint', { days: windowDays })}</TooltipContent> : null}
+                  {!canPick ? (
+                    <TooltipContent>{real ? rfq('dateHint') : t('dateHint', { days: windowDays })}</TooltipContent>
+                  ) : null}
                 </Tooltip>
               </motion.div>
             )
@@ -1235,7 +1381,7 @@ function MonthCalendar({
             exit={{ opacity: 0, height: 0 }}
             className='text-brand-orange mt-2 overflow-hidden text-xs'
           >
-            {t('dateHint', { days: windowDays })}
+            {real ? rfq('dateHint') : t('dateHint', { days: windowDays })}
           </motion.p>
         ) : null}
       </AnimatePresence>

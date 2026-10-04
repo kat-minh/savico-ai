@@ -154,3 +154,5 @@ export type {
   ProjectStatus,
   SharedDossier
 } from './types/design.types'
+
+export { DesignLoadError } from './components/design-load-error'

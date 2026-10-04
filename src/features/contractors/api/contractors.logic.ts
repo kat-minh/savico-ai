@@ -1,4 +1,4 @@
-import type { Contractor, ContractorProject } from '../types/contractor.types'
+import type { Contractor, ContractorProject, ServiceRegion } from '../types/contractor.types'
 
 /**
  * Logic thuần của khu KHÁCH XEM nhà thầu (không gọi mạng, không import có alias lúc chạy) — tách
@@ -176,6 +176,8 @@ export function mergeProjectDetail(
 
 /** Hồ sơ nhà thầu công khai đã chuẩn hoá. */
 export interface ApiContractor {
+  region?: ServiceRegion | null
+  provinceCode?: string | null
   id: string
   name: string
   shortDescription?: string
@@ -224,6 +226,11 @@ export function normalizeContractor(raw: unknown): ApiContractor | null {
   return {
     id,
     name: text(profile.name) ?? '',
+    region:
+      root.regionCode === 'north' || root.regionCode === 'central' || root.regionCode === 'south'
+        ? root.regionCode
+        : null,
+    provinceCode: text(profile.provinceCode) ?? null,
     ...(text(profile.shortDescription) ? { shortDescription: text(profile.shortDescription) } : {}),
     ...(text(profile.introduction) ? { intro: text(profile.introduction) } : {}),
     ...(text(profile.contractorType) ? { kind: text(profile.contractorType) } : {}),
@@ -267,7 +274,9 @@ export function contractorFromApi(api: ApiContractor): Contractor {
     completedProjects: api.projects.length,
     distanceKm: 0,
     serviceAreas: api.serviceAreas,
-    region: 'south',
+    region: api.region ?? null,
+    provinceCode: api.provinceCode ?? null,
+    distanceKnown: false,
     surveyWithinHours: api.surveyHours ?? 0,
     acceptingProjects: api.acceptingProjects ?? false,
     intro: api.intro ?? '',

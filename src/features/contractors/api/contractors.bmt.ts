@@ -1,26 +1,9 @@
 import { http } from '@/shared/lib/api'
+import { serviceRegionSchema, type ContractorSearchFilters } from '@/shared/contractors'
 import type { Contractor } from '../types/contractor.types'
 import { contractorFromApi, isUuid, normalizeContractor, normalizeProject, type ApiProject } from './contractors.logic'
-import { mockContractorsApi } from './contractors.mock'
 
-/**
- * Nối khu KHÁCH XEM nhà thầu vào BMT API (STORY-CTR-004, TDD-CTR-002).
- *
- * Chỉ bốn endpoint đọc công khai có API: danh sách (`GET /contractors`), bộ lọc
- * (`GET /contractors/filter-options`), chi tiết (`GET /contractors/{id}`) và chi tiết một
- * dự án (`GET /contractors/{id}/projects/{projectId}`). Toàn
- * bộ luồng cũ S09–S18 (mời báo giá, khảo sát, đánh giá, so sánh, hồ sơ gửi thầu)
- * KHÔNG có API, ngoài phạm vi → giữ mock.
- *
- * LỆCH NỀN TẢNG (spec đã cảnh báo): FE `Contractor.scopes` dùng 4 mã cứng
- * (turnkey/shell/finishing/interior) còn API dùng danh mục phạm vi GUID động —
- * không map thẳng được nên để trống `scopes` khi lấy từ API. Nhiều field thẻ S09
- * (similarProjects, strengths, region…) không có nguồn API → để mặc định.
- *
- * DB nhà thầu đang RỖNG nên list/detail TỰ VỀ MOCK khi API trả rỗng / lỗi / 404
- * để demo không trống — khi admin tạo & Hiện nhà thầu thì dữ liệu thật hiện ra.
- */
-
+/** Public contractor directory uses the BMT API. Mock mode is selected only in contractors.api.ts. */
 interface PublicContractorItem {
   contractorId: string
   name: string
@@ -35,6 +18,8 @@ interface PublicContractorItem {
   ratingCount?: number | null
   projectCount: number
   distanceKm?: number | null
+  provinceCode?: string | null
+  regionCode?: string | null
 }
 
 /** PublicContractorItem → Contractor (type UI). Field không có nguồn API để mặc định. */
@@ -52,7 +37,9 @@ function toContractor(item: PublicContractorItem): Contractor {
     completedProjects: item.projectCount ?? 0,
     distanceKm: item.distanceKm ?? 0,
     serviceAreas: [],
-    region: 'south',
+    region: item.regionCode == null ? null : serviceRegionSchema.parse(item.regionCode),
+    provinceCode: item.provinceCode ?? null,
+    distanceKnown: item.distanceKm != null,
     surveyWithinHours: 0,
     acceptingProjects: false,
     intro: '',
@@ -75,26 +62,28 @@ function toContractor(item: PublicContractorItem): Contractor {
 }
 
 export const bmtContractorsApi = {
-  async listContractors(projectId: string): Promise<Contractor[]> {
-    try {
-      const res = await http.get<{ items: PublicContractorItem[]; totalCount: number }>('/contractors')
-      if (!res.items?.length) return mockContractorsApi.listContractors(projectId)
-      return res.items.map(toContractor)
-    } catch {
-      return mockContractorsApi.listContractors(projectId)
-    }
+  async listContractors(
+    _projectId: string,
+    filters: ContractorSearchFilters = {},
+    signal?: AbortSignal
+  ): Promise<Contractor[]> {
+    const params = new URLSearchParams()
+    if (filters.region) params.set('region', filters.region)
+    if (filters.radiusKm !== undefined) params.set('radiusKm', String(filters.radiusKm))
+    if (filters.constructionSiteId) params.set('constructionSiteId', filters.constructionSiteId)
+    for (const id of filters.buildingTypeIds ?? []) params.append('buildingTypeIds', id)
+    for (const id of filters.scopeIds ?? []) params.append('scopeIds', id)
+    const res = await http.get<{ items: PublicContractorItem[]; totalCount: number }>('/contractors', {
+      params,
+      signal
+    })
+    return res.items.map(toContractor)
   },
 
   async getContractor(contractorId: string): Promise<Contractor> {
-    try {
-      // Chi tiết công khai KHÁC item danh sách: thông tin hồ sơ nằm trong `profile` (đọc thẳng
-      // `item.name` như trước làm trang hồ sơ thật mất tên). Map ở `contractors.logic.ts`.
-      const detail = normalizeContractor(await http.get<unknown>(`/contractors/${contractorId}`))
-      if (!detail) return mockContractorsApi.getContractor(contractorId)
-      return contractorFromApi(detail)
-    } catch {
-      return mockContractorsApi.getContractor(contractorId)
-    }
+    const detail = normalizeContractor(await http.get<unknown>(`/contractors/${contractorId}`))
+    if (!detail) throw new Error('InvalidContractorResponse')
+    return contractorFromApi(detail)
   },
 
   /**

@@ -21,6 +21,7 @@ import { formatDisplayDate } from '@/shared/utils'
 import { DESIGN_STEPS } from '../constants/design.constants'
 import { useEstimateBrief } from '../hooks/use-estimate-brief'
 import { useProjects } from '../hooks/use-projects'
+import { DesignLoadError } from './design-load-error'
 import { displayProjectId } from '../services/estimate-input.logic'
 import type { DesignStep, Project } from '../types/design.types'
 import { DeleteProjectDialog, RenameProjectDialog } from './project-menu-dialogs'
@@ -50,7 +51,7 @@ interface MyProjectsProps {
  */
 export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
   const t = useTranslations('account.projects')
-  const { data: projects, isPending } = useProjects()
+  const { data: projects, isPending, isError, refetch } = useProjects()
 
   const [renaming, setRenaming] = useState<Project | null>(null)
   const [deleting, setDeleting] = useState<Project | null>(null)
@@ -71,6 +72,8 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
       </div>
     )
   }
+
+  if (isError) return <DesignLoadError onRetry={() => void refetch()} />
 
   if (!projects?.length) {
     return <EmptyState title={t('empty.title')} description={t('empty.description')} />

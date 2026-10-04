@@ -30,4 +30,20 @@ export function createSurveySchema(m: SurveySchemaMessages) {
   })
 }
 
+/** RFQ uses the contact syntax of CONSULT, without requiring an editable email. */
+export function createQuotationSurveySchema(m: SurveySchemaMessages) {
+  return z.object({
+    date: z.string().min(1, m.dateRequired),
+    slotId: z.string().min(1, m.slotRequired),
+    phone: z
+      .string()
+      .trim()
+      .min(1, m.phoneRequired)
+      .max(20, m.phoneInvalid)
+      .refine((value) => /^\+?[0-9 .\-()]+$/.test(value) && /[0-9]/.test(value), m.phoneInvalid),
+    email: z.string(),
+    note: z.string().trim().max(5000, m.noteMaxLength)
+  })
+}
+
 export type SurveyFormValues = z.infer<ReturnType<typeof createSurveySchema>>

@@ -1541,8 +1541,10 @@ export interface CmsContractor {
    */
   completedProjects: number
   distanceKm: number
+  distanceKnown?: boolean
+  provinceCode?: string | null
   serviceAreas: string[]
-  region: CmsServiceRegion
+  region: CmsServiceRegion | null
   /** Có thể khảo sát trong bao nhiêu giờ — 24 hoặc 48 (S12, S15). */
   surveyWithinHours: number
   acceptingProjects: boolean
