@@ -3833,7 +3833,30 @@
         "ContractorNotFound": "Contractor profile not found (it may have been deleted).",
         "ContractorProjectNotFound": "This project was not found in the profile.",
         "AccessForbidden": "Only admin accounts can manage contractors.",
-        "generic": "Could not upload the file. Please retry."
+        "generic": "Could not upload the file. Please retry.",
+        "LocationDatasetChanged": "The location list has changed. Reload and select the address again.",
+        "DependencyUnavailable": "The data source is unavailable. Please try again."
+      },
+      "addressParts": {
+        "province": "Province/City",
+        "ward": "Ward/Commune",
+        "street": "House number/Street",
+        "legacy": "Previously saved address",
+        "noAddress": "No address yet",
+        "add": "Add separate address fields",
+        "fullAddress": "Full address",
+        "locate": "Find location on map",
+        "selectLocation": "Select the matching location",
+        "noResult": "No location found. Check the address and try again.",
+        "mapError": "Unable to find the location. Please try again.",
+        "coordinatesRequired": "Select a map location or enter and confirm coordinates for the current address before saving.",
+        "confirmCoordinates": "Confirm entered coordinates for this address",
+        "required": "Enter the province/city, ward/commune and house number/street.",
+        "tooLong": "House number/street must not exceed 500 characters.",
+        "clear": "Clear the entire address",
+        "catalogError": "Unable to load provinces/wards. Your input has been preserved.",
+        "reload": "Reload locations",
+        "selectAgain": "Select the address from the new location list"
       }
     },
     "paymentConnections": {

@@ -10,6 +10,8 @@ Cập nhật file này mỗi khi hoàn thiện một màn hình.
 > chưa đưa vào repo). Bản v2.0 cũng thêm section Tư vấn 1:1 ở trang chủ (mục III.2)
 > và mục "Tư vấn 1:1" trên thanh công cụ (mục II.1) — cả hai đã làm.
 
+Bổ sung địa chỉ nhà thầu ngày 04/10/2026 theo TDD-CTR-003/BR-CTR-009: form quản trị tách tỉnh/thành, phường/xã và số nhà/đường, dùng nguồn danh mục chung với dự toán/công trình. Địa chỉ đầy đủ chỉ đọc; đổi địa chỉ bỏ tọa độ cũ và hủy kết quả bản đồ đến muộn. Admin chọn vị trí trên bản đồ hoặc nhập và xác nhận tọa độ của địa chỉ hiện tại. Hồ sơ cũ giữ địa chỉ dạng chữ khi sửa các phần khác; có nút chuyển sang ba phần. Backend cần migration `20261003181715_AddContractorStructuredAddress`. Backend đạt 67 test ứng dụng, 16 test HTTP và 15 test PostgreSQL; TypeScript, ESLint và Prettier của các file thay đổi đều đạt. Chưa kiểm E2E trình duyệt vì profile Chrome đang được phiên khác sử dụng; phần frontend này được đưa lên main theo yêu cầu người dùng; chưa xác minh bản deploy.
+
 ## Bản đồ màn hình → route → code
 
 Các trang pháp lý ở footer theo thứ tự: `/terms` → `/privacy` → `/ai-terms` → `/ecommerce-partners` → `/payment-policy`.

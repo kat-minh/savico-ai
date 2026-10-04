@@ -3833,7 +3833,30 @@
         "ContractorNotFound": "Không tìm thấy hồ sơ nhà thầu (có thể đã bị xoá).",
         "ContractorProjectNotFound": "Không tìm thấy dự án này trong hồ sơ.",
         "AccessForbidden": "Chỉ tài khoản quản trị mới quản lý được nhà thầu.",
-        "generic": "Không tải được tệp. Bạn thử lại giúp."
+        "generic": "Không tải được tệp. Bạn thử lại giúp.",
+        "LocationDatasetChanged": "Danh mục tỉnh/phường đã thay đổi. Tải lại và chọn lại địa chỉ.",
+        "DependencyUnavailable": "Nguồn dữ liệu chưa sẵn sàng. Vui lòng thử lại."
+      },
+      "addressParts": {
+        "province": "Tỉnh/Thành phố",
+        "ward": "Phường/Xã",
+        "street": "Số nhà/Đường",
+        "legacy": "Địa chỉ đã lưu trước đây",
+        "noAddress": "Chưa có địa chỉ",
+        "add": "Bổ sung địa chỉ tách riêng",
+        "fullAddress": "Địa chỉ đầy đủ",
+        "locate": "Tìm vị trí trên bản đồ",
+        "selectLocation": "Chọn vị trí phù hợp",
+        "noResult": "Không tìm thấy vị trí. Kiểm tra địa chỉ và thử lại.",
+        "mapError": "Chưa tra được vị trí. Vui lòng thử lại.",
+        "coordinatesRequired": "Chọn vị trí trên bản đồ hoặc nhập và xác nhận tọa độ của địa chỉ hiện tại trước khi lưu.",
+        "confirmCoordinates": "Xác nhận tọa độ đã nhập cho địa chỉ này",
+        "required": "Nhập đủ tỉnh/thành, phường/xã và số nhà/đường.",
+        "tooLong": "Số nhà/đường tối đa 500 ký tự.",
+        "clear": "Xóa toàn bộ địa chỉ",
+        "catalogError": "Không tải được danh mục tỉnh/phường. Dữ liệu đã nhập được giữ lại.",
+        "reload": "Tải lại danh mục",
+        "selectAgain": "Chọn lại địa chỉ từ danh mục mới"
       }
     },
     "paymentConnections": {
