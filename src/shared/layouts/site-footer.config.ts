@@ -47,7 +47,8 @@ export const FOOTER_SUPPORT_LINKS: readonly FooterLink[] = [
   { labelKey: 'guide', href: ROUTES.GUIDE },
   { labelKey: 'handbook', href: ROUTES.HANDBOOK },
   { labelKey: 'consult', href: ROUTES.CONSULT },
-  { labelKey: 'faq', href: ROUTES.GUIDE }
+  // FAQ nằm ở trang Tìm nhà thầu (section #faq), không phải trang Hướng dẫn.
+  { labelKey: 'faq', href: `${ROUTES.CONTRACTORS}#faq` }
 ] as const
 
 /** Cot "Ve SAVICO". */

@@ -1,8 +1,10 @@
 import { z } from 'zod'
 
+import type { RequiredMessage } from '@/shared/hooks'
+
 /** Resolved, localized validation messages injected into the schema. */
 export interface CreateProjectSchemaMessages {
-  required: string
+  required: RequiredMessage
   maxLength: string
   descriptionMaxLength: string
 }
@@ -19,7 +21,7 @@ export function createProjectSchema(m: CreateProjectSchemaMessages) {
     name: z
       .string()
       .trim()
-      .min(1, { message: m.required })
+      .min(1, { message: m.required('projectName') })
       .refine((value) => [...value].length <= PROJECT_NAME_MAX_LENGTH, { message: m.maxLength }),
     description: z
       .string()

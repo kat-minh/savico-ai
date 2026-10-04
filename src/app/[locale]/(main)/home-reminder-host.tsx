@@ -553,7 +553,7 @@ export function HomeReminderHost() {
                 </button>
 
                 <div className='pr-14'>
-                  <p className='flex items-center gap-2 text-[11px] font-extrabold tracking-[0.18em] text-primary-strong uppercase'>
+                  <p className='flex items-center gap-2 max-md:text-xs text-[11px] font-extrabold tracking-[0.18em] text-primary-strong uppercase'>
                     <span className='size-2 rounded-full bg-primary-strong' />
                     {t('eyebrow')}
                   </p>

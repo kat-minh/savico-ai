@@ -48,7 +48,7 @@ export function QuotationInvitationTracker({ projectId }: { projectId: string })
   const canShowDetail = !list.isError && items.some((item) => item.id === selected)
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:px-8 lg:py-8'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:px-8'>
       <ProjectContextBar brief={brief} />
       <Link
         href={contractorMatchesRoute(projectId)}

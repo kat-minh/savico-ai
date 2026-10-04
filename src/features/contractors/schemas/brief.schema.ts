@@ -1,10 +1,12 @@
 import { z } from 'zod'
 
+import type { RequiredMessage } from '@/shared/hooks'
+
 import { CONSTRUCTION_SCOPES, PROJECT_SCALES, SITE_CONDITIONS, START_WINDOWS } from '../constants/contractors.constants'
 
 /** Resolved, localized validation messages injected into the schema. */
 export interface BriefSchemaMessages {
-  required: string
+  required: RequiredMessage
   nameMaxLength: string
   areaPositive: string
   budgetPositive: string
@@ -36,8 +38,15 @@ export function createBriefSchema(
 ) {
   return z
     .object({
-      name: z.string().trim().min(1, { message: m.required }).max(BRIEF_NAME_MAX_LENGTH, { message: m.nameMaxLength }),
-      buildingType: z.string().trim().min(1, { message: m.required }),
+      name: z
+        .string()
+        .trim()
+        .min(1, { message: m.required('projectName') })
+        .max(BRIEF_NAME_MAX_LENGTH, { message: m.nameMaxLength }),
+      buildingType: z
+        .string()
+        .trim()
+        .min(1, { message: m.required('buildingType') }),
       /** Mã CMS dùng để áp đúng các trường điều kiện; nhãn vẫn được lưu để hiển thị hồ sơ. */
       buildingTypeId: z.string().nullable(),
       // Giữ dạng chuỗi: ô nhập trả về string, ép kiểu ngay trong schema sẽ làm
@@ -49,9 +58,12 @@ export function createBriefSchema(
       // Chỉ giữ MÃ hành chính trong form; tên tỉnh/phường tra lại từ danh mục lúc
       // lưu. Giữ cả hai trong form thì chúng lệch nhau ngay lần đầu người dùng đổi
       // tỉnh mà quên cập nhật tên.
-      provinceCode: z.string().min(1, { message: m.required }),
-      wardCode: z.string().min(1, { message: m.required }),
-      street: z.string().trim().min(1, { message: m.required }),
+      provinceCode: z.string().min(1, { message: m.required('province') }),
+      wardCode: z.string().min(1, { message: m.required('ward') }),
+      street: z
+        .string()
+        .trim()
+        .min(1, { message: m.required('street') }),
       budget: z.string().trim().regex(POSITIVE_NUMBER, { message: m.budgetPositive }),
       startWindow: z.enum(START_WINDOWS),
       scope: z.enum(CONSTRUCTION_SCOPES),
@@ -66,10 +78,10 @@ export function createBriefSchema(
       const required = requiredOf(values.buildingTypeId)
 
       if (required.floor && !values.scale) {
-        context.addIssue({ code: 'custom', path: ['scale'], message: m.required })
+        context.addIssue({ code: 'custom', path: ['scale'], message: m.required('scale') })
       }
       if (required.attic && values.hasAttic === null) {
-        context.addIssue({ code: 'custom', path: ['hasAttic'], message: m.required })
+        context.addIssue({ code: 'custom', path: ['hasAttic'], message: m.required('hasAttic') })
       }
     })
 }

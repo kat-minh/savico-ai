@@ -39,14 +39,14 @@ export function GuideHighlights({ onCreateProject }: GuideHighlightsProps) {
 
   return (
     <section className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-      <header className='mb-4 flex items-start justify-between gap-4 lg:mb-8 lg:flex-wrap'>
-        <div className='space-y-2'>
+      <header className='mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-2 lg:mb-8'>
+        <div className='contents'>
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
-          <p className='text-foreground max-w-2xl text-sm text-pretty'>{t('subtitle')}</p>
+          <p className='text-foreground col-span-2 row-start-2 max-w-2xl text-sm text-pretty'>{t('subtitle')}</p>
         </div>
         <Link
           href={ROUTES.GUIDE}
-          className='max-lg:h-8 max-lg:shrink-0 text-primary hover:text-brand-orange inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
+          className='max-lg:h-8 max-lg:shrink-0 text-primary hover:text-brand-orange col-start-2 row-start-1 inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
         >
           {/* Mobile: chỉ còn mũi tên, chữ giữ lại cho trình đọc màn hình. */}
           <span className='max-lg:sr-only'>{t('viewAll')}</span>

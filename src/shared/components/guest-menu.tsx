@@ -12,7 +12,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
 import { cn } from '@/shared/lib/utils'
@@ -90,17 +89,15 @@ export function GuestMenu({ onOpenChange }: { onOpenChange?: (open: boolean) => 
             {t('guestHint')}
           </span>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className={staggerClass(2)} />
-        <DropdownMenuItem onClick={() => openAfterMenuCloses('login')} className={staggerClass(3)}>
+        <DropdownMenuItem onClick={() => openAfterMenuCloses('login')} className={staggerClass(2)}>
           <LogIn />
           {tLogin('submit')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => openAfterMenuCloses('register')} className={staggerClass(4)}>
+        <DropdownMenuItem onClick={() => openAfterMenuCloses('register')} className={staggerClass(3)}>
           <UserPlus />
           {tRegister('submit')}
         </DropdownMenuItem>
-        <DropdownMenuSeparator className={staggerClass(5)} />
-        <PreferenceSwitches className={staggerClass(6)} />
+        <PreferenceSwitches className={staggerClass(4)} />
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -250,6 +250,34 @@
   },
   "validation": {
     "required": "This field is required",
+    "requiredField": "{field} is required",
+    "emailRequired": "Email is required",
+    "fields": {
+      "fullName": "Full name",
+      "projectName": "Project name",
+      "contractorName": "Contractor name",
+      "email": "Email",
+      "phone": "Phone number",
+      "password": "Password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Password confirmation",
+      "verifyCode": "Verification code",
+      "address": "Address",
+      "street": "Street address",
+      "province": "Province / city",
+      "ward": "Ward",
+      "buildingType": "Building type",
+      "scale": "Number of floors",
+      "floorCount": "Number of floors",
+      "hasAttic": "Attic",
+      "architectureStyle": "Architecture style",
+      "interiorStyle": "Interior style",
+      "landPhoto": "Land photo",
+      "date": "Date",
+      "timeSlot": "Time slot",
+      "note": "Project description"
+    },
     "email": "Enter a valid email address",
     "minLength": "Must be at least {min} characters",
     "maxLength": "Must be at most {max} characters",
@@ -834,6 +862,8 @@
       "imageCount": "{count} 3D images"
     },
     "library": {
+      "bannerTitle": "Explore floor plan templates\nthat fit your home",
+      "bannerDescription": "From townhouses and villas to apartments, in many styles and layouts. Easy to search by what you need.",
       "kind": {
         "2d": "2D floor plans",
         "3d": "3D templates"
@@ -1107,7 +1137,6 @@
       },
       "popup": {
         "brandTagline": "AI platform for architecture and construction",
-        "badge": "Handbook",
         "close": "Close",
         "title": "Finished reading — ready to start your home?",
         "subtitle": "Turn knowledge into a real project in minutes. Choose the next step that fits you.",
@@ -2278,7 +2307,7 @@
       "understood": "Got it",
       "conditionsLabel": "Terms",
       "imageSlot": "Gift photo — awaiting client asset",
-      "extraTitle": "+ Extra offer"
+      "extraTitle": "Extra offer"
     },
     "comparison": {
       "title": "Compare the three packages",

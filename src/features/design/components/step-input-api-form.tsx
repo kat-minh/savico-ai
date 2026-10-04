@@ -155,7 +155,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
 
   if (input.detail.isError || catalog.isError) {
     return (
-      <div className='mx-auto w-full max-w-2xl px-4 py-5 lg:py-12 text-center'>
+      <div className='mx-auto w-full max-w-2xl px-4 py-5 text-center'>
         <p className='text-muted-foreground mb-4 text-sm'>{t('loadError')}</p>
         <Button
           variant='outline'
@@ -266,7 +266,7 @@ export function StepInputApiForm({ projectId, onSubmit }: StepInputApiFormProps)
     : false
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] px-4 pt-2 pb-5 lg:pb-6 lg:px-8 lg:pt-6'>
+    <div className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8'>
       {locked ? (
         <div
           role='alert'

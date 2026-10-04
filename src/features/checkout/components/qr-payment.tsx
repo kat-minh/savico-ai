@@ -15,7 +15,7 @@ import { checkoutConfirmRoute, checkoutDoneRoute, checkoutFailedRoute } from '@/
 import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatPriceTag } from '@/shared/utils'
-import { isApiOrderId, QR_TTL_MINUTES } from '../constants/checkout.constants'
+import { isApiOrderId, orderDisplayCode, QR_TTL_MINUTES } from '../constants/checkout.constants'
 import { useCancelOrder, useMarkTransferred, useOrder, useRegenerateQr } from '../hooks/use-checkout'
 import { CheckoutSteps } from './checkout-steps'
 
@@ -63,6 +63,7 @@ function useCountdown(expiresAt?: string, serverOffsetMs = 0): { label: string; 
  */
 export function QrPayment({ orderId }: QrPaymentProps) {
   const t = useTranslations('checkout.payment')
+  const tCommon = useTranslations('common')
   const locale = useLocale() as Locale
   const router = useRouter()
 
@@ -192,14 +193,14 @@ export function QrPayment({ orderId }: QrPaymentProps) {
 
   const openSupport = () => {
     if (!order) return
-    const subject = t('supportSubject', { code: order.id })
-    const body = t('supportBody', { code: order.id })
+    const subject = t('supportSubject', { code: orderDisplayCode(order) })
+    const body = t('supportBody', { code: orderDisplayCode(order) })
     window.location.href = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'>
         <CheckoutSteps current='payment' clickableCompletedSteps={[]} />
 
         <section className='relative flex flex-wrap items-center gap-4 overflow-hidden rounded-2xl border p-4 pb-7'>
@@ -307,10 +308,12 @@ export function QrPayment({ orderId }: QrPaymentProps) {
       data-page-entrance={entranceState}
       data-checkout-payment-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'
     >
       <CheckoutSteps
         current='payment'
+        onPreviousStep={() => void backToConfirm()}
+        previousStepLabel={tCommon('back')}
         clickableCompletedSteps={['confirm']}
         onCompletedStep={(step) => {
           if (step === 'confirm') void backToConfirm()
@@ -430,7 +433,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
               })}
             </p>
           ) : null}
-          <p className='text-muted-foreground font-mono text-xs'>#{order.id}</p>
+          <p className='text-muted-foreground font-mono text-xs'>#{orderDisplayCode(order)}</p>
 
           <div className='mt-4 flex flex-wrap justify-center gap-2'>
             <Button data-payment-minor-action variant='outline' size='sm' onClick={downloadQr}>
@@ -442,7 +445,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
               data-copied={copiedKeys.has('order') ? 'true' : 'false'}
               variant='outline'
               size='sm'
-              onClick={() => void copy('order', order.id, order.id)}
+              onClick={() => void copy('order', orderDisplayCode(order), orderDisplayCode(order))}
             >
               {copiedKeys.has('order') ? <Check className='size-4' /> : <Copy className='size-4' />}
               {copiedKeys.has('order') ? t('copied') : t('copyOrder')}
@@ -452,7 +455,7 @@ export function QrPayment({ orderId }: QrPaymentProps) {
           <ol data-payment-guide className='mt-5 space-y-2 border-t pt-4 text-left'>
             {[t('guide1'), t('guide2'), t('guide3')].map((step, index) => (
               <li key={step} data-payment-guide-step className='flex items-start gap-2.5 text-sm'>
-                <span className='bg-primary text-primary-foreground mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold'>
+                <span className='bg-primary text-primary-foreground mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full max-md:text-xs text-[11px] font-semibold'>
                   {index + 1}
                 </span>
                 <span className='text-pretty'>{step}</span>
@@ -485,7 +488,12 @@ export function QrPayment({ orderId }: QrPaymentProps) {
                     )}
                   >
                     <div className='min-w-0 flex-1'>
-                      <dt className={cn('text-muted-foreground text-[11px]', row.highlight && 'text-warning-strong')}>
+                      <dt
+                        className={cn(
+                          'text-muted-foreground max-md:text-xs text-[11px]',
+                          row.highlight && 'text-warning-strong'
+                        )}
+                      >
                         {row.label}
                       </dt>
                       <dd className={cn('truncate font-medium', row.highlight && 'text-warning-strong font-semibold')}>

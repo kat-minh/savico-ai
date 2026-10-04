@@ -15,7 +15,7 @@ import { useChatbotStore } from '../store/chatbot.store'
 
 export function ChatPanel() {
   const t = useTranslations('chatbot')
-  const { messages, send, isReplying, remaining, dailyLimit, limitReached } = useChat()
+  const { messages, send, isReplying, dailyLimit, limitReached } = useChat()
   const input = useChatbotStore((state) => state.draft)
   const setInput = useChatbotStore((state) => state.setDraft)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -128,9 +128,6 @@ export function ChatPanel() {
             <span className='sr-only'>{t('send')}</span>
           </Button>
         </div>
-        <p className='text-muted-foreground mt-2 text-right text-xs'>
-          {t('remaining', { remaining, limit: dailyLimit })}
-        </p>
       </form>
     </Card>
   )

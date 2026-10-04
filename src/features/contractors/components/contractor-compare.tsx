@@ -192,7 +192,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
     <motion.div
       animate={leavingBack ? { opacity: 0, x: 20 } : { opacity: 1, x: 0 }}
       transition={{ duration: 0.18, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5 lg:py-8'
+      className='mx-auto w-full max-w-[90rem] px-4 lg:px-8 space-y-5 py-5'
     >
       {preview ? null : <ProjectContextBar brief={brief} />}
 
@@ -263,7 +263,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
         <>
           <div id={TABLE_TOP_ANCHOR_ID} className='h-px' aria-hidden />
           <div className='bg-card overflow-x-auto rounded-2xl border md:overflow-visible'>
-            <div className='relative min-w-[640px]'>
+            <div className='relative min-w-[820px] md:min-w-[640px]'>
               <table className='w-full border-collapse text-sm'>
                 <thead className='sticky top-0 z-20 md:top-16'>
                   <tr
@@ -277,7 +277,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                         hidden`, vì `sticky` cần thoát ra ngoài để dính đúng),
                         nên ô vuông này phải tự bo đúng góc, không thì lộ khe
                         trắng giữa viền cong và góc vuông của ô. */}
-                    <th className='bg-card sticky left-0 z-30 w-[19%] rounded-tl-2xl border-r border-b p-4 text-left align-middle font-medium'>
+                    <th className='bg-card sticky left-0 z-30 w-[19%] rounded-tl-2xl border-r border-b p-4 text-left align-middle font-medium whitespace-nowrap'>
                       {t('criterion')}
                     </th>
                     <AnimatePresence initial={false}>
@@ -303,6 +303,11 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                               : hoveredColumn === contractor.id && 'bg-accent/20'
                           )}
                         >
+                          <PickedFrame
+                            show={picked.includes(contractor.id)}
+                            edge='top'
+                            last={index === rows.length - 1}
+                          />
                           {/* Rê tiêu đề cột → nút × hiện (mục 3). */}
                           <button
                             type='button'
@@ -360,7 +365,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                         onMouseLeave={() => setHoveredRow((current) => (current === criterion ? null : current))}
                         className={cn('border-b transition-colors', hoveredRow === criterion && 'bg-muted/40')}
                       >
-                        <th className='bg-card sticky left-0 z-10 border-r p-3.5 text-left text-sm font-normal'>
+                        <th className='bg-card sticky left-0 z-10 border-r p-3.5 text-left text-sm font-normal whitespace-nowrap'>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className='cursor-help underline decoration-dotted underline-offset-4'>
@@ -382,10 +387,14 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                                 exit={reduceMotion ? undefined : { opacity: 0, scaleX: 0.72 }}
                                 transition={{ duration: 0.28, ease: revealEase }}
                                 className={cn(
-                                  'border-l p-3.5 text-center transition-colors',
+                                  'relative border-l p-3.5 text-center transition-colors',
                                   hoveredColumn === contractor.id && 'bg-accent/20'
                                 )}
                               >
+                                <PickedFrame
+                                  show={picked.includes(contractor.id)}
+                                  last={contractor.id === rows[rows.length - 1]?.id}
+                                />
                                 <span className='relative inline-flex items-center gap-2 rounded-lg px-2 py-1'>
                                   <AnimatePresence>
                                     {isBetter ? (
@@ -412,7 +421,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                                           duration: 0.25,
                                           delay: highlightBetter ? 0.62 + rowIndex * 0.07 : 0
                                         }}
-                                        className='bg-primary text-primary-foreground relative z-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap'
+                                        className='bg-primary text-primary-foreground relative z-1 rounded-full px-1.5 py-0.5 max-md:text-xs text-[10px] font-semibold whitespace-nowrap'
                                       >
                                         {t('betterBadge')}
                                       </motion.span>
@@ -430,7 +439,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                   <tr>
                     {/* Hai góc dưới cùng lý do với hai góc trên: tự bo vì khối
                         cha không clip nội dung theo viền cong của nó. */}
-                    <th className='bg-card sticky left-0 z-10 rounded-bl-2xl border-r p-3.5 text-left text-sm font-normal'>
+                    <th className='bg-card sticky left-0 z-10 rounded-bl-2xl border-r p-3.5 text-left text-sm font-normal whitespace-nowrap'>
                       {t('select')}
                     </th>
                     <AnimatePresence initial={false}>
@@ -445,11 +454,12 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                             exit={reduceMotion ? undefined : { opacity: 0, scaleX: 0.72 }}
                             transition={{ duration: 0.28, ease: revealEase }}
                             className={cn(
-                              'border-l p-3.5',
+                              'relative border-l p-3.5',
                               index === rows.length - 1 && 'rounded-br-2xl',
                               hoveredColumn === contractor.id && 'bg-accent/20'
                             )}
                           >
+                            <PickedFrame show={isPicked} edge='bottom' last={index === rows.length - 1} />
                             {/* Vòng tròn rỗng / vòng tròn có dấu tick: nhìn là biết ô
                             nào đang được chọn mà không phải đọc chữ. Chọn vượt
                             lượt còn lại → rung + thông báo thay vì khoá cứng im
@@ -491,30 +501,6 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                   </tr>
                 </tbody>
               </table>
-
-              <AnimatePresence>
-                {rows.map((contractor, index) =>
-                  picked.includes(contractor.id) ? (
-                    <motion.div
-                      key={contractor.id}
-                      aria-hidden
-                      initial={reduceMotion ? false : { clipPath: 'inset(0 0 100% 0)', opacity: 0 }}
-                      animate={{ clipPath: 'inset(0 0 0% 0)', opacity: 1 }}
-                      exit={reduceMotion ? undefined : { clipPath: 'inset(0 0 100% 0)', opacity: 0 }}
-                      transition={{ duration: 0.45, ease: revealEase }}
-                      style={
-                        index === rows.length - 1
-                          ? { right: 0, width: colWidth }
-                          : { left: `${19 + index * (81 / rows.length)}%`, width: colWidth }
-                      }
-                      className={cn(
-                        'border-primary pointer-events-none absolute inset-y-0 z-30 box-border border-2',
-                        index === rows.length - 1 && 'rounded-r-2xl'
-                      )}
-                    />
-                  ) : null
-                )}
-              </AnimatePresence>
             </div>
           </div>
 
@@ -701,4 +687,25 @@ function CriterionValue({
         <Minus className='text-muted-foreground mx-auto size-4' />
       )
   }
+}
+
+/**
+ * Viền xanh của cột được chọn, vẽ BÊN TRONG từng ô của cột (không phải khung
+ * phủ lên bảng) nên đi theo cột khi cuộn ngang và bị cột "Tiêu chí" che. Cột
+ * cuối tự bo góc phải theo viền cong của bảng.
+ */
+function PickedFrame({ show, edge, last }: { show: boolean; edge?: 'top' | 'bottom'; last: boolean }) {
+  if (!show) return null
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'border-primary pointer-events-none absolute -inset-px border-x-2',
+        edge === 'top' && 'border-t-2',
+        edge === 'bottom' && 'border-b-2',
+        last && edge === 'top' && 'rounded-tr-2xl',
+        last && edge === 'bottom' && 'rounded-br-2xl'
+      )}
+    />
+  )
 }

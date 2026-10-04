@@ -26,3 +26,13 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export function isApiOrderId(id: string): boolean {
   return UUID_RE.test(id.trim())
 }
+
+/**
+ * Mã đơn để HIỆN cho khách. Đơn của BMT API có id là UUID — không đọc được, không
+ * đọc qua điện thoại cho hỗ trợ được — nên hiện mã thanh toán (nội dung chuyển
+ * khoản) mà BE cấp; thiếu thì cắt 8 ký tự đầu. Đơn mock có sẵn mã ngắn → giữ nguyên.
+ */
+export function orderDisplayCode(order: { id: string; transfer: { content: string } }): string {
+  if (!isApiOrderId(order.id)) return order.id
+  return order.transfer.content.trim() || order.id.slice(0, 8).toUpperCase()
+}

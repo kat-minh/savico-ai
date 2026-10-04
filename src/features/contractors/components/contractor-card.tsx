@@ -183,7 +183,7 @@ export function ContractorCard({
           ref={compareSourceRef}
           title={!compared && compareLocked ? tMatches('maxCompare', { max: MAX_INVITATIONS }) : undefined}
           className={cn(
-            'text-muted-foreground flex cursor-pointer flex-col items-center gap-1.5 text-[11px] transition-opacity',
+            'text-muted-foreground flex cursor-pointer flex-col items-center gap-1.5 max-md:text-xs text-[11px] transition-opacity',
             !compared && compareLocked && 'cursor-not-allowed opacity-35'
           )}
         >
@@ -231,7 +231,7 @@ export function ContractorCard({
                   duration: 0.35,
                   delay: invitedJustNow && !reduceMotion ? 0.45 : 0
                 }}
-                className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'
+                className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium'
               >
                 {t('invited')}
               </motion.span>
@@ -345,7 +345,7 @@ export function ContractorCard({
               onAnimationComplete={() => setCompareFlight(null)}
               className='bg-card pointer-events-none fixed top-0 left-0 z-60 flex max-w-44 items-center gap-2 rounded-xl border px-2 py-1.5 shadow-lg'
             >
-              <ContractorLogo contractor={contractor} className='size-7 rounded-md text-[9px]' />
+              <ContractorLogo contractor={contractor} className='size-7 rounded-md max-md:text-xs text-[9px]' />
               <span className='truncate text-xs font-semibold'>{contractor.name}</span>
             </motion.div>,
             document.body
@@ -379,7 +379,9 @@ function Fact({
         <Icon aria-hidden className={cn('size-3.5 shrink-0', iconClass ?? 'text-primary')} />
         <span className='truncate'>{value}</span>
       </p>
-      <p className='text-muted-foreground mt-0.5 line-clamp-2 pl-5 text-[11px] leading-snug text-pretty'>{hint}</p>
+      <p className='text-muted-foreground mt-0.5 line-clamp-2 pl-5 max-md:text-xs text-[11px] leading-snug text-pretty'>
+        {hint}
+      </p>
     </div>
   )
 }

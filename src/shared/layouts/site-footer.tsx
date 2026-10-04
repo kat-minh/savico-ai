@@ -135,6 +135,7 @@ function LinkColumn({
  */
 export function SiteFooter() {
   const t = useTranslations('footer')
+  const tNav = useTranslations('nav')
   const year = new Date().getFullYear()
   const { contact, social } = siteConfig
   // Noi dung lien he / mang xa hoi do admin sua (muc X). Chua sua thi roi ve
@@ -170,6 +171,7 @@ export function SiteFooter() {
         <div className='mx-auto grid w-full max-w-[90rem] gap-10 px-4 pt-10 pb-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.2fr] lg:gap-10 lg:px-8 lg:pt-14'>
           {/* Cot 1 - Thuong hieu */}
           <motion.div
+            className='max-lg:order-1'
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
@@ -181,7 +183,7 @@ export function SiteFooter() {
                 <Logo onDark className='h-12 max-w-full max-lg:h-14' />
               </div>
               <p className='text-footer-foreground mt-4 max-w-xs text-sm leading-relaxed'>
-                {cmsText(settings.tagline, t('tagline'))}
+                {cmsText(settings.tagline, tNav('brandTagline'))}
               </p>
             </div>
 
@@ -207,12 +209,13 @@ export function SiteFooter() {
           </motion.div>
 
           {[
-            { title: t('productTitle'), links: FOOTER_PRODUCT_LINKS },
-            { title: t('supportTitle'), links: FOOTER_SUPPORT_LINKS },
-            { title: t('aboutTitle'), links: FOOTER_ABOUT_LINKS }
+            { title: t('productTitle'), links: FOOTER_PRODUCT_LINKS, order: 'max-lg:order-3' },
+            { title: t('supportTitle'), links: FOOTER_SUPPORT_LINKS, order: 'max-lg:order-4' },
+            { title: t('aboutTitle'), links: FOOTER_ABOUT_LINKS, order: 'max-lg:order-2' }
           ].map((column, index) => (
             <motion.div
               key={column.title}
+              className={column.order}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
@@ -229,6 +232,7 @@ export function SiteFooter() {
 
           {/* Cot 5 - Lien he */}
           <motion.div
+            className='max-lg:order-5'
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}

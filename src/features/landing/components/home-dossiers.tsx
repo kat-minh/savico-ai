@@ -168,8 +168,8 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
 
   return (
     <section id='home-dossiers' className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
-      <header className='flex items-start justify-between gap-x-10 gap-y-3 lg:flex-wrap lg:items-baseline'>
-        <div className='space-y-2'>
+      <header className='grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 gap-y-3 lg:gap-x-10'>
+        <div className='contents'>
           {/* Góp ý BuildX: bỏ chữ "Hồ sơ mẫu", lấy "Danh sách thư viện mẫu" làm tiêu đề; bên dưới là nút chọn 2D/3D. */}
           <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
           {cards ? (
@@ -177,7 +177,7 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
               ref={kindTrackRef}
               role='tablist'
               aria-label={t('title')}
-              className='bg-muted relative mt-3 inline-flex flex-nowrap rounded-full p-1.5'
+              className='bg-muted relative col-span-2 row-start-2 inline-flex w-fit rounded-full p-1.5'
             >
               <span
                 data-template-kind-pill
@@ -212,9 +212,8 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
           ) : null}
         </div>
 
-        {/* Header `items-baseline`: mép dưới chữ "Xem tất cả" thẳng hàng với mép dưới chữ tiêu đề. Link cao `h-7.5` bằng nút mũi tên cạnh nó,
-            nếu không flex căn giữa nó lệch khỏi đường chân chữ mà container dùng để canh baseline. */}
-        <div className='flex items-center gap-4'>
+        {/* CTA và nút chuyển mẫu nằm cùng hàng với tiêu đề, phía trên bộ chọn 2D/3D. */}
+        <div className='col-start-2 row-start-1 flex items-center gap-4'>
           <Link
             href={LIBRARY_HREF}
             className='max-lg:h-8 max-lg:shrink-0 text-primary hover:text-brand-orange inline-flex h-7.5 items-center gap-1.5 text-sm font-medium transition-colors hover:underline'
@@ -341,7 +340,7 @@ function DossierCard({ item, index }: { item: HomeTemplateItem; index: number })
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: revealAmount }}
             transition={{ duration: 0.35, delay: order * 0.1 + 0.25, ease: revealEase }}
-            className='bg-brand-orange text-brand-orange-foreground absolute bottom-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'
+            className='bg-brand-orange text-brand-orange-foreground absolute bottom-3 left-3 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'
           >
             {item.badge}
           </motion.span>

@@ -65,7 +65,7 @@ export function AccountNav() {
                 {badge ? (
                   <span
                     className={cn(
-                      'rounded px-1.5 py-0.5 text-[9px] font-semibold',
+                      'rounded px-1.5 py-0.5 max-md:text-xs text-[9px] font-semibold',
                       active ? 'bg-primary-foreground/15 text-primary-foreground' : 'bg-accent text-primary-strong'
                     )}
                   >

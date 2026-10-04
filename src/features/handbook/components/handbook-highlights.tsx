@@ -47,7 +47,7 @@ export function HandbookHighlights() {
     <section className='brand-band'>
       <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
         <header>
-          <div className='flex items-center justify-between gap-x-10 gap-y-3 lg:flex-wrap'>
+          <div className='grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 lg:gap-x-10'>
             <h2 className='text-2xl font-bold tracking-tight text-balance lg:text-[1.75rem]'>{t('title')}</h2>
 
             <Link
@@ -94,13 +94,13 @@ export function HandbookHighlights() {
                         {/* Phủ xanh mờ khi rê — nằm ĐÈ LÊN ảnh, không thay ảnh. */}
                         <div className='bg-primary/0 group-hover:bg-primary/20 pointer-events-none absolute inset-0 transition-colors duration-300' />
                         {isNew ? (
-                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                             {t('newBadge')}
                           </span>
                         ) : null}
                       </div>
                       <span className='flex flex-1 flex-col gap-2 p-4'>
-                        <span className='group-hover:text-primary-strong line-clamp-2 font-bold transition-colors'>
+                        <span className='group-hover:text-brand-orange line-clamp-2 font-bold transition-colors'>
                           {article.title}
                         </span>
                         <span className={cn(ARTICLE_META_TEXT, 'flex flex-wrap items-center gap-x-4 gap-y-1 text-xs')}>

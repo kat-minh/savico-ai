@@ -255,7 +255,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
             <li key={item.id} className='flex gap-3'>
               <span
                 className={cn(
-                  'flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
+                  'flex size-8 shrink-0 items-center justify-center rounded-full max-md:text-xs text-[11px] font-semibold',
                   item.role === 'GS' ? 'bg-warning/20 text-warning-strong' : 'bg-accent text-primary-strong'
                 )}
               >
@@ -266,7 +266,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
                   <span className='text-foreground font-medium'>{item.author}</span> ·{' '}
                   {formatDisplayDateTime(item.at, locale)}
                   {item.changeRequestId ? (
-                    <span className='bg-warning/20 text-warning-strong ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium'>
+                    <span className='bg-warning/20 text-warning-strong ml-2 rounded px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'>
                       {item.changeRequestId}
                     </span>
                   ) : null}
@@ -309,7 +309,7 @@ export function StageDetail({ projectId, stage, onUpload }: StageDetailProps) {
                 trông như hai loại nội dung khác hẳn. */}
             <span
               aria-hidden
-              className='bg-warning/20 text-warning-strong flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold'
+              className='bg-warning/20 text-warning-strong flex size-8 shrink-0 items-center justify-center rounded-full max-md:text-xs text-[11px] font-semibold'
             >
               {ROLE_SUPERVISOR}
             </span>
@@ -446,7 +446,7 @@ function StageFileCard({ file }: { file: StageFile }) {
         )}
         <span
           className={cn(
-            'absolute top-2 left-2 rounded px-1.5 py-0.5 text-[10px] font-semibold',
+            'absolute top-2 left-2 rounded px-1.5 py-0.5 max-md:text-xs text-[10px] font-semibold',
             file.by === 'GS' ? 'bg-warning text-warning-foreground' : 'bg-primary text-primary-foreground'
           )}
         >
@@ -456,17 +456,17 @@ function StageFileCard({ file }: { file: StageFile }) {
 
       <div className='space-y-1 p-3'>
         <p className='text-sm text-pretty'>{file.name}</p>
-        <p className='text-muted-foreground text-[11px]'>
+        <p className='text-muted-foreground max-md:text-xs text-[11px]'>
           {formatDisplayDateTime(file.capturedAt ?? file.uploadedAt, locale)}
         </p>
         <div className='flex flex-wrap gap-1.5'>
           {file.fromInspection ? (
-            <span className='bg-warning/20 text-warning-strong rounded px-1.5 py-0.5 text-[10px] font-medium'>
+            <span className='bg-warning/20 text-warning-strong rounded px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'>
               {t('fileTagInspection')}
             </span>
           ) : null}
           {file.addedInVersion ? (
-            <span className='bg-accent text-primary-strong rounded px-1.5 py-0.5 text-[10px] font-medium'>
+            <span className='bg-accent text-primary-strong rounded px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'>
               {t('fileTagAddedIn', { version: file.addedInVersion })}
             </span>
           ) : null}

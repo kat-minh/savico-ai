@@ -794,7 +794,7 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
   const sourceItems = sources.data?.pages.flatMap((page) => page.items) ?? []
 
   return (
-    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8 lg:py-8'>
+    <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'>
       <div className='flex items-center justify-between'>
         <span className='bg-accent text-primary-strong inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium'>
           <Gift className='size-4' />

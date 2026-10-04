@@ -15,6 +15,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { useRequiredMessage } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDisplayDate, formatPhoneDisplay, normalizePhone } from '@/shared/utils'
 import { useBookConsultation } from '../hooks/use-consultation'
@@ -74,6 +75,7 @@ export function BookingDialog({ open, onOpenChange, consultant, date, time, onBo
   const t = useTranslations('consult.booking')
   const tCommon = useTranslations('common')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const locale = useLocale() as Locale
 
   const accountPhone = useAuthStore((s) => s.user?.phone)
@@ -82,11 +84,11 @@ export function BookingDialog({ open, onOpenChange, consultant, date, time, onBo
   const schema = useMemo(
     () =>
       createBookingSchema({
-        phoneRequired: tv('required'),
+        phoneRequired: required('phone'),
         phoneInvalid: tv('phone'),
         noteMaxLength: tv('maxLength', { max: BOOKING_NOTE_MAX_LENGTH })
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<BookingFormValues>({

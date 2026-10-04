@@ -323,11 +323,13 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
     scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: clip;
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
@@ -691,6 +693,31 @@
     z-index: 1;
   }
 
+  /* Thanh "Menu" của panel mobile — cùng quầng xanh loang như header web. */
+  .site-nav-mobile-bar {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--header-bg-scrolled);
+  }
+  .site-nav-mobile-bar::before {
+    content: '';
+    position: absolute;
+    inset: -80% -25%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(7rem 4rem at 18% 50%, var(--header-aurora-1), transparent 72%),
+      radial-gradient(6rem 3.5rem at 52% 46%, var(--header-aurora-2), transparent 70%),
+      radial-gradient(8rem 4rem at 86% 52%, var(--header-aurora-1), transparent 74%);
+    filter: blur(24px);
+    animation: header-aurora 24s var(--ease-out-soft) infinite;
+  }
+  .site-nav-mobile-bar > * {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Shared page-opening choreography. Existing page elements opt in with
    * data attributes only, so motion never changes the finished UI/layout. */
   [data-page-entrance='play'] [data-entrance-step] {
@@ -802,7 +829,9 @@
   }
 
   [data-handbook-foundation]:hover .foundation-hero-motion,
-  [data-handbook-foundation]:focus-within .foundation-hero-motion {
+  [data-handbook-foundation]:focus-within .foundation-hero-motion,
+  [data-library-banner]:hover .foundation-hero-motion,
+  [data-library-banner]:focus-within .foundation-hero-motion {
     filter: brightness(1.05);
   }
 
@@ -4046,7 +4075,9 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
     transform: none !important;
   }
   [data-handbook-foundation]:hover .foundation-hero-motion,
-  [data-handbook-foundation]:focus-within .foundation-hero-motion {
+  [data-handbook-foundation]:focus-within .foundation-hero-motion,
+  [data-library-banner]:hover .foundation-hero-motion,
+  [data-library-banner]:focus-within .foundation-hero-motion {
     filter: none !important;
   }
   [data-foundation-cta-arrow][data-nudge='true'] {
@@ -4089,6 +4120,7 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
     transition-duration: 0ms !important;
   }
   .site-header-shell::before,
+  .site-nav-mobile-bar::before,
   .hero-photo-drift,
   .animate-marquee,
   .ambient-orb,
@@ -5137,7 +5169,7 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   border-radius: 0.65rem;
   background: var(--primary-strong);
   color: var(--primary-foreground);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   text-align: left;
   pointer-events: none;
@@ -6334,32 +6366,6 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
     scroll-snap-align: center;
   }
 }
-.plan-comparison-head {
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s cubic-bezier(0.2, 0.72, 0.3, 1),
-    box-shadow 0.22s ease;
-}
-.plan-comparison-shell[data-stuck='true'] .plan-comparison-head {
-  transform: translateY(2px);
-  box-shadow: 0 9px 18px -14px color-mix(in srgb, var(--foreground) 48%, transparent);
-}
-.plan-sticky-price {
-  display: block;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-3px);
-  transition:
-    max-height 0.26s ease,
-    opacity 0.22s ease,
-    transform 0.26s cubic-bezier(0.2, 0.72, 0.3, 1);
-}
-.plan-comparison-shell[data-stuck='true'] .plan-sticky-price {
-  max-height: 18px;
-  opacity: 1;
-  transform: none;
-}
 .plan-comparison-cell,
 .plan-comparison-row > th {
   transition:
@@ -6652,31 +6658,16 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
   border-right-color: color-mix(in srgb, var(--brand-orange) 46%, var(--border));
 }
 
-/* Chữ viết tay ở giữa hai nhóm CTA cuối bài: kính mờ và ánh màu thương hiệu. */
+/* Slogan viết trực tiếp trên ảnh, chỉ giữ ánh màu chữ và nét gạch chân. */
 [data-article-handwritten] {
   position: relative;
-  padding: 9px 8px 13px;
-  border: 1px solid color-mix(in oklab, var(--card) 65%, transparent);
-  border-radius: 16px;
-  background: color-mix(in oklab, var(--card) 68%, transparent);
-  backdrop-filter: blur(12px) saturate(1.15);
-  box-shadow:
-    0 1px 0 color-mix(in oklab, var(--card) 75%, transparent) inset,
-    0 4px 16px color-mix(in oklab, var(--primary-strong) 10%, transparent);
-  transition:
-    background-color 350ms ease,
-    box-shadow 350ms ease;
-}
-
-[data-article-handwritten]:hover {
-  background: color-mix(in oklab, var(--card) 82%, transparent);
-  box-shadow: 0 6px 20px color-mix(in oklab, var(--primary-strong) 16%, transparent);
+  padding-bottom: 9px;
 }
 
 [data-article-handwritten]::after {
   content: '';
   position: absolute;
-  bottom: 6px;
+  bottom: 0;
   left: 25%;
   width: 50%;
   height: 2px;
@@ -6713,8 +6704,5 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
 @media (prefers-reduced-motion: reduce) {
   [data-article-handwritten-text] {
     animation: none;
-  }
-  [data-article-handwritten] {
-    transition: none;
   }
 }

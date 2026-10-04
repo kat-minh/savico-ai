@@ -235,7 +235,7 @@ export function DossierReady({
       data-files-entering={filesEntering}
       data-m09-leaving={leaving}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 px-4 py-5 lg:px-8'
     >
       <header className='space-y-3 text-center'>
         <motion.span
@@ -319,7 +319,7 @@ export function DossierReady({
                     <span
                       data-file-kind
                       className={cn(
-                        'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-white transition-[font-weight]',
+                        'shrink-0 rounded px-1.5 py-0.5 max-md:text-xs text-[10px] font-semibold text-white transition-[font-weight]',
                         kind === 'pdf' ? 'bg-destructive' : 'bg-primary'
                       )}
                     >

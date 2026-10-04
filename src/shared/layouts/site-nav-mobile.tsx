@@ -45,7 +45,7 @@ export function SiteNavMobile() {
             khoảng cách tới mép trên bằng khoảng cách tới mép trái. Nút đóng nằm
             trong cùng hàng để căn giữa theo tiêu đề, không dùng nút mặc định
             `absolute top-4` (lệch khỏi tâm khi thanh cao hơn 48px). */}
-        <SheetHeader className='h-[max(var(--public-header-offset,64px),56px)] shrink-0 flex-row items-center justify-between gap-0 border-b px-5 py-0 text-left'>
+        <SheetHeader className='site-nav-mobile-bar h-[max(var(--public-header-offset,64px),56px)] shrink-0 flex-row items-center justify-between gap-0 border-b px-5 py-0 text-left'>
           <SheetTitle className='text-base'>{t('menu')}</SheetTitle>
           <SheetClose className='text-muted-foreground hover:text-foreground -mr-1 rounded-xs p-1 transition-colors focus-visible:ring-2 focus-visible:outline-hidden'>
             <X className='size-4' />

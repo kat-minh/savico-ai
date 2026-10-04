@@ -22,7 +22,6 @@ import { DESIGN_STEPS } from '../constants/design.constants'
 import { useEstimateBrief } from '../hooks/use-estimate-brief'
 import { useProjects } from '../hooks/use-projects'
 import { DesignLoadError } from './design-load-error'
-import { displayProjectId } from '../services/estimate-input.logic'
 import type { DesignStep, Project } from '../types/design.types'
 import { DeleteProjectDialog, RenameProjectDialog } from './project-menu-dialogs'
 
@@ -106,7 +105,7 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
                   supervision && 'sm:grid sm:grid-rows-2'
                 )}
               >
-                <div className='flex gap-3 p-3'>
+                <div className='flex gap-4 p-4'>
                   {/* Ảnh bìa là ảnh lô đất của Bước 1; chưa có thì để khung rỗng. */}
                   <ProjectCover project={project} />
 
@@ -138,7 +137,6 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
                       </DropdownMenu>
                     </div>
 
-                    <p className='text-muted-foreground font-mono text-sm'>{displayProjectId(project.id)}</p>
                     {/* Hình S24: "Tạo ngày 12/06/2026 · Nhà phố · 120 m²" — một
                         dòng, ngăn bằng dấu chấm giữa. Hai vế sau chỉ có sau khi
                         khách qua Bước 1 và Bước 2, thiếu vế nào thì bỏ luôn cả
@@ -147,8 +145,8 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
 
                     {/* Hình S24: nhãn + ba CHẤM có số và tên bước, không phải ba
                       thanh trơn — ba thanh không nói được đang dừng ở bước nào. */}
-                    <p className='mt-3 text-sm font-medium'>{t('progressLabel')}</p>
-                    <ol className='mt-2 flex items-start'>
+                    <p className='mt-4 text-sm font-medium'>{t('progressLabel')}</p>
+                    <ol className='mt-2.5 flex items-start'>
                       {DESIGN_STEPS.map((step, index) => {
                         const reached = done || step <= project.currentStep
                         const current = !done && step === project.currentStep
@@ -158,7 +156,7 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
                             <li className='flex shrink-0 flex-col items-center gap-1'>
                               <span
                                 className={cn(
-                                  'flex size-6 items-center justify-center rounded-full text-[11px] leading-none font-semibold',
+                                  'flex size-6 items-center justify-center rounded-full max-md:text-xs text-[11px] leading-none font-semibold',
                                   current && 'bg-info text-primary-foreground',
                                   !current && reached && 'bg-primary text-primary-foreground',
                                   !reached && 'border-border text-muted-foreground border'
@@ -192,7 +190,7 @@ export function MyProjects({ renderSupervision }: MyProjectsProps = {}) {
 
                     {/* Viên nhãn trạng thái và liên kết xếp DỌC, canh trái —
                       Hình S24 để chúng trên hai dòng chứ không đẩy hai đầu. */}
-                    <div className='mt-3 flex flex-col items-start gap-1.5'>
+                    <div className='mt-4 flex flex-col items-start gap-2'>
                       <span
                         // Hình S24: "Hoàn tất" nền XANH LÁ nhạt, "Bước 2/3"
                         // nền XANH DƯƠNG nhạt — cùng màu với chấm bước đang

@@ -53,6 +53,8 @@ interface OrderConfirmProps {
   productId: string
   kind: OrderKind
   projectId?: string
+  /** Tên dự án đang mua cho — tầng app tra từ `features/design`; chưa có thì không hiện dòng "Cho dự án". */
+  projectName?: string
   /** Khóa offer gửi kèm khi tạo đơn API (`Month` / `Year` / `ConstructionSite`). */
   offerKey?: OfferKey
   /**
@@ -97,7 +99,7 @@ function AnimatedCheckoutTotal({ value, locale }: { value: number; locale: Local
   )
 }
 
-export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct }: OrderConfirmProps) {
+export function OrderConfirm({ productId, kind, projectId, projectName, offerKey, apiProduct }: OrderConfirmProps) {
   const t = useTranslations('checkout.confirm')
   const tPlans = useTranslations('plans.tiers')
   const tPlanTags = useTranslations('plans.tierTags')
@@ -254,7 +256,7 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
 
   if (!product) {
     return (
-      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:py-16 lg:px-8'>
+      <div className='mx-auto w-full max-w-3xl px-4 py-5 lg:px-8'>
         <EmptyState
           title={t('missingProduct')}
           action={
@@ -335,13 +337,13 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
       data-page-entrance={entranceState}
       data-checkout-confirm-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:py-8 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'
     >
       {/* Góp ý BuildX: màn này chỉ có logo để về trang chủ — thêm lối lùi về bảng giá. */}
       <button
         type='button'
         onClick={backToPlan}
-        className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium transition-colors'
+        className='text-muted-foreground hover:text-foreground hidden items-center gap-1.5 text-sm font-medium transition-colors sm:inline-flex'
       >
         <ArrowLeft className='size-4' />
         {t('backToPlans')}
@@ -349,6 +351,8 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
 
       <CheckoutSteps
         current='confirm'
+        onPreviousStep={backToPlan}
+        previousStepLabel={t('backToPlans')}
         onCompletedStep={(step) => {
           if (step === 'plan') backToPlan()
         }}
@@ -585,18 +589,18 @@ export function OrderConfirm({ productId, kind, projectId, offerKey, apiProduct 
               <div className='flex flex-wrap items-center gap-2'>
                 <p className='text-primary-strong text-lg font-bold tracking-wide uppercase'>{product.name}</p>
                 {product.tierTag ? (
-                  <span className='bg-accent text-primary-strong rounded-sm px-2.5 py-0.5 text-[11px] font-semibold'>
+                  <span className='bg-accent text-primary-strong rounded-sm px-2.5 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                     {product.tierTag}
                   </span>
                 ) : null}
                 {product.popular ? (
-                  <span className='bg-brand-orange text-brand-orange-foreground ml-auto rounded-sm px-2.5 py-0.5 text-[11px] font-semibold'>
+                  <span className='bg-brand-orange text-brand-orange-foreground ml-auto rounded-sm px-2.5 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                     {tPlansRoot('popularShort')}
                   </span>
                 ) : null}
               </div>
-              {projectId ? (
-                <p className='text-muted-foreground mt-0.5 text-xs'>{t('forProject', { project: projectId })}</p>
+              {projectName ? (
+                <p className='text-muted-foreground mt-0.5 text-xs'>{t('forProject', { project: projectName })}</p>
               ) : null}
 
               {/* Hình S03: mỗi dòng quyền lợi có ICON RIÊNG (bảng màu · ô bút chì ·

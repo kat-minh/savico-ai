@@ -40,7 +40,7 @@ export function LoginForm({ embedded = false }: LoginFormProps = {}) {
   const schema = useMemo(
     () =>
       createLoginSchema({
-        required: tv('required'),
+        emailRequired: tv('emailRequired'),
         email: tv('email'),
         passwordMin: tv('passwordMin', { min: 8 })
       }),

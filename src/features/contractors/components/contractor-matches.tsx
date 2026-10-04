@@ -17,7 +17,6 @@ import {
   contractorCompareRoute,
   contractorMatchesRoute
 } from '@/shared/constants/routes'
-import { useMediaQuery } from '@/shared/hooks'
 import { isApiError } from '@/shared/lib/api'
 import { cn } from '@/shared/lib/utils'
 import {
@@ -184,7 +183,6 @@ function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
   const t = useTranslations('contractors.matches')
   const tSort = useTranslations('contractors.sort')
   const reduceMotion = useReducedMotion()
-  const isMobile = useMediaQuery('(max-width: 767px)')
 
   const { data: brief, isError: briefFailed } = useBrief(projectId)
   const { data: invitations, limit, remaining } = useInvitations(projectId)
@@ -263,54 +261,6 @@ function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
   const [inviteFlipStage, setInviteFlipStage] = useState<'old' | 'lock' | null>(null)
   const [newlyInvitedIds, setNewlyInvitedIds] = useState<Set<string>>(() => new Set())
   const [projectChangeRevision, setProjectChangeRevision] = useState(0)
-  const projectBarRef = useRef<HTMLDivElement>(null)
-  const projectBarTriggerRef = useRef<number | null>(null)
-  const [projectBarStuck, setProjectBarStuck] = useState(false)
-
-  useEffect(() => {
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const trigger = projectBarTriggerRef.current
-      if (trigger === null) return
-      setProjectBarStuck((current) => {
-        // So sánh với một mốc scroll tuyệt đối, không đo lại chính thanh sticky
-        // đang co giãn. Khoảng trễ 12px chỉ áp dụng khi cuộn ngược để mỗi chiều
-        // đi qua vùng chuyển tiếp đúng một lần.
-        const next = current ? window.scrollY >= trigger - 12 : window.scrollY >= trigger
-        return current === next ? current : next
-      })
-    }
-    const measure = () => {
-      let node: HTMLElement | null = projectBarRef.current
-      if (!node) return
-      let naturalTop = 0
-      while (node) {
-        naturalTop += node.offsetTop
-        node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null
-      }
-      // Khi bắt đầu cuộn, site header thu từ 64px xuống 48px. Trừ trước
-      // phần chênh 16px để mốc này trùng lúc thanh chạm `top-14`.
-      projectBarTriggerRef.current = Math.max(8, naturalTop - 72)
-      update()
-    }
-    const schedule = () => {
-      if (frame) return
-      frame = window.requestAnimationFrame(update)
-    }
-    const scheduleMeasure = () => {
-      if (frame) window.cancelAnimationFrame(frame)
-      frame = window.requestAnimationFrame(measure)
-    }
-    measure()
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', scheduleMeasure)
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', scheduleMeasure)
-    }
-  }, [])
 
   useEffect(() => {
     if (window.sessionStorage.getItem(MATCHES_PROJECT_CHANGED_KEY) === projectId) {
@@ -423,7 +373,7 @@ function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-5 lg:py-8 lg:px-8'>
+    <div className='relative mx-auto flex w-full max-w-[90rem] flex-col gap-5 lg:gap-6 px-4 py-5 lg:px-8'>
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
         initial='hidden'
@@ -472,14 +422,11 @@ function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
       ) : (
         <>
           <motion.div
-            ref={projectBarRef}
+            data-project-bar-slot
             initial={reduceMotion ? false : { opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.4, ease: revealEase }}
-            className={cn(
-              'sticky top-14 z-30 order-1 transition-shadow duration-300',
-              projectBarStuck && 'shadow-[0_10px_30px_-20px_rgba(42,117,63,0.5)]'
-            )}
+            className='order-1'
           >
             <AnimatePresence mode='wait'>
               <motion.div
@@ -490,7 +437,6 @@ function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
               >
                 <ProjectContextBar
                   brief={brief}
-                  condensed={projectBarStuck && !isMobile}
                   invitedPill={
                     <motion.span
                       title={pillLocked ? t('inviteLimitReached', { max: limit ?? 0 }) : undefined}
@@ -740,7 +686,7 @@ function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
                     transition={{ duration: 0.24, delay: reduceMotion ? 0 : 0.68 }}
                     className='flex items-center gap-2.5 rounded-xl border p-2.5'
                   >
-                    <ContractorLogo contractor={contractor} className='size-10 rounded-lg text-[11px]' />
+                    <ContractorLogo contractor={contractor} className='size-10 rounded-lg max-md:text-xs text-[11px]' />
                     <span className='min-w-0 flex-1 truncate text-sm font-medium'>{contractor.name}</span>
                     <span className='inline-flex shrink-0 items-center gap-1 text-sm font-semibold'>
                       <Star className='text-warning size-3.5 fill-current' />

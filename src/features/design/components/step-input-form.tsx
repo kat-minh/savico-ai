@@ -54,7 +54,7 @@ interface StepInputFormProps {
 /** Nhãn nhóm đánh số trong cột trái (Hình 04): "1 · HÌNH ẢNH & MÔ TẢ". */
 function GroupHeading({ index, children }: { index: number; children: ReactNode }) {
   return (
-    <h2 className='text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.1em] uppercase'>
+    <h2 className='text-muted-foreground mb-3 max-md:text-xs text-[11px] font-semibold tracking-[0.1em] uppercase'>
       {index} · {children}
     </h2>
   )
@@ -189,7 +189,7 @@ export function StepInputForm({ projectId, onSubmit }: StepInputFormProps) {
       data-validation-run={validationRun}
       data-flow-leaving={leaving}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] px-4 pt-2 pb-5 lg:pb-6 lg:px-8 lg:pt-6'
+      className='mx-auto w-full max-w-[90rem] px-4 pt-5 pb-5 lg:px-8'
     >
       <div className='grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]'>
         {/* ── Cột TRÁI — 3 nhóm đánh số ─────────────────────────────── */}

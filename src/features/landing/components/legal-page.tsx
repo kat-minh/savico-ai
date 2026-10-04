@@ -13,8 +13,14 @@ import { LEGAL_DOCS_EN } from '../constants/legal-docs.en'
 
 const ALIGN = { j: 'justify', c: 'center', r: 'right' } as const
 
+/** Dính "Build X" bằng khoảng trắng không ngắt, để chữ "X" không rớt xuống dòng riêng. */
+const keepBrandTogether = (text: string) => text.replace(/(build)\s+x\b/gi, '$1 X')
+
 /** Một đoạn chữ với đúng màu / đậm / nghiêng / cỡ chữ của file docs. */
-function Runs({ paragraph, base }: { paragraph: LegalParagraph; base: LegalDoc['base'] }) {
+function Runs({ paragraph, base, oneLine }: { paragraph: LegalParagraph; base: LegalDoc['base']; oneLine?: boolean }) {
+  // Tiêu đề một dòng: cỡ chữ không vượt quá bề rộng khung chia theo số ký tự (chữ hoa đậm ≈ 0.75em/ký tự).
+  const chars = paragraph.r.reduce((n, run) => n + run.t.length, 0)
+  const fitCqw = (100 / (chars * 0.75)).toFixed(2)
   return (
     <>
       {paragraph.r.map((run, i) => (
@@ -23,12 +29,16 @@ function Runs({ paragraph, base }: { paragraph: LegalParagraph; base: LegalDoc['
           style={{
             color: `#${run.c ?? base.c}`,
             // Cỡ thân bài = 1rem; các cỡ khác theo đúng tỉ lệ trong file gốc.
-            fontSize: run.z && run.z !== base.z ? `${run.z / base.z}rem` : undefined,
+            fontSize: oneLine
+              ? `min(${(run.z ?? base.z) / base.z}rem, ${fitCqw}cqw)`
+              : run.z && run.z !== base.z
+                ? `${run.z / base.z}rem`
+                : undefined,
             fontWeight: run.b ? 700 : undefined,
             fontStyle: run.i ? 'italic' : undefined
           }}
         >
-          {run.t}
+          {keepBrandTogether(run.t)}
         </span>
       ))}
     </>
@@ -47,8 +57,8 @@ function Paragraph({ p, base, first }: { p: LegalParagraph; base: LegalDoc['base
   const spacing = first ? '' : isHeadingLike(p, base) ? 'mt-8' : 'mt-3'
   const Tag = p.k === 'title' ? 'h1' : p.k === 'h2' ? 'h2' : p.k === 'h3' ? 'h3' : 'p'
   return (
-    <Tag className={`leading-relaxed ${spacing}`} style={style}>
-      <Runs paragraph={p} base={base} />
+    <Tag className={`leading-relaxed ${p.k === 'title' ? 'whitespace-nowrap' : ''} ${spacing}`} style={style}>
+      <Runs paragraph={p} base={base} oneLine={p.k === 'title'} />
     </Tag>
   )
 }
@@ -101,8 +111,11 @@ export function LegalPage({ doc }: { doc: LegalDocKey }) {
   }
 
   return (
-    <div className='mx-auto w-full max-w-4xl px-4 py-5 lg:px-8 lg:py-16'>
-      <article className='rounded-2xl border bg-white px-6 py-10 shadow-sm sm:px-12' style={{ color: `#${base.c}` }}>
+    <div className='mx-auto w-full max-w-4xl px-4 py-5 lg:px-8'>
+      <article
+        className='@container rounded-2xl border bg-white px-6 py-10 shadow-sm sm:px-12'
+        style={{ color: `#${base.c}` }}
+      >
         {groups.map((group, i) => {
           if (group.kind === 'list') {
             return (
