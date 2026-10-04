@@ -163,7 +163,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
       initial={reduceMotion ? false : { opacity: 0, x: 32 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'
     >
       {/* Hình S11: link quay lại màu XANH, và ngay cạnh nó là viên nhãn
           "HỒ SƠ TỰ TẠO" — bản trước không có viên nhãn này. */}
@@ -180,7 +180,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
           <ArrowLeft className='size-4' />
           {t('back')}
         </Link>
-        <span className='bg-accent text-primary-strong inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide uppercase'>
+        <span className='bg-accent text-primary-strong inline-flex items-center gap-1.5 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
           <ClipboardList className='size-3.5' />
           {tCommon('selfCreated')}
         </span>
@@ -283,7 +283,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
             <span className='bg-accent text-primary flex size-11 shrink-0 items-center justify-center rounded-xl'>
               <House className='size-5' />
             </span>
-            <span className='bg-accent text-primary-strong inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase'>
+            <span className='bg-accent text-primary-strong inline-flex items-center rounded-full px-2.5 py-1 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
               {tCommon('selfCreated')}
             </span>
           </div>

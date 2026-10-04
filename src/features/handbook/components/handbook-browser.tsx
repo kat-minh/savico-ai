@@ -242,7 +242,7 @@ export function HandbookBrowser() {
         className={cn(
           'w-full min-w-0 outline-none',
           active ? 'relative' : 'pointer-events-none absolute inset-x-0 top-0',
-          value === 'news' && 'space-y-6'
+          value === 'news' && 'space-y-5 sm:space-y-6'
         )}
       >
         {value === 'library' ? (
@@ -263,7 +263,7 @@ export function HandbookBrowser() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-4 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-4 px-4 py-5 lg:px-8'
     >
       <h1 data-entrance-step='0' className='text-3xl font-semibold tracking-tight'>
         {t('title')}
@@ -301,7 +301,7 @@ export function HandbookBrowser() {
           />
         </TabsList>
 
-        <div ref={contentFrameRef} data-handbook-content-frame className='relative mt-6'>
+        <div ref={contentFrameRef} data-handbook-content-frame className='relative mt-5 sm:mt-6'>
           {renderTabContent('library')}
           {renderTabContent('news')}
         </div>

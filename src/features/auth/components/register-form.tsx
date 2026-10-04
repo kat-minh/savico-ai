@@ -15,6 +15,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
+import { useRequiredMessage } from '@/shared/hooks'
 import { useRegister } from '../hooks/use-register'
 import { isApiError } from '@/shared/lib/api'
 import { createRegisterSchema, type RegisterFormValues } from '../schemas/register.schema'
@@ -35,6 +36,7 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
   const t = useTranslations('auth.register')
   const tSocial = useTranslations('auth.social')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const router = useRouter()
   const register = useRegister()
   const pending = register.isPending
@@ -42,13 +44,13 @@ export function RegisterForm({ embedded = false, onSwitchToLogin }: RegisterForm
   const schema = useMemo(
     () =>
       createRegisterSchema({
-        required: tv('required'),
+        required,
         email: tv('email'),
         passwordMin: tv('passwordMin', { min: 8 }),
         passwordMismatch: tv('passwordMismatch'),
         agreeTerms: tv('agreeTerms')
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<RegisterFormValues>({

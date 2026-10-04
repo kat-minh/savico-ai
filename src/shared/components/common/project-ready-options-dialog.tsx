@@ -96,11 +96,11 @@ export function ProjectReadyOptionsDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           showCloseButton={false}
-          className='max-h-[calc(100dvh-20px)] w-[min(1080px,calc(100vw-24px))] max-w-[1080px] gap-0 overflow-x-hidden overflow-y-auto rounded-[24px] border-0 bg-background p-0 shadow-2xl sm:max-w-[1080px] max-[899px]:inset-x-0 max-[899px]:bottom-0 max-[899px]:top-auto max-[899px]:flex max-[899px]:h-[90dvh] max-[899px]:max-h-[90dvh] max-[899px]:w-full max-[899px]:max-w-full max-[899px]:translate-x-0 max-[899px]:translate-y-0 max-[899px]:flex-col max-[899px]:overflow-hidden max-[899px]:rounded-b-none max-[899px]:rounded-t-[24px]'
+          className='max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[1080px] gap-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[24px] border-0 bg-background p-0 shadow-2xl sm:max-w-[1080px]'
         >
           <ReadyDialogHeader title={t('title')} subtitle={t('subtitle')} closeLabel={t('close')} />
 
-          <div className='grid gap-4 px-4 pt-5 sm:px-6 min-[900px]:grid-cols-3 max-[899px]:min-h-0 max-[899px]:flex-1 max-[899px]:overflow-y-auto max-[899px]:overscroll-contain max-[899px]:pt-2 max-[899px]:pb-4'>
+          <div className='grid gap-4 px-4 pt-5 pb-4 sm:px-6 sm:pb-5 min-[900px]:grid-cols-3'>
             <ReadyOptionCard
               tone='green'
               image={BUILDING_IMAGE.townhouse}
@@ -181,7 +181,7 @@ export function ProjectReadyOptionsDialog({
             />
           </div>
 
-          <div className='flex shrink-0 justify-end bg-background px-5 pt-4 pb-4 sm:px-6 max-[899px]:border-t max-[899px]:border-border/70 max-[899px]:pt-3'>
+          <div className='flex shrink-0 justify-end bg-background px-5 pt-4 pb-4 sm:px-6'>
             <button
               type='button'
               onClick={() => handleOpenChange(false)}
@@ -290,7 +290,7 @@ function ReadyOptionCard({
           />
 
           {badge ? (
-            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 z-10 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide uppercase shadow-sm'>
+            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 z-10 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-bold tracking-wide uppercase shadow-sm'>
               {badge}
             </span>
           ) : null}

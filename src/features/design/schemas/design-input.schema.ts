@@ -1,10 +1,12 @@
 import { z } from 'zod'
 
+import type { RequiredMessage } from '@/shared/hooks'
+
 import { WISHES_MAX_LENGTH } from '../constants/design.constants'
 
 /** Resolved, localized validation messages injected into the schema. */
 export interface DesignInputSchemaMessages {
-  required: string
+  required: RequiredMessage
   maxLength: string
 }
 
@@ -18,14 +20,17 @@ export interface DesignInputSchemaMessages {
 export function createDesignInputSchema(m: DesignInputSchemaMessages) {
   return z
     .object({
-      landPhotoUrl: z.string().min(1, { message: m.required }),
-      address: z.string().trim().min(1, { message: m.required }),
+      landPhotoUrl: z.string().min(1, { message: m.required('landPhoto') }),
+      address: z
+        .string()
+        .trim()
+        .min(1, { message: m.required('address') }),
       buildingType: z.enum(['house', 'townhouse', 'apartment']),
       floorCount: z.enum(['ground', 'ground+1', 'ground+2', 'ground+3', 'ground+4']).nullable(),
       hasAttic: z.boolean().nullable(),
       packageTier: z.enum(['basic', 'standard', 'vip']),
       architectureStyle: z.enum(['roofed', 'modern-townhouse', 'neoclassical']).nullable(),
-      interiorStyle: z.string().min(1, { message: m.required }),
+      interiorStyle: z.string().min(1, { message: m.required('interiorStyle') }),
       wishes: z.string().max(WISHES_MAX_LENGTH, { message: m.maxLength })
     })
     .superRefine((values, ctx) => {
@@ -35,7 +40,7 @@ export function createDesignInputSchema(m: DesignInputSchemaMessages) {
       const conditional = ['floorCount', 'hasAttic', 'architectureStyle'] as const
       for (const field of conditional) {
         if (values[field] === null) {
-          ctx.addIssue({ code: 'custom', path: [field], message: m.required })
+          ctx.addIssue({ code: 'custom', path: [field], message: m.required(field) })
         }
       }
     })

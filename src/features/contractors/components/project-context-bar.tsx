@@ -87,7 +87,7 @@ export function ProjectContextBar({ brief, condensed = false, invitedPill, extra
         <p
           aria-hidden={condensed}
           className={cn(
-            'text-muted-foreground overflow-hidden text-[11px] font-medium tracking-wide uppercase transition-[max-height,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+            'text-muted-foreground overflow-hidden max-md:text-xs text-[11px] font-medium tracking-wide uppercase transition-[max-height,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
             condensed ? 'max-h-0 -translate-y-1 opacity-0' : 'max-h-5 translate-y-0 opacity-100'
           )}
         >
@@ -104,12 +104,12 @@ export function ProjectContextBar({ brief, condensed = false, invitedPill, extra
             {brief.name}
           </h2>
           {brief.selfCreated ? (
-            <span className='border-primary/40 text-primary-strong rounded-md border px-2 py-0.5 text-[11px] font-medium'>
+            <span className='border-primary/40 text-primary-strong rounded-md border px-2 py-0.5 max-md:text-xs text-[11px] font-medium'>
               {t('selfCreated')}
             </span>
           ) : null}
           {version > 1 ? (
-            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
+            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium'>
               {tBar('version', { version })}
             </span>
           ) : null}

@@ -357,7 +357,9 @@ export function VideoCard({
 
         <div className={cn('flex flex-1 flex-col gap-1 p-4', row && 'justify-center')}>
           {topicLabel ? (
-            <p className='text-primary text-[0.7rem] font-semibold tracking-wide uppercase'>{topicLabel}</p>
+            <p className='text-primary max-md:text-xs text-[0.7rem] font-semibold tracking-wide uppercase'>
+              {topicLabel}
+            </p>
           ) : null}
           <h3
             className={cn(

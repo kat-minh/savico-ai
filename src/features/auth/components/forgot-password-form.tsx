@@ -16,6 +16,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/components/ui/form'
+import { useRequiredMessage } from '@/shared/hooks'
 import {
   createForgotPasswordSchema,
   createResetPasswordSchema,
@@ -34,6 +35,7 @@ type Step = 'email' | 'code' | 'password' | 'done'
 export function ForgotPasswordForm() {
   const t = useTranslations('auth.forgot')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const [step, setStep] = useState<Step>('email')
   const [email, setEmail] = useState('')
   const [pending, setPending] = useState(false)
@@ -41,15 +43,15 @@ export function ForgotPasswordForm() {
   const [code, setCode] = useState('')
   const [codeError, setCodeError] = useState<string | null>(null)
 
-  const emailSchema = useMemo(() => createForgotPasswordSchema({ required: tv('required'), email: tv('email') }), [tv])
+  const emailSchema = useMemo(() => createForgotPasswordSchema({ required, email: tv('email') }), [required, tv])
   const passwordSchema = useMemo(
     () =>
       createResetPasswordSchema({
-        required: tv('required'),
+        required,
         passwordMin: tv('passwordMin', { min: 8 }),
         passwordMismatch: tv('passwordMismatch')
       }),
-    [tv]
+    [required, tv]
   )
 
   const emailForm = useForm<ForgotPasswordFormValues>({
@@ -91,7 +93,7 @@ export function ForgotPasswordForm() {
     event.preventDefault()
     const trimmed = code.trim()
     if (!/^\d+$/.test(trimmed)) {
-      setCodeError(trimmed ? t('codeInvalid') : tv('required'))
+      setCodeError(trimmed ? t('codeInvalid') : required('verifyCode'))
       return
     }
     setCodeError(null)

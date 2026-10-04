@@ -144,7 +144,6 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const t = useTranslations('contractors.matches')
   const tSort = useTranslations('contractors.sort')
   const reduceMotion = useReducedMotion()
-
   const { data: brief } = useBrief(projectId)
   const { data: contractors, isPending } = useContractors(projectId)
   const { data: invitations } = useInvitations(projectId)
@@ -226,6 +225,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [inviteFlipStage, setInviteFlipStage] = useState<'old' | 'lock' | null>(null)
   const [newlyInvitedIds, setNewlyInvitedIds] = useState<Set<string>>(() => new Set())
   const [projectChangeRevision, setProjectChangeRevision] = useState(0)
+
   useEffect(() => {
     if (window.sessionStorage.getItem(MATCHES_PROJECT_CHANGED_KEY) === projectId) {
       window.sessionStorage.removeItem(MATCHES_PROJECT_CHANGED_KEY)
@@ -326,7 +326,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='relative mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-5 lg:px-8'>
+    <div className='relative mx-auto flex w-full max-w-[90rem] flex-col gap-5 lg:gap-6 px-4 py-5 lg:px-8'>
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
         initial='hidden'
@@ -375,6 +375,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
       ) : (
         <>
           <motion.div
+            data-project-bar-slot
             initial={reduceMotion ? false : { opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.4, ease: revealEase }}
@@ -607,7 +608,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                     transition={{ duration: 0.24, delay: reduceMotion ? 0 : 0.68 }}
                     className='flex items-center gap-2.5 rounded-xl border p-2.5'
                   >
-                    <ContractorLogo contractor={contractor} className='size-10 rounded-lg text-[11px]' />
+                    <ContractorLogo contractor={contractor} className='size-10 rounded-lg max-md:text-xs text-[11px]' />
                     <span className='min-w-0 flex-1 truncate text-sm font-medium'>{contractor.name}</span>
                     <span className='inline-flex shrink-0 items-center gap-1 text-sm font-semibold'>
                       <Star className='text-warning size-3.5 fill-current' />

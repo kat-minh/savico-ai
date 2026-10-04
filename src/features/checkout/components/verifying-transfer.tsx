@@ -240,7 +240,7 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
 
   if (isPending || !order) {
     return (
-      <div className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
+      <div className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'>
         <CheckoutSteps current='payment' animateEntrance={false} />
 
         <div className='space-y-3 text-center'>
@@ -281,11 +281,13 @@ export function VerifyingTransfer({ orderId }: VerifyingTransferProps) {
       data-checkout-verifying-root
       data-confirmed={confirmed ? 'true' : 'false'}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8 [&>*:not([data-checkout-stepper])]:mx-auto [&>*:not([data-checkout-stepper])]:max-w-lg'
     >
       <CheckoutSteps
         current='payment'
         animateEntrance={false}
+        onPreviousStep={() => void backToPayment()}
+        previousStepLabel={t('backToQr')}
         onCurrentStep={
           confirmed
             ? undefined

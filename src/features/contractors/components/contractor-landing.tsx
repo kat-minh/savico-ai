@@ -405,7 +405,7 @@ export function ContractorLanding() {
   // trên ảnh 450px = 41–48px ở khổ thật, còn `space-y-16` (64px) của bản trước
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
-    <div className='space-y-10 sm:space-y-11 pb-5'>
+    <div className='space-y-5 sm:space-y-11 pb-5'>
       {/* Hero — ảnh phủ toàn banner, lớp blur bên trái tan dần trên ảnh. */}
       <section data-contractor-hero className='relative isolate overflow-hidden'>
         {/* Không chia cột ảnh: chỉ mask lớp blur, giữ ảnh gốc liền mạch. */}
@@ -523,7 +523,7 @@ export function ContractorLanding() {
             241…308, 331…428 — chia 424px thành 4 cột đều 106px thì cả bốn cụm
             đều nằm giữa cột của mình, không phải canh trái. */}
       <motion.section
-        className={cn(PAGE_CONTAINER, 'max-sm:-mt-3')}
+        className={PAGE_CONTAINER}
         initial={reduceMotion ? false : { opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.4 }}

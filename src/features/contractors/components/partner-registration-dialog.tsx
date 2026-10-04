@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/shared/components/ui/button'
+import { useRequiredMessage } from '@/shared/hooks'
 import {
   Dialog,
   DialogContent,
@@ -30,16 +31,17 @@ interface PartnerRegistrationDialogProps {
 export function PartnerRegistrationDialog({ open, onOpenChange }: PartnerRegistrationDialogProps) {
   const t = useTranslations('contractors.landing.partner')
   const tValidation = useTranslations('validation')
+  const required = useRequiredMessage()
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
 
   const schema = useMemo(
     () =>
       createPartnerRegistrationSchema({
-        required: tValidation('required'),
+        required,
         email: tValidation('email'),
         phone: tValidation('phone')
       }),
-    [tValidation]
+    [required, tValidation]
   )
   const form = useForm<PartnerRegistrationFormValues>({
     resolver: zodResolver(schema),

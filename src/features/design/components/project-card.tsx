@@ -109,7 +109,7 @@ function MiniStepper({ project }: { project: Project }) {
                 data-step-dot
                 data-active={state === 'current'}
                 className={cn(
-                  'flex size-[18px] items-center justify-center rounded-full text-[10px] leading-none font-semibold',
+                  'flex size-[18px] items-center justify-center rounded-full max-md:text-xs text-[10px] leading-none font-semibold',
                   state === 'done' && 'bg-primary text-primary-foreground',
                   state === 'current' && currentDotClass(project.status),
                   state === 'pending' && 'border-border text-muted-foreground border bg-transparent'
@@ -119,7 +119,7 @@ function MiniStepper({ project }: { project: Project }) {
               </span>
               <span
                 className={cn(
-                  'text-[10px] leading-none whitespace-nowrap',
+                  'max-md:text-xs text-[10px] leading-none whitespace-nowrap',
                   state === 'pending' ? 'text-muted-foreground' : 'text-foreground'
                 )}
               >
@@ -244,7 +244,7 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
             data-project-status
             data-completed={project.status === 'completed'}
             className={cn(
-              'flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium',
+              'flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium',
               BADGE_CLASS[project.status]
             )}
           >

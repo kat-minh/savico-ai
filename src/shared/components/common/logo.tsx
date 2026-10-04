@@ -47,7 +47,7 @@ export function Logo({ className, onDark = false, tagline }: LogoProps) {
       {image}
       <span
         className={cn(
-          'text-[0.625rem] leading-none font-medium tracking-[0.12em] whitespace-nowrap uppercase',
+          'max-md:text-xs text-[0.625rem] leading-none font-medium tracking-[0.12em] whitespace-nowrap uppercase',
           onDark ? 'text-footer-foreground/60' : 'text-muted-foreground'
         )}
       >

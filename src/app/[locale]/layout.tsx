@@ -11,10 +11,27 @@ import { notFound } from 'next/navigation'
 
 import '../globals.css'
 
+const MOBILE_SCROLL_RESET_SCRIPT = `
+(() => {
+  const navigation = performance.getEntriesByType('navigation')[0];
+  const isReload = navigation && navigation.type === 'reload';
+  const isMobile = window.matchMedia('(max-width: 767px)').matches;
+  if (!isReload || !isMobile) return;
+
+  history.scrollRestoration = 'manual';
+
+  const reset = () => window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  reset();
+  requestAnimationFrame(reset);
+  requestAnimationFrame(() => requestAnimationFrame(reset));
+})();
+`
+
 const PRICING_SCROLL_RESTORE_SCRIPT = `
 (() => {
   const path = location.pathname.endsWith('/') ? location.pathname.slice(0, -1) : location.pathname;
   if (!path.endsWith('/plans')) return;
+  if (window.matchMedia('(max-width: 767px)').matches) return;
 
   const key = 'pricing-scroll:' + location.pathname + location.search;
   const navigation = performance.getEntriesByType('navigation')[0];
@@ -137,6 +154,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} data-scroll-behavior='smooth' suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: MOBILE_SCROLL_RESET_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: PRICING_SCROLL_RESTORE_SCRIPT }} />
       </head>
       <body

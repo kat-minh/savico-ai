@@ -314,7 +314,7 @@ export function DossierReady({
                     <span
                       data-file-kind
                       className={cn(
-                        'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold text-white transition-[font-weight]',
+                        'shrink-0 rounded px-1.5 py-0.5 max-md:text-xs text-[10px] font-semibold text-white transition-[font-weight]',
                         kind === 'pdf' ? 'bg-destructive' : 'bg-primary'
                       )}
                     >

@@ -286,7 +286,7 @@ function ManagementOptionCard({
           </motion.div>
 
           {badge ? (
-            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 z-10 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide uppercase shadow-sm'>
+            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 z-10 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-bold tracking-wide uppercase shadow-sm'>
               {badge}
             </span>
           ) : null}

@@ -161,7 +161,7 @@ export function TemplateLookupExhaustedDialog({
               initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: reduceMotion ? 0 : 0.24, delay: reduceMotion ? 0 : 0.2 }}
-              className='mt-4 flex items-center justify-between gap-5 text-[11.5px] leading-relaxed text-white/68 max-[899px]:sticky max-[899px]:bottom-0 max-[899px]:z-20 max-[899px]:-mx-5 max-[899px]:bg-primary-strong max-[899px]:px-5 max-[899px]:pt-3 max-[899px]:pb-1'
+              className='mt-4 flex items-center justify-between gap-5 max-md:text-xs text-[11.5px] leading-relaxed text-white/68 max-[899px]:sticky max-[899px]:bottom-0 max-[899px]:z-20 max-[899px]:-mx-5 max-[899px]:bg-primary-strong max-[899px]:px-5 max-[899px]:pt-3 max-[899px]:pb-1'
             >
               <p className='max-w-[820px]'>{period === 'month' ? t('footnoteMonth') : t('footnoteDay')}</p>
               <button

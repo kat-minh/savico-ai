@@ -7,6 +7,7 @@ import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/shared/components/ui/button'
+import { useRequiredMessage } from '@/shared/hooks'
 import {
   Dialog,
   DialogContent,
@@ -36,16 +37,17 @@ interface RenameProjectDialogProps {
 export function RenameProjectDialog({ project, onClose }: RenameProjectDialogProps) {
   const t = useTranslations('design.projects.rename')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const tCommon = useTranslations('common')
   const rename = useRenameProject()
 
   const schema = useMemo(
     () =>
       createProjectSchema({
-        required: tv('required'),
+        required,
         maxLength: tv('maxLength', { max: PROJECT_NAME_MAX_LENGTH })
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<CreateProjectFormValues>({

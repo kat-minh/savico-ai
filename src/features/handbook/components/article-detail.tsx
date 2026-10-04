@@ -9,7 +9,7 @@ import {
   useRef,
   useState
 } from 'react'
-import { ArrowUp, Clock } from 'lucide-react'
+import { ArrowLeft, ArrowUp, Clock } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
@@ -303,8 +303,16 @@ export function ArticleDetail({ slug, onCreateProject }: ArticleDetailProps) {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 py-5 lg:px-8'
     >
+      <Link
+        href={ROUTES.HANDBOOK}
+        onClick={(event) => navigateArticle(event, ROUTES.HANDBOOK, 'back')}
+        className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium transition-colors lg:hidden'
+      >
+        <ArrowLeft className='size-4' />
+        {t('breadcrumbRoot')}
+      </Link>
       <Breadcrumb data-entrance-step='0' data-article-breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -566,7 +574,7 @@ function ArticleDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 py-5 lg:px-8'
       aria-hidden='true'
     >
       <Skeleton className='handbook-skeleton animate-none h-4 w-72 max-w-[78%]' />

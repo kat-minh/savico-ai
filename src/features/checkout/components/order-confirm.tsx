@@ -337,13 +337,13 @@ export function OrderConfirm({ productId, kind, projectId, projectName, offerKey
       data-page-entrance={entranceState}
       data-checkout-confirm-root
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'
     >
       {/* Góp ý BuildX: màn này chỉ có logo để về trang chủ — thêm lối lùi về bảng giá. */}
       <button
         type='button'
         onClick={backToPlan}
-        className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium transition-colors'
+        className='text-muted-foreground hover:text-foreground hidden items-center gap-1.5 text-sm font-medium transition-colors sm:inline-flex'
       >
         <ArrowLeft className='size-4' />
         {t('backToPlans')}
@@ -351,6 +351,8 @@ export function OrderConfirm({ productId, kind, projectId, projectName, offerKey
 
       <CheckoutSteps
         current='confirm'
+        onPreviousStep={backToPlan}
+        previousStepLabel={t('backToPlans')}
         onCompletedStep={(step) => {
           if (step === 'plan') backToPlan()
         }}
@@ -587,12 +589,12 @@ export function OrderConfirm({ productId, kind, projectId, projectName, offerKey
               <div className='flex flex-wrap items-center gap-2'>
                 <p className='text-primary-strong text-lg font-bold tracking-wide uppercase'>{product.name}</p>
                 {product.tierTag ? (
-                  <span className='bg-accent text-primary-strong rounded-sm px-2.5 py-0.5 text-[11px] font-semibold'>
+                  <span className='bg-accent text-primary-strong rounded-sm px-2.5 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                     {product.tierTag}
                   </span>
                 ) : null}
                 {product.popular ? (
-                  <span className='bg-brand-orange text-brand-orange-foreground ml-auto rounded-sm px-2.5 py-0.5 text-[11px] font-semibold'>
+                  <span className='bg-brand-orange text-brand-orange-foreground ml-auto rounded-sm px-2.5 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                     {tPlansRoot('popularShort')}
                   </span>
                 ) : null}

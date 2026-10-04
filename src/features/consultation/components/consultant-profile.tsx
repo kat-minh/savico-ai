@@ -208,13 +208,15 @@ export function ConsultantProfile({
           <div className='min-w-0 space-y-2'>
             <motion.div {...entrance(1)}>
               <h1 className='text-xl font-semibold tracking-tight sm:text-2xl'>{consultant.name}</h1>
-              <p className='text-muted-foreground text-sm'>{consultant.title}</p>
+              <p className='text-muted-foreground text-sm max-md:text-base'>{consultant.title}</p>
               {consultant.company && (
-                <p className='text-muted-foreground/80 text-xs'>{t('company', { company: consultant.company })}</p>
+                <p className='text-muted-foreground/80 text-xs max-md:text-sm'>
+                  {t('company', { company: consultant.company })}
+                </p>
               )}
             </motion.div>
 
-            <ul className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs'>
+            <ul className='text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs max-md:text-sm'>
               <motion.li {...entrance(2)} className='flex items-center gap-1'>
                 <SparkleStar />
                 <span className='text-foreground font-medium'>{consultant.rating.toFixed(1)}</span>
@@ -234,7 +236,7 @@ export function ConsultantProfile({
 
             <motion.div {...entrance(5)} className='space-y-0.5'>
               {consultant.bio.map((line) => (
-                <p key={line} className='text-sm leading-relaxed'>
+                <p key={line} className='text-sm max-md:text-base leading-relaxed'>
                   {line}
                 </p>
               ))}
@@ -335,7 +337,7 @@ export function ConsultantProfile({
             ) : null}
           </Button>
           {!selectedTime ? (
-            <p className='text-muted-foreground mt-2 text-center text-xs'>{t('chooseSlotHint')}</p>
+            <p className='text-muted-foreground mt-2 text-center text-xs max-md:text-sm'>{t('chooseSlotHint')}</p>
           ) : null}
         </div>
 
@@ -424,11 +426,11 @@ function BookedPanel({
       <div className='flex items-center gap-2'>
         <CalendarCheck className='text-primary size-5' />
         <h3 className='font-semibold'>{t('title')}</h3>
-        <span className='bg-brand-orange-soft text-brand-orange rounded-full px-2 py-0.5 text-[11px] font-semibold'>
+        <span className='bg-brand-orange-soft text-brand-orange rounded-full px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'>
           {t('pending')}
         </span>
       </div>
-      <dl className='grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4'>
+      <dl className='grid gap-1.5 text-sm max-md:text-base sm:grid-cols-[auto_1fr] sm:gap-x-4'>
         <dt className='text-muted-foreground'>{t('architect')}</dt>
         <dd className='font-medium'>{booking.consultantName}</dd>
         <dt className='text-muted-foreground'>{t('when')}</dt>
@@ -438,7 +440,7 @@ function BookedPanel({
         <dt className='text-muted-foreground'>{t('format')}</dt>
         <dd className='font-medium'>{t('formatValue')}</dd>
       </dl>
-      <p className='text-muted-foreground text-xs text-pretty'>{t('policy')}</p>
+      <p className='text-muted-foreground text-xs max-md:text-sm text-pretty'>{t('policy')}</p>
       <Button asChild size='sm' variant='outline'>
         <Link href={ROUTES.ACCOUNT_CONSULTATIONS}>{t('viewMine')}</Link>
       </Button>

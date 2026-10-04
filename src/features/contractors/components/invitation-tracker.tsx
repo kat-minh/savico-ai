@@ -541,7 +541,7 @@ function InvitationCard({
                   initial={{ opacity: 0, scale: 0.6 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.7 }}
-                  className='bg-destructive text-destructive-foreground ml-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold'
+                  className='bg-destructive text-destructive-foreground ml-0.5 rounded-full px-1.5 py-0.5 max-md:text-xs text-[9px] font-semibold'
                 >
                   {t('newUpdateBadge')}
                 </motion.span>
@@ -856,7 +856,7 @@ function SentDossier({ projectId, version, onView }: { projectId: string; versio
           initial={reduceMotion ? false : { scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20, delay: reduceMotion ? 0 : 0.9 }}
-          className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 text-[10px] font-medium'
+          className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'
         >
           {version}
         </motion.span>
@@ -1007,7 +1007,7 @@ function DossierSheet({
         <SheetHeader className='border-b pr-10'>
           <div className='flex items-center gap-2'>
             <SheetTitle>{t('dossierTitle')}</SheetTitle>
-            <span className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 text-[10px] font-medium'>
+            <span className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'>
               {version}
             </span>
           </div>

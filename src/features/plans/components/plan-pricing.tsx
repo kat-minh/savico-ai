@@ -139,7 +139,7 @@ function PlanPricingContent() {
       ref={rootRef}
       data-page-entrance={entranceState}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 pt-5 pb-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 pt-5 pb-5 lg:px-8'
     >
       {/* Hình S01: tiêu đề IN HOA cỡ lớn, chữ cuối (tên thương hiệu) tô cam,
           hai bên có hai chiếc lá. Tách chữ cuối ngay tại đây để admin đổi tiêu
@@ -166,7 +166,7 @@ function PlanPricingContent() {
         onViewportEnter={(entry) => {
           if (entry) (entry.target as HTMLElement).dataset.seen = 'true'
         }}
-        className='plan-cta-band relative bg-accent/40 -mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5'
+        className='plan-cta-band relative bg-accent/40 md:-mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5'
         initial={reduceMotion ? false : { opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.5 }}
@@ -491,7 +491,7 @@ function ValueTable() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.12 }}
         transition={{ duration: reduceMotion ? 0.01 : 0.52, delay: reduceMotion ? 0 : 0.2, ease: pricingEase }}
-        className='bg-card mt-5 overflow-x-auto rounded-2xl border'
+        className='bg-card mt-5 overflow-x-auto overflow-y-hidden rounded-2xl border'
       >
         <table className='plan-value-table w-full min-w-[640px] table-fixed text-sm'>
           <colgroup>
@@ -513,7 +513,7 @@ function ValueTable() {
                 onViewportEnter={(entry) => {
                   if (entry) (entry.target as HTMLElement).dataset.seen = 'true'
                 }}
-                viewport={{ once: true, amount: 0.5 }}
+                viewport={{ once: true, amount: 0.05 }}
                 transition={{
                   duration: reduceMotion ? 0.01 : 0.56,
                   delay: reduceMotion ? 0 : 0.32 + index * 0.14,
@@ -568,7 +568,7 @@ function GroupRow({ label, highlight = false }: { label: string; highlight?: boo
         className={cn(
           // Dải nhóm dùng cùng cỡ chữ 14px với nội dung bảng; xanh đậm chứ không
           // phải xanh chính của nút.
-          'px-3 py-1.5 text-left text-sm font-semibold tracking-wide uppercase',
+          'px-3 py-1.5 text-left max-md:text-xs text-sm font-semibold tracking-wide uppercase',
           highlight ? 'bg-brand-orange text-brand-orange-foreground' : 'bg-primary-strong text-primary-foreground'
         )}
       >
@@ -859,7 +859,7 @@ function PlanCards({ plans }: { plans: PlanView[] }) {
           />
         ))}
       </ul>
-      <div className='plan-dots mx-auto flex w-fit gap-3 md:hidden' aria-label={t('title')}>
+      <div className='plan-dots mx-auto -mt-4! flex w-fit gap-3 md:hidden' aria-label={t('title')}>
         {plans.map((plan, index) => (
           <button
             key={plan.id}

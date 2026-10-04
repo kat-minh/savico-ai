@@ -94,7 +94,7 @@ export function HandbookHighlights() {
                         {/* Phủ xanh mờ khi rê — nằm ĐÈ LÊN ảnh, không thay ảnh. */}
                         <div className='bg-primary/0 group-hover:bg-primary/20 pointer-events-none absolute inset-0 transition-colors duration-300' />
                         {isNew ? (
-                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                             {t('newBadge')}
                           </span>
                         ) : null}

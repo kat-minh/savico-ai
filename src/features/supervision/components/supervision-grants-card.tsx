@@ -51,7 +51,7 @@ export function SupervisionGrantsCard() {
 
   return (
     <section className='border-brand-orange/40 bg-brand-orange-soft/50 space-y-3 rounded-xl border p-4'>
-      <h2 className='text-brand-orange flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase'>
+      <h2 className='text-brand-orange flex items-center gap-1.5 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
         <ShieldCheck className='size-3.5' />
         {g('title')}
       </h2>

@@ -117,7 +117,7 @@ export function PlanGiftDialog({ plan, open, onClose, origin }: PlanGiftDialogPr
                     />
                   ) : (
                     <div className='border-brand-orange/30 bg-brand-orange-soft/40 relative size-full rounded-xl border-2 border-dashed'>
-                      <span className='text-brand-orange/70 absolute inset-x-0 bottom-3 text-center text-[11px] font-medium'>
+                      <span className='text-brand-orange/70 absolute inset-x-0 bottom-3 text-center max-md:text-xs text-[11px] font-medium'>
                         {t('imageSlot')}
                       </span>
                     </div>

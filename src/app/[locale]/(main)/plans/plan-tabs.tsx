@@ -155,14 +155,14 @@ export function PlanTabs({ active }: PlanTabsProps) {
             >
               <span
                 className={cn(
-                  'absolute -top-2.5 right-3 rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                  'absolute -top-2.5 right-3 rounded-full px-2 py-0.5 max-md:text-xs text-[10px] font-semibold',
                   isActive ? 'bg-card text-primary-strong' : 'bg-accent text-primary-strong'
                 )}
               >
                 {isActive ? t('viewing') : t('view')}
               </span>
               {tab.isNew ? (
-                <span className='bg-brand-orange absolute -top-2.5 left-3 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white'>
+                <span className='bg-brand-orange absolute -top-2.5 left-3 rounded-full px-2 py-0.5 max-md:text-xs text-[10px] font-semibold text-white'>
                   {t('new')}
                 </span>
               ) : null}
@@ -178,7 +178,7 @@ export function PlanTabs({ active }: PlanTabsProps) {
                 <span className='block font-semibold'>{tab.label}</span>
                 <span
                   className={cn(
-                    'block text-xs text-pretty',
+                    'block text-xs max-md:text-sm text-pretty',
                     isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
                   )}
                 >
@@ -191,7 +191,7 @@ export function PlanTabs({ active }: PlanTabsProps) {
                 </span>
                 <span
                   className={cn(
-                    'block text-[11px] whitespace-nowrap',
+                    'block max-md:text-xs text-[11px] whitespace-nowrap',
                     isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
                   )}
                 >

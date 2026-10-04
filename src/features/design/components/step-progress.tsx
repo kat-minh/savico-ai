@@ -28,6 +28,8 @@ interface StepProgressProps {
   subtitle?: ReactNode
   /** Liên kết quay lại (ví dụ danh sách dự án) hiện phía trên tiêu đề. */
   back?: { href: string; label: string }
+  /** Explicit previous-step action shown on narrow screens. */
+  previousStep?: { href: string; label: string }
   /**
    * Ngày nấc hiện tại xong (ISO). Có thì dòng trạng thái ghi "Hoàn thành ngày …"
    * thay cho "Vừa hoàn thành" (góp ý BuildX: dự toán làm từ nhiều ngày trước).
@@ -52,6 +54,7 @@ export function StepProgress({
   title,
   subtitle,
   back,
+  previousStep,
   currentDoneAt,
   currentDone = false,
   entranceKey,
@@ -76,6 +79,15 @@ export function StepProgress({
           // header → tiêu đề 24 · tiêu đề → stepper 24 (`pb-2` + `py-4` của nav) · stepper → nội dung 24.
           className='mx-auto w-full max-w-[90rem] px-4 pt-5 lg:pt-6 pb-2 lg:px-8 lg:pb-0'
         >
+          {previousStep ? (
+            <Link
+              href={previousStep.href}
+              className='text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1.5 text-sm font-medium transition-colors lg:hidden'
+            >
+              <ArrowLeft className='size-4' />
+              {previousStep.label}
+            </Link>
+          ) : null}
           {back ? (
             <Link
               href={back.href}

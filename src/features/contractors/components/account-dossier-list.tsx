@@ -72,12 +72,12 @@ function DossierRow({
       <div className='min-w-0'>
         <div className='flex flex-wrap items-center gap-2'>
           <h3 className='text-[15px] font-semibold'>{brief.name}</h3>
-          <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-[11px] font-medium'>
+          <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium'>
             {brief.selfCreated ? t('source.selfCreated') : t('source.design')}
           </span>
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium',
+              'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium',
               completed
                 ? 'bg-primary/10 text-primary-strong'
                 : invitedCount > 0
@@ -152,7 +152,7 @@ function DossierRow({
           </Button>
         ) : null}
 
-        <span className='text-muted-foreground text-[10px]'>
+        <span className='text-muted-foreground max-md:text-xs text-[10px]'>
           {latestVersion} · {brief.id}
         </span>
       </div>
@@ -238,7 +238,7 @@ export function AccountDossierList() {
           initial={reduceMotion ? false : { opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={reduceMotion ? { duration: 0 } : { duration: 0.28, delay: noteDelay, ease: revealEase }}
-          className='text-muted-foreground flex items-start gap-1.5 px-0.5 text-[11px] leading-relaxed'
+          className='text-muted-foreground flex items-start gap-1.5 px-0.5 max-md:text-xs text-[11px] leading-relaxed'
         >
           <Info className='mt-0.5 size-3.5 shrink-0' />
           {t('note')}

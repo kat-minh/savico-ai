@@ -41,7 +41,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { contractorReviewRoute, ROUTES } from '@/shared/constants/routes'
-import { useGetProvinces, useGetWards } from '@/shared/hooks'
+import { useGetProvinces, useGetWards, useRequiredMessage } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatBudgetShort, formatDigitGroups, formatDisplayTime } from '@/shared/utils'
 import { formatFileSize } from '../services/brief.service'
@@ -206,6 +206,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
   const tScale = useTranslations('contractors.scale')
   const tStart = useTranslations('contractors.startWindow')
   const tValidation = useTranslations('validation')
+  const required = useRequiredMessage()
   const locale = useLocale() as Locale
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -228,11 +229,11 @@ export function BriefForm({ projectId }: BriefFormProps) {
     () =>
       createBriefSchema(
         {
-          required: tValidation('required'),
+          required,
           nameMaxLength: tValidation('maxLength', { max: 120 }),
           areaPositive: tValidation('positiveNumber'),
           budgetPositive: tValidation('positiveNumber'),
-          noteRequired: tValidation('required'),
+          noteRequired: required('note'),
           noteMaxLength: tValidation('maxLength', { max: BRIEF_NOTE_MAX_LENGTH })
         },
         (buildingTypeId) => {
@@ -240,7 +241,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
           return { floor: fields.floorRequired, attic: fields.atticRequired }
         }
       ),
-    [tValidation, fieldsOf]
+    [required, tValidation, fieldsOf]
   )
 
   const form = useForm<BriefFormValues>({
@@ -584,7 +585,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
       initial={reduceMotion ? false : returningToGroup ? { opacity: 0, x: -32 } : { opacity: 0, y: 22 }}
       animate={pageTransition === 'back' ? { opacity: 0, x: reduceMotion ? 0 : 36 } : { opacity: 1, x: 0, y: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'
     >
       <motion.div
         initial={{ opacity: 0 }}
@@ -1147,7 +1148,7 @@ export function BriefForm({ projectId }: BriefFormProps) {
                     kiến" — không phải một thẻ riêng ở cột phải. */}
                   <h3 className='text-xs font-semibold tracking-wide uppercase'>
                     {t('documents.title')}{' '}
-                    <span className='text-muted-foreground text-[11px] font-normal normal-case'>
+                    <span className='text-muted-foreground max-md:text-xs text-[11px] font-normal normal-case'>
                       ({t('documents.optional')})
                     </span>
                   </h3>

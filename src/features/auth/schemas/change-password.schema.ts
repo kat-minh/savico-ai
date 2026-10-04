@@ -1,8 +1,10 @@
 import { z } from 'zod'
 
+import type { RequiredMessage } from '@/shared/hooks'
+
 /** Resolved, localized validation messages for the change-password form. */
 export interface ChangePasswordSchemaMessages {
-  required: string
+  required: RequiredMessage
   passwordMin: string
   passwordMismatch: string
 }
@@ -14,9 +16,9 @@ export interface ChangePasswordSchemaMessages {
 export function createChangePasswordSchema(m: ChangePasswordSchemaMessages) {
   return z
     .object({
-      currentPassword: z.string().min(1, { message: m.required }),
+      currentPassword: z.string().min(1, { message: m.required('currentPassword') }),
       newPassword: z.string().min(8, { message: m.passwordMin }),
-      confirmPassword: z.string().min(1, { message: m.required })
+      confirmPassword: z.string().min(1, { message: m.required('confirmPassword') })
     })
     .refine((data) => data.newPassword === data.confirmPassword, {
       message: m.passwordMismatch,
