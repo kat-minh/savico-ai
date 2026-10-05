@@ -352,18 +352,6 @@ export function ContractorAdminManager() {
 
             <Divider titlePlacement='start'>{c('sections.location')}</Divider>
             <ContractorAddressField form={form} visible={ctx.item?.status === 'Visible'} />
-            <Row gutter={12}>
-              <Col span={12}>
-                <Form.Item name='latitude' label={c('latitude')}>
-                  <InputNumber style={{ width: '100%' }} step={0.000001} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name='longitude' label={c('longitude')}>
-                  <InputNumber style={{ width: '100%' }} step={0.000001} />
-                </Form.Item>
-              </Col>
-            </Row>
             <Form.Item name='serviceAreaText' label={c('serviceAreaText')}>
               <Input />
             </Form.Item>

@@ -1,10 +1,12 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Alert, Button, Form, Input, Select, Space, Typography, type FormInstance } from 'antd'
+import { Alert, Button, Form, Input, InputNumber, Select, Space, Typography, type FormInstance } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
-import { locationApi, type LocationSuggestion } from '@/shared/locations'
+import { LocationMap } from '@/shared/components/common'
+import { useDebouncedValue } from '@/shared/hooks'
+import { locationApi } from '@/shared/locations'
 
 const text = (v: unknown) => (typeof v === 'string' ? v.normalize('NFC').trim() : '')
 export function contractorAddressKey(values: Record<string, unknown>): string {
@@ -44,7 +46,6 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
     retry: false
   })
   const controller = useRef<AbortController | null>(null)
-  const [suggestions, setSuggestions] = useState<{ key: string; items: LocationSuggestion[] } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   useEffect(
@@ -83,8 +84,20 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
     Number.isFinite(longitude) &&
     longitude >= -180 &&
     longitude <= 180
+  const searchText = useDebouncedValue(address, 400)
+  const canSearch = active && complete && text(detail).length >= 2 && address.length <= 500
+  // TDD-CTR-003 / ST-CTR-045: search results and coordinates belong to the current address only.
+  const search = useQuery({
+    queryKey: ['locations', 'address-search', key, searchText],
+    queryFn: ({ signal }) => locationApi.search(searchText, signal),
+    enabled: canSearch && needsCoordinates && searchText === address,
+    staleTime: 5 * 60 * 1000,
+    retry: false
+  })
+  const searching = canSearch && needsCoordinates && (searchText !== address || search.isFetching)
+  const suggestions = canSearch && needsCoordinates && searchText === address ? (search.data ?? []) : []
 
-  async function locate(refId?: string) {
+  async function locate(refId: string) {
     const requestKey = key
     controller.current?.abort()
     const next = new AbortController()
@@ -92,21 +105,9 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
     setBusy(true)
     setError('')
     try {
-      if (refId) {
-        const result = await locationApi.place(refId, next.signal)
-        if (next.signal.aborted || contractorAddressKey(form.getFieldsValue(true)) !== requestKey) return
-        form.setFieldsValue({
-          latitude: result.latitude,
-          longitude: result.longitude,
-          _addressCoordinateKey: requestKey
-        })
-        void form.validateFields(['addressDetail']).catch(() => {})
-      } else {
-        const result = await locationApi.search(address, next.signal)
-        if (next.signal.aborted || contractorAddressKey(form.getFieldsValue(true)) !== requestKey) return
-        setSuggestions({ key: requestKey, items: result })
-        if (!result.length) setError(t('noResult'))
-      }
+      const result = await locationApi.place(refId, next.signal)
+      if (next.signal.aborted || contractorAddressKey(form.getFieldsValue(true)) !== requestKey) return
+      confirmCoordinates(result.latitude, result.longitude)
     } catch {
       if (!next.signal.aborted) setError(t('mapError'))
     } finally {
@@ -117,6 +118,15 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
   function invalidate() {
     form.setFieldsValue({ latitude: null, longitude: null, _addressCoordinateKey: '' })
     controller.current?.abort()
+    setBusy(false)
+    setError('')
+  }
+  function confirmCoordinates(lat: number, lng: number) {
+    controller.current?.abort()
+    setBusy(false)
+    setError('')
+    form.setFieldsValue({ latitude: lat, longitude: lng, _addressCoordinateKey: key })
+    void form.validateFields(['addressDetail']).catch(() => {})
   }
   function activate() {
     const stored = form.getFieldValue('locationDatasetVersion')
@@ -136,31 +146,36 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
         </>
       ) : (
         <>
-          <Form.Item name='provinceCode' label={t('province')}>
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp='label'
-              loading={provinces.isPending}
-              disabled={provinces.isError}
-              options={provinceOptions}
-              onChange={() => {
-                invalidate()
-                form.setFieldsValue({ wardCode: null, locationDatasetVersion: provinces.data?.datasetVersion ?? null })
-              }}
-            />
-          </Form.Item>
-          <Form.Item name='wardCode' label={t('ward')}>
-            <Select
-              allowClear
-              showSearch
-              optionFilterProp='label'
-              loading={wards.isPending}
-              disabled={!province || wards.isError}
-              options={wardOptions}
-              onChange={invalidate}
-            />
-          </Form.Item>
+          <div className='grid gap-x-3 sm:grid-cols-2'>
+            <Form.Item name='provinceCode' label={t('province')}>
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp='label'
+                loading={provinces.isPending}
+                disabled={provinces.isError}
+                options={provinceOptions}
+                onChange={() => {
+                  invalidate()
+                  form.setFieldsValue({
+                    wardCode: null,
+                    locationDatasetVersion: provinces.data?.datasetVersion ?? null
+                  })
+                }}
+              />
+            </Form.Item>
+            <Form.Item name='wardCode' label={t('ward')}>
+              <Select
+                allowClear
+                showSearch
+                optionFilterProp='label'
+                loading={wards.isPending}
+                disabled={!province || wards.isPending || wards.isError}
+                options={wardOptions}
+                onChange={invalidate}
+              />
+            </Form.Item>
+          </div>
           <Form.Item
             name='addressDetail'
             label={t('street')}
@@ -182,41 +197,84 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
                   )
                     throw new Error(t('required'))
                   if (text(v.addressDetail).length > 500) throw new Error(t('tooLong'))
-                  if (v._addressCoordinateKey !== contractorAddressKey(v) || v.latitude == null || v.longitude == null)
+                  if (
+                    v._addressCoordinateKey !== contractorAddressKey(v) ||
+                    typeof v.latitude !== 'number' ||
+                    !Number.isFinite(v.latitude) ||
+                    Math.abs(v.latitude) > 90 ||
+                    typeof v.longitude !== 'number' ||
+                    !Number.isFinite(v.longitude) ||
+                    Math.abs(v.longitude) > 180
+                  )
                     throw new Error(t('coordinatesRequired'))
                 }
               }
             ]}
           >
-            <Input.TextArea rows={2} onChange={invalidate} />
+            <Input
+              autoComplete='off'
+              aria-controls='contractor-location-suggestions'
+              placeholder={t('streetPlaceholder')}
+              onChange={invalidate}
+            />
           </Form.Item>
+          {searching || busy ? <Typography.Text role='status'>{t('searching')}</Typography.Text> : null}
+          {suggestions.length > 0 && !busy ? (
+            <ul
+              id='contractor-location-suggestions'
+              className='max-h-64 overflow-y-auto rounded-lg border'
+              aria-label={t('selectLocation')}
+            >
+              {suggestions.map((suggestion) => (
+                <li key={suggestion.refId}>
+                  <Button
+                    type='text'
+                    block
+                    style={{ height: 'auto', whiteSpace: 'normal', textAlign: 'left', justifyContent: 'flex-start' }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => void locate(suggestion.refId)}
+                  >
+                    <span className='min-w-0 py-1'>
+                      <span className='block font-medium'>{suggestion.name || suggestion.display}</span>
+                      <span className='text-muted-foreground block text-xs'>{suggestion.address}</span>
+                    </span>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           <Typography.Text>
             {t('fullAddress')}: {address || t('noAddress')}
           </Typography.Text>
-          <Button onClick={() => void locate()} disabled={!complete} loading={busy}>
-            {t('locate')}
-          </Button>
-          {suggestions?.key === key && suggestions.items.length > 0 ? (
-            <Select
-              style={{ width: '100%' }}
-              placeholder={t('selectLocation')}
-              options={suggestions.items.map((s) => ({ value: s.refId, label: s.display }))}
-              onChange={(ref) => void locate(ref)}
-              loading={busy}
+          {validCoordinates ? (
+            <div className='space-y-2'>
+              <LocationMap
+                latitude={latitude}
+                longitude={longitude}
+                onChange={complete ? confirmCoordinates : undefined}
+              />
+              <Typography.Text type='secondary'>{t('mapAdjust')}</Typography.Text>
+            </div>
+          ) : (
+            <Typography.Text type='secondary'>{t('mapHint')}</Typography.Text>
+          )}
+          {canSearch && needsCoordinates && searchText === address && search.isError ? (
+            <Alert
+              type='error'
+              title={t('mapError')}
+              action={<Button onClick={() => void search.refetch()}>{t('retry')}</Button>}
             />
           ) : null}
-          {needsCoordinates ? <Typography.Text type='warning'>{t('coordinatesRequired')}</Typography.Text> : null}
-          {needsCoordinates ? (
-            <Button
-              disabled={!validCoordinates}
-              onClick={() => {
-                controller.current?.abort()
-                form.setFieldsValue({ _addressCoordinateKey: key })
-                void form.validateFields(['addressDetail']).catch(() => {})
-              }}
-            >
-              {t('confirmCoordinates')}
-            </Button>
+          {canSearch &&
+          needsCoordinates &&
+          searchText === address &&
+          search.isSuccess &&
+          !searching &&
+          !suggestions.length ? (
+            <Typography.Text type='secondary'>{t('noResult')}</Typography.Text>
+          ) : null}
+          {complete && address.length > 500 ? (
+            <Typography.Text type='warning'>{t('searchTooLong')}</Typography.Text>
           ) : null}
           {error ? <Alert type='error' title={error} /> : null}
           {!visible ? (
@@ -268,6 +326,12 @@ export function ContractorAddressField({ form, visible }: { form: FormInstance; 
       </Form.Item>
       <Form.Item name='address' hidden>
         <Input />
+      </Form.Item>
+      <Form.Item name='latitude' hidden>
+        <InputNumber />
+      </Form.Item>
+      <Form.Item name='longitude' hidden>
+        <InputNumber />
       </Form.Item>
       {!active ? (
         <Form.Item name='provinceCode' hidden>

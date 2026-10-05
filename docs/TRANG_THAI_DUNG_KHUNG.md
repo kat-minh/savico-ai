@@ -112,6 +112,8 @@ mở thẳng URL thay vì bấm link):
 
 Công trình (`/admin/construction-sites`): đã nối danh sách/chi tiết hồ sơ đầy đủ, tải tệp có xác thực và VietMap chỉ đọc (04/10/2026). Xem [tích hợp công trình](./TICH_HOP_CONG_TRINH.md).
 
+Nhà thầu (`/admin/contractors`): phần địa chỉ dùng danh mục tỉnh/phường chung, tự tìm gợi ý khi gõ số nhà–đường và hiện VietMap để chỉnh ghim sau khi chọn vị trí (05/10/2026). Giao diện tự lấy tọa độ từ vị trí được chọn và gửi cùng địa chỉ khi lưu; đã bỏ ô nhập kinh độ/vĩ độ và nút xác nhận thủ công theo yêu cầu người dùng. Giữ địa chỉ cũ; đổi địa chỉ phải xác định lại vị trí. Đã kiểm luồng chọn gợi ý, phản hồi đến muộn, đổi tỉnh, lỗi tìm kiếm/thử lại và lưu bằng dữ liệu thử trên trình duyệt ở lượt trước; chưa kiểm lưu qua API thật.
+
 Spec không vẽ màn hình admin, chỉ nói rải rác "admin biên soạn / cấu hình" (mục VI,
 mục VIII, mục X). Khu này dựng theo đúng những chỗ đó: mỗi thứ spec giao cho admin là
 một trang. URL vẫn `/admin/...` (route group `(admin)`), chỉ tài khoản vai `admin` vào được.
