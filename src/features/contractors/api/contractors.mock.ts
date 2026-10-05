@@ -14,6 +14,7 @@ import { mockDelay } from '@/shared/lib/mock'
 import type { ApiProject } from './contractors.logic'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { emptyBrief, fullAddress, isBlankBrief } from '../services/brief.service'
+import { isLegacyConstructionScope } from '../services/construction-scope.service'
 import type {
   Contractor,
   ContractorReview,
@@ -234,7 +235,7 @@ export const mockContractorsApi = {
     // Chỉ Loại công trình đang Hoạt động mới dùng để đề xuất nhà thầu (ContractorManagement §12).
     if (buildingType && buildingType.status !== 'active') return []
     const buildingTypeId = buildingType?.id ?? null
-    const context = brief ? { buildingTypeId, scope: brief.scope } : undefined
+    const context = brief && isLegacyConstructionScope(brief.scope) ? { buildingTypeId, scope: brief.scope } : undefined
     if (!isBriefSupported(rules, context)) return []
     const today = new Date().toISOString().slice(0, 10)
     return cmsDb

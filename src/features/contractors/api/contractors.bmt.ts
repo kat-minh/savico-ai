@@ -17,9 +17,13 @@ interface PublicContractorItem {
   rating?: number | null
   ratingCount?: number | null
   projectCount: number
+  similarProjectCount?: number
   distanceKm?: number | null
   provinceCode?: string | null
   regionCode?: string | null
+  serviceAreaText?: string | null
+  surveyHours?: number | null
+  acceptingProjects?: boolean | null
 }
 
 /** PublicContractorItem → Contractor (type UI). Field không có nguồn API để mặc định. */
@@ -33,15 +37,22 @@ function toContractor(item: PublicContractorItem): Contractor {
     verified: true,
     rating: item.rating ?? 0,
     reviewCount: item.ratingCount ?? 0,
-    similarProjects: 0,
+    ratingKnown: item.rating != null,
+    reviewCountKnown: item.ratingCount != null,
+    similarProjects: item.similarProjectCount ?? 0,
     completedProjects: item.projectCount ?? 0,
     distanceKm: item.distanceKm ?? 0,
-    serviceAreas: [],
+    serviceAreas: (item.serviceAreaText ?? '')
+      .split(/[,;\n]/)
+      .map((part) => part.trim())
+      .filter(Boolean),
     region: item.regionCode == null ? null : serviceRegionSchema.parse(item.regionCode),
     provinceCode: item.provinceCode ?? null,
     distanceKnown: item.distanceKm != null,
-    surveyWithinHours: 0,
-    acceptingProjects: false,
+    surveyWithinHours: item.surveyHours ?? 0,
+    surveyTimeKnown: item.surveyHours != null,
+    acceptingProjects: item.acceptingProjects ?? false,
+    acceptingProjectsKnown: item.acceptingProjects != null,
     intro: '',
     strengths: [],
     photos: [],
@@ -61,23 +72,31 @@ function toContractor(item: PublicContractorItem): Contractor {
   }
 }
 
+async function listDirectory(filters: ContractorSearchFilters = {}, signal?: AbortSignal): Promise<Contractor[]> {
+  const params = new URLSearchParams()
+  if (filters.region) params.set('region', filters.region)
+  if (filters.radiusKm !== undefined) params.set('radiusKm', String(filters.radiusKm))
+  if (filters.constructionSiteId) params.set('constructionSiteId', filters.constructionSiteId)
+  for (const id of filters.buildingTypeIds ?? []) params.append('buildingTypeIds', id)
+  for (const id of filters.scopeIds ?? []) params.append('scopeIds', id)
+  if (filters.floorCount !== undefined) params.set('floorCount', String(filters.floorCount))
+  if (filters.minSimilarProjects !== undefined) params.set('minSimilarProjects', String(filters.minSimilarProjects))
+  if (filters.maxSimilarProjects !== undefined) params.set('maxSimilarProjects', String(filters.maxSimilarProjects))
+  const res = await http.get<{ items: PublicContractorItem[]; totalCount: number }>('/contractors', {
+    params,
+    signal
+  })
+  return res.items.map(toContractor)
+}
+
 export const bmtContractorsApi = {
-  async listContractors(
+  listDirectory,
+  listContractors(
     _projectId: string,
     filters: ContractorSearchFilters = {},
     signal?: AbortSignal
   ): Promise<Contractor[]> {
-    const params = new URLSearchParams()
-    if (filters.region) params.set('region', filters.region)
-    if (filters.radiusKm !== undefined) params.set('radiusKm', String(filters.radiusKm))
-    if (filters.constructionSiteId) params.set('constructionSiteId', filters.constructionSiteId)
-    for (const id of filters.buildingTypeIds ?? []) params.append('buildingTypeIds', id)
-    for (const id of filters.scopeIds ?? []) params.append('scopeIds', id)
-    const res = await http.get<{ items: PublicContractorItem[]; totalCount: number }>('/contractors', {
-      params,
-      signal
-    })
-    return res.items.map(toContractor)
+    return listDirectory(filters, signal)
   },
 
   async getContractor(contractorId: string): Promise<Contractor> {

@@ -16,7 +16,7 @@ export function emptyBrief(): Omit<ProjectBrief, 'id' | 'createdAt' | 'updatedAt
     address: { provinceCode: null, provinceName: '', wardCode: null, wardName: '', street: '' },
     budget: 0,
     startWindow: 'in-1-3-months',
-    scope: 'turnkey',
+    scope: '',
     scopeNote: '',
     documents: [],
     coverUrl: null,
@@ -65,6 +65,7 @@ export function isBlankBrief(brief: ProjectBrief): boolean {
     !brief.name.trim() &&
     !(brief.landArea > 0) &&
     !brief.address.provinceName &&
+    !brief.scope &&
     !brief.scopeNote.trim() &&
     brief.documents.length === 0
   )

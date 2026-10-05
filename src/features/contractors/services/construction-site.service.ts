@@ -69,7 +69,8 @@ export function toSiteProfile(values: SiteFormValues, catalog: SiteCatalog): Sit
 }
 export function createSiteFormSchema(
   catalog: SiteCatalog | undefined,
-  messages: { required: string; area: string; budget: string; max: (n: number) => string }
+  messages: { required: string; area: string; budget: string; max: (n: number) => string },
+  scopeIds: readonly string[] = []
 ) {
   return z
     .object({
@@ -88,7 +89,10 @@ export function createSiteFormSchema(
       hasTum: z.boolean().nullable(),
       architectureStyleId: z.string().nullable(),
       interiorStyleId: z.string().nullable(),
-      scope: z.enum(['turnkey', 'shell', 'finishing', 'interior']),
+      scope: z
+        .string()
+        .min(1, messages.required)
+        .refine((id) => scopeIds.includes(id), messages.required),
       scopeNote: z.string().trim().min(1, messages.required).max(1000, messages.max(1000))
     })
     .superRefine((values, context) => {

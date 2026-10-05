@@ -23,7 +23,7 @@ import type { AttachmentGroup, SiteDetail, SiteDraft } from './construction-site
  *   dự kiến của CHỦ NHÀ; RFQ giữ ngân sách trong bản hồ sơ đã gửi theo TDD-RFQ-001.
  */
 
-/** Phạm vi thi công — 4 thẻ chọn ở Bước 1 (S10). */
+/** Mã phạm vi cũ, chỉ dành cho dữ liệu lịch sử và mock. */
 export type ConstructionScope = 'turnkey' | 'shell' | 'finishing' | 'interior'
 
 /** Hiện trạng khu đất — hàng chọn ở Bước 1 (S10). */
@@ -146,7 +146,9 @@ export interface ProjectBrief {
   /** Ngân sách dự kiến (VND) của chủ nhà; bản lưu RFQ giữ giá trị SITE tại lúc gửi. */
   budget: number
   startWindow: StartWindow
-  scope: ConstructionScope
+  /** ID phạm vi hệ thống; mã cũ vẫn được đọc để giữ bản nhập liệu trước đây. */
+  scope: string
+  scopeName?: string
   scopeNote: string
   documents: BriefDocument[]
   /**
@@ -189,7 +191,14 @@ export interface ProjectBriefSummary {
 export type ContractorPhoto = CmsContractorPhoto
 
 /** Dự án tiêu biểu của nhà thầu (S13). */
-export type ContractorProject = CmsContractorProject
+export type ContractorProject = CmsContractorProject & {
+  /** Phân loại do API trả, cùng GUID và tên danh mục hiện hành. */
+  buildingTypeName?: string
+  scopeId?: string
+  scopeName?: string
+  /** Tổng số tầng gồm tầng trệt, tum được ghi riêng. */
+  floorCount?: number
+}
 
 /** Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14). */
 export type ContractorPartnership = CmsContractorPartnership
@@ -201,7 +210,14 @@ export type ContractorLegalProfile = CmsContractorLegalProfile
  * Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. Trường
  * `contact` chỉ dành cho vận hành, trang công khai không in ra.
  */
-export type Contractor = CmsContractor
+export type Contractor = Omit<CmsContractor, 'featuredProjects'> & {
+  featuredProjects: ContractorProject[]
+  /** API phân biệt chưa khai báo với giá trị 0/false; mock cũ không có các cờ này. */
+  ratingKnown?: boolean
+  reviewCountKnown?: boolean
+  surveyTimeKnown?: boolean
+  acceptingProjectsKnown?: boolean
+}
 
 /** Một khung giờ khảo sát (S16). */
 export interface SurveySlot {

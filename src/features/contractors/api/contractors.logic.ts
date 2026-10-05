@@ -12,9 +12,8 @@ import type { Contractor, ContractorProject, ServiceRegion } from '../types/cont
  *     scopes[{id,name}], images[{assetId,contentUrl,kind,position}], legal|null, licenses[],
  *     partnership|null, projects[], isVerified }
  *
- * Hình dạng của PHẦN TỬ `projects[]` và của `GET /contractors/{id}/projects/{projectId}` thì KHÔNG
- * có trong docs và hồ sơ thử chưa có dự án nào để đối chiếu, nên mọi hàm dưới đây đọc phòng thủ:
- * thử các tên field quen thuộc (theo body admin của TDD-CTR-001) và bỏ qua thứ không nhận ra.
+ * Dự án công khai theo TDD-CTR-001 và Response.PublicProject: projectId, buildingType{id,name},
+ * scope{id,name}, floorCount, hasAttic và bộ ảnh. Dạng phẳng cũ vẫn được đọc để giữ tương thích.
  */
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -50,7 +49,9 @@ export interface ApiProject {
   name: string
   completedYear?: number
   buildingTypeId?: string
+  buildingTypeName?: string
   scopeId?: string
+  scopeName?: string
   /** URL ảnh công khai theo `position`, không trùng. */
   imageUrls: string[]
   widthM?: number
@@ -101,12 +102,18 @@ export function readImageUrls(source: Bag): string[] {
 export function normalizeProject(raw: unknown): ApiProject | null {
   const item = bag(raw)
   if (!item) return null
+  const type = bag(item.buildingType)
+  const scope = bag(item.scope)
+  const buildingTypeId = text(item.buildingTypeId) ?? text(type?.id)
+  const scopeId = text(item.scopeId) ?? text(scope?.id)
   return {
     id: text(item.id) ?? text(item.projectId) ?? '',
     name: text(item.name) ?? '',
     ...(num(item.completedYear) !== undefined ? { completedYear: num(item.completedYear) } : {}),
-    ...(text(item.buildingTypeId) ? { buildingTypeId: text(item.buildingTypeId) } : {}),
-    ...(text(item.scopeId) ? { scopeId: text(item.scopeId) } : {}),
+    ...(buildingTypeId ? { buildingTypeId } : {}),
+    ...(text(type?.name) ? { buildingTypeName: text(type?.name) } : {}),
+    ...(scopeId ? { scopeId } : {}),
+    ...(text(scope?.name) ? { scopeName: text(scope?.name) } : {}),
     imageUrls: readImageUrls(item),
     ...(num(item.widthM) !== undefined ? { widthM: num(item.widthM) } : {}),
     ...(num(item.lengthM) !== undefined ? { lengthM: num(item.lengthM) } : {}),
@@ -128,9 +135,9 @@ export function dimensionsText(widthM?: number, lengthM?: number): string | unde
 }
 
 /**
- * `ApiProject` → dự án của giao diện. Chỉ điền field API CÓ; không đụng `buildingTypeId` vì id của BE là
- * GUID còn giao diện tra nhãn theo danh mục mock (ra GUID thô), không đụng `scope` (4 mã cứng) và
- * `contractorRole` (enum) vì `roleText` là chữ tự do — thiếu chỗ thì bỏ chứ không ép vào.
+ * `ApiProject` → dự án của giao diện. Giữ GUID và tên danh mục từ API để hiển thị và lọc loại công trình.
+ * Phạm vi động dùng scopeId/scopeName; không ép GUID vào enum scope của mock.
+ * `roleText` là chữ tự do, không ép vào enum contractorRole.
  */
 export function projectFromApi(api: ApiProject): ContractorProject {
   const [cover, ...rest] = api.imageUrls
@@ -139,6 +146,11 @@ export function projectFromApi(api: ApiProject): ContractorProject {
     id: api.id,
     name: api.name,
     year: api.completedYear ?? 0,
+    ...(api.buildingTypeId ? { buildingTypeId: api.buildingTypeId } : {}),
+    ...(api.buildingTypeName ? { buildingTypeName: api.buildingTypeName } : {}),
+    ...(api.scopeId ? { scopeId: api.scopeId } : {}),
+    ...(api.scopeName ? { scopeName: api.scopeName } : {}),
+    ...(api.floorCount !== undefined ? { floorCount: api.floorCount } : {}),
     ...(api.hasAttic !== undefined ? { hasAttic: api.hasAttic } : {}),
     ...(api.areaM2 !== undefined ? { areaM2: api.areaM2 } : {}),
     ...(dimensions ? { dimensions } : {}),
@@ -164,6 +176,11 @@ export function mergeProjectDetail(
     ...base,
     ...(detail.name ? { name: api.name } : {}),
     ...(detail.completedYear !== undefined ? { year: api.year } : {}),
+    ...(api.buildingTypeId ? { buildingTypeId: api.buildingTypeId } : {}),
+    ...(api.buildingTypeName ? { buildingTypeName: api.buildingTypeName } : {}),
+    ...(api.scopeId ? { scopeId: api.scopeId } : {}),
+    ...(api.scopeName ? { scopeName: api.scopeName } : {}),
+    ...(api.floorCount !== undefined ? { floorCount: api.floorCount } : {}),
     ...(api.hasAttic !== undefined ? { hasAttic: api.hasAttic } : {}),
     ...(api.areaM2 !== undefined ? { areaM2: api.areaM2 } : {}),
     ...(api.dimensions ? { dimensions: api.dimensions } : {}),
@@ -270,6 +287,8 @@ export function contractorFromApi(api: ApiContractor): Contractor {
     verified: api.verified,
     rating: api.rating ?? 0,
     reviewCount: api.ratingCount ?? 0,
+    ratingKnown: api.rating != null,
+    reviewCountKnown: api.ratingCount != null,
     similarProjects: 0,
     completedProjects: api.projects.length,
     distanceKm: 0,
@@ -279,6 +298,8 @@ export function contractorFromApi(api: ApiContractor): Contractor {
     distanceKnown: false,
     surveyWithinHours: api.surveyHours ?? 0,
     acceptingProjects: api.acceptingProjects ?? false,
+    surveyTimeKnown: api.surveyHours != null,
+    acceptingProjectsKnown: api.acceptingProjects != null,
     intro: api.intro ?? '',
     strengths: [],
     photos: api.photoUrls.map((url) => ({ url, caption: '' })),

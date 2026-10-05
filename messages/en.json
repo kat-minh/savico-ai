@@ -3764,7 +3764,17 @@
         "locationText": "Location",
         "roleText": "Role",
         "mainWork": "Main work",
-        "deleteConfirmTitle": "Delete project \"{name}\"?"
+        "deleteConfirmTitle": "Delete project \"{name}\"?",
+        "tum": "Rooftop enclosure",
+        "hasTum": "With rooftop enclosure",
+        "noTum": "Without rooftop enclosure",
+        "classificationHint": "Floors and rooftop enclosure follow the building type configuration in the estimate catalog.",
+        "notApplicable": "Not applicable to this building type",
+        "selectTypeFirst": "Select a building type first",
+        "selectOptional": "Select if known",
+        "savedFloor": "{count} floors (saved value)",
+        "categoryError": "Unable to load classification options. Your input has been preserved.",
+        "retry": "Retry"
       },
       "addressHint": "Pick a suggestion to auto-fill latitude/longitude; you can still edit them below.",
       "files": {
@@ -5258,6 +5268,9 @@
       "surveyHours": "within {hours}h",
       "acceptingLabel": "Accepting",
       "acceptingSuffix": "projects",
+      "informationUnknown": "Not provided",
+      "ratingUnknown": "No rating yet",
+      "projectAvailability": "Project availability",
       "distanceUnknown": "Distance unavailable"
     },
     "scope": {
@@ -5362,7 +5375,11 @@
           "any": "Any rating",
           "good": "4.0 stars and up",
           "great": "4.5 stars and up"
-        }
+        },
+        "unsupported": "Filtering by this criterion is not yet supported.",
+        "loadError": "Could not load filter options. Please try again.",
+        "distanceNeedsRadius": "Choose a project and a radius to sort by nearest contractors.",
+        "configureRadius": "Choose a radius"
       },
       "ranking": {
         "stickyNudge": "Create a project brief - free",
@@ -5372,7 +5389,10 @@
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
+        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more.",
+        "loading": "Loading contractors…",
+        "loadError": "Could not load contractors. Please try again.",
+        "retry": "Try again"
       },
       "safety": {
         "title": "Safe & transparent",
@@ -5670,6 +5690,7 @@
       "title": "Suggested contractors",
       "subtitle": "Pick a contractor to view their record, compare, or invite them to quote.",
       "radius": "Search radius",
+      "radiusNone": "Not applied",
       "radiusOption": "{km} km",
       "resultsInRadius": "{count} contractors within {km} km",
       "empty": "No contractors within {km} km. Try widening the search radius.",
@@ -5682,6 +5703,7 @@
       "inviteLimitReached": "All {max} invitation slots have been used",
       "whyTitle": "Why BuildX suggests these",
       "why1": "Matches your building type",
+      "whySurveyUnknown": "Survey time has not been provided",
       "why2": "{count} completed projects",
       "why3": "Can survey within {hours}h",
       "invitedPill": "Invited <n>{used}</n>/{max} · <n>{left}</n> left",
@@ -6129,6 +6151,10 @@
       "description": "Describe your needs",
       "descriptionPlaceholder": "Example: Looking for an experienced contractor for a turnkey two-storey townhouse, available for a weekend survey.",
       "needsLocal": "Construction needs are saved in this browser; they have not been sent to a contractor.",
+      "scopeLoadError": "Unable to load construction scopes. Please retry.",
+      "scopeEmpty": "There are no active construction scopes in the catalog.",
+      "scopeHistorical": "Previously saved selection",
+      "savedScope": "Saved construction scope",
       "optional": "(optional)",
       "retry": "Retry",
       "locked": "A supervision package is holding this project. Project information and files are locked.",

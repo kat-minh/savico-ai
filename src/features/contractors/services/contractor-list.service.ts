@@ -19,7 +19,7 @@ import type {
 /** Bộ lọc của header dự án + chip sắp xếp (S12). */
 export interface ContractorFilters {
   radiusKm: SearchRadiusKm
-  sort: ContractorSort
+  sort: ContractorSort | null
   /**
    * Tab vùng Bắc / Trung / Nam (S12). Bỏ trống thì không lọc theo vùng — landing
    * S09 dùng chung hàm này nhưng không có tab vùng.
@@ -29,10 +29,12 @@ export interface ContractorFilters {
 
 const distanceScore = (c: Contractor) => (c.distanceKnown === false ? Number.POSITIVE_INFINITY : c.distanceKm)
 
+const surveyScore = (c: Contractor) => (c.surveyTimeKnown === false ? Number.POSITIVE_INFINITY : c.surveyWithinHours)
+
 const COMPARATORS: Record<ContractorSort, (a: Contractor, b: Contractor) => number> = {
   distance: (a, b) => distanceScore(a) - distanceScore(b),
   rating: (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount,
-  survey: (a, b) => a.surveyWithinHours - b.surveyWithinHours || distanceScore(a) - distanceScore(b)
+  survey: (a, b) => surveyScore(a) - surveyScore(b) || distanceScore(a) - distanceScore(b)
 }
 
 /**
@@ -85,7 +87,11 @@ export function matchesCriteria(contractor: Contractor, criteria: ContractorCrit
 
   if (rating && contractor.rating < MIN_RATING[rating]) return false
 
-  if (startWindow === 'asap' && !(contractor.acceptingProjects && contractor.surveyWithinHours <= 24)) return false
+  if (
+    startWindow === 'asap' &&
+    !(contractor.acceptingProjects && contractor.surveyTimeKnown !== false && contractor.surveyWithinHours <= 24)
+  )
+    return false
   if (startWindow === 'in-1-3-months' && !contractor.acceptingProjects) return false
 
   return true
@@ -97,13 +103,13 @@ export function filterContractors(
   filters: ContractorFilters,
   criteria: ContractorCriteria = {}
 ): Contractor[] {
-  return contractors
+  const filtered = contractors
     .filter(
       (c) => !Number.isFinite(filters.radiusKm) || (c.distanceKnown !== false && c.distanceKm <= filters.radiusKm)
     )
     .filter((c) => !filters.region || c.region === filters.region)
     .filter((c) => matchesCriteria(c, criteria))
-    .sort(COMPARATORS[filters.sort])
+  return filters.sort === null ? filtered : filtered.sort(COMPARATORS[filters.sort])
 }
 
 /**

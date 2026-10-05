@@ -3764,7 +3764,17 @@
         "locationText": "Địa điểm",
         "roleText": "Vai trò",
         "mainWork": "Hạng mục chính",
-        "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
+        "deleteConfirmTitle": "Xoá dự án \"{name}\"?",
+        "tum": "Tum",
+        "hasTum": "Có tum",
+        "noTum": "Không tum",
+        "classificationHint": "Số tầng và tum dùng cấu hình của loại công trình trong danh mục dự toán.",
+        "notApplicable": "Không áp dụng cho loại công trình này",
+        "selectTypeFirst": "Chọn loại công trình trước",
+        "selectOptional": "Chọn nếu đã có thông tin",
+        "savedFloor": "{count} tầng (giá trị đã lưu)",
+        "categoryError": "Không tải được danh mục phân loại. Dữ liệu đang nhập được giữ lại.",
+        "retry": "Thử lại"
       },
       "addressHint": "Chọn một gợi ý để tự điền vĩ độ/kinh độ; vẫn sửa tay được bên dưới.",
       "files": {
@@ -5258,6 +5268,9 @@
       "surveyHours": "trong {hours}h",
       "acceptingLabel": "Đang nhận",
       "acceptingSuffix": "dự án",
+      "informationUnknown": "Chưa cập nhật",
+      "ratingUnknown": "Chưa có đánh giá",
+      "projectAvailability": "Trạng thái nhận dự án",
       "distanceUnknown": "Chưa tính khoảng cách"
     },
     "scope": {
@@ -5362,7 +5375,11 @@
           "any": "Mọi mức đánh giá",
           "good": "Từ 4,0 sao",
           "great": "Từ 4,5 sao"
-        }
+        },
+        "unsupported": "Chưa hỗ trợ lọc theo tiêu chí này.",
+        "loadError": "Không tải được danh mục. Vui lòng thử lại.",
+        "distanceNeedsRadius": "Chọn công trình và bán kính để sắp xếp nhà thầu gần nhất.",
+        "configureRadius": "Chọn bán kính"
       },
       "ranking": {
         "stickyNudge": "Tạo hồ sơ dự án - miễn phí",
@@ -5372,7 +5389,10 @@
           "survey": "Khảo sát sớm"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
-        "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
+        "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm.",
+        "loading": "Đang tải nhà thầu…",
+        "loadError": "Không tải được danh sách nhà thầu. Vui lòng thử lại.",
+        "retry": "Thử lại"
       },
       "safety": {
         "title": "An toàn & minh bạch",
@@ -5670,6 +5690,7 @@
       "restoreRetry": "Thử lại",
       "subtitle": "Chọn nhà thầu để xem hồ sơ, so sánh hoặc mời báo giá.",
       "radius": "Bán kính tìm kiếm",
+      "radiusNone": "Không áp dụng",
       "radiusOption": "{km} km",
       "resultsInRadius": "{count} nhà thầu trong {km} km",
       "empty": "Chưa có nhà thầu nào trong bán kính {km} km. Thử mở rộng bán kính tìm kiếm.",
@@ -5682,6 +5703,7 @@
       "inviteLimitReached": "Đã dùng hết {max} lượt mời",
       "whyTitle": "Vì sao BuildX đề xuất?",
       "why1": "Phù hợp loại công trình",
+      "whySurveyUnknown": "Chưa cập nhật thời gian khảo sát",
       "why2": "{count} dự án đã thực hiện",
       "why3": "Có thể khảo sát trong {hours}h",
       "invitedPill": "Đã mời <n>{used}</n>/{max} · còn <n>{left}</n> lượt",
@@ -6129,6 +6151,10 @@
       "description": "Mô tả nhu cầu",
       "descriptionPlaceholder": "VD: Cần nhà thầu thi công trọn gói nhà phố 2 tầng, có kinh nghiệm và có thể khảo sát cuối tuần.",
       "needsLocal": "Nhu cầu thi công được lưu trên trình duyệt này; hiện chưa gửi đến nhà thầu.",
+      "scopeLoadError": "Không tải được danh mục phạm vi thi công. Vui lòng thử lại.",
+      "scopeEmpty": "Chưa có phạm vi thi công đang dùng trong danh mục.",
+      "scopeHistorical": "Lựa chọn đã lưu trước đây",
+      "savedScope": "Phạm vi đã lưu",
       "optional": "(không bắt buộc)",
       "retry": "Thử lại",
       "locked": "Công trình đang có gói giám sát giữ chỗ nên thông tin công trình và tệp được khóa.",

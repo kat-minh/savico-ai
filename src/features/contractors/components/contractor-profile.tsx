@@ -968,7 +968,7 @@ function PhotoLightbox({
 function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor; inviteAction?: React.ReactNode }) {
   const t = useTranslations('contractors.firm')
   const reduceMotion = useReducedMotion()
-  const { typeLabel, scaleOf } = useProjectLabels()
+  const { typeLabel, scopeLabel, scaleOf } = useProjectLabels(contractor.featuredProjects)
   const [selectedProject, setSelectedProject] = useState<ContractorProject | null>(null)
   const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -1116,11 +1116,11 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
                       <h3 className='group-hover:text-primary-strong text-sm font-semibold transition-colors'>
                         {project.name}
                       </h3>
-                      {project.buildingTypeId || project.scope ? (
+                      {project.buildingTypeId || project.scopeId || project.scope ? (
                         <div className='mt-2 flex flex-wrap gap-1.5'>
                           {[
                             project.buildingTypeId ? typeLabel(project.buildingTypeId) : null,
-                            project.scope ? t(`projects.detail.constructionScopes.${project.scope}`) : null
+                            project.scopeId || project.scope ? scopeLabel(project) : null
                           ]
                             .filter(Boolean)
                             .map((label) => (
@@ -1191,20 +1191,28 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
 
 /**
  * Nhãn Loại công trình theo danh mục dùng chung và Quy mô (Số tầng, Tum) theo
- * phương án đã lưu (ContractorManagement §7). Dự án nhập trước khi có danh mục
- * chỉ có dòng quy mô dạng chữ — dùng tạm dòng đó.
+ * phương án đã lưu (ContractorManagement §7). Bản API dùng tên loại/phạm vi và
+ * số tầng trong DTO; dự án cũ chỉ có quy mô dạng chữ vẫn giữ dòng đó.
  */
-function useProjectLabels() {
+function useProjectLabels(projects: readonly ContractorProject[]) {
   const t = useTranslations('contractors.firm.projects.detail')
   const buildingTypes = useCmsCollection('buildingTypes')
   const floorOptions = useCmsCollection('floorOptions')
-  const typeLabel = (id: string) => buildingTypes.find((type) => type.id === id)?.label ?? id
+  const typeLabel = (id: string) =>
+    projects.find((project) => project.buildingTypeId === id && project.buildingTypeName)?.buildingTypeName ??
+    buildingTypes.find((type) => type.id === id)?.label ??
+    t('notUpdated')
+  const scopeLabel = (project: ContractorProject) =>
+    project.scopeName ?? (project.scope ? t(`constructionScopes.${project.scope}`) : t('notUpdated'))
   const scaleOf = (project: ContractorProject) => {
-    const floors = floorOptions.find((option) => option.id === project.floorOptionId)?.label
+    const floors =
+      project.floorCount == null
+        ? floorOptions.find((option) => option.id === project.floorOptionId)?.label
+        : t('floors', { count: project.floorCount })
     const attic = project.hasAttic === undefined ? null : project.hasAttic ? t('attic') : t('noAttic')
     return [floors ?? (project.floorOptionId ? null : project.scale), attic].filter(Boolean).join(' · ')
   }
-  return { typeLabel, scaleOf }
+  return { typeLabel, scopeLabel, scaleOf }
 }
 
 /**
@@ -1240,9 +1248,9 @@ function ProjectDetailModal({
     setActiveIndex(0)
   }
 
-  const { typeLabel, scaleOf } = useProjectLabels()
+  const { typeLabel, scopeLabel, scaleOf } = useProjectLabels(project ? [project] : [])
   const projectType = project?.buildingTypeId ? typeLabel(project.buildingTypeId) : t('notUpdated')
-  const constructionScope = project?.scope ? t(`constructionScopes.${project.scope}`) : t('notUpdated')
+  const constructionScope = project ? scopeLabel(project) : t('notUpdated')
   const contractorRole = project?.contractorRole ? t(`roles.${project.contractorRole}`) : t('roles.contractor')
   const dimensions = [
     project?.dimensions,

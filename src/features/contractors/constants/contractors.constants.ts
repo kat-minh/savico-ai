@@ -1,5 +1,4 @@
 import type {
-  ConstructionScope,
   ContractorSort,
   ExperienceLevel,
   InvitationStatus,
@@ -49,9 +48,6 @@ export const CONTRACTOR_SORTS: readonly ContractorSort[] = ['rating', 'distance'
 
 /** Tab xếp hạng ở landing (S09) — chỉ ba tab, KHÔNG có "Phù hợp nhất". */
 export const LANDING_SORTS: readonly Exclude<ContractorSort, 'match'>[] = ['distance', 'rating', 'survey'] as const
-
-/** 4 thẻ phạm vi thi công ở Bước 1 (S10). */
-export const CONSTRUCTION_SCOPES: readonly ConstructionScope[] = ['turnkey', 'shell', 'finishing', 'interior'] as const
 
 /** Hiện trạng khu đất (S10). */
 export const SITE_CONDITIONS: readonly SiteCondition[] = ['empty', 'demolish', 'renovate'] as const

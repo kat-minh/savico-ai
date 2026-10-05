@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowRight, Armchair, BrickWall, FileUp, Gift, House, LoaderCircle, PaintRoller, X } from 'lucide-react'
+import { ArrowRight, FileUp, Gift, Hammer, LoaderCircle, X } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -41,6 +41,7 @@ import { allConstructionSites } from '../api/construction-briefs.api'
 import { briefDrafts, requireBriefUserId, siteToBrief } from '../api/brief-drafts'
 import { contractorKeys } from '../api/contractors.keys'
 import { useBrief } from '../hooks/use-brief'
+import { useConstructionScopes } from '../hooks/use-construction-scopes'
 import {
   useSiteLocations,
   useSiteOptions,
@@ -69,7 +70,7 @@ import type {
   SiteFormValues,
   SiteSource
 } from '../types/construction-site.types'
-import type { ConstructionScope, ProjectBrief } from '../types/contractor.types'
+import type { ProjectBrief } from '../types/contractor.types'
 import { BriefSteps, BRIEF_STEP_TRANSITION_KEY } from './brief-steps'
 import { SiteStyleField } from './site-style-field'
 
@@ -89,10 +90,9 @@ const EMPTY: SiteFormValues = {
   hasTum: null,
   architectureStyleId: null,
   interiorStyleId: null,
-  scope: 'turnkey',
+  scope: '',
   scopeNote: ''
 }
-const SCOPES = { turnkey: House, shell: BrickWall, finishing: PaintRoller, interior: Armchair } as const
 const ERROR_CODES = [
   'ConstructionSiteNameTaken',
   'ConstructionSiteCatalogChanged',
@@ -121,7 +121,7 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
   const userId = useAuthStore((state) => state.user?.id)
   const t = useTranslations('contractors.siteForm')
   const old = useTranslations('contractors.brief')
-  const scopes = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const starts = useTranslations('contractors.startWindow')
   const validation = useTranslations('validation')
   const locale = useLocale()
@@ -166,13 +166,21 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
   )
   const formSchema = useMemo(
     () =>
-      createSiteFormSchema(activeCatalog, {
-        required: validation('required'),
-        area: t('areaError'),
-        budget: t('budgetError'),
-        max: (max) => validation('maxLength', { max })
-      }),
-    [activeCatalog, validation, t]
+      createSiteFormSchema(
+        activeCatalog,
+        {
+          required: validation('required'),
+          area: t('areaError'),
+          budget: t('budgetError'),
+          max: (max) => validation('maxLength', { max })
+        },
+        [
+          ...scopes.options.map((option) => option.id),
+          briefQuery.data?.scope ?? '',
+          briefQuery.data?.siteDraft?.values.scope ?? ''
+        ].filter(Boolean)
+      ),
+    [activeCatalog, scopes.options, briefQuery.data?.scope, briefQuery.data?.siteDraft?.values.scope, validation, t]
   )
   const form = useForm<SiteFormValues>({ defaultValues: EMPTY, resolver: zodResolver(formSchema) })
   // RHF owns the form state; these subscriptions intentionally bypass React Compiler memoization.
@@ -344,6 +352,9 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
         street: draftValues.addressDetail
       },
       scope: draftValues.scope,
+      scopeName: draftValues.scope
+        ? scopes.label(draftValues.scope, draftValues.scope === current.scope ? current.scopeName : undefined)
+        : undefined,
       scopeNote: draftValues.scopeNote,
       constructionSiteId: nextSite?.constructionSiteId ?? siteId,
       siteDraft: { values: draftValues, catalog, source: source ?? draftSource, location, uploads, pendingCreation },
@@ -426,6 +437,10 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
   }
   async function submit(input: SiteFormValues) {
     if (submitLock.current || fileBusy || pendingCreation || versionConflict) return
+    if (scopes.isPending || scopes.isError) {
+      setError(t('scopeLoadError'))
+      return
+    }
     if (
       !catalog ||
       (selectedSource && (sourceQuery.isFetching || sourceQuery.isError || sourceApplied.current !== selectedSource))
@@ -1273,24 +1288,41 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
                           *
                         </span>
                       </FormLabel>
+                      {scopes.isPending ? <Skeleton className='h-24 w-full' /> : null}
+                      {scopes.isError ? (
+                        <div role='alert' className='space-y-2'>
+                          <p className='text-destructive text-sm'>{t('scopeLoadError')}</p>
+                          <Button type='button' variant='outline' size='sm' onClick={() => void scopes.refetch()}>
+                            {t('retry')}
+                          </Button>
+                        </div>
+                      ) : !scopes.isPending && scopes.options.length === 0 ? (
+                        <p className='text-muted-foreground text-sm'>{t('scopeEmpty')}</p>
+                      ) : null}
                       <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
-                        {Object.entries(SCOPES).map(([value, Icon]) => (
+                        {scopes.options.map((option) => (
                           <button
-                            key={value}
+                            key={option.id}
                             type='button'
-                            aria-pressed={field.value === value}
-                            onClick={() => field.onChange(value)}
+                            aria-pressed={field.value === option.id}
+                            onClick={() => field.onChange(option.id)}
                             className={cn(
                               'flex min-h-24 min-w-0 flex-col items-center justify-center gap-3 rounded-xl border px-2 py-3 text-center text-sm transition-colors',
-                              field.value === value
+                              field.value === option.id
                                 ? 'border-primary bg-accent text-primary-strong'
                                 : 'hover:border-primary/50'
                             )}
                           >
-                            <Icon className='text-primary size-6' />
-                            {scopes(value as ConstructionScope)}
+                            <Hammer className='text-primary size-6' aria-hidden />
+                            {option.name}
                           </button>
                         ))}
+                        {field.value && !scopes.options.some((option) => option.id === field.value) ? (
+                          <div className='border-primary bg-accent text-primary-strong flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border px-2 py-3 text-center text-sm'>
+                            <span>{scopes.label(field.value, briefQuery.data?.scopeName)}</span>
+                            <span className='text-muted-foreground text-xs'>{t('scopeHistorical')}</span>
+                          </div>
+                        ) : null}
                       </div>
                       <FormMessage />
                     </FormItem>
@@ -1343,7 +1375,13 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
             <Button
               type='submit'
               disabled={
-                allBusy || Boolean(pendingCreation) || versionConflict || sourceQuery.isFetching || sourceQuery.isError
+                allBusy ||
+                Boolean(pendingCreation) ||
+                versionConflict ||
+                sourceQuery.isFetching ||
+                sourceQuery.isError ||
+                scopes.isPending ||
+                scopes.isError
               }
             >
               {allBusy ? <LoaderCircle className='size-4 animate-spin' /> : null}

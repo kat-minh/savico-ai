@@ -21,4 +21,7 @@ export interface ContractorSearchFilters {
   constructionSiteId?: string
   buildingTypeIds?: string[]
   scopeIds?: string[]
+  floorCount?: number
+  minSimilarProjects?: number
+  maxSimilarProjects?: number
 }

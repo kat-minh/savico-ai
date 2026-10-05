@@ -17,7 +17,7 @@ import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
 import { useInvitations } from '../hooks/use-invitations'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import type { Contractor, ContractorSort } from '../types/contractor.types'
+import type { Contractor } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
 
 interface ContractorCardProps {
@@ -34,8 +34,6 @@ interface ContractorCardProps {
   inviteLocked: boolean
   /** Đủ ba lựa chọn: khóa và làm mờ checkbox của những thẻ chưa chọn. */
   compareLocked?: boolean
-  /** Vừa đổi chip sắp xếp theo tiêu chí này — ô tương ứng nổi lên 1 giây (mục 4). */
-  highlightField?: ContractorSort | null
   /** Vừa tạo hồ sơ từ M04, đây là thẻ đầu danh sách → viền loé một lần (mục 6). */
   ringFlash?: boolean
 }
@@ -63,7 +61,6 @@ export function ContractorCard({
   invitedJustNow = false,
   inviteLocked,
   compareLocked = false,
-  highlightField,
   ringFlash = false
 }: ContractorCardProps) {
   const t = useTranslations('contractors.common')
@@ -107,19 +104,25 @@ export function ContractorCard({
       key: 'rating',
       icon: Star,
       iconClass: 'text-warning fill-current',
-      value: (
-        <AnimatedMetric
-          value={Math.round(contractor.rating * 10)}
-          format={(value) => `${formatNumber(value / 10, locale, { minimumFractionDigits: 1 })}/5`}
-        />
-      ),
-      hint: t('reviewCount', { count: contractor.reviewCount })
+      value:
+        contractor.ratingKnown === false ? (
+          t('ratingUnknown')
+        ) : (
+          <AnimatedMetric
+            value={Math.round(contractor.rating * 10)}
+            format={(value) => `${formatNumber(value / 10, locale, { minimumFractionDigits: 1 })}/5`}
+          />
+        ),
+      hint:
+        contractor.reviewCountKnown === false
+          ? t('informationUnknown')
+          : t('reviewCount', { count: contractor.reviewCount })
     },
     {
       key: 'similar',
       icon: CalendarCheck,
       value: (
-        <AnimatedMetric value={contractor.similarProjects} format={(value) => t('similarShort', { count: value })} />
+        <AnimatedMetric value={contractor.completedProjects} format={(value) => t('similarShort', { count: value })} />
       ),
       hint: t('similarSuffix')
     },
@@ -143,7 +146,7 @@ export function ContractorCard({
       key: 'areas',
       icon: MapIcon,
       value: t('serviceAreas'),
-      hint: contractor.serviceAreas.slice(0, 3).join(', ')
+      hint: contractor.serviceAreas.slice(0, 3).join(', ') || t('informationUnknown')
     }
   ]
 
@@ -244,14 +247,7 @@ export function ContractorCard({
         <div className='divide-border mt-3 grid grid-cols-[minmax(0,1fr)] divide-y sm:grid-cols-2 lg:grid-cols-4'>
           <div className='divide-border grid grid-cols-[minmax(0,1fr)] divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4 lg:grid-cols-4'>
             {facts.map((fact) => (
-              <Fact
-                key={fact.key}
-                icon={fact.icon}
-                iconClass={fact.iconClass}
-                value={fact.value}
-                hint={fact.hint}
-                highlighted={highlightField === fact.key}
-              />
+              <Fact key={fact.key} icon={fact.icon} iconClass={fact.iconClass} value={fact.value} hint={fact.hint} />
             ))}
           </div>
 
@@ -259,18 +255,27 @@ export function ContractorCard({
             <Fact
               icon={Clock}
               value={
-                <AnimatedMetric
-                  value={contractor.surveyWithinHours}
-                  format={(value) => t('surveyWithin', { hours: value })}
-                />
+                contractor.surveyTimeKnown === false ? (
+                  t('informationUnknown')
+                ) : (
+                  <AnimatedMetric
+                    value={contractor.surveyWithinHours}
+                    format={(value) => t('surveyWithin', { hours: value })}
+                  />
+                )
               }
-              hint={t('surveyEarly')}
-              highlighted={highlightField === 'survey'}
+              hint={t('surveyLabel')}
             />
             <Fact
               icon={CircleCheck}
-              value={contractor.acceptingProjects ? t('accepting') : t('notAccepting')}
-              hint={t('readyToStart')}
+              value={
+                contractor.acceptingProjectsKnown === false
+                  ? t('informationUnknown')
+                  : contractor.acceptingProjects
+                    ? t('accepting')
+                    : t('notAccepting')
+              }
+              hint={t('projectAvailability')}
             />
           </div>
         </div>
@@ -360,21 +365,18 @@ function Fact({
   icon: Icon,
   iconClass,
   value,
-  hint,
-  highlighted = false
+  hint
 }: {
   icon: typeof Star
   iconClass?: string
   value: ReactNode
   hint: string
-  /** Tiêu chí đang được xếp theo — nổi trong thẻ một giây (mục 4). */
-  highlighted?: boolean
 }) {
   return (
     // Cột chỉ số hẹp (4 ô trên một hàng) nên chữ phải nhỏ lại, và dòng nhãn
     // được XUỐNG DÒNG tối đa 2 dòng thay vì `truncate` — "TP. Buôn Ma Thuột,
     // Cư M'gar" mà cắt cụt thì mất luôn thông tin phục vụ ở đâu.
-    <div className={cn('min-w-0 rounded-lg px-2.5 py-2 transition-colors first:pl-0', highlighted && 'bg-accent')}>
+    <div className='min-w-0 rounded-lg px-2.5 py-2 first:pl-0'>
       <p className='flex items-center gap-1.5 text-[13px] leading-snug font-semibold'>
         <Icon aria-hidden className={cn('size-3.5 shrink-0', iconClass ?? 'text-primary')} />
         <span className='truncate'>{value}</span>

@@ -145,7 +145,7 @@ export type UpdateSiteRequest = SiteFields & {
 }
 export interface SiteFormValues extends SiteFields, SiteProfile {
   sourceEstimateId: string
-  scope: 'turnkey' | 'shell' | 'finishing' | 'interior'
+  scope: string
   scopeNote: string
 }
 export interface PendingSiteFile {

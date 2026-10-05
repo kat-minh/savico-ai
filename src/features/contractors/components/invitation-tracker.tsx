@@ -37,6 +37,7 @@ import { formatDisplayDate, formatDisplayDateTime } from '@/shared/utils'
 import { surveySlotLabel } from '@/shared/cms'
 import { INVITATION_STEPS, INVITATIONS_ARRIVE_FORWARD_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
+import { useConstructionScopes } from '../hooks/use-construction-scopes'
 import { useContractors } from '../hooks/use-contractors'
 import { useContractorReviews, useMockInvitations as useInvitations } from '../hooks/use-invitations'
 import type { Contractor, ContractorReview, Invitation } from '../types/contractor.types'
@@ -837,7 +838,7 @@ function StatusLegend({
  */
 function SentDossier({ projectId, version, onView }: { projectId: string; version: string; onView: () => void }) {
   const t = useTranslations('contractors.invitations')
-  const tScope = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const tScale = useTranslations('contractors.scale')
   const { data: brief } = useBrief(projectId)
   const reduceMotion = useReducedMotion()
@@ -847,7 +848,7 @@ function SentDossier({ projectId, version, onView }: { projectId: string; versio
   const rows = [
     { label: t('dossierType'), value: brief.buildingType },
     { label: t('dossierScale'), value: `${tScale(brief.scale)} · ${brief.landArea} m²` },
-    { label: t('dossierScope'), value: tScope(brief.scope) },
+    { label: t('dossierScope'), value: scopes.label(brief.scope, brief.scopeName) },
     { label: t('dossierFiles'), value: t('dossierFileCount', { count: brief.documents.length }) }
   ]
 
@@ -906,7 +907,7 @@ function DossierSheet({
   version: string
 }) {
   const t = useTranslations('contractors.invitations')
-  const tScope = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const tScale = useTranslations('contractors.scale')
   const { data: brief } = useBrief(projectId)
 
@@ -914,7 +915,7 @@ function DossierSheet({
     ? [
         { label: t('dossierType'), value: brief.buildingType },
         { label: t('dossierScale'), value: `${tScale(brief.scale)} · ${brief.landArea} m²` },
-        { label: t('dossierScope'), value: tScope(brief.scope) },
+        { label: t('dossierScope'), value: scopes.label(brief.scope, brief.scopeName) },
         { label: t('dossierFiles'), value: t('dossierFileCount', { count: brief.documents.length }) }
       ]
     : []

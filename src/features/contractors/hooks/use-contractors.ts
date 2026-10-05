@@ -6,13 +6,23 @@ import { getContractorFilterOptions, type ContractorSearchFilters } from '@/shar
 
 import { contractorsApi } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
+import { bmtContractorsApi } from '../api/contractors.bmt'
+
+/** Danh bạ công khai S09; không yêu cầu hồ sơ khi chưa lọc bán kính. */
+export function useContractorDirectory(filters: ContractorSearchFilters = {}) {
+  return useQuery({
+    queryKey: contractorKeys.directory(filters),
+    queryFn: ({ signal }) => bmtContractorsApi.listDirectory(filters, signal),
+    enabled: !env.NEXT_PUBLIC_USE_MOCK_API
+  })
+}
 
 /** Danh sách nhà thầu đề xuất cho một hồ sơ dự án (S12). */
-export function useContractors(projectId: string, filters: ContractorSearchFilters = {}) {
+export function useContractors(projectId: string, filters: ContractorSearchFilters = {}, enabled = true) {
   return useQuery({
     queryKey: contractorKeys.list(projectId, filters),
     queryFn: ({ signal }) => contractorsApi.listContractors(projectId, filters, signal),
-    enabled: Boolean(projectId)
+    enabled: enabled && Boolean(projectId)
   })
 }
 

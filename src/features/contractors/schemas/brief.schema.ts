@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import type { RequiredMessage } from '@/shared/hooks'
 
-import { CONSTRUCTION_SCOPES, PROJECT_SCALES, SITE_CONDITIONS, START_WINDOWS } from '../constants/contractors.constants'
+import { PROJECT_SCALES, SITE_CONDITIONS, START_WINDOWS } from '../constants/contractors.constants'
 
 /** Resolved, localized validation messages injected into the schema. */
 export interface BriefSchemaMessages {
@@ -10,6 +10,7 @@ export interface BriefSchemaMessages {
   nameMaxLength: string
   areaPositive: string
   budgetPositive: string
+  scopeRequired: string
   noteRequired: string
   noteMaxLength: string
 }
@@ -66,7 +67,7 @@ export function createBriefSchema(
         .min(1, { message: m.required('street') }),
       budget: z.string().trim().regex(POSITIVE_NUMBER, { message: m.budgetPositive }),
       startWindow: z.enum(START_WINDOWS),
-      scope: z.enum(CONSTRUCTION_SCOPES),
+      scope: z.string().trim().min(1, { message: m.scopeRequired }),
       scopeNote: z
         .string()
         .trim()

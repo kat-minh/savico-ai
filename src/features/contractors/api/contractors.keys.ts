@@ -4,6 +4,8 @@ import type { ContractorSearchFilters } from '@/shared/contractors'
 export const contractorKeys = {
   all: ['contractors'] as const,
 
+  directory: (filters: ContractorSearchFilters = {}) => [...contractorKeys.all, 'directory', filters] as const,
+
   /** Danh sách nhà thầu đề xuất cho một dự án (S12). */
   list: (projectId: string, filters: ContractorSearchFilters = {}) =>
     [...contractorKeys.all, 'list', projectId, filters] as const,

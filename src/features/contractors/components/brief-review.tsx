@@ -33,6 +33,7 @@ import { contractorBriefRoute, contractorMatchesRoute } from '@/shared/constants
 import { canShowReadyProjectPopup, cn } from '@/shared/lib'
 import { formatBudgetShort, formatCurrency } from '@/shared/utils'
 import { useBrief, useCompleteBrief } from '../hooks/use-brief'
+import { useConstructionScopes } from '../hooks/use-construction-scopes'
 import { briefReadiness, formatFileSize, fullAddress, isBriefComplete } from '../services/brief.service'
 import { BRIEF_STEP_TRANSITION_KEY, BriefSteps } from './brief-form'
 import { MATCHES_JUST_ARRIVED_KEY } from './contractor-matches'
@@ -53,7 +54,7 @@ interface BriefReviewProps {
  */
 export function BriefReview({ projectId }: BriefReviewProps) {
   const t = useTranslations('contractors.review')
-  const tScope = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const tScale = useTranslations('contractors.scale')
   const tCondition = useTranslations('contractors.siteCondition')
   const tStart = useTranslations('contractors.startWindow')
@@ -259,7 +260,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
             rows={[
               // Hình S11: giá trị "Phạm vi" là VIÊN NHÃN nền xanh nhạt, không
               // phải chữ trơn như các dòng khác.
-              { key: 'scope', label: t('scopeLabel'), value: tScope(brief.scope), chip: true },
+              { key: 'scope', label: t('scopeLabel'), value: scopes.label(brief.scope, brief.scopeName), chip: true },
               { key: 'scopeNote', label: t('noteLabel'), value: brief.scopeNote }
             ]}
             changedKeys={changedFields}

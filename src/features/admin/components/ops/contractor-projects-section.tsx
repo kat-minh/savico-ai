@@ -2,12 +2,29 @@
 
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
-import { App, Button, Divider, Empty, Form, Image, Input, InputNumber, Modal, Select, Space, Typography } from 'antd'
+import {
+  Alert,
+  App,
+  Button,
+  Col,
+  Divider,
+  Empty,
+  Form,
+  Image,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Typography
+} from 'antd'
 import type { FormInstance } from 'antd'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { http } from '@/shared/lib/api'
+import { useEstimateCatalog } from '../../hooks/use-estimate-catalog'
+import { useFloorLabel } from '../catalog/use-floor-label'
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
 import {
   contractorsAdminApi,
@@ -27,11 +44,6 @@ import {
 } from './contractor-form.logic'
 
 const { Text } = Typography
-
-interface FilterOptions {
-  buildingTypes: { id: string; name: string }[]
-  scopes: { id: string; name: string }[]
-}
 
 const num = (v: unknown): number | null => (v === '' || v == null ? null : Number(v))
 const str = (v: unknown): string | null => {
@@ -62,8 +74,11 @@ export function buildProjectBody(
     buildingTypeId: String(values.buildingTypeId),
     scopeId: String(values.scopeId),
     images: projectImagesToRequest(images),
+    widthM: num(values.widthM),
+    lengthM: num(values.lengthM),
     areaM2: num(values.areaM2),
     floorCount: num(values.floorCount),
+    hasAttic: typeof values.hasAttic === 'boolean' ? values.hasAttic : null,
     locationText: str(values.locationText),
     completedYear: num(values.completedYear),
     roleText: str(values.roleText),
@@ -101,24 +116,50 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
   const pending = (Form.useWatch('pendingProjects', form) as PendingProject[] | undefined) ?? []
   const setPending = (next: PendingProject[]) => form.setFieldValue('pendingProjects', next)
 
-  const options = useQuery<FilterOptions>({
-    queryKey: ['admin', 'contractor-form-options'],
-    queryFn: async () => {
-      const [filter, scopes] = await Promise.all([
-        http.get<FilterOptions>('/contractors/filter-options'),
-        constructionScopesApi.list()
-      ])
-      return {
-        buildingTypes: filter.buildingTypes ?? [],
-        scopes: scopes.filter((s) => s.isActive).map((s) => ({ id: s.id, name: s.name }))
-      }
-    }
+  const catalog = useEstimateCatalog()
+  const scopes = useQuery({
+    queryKey: ['admin', 'contractor-project-scope-options'],
+    queryFn: constructionScopesApi.list
   })
-
-  const typeOptions = (options.data?.buildingTypes ?? []).map((b) => ({ label: b.name, value: b.id }))
-  const scopeOptions = (options.data?.scopes ?? []).map((s) => ({ label: s.name, value: s.id }))
-  const nameOf = (list: { id: string; name: string }[] | undefined, id: string) =>
-    list?.find((x) => x.id === id)?.name ?? id
+  const floorLabel = useFloorLabel()
+  const buildingTypeId = Form.useWatch('buildingTypeId', projectForm) as string | undefined
+  const scopeId = Form.useWatch('scopeId', projectForm) as string | undefined
+  const floorCount = Form.useWatch('floorCount', projectForm) as number | null | undefined
+  const selectedType = catalog.data?.buildingTypes.find((type) => type.buildingTypeId === buildingTypeId)
+  const floorsApply = Boolean(selectedType?.floorsEnabled && selectedType.floorCounts.length)
+  const tumApplies = Boolean(selectedType?.tumEnabled)
+  const typeOptions = (catalog.data?.buildingTypes ?? []).map((type) => ({
+    label: type.name,
+    value: type.buildingTypeId
+  }))
+  const scopeOptions = (scopes.data ?? [])
+    .filter((scope) => scope.isActive || scope.id === scopeId)
+    .map((scope) => ({ label: scope.name, value: scope.id, disabled: !scope.isActive }))
+  const floorOptions = (floorsApply ? (selectedType?.floorCounts ?? []) : [])
+    .slice()
+    .sort((a, b) => a - b)
+    .map((value) => ({ label: floorLabel(value), value, disabled: false }))
+  // Keep historical values visible when editing; changing the type reconciles them with its configuration.
+  if (floorCount != null && !floorOptions.some((option) => option.value === floorCount))
+    floorOptions.push({ label: c('savedFloor', { count: floorCount }), value: floorCount, disabled: true })
+  const optionsFailed = catalog.isError || scopes.isError
+  const optionsPending = catalog.isPending || scopes.isPending
+  const typeName = (id: string) => catalog.data?.buildingTypes.find((type) => type.buildingTypeId === id)?.name ?? id
+  const scopeName = (id: string) => scopes.data?.find((scope) => scope.id === id)?.name ?? id
+  const retryOptions = () => {
+    void catalog.refetch()
+    void scopes.refetch()
+  }
+  const changeBuildingType = (id: string) => {
+    const type = catalog.data?.buildingTypes.find((item) => item.buildingTypeId === id)
+    const currentFloor = num(projectForm.getFieldValue('floorCount'))
+    const currentTum: unknown = projectForm.getFieldValue('hasAttic')
+    projectForm.setFieldsValue({
+      floorCount:
+        type?.floorsEnabled && currentFloor != null && type.floorCounts.includes(currentFloor) ? currentFloor : null,
+      hasAttic: type?.tumEnabled && typeof currentTum === 'boolean' ? currentTum : null
+    })
+  }
 
   /** Đồng bộ version mới của contractor vào form hồ sơ cha + tải lại danh sách. */
   const syncVersion = async (contractorVersion: number) => {
@@ -135,18 +176,23 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
   function openEditPending(p: PendingProject) {
     setEditing(p)
     setImages(p.images)
+    projectForm.resetFields()
     projectForm.setFieldsValue(p.values)
   }
 
   function openEdit(p: ContractorProjectDetail) {
     setEditing(p)
     setImages(projectImagesFromDetail(p.images, contractorId as string))
+    projectForm.resetFields()
     projectForm.setFieldsValue({
       name: p.name,
       buildingTypeId: p.buildingTypeId,
       scopeId: p.scopeId,
+      widthM: p.widthM ?? null,
+      lengthM: p.lengthM ?? null,
       areaM2: p.areaM2 ?? null,
       floorCount: p.floorCount ?? null,
+      hasAttic: p.hasAttic ?? null,
       locationText: p.locationText ?? '',
       completedYear: p.completedYear ?? null,
       roleText: p.roleText ?? '',
@@ -224,6 +270,8 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
     name: string
     buildingTypeId: string
     scopeId: string
+    floorCount?: number | null
+    hasAttic?: boolean | null
     completedYear?: number | null
     thumb?: string
     onEdit: () => void
@@ -236,6 +284,8 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
         name: p.name,
         buildingTypeId: p.buildingTypeId,
         scopeId: p.scopeId,
+        floorCount: p.floorCount,
+        hasAttic: p.hasAttic,
         completedYear: p.completedYear,
         thumb: projectImagesFromDetail(p.images, contractorId)[0]?.previewUrl,
         onEdit: () => openEdit(p),
@@ -246,6 +296,8 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
         name: String(p.values.name ?? ''),
         buildingTypeId: String(p.values.buildingTypeId ?? ''),
         scopeId: String(p.values.scopeId ?? ''),
+        floorCount: num(p.values.floorCount),
+        hasAttic: typeof p.values.hasAttic === 'boolean' ? p.values.hasAttic : null,
         completedYear: num(p.values.completedYear),
         thumb: p.images[0]?.previewUrl,
         onEdit: () => openEditPending(p),
@@ -298,9 +350,19 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
                 <Text strong>{row.name}</Text>
                 <div>
                   <Text type='secondary' style={{ fontSize: 12 }}>
-                    {nameOf(options.data?.buildingTypes, row.buildingTypeId)} ·{' '}
-                    {nameOf(options.data?.scopes, row.scopeId)}
-                    {row.completedYear ? ` · ${row.completedYear}` : ''}
+                    {[
+                      typeName(row.buildingTypeId),
+                      row.floorCount == null
+                        ? null
+                        : row.floorCount > 0
+                          ? floorLabel(row.floorCount)
+                          : c('savedFloor', { count: row.floorCount }),
+                      row.hasAttic == null ? null : c(row.hasAttic ? 'hasTum' : 'noTum'),
+                      scopeName(row.scopeId),
+                      row.completedYear
+                    ]
+                      .filter((value) => value != null && value !== '')
+                      .join(' · ')}
                   </Text>
                 </div>
               </div>
@@ -327,12 +389,28 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
         title={editing === 'new' ? c('add') : c('editTitle')}
         onCancel={() => setEditing(null)}
         onOk={submitProject}
-        okButtonProps={{ loading: saving }}
+        okButtonProps={{ loading: saving, disabled: optionsFailed || optionsPending }}
         okText={t('actions.save')}
         cancelText={t('actions.cancel')}
         destroyOnHidden
+        width={640}
       >
-        <Form form={projectForm} layout='vertical'>
+        {optionsFailed ? (
+          <Alert
+            type='error'
+            showIcon
+            title={c('categoryError')}
+            action={<Button onClick={retryOptions}>{c('retry')}</Button>}
+            style={{ marginBottom: 16 }}
+          />
+        ) : null}
+        <Form name='contractor-project' form={projectForm} layout='vertical'>
+          <Form.Item name='widthM' hidden>
+            <HiddenValue />
+          </Form.Item>
+          <Form.Item name='lengthM' hidden>
+            <HiddenValue />
+          </Form.Item>
           <Form.Item
             name='name'
             label={c('name')}
@@ -345,14 +423,65 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
             label={c('buildingType')}
             rules={[{ required: true, message: t('fields.requiredMessage') }]}
           >
-            <Select options={typeOptions} loading={options.isPending} optionFilterProp='label' showSearch />
+            <Select
+              options={typeOptions}
+              loading={catalog.isPending}
+              disabled={catalog.isError || saving}
+              optionFilterProp='label'
+              showSearch
+              onChange={changeBuildingType}
+            />
           </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item name='floorCount' label={c('floorCount')} extra={c('classificationHint')}>
+                <Select
+                  options={floorOptions}
+                  allowClear
+                  disabled={!floorsApply || saving}
+                  placeholder={
+                    floorsApply ? c('selectOptional') : selectedType ? c('notApplicable') : c('selectTypeFirst')
+                  }
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item
+                name='hasAttic'
+                label={c('tum')}
+                getValueProps={(value: boolean | null | undefined) => ({
+                  value: typeof value === 'boolean' ? (value ? 'yes' : 'no') : undefined
+                })}
+                normalize={(value: string | undefined) => (value == null ? null : value === 'yes')}
+              >
+                <Select
+                  options={[
+                    { label: c('hasTum'), value: 'yes' },
+                    { label: c('noTum'), value: 'no' }
+                  ]}
+                  allowClear
+                  disabled={!tumApplies || saving}
+                  placeholder={
+                    tumApplies ? c('selectOptional') : selectedType ? c('notApplicable') : c('selectTypeFirst')
+                  }
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item
             name='scopeId'
             label={c('scope')}
             rules={[{ required: true, message: t('fields.requiredMessage') }]}
           >
-            <Select options={scopeOptions} loading={options.isPending} optionFilterProp='label' showSearch />
+            <Select
+              options={scopeOptions}
+              loading={scopes.isPending}
+              disabled={scopes.isError || saving}
+              optionFilterProp='label'
+              showSearch
+            />
           </Form.Item>
           <Form.Item label={c('images')} required extra={c('imagesHint')}>
             <ImageStrip
@@ -363,17 +492,18 @@ export function ContractorProjectsSection({ form, contractorId }: { form: FormIn
               onMove={(key, delta) => setImages((current) => moveProjectImage(current, key, delta))}
             />
           </Form.Item>
-          <Space size={8} style={{ width: '100%' }}>
-            <Form.Item name='areaM2' label={c('areaM2')} style={{ flex: 1 }}>
-              <InputNumber style={{ width: '100%' }} min={0} />
-            </Form.Item>
-            <Form.Item name='floorCount' label={c('floorCount')} style={{ flex: 1 }}>
-              <InputNumber style={{ width: '100%' }} min={0} />
-            </Form.Item>
-            <Form.Item name='completedYear' label={c('completedYear')} style={{ flex: 1 }}>
-              <InputNumber style={{ width: '100%' }} />
-            </Form.Item>
-          </Space>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item name='areaM2' label={c('areaM2')}>
+                <InputNumber style={{ width: '100%' }} min={0} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name='completedYear' label={c('completedYear')}>
+                <InputNumber style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item name='locationText' label={c('locationText')}>
             <Input />
           </Form.Item>
