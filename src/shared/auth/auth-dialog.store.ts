@@ -17,6 +17,8 @@ interface AuthDialogStore {
   open: (mode?: AuthDialogMode, pendingAction?: () => void) => void
   close: () => void
   setOpen: (open: boolean) => void
+  /** Switch tabs without losing the action that requested authentication. */
+  setMode: (mode: AuthDialogMode) => void
   /** Return and clear the pending action (run it after a successful login). */
   consumePendingAction: () => (() => void) | null
 }
@@ -34,6 +36,7 @@ export const useAuthDialogStore = create<AuthDialogStore>((set, get) => ({
   open: (mode = 'login', pendingAction) => set({ isOpen: true, mode, pendingAction: pendingAction ?? null }),
   close: () => set({ isOpen: false, pendingAction: null }),
   setOpen: (isOpen) => set(isOpen ? { isOpen } : { isOpen, pendingAction: null }),
+  setMode: (mode) => set({ mode }),
   consumePendingAction: () => {
     const action = get().pendingAction
     set({ pendingAction: null })

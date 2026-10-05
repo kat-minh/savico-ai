@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
-import { CONTRACTOR_PREVIEW_ID, contractorInviteSentRoute } from '@/shared/constants/routes'
+import { CONTRACTOR_PREVIEW_ID, contractorInvitationsRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { env } from '@/shared/config/env'
 import { useAuthStore } from '@/shared/auth'
@@ -64,7 +64,7 @@ export function useSurveySlots(contractorId: string, date: string) {
 }
 
 /**
- * "Xác nhận thời gian khảo sát" (S16) → màn Đã gửi lời mời (S17).
+ * "Xác nhận thời gian khảo sát" (S16) → danh sách lời mời (S18).
  *
  * Nhận MỘT MẢNG booking vì khách có thể mời nhiều nhà thầu trong cùng một lượt
  * từ bảng so sánh (S15); server gộp chúng vào một mã yêu cầu khảo sát.
@@ -86,11 +86,11 @@ export function useSendInvitations(projectId: string, options: SendInvitationMot
       if (!env.NEXT_PUBLIC_USE_MOCK_API) throw new Error('UseQuotationRequestsApi')
       return mockContractorsApi.createInvitations(projectId, bookings)
     },
-    onSuccess: ({ request }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractorKeys.invitationList(projectId) })
       queryClient.invalidateQueries({ queryKey: contractorKeys.brief(projectId) })
       options.onSuccess?.()
-      const navigate = () => router.push(contractorInviteSentRoute(projectId, request.id))
+      const navigate = () => router.push(contractorInvitationsRoute(projectId))
       if (options.navigateDelayMs) window.setTimeout(navigate, options.navigateDelayMs)
       else navigate()
     },

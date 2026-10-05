@@ -18,7 +18,7 @@ import { RegisterForm } from './register-form'
  */
 export function AuthDialog() {
   const t = useTranslations('auth')
-  const { isOpen, mode, open, setOpen } = useAuthDialogStore()
+  const { isOpen, mode, open, setOpen, setMode } = useAuthDialogStore()
   // `useSearchParams`, không phải `window.location`: guard chuyển hướng bằng
   // `router.replace` nên dialog đã mounted sẵn — đọc URL một lần lúc mount thì
   // lần bị đá về sau đó sẽ không mở popup nữa.
@@ -78,7 +78,7 @@ export function AuthDialog() {
           <DialogTitle className='text-title'>{t(`${mode}.title`)}</DialogTitle>
           <DialogDescription>{t(`${mode}.subtitle`)}</DialogDescription>
         </DialogHeader>
-        <Tabs value={mode} onValueChange={(value) => open(value as AuthDialogMode)}>
+        <Tabs value={mode} onValueChange={(value) => setMode(value as AuthDialogMode)}>
           <TabsList className='grid w-full grid-cols-2'>
             <TabsTrigger value='login'>{t('login.submit')}</TabsTrigger>
             <TabsTrigger value='register'>{t('register.submit')}</TabsTrigger>
@@ -87,7 +87,7 @@ export function AuthDialog() {
             <LoginForm embedded />
           </TabsContent>
           <TabsContent value='register' className='mt-4'>
-            <RegisterForm embedded onSwitchToLogin={() => open('login')} />
+            <RegisterForm embedded onSwitchToLogin={() => setMode('login')} />
           </TabsContent>
         </Tabs>
       </DialogContent>

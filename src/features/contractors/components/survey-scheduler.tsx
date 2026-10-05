@@ -49,7 +49,7 @@ import { contractorCompareRoute, contractorInviteRoute, contractorMatchesRoute }
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { env } from '@/shared/config/env'
-import { contractorInviteSentRoute } from '@/shared/constants/routes'
+import { contractorInvitationsRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { readQuotationAttempt } from '../api/quotation-requests.api'
 import { useSubmitQuotation } from '../hooks/use-quotations'
@@ -361,7 +361,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
           surveyNote: values.note.trim() || null
         },
         {
-          onSuccess: (receipt) => {
+          onSuccess: () => {
             addBooking({ contractorId, ...values })
             setUncertain(false)
             const next = inviteQueue[queueIndex + 1]
@@ -371,7 +371,7 @@ export function SurveyScheduler({ projectId, contractorId }: SurveySchedulerProp
             } else {
               clearQueue()
               clearCompare()
-              router.push(contractorInviteSentRoute(projectId, receipt.id))
+              router.push(contractorInvitationsRoute(projectId))
             }
           },
           onError: (error) => {

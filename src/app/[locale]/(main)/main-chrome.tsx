@@ -9,7 +9,7 @@ import { useAccountPlan } from '@/features/account'
 import { AuthDialog, useLogout } from '@/features/auth'
 import { CreateProjectDialog, resumeProjectRoute, useDesignStore } from '@/features/design'
 import { usePathname, useRouter } from '@/i18n/navigation'
-import { useAuth } from '@/shared/auth'
+import { useAuth, useAuthDialogStore } from '@/shared/auth'
 import { AccountMenu } from '@/shared/components/account-menu'
 import { ROUTES } from '@/shared/constants/routes'
 import { SiteHeader } from '@/shared/layouts'
@@ -64,6 +64,25 @@ function CreateProjectQueryBridge() {
   return null
 }
 
+/** Mở đăng nhập trước mọi yêu cầu tạo dự án của khách, rồi tiếp tục sau khi đăng nhập. */
+function CreateProjectAuthGate() {
+  const { isAuthenticated, isInitialized } = useAuth()
+  const isCreateOpen = useDesignStore((s) => s.isCreateDialogOpen)
+  const closeCreateDialog = useDesignStore((s) => s.closeCreateDialog)
+  const openCreateDialog = useDesignStore((s) => s.openCreateDialog)
+  const openAuthDialog = useAuthDialogStore((s) => s.open)
+
+  useEffect(() => {
+    if (!isCreateOpen || !isInitialized || isAuthenticated) return
+    closeCreateDialog()
+    openAuthDialog('login', openCreateDialog)
+  }, [isCreateOpen, isInitialized, isAuthenticated, closeCreateDialog, openAuthDialog, openCreateDialog])
+
+  // Chờ kiểm tra phiên trước khi hiện form; mọi nút tạo dự án cùng đi qua cổng này.
+  if (!isInitialized || !isAuthenticated) return null
+  return <CreateProjectDialog />
+}
+
 /**
  * Chặn tạo hồ sơ thi công khi tài khoản CHƯA MUA GÓI (không còn tạo miễn phí):
  * mở cửa sổ Tạo dự án mà `/me/design-subscription` trả rỗng → đóng modal và đá
@@ -83,6 +102,7 @@ function DesignPlanGate() {
   const redirectedRef = useRef(false)
 
   useEffect(() => {
+    if (!isInitialized || !isAuthenticated) return
     if (!isCreateOpen) {
       redirectedRef.current = false
       return
@@ -94,7 +114,7 @@ function DesignPlanGate() {
     closeCreateDialog()
     toast.info(t('needPlan'))
     router.push(ROUTES.PLANS)
-  }, [isCreateOpen, plan, closeCreateDialog, router, t])
+  }, [isInitialized, isAuthenticated, isCreateOpen, plan, closeCreateDialog, router, t])
 
   return null
 }
@@ -121,7 +141,7 @@ export function MainChrome() {
         <AuthDialog />
         <CreateProjectQueryBridge />
       </Suspense>
-      <CreateProjectDialog />
+      <CreateProjectAuthGate />
       <DesignPlanGate />
       <JourneyPopupHost />
     </>

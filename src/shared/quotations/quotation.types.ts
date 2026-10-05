@@ -73,12 +73,14 @@ export const quotationDetailSchema = z.object({
 })
 export const quotationAdminDetailSchema = z.object({
   request: quotationDetailSchema,
-  customerId: z.string().uuid(),
+  customerId: z.string().guid(),
   customerEmail: z.string(),
   internalNote: z.string().nullable(),
   version: z.number().int().positive(),
   updatedAtUtc: z.string(),
-  updatedBy: z.string().uuid().nullable()
+  // .NET accepts fixed user GUIDs (including the bootstrap admin seed), which
+  // do not necessarily carry an RFC UUID version/variant.
+  updatedBy: z.string().guid().nullable()
 })
 export type QuotationItem = z.infer<typeof quotationItemSchema>
 export type QuotationDetail = z.infer<typeof quotationDetailSchema>
