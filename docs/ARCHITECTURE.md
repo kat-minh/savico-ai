@@ -116,10 +116,20 @@ built via factories that receive **resolved, localized** messages
 
 ## 10. Authentication (infrastructure)
 
-`shared/auth` provides the store, roles (`guest` / `user` / `admin`), and the
-`ProtectedRoute` / `GuestRoute` / `RoleGuard` guards. The middleware is the
-primary gate; guards handle client navigations. **Authorization is always
-enforced by the backend** — client guards are UX only.
+`shared/auth` provides the store, routing personas (`guest` / `customer` /
+`staff` / `admin`), permissions, and route guards. `src/proxy.ts` checks the
+non-sensitive `bmt.auth` marker; `AuthBootstrap` checks `/users/me` before
+rendering private pages, including client navigations. `accountKind` separates
+customer and staff areas; stable `roleCodes` identify the system Admin role.
+The effective token permissions drive both the admin sidebar and direct URL
+access through `ADMIN_ROUTE_ACCESS`. Admin has no implicit permission bypass.
+Legacy CMS screens and contractor endpoints retain their system Admin gate.
+Refresh rechecks the session and unrecoverable 401 clears private caches.
+**Authorization and assignment scope are always enforced by the backend** —
+client guards are UX only. See [the integration notes](./TICH_HOP_PHAN_QUYEN.md).
+
+`pnpm test:auth` runs the pure routing policy regression tests using Node's
+built-in runner and the existing TypeScript compiler.
 
 ## 11. Quality gates
 

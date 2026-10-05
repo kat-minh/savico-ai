@@ -29,7 +29,7 @@ export function MustChangePasswordDialog() {
   const t = useTranslations('auth.mustChange')
   const tv = useTranslations('validation')
   const required = useRequiredMessage()
-  const open = useAuthStore((s) => Boolean(s.user?.mustChangePassword))
+  const open = useAuthStore((s) => s.isInitialized && Boolean(s.user?.mustChangePassword))
   const changePassword = useChangePassword()
 
   const schema = useMemo(

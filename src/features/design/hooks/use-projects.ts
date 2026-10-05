@@ -15,11 +15,17 @@ import { useDesignStore } from '../store/design.store'
 
 /** Danh sách "Dự án của tôi" trong Cửa sổ cá nhân (mục IV). */
 export function useProjects(enabled = true) {
-  const { user } = useAuth()
+  const { user, isAuthenticated, isInitialized } = useAuth()
   return useQuery({
     queryKey: [...designKeys.projects(), 'owner', user?.id],
     queryFn: () => designApi.listProjects(),
-    enabled
+    enabled:
+      enabled &&
+      isInitialized &&
+      isAuthenticated &&
+      user?.accountKind === 'Customer' &&
+      !user.mustChangePassword &&
+      user.emailVerified !== false
   })
 }
 

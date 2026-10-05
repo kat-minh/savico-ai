@@ -7,6 +7,7 @@ import { createElement, useMemo, useState } from 'react'
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { ADMIN_ROUTES } from '@/shared/constants'
+import { canAccessAdminRoute, useAuth } from '@/shared/auth'
 import { ADMIN_NAV, ADMIN_NAV_ITEMS } from './admin-nav.config'
 
 type MenuItem = NonNullable<MenuProps['items']>[number]
@@ -33,6 +34,15 @@ type MenuItem = NonNullable<MenuProps['items']>[number]
 export function AdminMenu() {
   const t = useTranslations('admin')
   const pathname = usePathname()
+  const { user } = useAuth()
+  const visibleGroups = useMemo(
+    () =>
+      ADMIN_NAV.map((group) => ({
+        ...group,
+        items: group.items.filter((item) => canAccessAdminRoute(user, item.href))
+      })).filter((group) => group.items.length > 0),
+    [user]
+  )
 
   /** Mục khớp dài nhất thắng — `/admin/bookings/reschedule` không bôi luôn `/admin/bookings`. */
   const selectedKey = useMemo(() => {
@@ -44,8 +54,8 @@ export function AdminMenu() {
 
   /** Nhóm chứa trang đang xem — luôn phải mở, nếu không thì mục đang chọn bị giấu. */
   const activeGroupKey = useMemo(
-    () => ADMIN_NAV.find((group) => group.items.some((item) => item.href === selectedKey))?.key,
-    [selectedKey]
+    () => visibleGroups.find((group) => group.items.some((item) => item.href === selectedKey))?.key,
+    [selectedKey, visibleGroups]
   )
 
   /**
@@ -63,7 +73,7 @@ export function AdminMenu() {
 
   const items = useMemo<MenuItem[]>(
     () =>
-      ADMIN_NAV.map((group) => ({
+      visibleGroups.map((group) => ({
         key: group.key,
         icon: createElement(group.icon),
         label: t(`navGroups.${group.key}`),
@@ -73,7 +83,7 @@ export function AdminMenu() {
           label: <Link href={item.href}>{t(`nav.${item.key}`)}</Link>
         }))
       })),
-    [t]
+    [t, visibleGroups]
   )
 
   return (

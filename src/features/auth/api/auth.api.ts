@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { AuthUser } from '@/shared/auth'
 import { AUTH_ENDPOINTS, ROLES, clearSessionMarker, hasSessionMarker, setSessionMarker } from '@/shared/auth'
 import { env } from '@/shared/config/env'
@@ -7,37 +8,28 @@ import type { ChangePasswordPayload, LoginPayload, LoginResponse, RegisterPayloa
 import { mockAuthApi } from './auth.mock'
 
 /** `GET /users/me` of the BMT API (`Response.GetMeBasic`). */
-interface BmtMe {
-  id: string
-  email: string
-  firstName: string
-  lastName: string
-  avatar?: string | null
-  phoneNumber?: string | null
-  roles?: string[] | null
-  mustChangePassword?: boolean
-  isEmailVerified?: boolean
-}
+const meSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  avatar: z.string().nullish(),
+  phoneNumber: z.string().nullish(),
+  roles: z.array(z.string()).nullish(),
+  roleCodes: z.array(z.string()).nullish(),
+  accountKind: z.enum(['Customer', 'Staff']).nullish(),
+  permissions: z.array(z.string()).nullish(),
+  mustChangePassword: z.boolean().optional(),
+  isEmailVerified: z.boolean().optional(),
+  authenticationMethod: z.string().optional()
+})
 
-/**
- * Tên vai trò mà `GET /users/me` trả cho một tài khoản KHÁCH HÀNG thuần. Backend
- * trả `["User"]` cho khách đăng ký thường (không phải `"customer"` hay tên hệ
- * thống `"Khách hàng"`), và `["Admin"]` cho quản trị. Chuẩn hóa về chữ thường.
- */
-const CUSTOMER_ROLE_TOKENS = new Set(['user', 'customer', 'khách hàng'])
+type BmtMe = z.infer<typeof meSchema>
 
-/**
- * The frontend only knows customer vs admin. A pure customer account opens the
- * public site; any other role (Admin or a custom staff role) opens the admin
- * area. The backend still enforces each permission per request.
- *
- * Lưu ý: `/users/me` trả `"User"` cho khách thường — nếu coi mọi thứ khác
- * `"customer"` là staff thì khách bị đẩy nhầm vào khu admin. Vì vậy phải whitelist
- * các token vai trò khách, rồi mới coi phần còn lại là staff.
- */
-function toRoles(roles: string[] | null | undefined): AuthUser['roles'] {
-  const staff = (roles ?? []).some((r) => !CUSTOMER_ROLE_TOKENS.has(r.trim().toLowerCase()))
-  return staff ? [ROLES.ADMIN] : [ROLES.CUSTOMER]
+function toRoles(me: BmtMe): AuthUser['roles'] {
+  if (me.accountKind === 'Customer') return [ROLES.CUSTOMER]
+  if (me.accountKind !== 'Staff') return []
+  return (me.roleCodes ?? []).includes('admin') ? [ROLES.STAFF, ROLES.ADMIN] : [ROLES.STAFF]
 }
 
 function toAuthUser(me: BmtMe): AuthUser {
@@ -51,7 +43,9 @@ function toAuthUser(me: BmtMe): AuthUser {
       me.email,
     phone: me.phoneNumber ?? undefined,
     avatarUrl: me.avatar ?? undefined,
-    roles: toRoles(me.roles),
+    roles: toRoles(me),
+    accountKind: me.accountKind ?? null,
+    permissions: [...new Set(me.permissions ?? [])],
     mustChangePassword: me.mustChangePassword ?? false,
     // Không có field (BE cũ) → coi như đã xác minh để không chặn nhầm.
     emailVerified: me.isEmailVerified ?? true
@@ -68,14 +62,20 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
   return { firstName, lastName: words.join(' ') || firstName }
 }
 
-async function getCurrentUser(): Promise<AuthUser> {
+async function getCurrentUser(signal?: AbortSignal): Promise<AuthUser> {
   // No marker = never logged in on this browser (or logged out): skip the
   // `/me` → 401 → refresh → 401 round trips every guest page load would pay.
   if (!hasSessionMarker()) {
     const error: ApiError = { status: 401, message: 'No active session.' }
     throw error
   }
-  const user = toAuthUser(await http.get<BmtMe>(AUTH_ENDPOINTS.ME))
+  const me = meSchema.parse(await http.get<unknown>(AUTH_ENDPOINTS.ME, { signal }))
+  if (me.authenticationMethod === 'PasswordReset') {
+    clearSessionMarker()
+    const error: ApiError = { status: 401, message: 'Password reset session.' }
+    throw error
+  }
+  const user = toAuthUser(me)
   setSessionMarker()
   return user
 }

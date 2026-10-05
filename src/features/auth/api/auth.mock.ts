@@ -1,5 +1,5 @@
 import type { AuthUser } from '@/shared/auth'
-import { ROLES } from '@/shared/auth'
+import { PERMISSIONS, ROLES } from '@/shared/auth'
 import { MOCK_SESSION_USER_KEY, clearSessionMarker, hasSessionMarker, setSessionMarker } from '@/shared/auth'
 import type { ApiError } from '@/shared/types'
 import type { LoginPayload, LoginResponse, RegisterPayload } from '../types/auth.types'
@@ -19,7 +19,9 @@ const MOCK_USER: AuthUser = {
   email: 'dev@bmt.local',
   name: 'Dev User',
   phone: '0938 123 456',
-  roles: [ROLES.CUSTOMER]
+  roles: [ROLES.CUSTOMER],
+  accountKind: 'Customer',
+  permissions: []
 }
 
 /**
@@ -27,7 +29,7 @@ const MOCK_USER: AuthUser = {
  * backend: an email containing "admin" → admin, otherwise → customer.
  */
 function rolesForEmail(email: string): AuthUser['roles'] {
-  return email.toLowerCase().includes('admin') ? [ROLES.ADMIN] : [ROLES.CUSTOMER]
+  return email.toLowerCase().includes('admin') ? [ROLES.STAFF, ROLES.ADMIN] : [ROLES.CUSTOMER]
 }
 
 /** Simulate network latency so loading states are exercised. */
@@ -50,7 +52,9 @@ export const mockAuthApi = {
     const user: AuthUser = {
       ...MOCK_USER,
       email: payload.email,
-      roles: rolesForEmail(payload.email)
+      roles: rolesForEmail(payload.email),
+      accountKind: payload.email.toLowerCase().includes('admin') ? 'Staff' : 'Customer',
+      permissions: payload.email.toLowerCase().includes('admin') ? Object.values(PERMISSIONS) : []
     }
     localStorage.setItem(MOCK_SESSION_USER_KEY, JSON.stringify(user))
     setSessionMarker()
@@ -63,7 +67,7 @@ export const mockAuthApi = {
     clearSessionMarker()
   },
 
-  async getCurrentUser(): Promise<AuthUser> {
+  async getCurrentUser(signal?: AbortSignal): Promise<AuthUser> {
     await delay(150)
     const raw = typeof window !== 'undefined' ? localStorage.getItem(MOCK_SESSION_USER_KEY) : null
     // The session is only valid if BOTH the profile and the cookie exist.
@@ -73,6 +77,7 @@ export const mockAuthApi = {
       localStorage.removeItem(MOCK_SESSION_USER_KEY)
       throw apiError('No active session (mock).', 401)
     }
+    signal?.throwIfAborted()
     return JSON.parse(raw) as AuthUser
   },
 
@@ -118,6 +123,9 @@ export const mockAuthApi = {
     await delay(200)
     const raw = localStorage.getItem(MOCK_SESSION_USER_KEY)
     const user = raw ? (JSON.parse(raw) as AuthUser) : { ...MOCK_USER, email }
-    return { user: { ...user, mustChangePassword: false } }
+    const updated = { ...user, mustChangePassword: false }
+    localStorage.setItem(MOCK_SESSION_USER_KEY, JSON.stringify(updated))
+    setSessionMarker()
+    return { user: updated }
   }
 }

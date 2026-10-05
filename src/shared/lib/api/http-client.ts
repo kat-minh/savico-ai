@@ -104,6 +104,9 @@ httpClient.interceptors.response.use(
       }
     }
 
+    if (status === 401 && originalRequest?._retry && !isRefreshExempt(originalRequest.url) && hasSessionMarker()) {
+      onUnauthorized()
+    }
     return Promise.reject(normalizeApiError(error))
   }
 )

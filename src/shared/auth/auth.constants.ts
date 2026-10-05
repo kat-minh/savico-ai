@@ -1,7 +1,8 @@
-/** Auth roles understood by the frontend. Mirror the backend's role names. */
+/** Personas used for frontend routing; custom backend roles grant permissions. */
 export const ROLES = {
   GUEST: 'guest',
   CUSTOMER: 'customer',
+  STAFF: 'staff',
   ADMIN: 'admin'
 } as const
 
@@ -38,6 +39,9 @@ export const AUTH_ENDPOINTS = {
 
 /** localStorage key under which the (non-sensitive) auth profile is persisted. */
 export const AUTH_STORAGE_KEY = 'bmt.auth-state'
+
+export const AUTH_SESSION_REFRESHED_EVENT = 'bmt:session-refreshed'
+export const AUTH_SESSION_ENDED_EVENT = 'bmt:session-ended'
 
 /**
  * localStorage key of the fake session profile the mock backend keeps

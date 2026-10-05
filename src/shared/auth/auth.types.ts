@@ -9,6 +9,10 @@ export interface AuthUser {
   phone?: string
   avatarUrl?: string
   roles: Role[]
+  /** Stable account type from /users/me; null means the API contract is unavailable. */
+  accountKind: 'Customer' | 'Staff' | null
+  /** Effective permissions of the current access token (BR-RBAC-001, BR-RBAC-009). */
+  permissions: string[]
   /**
    * True khi tài khoản còn dùng mật khẩu do người khác đặt (nhân viên mới do
    * admin tạo). Theo BR-RBAC-006, backend chặn mọi chức năng khác cho tới khi

@@ -6,14 +6,14 @@ import { useAuth } from '@/shared/auth'
 
 /** App-layer glue for the purchased design package shown on the public home page. */
 export function HomeServicesSection() {
-  const { isAuthenticated } = useAuth()
-  const { data: accountPlan } = useAccountPlan(isAuthenticated)
-  const { data: purchases } = usePurchaseHistory(isAuthenticated)
+  const { isCustomer } = useAuth()
+  const { data: accountPlan } = useAccountPlan(isCustomer)
+  const { data: purchases } = usePurchaseHistory(isCustomer)
 
   return (
     <HomeServices
-      ownedDesignRemaining={accountPlan?.design.remaining}
-      ownsSupervision={isAuthenticated && Boolean(purchases?.supervisionOrderId)}
+      ownedDesignRemaining={isCustomer ? accountPlan?.design.remaining : undefined}
+      ownsSupervision={isCustomer && Boolean(purchases?.supervisionOrderId)}
     />
   )
 }

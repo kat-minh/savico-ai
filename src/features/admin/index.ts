@@ -6,6 +6,7 @@
  * đổi theo.
  */
 export { AdminShell } from './components/layout/admin-shell'
+export { AdminRouteGuard, AdminLanding } from './components/layout/admin-route-guard'
 export { AdminInbox } from './components/dashboard/admin-inbox'
 export { AdminCharts } from './components/dashboard/admin-charts'
 

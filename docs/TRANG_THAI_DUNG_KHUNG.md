@@ -5,6 +5,8 @@ bộ giao diện v1.1** ở [MO_TA_GIAO_DIEN_V11.md](./MO_TA_GIAO_DIEN_V11.md) v
 kèm phần **Khu quản trị (admin)** dựng theo những chỗ spec giao việc cho admin.
 Cập nhật file này mỗi khi hoàn thiện một màn hình.
 
+Ngày 05/10/2026, bổ sung chặn route theo phiên và loại tài khoản, quyền truy cập từng section admin, lọc menu và thao tác theo permission. `/admin` chọn mục được phép thay vì luôn chuyển tới Đơn hàng. Backend `/users/me` bổ sung `accountKind`, `roleCodes` và bộ `permissions` của token hiện tại; cần triển khai contract mới trước khi phát hành frontend. Không xóa màn hình; chỉ ẩn mục và nút không đủ quyền. Xem [ghi chú phân quyền](./TICH_HOP_PHAN_QUYEN.md).
+
 > Trang **Tư vấn 1:1** (dòng 12, 13, 13a) dựng theo **mục VIII, Hình 14–16** của bản
 > "Mô tả giao diện web SAVICO **v2.0 — 05/08/2026**" (bản Bên A gửi qua Google Docs,
 > chưa đưa vào repo). Bản v2.0 cũng thêm section Tư vấn 1:1 ở trang chủ (mục III.2)

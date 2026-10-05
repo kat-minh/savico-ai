@@ -3,8 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useRouter } from '@/i18n/navigation'
-import { ROLES, useAuthStore } from '@/shared/auth'
-import { ADMIN_ROUTES, ROUTES } from '@/shared/constants/routes'
+import { authHome, useAuthStore } from '@/shared/auth'
 import { authApi } from '../api/auth.api'
 import { authKeys } from '../api/auth.keys'
 
@@ -36,8 +35,8 @@ export function useChangePassword() {
     onSuccess: ({ user }) => {
       setUser(user)
       queryClient.setQueryData(authKeys.currentUser(), user)
-      // Tổng quan (`/admin`) đã ẩn khỏi menu → admin về mục đầu sidebar (Đơn hàng).
-      router.replace(user.roles.includes(ROLES.ADMIN) ? ADMIN_ROUTES.ORDERS : ROUTES.HOME)
+      useAuthStore.getState().setInitialized(true)
+      router.replace(authHome(user))
     }
   })
 }

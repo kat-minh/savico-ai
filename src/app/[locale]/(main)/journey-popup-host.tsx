@@ -21,8 +21,8 @@ import { HOME_REMINDER_WAKE_EVENT } from '@/shared/constants'
  */
 export function JourneyPopupHost() {
   const pathname = usePathname()
-  const { isAuthenticated, isInitialized } = useAuth()
-  const accountPlan = useAccountPlan(isAuthenticated)
+  const { user, isCustomer, isAuthenticated, isInitialized } = useAuth()
+  const accountPlan = useAccountPlan(isCustomer)
   const [customerState, setCustomerState] = useState<JourneyCustomerState | null>(null)
   const snapshotIdentityRef = useRef<string | null>(null)
 
@@ -54,7 +54,8 @@ export function JourneyPopupHost() {
     return () => window.clearTimeout(snapshotTimer)
   }, [accountPlan.data, accountPlan.isFetched, customerState, isAuthenticated, isInitialized])
 
-  const homeStepOneEnabled = pathname === '/' && (customerState === 'S0' || customerState === 'S1')
+  const homeStepOneEnabled =
+    user?.accountKind !== 'Staff' && pathname === '/' && (customerState === 'S0' || customerState === 'S1')
   const { open, handleOpenChange, complete } = usePopupStepOneTrigger({
     enabled: homeStepOneEnabled,
     blocked: authDialogOpen || createProjectOpen

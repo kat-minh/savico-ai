@@ -158,9 +158,15 @@ export function HomeReminderHost() {
   const reduceMotion = useReducedMotion()
 
   const { isAuthenticated, isInitialized, user } = useAuth()
-  const accountPlan = useAccountPlan(isAuthenticated)
-  const projectsQuery = useProjects(isAuthenticated)
-  const briefsQuery = useBriefs(isAuthenticated)
+  const isCustomer =
+    isAuthenticated &&
+    isInitialized &&
+    user?.accountKind === 'Customer' &&
+    !user.mustChangePassword &&
+    user.emailVerified !== false
+  const accountPlan = useAccountPlan(isCustomer)
+  const projectsQuery = useProjects(isCustomer)
+  const briefsQuery = useBriefs(isCustomer)
 
   const plans = useCmsCollection('plans')
   const invitations = useCmsCollection('contractorInvitations')

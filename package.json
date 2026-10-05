@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "next typegen && tsc --noEmit",
+    "test:auth": "node --test scripts/route-access.test.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
     "knip": "knip",

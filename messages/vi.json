@@ -114,9 +114,15 @@
     },
     "forbidden": {
       "title": "Không có quyền truy cập",
-      "description": "Khu vực này chỉ dành cho quản trị viên.",
+      "description": "Khu vực này chỉ dành cho tài khoản nhân viên.",
       "backHome": "Về trang chủ",
-      "switchAccount": "Đăng nhập tài khoản khác"
+      "switchAccount": "Đăng nhập tài khoản khác",
+      "routeDescription": "Loại tài khoản hiện tại không được truy cập trang này.",
+      "sessionUnavailable": "Chưa nhận được thông tin phân quyền của phiên. Vui lòng đăng nhập lại sau khi hệ thống được cập nhật.",
+      "sectionDescription": "Bạn chưa được cấp quyền truy cập section này.",
+      "noSections": "Tài khoản hiện chưa được cấp quyền truy cập mục nào trong khu quản trị. Hãy liên hệ người quản lý để được cấp quyền.",
+      "allowedSection": "Đến mục được phép truy cập",
+      "adminHome": "Về khu quản trị"
     },
     "register": {
       "title": "Tạo tài khoản",
@@ -5182,7 +5188,8 @@
         "assigned": "Đã phân công gói cho nhân viên.",
         "transferred": "Đã chuyển giao phân công.",
         "removed": "Đã gỡ phân công."
-      }
+      },
+      "staffPermissionRequired": "Cần thêm quyền quản lý nhân viên (user.manage) để chọn người nhận phân công hoặc chuyển giao."
     },
     "address": {
       "noResult": "Không tìm thấy địa chỉ phù hợp",

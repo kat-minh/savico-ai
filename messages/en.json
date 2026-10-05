@@ -114,9 +114,15 @@
     },
     "forbidden": {
       "title": "No access",
-      "description": "This area is restricted to administrators.",
+      "description": "This area is restricted to staff accounts.",
       "backHome": "Back to home",
-      "switchAccount": "Sign in with another account"
+      "switchAccount": "Sign in with another account",
+      "routeDescription": "Your account type cannot access this page.",
+      "sessionUnavailable": "Session authorization is unavailable. Please sign in again after the system has been updated.",
+      "sectionDescription": "Your session does not have permission to access this section.",
+      "noSections": "Your account has no accessible admin sections. Please contact your administrator for access.",
+      "allowedSection": "Open an accessible section",
+      "adminHome": "Go to administration"
     },
     "register": {
       "title": "Create account",
@@ -5182,7 +5188,8 @@
         "assigned": "Grant assigned to staff.",
         "transferred": "Assignment transferred.",
         "removed": "Assignment removed."
-      }
+      },
+      "staffPermissionRequired": "Staff management permission (user.manage) is also required to select an assignee or transfer recipient."
     },
     "address": {
       "noResult": "No matching address",

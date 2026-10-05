@@ -1,7 +1,7 @@
 import { createNavigation } from 'next-intl/navigation'
 import type { ComponentProps } from 'react'
 
-import { PROTECTED_ROUTE_PREFIXES } from '@/shared/constants/routes'
+import { isProtectedPath } from '@/shared/auth/route-access'
 import { routing } from './routing'
 
 /**
@@ -19,7 +19,7 @@ type LinkProps = ComponentProps<typeof IntlLink>
 function isProtectedHref(href: LinkProps['href']): boolean {
   const raw = typeof href === 'string' ? href : (href?.pathname ?? '')
   const path = raw.split(/[?#]/)[0]!
-  return PROTECTED_ROUTE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
+  return isProtectedPath(path)
 }
 
 /**

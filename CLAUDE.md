@@ -66,7 +66,7 @@ Quality gate to run before considering work done (CI mirrors this):
 pnpm typecheck && pnpm lint && pnpm format:check
 ```
 
-There is no test runner configured yet. `services/` (pure domain logic) is the intended unit-test target if one is added.
+`pnpm test:auth` runs pure routing policy tests with Node's built-in runner and is included in CI. There is no general React test framework; `services/` (pure domain logic) remains the intended target for broader unit coverage.
 
 ## Running without the backend
 
@@ -117,7 +117,7 @@ Every i18n namespace is **owned by exactly one page** via `copyNamespaces` in `a
 
 **Data/auth flow**: one Axios instance in `shared/lib/api` (`httpClient` + typed `http` helpers). Auth is **cookie-based (httpOnly), set by the backend** — no token is stored client-side. The auth store (`shared/auth/auth.store.ts`) persists only the non-sensitive user profile. The response interceptor does a **single-flight refresh-token retry on 401**; on refresh failure it clears client auth via the `auth-bridge` (which decouples the HTTP layer from the store). Errors are normalized to `ApiError`.
 
-**Routing & auth gate**: `src/proxy.ts` is the Next.js 16 proxy (the renamed `middleware` convention). It runs next-intl locale routing **and** the primary auth route guard — it redirects based on the presence of the backend-set auth cookie (`PROTECTED_ROUTE_PREFIXES` / `GUEST_ONLY_ROUTES` in `shared/constants/routes.ts`), with no token verification. The client guards in `shared/auth` (`ProtectedRoute`/`GuestRoute`/`RoleGuard`, roles `guest`/`user`/`admin`) handle client navigations and are **UX only** — real authorization is always enforced by the backend.
+**Routing & auth gate**: `src/proxy.ts` is the Next.js 16 proxy (the renamed `middleware` convention). It runs next-intl and checks the client-set, non-sensitive `bmt.auth` marker; it does not verify backend tokens. `AuthBootstrap` checks `GET /users/me` before private pages render, including client navigation. `accountKind` separates Customer and Staff routes; stable `roleCodes` identify the system Admin role. `shared/auth/route-access.ts` is the policy used by the proxy, link prefetch checks, admin menu and `AdminRouteGuard`; `PROTECTED_ROUTE_PREFIXES` / `GUEST_ONLY_ROUTES` remain in `shared/constants/routes.ts`, with private contractor children also protected. Frontend personas are `guest`/`customer`/`staff`/`admin`; permissions come from the current token snapshot in `/users/me`, with no Admin bypass for permission-backed sections. Legacy CMS and contractor APIs retain their system Admin gate. Refresh rechecks permissions; unrecoverable 401 clears auth and query caches. Guards are **UX only** — real permissions and assignment scope are always enforced by the backend. `pnpm test:auth` runs pure routing policy regression tests; see `docs/TICH_HOP_PHAN_QUYEN.md`.
 
 ## Conventions
 

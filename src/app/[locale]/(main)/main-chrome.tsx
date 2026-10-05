@@ -78,8 +78,8 @@ function DesignPlanGate() {
   const router = useRouter()
   const isCreateOpen = useDesignStore((s) => s.isCreateDialogOpen)
   const closeCreateDialog = useDesignStore((s) => s.closeCreateDialog)
-  const { isAuthenticated, isInitialized } = useAuth()
-  const { data: plan } = useAccountPlan(isAuthenticated && isInitialized)
+  const { user, isAuthenticated, isInitialized } = useAuth()
+  const { data: plan } = useAccountPlan(isAuthenticated && isInitialized && user?.accountKind === 'Customer')
   const redirectedRef = useRef(false)
 
   useEffect(() => {

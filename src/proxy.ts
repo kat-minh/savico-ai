@@ -1,6 +1,7 @@
 import { routing } from '@/i18n/routing'
 import { AUTH_COOKIE_NAME } from '@/shared/auth/auth.constants'
-import { GUEST_ONLY_ROUTES, PROTECTED_ROUTE_PREFIXES } from '@/shared/constants/routes'
+import { isProtectedPath } from '@/shared/auth/route-access'
+import { GUEST_ONLY_ROUTES } from '@/shared/constants/routes'
 import createMiddleware from 'next-intl/middleware'
 import { type NextRequest, NextResponse } from 'next/server'
 
@@ -19,16 +20,12 @@ function stripLocale(pathname: string): string {
   return pathname
 }
 
-function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
-  return prefixes.some((p) => path === p || path.startsWith(`${p}/`))
-}
-
 /**
  * Composite proxy (formerly `middleware` — renamed for the Next.js 16
  * file convention):
  *  1. Resolve locale & rewrite via next-intl.
- *  2. Apply auth route guards based on the presence of the auth cookie set
- *     by the .NET backend. (Infrastructure only — no token verification here;
+ *  2. Apply auth route guards based on the presence of a non-sensitive session marker
+ *     set by the client after backend authentication. (Infrastructure only — no token verification here;
  *     authorization is enforced server-side by the API.)
  */
 export default function proxy(request: NextRequest) {
@@ -59,12 +56,12 @@ export default function proxy(request: NextRequest) {
   // Block protected routes for unauthenticated users. Login/register are a
   // popup, not pages — bounce to the public home and let `?auth=login` auto-open
   // the dialog (see features/auth `AuthDialog`), preserving the intended target.
-  if (matchesPrefix(path, PROTECTED_ROUTE_PREFIXES) && !isAuthenticated) {
+  if (isProtectedPath(path) && !isAuthenticated) {
     const url = request.nextUrl.clone()
     url.pathname = `/${locale}`
     url.search = ''
     url.searchParams.set('auth', 'login')
-    url.searchParams.set('redirect', path)
+    url.searchParams.set('redirect', path + request.nextUrl.search)
     return NextResponse.redirect(url)
   }
 

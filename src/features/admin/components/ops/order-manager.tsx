@@ -22,6 +22,7 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState, type ReactNode } from 'react'
 
+import { PERMISSIONS, useAuth } from '@/shared/auth'
 import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import {
@@ -729,6 +730,7 @@ function LifecycleActions({ purchase }: { purchase: BmtAdminPackagePurchaseDetai
   const t = useTranslations('admin.bmtCommerce')
   const tAdmin = useTranslations('admin')
   const { message } = App.useApp()
+  const { hasPermission } = useAuth()
   const queryClient = useQueryClient()
   const [form] = Form.useForm<{ reason?: string }>()
   const [action, setAction] = useState<LifecycleAction | null>(null)
@@ -746,13 +748,22 @@ function LifecycleActions({ purchase }: { purchase: BmtAdminPackagePurchaseDetai
     if (grant.state === 'Completed') available.push('reopen')
     if (grant.state !== 'CanceledByStaff') available.push('cancel')
   }
-  if (!available.length) return null
+  const permitted = available.filter((item) =>
+    hasPermission(
+      item === 'cancel'
+        ? PERMISSIONS.PACKAGE_CANCEL
+        : item === 'unassign'
+          ? PERMISSIONS.SUPERVISION_UNASSIGN
+          : PERMISSIONS.SUPERVISION_COMPLETE
+    )
+  )
+  if (!permitted.length) return null
 
   const version = (purchase.kind === 'Design' ? period?.version : grant?.version) ?? 0
   const needsReason = action !== null && action !== 'complete'
 
   async function run() {
-    if (!action || !packageId) return
+    if (!action || !packageId || !permitted.includes(action)) return
     const values = needsReason ? await form.validateFields().catch(() => null) : {}
     if (!values) return
     const reason = values.reason?.trim() ?? ''
@@ -784,7 +795,7 @@ function LifecycleActions({ purchase }: { purchase: BmtAdminPackagePurchaseDetai
   return (
     <>
       <Space size={4} wrap>
-        {available.map((item) => (
+        {permitted.map((item) => (
           <Button key={item} size='small' danger={item === 'cancel'} onClick={() => setAction(item)}>
             {t(`lifecycle.${item}`)}
           </Button>

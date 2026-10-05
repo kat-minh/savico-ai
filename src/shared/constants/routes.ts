@@ -272,7 +272,7 @@ export const PROTECTED_ROUTE_PREFIXES: readonly string[] = [
 ]
 
 /**
- * Khu chỉ dành vai trò `admin`. Proxy chỉ biết "đã đăng nhập hay chưa" (nó đọc
+ * Khu dành cho tài khoản nhân viên theo `accountKind=Staff`. Proxy chỉ biết "đã đăng nhập hay chưa" (nó đọc
  * cookie, không giải mã token) nên lớp chặn theo vai trò nằm ở `AdminGuard`
  * trong layout — và backend vẫn là nơi phân quyền thật sự.
  */

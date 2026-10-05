@@ -25,6 +25,11 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: AUTH_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
+      // Storage is a profile cache, never evidence that this session was checked.
+      merge: (persisted, current) => {
+        const profile = (persisted as Partial<AuthStore> | undefined)?.user ?? null
+        return { ...current, user: profile, isAuthenticated: Boolean(profile), isInitialized: false }
+      },
       // Never persist the `isInitialized` flag — it must re-derive per session.
       partialize: (state) => ({
         user: state.user,

@@ -41,6 +41,9 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Routing authorization tests
+        run: pnpm test:auth
+
       - name: Knip (unused code)
         run: pnpm knip
 
