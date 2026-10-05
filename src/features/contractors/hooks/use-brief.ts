@@ -8,6 +8,12 @@ import { useRouter } from '@/i18n/navigation'
 import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { useAuthStore } from '@/shared/auth'
+import {
+  hydrateProjectSelection,
+  refreshSelectedProject,
+  useProjectSelectionStore
+} from '../store/project-selection.store'
+import { isSelectableProject } from '../services/project-selection.service'
 import { contractorsApi, type SaveBriefPayload } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
 
@@ -41,6 +47,7 @@ export function useBriefs(enabled = true) {
   return useQuery({
     queryKey: contractorKeys.briefList(userId),
     queryFn: () => contractorsApi.listBriefs(),
+    staleTime: 0,
     enabled: enabled && Boolean(userId)
   })
 }
@@ -82,8 +89,14 @@ export function useSaveBrief(projectId: string) {
 
   return useMutation({
     mutationFn: (payload: SaveBriefPayload) => contractorsApi.saveBrief(projectId, payload),
-    onSuccess: (brief) => {
+    onSuccess: async (brief) => {
       queryClient.setQueryData(contractorKeys.brief(projectId, userId), brief)
+      await hydrateProjectSelection()
+      try {
+        refreshSelectedProject(brief)
+      } catch {
+        // The draft is saved even if browser preference storage is unavailable.
+      }
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))
@@ -102,8 +115,18 @@ export function useCompleteBrief(projectId: string) {
 
   return useMutation({
     mutationFn: () => contractorsApi.completeBrief(projectId),
-    onSuccess: (brief) => {
+    onSuccess: async (brief) => {
       queryClient.setQueryData(contractorKeys.brief(projectId, userId), brief)
+      await hydrateProjectSelection()
+      if (userId && isSelectableProject(brief, userId)) {
+        try {
+          useProjectSelectionStore.getState().selectProject(userId, brief)
+        } catch {
+          // Continue to the completed project when browser preference storage fails.
+        }
+      }
+      void queryClient.invalidateQueries({ queryKey: contractorKeys.briefList(userId) })
+      void queryClient.invalidateQueries({ queryKey: contractorKeys.briefSummaries(userId) })
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))

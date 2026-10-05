@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/shared/auth'
-import { useProjectSelectionStore } from '../store/project-selection.store'
+import {
+  hydrateProjectSelection,
+  PROJECT_SELECTION_STORAGE_KEY,
+  useProjectSelectionStore
+} from '../store/project-selection.store'
 
 /** Restore browser selection after hydration, keeping each account's choice separate. */
 export function useSelectedProject() {
@@ -16,14 +20,20 @@ export function useSelectedProject() {
 
   useEffect(() => {
     let active = true
-    const hydration = useProjectSelectionStore.persist.hasHydrated()
-      ? undefined
-      : useProjectSelectionStore.persist.rehydrate()
-    void Promise.resolve(hydration).then(() => {
+    void hydrateProjectSelection().then(() => {
       if (active) setIsHydrated(true)
     })
+    const syncStorage = () => void useProjectSelectionStore.persist.rehydrate()
+    const onStorage = (event: StorageEvent) => {
+      if (event.storageArea === localStorage && (event.key === PROJECT_SELECTION_STORAGE_KEY || event.key === null))
+        syncStorage()
+    }
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('focus', syncStorage)
     return () => {
       active = false
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('focus', syncStorage)
     }
   }, [])
 

@@ -13,6 +13,7 @@ import { cn } from '@/shared/lib/utils'
 import { env } from '@/shared/config/env'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useInvitations } from '../hooks/use-invitations'
+import { useSyncSelectedProject } from '../hooks/use-sync-selected-project'
 import { shortAddress } from '../services/brief.service'
 import { useProjectPickerStore } from '../store/project-picker.store'
 import type { ProjectBrief } from '../types/contractor.types'
@@ -45,6 +46,7 @@ interface ProjectContextBarProps {
  * bản cũ; nhãn "Hồ sơ v2" và chú thích trên nút sửa nói rõ điều đó.
  */
 export function ProjectContextBar({ brief, condensed = false, invitedPill, extra }: ProjectContextBarProps) {
+  useSyncSelectedProject(brief)
   const t = useTranslations('contractors.common')
   const tBar = useTranslations('contractors.projectBar')
   const rfq = useTranslations('contractors.rfq')

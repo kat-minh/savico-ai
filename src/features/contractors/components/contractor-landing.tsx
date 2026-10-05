@@ -53,8 +53,8 @@ import {
 import { useBriefs, useCreateBrief } from '../hooks/use-brief'
 import { useContractorDirectory, useContractorFilterOptions } from '../hooks/use-contractors'
 import { useSelectedProject } from '../hooks/use-selected-project'
-import { isBriefComplete } from '../services/brief.service'
 import { filterContractors, type ContractorCriteria } from '../services/contractor-list.service'
+import { resolveSelectedProject } from '../services/project-selection.service'
 import type { Contractor, ContractorSort, SearchRadiusKm } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
 import { PartnerRegistrationDialog } from './partner-registration-dialog'
@@ -293,27 +293,29 @@ export function ContractorLanding() {
   // Thẻ "phù hợp nhất" ở hero chỉ MỞ KHOÁ số liệu khi tài khoản đã có ít nhất
   // một hồ sơ dự án — chưa có thì SAVICO không có gì để ghép, số liệu thật sẽ
   // gây hiểu lầm (mục 3).
-  const { data: briefs } = useBriefs(isAuthenticated)
+  const briefsQuery = useBriefs(isAuthenticated)
+  const { data: briefs } = briefsQuery
   const hasBrief = isAuthenticated && Boolean(briefs?.length)
   // Ưu tiên dự án người dùng đã chọn; khi chưa có thì dùng hồ sơ đủ thông tin mới nhất.
-  const { userId, selectedProject } = useSelectedProject()
-  const clearSelectedProject = useProjectSelectionStore((s) => s.clearSelectedProject)
+  const { userId, selectedProject, isHydrated } = useSelectedProject()
   const briefsByNewest = hasBrief ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) : []
-  const savedBrief = briefsByNewest.find(
-    (brief) => brief.id === selectedProject?.id && brief.status !== 'contracted' && isBriefComplete(brief)
-  )
-  const currentBrief = savedBrief ?? briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
+  const savedBrief = userId ? resolveSelectedProject(briefsByNewest, selectedProject, userId) : undefined
+  const currentBrief = savedBrief ?? briefsByNewest[0]
   const openPicker = useProjectPickerStore((s) => s.openPicker)
 
   useEffect(() => {
-    if (isAuthenticated && userId && selectedProject && briefs && !savedBrief) {
-      try {
-        clearSelectedProject(userId)
-      } catch {
-        // An unavailable browser store must not prevent rendering the live project list.
-      }
+    // Cached/failed lists cannot establish that the saved project was deleted.
+    if (!isAuthenticated || !userId || !isHydrated || !briefs || !briefsQuery.isSuccess || briefsQuery.isFetching)
+      return
+    try {
+      const store = useProjectSelectionStore.getState()
+      const next = resolveSelectedProject(briefs, store.selectedProjects[userId], userId)
+      if (next) store.selectProject(userId, next)
+      else if (store.selectedProjects[userId]) store.clearSelectedProject(userId)
+    } catch {
+      // An unavailable browser store must not prevent rendering the live project list.
     }
-  }, [isAuthenticated, userId, selectedProject, briefs, savedBrief, clearSelectedProject])
+  }, [isAuthenticated, userId, isHydrated, selectedProject, briefs, briefsQuery.isSuccess, briefsQuery.isFetching])
 
   /**
    * Danh sách hiển thị tối đa ba nhà thầu khớp bộ lọc, xếp theo tab đang bật.
