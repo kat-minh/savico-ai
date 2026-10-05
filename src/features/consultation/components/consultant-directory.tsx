@@ -144,7 +144,7 @@ export function ConsultantDirectory({ preferredSpecialtyId }: ConsultantDirector
       <p className='text-center text-sm font-medium'>{t('lead')}</p>
 
       {isPending ? (
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className='h-52 w-full rounded-xl' />
           ))}
@@ -152,7 +152,7 @@ export function ConsultantDirectory({ preferredSpecialtyId }: ConsultantDirector
       ) : results.length === 0 ? (
         <EmptyState title={t('empty.title')} description={t('empty.description')} />
       ) : (
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           <AnimatePresence>
             {results.map((consultant, index) => (
               <ConsultantCard

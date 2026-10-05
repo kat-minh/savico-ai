@@ -1,9 +1,9 @@
 'use client'
 
-import { Facebook, Instagram, Youtube } from 'lucide-react'
+import { ChevronDown, Facebook, Instagram, Youtube } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useId, useState, type CSSProperties, type ReactNode } from 'react'
 
 import { Link } from '@/i18n/navigation'
 import { cmsText, useCmsDocument } from '@/shared/cms'
@@ -21,14 +21,57 @@ function FooterNavLink({
   label,
   pendingLabel,
   index,
-  onAction
+  onAction,
+  plain = false
 }: {
   link: FooterLink
   label: string
   pendingLabel: string
   index: number
   onAction?: (action: NonNullable<FooterLink['action']>) => void
+  /** Trong mục xếp lại (accordion mobile): không hiệu ứng vào khung nhìn — vùng đang đóng chưa từng "vào khung". */
+  plain?: boolean
 }) {
+  if (plain) {
+    if (link.action && onAction) {
+      const action = link.action
+      return (
+        <li>
+          <button
+            type='button'
+            onClick={() => onAction(action)}
+            className='footer-animated-link text-footer-foreground relative inline-block text-left text-sm transition-colors'
+          >
+            {label}
+          </button>
+        </li>
+      )
+    }
+    if (!link.href) {
+      return (
+        <li>
+          <span
+            aria-disabled='true'
+            title={pendingLabel}
+            className='text-footer-foreground/50 cursor-default text-sm select-none'
+          >
+            {label}
+          </span>
+        </li>
+      )
+    }
+    return (
+      <li>
+        <Link
+          href={link.href}
+          className='footer-animated-link text-footer-foreground relative inline-block text-sm transition-colors'
+        >
+          {label}
+        </Link>
+      </li>
+    )
+  }
+
   if (link.action && onAction) {
     const action = link.action
     return (
@@ -123,6 +166,56 @@ function LinkColumn({
 }
 
 /**
+ * Mobile (< sm): bốn mục lớn thu gọn, chỉ hiện tiêu đề + mũi tên bên phải; bấm một
+ * mục mới sổ nội dung của nó (mở một mục thì mục đang mở tự đóng). PC / tablet giữ
+ * nguyên dạng cột.
+ */
+function FooterAccordion({ sections }: { sections: { key: string; title: string; content: ReactNode }[] }) {
+  const baseId = useId()
+  const [openKey, setOpenKey] = useState<string | null>(null)
+
+  return (
+    <div className='border-footer-foreground/15 divide-footer-foreground/15 divide-y border-y sm:hidden'>
+      {sections.map((section) => {
+        const open = openKey === section.key
+        const panelId = `${baseId}-${section.key}`
+        return (
+          <section key={section.key}>
+            <h2>
+              <button
+                type='button'
+                aria-expanded={open}
+                aria-controls={panelId}
+                onClick={() => setOpenKey(open ? null : section.key)}
+                className='flex w-full items-center justify-between gap-3 py-4 text-left text-sm font-bold tracking-[0.12em] uppercase'
+              >
+                {section.title}
+                <ChevronDown
+                  aria-hidden
+                  className={cn('size-5 shrink-0 transition-transform duration-300', open && 'rotate-180')}
+                />
+              </button>
+            </h2>
+            <div
+              id={panelId}
+              inert={!open}
+              className={cn(
+                'grid transition-[grid-template-rows] duration-300 ease-out',
+                open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              )}
+            >
+              <div className='overflow-hidden'>
+                <div className='pb-5'>{section.content}</div>
+              </div>
+            </div>
+          </section>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
  * Footer dung chung cho moi trang (quy uoc xuyen suot, muc I).
  *
  * Dung theo anh mockup khach gui: nen toi, nam cot - thuong hieu (logo, mo ta,
@@ -163,6 +256,42 @@ export function SiteFooter() {
   ]
 
   const pendingLabel = t('comingSoon')
+
+  // Nội dung các mục trong accordion mobile — cùng dữ liệu với cột PC, bỏ hiệu ứng vào khung nhìn.
+  const linkList = (links: readonly FooterLink[]) => (
+    <ul className='space-y-2.5 text-sm leading-5'>
+      {links.map((link, index) => (
+        <FooterNavLink
+          key={link.labelKey}
+          link={link}
+          label={t(`links.${link.labelKey}`)}
+          pendingLabel={pendingLabel}
+          index={index}
+          onAction={() => setTurnkeyOpen(true)}
+          plain
+        />
+      ))}
+    </ul>
+  )
+  const contactList = (
+    <ul className='text-footer-foreground space-y-2.5 text-sm leading-5'>
+      <li>
+        {t('hotline')}:{' '}
+        <HotlineLink hotline={hotline} className='footer-animated-link relative inline-block transition-colors'>
+          {hotline}
+        </HotlineLink>
+      </li>
+      <li>
+        {t('emailLabel')}:{' '}
+        <a href={`mailto:${email}`} className='footer-animated-link relative inline-block transition-colors'>
+          {email}
+        </a>
+      </li>
+      <li>
+        {t('addressLabel')}: {cmsText(settings.address, t('address'))}
+      </li>
+    </ul>
+  )
 
   return (
     // Nen toi o ca light lan dark (quy uoc xuyen suot, muc I).
@@ -207,6 +336,15 @@ export function SiteFooter() {
             </ul>
           </motion.div>
 
+          <FooterAccordion
+            sections={[
+              { key: 'about', title: t('aboutTitle'), content: linkList(FOOTER_ABOUT_LINKS) },
+              { key: 'product', title: t('productTitle'), content: linkList(FOOTER_PRODUCT_LINKS) },
+              { key: 'support', title: t('supportTitle'), content: linkList(FOOTER_SUPPORT_LINKS) },
+              { key: 'contact', title: t('contactTitle'), content: contactList }
+            ]}
+          />
+
           {[
             { title: t('productTitle'), links: FOOTER_PRODUCT_LINKS },
             { title: t('supportTitle'), links: FOOTER_SUPPORT_LINKS },
@@ -214,6 +352,7 @@ export function SiteFooter() {
           ].map((column, index) => (
             <motion.div
               key={column.title}
+              className='max-sm:hidden'
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
@@ -235,6 +374,7 @@ export function SiteFooter() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.58, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
             style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
+            className='max-sm:hidden'
           >
             <ColumnTitle>{t('contactTitle')}</ColumnTitle>
             <ul className='text-footer-foreground space-y-2.5 text-sm leading-5'>

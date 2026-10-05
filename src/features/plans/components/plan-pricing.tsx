@@ -1274,10 +1274,19 @@ function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled:
   const [ripple, setRipple] = useState<{ x: number; y: number; id: number } | null>(null)
   const { reduceMotion } = usePricingMotion()
   const alive = useRef(true)
+  // Hiệu ứng mờ dần của `<main>` dùng `fill: 'forwards'` nên tự nó không bao giờ hết.
+  // `<main>` thuộc layout chung, không bị tháo khi sang trang cùng layout (vd. bị đá
+  // về trang chủ để hiện popup đăng nhập) → nếu không huỷ thì cả trang trắng xoá.
+  const fade = useRef<Animation | null>(null)
+  const clearFade = () => {
+    fade.current?.cancel()
+    fade.current = null
+  }
   useEffect(() => {
     alive.current = true
     return () => {
       alive.current = false
+      clearFade()
     }
   }, [])
   const release = (e: PointerEvent<HTMLAnchorElement>) => {
@@ -1295,15 +1304,22 @@ function PlanBuyButton({ plan, disabled, onSelect }: { plan: PlanView; disabled:
     if (!reduceMotion) {
       await new Promise((resolve) => setTimeout(resolve, 350))
       if (!alive.current) return
-      await main
-        ?.animate([{ opacity: 1 }, { opacity: 0 }], {
+      fade.current =
+        main?.animate([{ opacity: 1 }, { opacity: 0 }], {
           duration: 320,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
           fill: 'forwards'
-        })
-        .finished.catch(() => undefined)
+        }) ?? null
+      await fade.current?.finished.catch(() => undefined)
     }
-    if (alive.current) router.push(checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY))
+    if (!alive.current) return
+    router.push(checkoutConfirmRoute(plan.id, undefined, plan.cycle ?? DESIGN_OFFER_KEY))
+    // Chuyển trang không thành (bị chặn / chậm bất thường) mà trang này vẫn còn → trả lại nội dung.
+    window.setTimeout(() => {
+      if (!alive.current) return
+      clearFade()
+      setPending(false)
+    }, 4000)
   }
   return (
     <Button asChild size='lg' className='mt-5 h-[11cqw] w-full text-[5cqw] font-bold'>
