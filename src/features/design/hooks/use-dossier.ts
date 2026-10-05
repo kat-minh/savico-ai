@@ -32,12 +32,9 @@ export function useRenderDossier(projectId: string) {
           : project
 
       queryClient.setQueryData<Project | undefined>(designKeys.project(projectId), completed)
-      queryClient.setQueryData<Project[] | undefined>(designKeys.projects(), (projects) =>
-        projects?.map((project) => (project.id === projectId ? completed(project)! : project))
-      )
 
       void queryClient.invalidateQueries({ queryKey: designKeys.project(projectId), exact: true })
-      void queryClient.invalidateQueries({ queryKey: designKeys.projects(), exact: true })
+      void queryClient.invalidateQueries({ queryKey: designKeys.projects() })
     }
   })
 }

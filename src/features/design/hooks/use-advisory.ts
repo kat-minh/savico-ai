@@ -1,5 +1,6 @@
 'use client'
 
+import { env } from '@/shared/config/env'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
@@ -25,6 +26,7 @@ export function useAdvisory(result: EstimateResult | undefined, customerName: st
   const advice = useCmsDocument('estimateAdvice')
 
   if (!result) return []
+  if (!env.NEXT_PUBLIC_USE_MOCK_API) return result.advisory.split(/\n{2,}/).filter(Boolean)
   if (result.advisory) return result.advisory.split(/\n{2,}/).filter(Boolean)
 
   const facts = advisoryFacts(result)

@@ -47,7 +47,7 @@ export function ContractorStats({ contractor, dense = false, className }: Contra
 
       <li className='flex items-center gap-1.5'>
         <MapPin className='text-primary size-3.5 shrink-0' />
-        <span>{t('distance', { km: distance })}</span>
+        <span>{contractor.distanceKnown === false ? t('distanceUnknown') : t('distance', { km: distance })}</span>
       </li>
 
       {dense ? null : (

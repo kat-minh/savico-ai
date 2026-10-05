@@ -5,8 +5,7 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useRouter } from '@/i18n/navigation'
-import { ROLES, useAuthDialogStore, useAuthStore } from '@/shared/auth'
-import { ADMIN_ROUTES, ROUTES } from '@/shared/constants/routes'
+import { loginDestination, useAuthDialogStore, useAuthStore } from '@/shared/auth'
 import { isApiError } from '@/shared/lib/api'
 import { authApi } from '../api/auth.api'
 import { authKeys } from '../api/auth.keys'
@@ -29,8 +28,11 @@ export function useLogin(redirectTo?: string) {
 
   return useMutation({
     mutationFn: (payload: LoginPayload) => authApi.login(payload),
-    onSuccess: ({ user }) => {
+    onSuccess: async ({ user }) => {
+      await queryClient.cancelQueries()
+      queryClient.clear()
       setUser(user)
+      useAuthStore.getState().setInitialized(true)
       queryClient.setQueryData(authKeys.currentUser(), user)
       // Dọn Router Cache trước khi điều hướng: mọi trang đã được prefetch trong
       // phiên khách đều đang giữ payload dựng cho khách. (Riêng nhóm route bắt
@@ -43,20 +45,8 @@ export function useLogin(redirectTo?: string) {
       // (BR-RBAC-006). Đừng đá vào khu quản trị (toàn 403) — màn buộc đổi mật
       // khẩu ở `AuthBootstrap` sẽ hiện đè lên trang hiện tại và lo phần còn lại.
       if (user.mustChangePassword) return
-      // Đá theo VAI TRÒ: admin LUÔN về khu quản trị, không rơi vào trang khách
-      // dù phiên khách có `redirect`/hành động chờ (vd guest bấm link /account
-      // rồi đăng nhập bằng tài khoản admin). Khu admin và khu khách tách biệt.
-      if (user.roles.includes(ROLES.ADMIN)) {
-        // Trang Tổng quan (`/admin`) đã ẩn khỏi menu → đá về mục đầu sidebar
-        // (Đơn hàng) để không rơi vào trang không có trong điều hướng.
-        router.replace(ADMIN_ROUTES.ORDERS)
-        return
-      }
-      // Khách: nối lại hành động đang chờ (tải / xem) tại chỗ → đích `redirect`
-      // (đều là trang khách) → mặc định trang chủ.
-      if (pending) pending()
-      else if (redirectTo) router.replace(redirectTo)
-      else router.replace(ROUTES.HOME)
+      if (pending && user.accountKind === 'Customer') pending()
+      else router.replace(loginDestination(user, redirectTo))
     },
     onError: (error) => {
       if (!isApiError(error) || error.status === 0) {

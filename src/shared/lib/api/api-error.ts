@@ -9,6 +9,8 @@ interface ValidationItem {
   /** API media: `PropertyName` / `ErrorMessage`. */
   PropertyName?: string
   ErrorMessage?: string
+  propertyName?: string
+  errorMessage?: string
 }
 
 /**
@@ -40,7 +42,13 @@ export function normalizeApiError(error: unknown): ApiError {
       // `detail` chỉ là câu tiếng Anh chung "A validation error occured". Câu có ích nằm ở
       // phần tử đầu của mảng nên ưu tiên nó.
       const items = Array.isArray(data?.errors) ? data.errors : []
-      const first = items.find((item) => item?.message || item?.ErrorMessage)
+      const first = items.find((item) => item?.message || item?.ErrorMessage || item?.errorMessage)
+      const fieldErrors: Record<string, string[]> = {}
+      for (const item of items) {
+        const field = item.propertyName ?? item.PropertyName
+        const message = item.errorMessage ?? item.ErrorMessage ?? item.message
+        if (field && message) (fieldErrors[field] ??= []).push(message)
+      }
       return {
         status: error.response.status,
         code: data?.error?.code || data?.code || undefined,
@@ -49,10 +57,16 @@ export function normalizeApiError(error: unknown): ApiError {
           data?.error?.message ||
           first?.message ||
           first?.ErrorMessage ||
+          first?.errorMessage ||
           data?.detail ||
           data?.message ||
           defaultMessageForStatus(error.response.status),
-        errors: data?.errors && !Array.isArray(data.errors) ? data.errors : undefined
+        errors:
+          data?.errors && !Array.isArray(data.errors)
+            ? data.errors
+            : Object.keys(fieldErrors).length
+              ? fieldErrors
+              : undefined
       }
     }
 

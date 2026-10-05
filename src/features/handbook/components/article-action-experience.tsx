@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } 
 import { Link } from '@/i18n/navigation'
 import { useAuthStore } from '@/shared/auth'
 import { useCmsCollection, useSiteImage } from '@/shared/cms'
-import { Logo, Photo } from '@/shared/components/common'
+import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/shared/components/ui/dialog'
 import { JOURNEY_POPUP_TEST_MODE } from '@/shared/constants'
@@ -252,23 +252,21 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
           showCloseButton={false}
           className='max-h-[calc(100dvh-20px)] w-[min(1080px,calc(100vw-24px))] max-w-[1080px] gap-0 overflow-x-hidden overflow-y-auto rounded-[24px] border-0 bg-background p-0 shadow-2xl sm:max-w-[1080px] max-[899px]:inset-x-0 max-[899px]:bottom-0 max-[899px]:top-auto max-[899px]:flex max-[899px]:h-[90dvh] max-[899px]:max-h-[90dvh] max-[899px]:w-full max-[899px]:max-w-full max-[899px]:translate-x-0 max-[899px]:translate-y-0 max-[899px]:flex-col max-[899px]:overflow-hidden max-[899px]:rounded-b-none max-[899px]:rounded-t-[24px]'
         >
-          <div className='relative shrink-0 bg-background px-5 pt-5 sm:px-6 max-[899px]:pb-3'>
+          <div className='relative shrink-0 bg-background px-5 pt-5 sm:px-6 max-[899px]:px-4 max-[899px]:pt-12 max-[899px]:pb-3'>
             <motion.div
               initial={reduceMotion ? false : { opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.26, ease: [0.22, 1, 0.36, 1] }}
               className='absolute top-5 left-6 hidden origin-top-left min-[900px]:block'
             >
-              <Logo className='origin-top-left scale-[0.92]' />
-            </motion.div>
-
-            <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: -6, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className='bg-accent text-primary-strong mx-auto flex w-fit rounded-full px-4 py-2 text-sm font-bold'
-            >
-              {t('popup.badge')}
+              {/* Logo dọc, cùng popup "Bạn đang ở bước nào…" (`JourneyDialogShell`). `mix-blend-multiply`
+                  để nền trắng của ảnh hòa vào nền popup. */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- logo tĩnh trong public, không cần loader */}
+              <img
+                src='/images/brand/buildx-logo-vertical.png'
+                alt='BuildX'
+                className='h-16 w-auto mix-blend-multiply'
+              />
             </motion.div>
 
             <DialogClose
@@ -282,9 +280,9 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               initial={reduceMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.3, delay: reduceMotion ? 0 : 0.04 }}
-              className='mx-auto mt-4 max-w-[820px] text-center max-[899px]:px-14'
+              className='mx-auto max-w-[820px] pt-1 text-center min-[900px]:pt-2 max-[899px]:w-full max-[899px]:max-w-none'
             >
-              <DialogTitle className='text-foreground text-[clamp(1.5rem,2.25vw,2.1rem)] leading-[1.15] font-extrabold tracking-[-0.025em]'>
+              <DialogTitle className='text-foreground text-[clamp(1.5rem,2.25vw,2.1rem)] leading-[1.15] font-extrabold tracking-[-0.025em] max-[899px]:line-clamp-2 max-[899px]:text-[clamp(1.25rem,5.75vw,1.5rem)]'>
                 {t('popup.title')}
               </DialogTitle>
               <DialogDescription className='text-muted-foreground mt-2 text-[clamp(.9rem,1.2vw,1rem)] leading-relaxed'>
@@ -358,7 +356,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
             />
           </div>
 
-          <div className='flex shrink-0 justify-end bg-background px-5 pt-4 pb-4 sm:px-6 max-[899px]:border-t max-[899px]:border-border/70 max-[899px]:pt-3'>
+          <div className='flex shrink-0 justify-end bg-background px-5 pt-4 pb-4 sm:px-6 max-[899px]:hidden'>
             <button
               type='button'
               onClick={() => handleOpenChange(false)}
@@ -518,7 +516,7 @@ function PopupCard({
             imageClassName='transition-transform duration-[180ms] ease-out group-hover:scale-[1.025]'
           />
           {badge ? (
-            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 rounded-full px-3 py-1 text-[11px] font-bold uppercase'>
+            <span className='bg-brand-orange text-brand-orange-foreground absolute top-2 left-2 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-bold uppercase'>
               {badge}
             </span>
           ) : null}

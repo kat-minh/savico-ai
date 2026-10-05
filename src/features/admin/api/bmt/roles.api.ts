@@ -1,10 +1,11 @@
+import type { PermissionCode } from '@/shared/auth'
 import { http } from '@/shared/lib/api'
 
 /**
  * Vai trò & quyền (Roles) — mô hình RBAC người → vai trò → quyền
  * (STORY-RBAC-001, BR-RBAC-001..012). Mọi endpoint cần quyền `role.manage`.
  *
- * Danh mục mã quyền do hệ thống định nghĩa (14 mã cố định): người quản trị chỉ
+ * Danh mục mã quyền do hệ thống định nghĩa : người quản trị chỉ
  * CHỌN trong danh sách này, không tự đặt mã mới. Hiển thị `label` lấy từ API,
  * không hardcode.
  *
@@ -17,22 +18,7 @@ import { http } from '@/shared/lib/api'
  * - Tên trùng — 409 `RoleNameDuplicated`; mã quyền lạ — 422 `PermissionCodeUnknown`.
  */
 
-/** 14 mã quyền cố định của hệ thống (BR-RBAC-001, cập nhật 25/09/2026). */
-export type PermissionCode =
-  | 'commerce.read'
-  | 'package.cancel'
-  | 'supervision.unassign'
-  | 'supervision.complete'
-  | 'user.manage'
-  | 'role.manage'
-  | 'assignment.manage'
-  | 'audit.read'
-  | 'plan.manage'
-  | 'estimate.catalog.manage'
-  | 'payment.connection.manage'
-  | 'consultation.manage'
-  | 'news.manage'
-  | 'library.manage'
+export type { PermissionCode } from '@/shared/auth'
 
 /** Một mã quyền trong danh mục hệ thống (`GET /permissions`). */
 export interface PermissionItem {
@@ -114,7 +100,7 @@ function toDetail(raw: RawRoleDetail): RoleDetail {
   return { ...toSummary(raw), effectiveWithinMinutes: raw.effectiveWithinMinutes ?? 0 }
 }
 
-/** Danh mục 14 mã quyền cố định kèm nhãn và cờ `requiresAssignment`. */
+/** Danh mục mã quyền kèm nhãn và cờ `requiresAssignment`. */
 export async function listPermissions(): Promise<PermissionItem[]> {
   const rows = await http.get<PermissionItem[] | null>('/permissions')
   return rows ?? []

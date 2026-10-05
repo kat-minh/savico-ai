@@ -17,6 +17,9 @@ import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion
 import { useLocale, useTranslations } from 'next-intl'
 import { type MouseEvent, useEffect, useRef, useState } from 'react'
 
+import { env } from '@/shared/config/env'
+import { QuotationTracker } from './quotation-tracker'
+
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
 import { ProjectManagementOptionsDialog, revealEase } from '@/shared/components/common'
@@ -34,7 +37,7 @@ import {
 } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractors } from '../hooks/use-contractors'
-import { useInvitations, useSurveyRequest } from '../hooks/use-invitations'
+import { useMockInvitations as useInvitations, useSurveyRequest } from '../hooks/use-invitations'
 import { fullAddress } from '../services/brief.service'
 import { remainingInvites } from '../services/contractor-list.service'
 import { ContractorLogo } from './contractor-logo'
@@ -99,7 +102,7 @@ const crossFadeVariants: Variants = {
  * Khối "Chi tiết yêu cầu" liệt kê TẤT CẢ nhà thầu của lượt mời này (≤ 3, R1) —
  * mời ba nhà thầu thì đây là ba dòng, không phải ba màn xác nhận rời nhau.
  */
-export function InviteSent({ projectId, requestId }: InviteSentProps) {
+function MockInviteSent({ projectId, requestId }: InviteSentProps) {
   const t = useTranslations('contractors.sent')
   const tCommon = useTranslations('contractors.common')
   const locale = useLocale() as Locale
@@ -572,4 +575,8 @@ export function InviteSent({ projectId, requestId }: InviteSentProps) {
       <ProjectManagementOptionsDialog open={managementOpen} onOpenChange={setManagementOpen} projectId={projectId} />
     </motion.div>
   )
+}
+
+export function InviteSent(props: InviteSentProps) {
+  return env.NEXT_PUBLIC_USE_MOCK_API ? <MockInviteSent {...props} /> : <QuotationTracker {...props} />
 }

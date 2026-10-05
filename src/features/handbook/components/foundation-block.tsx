@@ -929,7 +929,9 @@ export function FoundationBlock() {
                   >
                     <span className='bg-primary size-1.5 shrink-0 rounded-full' aria-hidden />
                     <span className='min-w-0 flex-1 text-sm font-medium'>{article.title}</span>
-                    <span className={cn(ARTICLE_META_TEXT, 'flex shrink-0 items-center gap-1.5 text-xs')}>
+                    <span
+                      className={cn(ARTICLE_META_TEXT, 'flex shrink-0 items-center gap-1.5 text-xs whitespace-nowrap')}
+                    >
                       <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
@@ -1125,7 +1127,7 @@ export function FoundationBlock() {
                         data-stage-guide-link
                         href={handbookArticleRoute(stageArticle.slug)}
                         onClick={(event) => event.stopPropagation()}
-                        className='text-primary mt-auto inline-flex shrink-0 items-center gap-1.5 self-start pt-1 text-xs font-medium hover:font-bold focus-visible:font-bold'
+                        className='text-primary mt-auto hidden shrink-0 items-center gap-1.5 self-start pt-1 text-xs font-medium hover:font-bold focus-visible:font-bold lg:inline-flex'
                       >
                         <span data-stage-guide-text className='relative grid'>
                           <span aria-hidden className='invisible col-start-1 row-start-1 font-bold'>

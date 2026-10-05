@@ -34,6 +34,8 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useMemo, useState, type CSSProperties } from 'react'
 
 import type { Locale } from '@/i18n/routing'
+import { env } from '@/shared/config/env'
+import { QuotationManager } from './quotation-manager'
 import {
   isActiveSurvey,
   isSurveyDayClosed,
@@ -105,7 +107,7 @@ const FIXED = (width: number): CSSProperties => ({ width, justifyContent: 'flex-
  *
  * R2/R3 — không có trường tiền, không có "báo giá đã nhận".
  */
-export function InvitationManager() {
+function MockInvitationManager() {
   const t = useTranslations('admin')
   const tMeaning = useTranslations('contractors.statusMeaning')
   const locale = useLocale() as Locale
@@ -655,4 +657,8 @@ export function InvitationManager() {
       </Modal>
     </>
   )
+}
+
+export function InvitationManager() {
+  return env.NEXT_PUBLIC_USE_MOCK_API ? <MockInvitationManager /> : <QuotationManager />
 }

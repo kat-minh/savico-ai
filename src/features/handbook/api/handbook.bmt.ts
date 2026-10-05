@@ -432,27 +432,18 @@ export const bmtHandbookApi = {
   },
 
   /**
-   * Tuỳ chọn bộ lọc thư viện từ `GET /design-templates/filters` (công khai). Lỗi → `null` để giao
-   * diện dùng tuỳ chọn suy ra từ chính danh sách mẫu đang có.
+   * Danh mục bộ lọc công khai từ hệ thống. Giữ lỗi để giao diện báo và cho thử lại.
    */
   async getLibraryFilters(query?: LibraryFilterQuery): Promise<LibraryFilterOptions | null> {
-    try {
-      return await fetchLibraryFilters(query)
-    } catch {
-      return null
-    }
+    return fetchLibraryFilters(query)
   },
 
   /**
-   * `templateId` khớp phong cách (lọc ở BE, tham số lặp). Lỗi → `null`: giao diện không áp bộ
-   * lọc phía BE thay vì hiện lưới rỗng sai.
+   * ID mẫu khớp loại, tầng, tum và phong cách (BE lọc, phong cách dùng tham số lặp).
+   * Giữ lỗi để giao diện không âm thầm bỏ điều kiện đã chọn.
    */
   async listTemplateIdsByStyle(query: TemplateStyleQuery): Promise<string[] | null> {
-    try {
-      return await fetchTemplateIdsByStyle(query)
-    } catch {
-      return null
-    }
+    return fetchTemplateIdsByStyle(query)
   },
 
   /** Một trang con trực tiếp của `parentId` (hoặc cấp gốc). Lỗi → trang rỗng. */

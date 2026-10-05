@@ -199,7 +199,8 @@ export function HomeDossiers({ items }: HomeDossiersProps) {
                     aria-selected={selected}
                     onClick={() => selectKind(option)}
                     className={cn(
-                      'relative z-10 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors duration-200',
+                      // `whitespace-nowrap shrink-0`: không bao giờ rớt dòng ở màn nhỏ; đệm thu nhỏ ở mobile.
+                      'relative z-10 shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-200 sm:px-6',
                       selected ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
@@ -339,7 +340,7 @@ function DossierCard({ item, index }: { item: HomeTemplateItem; index: number })
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: revealAmount }}
             transition={{ duration: 0.35, delay: order * 0.1 + 0.25, ease: revealEase }}
-            className='bg-brand-orange text-brand-orange-foreground absolute bottom-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'
+            className='bg-brand-orange text-brand-orange-foreground absolute bottom-3 left-3 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'
           >
             {item.badge}
           </motion.span>

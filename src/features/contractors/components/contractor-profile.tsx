@@ -8,7 +8,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  CircleAlert,
   CircleCheck,
   Clock,
   Download,
@@ -62,15 +61,16 @@ import {
   contractorInviteRoute,
   contractorMatchesRoute
 } from '@/shared/constants/routes'
-import { useCountUp, usePastElement } from '@/shared/hooks'
+import { useCountUp } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { formatDate, formatDisplayDate, formatNumber } from '@/shared/utils'
 import { mergeProjectDetail } from '../api/contractors.logic'
+import { env } from '@/shared/config/env'
 import { CONTRACTOR_TABS, MAX_INVITATIONS, type ContractorTab } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
 import { useContractor, useContractorProject } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
-import { isInvited, remainingInvites } from '../services/contractor-list.service'
+import { isInvited } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import type { Contractor, ContractorPhoto, ContractorProject } from '../types/contractor.types'
 import { MATCHES_LAST_VIEWED_KEY } from './contractor-matches'
@@ -88,9 +88,6 @@ interface ContractorProfileProps {
 
 /** Bề ngang trang, đo từ ảnh S13: khối nội dung chiếm 90% bề ngang màn. */
 const PAGE_CONTAINER = 'mx-auto w-full max-w-[90rem] px-4 lg:px-8'
-
-/** Mốc để bật thanh hồ sơ thu gọn sau khi phần nhận diện rời khỏi viewport. */
-const HEADER_ANCHOR_ID = 'firm-header-anchor'
 
 /** Vòng tròn luôn khép kín; chỉ nét tick bên trong chạy hiệu ứng vẽ. */
 function DrawnCircleCheck({
@@ -181,7 +178,10 @@ function InviteButton({
   const t = useTranslations('contractors.firm')
   const tCommon = useTranslations('contractors.common')
 
-  if (!contractor.acceptingProjects) {
+  const { limit } = useInvitations(projectId)
+  const rfq = useTranslations('contractors.rfq')
+
+  if (env.NEXT_PUBLIC_USE_MOCK_API && !contractor.acceptingProjects) {
     return (
       <Button size={size} className='w-full opacity-50' disabled>
         <Send className='size-4' />
@@ -212,9 +212,14 @@ function InviteButton({
 
   if (inviteLocked) {
     return (
-      <Button size={size} className='w-full' disabled title={tCommon('inviteFull', { max: MAX_INVITATIONS })}>
+      <Button
+        size={size}
+        className='w-full'
+        disabled
+        title={limit === undefined ? rfq('quotaUnavailable') : tCommon('inviteFull', { max: limit })}
+      >
         <Send className='size-4' />
-        {tCommon('inviteFull', { max: MAX_INVITATIONS })}
+        {limit === undefined ? tCommon('invite') : tCommon('inviteFull', { max: limit })}
       </Button>
     )
   }
@@ -254,15 +259,15 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   const preview = projectId === CONTRACTOR_PREVIEW_ID
 
   const { data: brief } = useBrief(projectId)
-  const { data: contractor, isPending } = useContractor(contractorId)
-  const { data: invitations } = useInvitations(projectId)
+  const { data: contractor, isPending, isError, refetch } = useContractor(contractorId)
+  const { data: invitations, remaining } = useInvitations(projectId)
 
   const compareIds = useContractorsStore((s) => s.compareIds)
   const toggleCompare = useContractorsStore((s) => s.toggleCompare)
 
   const sent = invitations ?? []
   const invited = isInvited(sent, contractorId)
-  const inviteLocked = remainingInvites(sent) === 0
+  const inviteLocked = remaining === 0
   const inCompare = compareIds.includes(contractorId)
   const compareLocked = !inCompare && compareIds.length >= MAX_INVITATIONS
   const reduceMotion = useReducedMotion()
@@ -275,7 +280,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
   } | null>(null)
 
   // Cuộn qua khối nhận diện → dải tóm tắt dính dưới thanh điều hướng (mục 3).
-  const barCollapsed = usePastElement(HEADER_ANCHOR_ID, Boolean(contractor))
 
   const handleToggleCompare = () => {
     if (compareLocked) return
@@ -319,6 +323,14 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
     setRenderedTab(tab)
   }
 
+  if (isError)
+    return (
+      <div className='mx-auto max-w-5xl space-y-3 p-6'>
+        <p role='alert'>{t('loadFailed')}</p>
+        <Button onClick={() => void refetch()}>{t('retry')}</Button>
+      </div>
+    )
+
   if (isPending || !contractor) {
     return (
       <div className={cn(PAGE_CONTAINER, 'space-y-6 py-5')}>
@@ -346,16 +358,19 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
     {
       key: 'distance',
       icon: MapPin,
-      value: (
-        <CountedMetric
-          value={Math.round(contractor.distanceKm * 10)}
-          format={(value) =>
-            tCommon('distanceShort', {
-              km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 })
-            })
-          }
-        />
-      ),
+      value:
+        contractor.distanceKnown === false ? (
+          tCommon('distanceUnknown')
+        ) : (
+          <CountedMetric
+            value={Math.round(contractor.distanceKm * 10)}
+            format={(value) =>
+              tCommon('distanceShort', {
+                km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 })
+              })
+            }
+          />
+        ),
       hint: tCommon('distanceSuffix')
     },
     {
@@ -456,7 +471,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                   <div className='flex flex-wrap items-center gap-2'>
                     <h1 className='min-w-0 text-xl font-semibold tracking-tight text-balance'>{contractor.name}</h1>
                     {invited ? (
-                      <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
+                      <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium'>
                         {tCommon('invited')}
                       </span>
                     ) : null}
@@ -482,10 +497,12 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                   initial='hidden'
                   animate='show'
                   transition={{ delayChildren: 0.4 }}
-                  className='divide-border border-border flex min-w-0 grow basis-full divide-x border-l lg:basis-0'
+                  // Mobile: lưới 2x2 (4 ô một hàng làm chữ bị cắt "3 d…", "6.9…"); từ `sm` trở lên
+                  // quay về một hàng có vạch ngăn dọc như cũ.
+                  className='divide-border border-border grid min-w-0 grow basis-full grid-cols-2 gap-x-3 gap-y-3 sm:flex sm:gap-0 sm:divide-x sm:border-l lg:basis-0'
                 >
                   {headerFacts.map((fact) => (
-                    <motion.div variants={revealItemVariants} key={fact.key} className='min-w-0 flex-1 px-2.5'>
+                    <motion.div variants={revealItemVariants} key={fact.key} className='min-w-0 flex-1 sm:px-2.5'>
                       <p className='flex min-w-0 items-center gap-1.5 text-sm font-semibold'>
                         <fact.icon aria-hidden className='text-primary size-4 shrink-0' />
                         <span className='truncate'>{fact.value}</span>
@@ -546,14 +563,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               ) : null}
             </motion.div>
 
-            {/* Mốc mỏng cho `usePastElement` — CÙNG mẫu với bảng so sánh
-                (`TABLE_TOP_ANCHOR_ID`), không gắn `id` lên cả khối tiêu đề cao
-                bên trên. Gắn lên khối cao thì thanh dính bật ngay khi cuộn qua
-                dù tên "An Gia Build" vẫn còn hiện — khối đó cao hơn khung nhìn
-                nên `IntersectionObserver` báo "hết giao" ở nhiều mốc cuộn khác
-                nhau tùy chiều cao màn hình, không riêng lúc đã cuộn qua hẳn. */}
-            <div id={HEADER_ANCHOR_ID} className='h-px' aria-hidden />
-
             <motion.div layout className='overflow-hidden' transition={{ duration: 0.3, ease: revealEase }}>
               <AnimatePresence mode='wait'>
                 <TabPanel key={tab} direction={tabDirection}>
@@ -576,7 +585,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className='hidden space-y-4 lg:sticky lg:top-24 lg:block lg:self-start'
+          className='hidden space-y-4 lg:block'
         >
           <motion.section
             variants={revealContainerVariants}
@@ -603,7 +612,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
                     )}
                   />
                   <div className='min-w-0'>
-                    <p className='text-muted-foreground text-[11px] leading-tight'>{row.label}</p>
+                    <p className='text-muted-foreground max-md:text-xs text-[11px] leading-tight'>{row.label}</p>
                     <p className='mt-0.5 truncate text-sm font-semibold'>{row.value}</p>
                   </div>
                 </motion.li>
@@ -668,78 +677,6 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
         </motion.aside>
       </div>
 
-      <div
-        aria-hidden={!barCollapsed}
-        className={cn(
-          PAGE_CONTAINER,
-          // Nằm NGAY DƯỚI menu (bám `--public-header-offset`, menu trang này cao 64px — `top-14`
-          // cũ đè 8px lên menu) và chỉ từ `lg`, khớp với thanh đáy `lg:hidden`: mọi khổ màn hình
-          // chỉ có MỘT thanh cố định (góp ý NT31).
-          'pointer-events-none fixed top-[calc(var(--public-header-offset,64px)+0.5rem)] left-1/2 z-30 hidden -translate-x-1/2 lg:block'
-        )}
-      >
-        <AnimatePresence>
-          {barCollapsed ? (
-            <motion.div
-              initial={reduceMotion ? false : { y: -18, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={reduceMotion ? undefined : { y: -18, opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.3, ease: revealEase }}
-              className='bg-card/95 pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-2 shadow-[0_10px_30px_-20px_rgba(42,117,63,0.5)] backdrop-blur-sm'
-            >
-              <ContractorLogo contractor={contractor} className='size-8 shrink-0 rounded-md text-xs' />
-              <span className='truncate text-sm font-semibold'>{contractor.name}</span>
-              {invited ? (
-                <span className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'>
-                  {tCommon('invited')}
-                </span>
-              ) : null}
-              <div className='ml-auto h-9 w-44 shrink-0 [&>*]:h-9'>
-                <InviteButton
-                  projectId={projectId}
-                  contractorId={contractorId}
-                  contractor={contractor}
-                  preview={preview}
-                  invited={invited}
-                  inviteLocked={inviteLocked}
-                  navigating={navigatingInvite}
-                  onNavigate={() => setNavigatingInvite(true)}
-                  onOpenPicker={openPicker}
-                  size='sm'
-                />
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </div>
-
-      {barCollapsed ? <div className='h-20 lg:hidden' aria-hidden /> : null}
-      <AnimatePresence>
-        {barCollapsed ? (
-          <motion.div
-            initial={reduceMotion ? false : { y: 72, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={reduceMotion ? undefined : { y: 72, opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.3, ease: revealEase }}
-            className='bg-card/95 fixed inset-x-0 bottom-0 z-30 border-t p-3 backdrop-blur-sm lg:hidden'
-          >
-            <div className='mx-auto h-11 w-full max-w-lg [&>*]:h-11'>
-              <InviteButton
-                projectId={projectId}
-                contractorId={contractorId}
-                contractor={contractor}
-                preview={preview}
-                invited={invited}
-                inviteLocked={inviteLocked}
-                navigating={navigatingInvite}
-                onNavigate={() => setNavigatingInvite(true)}
-                onOpenPicker={openPicker}
-              />
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
       {compareFlight && typeof document !== 'undefined'
         ? createPortal(
             <motion.div
@@ -754,7 +691,7 @@ export function ContractorProfile({ projectId, contractorId, tab }: ContractorPr
               onAnimationComplete={() => setCompareFlight(null)}
               className='bg-card pointer-events-none fixed top-0 left-0 z-60 flex max-w-44 items-center gap-2 rounded-xl border px-2 py-1.5 shadow-lg'
             >
-              <ContractorLogo contractor={contractor} className='size-7 rounded-md text-[9px]' />
+              <ContractorLogo contractor={contractor} className='size-7 rounded-md max-md:text-xs text-[9px]' />
               <span className='truncate text-xs font-semibold'>{contractor.name}</span>
             </motion.div>,
             document.body
@@ -1031,7 +968,7 @@ function PhotoLightbox({
 function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor; inviteAction?: React.ReactNode }) {
   const t = useTranslations('contractors.firm')
   const reduceMotion = useReducedMotion()
-  const { typeLabel, scaleOf } = useProjectLabels()
+  const { typeLabel, scopeLabel, scaleOf } = useProjectLabels(contractor.featuredProjects)
   const [selectedProject, setSelectedProject] = useState<ContractorProject | null>(null)
   const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -1167,7 +1104,7 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
                       )}
                       <div className='absolute top-2 left-2 flex flex-wrap gap-1.5'>
                         {project.featured ? (
-                          <span className='bg-background/95 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium shadow-sm'>
+                          <span className='bg-background/95 inline-flex items-center gap-1 rounded-md border px-2 py-1 max-md:text-xs text-[11px] font-medium shadow-sm'>
                             <Star className='size-3.5' />
                             {t('projects.featuredBadge')}
                           </span>
@@ -1179,17 +1116,17 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
                       <h3 className='group-hover:text-primary-strong text-sm font-semibold transition-colors'>
                         {project.name}
                       </h3>
-                      {project.buildingTypeId || project.scope ? (
+                      {project.buildingTypeId || project.scopeId || project.scope ? (
                         <div className='mt-2 flex flex-wrap gap-1.5'>
                           {[
                             project.buildingTypeId ? typeLabel(project.buildingTypeId) : null,
-                            project.scope ? t(`projects.detail.constructionScopes.${project.scope}`) : null
+                            project.scopeId || project.scope ? scopeLabel(project) : null
                           ]
                             .filter(Boolean)
                             .map((label) => (
                               <span
                                 key={label}
-                                className='bg-muted rounded-md px-2 py-1 text-[11px] text-muted-foreground'
+                                className='bg-muted rounded-md px-2 py-1 max-md:text-xs text-[11px] text-muted-foreground'
                               >
                                 {label}
                               </span>
@@ -1254,20 +1191,28 @@ function FeaturedProjects({ contractor, inviteAction }: { contractor: Contractor
 
 /**
  * Nhãn Loại công trình theo danh mục dùng chung và Quy mô (Số tầng, Tum) theo
- * phương án đã lưu (ContractorManagement §7). Dự án nhập trước khi có danh mục
- * chỉ có dòng quy mô dạng chữ — dùng tạm dòng đó.
+ * phương án đã lưu (ContractorManagement §7). Bản API dùng tên loại/phạm vi và
+ * số tầng trong DTO; dự án cũ chỉ có quy mô dạng chữ vẫn giữ dòng đó.
  */
-function useProjectLabels() {
+function useProjectLabels(projects: readonly ContractorProject[]) {
   const t = useTranslations('contractors.firm.projects.detail')
   const buildingTypes = useCmsCollection('buildingTypes')
   const floorOptions = useCmsCollection('floorOptions')
-  const typeLabel = (id: string) => buildingTypes.find((type) => type.id === id)?.label ?? id
+  const typeLabel = (id: string) =>
+    projects.find((project) => project.buildingTypeId === id && project.buildingTypeName)?.buildingTypeName ??
+    buildingTypes.find((type) => type.id === id)?.label ??
+    t('notUpdated')
+  const scopeLabel = (project: ContractorProject) =>
+    project.scopeName ?? (project.scope ? t(`constructionScopes.${project.scope}`) : t('notUpdated'))
   const scaleOf = (project: ContractorProject) => {
-    const floors = floorOptions.find((option) => option.id === project.floorOptionId)?.label
+    const floors =
+      project.floorCount == null
+        ? floorOptions.find((option) => option.id === project.floorOptionId)?.label
+        : t('floors', { count: project.floorCount })
     const attic = project.hasAttic === undefined ? null : project.hasAttic ? t('attic') : t('noAttic')
     return [floors ?? (project.floorOptionId ? null : project.scale), attic].filter(Boolean).join(' · ')
   }
-  return { typeLabel, scaleOf }
+  return { typeLabel, scopeLabel, scaleOf }
 }
 
 /**
@@ -1303,9 +1248,9 @@ function ProjectDetailModal({
     setActiveIndex(0)
   }
 
-  const { typeLabel, scaleOf } = useProjectLabels()
+  const { typeLabel, scopeLabel, scaleOf } = useProjectLabels(project ? [project] : [])
   const projectType = project?.buildingTypeId ? typeLabel(project.buildingTypeId) : t('notUpdated')
-  const constructionScope = project?.scope ? t(`constructionScopes.${project.scope}`) : t('notUpdated')
+  const constructionScope = project ? scopeLabel(project) : t('notUpdated')
   const contractorRole = project?.contractorRole ? t(`roles.${project.contractorRole}`) : t('roles.contractor')
   const dimensions = [
     project?.dimensions,
@@ -1513,25 +1458,7 @@ function ProjectDetailModal({
                         <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>{t('verifiedBody')}</p>
                       </div>
                     </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: reduceMotion ? 0 : 0.28, delay: reduceMotion ? 0 : 0.13 }}
-                      className='mt-5 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'
-                    >
-                      <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                      <div>
-                        <p className='text-sm font-semibold'>{t('selfReportedTitle')}</p>
-                        <p className='mt-1 text-xs leading-relaxed'>{t('selfReportedBody')}</p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-amber-300/60 bg-amber-50 p-3.5 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100'>
-                    <CircleAlert className='mt-0.5 size-4 shrink-0' />
-                    <p className='text-xs leading-relaxed'>{t('priceNotice')}</p>
-                  </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1544,7 +1471,10 @@ function ProjectDetailModal({
                   loại hình (`contractor.kind` = "Nhà thầu xây dựng"). Tên co lại
                   khi hẹp để không đẩy hai nút ra ngoài. */}
               <div className='flex min-w-0 items-center gap-2.5'>
-                <ContractorLogo contractor={contractor} className='size-9 shrink-0 rounded-lg text-[10px]' />
+                <ContractorLogo
+                  contractor={contractor}
+                  className='size-9 shrink-0 rounded-lg max-md:text-xs text-[10px]'
+                />
                 <div className='min-w-0'>
                   <p className='truncate text-sm font-semibold'>{contractor.name}</p>
                   <p className='text-muted-foreground truncate text-xs'>{contractor.kind}</p>
@@ -1608,7 +1538,9 @@ function LegalChecks({ contractor, detailed = false }: { contractor: Contractor;
                 {tLegal('fields.taxCodeHint')}
               </TooltipContent>
             </Tooltip>
-            <span className='text-muted-foreground text-[11px] font-normal'>{tLegal('fields.taxCodeHint')}</span>
+            <span className='text-muted-foreground max-md:text-xs text-[11px] font-normal'>
+              {tLegal('fields.taxCodeHint')}
+            </span>
           </span>
         )
       },
@@ -1649,7 +1581,7 @@ function LegalChecks({ contractor, detailed = false }: { contractor: Contractor;
         >
           <div className='mb-3 flex flex-wrap items-center gap-2'>
             <h2 className='text-base font-semibold'>{tLegal('identity.title')}</h2>
-            <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium'>
+            <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1 rounded-md px-2 py-1 max-md:text-xs text-[11px] font-medium'>
               <CircleCheck className='size-3.5' />
               {verified ? tLegal('identity.active') : tLegal('identity.pending')}
             </span>
@@ -1671,7 +1603,7 @@ function LegalChecks({ contractor, detailed = false }: { contractor: Contractor;
         >
           <div className='mb-3 flex flex-wrap items-center gap-2'>
             <h2 className='text-base font-semibold'>{tLegal('license.title')}</h2>
-            <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium'>
+            <span className='bg-primary/10 text-primary-strong inline-flex items-center gap-1 rounded-md px-2 py-1 max-md:text-xs text-[11px] font-medium'>
               <CircleCheck className='size-3.5' />
               {verified ? tLegal('license.verified') : tLegal('identity.pending')}
             </span>

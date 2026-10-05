@@ -39,7 +39,14 @@ import {
   HANDBOOK_TEMPLATE_RETURN_SESSION_KEY
 } from '../constants/handbook.constants'
 import { LibraryAccessDeniedError } from '../api/handbook.bmt'
-import { useHandbookDetailQuota, useHandbookTemplate, useHandbookTemplates } from '../hooks/use-handbook'
+import {
+  useHandbookDetailQuota,
+  useHandbookLibraryFilters,
+  useHandbookTemplate,
+  useHandbookTemplates,
+  useHandbookTemplateStyles
+} from '../hooks/use-handbook'
+import { useTemplateClassification } from '../hooks/use-template-classification'
 import { selectSimilarTemplates } from '../services/handbook.service'
 import { useHandbookReadStore } from '../store/handbook-read.store'
 import type { HandbookTemplate } from '../types/handbook.types'
@@ -50,6 +57,7 @@ import { TemplateAttachments } from './template-attachments'
 import { TemplateFigure } from './template-figure'
 import { TemplateInfo } from './template-info'
 import { TemplateDetailCtaPopup } from './template-detail-cta-popup'
+import { TemplateCategoryBadges } from './template-category-badges'
 
 const CONSULT_IDLE_MS = 4800
 const SIMILAR_BLOCK_SHAKE_MS = 520
@@ -67,6 +75,7 @@ interface TemplateReturnMarker {
  */
 export function TemplateDetail({ templateId }: { templateId: string }) {
   const t = useTranslations('handbook.detail')
+  const tInfo = useTranslations('handbook.info')
   const tQuota = useTranslations('handbook.quota')
   const router = useRouter()
   const [activeTemplateId, setActiveTemplateId] = useState(templateId)
@@ -82,26 +91,25 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
   const [showMobileConsult, setShowMobileConsult] = useState(false)
 
   const markRead = useHandbookReadStore((state) => state.markRead)
-  const { data: pool } = useHandbookTemplates()
+  const { data: pool, isPending: isPoolPending } = useHandbookTemplates()
   const { isAuthenticated, isInitialized } = useAuth()
   // Mẫu đến từ BMT API (`source: 'bmt'`) yêu cầu đăng nhập mới xem chi tiết. Chưa
   // đăng nhập thì dựng cổng đăng nhập và KHÔNG gọi `getTemplate` (không trừ lượt).
   // Mẫu mock (không có cờ) vẫn xem công khai như cũ.
-  const poolTemplate = pool?.find((item) => item.id === templateId)
+  const poolTemplate = pool?.find((item) => item.id === activeTemplateId)
   const isApiTemplate = poolTemplate?.source === 'bmt'
   const needsLogin = isApiTemplate && isInitialized && !isAuthenticated
-  const initialQuery = useHandbookTemplate(templateId, { enabled: !needsLogin })
+  const initialQuery = useHandbookTemplate(activeTemplateId, { enabled: !needsLogin })
   const detailQuota = useHandbookDetailQuota()
 
   const template = useMemo(() => {
     const fromPool = pool?.find((item) => item.id === activeTemplateId)
-    // Mẫu API: chi tiết đầy đủ (floors/description/assets) chỉ có ở `getTemplate`;
-    // pool chỉ có bản tóm tắt nên ưu tiên bản đã tải khi đang xem đúng mẫu vào trang.
-    if (fromPool?.source === 'bmt' && activeTemplateId === templateId && initialQuery.data) {
-      return initialQuery.data
-    }
-    return fromPool ?? (activeTemplateId === templateId ? initialQuery.data : undefined)
-  }, [activeTemplateId, initialQuery.data, pool, templateId])
+    // Summary không có phong cách/section. Luôn đọc chi tiết của mẫu đang xem,
+    // kể cả khi chuyển qua Mẫu tương tự, và chờ bản đầy đủ trước khi hiển thị.
+    if (fromPool?.source === 'bmt') return initialQuery.data
+    return fromPool ?? initialQuery.data
+  }, [activeTemplateId, initialQuery.data, pool])
+  const classification = useTemplateClassification(template)
   const isPending = initialQuery.isPending && !template
   const isError = initialQuery.isError && !template
   const similarSourceTemplate = useMemo(
@@ -113,6 +121,11 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
     () => (pool && similarSourceTemplate ? selectSimilarTemplates(pool, similarSourceTemplate) : []),
     [pool, similarSourceTemplate]
   )
+  const hasApiSimilarStyles = similar.some((item) => item.source === 'bmt' && item.kind === '3d')
+  const similarStyleOptions = useHandbookLibraryFilters('3d', hasApiSimilarStyles)
+  const similarStyles = useHandbookTemplateStyles(similarStyleOptions.data, hasApiSimilarStyles)
+  const similarStylesError = hasApiSimilarStyles && (similarStyleOptions.isError || similarStyles.isError)
+  const similarStylesPending = hasApiSimilarStyles && (similarStyleOptions.isPending || similarStyles.isPending)
   // Ưu tiên `template` khi trùng id: mẫu API trong `pool` chỉ là bản tóm tắt (`floors: []`), nếu lấy từ `pool` trước
   // thì dải ảnh xem trước (thumbnail) và nút chuyển tầng của mẫu thật biến mất.
   const floorControlsTemplate = useMemo(
@@ -339,11 +352,11 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
         setSimilarVisible(true)
         observer.disconnect()
       },
-      { threshold: 0.16 }
+      { threshold: 0 }
     )
     observer.observe(similarNode)
     return () => observer.disconnect()
-  }, [similar.length, similarVisible])
+  }, [similar.length, similarVisible, template?.id])
 
   useEffect(() => {
     const updateMobileCta = () => {
@@ -564,9 +577,16 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
       data-template-detail
       data-template-detail-id={template.id}
       style={entranceStyle}
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 py-5 lg:px-8'
     >
       <div className='space-y-3'>
+        <Link
+          href={ROUTES.HANDBOOK}
+          className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm font-medium transition-colors lg:hidden'
+        >
+          <ArrowLeft className='size-4' />
+          {t('breadcrumbRoot')}
+        </Link>
         <Breadcrumb data-entrance-step='0' data-detail-breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -625,7 +645,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
             >
               <Badge variant='secondary'>{template.specs.buildingTypeLabel}</Badge>
             </span>
-            {template.kind === '3d' ? (
+            {template.kind === '3d' && !classification.groupedStyles ? (
               <span
                 data-entrance-step='3'
                 data-entrance-order='2'
@@ -641,12 +661,45 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
               data-detail-tag
               style={inPlaceTransitionActive ? { viewTransitionName: 'handbook-detail-tag-floors' } : undefined}
             >
-              <Badge variant='secondary'>{template.specs.floorLabel}</Badge>
+              <Badge variant='secondary'>
+                {template.floorCount == null && !template.tags.floorCount
+                  ? `${tInfo('floorsPlan')}: ${classification.floorLabel}`
+                  : classification.floorLabel}
+              </Badge>
             </span>
+            <span
+              data-entrance-step='3'
+              data-entrance-order='4'
+              data-detail-tag
+              style={inPlaceTransitionActive ? { viewTransitionName: 'handbook-detail-tag-tum' } : undefined}
+            >
+              <Badge variant='secondary'>
+                {template.tags.hasAttic == null
+                  ? `${tInfo('tum')}: ${classification.tumLabel}`
+                  : classification.tumLabel}
+              </Badge>
+            </span>
+            {template.kind === '3d' && classification.groupedStyles
+              ? (['architecture', 'interior'] as const).map((group, index) => (
+                  <span
+                    key={group}
+                    data-entrance-step='3'
+                    data-entrance-order={5 + index}
+                    data-detail-tag
+                    className='min-w-0 max-w-full'
+                    style={inPlaceTransitionActive ? { viewTransitionName: `handbook-detail-tag-${group}` } : undefined}
+                  >
+                    <Badge variant='secondary' className='h-auto max-w-full whitespace-normal wrap-anywhere'>
+                      {tInfo(group === 'architecture' ? 'architectureStyle' : 'interiorStyle')}:{' '}
+                      {group === 'architecture' ? classification.architectureLabel : classification.interiorLabel}
+                    </Badge>
+                  </span>
+                ))
+              : null}
             {template.specs.lotSize ? (
               <span
                 data-entrance-step='3'
-                data-entrance-order={template.kind === '3d' ? '4' : '3'}
+                data-entrance-order='7'
                 data-detail-tag
                 style={inPlaceTransitionActive ? { viewTransitionName: 'handbook-detail-tag-size' } : undefined}
               >
@@ -658,7 +711,7 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
             ) : null}
             <span
               data-entrance-step='3'
-              data-entrance-order={template.kind === '3d' ? '5' : '4'}
+              data-entrance-order='8'
               className='ml-auto'
               style={inPlaceTransitionActive ? { viewTransitionName: 'handbook-detail-favorite' } : undefined}
             >
@@ -729,15 +782,33 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
         </aside>
       </div>
 
-      {similar.length > 0 ? (
-        <section
-          ref={similarRef}
-          data-similar-section
-          data-visible={similarVisible}
-          data-reveal-done={similarRevealDone}
-          className='bg-card space-y-4 rounded-2xl border p-5'
-        >
-          <h2 className='text-lg font-semibold'>{t('similar')}</h2>
+      <section
+        ref={similarRef}
+        data-similar-section
+        data-visible={similar.length === 0 || similarVisible}
+        data-reveal-done={similarRevealDone}
+        aria-busy={isPoolPending}
+        className='bg-card space-y-4 rounded-2xl border p-5'
+      >
+        <h2 className='text-lg font-semibold'>{t('similar')}</h2>
+        {similarStylesError ? (
+          <Button
+            variant='outline'
+            onClick={() => {
+              if (similarStyleOptions.isError) void similarStyleOptions.refetch()
+              if (similarStyles.isError) void similarStyles.refetch()
+            }}
+          >
+            {t('retry')}
+          </Button>
+        ) : null}
+        {isPoolPending ? (
+          <Skeleton className='h-16 rounded-lg' aria-hidden />
+        ) : similar.length === 0 ? (
+          <p data-similar-empty className='text-muted-foreground py-8 text-center text-sm' role='status'>
+            {t('similarEmpty')}
+          </p>
+        ) : (
           <ul className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
             {similar.map((item, index) => (
               <li
@@ -785,9 +856,17 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
                       <span className='group-hover/similar:text-primary line-clamp-2 block text-sm font-medium transition-colors'>
                         {item.name}
                       </span>
-                      <span className='text-primary block text-xs'>
-                        {[item.specs.floorLabel, item.specs.lotSize, item.specs.floorArea].filter(Boolean).join(' · ')}
-                      </span>
+                      {item.specs.lotSize || item.specs.floorArea ? (
+                        <span className='text-primary block text-xs'>
+                          {[item.specs.lotSize, item.specs.floorArea].filter(Boolean).join(' · ')}
+                        </span>
+                      ) : null}
+                      <TemplateCategoryBadges
+                        template={item}
+                        styles={similarStyles.data?.[item.id]}
+                        stylesPending={item.source === 'bmt' && similarStylesPending}
+                        stylesError={item.source === 'bmt' && similarStylesError}
+                      />
                     </span>
                   </button>
                   <FavoriteButton
@@ -804,8 +883,8 @@ export function TemplateDetail({ templateId }: { templateId: string }) {
               </li>
             ))}
           </ul>
-        </section>
-      ) : null}
+        )}
+      </section>
 
       <div
         data-mobile-consult-shell
@@ -1306,7 +1385,7 @@ function TemplateDetailSkeleton() {
   return (
     <div
       data-handbook-loading='true'
-      className='mx-auto w-full max-w-[90rem] space-y-8 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-8 px-4 py-5 lg:px-8'
       aria-hidden='true'
     >
       <div className='space-y-3'>

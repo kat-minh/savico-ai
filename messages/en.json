@@ -114,9 +114,15 @@
     },
     "forbidden": {
       "title": "No access",
-      "description": "This area is restricted to administrators.",
+      "description": "This area is restricted to staff accounts.",
       "backHome": "Back to home",
-      "switchAccount": "Sign in with another account"
+      "switchAccount": "Sign in with another account",
+      "routeDescription": "Your account type cannot access this page.",
+      "sessionUnavailable": "Session authorization is unavailable. Please sign in again after the system has been updated.",
+      "sectionDescription": "Your session does not have permission to access this section.",
+      "noSections": "Your account has no accessible admin sections. Please contact your administrator for access.",
+      "allowedSection": "Open an accessible section",
+      "adminHome": "Go to administration"
     },
     "register": {
       "title": "Create account",
@@ -250,6 +256,34 @@
   },
   "validation": {
     "required": "This field is required",
+    "requiredField": "{field} is required",
+    "emailRequired": "Email is required",
+    "fields": {
+      "fullName": "Full name",
+      "projectName": "Project name",
+      "contractorName": "Contractor name",
+      "email": "Email",
+      "phone": "Phone number",
+      "password": "Password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Password confirmation",
+      "verifyCode": "Verification code",
+      "address": "Address",
+      "street": "Street address",
+      "province": "Province / city",
+      "ward": "Ward",
+      "buildingType": "Building type",
+      "scale": "Number of floors",
+      "floorCount": "Number of floors",
+      "hasAttic": "Attic",
+      "architectureStyle": "Architecture style",
+      "interiorStyle": "Interior style",
+      "landPhoto": "Land photo",
+      "date": "Date",
+      "timeSlot": "Time slot",
+      "note": "Project description"
+    },
     "email": "Enter a valid email address",
     "minLength": "Must be at least {min} characters",
     "maxLength": "Must be at most {max} characters",
@@ -831,7 +865,11 @@
       "titleMobile": "Home-building handbook"
     },
     "card": {
-      "imageCount": "{count} 3D images"
+      "imageCount": "{count} 3D images",
+      "floorsNotApplicable": "Floors: Not applicable",
+      "tumNotApplicable": "Rooftop room: Not applicable",
+      "stylesLoading": "Loading styles…",
+      "stylesError": "Unable to load styles"
     },
     "library": {
       "bannerTitle": "Explore floor plan templates\nthat fit your home",
@@ -841,6 +879,17 @@
         "3d": "3D templates"
       },
       "allBuildingTypes": "All building types",
+      "kindShort": {
+        "2d": "2D",
+        "3d": "3D"
+      },
+      "filterLabels": {
+        "buildingType": "Building type",
+        "floors": "Number of floors",
+        "tum": "Rooftop room",
+        "architecture": "Architectural style",
+        "interior": "Interior style"
+      },
       "allScales": "All scales",
       "allStyles": "All styles",
       "buildingTypePrefix": "Building type: {value}",
@@ -856,6 +905,11 @@
       },
       "optionAll": "All",
       "scalePrefix": "Scale: {value}",
+      "tumPrefix": "Rooftop room: {value}",
+      "withTum": "With rooftop room",
+      "withoutTum": "Without rooftop room",
+      "architecturePrefix": "Architecture: {value}",
+      "interiorPrefix": "Interior: {value}",
       "stylePrefix": "Style: {value}",
       "prevPage": "Previous page",
       "nextPage": "Next page"
@@ -874,6 +928,13 @@
       "planTitle": "Drawing details",
       "templateTitle": "Template details",
       "buildingType": "Building type",
+      "tum": "Rooftop room",
+      "architectureStyle": "Architectural styles",
+      "interiorStyle": "Interior styles",
+      "notApplicable": "Not applicable",
+      "withTum": "With rooftop room",
+      "withoutTum": "Without rooftop room",
+      "floorCountValue": "{count} floors",
       "floors": "Scale",
       "lotSize": "Lot size",
       "floorArea": "Floor area",
@@ -894,6 +955,7 @@
       "breadcrumbRoot": "Handbook",
       "breadcrumbLibrary": "Template library",
       "similar": "Similar templates",
+      "similarEmpty": "Empty",
       "zoom": "Enlarge drawing",
       "viewerTitle": "Full-screen drawing viewer",
       "previousFloor": "Previous floor",
@@ -1109,7 +1171,6 @@
       },
       "popup": {
         "brandTagline": "AI platform for architecture and construction",
-        "badge": "Handbook",
         "close": "Close",
         "title": "Finished reading — ready to start your home?",
         "subtitle": "Turn knowledge into a real project in minutes. Choose the next step that fits you.",
@@ -1301,7 +1362,7 @@
       "nameHint": "Use a memorable name, e.g. \"Tan Loi townhouse, 3 floors\".",
       "namePlaceholder": "e.g. Tan Loi townhouse, 3 floors",
       "descriptionLabel": "Description (optional)",
-      "descriptionHint": "Private notes about this project — only you can see them.",
+      "descriptionHint": "Up to 500 characters, preserved in the input step and sent to AI.",
       "descriptionPlaceholder": "Add a description (optional)...",
       "needPlan": "You need a design plan to create a construction dossier. Please pick a plan on the Pricing page.",
       "submit": "Create project"
@@ -1434,7 +1495,8 @@
           "0": "Read your photo / description",
           "1": "Analysing quantities…",
           "2": "Pricing against {province} unit rates"
-        }
+        },
+        "processing": "Processing"
       },
       "dossier": {
         "title": "Rendering your construction dossier…",
@@ -1459,7 +1521,8 @@
           "drawings": "Processing drawings ({done}/{total})",
           "renders": "Rendering views ({done}/{total})",
           "package": "Packaging PDF"
-        }
+        },
+        "processing": "Preparing the dossier file…"
       }
     },
     "estimate": {
@@ -1517,7 +1580,8 @@
         "amount": "Amount"
       },
       "pageTitleWithProject": "Estimate: {name} ({id})",
-      "sampleNotice": "This is sample data generated for testing, not a real analysis of your building."
+      "sampleNotice": "This is sample data generated for testing, not a real analysis of your building.",
+      "exportError": "Could not download the estimate file. Your saved result is kept; try the download again."
     },
     "dossier": {
       "infoTitle": "Project details",
@@ -1616,7 +1680,8 @@
         "estimate": "Detailed cost estimate"
       },
       "downloadTitle": "Download & share",
-      "packagedNote": "The download is already packaged for you."
+      "packagedNote": "The download is already packaged for you.",
+      "exportError": "Could not download the PDF dossier. Please try again."
     },
     "share": {
       "eyebrow": "Shared dossier",
@@ -1751,7 +1816,9 @@
         "title": "Delete this project?",
         "description": "Project \"{name}\" and all of its input, estimate and dossier data will be deleted. This cannot be undone.",
         "confirm": "Delete project",
-        "success": "Project deleted."
+        "success": "Project deleted.",
+        "Processing": "The estimate is processing and cannot be deleted yet.",
+        "ConstructionSiteInUse": "The estimate is used by a construction site and cannot be deleted."
       },
       "createdAt": "Created {date}",
       "progressLabel": "Design & estimate progress"
@@ -1849,7 +1916,9 @@
         "saved": "Saved",
         "error": "Couldn't save — what you typed is kept.",
         "denied": "Couldn't save the changes.",
-        "retry": "Retry"
+        "retry": "Retry",
+        "conflict": "The saved version has changed. Your edits are kept; reloading will replace them with the server version.",
+        "reloadSaved": "Reload saved version"
       },
       "lock": {
         "noEdit": "You need an active design plan (with credits left) to save details and get an estimate.",
@@ -1883,9 +1952,10 @@
     },
     "estimateApi": {
       "startError": {
+        "mediaUnavailable": "The system couldn't process the estimate's images. What you entered is kept.",
         "unavailable": "The design service isn't ready yet. Please try again in a few minutes.",
         "locationChanged": "The address data was just updated. Please pick the ward / commune again and retry.",
-        "versionConflict": "The details just changed. Please press send once more.",
+        "versionConflict": "The input has changed. Reload and review the saved version before submitting.",
         "denied": "You need an active design plan with credits left to get an estimate.",
         "other": "Couldn't send the request. Please try again."
       },
@@ -1897,6 +1967,10 @@
         "generic": "The estimate wasn't created. You can edit the details or retry; what you entered is kept.",
         "retry": "Retry",
         "edit": "Edit details"
+      },
+      "load": {
+        "error": "Could not load the estimate. You can try reading it again.",
+        "retry": "Reload"
       }
     }
   },
@@ -3724,7 +3798,17 @@
         "locationText": "Location",
         "roleText": "Role",
         "mainWork": "Main work",
-        "deleteConfirmTitle": "Delete project \"{name}\"?"
+        "deleteConfirmTitle": "Delete project \"{name}\"?",
+        "tum": "Rooftop enclosure",
+        "hasTum": "With rooftop enclosure",
+        "noTum": "Without rooftop enclosure",
+        "classificationHint": "Floors and rooftop enclosure follow the building type configuration in the estimate catalog.",
+        "notApplicable": "Not applicable to this building type",
+        "selectTypeFirst": "Select a building type first",
+        "selectOptional": "Select if known",
+        "savedFloor": "{count} floors (saved value)",
+        "categoryError": "Unable to load classification options. Your input has been preserved.",
+        "retry": "Retry"
       },
       "addressHint": "Pick a suggestion to auto-fill latitude/longitude; you can still edit them below.",
       "files": {
@@ -3806,7 +3890,38 @@
         "ContractorNotFound": "Contractor profile not found (it may have been deleted).",
         "ContractorProjectNotFound": "This project was not found in the profile.",
         "AccessForbidden": "Only admin accounts can manage contractors.",
-        "generic": "Could not upload the file. Please retry."
+        "generic": "Could not upload the file. Please retry.",
+        "LocationDatasetChanged": "The location list has changed. Reload and select the address again.",
+        "DependencyUnavailable": "The data source is unavailable. Please try again."
+      },
+      "province": "Province/city",
+      "provinceHint": "Select the company’s province to determine its region. You can add it later.",
+      "provinceLoadError": "Could not load provinces. Reopen the form to try again.",
+      "addressParts": {
+        "province": "Province/City",
+        "ward": "Ward/Commune",
+        "street": "House number/Street",
+        "streetPlaceholder": "Enter a house number and street to find the location",
+        "searching": "Finding the location…",
+        "mapHint": "Select an address suggestion to show the map. The location will be saved automatically with the address.",
+        "mapAdjust": "Drag the pin or click the map to adjust the exact location.",
+        "retry": "Retry",
+        "searchTooLong": "The full address exceeds the map search limit of 500 characters. Shorten the house number/street and select the location again.",
+        "legacy": "Previously saved address",
+        "noAddress": "No address yet",
+        "add": "Add separate address fields",
+        "fullAddress": "Full address",
+        "locate": "Find location on map",
+        "selectLocation": "Select the matching location",
+        "noResult": "No location found. Check the address and try again.",
+        "mapError": "Unable to find the location. Please try again.",
+        "coordinatesRequired": "Select an address suggestion to determine the location before saving.",
+        "required": "Enter the province/city, ward/commune and house number/street.",
+        "tooLong": "House number/street must not exceed 500 characters.",
+        "clear": "Clear the entire address",
+        "catalogError": "Unable to load provinces/wards. Your input has been preserved.",
+        "reload": "Reload locations",
+        "selectAgain": "Select the address from the new location list"
       }
     },
     "paymentConnections": {
@@ -5073,7 +5188,8 @@
         "assigned": "Grant assigned to staff.",
         "transferred": "Assignment transferred.",
         "removed": "Assignment removed."
-      }
+      },
+      "staffPermissionRequired": "Staff management permission (user.manage) is also required to select an assignee or transfer recipient."
     },
     "address": {
       "noResult": "No matching address",
@@ -5117,6 +5233,43 @@
         "Assigned": "In progress",
         "Completed": "Completed",
         "CanceledByStaff": "Canceled"
+      },
+      "area": "Land area",
+      "condition": "Site condition",
+      "budget": "Expected budget",
+      "plannedStart": "Planned start",
+      "buildingType": "Building type",
+      "floors": "Floors",
+      "floorCount": "{count} floors (including ground floor)",
+      "tum": "Rooftop room",
+      "hasTum": "With rooftop room",
+      "noTum": "No rooftop room",
+      "architecture": "Architectural style",
+      "interior": "Interior style",
+      "notApplicable": "Not applicable",
+      "province": "Province / City",
+      "ward": "Ward / Commune",
+      "street": "Street address",
+      "source": "Source estimate",
+      "fromEstimate": "Created from an estimate",
+      "independent": "Independently created",
+      "sourceNote": "Site access does not grant access to the customer’s estimate results.",
+      "map": "Site location",
+      "files": "Attachments",
+      "noFiles": "No attachments",
+      "download": "Download",
+      "downloadError": "Unable to download. The file may have been removed or your access may have changed. Please retry.",
+      "loadError": "Unable to load site details.",
+      "retry": "Retry",
+      "startOptions": {
+        "ASAP": "As soon as possible",
+        "Within1To3Months": "Within 1–3 months",
+        "Within3To6Months": "Within 3–6 months",
+        "Undecided": "Undecided"
+      },
+      "fileGroups": {
+        "Drawing": "Drawing",
+        "ConditionPhoto": "Site photo"
       }
     }
   },
@@ -5149,7 +5302,11 @@
       "surveyLabel": "Can survey",
       "surveyHours": "within {hours}h",
       "acceptingLabel": "Accepting",
-      "acceptingSuffix": "projects"
+      "acceptingSuffix": "projects",
+      "informationUnknown": "Not provided",
+      "ratingUnknown": "No rating yet",
+      "projectAvailability": "Project availability",
+      "distanceUnknown": "Distance unavailable"
     },
     "scope": {
       "turnkey": "Turnkey construction",
@@ -5253,7 +5410,11 @@
           "any": "Any rating",
           "good": "4.0 stars and up",
           "great": "4.5 stars and up"
-        }
+        },
+        "unsupported": "Filtering by this criterion is not yet supported.",
+        "loadError": "Could not load filter options. Please try again.",
+        "distanceNeedsRadius": "Choose a project and a radius to sort by nearest contractors.",
+        "configureRadius": "Choose a radius"
       },
       "ranking": {
         "stickyNudge": "Create a project brief - free",
@@ -5263,7 +5424,10 @@
           "survey": "Earliest survey"
         },
         "surveyWithin": "Can survey within {hours}h",
-        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more."
+        "empty": "No contractor matches these criteria yet. Loosen a criterion to see more.",
+        "loading": "Loading contractors…",
+        "loadError": "Could not load contractors. Please try again.",
+        "retry": "Try again"
       },
       "safety": {
         "title": "Safe & transparent",
@@ -5556,9 +5720,12 @@
       }
     },
     "matches": {
+      "restoreError": "Could not load your selected project. Please try again.",
+      "restoreRetry": "Try again",
       "title": "Suggested contractors",
       "subtitle": "Pick a contractor to view their record, compare, or invite them to quote.",
       "radius": "Search radius",
+      "radiusNone": "Not applied",
       "radiusOption": "{km} km",
       "resultsInRadius": "{count} contractors within {km} km",
       "empty": "No contractors within {km} km. Try widening the search radius.",
@@ -5571,6 +5738,7 @@
       "inviteLimitReached": "All {max} invitation slots have been used",
       "whyTitle": "Why BuildX suggests these",
       "why1": "Matches your building type",
+      "whySurveyUnknown": "Survey time has not been provided",
       "why2": "{count} completed projects",
       "why3": "Can survey within {hours}h",
       "invitedPill": "Invited <n>{used}</n>/{max} · <n>{left}</n> left",
@@ -5584,7 +5752,14 @@
       "previewTitle": "Preview mode — create a project brief to invite contractors",
       "previewDescription": "A brief lets you keep your shortlist and send invitations.",
       "previewAction": "Create a project brief",
-      "viewInvites": "View invitations"
+      "viewInvites": "View invitations",
+      "allRegions": "All regions",
+      "resultsCount": "{count} contractors",
+      "loadError": "Could not load contractors. Please try again.",
+      "retry": "Retry",
+      "emptyFilters": "No contractors match your filters.",
+      "profileUnavailable": "This profile cannot be opened. Choose a profile with an established owner or create a new one.",
+      "chooseAnotherProfile": "Choose another profile"
     },
     "firm": {
       "tabs": {
@@ -5767,7 +5942,9 @@
       "introTags": {
         "buildingType": "Building type",
         "scope": "Scope of work"
-      }
+      },
+      "loadFailed": "Unable to load the contractor profile. It may be hidden or access may have changed.",
+      "retry": "Retry"
     },
     "compare": {
       "title": "Compare contractor records",
@@ -5922,6 +6099,7 @@
     },
     "picker": {
       "title": "Pick a project to find contractors",
+      "saveSelectionError": "Could not save the selected project. Allow browser storage and try again.",
       "subtitle": "Each project can invite up to {max} contractors. The brief we send carries no prices or budget.",
       "emptyBadge": "No project yet",
       "emptyTitle": "You have no projects yet",
@@ -5943,7 +6121,11 @@
       "contracted": "Contractor settled",
       "untitled": "Untitled brief",
       "draft": "Draft",
-      "completeBrief": "Complete brief"
+      "completeBrief": "Complete brief",
+      "loadSelectionError": "Unable to load sites and invitation counts. Please retry.",
+      "retrySelection": "Retry",
+      "apiSubtitle": "Choose a site to find contractors. Each site shows its invitations and current limit.",
+      "apiEmptyFootnote": "After creating a site, you can choose contractors and send quotation invitations."
     },
     "projectBar": {
       "label": "Selected project",
@@ -5952,6 +6134,212 @@
       "viewInvites": "View invitations",
       "switchProject": "Switch project",
       "editWarning": "Editing creates version {next} — invitations already sent keep {current}."
+    },
+    "siteForm": {
+      "projectTitle": "Project information",
+      "requiredHint": "Fields marked * are required",
+      "select": "Select a value",
+      "source": "Use a completed estimate (optional)",
+      "independent": "Enter a new project manually",
+      "linkedSource": "Linked estimate",
+      "moreSources": "Load more estimates",
+      "sourceHint": "Only your completed estimates that have not been used for a construction site are available.",
+      "sourceLocked": "Area, address, building type, floors, rooftop room and styles come from the source estimate. The source cannot be changed after creation.",
+      "sourceLoading": "Loading estimate information…",
+      "sourceNotReady": "Please wait for the source estimate to finish loading.",
+      "name": "Project name",
+      "namePlaceholder": "Example: Tan Loi two-storey townhouse",
+      "buildingType": "Building type",
+      "area": "Land area (m²)",
+      "areaError": "Enter an area greater than 0 with no more than 2 decimal places.",
+      "condition": "Site condition",
+      "floors": "Number of floors",
+      "floorLabel": "{count} floors (including ground floor)",
+      "tum": "Rooftop room",
+      "yesTum": "With rooftop room",
+      "noTum": "Without rooftop room",
+      "architecture": "Architectural style",
+      "interior": "Interior style",
+      "stylesTitle": "Project styles",
+      "stylePrompt": "Choose a building type to see the available styles.",
+      "styleNotApplicable": "Not applicable to this building type.",
+      "noStyleImage": "No preview image yet",
+      "province": "Province / City",
+      "ward": "Ward / Commune",
+      "street": "House number and street",
+      "streetPlaceholder": "Example: 12 Nguyen Tat Thanh",
+      "locationsError": "Could not load address options. Please retry.",
+      "location": "Project location",
+      "findLocation": "Find location from address",
+      "locating": "Finding location…",
+      "locationHint": "Enter the full address, search and choose the matching location to confirm coordinates.",
+      "addressFirst": "Enter a province, ward and house number / street first.",
+      "noLocation": "No address found. Check the house number and street, then retry.",
+      "chooseLocation": "Search and choose a location for the current address before continuing.",
+      "locationConfirmed": "Location confirmed: {address}",
+      "budget": "Expected budget (VND)",
+      "budgetError": "Enter a positive integer VND amount, up to 28 digits. Thousands separators are allowed.",
+      "start": "Expected construction start",
+      "needsTitle": "Construction needs",
+      "needsSubtitle": "Tell BuildX the scope and main requirements of your project.",
+      "scope": "Construction scope",
+      "description": "Describe your needs",
+      "descriptionPlaceholder": "Example: Looking for an experienced contractor for a turnkey two-storey townhouse, available for a weekend survey.",
+      "needsLocal": "Construction needs are saved in this browser; they have not been sent to a contractor.",
+      "scopeLoadError": "Unable to load construction scopes. Please retry.",
+      "scopeEmpty": "There are no active construction scopes in the catalog.",
+      "scopeHistorical": "Previously saved selection",
+      "savedScope": "Saved construction scope",
+      "optional": "(optional)",
+      "retry": "Retry",
+      "locked": "A supervision package is holding this project. Project information and files are locked.",
+      "saveLocal": "Save on this device",
+      "savedLocal": "Saved on this device",
+      "leaveDescription": "Information that has not become a construction site will only be saved on this device. Save before leaving?",
+      "uncertain": "The creation result is unknown. Check saved construction sites before sending the request again.",
+      "checkCreation": "Check creation result",
+      "notCreated": "No construction site matching the last request was found. Review the data and continue again.",
+      "files": {
+        "title": "Existing documents",
+        "hint": "{count}/9 files. Each file is limited to 10 MB (10,000,000 bytes) and stored privately.",
+        "Drawing": "Drawings",
+        "ConditionPhoto": "Site photos",
+        "DrawingHint": "PDF, DWG, DXF, JPG, PNG, WebP",
+        "ConditionPhotoHint": "JPG, PNG, WebP",
+        "formats": "PDF, DWG, DXF, JPG, PNG, WebP",
+        "uploading": "Uploading and validating files…",
+        "limit": "A construction site can have at most 9 files.",
+        "size": "The file exceeds 10,000,000 bytes.",
+        "type": "The file is empty or its format is not supported.",
+        "remove": "Remove {name}",
+        "download": "Download file",
+        "downloadError": "Could not download the file. Please retry.",
+        "choose": "Choose files"
+      },
+      "errors": {
+        "generic": "Could not save the construction site. Your input has been kept; please retry.",
+        "localSave": "Could not save on this device. Allow browser storage and retry.",
+        "ConstructionSiteNameTaken": "You already have a construction site with this name. Choose another name.",
+        "ConstructionSiteCatalogChanged": "The catalog changed. Review the building type, floors and styles before saving again.",
+        "ConstructionSiteConditionUnavailable": "The selected site condition is no longer available. Choose another.",
+        "ConstructionSiteSourceUnavailable": "This estimate is already used or is not eligible. Choose another source.",
+        "ConstructionSiteSourceNotFound": "Your source estimate could not be found.",
+        "ConstructionSiteSourceDataInvalid": "The source estimate data is incomplete. Choose another source or enter the information manually.",
+        "ConstructionSiteSourceLocked": "Information inherited from the source estimate cannot be changed.",
+        "ConstructionSiteVersionConflict": "The construction site changed. Reload the page to review the latest version before editing.",
+        "ConstructionSiteHasSupervision": "A supervision package is holding this project. Information and files cannot be changed.",
+        "LocationDatasetChanged": "The address dataset changed. Select the province and ward again.",
+        "DependencyUnavailable": "A required service is unavailable. Please retry later.",
+        "AccessForbidden": "This account cannot create or edit a construction site. Only its customer owner can do so.",
+        "ValidationError": "Some information is invalid. Check the marked fields and retry.",
+        "ConstructionSiteUploadUnavailable": "The file is not ready, expired or already used. Remove it and upload it again.",
+        "ConstructionSiteAttachmentLimitExceeded": "A construction site can have at most 9 files.",
+        "ConstructionSiteFileTooLarge": "The file exceeds 10,000,000 bytes.",
+        "ConstructionSiteFileInspectionUnavailable": "This drawing format could not be inspected. Please retry later.",
+        "StoragePutFailed": "The file could not be uploaded. Select the file to retry.",
+        "MapServiceUnavailable": "The location service is unavailable. Please retry later."
+      },
+      "descriptionCount": "{count} / 1000",
+      "reloadLatest": "Load the latest version for review",
+      "locationSearch": "Location search (you may shorten it; the project address stays unchanged)",
+      "searchLength": "Enter 1 to 500 characters for location search. You may shorten the query and choose the matching place.",
+      "mapHint": "Type an address to see suggestions. Select a result, then drag the pin or click the map to adjust the construction site location.",
+      "mapReadOnly": "Construction site location on the map. Location editing is disabled for this profile.",
+      "mapAdjustHint": "Drag the pin or click the map to adjust the location.",
+      "addressSearchHint": "Enter the street address, then select a suggested address."
+    },
+    "rfq": {
+      "title": "Quotation invitations",
+      "sentTitle": "Quotation invitation sent",
+      "supportHint": "Our support team will contact you and the contractor to confirm the appointment.",
+      "count": "Invited {used}/{limit} contractors · {remaining} remaining",
+      "loading": "Loading invitations…",
+      "loadFailed": "Unable to load quotation invitations. Please try again.",
+      "retry": "Retry",
+      "empty": "This site has no quotation invitations yet.",
+      "back": "Back to contractors",
+      "trackAll": "Track all invitations",
+      "detailTitle": "Submitted information and dossier",
+      "phone": "Contact phone",
+      "note": "Survey note",
+      "sentAt": "Sent at",
+      "desired": "Original requested time",
+      "appointment": "Current appointment (Vietnam time)",
+      "viewSent": "View submitted dossier",
+      "profile": "View contractor profile",
+      "snapshot": "Dossier v{version} · {count} files",
+      "snapshotHint": "Information and files are retained as submitted, even after the original site is edited.",
+      "fileFailed": "Unable to download the file. Check access and try again.",
+      "dateHint": "Choose a future date and time in Vietnam time.",
+      "timeHint": "This is your requested time, pending confirmation with the contractor.",
+      "siteRequired": "Save the construction site before sending an invitation.",
+      "sendFailed": "The submission result could not be confirmed. Please retry.",
+      "uncertain": "The previous submission is unconfirmed. Confirm again to check the same request; its information is preserved to prevent duplicates.",
+      "adminDescription": "Manage invitations for each site and contractor; update appointment, status and internal note.",
+      "allStatuses": "All statuses",
+      "internalNote": "Internal note (hidden from the customer)",
+      "save": "Save changes",
+      "saved": "Invitation saved.",
+      "versionConflict": "Someone else updated this invitation. Reload and review it before saving.",
+      "refresh": "Reload data",
+      "states": {
+        "Sent": "Sent",
+        "Received": "Received",
+        "ContractorReceived": "Contractor received",
+        "Completed": "Completed"
+      },
+      "errors": {
+        "QuotationAlreadyInvited": "This site has already invited this contractor.",
+        "QuotationLimitReached": "This site has reached its contractor invitation limit.",
+        "QuotationContractorUnavailable": "This contractor is now hidden and cannot receive new invitations.",
+        "QuotationTimeNotFuture": "The requested date and time must be in the future.",
+        "QuotationContactRequired": "Enter a valid contact phone number.",
+        "QuotationIdempotencyConflict": "The submission content does not match. Reload to check the previous request.",
+        "AccessForbidden": "You do not have permission to perform this action.",
+        "ConstructionSiteNotFound": "Your construction site was not found.",
+        "DependencyUnavailable": "Site data or files are not ready. Please retry."
+      },
+      "meanings": {
+        "Sent": "Your invitation has been saved.",
+        "Received": "Support has received your request.",
+        "ContractorReceived": "Support has passed the invitation to the contractor.",
+        "Completed": "Support has marked the request completed."
+      },
+      "reviewUnavailable": "Reviews cannot be submitted on this page yet.",
+      "chooseManagement": "Choose construction management",
+      "profileFields": {
+        "buildingType": "Building type",
+        "area": "Land area",
+        "condition": "Site condition",
+        "budget": "Expected budget",
+        "plannedStart": "Planned start",
+        "floors": "Floors",
+        "tum": "Rooftop room",
+        "hasTum": "With rooftop room",
+        "noTum": "No rooftop room",
+        "architecture": "Architectural style",
+        "interior": "Interior style",
+        "notApplicable": "Not applicable",
+        "address": "Address",
+        "source": "Source estimate",
+        "independent": "Independently created",
+        "startOptions": {
+          "ASAP": "As soon as possible",
+          "Within1To3Months": "Within 1–3 months",
+          "Within3To6Months": "Within 3–6 months",
+          "Undecided": "Undecided"
+        },
+        "site": "Construction site name"
+      },
+      "privacy": "Your phone is saved with the invitation so support can arrange the appointment.",
+      "phoneInvalid": "Use up to 20 characters with at least one digit: numbers, a leading +, spaces, dots, hyphens or parentheses.",
+      "quotaUnavailable": "Invitation allowance is unavailable.",
+      "displayCodeUnavailable": "Not yet available",
+      "updatedBySupport": "Status updated by the BuildX support team",
+      "scopeNotRecorded": "Not recorded in the sent profile",
+      "floorsCount": "{count} floors",
+      "footerNote": "After the contractor receives the invitation, discuss the survey, quotation and contract directly with them. BuildX tracks invitations; quotations and contracts are exchanged outside the platform. Contact support to change the appointment or get help.",
+      "snapshotVersion": "v{version}"
     }
   },
   "checkout": {

@@ -323,11 +323,13 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
     scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: clip;
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
@@ -687,6 +689,31 @@
     );
   }
   .site-header-shell > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Thanh "Menu" của panel mobile — cùng quầng xanh loang như header web. */
+  .site-nav-mobile-bar {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--header-bg-scrolled);
+  }
+  .site-nav-mobile-bar::before {
+    content: '';
+    position: absolute;
+    inset: -80% -25%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(7rem 4rem at 18% 50%, var(--header-aurora-1), transparent 72%),
+      radial-gradient(6rem 3.5rem at 52% 46%, var(--header-aurora-2), transparent 70%),
+      radial-gradient(8rem 4rem at 86% 52%, var(--header-aurora-1), transparent 74%);
+    filter: blur(24px);
+    animation: header-aurora 24s var(--ease-out-soft) infinite;
+  }
+  .site-nav-mobile-bar > * {
     position: relative;
     z-index: 1;
   }
@@ -3096,6 +3123,10 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   [data-create-dialog-content][data-state='closed'] {
     animation: design-dialog-mobile-close 240ms ease-in both !important;
   }
+  /* Mở xong thì bỏ animation hẳn — bật/tắt kéo sau đó không làm animation mở chạy lại. */
+  [data-create-dialog-content][data-state='open'][data-settled='true'] {
+    animation: none !important;
+  }
   [data-create-dialog-content][data-dragging='true'] {
     animation: none !important;
     translate: -50% calc(-50% + var(--dialog-drag-y, 0px)) !important;
@@ -4089,6 +4120,7 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
     transition-duration: 0ms !important;
   }
   .site-header-shell::before,
+  .site-nav-mobile-bar::before,
   .hero-photo-drift,
   .animate-marquee,
   .ambient-orb,
@@ -5137,7 +5169,7 @@ body:has([data-generation-waiting]) [data-assistant-idle-ring] {
   border-radius: 0.65rem;
   background: var(--primary-strong);
   color: var(--primary-foreground);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   text-align: left;
   pointer-events: none;

@@ -269,7 +269,7 @@ export function ContractorManager() {
           title: t('contractors.region'),
           key: 'region',
           width: 120,
-          render: (_, record) => t(`contractors.regions.${record.region}`)
+          render: (_, record) => (record.region ? t(`contractors.regions.${record.region}`) : '—')
         },
         {
           title: t('contractors.projects'),

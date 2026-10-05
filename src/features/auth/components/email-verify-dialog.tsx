@@ -10,6 +10,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { useRequiredMessage } from '@/shared/hooks'
 import { isApiError } from '@/shared/lib/api'
 import { authApi } from '../api/auth.api'
 import { useVerifyEmail } from '../hooks/use-verify-email'
@@ -25,9 +26,10 @@ import { useVerifyEmail } from '../hooks/use-verify-email'
  */
 export function EmailVerifyDialog() {
   const t = useTranslations('auth.verifyEmail')
-  const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const user = useAuthStore((s) => s.user)
-  const open = Boolean(user && user.emailVerified === false && !user.mustChangePassword)
+  const isInitialized = useAuthStore((s) => s.isInitialized)
+  const open = isInitialized && Boolean(user && user.emailVerified === false && !user.mustChangePassword)
   const verify = useVerifyEmail()
   const [code, setCode] = useState('')
   const [codeError, setCodeError] = useState<string | null>(null)
@@ -37,7 +39,7 @@ export function EmailVerifyDialog() {
     event.preventDefault()
     const trimmed = code.trim()
     if (!/^\d+$/.test(trimmed)) {
-      setCodeError(trimmed ? t('codeInvalid') : tv('required'))
+      setCodeError(trimmed ? t('codeInvalid') : required('verifyCode'))
       return
     }
     setCodeError(null)

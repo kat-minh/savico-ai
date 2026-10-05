@@ -114,9 +114,15 @@
     },
     "forbidden": {
       "title": "Không có quyền truy cập",
-      "description": "Khu vực này chỉ dành cho quản trị viên.",
+      "description": "Khu vực này chỉ dành cho tài khoản nhân viên.",
       "backHome": "Về trang chủ",
-      "switchAccount": "Đăng nhập tài khoản khác"
+      "switchAccount": "Đăng nhập tài khoản khác",
+      "routeDescription": "Loại tài khoản hiện tại không được truy cập trang này.",
+      "sessionUnavailable": "Chưa nhận được thông tin phân quyền của phiên. Vui lòng đăng nhập lại sau khi hệ thống được cập nhật.",
+      "sectionDescription": "Bạn chưa được cấp quyền truy cập section này.",
+      "noSections": "Tài khoản hiện chưa được cấp quyền truy cập mục nào trong khu quản trị. Hãy liên hệ người quản lý để được cấp quyền.",
+      "allowedSection": "Đến mục được phép truy cập",
+      "adminHome": "Về khu quản trị"
     },
     "register": {
       "title": "Tạo tài khoản",
@@ -250,6 +256,34 @@
   },
   "validation": {
     "required": "Trường này là bắt buộc",
+    "requiredField": "{field} là bắt buộc",
+    "emailRequired": "Email là bắt buộc",
+    "fields": {
+      "fullName": "Họ và tên",
+      "projectName": "Tên dự án",
+      "contractorName": "Tên nhà thầu",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "password": "Mật khẩu",
+      "currentPassword": "Mật khẩu hiện tại",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "verifyCode": "Mã xác minh",
+      "address": "Địa chỉ",
+      "street": "Số nhà, tên đường",
+      "province": "Tỉnh / thành phố",
+      "ward": "Phường / xã",
+      "buildingType": "Loại công trình",
+      "scale": "Số tầng",
+      "floorCount": "Số tầng",
+      "hasAttic": "Tum",
+      "architectureStyle": "Phong cách kiến trúc",
+      "interiorStyle": "Phong cách nội thất",
+      "landPhoto": "Ảnh lô đất",
+      "date": "Ngày",
+      "timeSlot": "Khung giờ",
+      "note": "Mô tả nhu cầu"
+    },
     "email": "Nhập địa chỉ email hợp lệ",
     "minLength": "Phải có ít nhất {min} ký tự",
     "maxLength": "Tối đa {max} ký tự",
@@ -831,7 +865,11 @@
       "titleMobile": "Cẩm nang xây nhà"
     },
     "card": {
-      "imageCount": "{count} ảnh 3D"
+      "imageCount": "{count} ảnh 3D",
+      "floorsNotApplicable": "Tầng: Không áp dụng",
+      "tumNotApplicable": "Tum: Không áp dụng",
+      "stylesLoading": "Đang tải phong cách…",
+      "stylesError": "Không tải được phong cách"
     },
     "library": {
       "bannerTitle": "Khám phá các mẫu bản vẽ\nphù hợp cho ngôi nhà của bạn",
@@ -841,6 +879,17 @@
         "3d": "Mẫu bản vẽ 3D"
       },
       "allBuildingTypes": "Tất cả loại công trình",
+      "kindShort": {
+        "2d": "2D",
+        "3d": "3D"
+      },
+      "filterLabels": {
+        "buildingType": "Loại công trình",
+        "floors": "Quy mô (tầng)",
+        "tum": "Tum",
+        "architecture": "Phong cách kiến trúc",
+        "interior": "Phong cách nội thất"
+      },
       "allScales": "Tất cả quy mô",
       "allStyles": "Tất cả phong cách",
       "buildingTypePrefix": "Loại công trình: {value}",
@@ -856,6 +905,11 @@
       },
       "optionAll": "Tất cả",
       "scalePrefix": "Quy mô: {value}",
+      "tumPrefix": "Tum: {value}",
+      "withTum": "Có tum",
+      "withoutTum": "Không tum",
+      "architecturePrefix": "Kiến trúc: {value}",
+      "interiorPrefix": "Nội thất: {value}",
       "stylePrefix": "Phong cách: {value}",
       "prevPage": "Trang trước",
       "nextPage": "Trang sau"
@@ -874,6 +928,13 @@
       "planTitle": "Thông tin bản vẽ",
       "templateTitle": "Thông tin mẫu",
       "buildingType": "Loại công trình",
+      "tum": "Tum",
+      "architectureStyle": "Phong cách kiến trúc",
+      "interiorStyle": "Phong cách nội thất",
+      "notApplicable": "Không áp dụng",
+      "withTum": "Có tum",
+      "withoutTum": "Không tum",
+      "floorCountValue": "{count} tầng",
       "floors": "Quy mô",
       "lotSize": "Kích thước lô",
       "floorArea": "Diện tích",
@@ -894,6 +955,7 @@
       "breadcrumbRoot": "Cẩm nang",
       "breadcrumbLibrary": "Thư viện mẫu",
       "similar": "Mẫu tương tự",
+      "similarEmpty": "Trống",
       "zoom": "Phóng to bản vẽ",
       "viewerTitle": "Xem bản vẽ toàn màn hình",
       "previousFloor": "Tầng trước",
@@ -1109,7 +1171,6 @@
       },
       "popup": {
         "brandTagline": "Nền tảng AI cho kiến trúc xây dựng",
-        "badge": "Cẩm nang",
         "close": "Đóng",
         "title": "Đọc xong rồi – bắt đầu ngôi nhà của bạn?",
         "subtitle": "Từ kiến thức đến phương án thật chỉ vài phút. Chọn bước phù hợp với bạn lúc này.",
@@ -1301,7 +1362,7 @@
       "nameHint": "Đặt tên gợi nhớ, ví dụ \"Nhà phố Tân Lợi 3 tầng\".",
       "namePlaceholder": "VD: Nhà phố Tân Lợi 3 tầng",
       "descriptionLabel": "Mô tả (không bắt buộc)",
-      "descriptionHint": "Ghi chú riêng về dự án, chỉ bạn nhìn thấy.",
+      "descriptionHint": "Mô tả tối đa 500 ký tự, được giữ ở bước nhập liệu và gửi cho AI.",
       "descriptionPlaceholder": "Nhập mô tả dự án (nếu có)...",
       "needPlan": "Bạn cần mua gói thiết kế để tạo hồ sơ thi công. Mời chọn gói ở trang Bảng giá.",
       "submit": "Tạo dự án"
@@ -1434,7 +1495,8 @@
           "0": "Đã đọc dữ liệu ảnh / mô tả",
           "1": "Đang phân tích khối lượng...",
           "2": "Tính chi phí theo đơn giá khu vực {province}"
-        }
+        },
+        "processing": "Đang xử lý"
       },
       "dossier": {
         "title": "Đang render bộ hồ sơ thi công...",
@@ -1459,7 +1521,8 @@
           "drawings": "Đang xử lý bản vẽ ({done}/{total})",
           "renders": "Đang render phối cảnh ({done}/{total})",
           "package": "Đóng gói PDF"
-        }
+        },
+        "processing": "Đang chuẩn bị tệp hồ sơ…"
       }
     },
     "estimate": {
@@ -1517,7 +1580,8 @@
         "amount": "Thành tiền"
       },
       "pageTitleWithProject": "Dự toán: {name} ({id})",
-      "sampleNotice": "Đây là dữ liệu mẫu do hệ thống tạo thử, chưa phải kết quả phân tích thật cho công trình của bạn."
+      "sampleNotice": "Đây là dữ liệu mẫu do hệ thống tạo thử, chưa phải kết quả phân tích thật cho công trình của bạn.",
+      "exportError": "Chưa tải được tệp dự toán. Kết quả đã lưu vẫn được giữ; bạn thử tải lại."
     },
     "dossier": {
       "infoTitle": "Thông tin dự án",
@@ -1616,7 +1680,8 @@
         "estimate": "Bảng dự toán chi tiết"
       },
       "downloadTitle": "Tải xuống & chia sẻ",
-      "packagedNote": "Tệp tải về đã được đóng gói sẵn."
+      "packagedNote": "Tệp tải về đã được đóng gói sẵn.",
+      "exportError": "Chưa tải được hồ sơ PDF. Bạn thử tải lại."
     },
     "share": {
       "eyebrow": "Hồ sơ được chia sẻ",
@@ -1751,7 +1816,9 @@
         "title": "Xóa dự án?",
         "description": "Dự án \"{name}\" cùng toàn bộ dữ liệu nhập liệu, dự toán và hồ sơ sẽ bị xóa. Thao tác này không hoàn tác được.",
         "confirm": "Xóa dự án",
-        "success": "Đã xóa dự án."
+        "success": "Đã xóa dự án.",
+        "Processing": "Dự toán đang được xử lý nên chưa thể xóa.",
+        "ConstructionSiteInUse": "Dự toán đang được dùng bởi một công trình nên chưa thể xóa."
       },
       "createdAt": "Tạo ngày {date}",
       "progressLabel": "Tiến độ thiết kế – dự toán"
@@ -1849,7 +1916,9 @@
         "saved": "Đã lưu",
         "error": "Chưa lưu được — nội dung bạn nhập vẫn được giữ.",
         "denied": "Không lưu được thay đổi.",
-        "retry": "Thử lại"
+        "retry": "Thử lại",
+        "conflict": "Bản đã lưu vừa thay đổi. Nội dung đang nhập được giữ; tải lại sẽ thay nội dung này bằng bản trên máy chủ.",
+        "reloadSaved": "Tải lại bản đã lưu"
       },
       "lock": {
         "noEdit": "Bạn cần một gói thiết kế đang hoạt động (và còn lượt) để lưu thông tin và nhận dự toán.",
@@ -1883,9 +1952,10 @@
     },
     "estimateApi": {
       "startError": {
+        "mediaUnavailable": "Hệ thống chưa xử lý được ảnh của dự toán. Thông tin bạn nhập vẫn được giữ.",
         "unavailable": "Dịch vụ tạo thiết kế chưa sẵn sàng. Bạn thử lại sau ít phút nhé.",
         "locationChanged": "Dữ liệu địa chỉ vừa được cập nhật. Bạn chọn lại phường / xã rồi thử lại.",
-        "versionConflict": "Thông tin vừa thay đổi. Bạn bấm gửi lại một lần nữa nhé.",
+        "versionConflict": "Thông tin đã thay đổi. Hãy tải lại bản đã lưu và kiểm tra trước khi gửi.",
         "denied": "Bạn cần một gói thiết kế đang hoạt động và còn lượt để nhận dự toán.",
         "other": "Không gửi được yêu cầu. Bạn thử lại nhé."
       },
@@ -1897,6 +1967,10 @@
         "generic": "Việc tạo dự toán chưa thành công. Bạn có thể sửa thông tin hoặc thử lại, thông tin bạn nhập vẫn được giữ.",
         "retry": "Thử lại",
         "edit": "Sửa thông tin"
+      },
+      "load": {
+        "error": "Chưa tải được dữ liệu dự toán. Bạn có thể thử đọc lại.",
+        "retry": "Tải lại"
       }
     }
   },
@@ -3724,7 +3798,17 @@
         "locationText": "Địa điểm",
         "roleText": "Vai trò",
         "mainWork": "Hạng mục chính",
-        "deleteConfirmTitle": "Xoá dự án \"{name}\"?"
+        "deleteConfirmTitle": "Xoá dự án \"{name}\"?",
+        "tum": "Tum",
+        "hasTum": "Có tum",
+        "noTum": "Không tum",
+        "classificationHint": "Số tầng và tum dùng cấu hình của loại công trình trong danh mục dự toán.",
+        "notApplicable": "Không áp dụng cho loại công trình này",
+        "selectTypeFirst": "Chọn loại công trình trước",
+        "selectOptional": "Chọn nếu đã có thông tin",
+        "savedFloor": "{count} tầng (giá trị đã lưu)",
+        "categoryError": "Không tải được danh mục phân loại. Dữ liệu đang nhập được giữ lại.",
+        "retry": "Thử lại"
       },
       "addressHint": "Chọn một gợi ý để tự điền vĩ độ/kinh độ; vẫn sửa tay được bên dưới.",
       "files": {
@@ -3806,7 +3890,38 @@
         "ContractorNotFound": "Không tìm thấy hồ sơ nhà thầu (có thể đã bị xoá).",
         "ContractorProjectNotFound": "Không tìm thấy dự án này trong hồ sơ.",
         "AccessForbidden": "Chỉ tài khoản quản trị mới quản lý được nhà thầu.",
-        "generic": "Không tải được tệp. Bạn thử lại giúp."
+        "generic": "Không tải được tệp. Bạn thử lại giúp.",
+        "LocationDatasetChanged": "Danh mục tỉnh/phường đã thay đổi. Tải lại và chọn lại địa chỉ.",
+        "DependencyUnavailable": "Nguồn dữ liệu chưa sẵn sàng. Vui lòng thử lại."
+      },
+      "province": "Tỉnh/thành",
+      "provinceHint": "Chọn tỉnh của địa chỉ công ty để xác định miền. Có thể bổ sung sau.",
+      "provinceLoadError": "Không tải được danh mục tỉnh. Vui lòng mở lại biểu mẫu để thử lại.",
+      "addressParts": {
+        "province": "Tỉnh/Thành phố",
+        "ward": "Phường/Xã",
+        "street": "Số nhà/Đường",
+        "streetPlaceholder": "Nhập số nhà, tên đường để tìm vị trí",
+        "searching": "Đang tìm vị trí…",
+        "mapHint": "Chọn một địa chỉ gợi ý để hiện bản đồ. Vị trí sẽ được lưu tự động cùng địa chỉ.",
+        "mapAdjust": "Kéo ghim hoặc bấm trên bản đồ để chỉnh vị trí chính xác.",
+        "retry": "Thử lại",
+        "searchTooLong": "Địa chỉ đầy đủ vượt 500 ký tự nên chưa thể tìm trên bản đồ. Hãy rút gọn số nhà/đường và chọn lại vị trí.",
+        "legacy": "Địa chỉ đã lưu trước đây",
+        "noAddress": "Chưa có địa chỉ",
+        "add": "Bổ sung địa chỉ tách riêng",
+        "fullAddress": "Địa chỉ đầy đủ",
+        "locate": "Tìm vị trí trên bản đồ",
+        "selectLocation": "Chọn vị trí phù hợp",
+        "noResult": "Không tìm thấy vị trí. Kiểm tra địa chỉ và thử lại.",
+        "mapError": "Chưa tra được vị trí. Vui lòng thử lại.",
+        "coordinatesRequired": "Chọn một địa chỉ gợi ý để xác định vị trí trước khi lưu.",
+        "required": "Nhập đủ tỉnh/thành, phường/xã và số nhà/đường.",
+        "tooLong": "Số nhà/đường tối đa 500 ký tự.",
+        "clear": "Xóa toàn bộ địa chỉ",
+        "catalogError": "Không tải được danh mục tỉnh/phường. Dữ liệu đã nhập được giữ lại.",
+        "reload": "Tải lại danh mục",
+        "selectAgain": "Chọn lại địa chỉ từ danh mục mới"
       }
     },
     "paymentConnections": {
@@ -5073,7 +5188,8 @@
         "assigned": "Đã phân công gói cho nhân viên.",
         "transferred": "Đã chuyển giao phân công.",
         "removed": "Đã gỡ phân công."
-      }
+      },
+      "staffPermissionRequired": "Cần thêm quyền quản lý nhân viên (user.manage) để chọn người nhận phân công hoặc chuyển giao."
     },
     "address": {
       "noResult": "Không tìm thấy địa chỉ phù hợp",
@@ -5117,6 +5233,43 @@
         "Assigned": "Đang thực hiện",
         "Completed": "Đã hoàn thành",
         "CanceledByStaff": "Đã huỷ"
+      },
+      "area": "Diện tích đất",
+      "condition": "Hiện trạng",
+      "budget": "Ngân sách dự kiến",
+      "plannedStart": "Dự kiến khởi công",
+      "buildingType": "Loại công trình",
+      "floors": "Số tầng",
+      "floorCount": "{count} tầng (gồm tầng trệt)",
+      "tum": "Tum",
+      "hasTum": "Có tum",
+      "noTum": "Không tum",
+      "architecture": "Phong cách kiến trúc",
+      "interior": "Phong cách nội thất",
+      "notApplicable": "Không áp dụng",
+      "province": "Tỉnh / Thành phố",
+      "ward": "Phường / Xã",
+      "street": "Số nhà, đường",
+      "source": "Dự toán nguồn",
+      "fromEstimate": "Tạo từ dự toán",
+      "independent": "Hồ sơ tự tạo",
+      "sourceNote": "Quyền xem công trình không bao gồm quyền mở kết quả dự toán của khách.",
+      "map": "Vị trí công trình",
+      "files": "Tài liệu đính kèm",
+      "noFiles": "Chưa có tài liệu đính kèm",
+      "download": "Tải tệp",
+      "downloadError": "Không tải được tệp. Tệp có thể đã bị gỡ hoặc quyền truy cập đã thay đổi. Vui lòng thử lại.",
+      "loadError": "Không tải được chi tiết công trình.",
+      "retry": "Thử lại",
+      "startOptions": {
+        "ASAP": "Càng sớm càng tốt",
+        "Within1To3Months": "Trong 1–3 tháng tới",
+        "Within3To6Months": "Trong 3–6 tháng tới",
+        "Undecided": "Chưa xác định"
+      },
+      "fileGroups": {
+        "Drawing": "Bản vẽ",
+        "ConditionPhoto": "Ảnh hiện trạng"
       }
     }
   },
@@ -5149,7 +5302,11 @@
       "surveyLabel": "Có thể khảo sát",
       "surveyHours": "trong {hours}h",
       "acceptingLabel": "Đang nhận",
-      "acceptingSuffix": "dự án"
+      "acceptingSuffix": "dự án",
+      "informationUnknown": "Chưa cập nhật",
+      "ratingUnknown": "Chưa có đánh giá",
+      "projectAvailability": "Trạng thái nhận dự án",
+      "distanceUnknown": "Chưa tính khoảng cách"
     },
     "scope": {
       "turnkey": "Thi công trọn gói",
@@ -5253,7 +5410,11 @@
           "any": "Mọi mức đánh giá",
           "good": "Từ 4,0 sao",
           "great": "Từ 4,5 sao"
-        }
+        },
+        "unsupported": "Chưa hỗ trợ lọc theo tiêu chí này.",
+        "loadError": "Không tải được danh mục. Vui lòng thử lại.",
+        "distanceNeedsRadius": "Chọn công trình và bán kính để sắp xếp nhà thầu gần nhất.",
+        "configureRadius": "Chọn bán kính"
       },
       "ranking": {
         "stickyNudge": "Tạo hồ sơ dự án - miễn phí",
@@ -5263,7 +5424,10 @@
           "survey": "Khảo sát sớm"
         },
         "surveyWithin": "Có thể khảo sát trong {hours}h",
-        "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm."
+        "empty": "Chưa có nhà thầu nào khớp bộ tiêu chí này. Hãy nới bớt tiêu chí để xem thêm.",
+        "loading": "Đang tải nhà thầu…",
+        "loadError": "Không tải được danh sách nhà thầu. Vui lòng thử lại.",
+        "retry": "Thử lại"
       },
       "safety": {
         "title": "An toàn & minh bạch",
@@ -5557,8 +5721,11 @@
     },
     "matches": {
       "title": "Nhà thầu được đề xuất",
+      "restoreError": "Chưa tải được hồ sơ dự án đã chọn. Vui lòng thử lại.",
+      "restoreRetry": "Thử lại",
       "subtitle": "Chọn nhà thầu để xem hồ sơ, so sánh hoặc mời báo giá.",
       "radius": "Bán kính tìm kiếm",
+      "radiusNone": "Không áp dụng",
       "radiusOption": "{km} km",
       "resultsInRadius": "{count} nhà thầu trong {km} km",
       "empty": "Chưa có nhà thầu nào trong bán kính {km} km. Thử mở rộng bán kính tìm kiếm.",
@@ -5571,6 +5738,7 @@
       "inviteLimitReached": "Đã dùng hết {max} lượt mời",
       "whyTitle": "Vì sao BuildX đề xuất?",
       "why1": "Phù hợp loại công trình",
+      "whySurveyUnknown": "Chưa cập nhật thời gian khảo sát",
       "why2": "{count} dự án đã thực hiện",
       "why3": "Có thể khảo sát trong {hours}h",
       "invitedPill": "Đã mời <n>{used}</n>/{max} · còn <n>{left}</n> lượt",
@@ -5584,7 +5752,14 @@
       "previewTitle": "Bạn đang xem thử — tạo hồ sơ dự án để mời nhà thầu",
       "previewDescription": "Tạo hồ sơ để lưu lựa chọn và gửi lời mời.",
       "previewAction": "Tạo hồ sơ dự án",
-      "viewInvites": "Xem lời mời"
+      "viewInvites": "Xem lời mời",
+      "allRegions": "Tất cả miền",
+      "resultsCount": "{count} nhà thầu",
+      "loadError": "Không tải được danh sách nhà thầu. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "emptyFilters": "Không có nhà thầu phù hợp với bộ lọc.",
+      "profileUnavailable": "Không thể mở hồ sơ này. Hãy chọn hồ sơ đã xác định được chủ sở hữu hoặc tạo hồ sơ mới.",
+      "chooseAnotherProfile": "Chọn hồ sơ khác"
     },
     "firm": {
       "tabs": {
@@ -5767,7 +5942,9 @@
       "introTags": {
         "buildingType": "Loại công trình",
         "scope": "Phạm vi thi công"
-      }
+      },
+      "loadFailed": "Không tải được hồ sơ nhà thầu. Nhà thầu có thể đã bị ẩn hoặc quyền truy cập đã thay đổi.",
+      "retry": "Thử lại"
     },
     "compare": {
       "title": "So sánh hồ sơ nhà thầu",
@@ -5922,6 +6099,7 @@
     },
     "picker": {
       "title": "Chọn dự án để tìm nhà thầu",
+      "saveSelectionError": "Không lưu được dự án đã chọn. Hãy cho phép lưu trữ trong trình duyệt rồi thử lại.",
       "subtitle": "Mỗi dự án mời tối đa {max} nhà thầu. Hồ sơ gửi đi không chứa giá hay ngân sách.",
       "emptyBadge": "Chưa có dự án",
       "emptyTitle": "Bạn chưa có dự án nào",
@@ -5943,7 +6121,11 @@
       "contracted": "Đã chốt thầu",
       "untitled": "Hồ sơ chưa đặt tên",
       "draft": "Bản nháp",
-      "completeBrief": "Hoàn thiện hồ sơ"
+      "completeBrief": "Hoàn thiện hồ sơ",
+      "loadSelectionError": "Không tải được hồ sơ và số lời mời. Vui lòng thử lại.",
+      "retrySelection": "Thử lại",
+      "apiSubtitle": "Chọn hồ sơ để tìm nhà thầu. Số lượt đã mời và giới hạn hiện tại được hiển thị theo từng hồ sơ.",
+      "apiEmptyFootnote": "Sau khi tạo hồ sơ, bạn có thể chọn nhà thầu và gửi lời mời báo giá."
     },
     "projectBar": {
       "label": "Dự án đang chọn",
@@ -5952,6 +6134,212 @@
       "viewInvites": "Xem lời mời",
       "switchProject": "Đổi dự án",
       "editWarning": "Sửa hồ sơ sẽ tạo phiên bản {next} — lời mời đã gửi vẫn dùng {current}."
+    },
+    "siteForm": {
+      "projectTitle": "Thông tin công trình",
+      "requiredHint": "Các trường có dấu * là bắt buộc",
+      "select": "Chọn một giá trị",
+      "source": "Lấy thông tin từ dự toán (không bắt buộc)",
+      "independent": "Tự nhập công trình mới",
+      "linkedSource": "Dự toán đã liên kết",
+      "moreSources": "Xem thêm dự toán",
+      "sourceHint": "Chỉ chọn được dự toán của bạn đã hoàn tất và chưa dùng để tạo công trình.",
+      "sourceLocked": "Diện tích, địa chỉ, loại công trình, tầng, tum và phong cách được giữ theo dự toán nguồn. Sau khi tạo không thể đổi nguồn.",
+      "sourceLoading": "Đang tải thông tin dự toán…",
+      "sourceNotReady": "Vui lòng đợi thông tin dự toán được tải đầy đủ.",
+      "name": "Tên dự án",
+      "namePlaceholder": "VD: Nhà phố Tân Lợi 2 tầng",
+      "buildingType": "Loại công trình",
+      "area": "Diện tích đất (m²)",
+      "areaError": "Nhập diện tích lớn hơn 0, tối đa 2 chữ số thập phân.",
+      "condition": "Hiện trạng",
+      "floors": "Số tầng",
+      "floorLabel": "{count} tầng (gồm tầng trệt)",
+      "tum": "Tum",
+      "yesTum": "Có tum",
+      "noTum": "Không tum",
+      "architecture": "Phong cách kiến trúc",
+      "interior": "Phong cách nội thất",
+      "stylesTitle": "Phong cách công trình",
+      "stylePrompt": "Chọn loại công trình để hiển thị các phong cách phù hợp.",
+      "styleNotApplicable": "Không áp dụng với loại công trình này.",
+      "noStyleImage": "Chưa có ảnh minh họa",
+      "province": "Tỉnh / Thành phố",
+      "ward": "Phường / Xã",
+      "street": "Số nhà, đường",
+      "streetPlaceholder": "VD: 12 Nguyễn Tất Thành",
+      "locationsError": "Chưa tải được danh mục địa chỉ. Hãy thử lại.",
+      "location": "Vị trí công trình",
+      "findLocation": "Tra vị trí từ địa chỉ",
+      "locating": "Đang xác định vị trí…",
+      "locationHint": "Nhập đủ địa chỉ, tra vị trí và chọn kết quả phù hợp để xác nhận tọa độ.",
+      "addressFirst": "Vui lòng nhập đủ tỉnh/thành, phường/xã và số nhà, đường.",
+      "noLocation": "Không tìm thấy địa chỉ. Kiểm tra số nhà, đường rồi tra lại.",
+      "chooseLocation": "Vui lòng tra và chọn vị trí cho địa chỉ hiện tại trước khi tiếp tục.",
+      "locationConfirmed": "Đã xác nhận vị trí: {address}",
+      "budget": "Ngân sách dự kiến (VND)",
+      "budgetError": "Nhập số nguyên VND lớn hơn 0, tối đa 28 chữ số. Có thể dùng dấu phân cách nhóm nghìn.",
+      "start": "Dự kiến khởi công",
+      "needsTitle": "Nhu cầu thi công",
+      "needsSubtitle": "Cho BuildX biết phạm vi và yêu cầu chính của dự án.",
+      "scope": "Phạm vi thi công",
+      "description": "Mô tả nhu cầu",
+      "descriptionPlaceholder": "VD: Cần nhà thầu thi công trọn gói nhà phố 2 tầng, có kinh nghiệm và có thể khảo sát cuối tuần.",
+      "needsLocal": "Nhu cầu thi công được lưu trên trình duyệt này; hiện chưa gửi đến nhà thầu.",
+      "scopeLoadError": "Không tải được danh mục phạm vi thi công. Vui lòng thử lại.",
+      "scopeEmpty": "Chưa có phạm vi thi công đang dùng trong danh mục.",
+      "scopeHistorical": "Lựa chọn đã lưu trước đây",
+      "savedScope": "Phạm vi đã lưu",
+      "optional": "(không bắt buộc)",
+      "retry": "Thử lại",
+      "locked": "Công trình đang có gói giám sát giữ chỗ nên thông tin công trình và tệp được khóa.",
+      "saveLocal": "Lưu trên thiết bị",
+      "savedLocal": "Đã lưu trên thiết bị này",
+      "leaveDescription": "Thông tin chưa tạo thành công trình sẽ chỉ được lưu trên thiết bị này. Bạn muốn lưu trước khi rời trang?",
+      "uncertain": "Chưa xác định được kết quả tạo công trình. Kiểm tra công trình đã lưu trước khi gửi lại.",
+      "checkCreation": "Kiểm tra kết quả tạo",
+      "notCreated": "Chưa tìm thấy công trình khớp với lần tạo vừa rồi. Bạn có thể kiểm tra dữ liệu và tiếp tục lại.",
+      "files": {
+        "title": "Tài liệu hiện có",
+        "hint": "{count}/9 tệp. Mỗi tệp tối đa 10 MB (10.000.000 byte), được lưu riêng tư.",
+        "Drawing": "Bản vẽ",
+        "ConditionPhoto": "Ảnh hiện trạng",
+        "DrawingHint": "PDF, DWG, DXF, JPG, PNG, WebP",
+        "ConditionPhotoHint": "JPG, PNG, WebP",
+        "formats": "PDF, DWG, DXF, JPG, PNG, WebP",
+        "uploading": "Đang tải và xác minh tệp…",
+        "limit": "Một công trình được gắn tối đa 9 tệp.",
+        "size": "Tệp vượt quá 10.000.000 byte.",
+        "type": "Tệp không thuộc định dạng được hỗ trợ hoặc là tệp rỗng.",
+        "remove": "Gỡ tệp {name}",
+        "download": "Tải tệp",
+        "downloadError": "Không tải được tệp. Vui lòng thử lại.",
+        "choose": "Chọn tệp"
+      },
+      "errors": {
+        "generic": "Không thể lưu công trình. Dữ liệu đã nhập vẫn được giữ, vui lòng thử lại.",
+        "localSave": "Không lưu được trên thiết bị. Hãy cho phép lưu trữ trong trình duyệt rồi thử lại.",
+        "ConstructionSiteNameTaken": "Bạn đã có công trình mang tên này. Vui lòng chọn tên khác.",
+        "ConstructionSiteCatalogChanged": "Danh mục đã thay đổi. Kiểm tra lại loại công trình, tầng và phong cách rồi lưu lại.",
+        "ConstructionSiteConditionUnavailable": "Hiện trạng đã chọn không còn dùng được. Vui lòng chọn lại.",
+        "ConstructionSiteSourceUnavailable": "Dự toán đã được dùng hoặc chưa đủ điều kiện. Vui lòng chọn nguồn khác.",
+        "ConstructionSiteSourceNotFound": "Không tìm thấy dự toán nguồn của bạn.",
+        "ConstructionSiteSourceDataInvalid": "Dữ liệu dự toán nguồn không đầy đủ. Vui lòng chọn nguồn khác hoặc tự nhập.",
+        "ConstructionSiteSourceLocked": "Không thể thay đổi thông tin kế thừa từ dự toán nguồn.",
+        "ConstructionSiteVersionConflict": "Công trình đã thay đổi. Hãy tải lại trang để xem phiên bản mới trước khi sửa.",
+        "ConstructionSiteHasSupervision": "Công trình đã có gói giám sát giữ chỗ; không thể sửa thông tin hoặc tệp.",
+        "LocationDatasetChanged": "Danh mục địa chỉ đã thay đổi. Vui lòng chọn lại tỉnh/thành và phường/xã.",
+        "DependencyUnavailable": "Dịch vụ phụ thuộc chưa sẵn sàng. Hãy thử lại sau.",
+        "AccessForbidden": "Tài khoản này không có quyền tạo hoặc sửa công trình. Chỉ khách hàng sở hữu được thực hiện.",
+        "ValidationError": "Thông tin chưa hợp lệ. Kiểm tra các trường được đánh dấu rồi thử lại.",
+        "ConstructionSiteUploadUnavailable": "Tệp chưa sẵn sàng, hết hạn hoặc đã được sử dụng. Hãy gỡ và tải lại tệp.",
+        "ConstructionSiteAttachmentLimitExceeded": "Một công trình được gắn tối đa 9 tệp.",
+        "ConstructionSiteFileTooLarge": "Tệp vượt quá 10.000.000 byte.",
+        "ConstructionSiteFileInspectionUnavailable": "Chưa thể kiểm tra định dạng bản vẽ này. Vui lòng thử lại sau.",
+        "StoragePutFailed": "Không tải được tệp lên kho. Vui lòng chọn tệp để thử lại.",
+        "MapServiceUnavailable": "Dịch vụ tra vị trí chưa sẵn sàng. Hãy thử lại sau."
+      },
+      "descriptionCount": "{count} / 1000",
+      "reloadLatest": "Tải phiên bản mới để kiểm tra",
+      "locationSearch": "Nội dung tra vị trí (có thể rút gọn; địa chỉ công trình vẫn giữ nguyên)",
+      "searchLength": "Nhập nội dung tra vị trí từ 1 đến 500 ký tự. Có thể rút gọn câu tìm rồi chọn kết quả phù hợp.",
+      "mapHint": "Gõ địa chỉ để xem danh sách gợi ý. Chọn một kết quả, sau đó kéo ghim hoặc bấm trên bản đồ để chỉnh vị trí công trình.",
+      "mapReadOnly": "Vị trí công trình trên bản đồ. Hồ sơ này không cho phép thay đổi vị trí.",
+      "mapAdjustHint": "Kéo ghim hoặc bấm trên bản đồ để chỉnh vị trí.",
+      "addressSearchHint": "Nhập số nhà, đường rồi chọn địa chỉ trong danh sách gợi ý."
+    },
+    "rfq": {
+      "title": "Lời mời báo giá",
+      "sentTitle": "Đã gửi lời mời báo giá",
+      "supportHint": "Đội hỗ trợ sẽ liên hệ với bạn và nhà thầu để xác nhận lịch.",
+      "count": "Đã mời {used}/{limit} nhà thầu · Còn {remaining} lượt",
+      "loading": "Đang tải lời mời…",
+      "loadFailed": "Không tải được lời mời báo giá. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "empty": "Hồ sơ chưa gửi lời mời báo giá.",
+      "back": "Quay lại danh sách nhà thầu",
+      "trackAll": "Theo dõi tất cả lời mời",
+      "detailTitle": "Thông tin và hồ sơ đã gửi",
+      "phone": "Số điện thoại liên lạc",
+      "note": "Ghi chú khảo sát",
+      "sentAt": "Gửi lúc",
+      "desired": "Lịch mong muốn ban đầu",
+      "appointment": "Lịch hẹn hiện tại (giờ Việt Nam)",
+      "viewSent": "Xem hồ sơ đã gửi",
+      "profile": "Xem hồ sơ nhà thầu",
+      "snapshot": "Hồ sơ v{version} · {count} tệp",
+      "snapshotHint": "Thông tin và tệp được giữ nguyên tại thời điểm gửi lời mời, kể cả khi hồ sơ gốc được sửa.",
+      "fileFailed": "Không tải được tệp. Vui lòng kiểm tra quyền truy cập và thử lại.",
+      "dateHint": "Chọn ngày giờ trong tương lai theo giờ Việt Nam.",
+      "timeHint": "Đây là thời gian bạn đề nghị, chưa phải lịch nhà thầu đã xác nhận.",
+      "siteRequired": "Vui lòng lưu hồ sơ công trình trước khi gửi lời mời.",
+      "sendFailed": "Chưa xác nhận được kết quả gửi. Vui lòng thử lại.",
+      "uncertain": "Chưa xác nhận được lần gửi trước. Bấm xác nhận để kiểm tra lại cùng yêu cầu; thông tin được giữ nguyên để tránh gửi trùng.",
+      "adminDescription": "Xử lý lời mời theo từng hồ sơ và nhà thầu; cập nhật lịch hẹn, trạng thái và ghi chú nội bộ.",
+      "allStatuses": "Tất cả trạng thái",
+      "internalNote": "Ghi chú nội bộ (khách không xem được)",
+      "save": "Lưu thay đổi",
+      "saved": "Đã lưu lời mời.",
+      "versionConflict": "Lời mời đã được người khác cập nhật. Hãy tải lại dữ liệu và kiểm tra trước khi lưu.",
+      "refresh": "Tải lại dữ liệu",
+      "states": {
+        "Sent": "Đã gửi",
+        "Received": "Đã tiếp nhận",
+        "ContractorReceived": "Nhà thầu đã nhận",
+        "Completed": "Hoàn tất"
+      },
+      "errors": {
+        "QuotationAlreadyInvited": "Hồ sơ đã gửi lời mời cho nhà thầu này.",
+        "QuotationLimitReached": "Hồ sơ đã đạt giới hạn nhà thầu được mời.",
+        "QuotationContractorUnavailable": "Nhà thầu hiện đã bị ẩn và không nhận lời mời mới.",
+        "QuotationTimeNotFuture": "Ngày giờ mong muốn phải ở tương lai.",
+        "QuotationContactRequired": "Vui lòng bổ sung số điện thoại liên lạc hợp lệ.",
+        "QuotationIdempotencyConflict": "Nội dung lần gửi không khớp. Vui lòng tải lại trang để kiểm tra yêu cầu trước.",
+        "AccessForbidden": "Bạn không có quyền thực hiện thao tác này.",
+        "ConstructionSiteNotFound": "Không tìm thấy hồ sơ công trình của bạn.",
+        "DependencyUnavailable": "Dữ liệu hoặc tệp hồ sơ chưa sẵn sàng. Vui lòng thử lại."
+      },
+      "meanings": {
+        "Sent": "Hệ thống đã lưu lời mời của bạn.",
+        "Received": "Đội hỗ trợ đã tiếp nhận yêu cầu.",
+        "ContractorReceived": "Đội hỗ trợ đã chuyển lời mời đến nhà thầu.",
+        "Completed": "Đội hỗ trợ đã đánh dấu yêu cầu hoàn tất."
+      },
+      "reviewUnavailable": "Chưa thể gửi đánh giá trên trang này.",
+      "chooseManagement": "Chọn cách quản lý thi công",
+      "profileFields": {
+        "buildingType": "Loại công trình",
+        "area": "Diện tích đất",
+        "condition": "Hiện trạng",
+        "budget": "Ngân sách dự kiến",
+        "plannedStart": "Dự kiến khởi công",
+        "floors": "Số tầng",
+        "tum": "Tum",
+        "hasTum": "Có tum",
+        "noTum": "Không tum",
+        "architecture": "Phong cách kiến trúc",
+        "interior": "Phong cách nội thất",
+        "notApplicable": "Không áp dụng",
+        "address": "Địa chỉ",
+        "source": "Dự toán nguồn",
+        "independent": "Hồ sơ tự tạo",
+        "startOptions": {
+          "ASAP": "Càng sớm càng tốt",
+          "Within1To3Months": "Trong 1–3 tháng tới",
+          "Within3To6Months": "Trong 3–6 tháng tới",
+          "Undecided": "Chưa xác định"
+        },
+        "site": "Tên công trình"
+      },
+      "privacy": "Số điện thoại được lưu cùng lời mời để đội hỗ trợ liên hệ sắp lịch.",
+      "phoneInvalid": "Số điện thoại cần có chữ số, tối đa 20 ký tự; chỉ dùng số, dấu + ở đầu, khoảng trắng, dấu chấm, gạch ngang hoặc ngoặc.",
+      "quotaUnavailable": "Chưa tải được số lượt mời.",
+      "displayCodeUnavailable": "Chưa có mã hiển thị",
+      "updatedBySupport": "Trạng thái do đội hỗ trợ BuildX cập nhật",
+      "scopeNotRecorded": "Chưa có trong bản đã gửi",
+      "floorsCount": "{count} tầng",
+      "footerNote": "Sau khi nhà thầu nhận lời mời, hai bên trao đổi trực tiếp về khảo sát, báo giá và hợp đồng. BuildX theo dõi lời mời; báo giá và hợp đồng được trao đổi ngoài hệ thống. Muốn đổi lịch hoặc cần hỗ trợ, hãy liên hệ đội hỗ trợ.",
+      "snapshotVersion": "v{version}"
     }
   },
   "checkout": {

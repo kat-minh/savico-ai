@@ -3,6 +3,8 @@
 import { useMemo } from 'react'
 import type { Role } from '../auth.constants'
 import { useAuthStore } from '../auth.store'
+import { hasPermission } from '../route-access'
+import type { PermissionCode } from '../permissions'
 
 /**
  * Ergonomic read-only view over the auth store plus role helpers.
@@ -15,13 +17,19 @@ export function useAuth() {
 
   return useMemo(() => {
     const roles = user?.roles ?? []
+    const ready = isInitialized && isAuthenticated
     return {
       user,
       roles,
       isAuthenticated,
       isInitialized,
-      hasRole: (role: Role) => roles.includes(role),
-      hasAnyRole: (allowed: readonly Role[]) => allowed.some((r) => roles.includes(r))
+      isCustomer: ready && user?.accountKind === 'Customer' && !user.mustChangePassword && user.emailVerified !== false,
+      isStaff: ready && user?.accountKind === 'Staff',
+      hasRole: (role: Role) => ready && roles.includes(role),
+      hasAnyRole: (allowed: readonly Role[]) => ready && allowed.some((r) => roles.includes(r)),
+      hasPermission: (code: PermissionCode) => ready && hasPermission(user, code),
+      hasAnyPermission: (codes: readonly PermissionCode[]) => ready && codes.some((code) => hasPermission(user, code)),
+      hasAllPermissions: (codes: readonly PermissionCode[]) => ready && codes.every((code) => hasPermission(user, code))
     }
   }, [user, isAuthenticated, isInitialized])
 }

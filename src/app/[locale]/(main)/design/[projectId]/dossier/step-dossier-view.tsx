@@ -15,7 +15,7 @@ import {
   useAdvisory,
   useCreateShareLink,
   useRevokeShareLink,
-  isApiEstimateId,
+  DesignLoadError,
   useDesignStore,
   useDossier,
   useEstimate,
@@ -29,7 +29,8 @@ import { ProactiveChatStream } from '@/features/chatbot'
 import { PersonalizedPanel, useHandbookPanelStore, type HandbookFilter } from '@/features/handbook'
 import { useRouter } from '@/i18n/navigation'
 import { useAuth } from '@/shared/auth'
-import { designDossierRoute } from '@/shared/constants/routes'
+import { env } from '@/shared/config/env'
+import { designDossierRoute, designEstimateRoute } from '@/shared/constants/routes'
 import { useProjectChatContext } from '../use-project-chat-context'
 
 /**
@@ -38,6 +39,7 @@ import { useProjectChatContext } from '../use-project-chat-context'
  */
 export function StepDossierView({ projectId }: { projectId: string }) {
   const t = useTranslations('design.dossier')
+  const tCommon = useTranslations('common')
   const tWaiting = useTranslations('design.progress.dossier')
   const tInput = useTranslations('design.input')
   const floorLabel = useFloorCountLabel()
@@ -48,15 +50,17 @@ export function StepDossierView({ projectId }: { projectId: string }) {
   const enteredFromEstimate = searchParams.get('entry') === 'estimate'
 
   const draft = useDesignStore((s) => s.drafts[projectId])
-  const { data: project } = useProject(projectId)
-  const { data: estimate } = useEstimate(projectId, { readOnly: true })
+  const projectQuery = useProject(projectId)
+  const project = projectQuery.data
+  const estimateQuery = useEstimate(projectId, { readOnly: true })
+  const estimate = estimateQuery.data
   const dossierQuery = useDossier(projectId)
   const dossier = dossierQuery.data
   const render = useRenderDossier(projectId)
   const createShareLink = useCreateShareLink(projectId)
   const revokeShareLink = useRevokeShareLink(projectId)
   // Dự toán THẬT: chủ bản chọn ngày hết hạn và thu hồi link được; dự án mock giữ link tạo sẵn.
-  const manageShare = isApiEstimateId(projectId)
+  const manageShare = !env.NEXT_PUBLIC_USE_MOCK_API
   const sendEmail = useSendDossierEmail(projectId)
   const advisory = useAdvisory(estimate, user?.name ?? '', draft)
   const panelMinimized = useHandbookPanelStore((s) => s.minimized)
@@ -140,12 +144,24 @@ export function StepDossierView({ projectId }: { projectId: string }) {
     router.replace(designDossierRoute(projectId), { scroll: false })
   }, [enteredFromEstimate, flow.phase, projectId, router])
 
+  if (projectQuery.isError || dossierQuery.isError || estimateQuery.isError)
+    return (
+      <DesignLoadError
+        onRetry={() => {
+          void projectQuery.refetch()
+          void dossierQuery.refetch()
+          void estimateQuery.refetch()
+        }}
+      />
+    )
+
   return (
     <>
       <StepProgress
         current={3}
         currentDone={showingFiles && flow.phase !== 'files'}
         title={renderActive ? tWaiting('pageTitle') : t('pageTitle')}
+        previousStep={{ href: designEstimateRoute(projectId), label: tCommon('back') }}
         entranceKey={`design.${projectId}.step3`}
         animateEntrance={false}
       />

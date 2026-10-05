@@ -49,7 +49,7 @@ import { ADMIN_ROUTES, type AdminRoute } from '@/shared/constants'
  */
 export const ADMIN_NAV = [
   // Đã ẩn "Tổng quan" (overview/dashboard) khỏi menu theo yêu cầu; route /admin và
-  // trang AdminInbox vẫn còn (vẫn là trang đích khi vào /admin) để bật lại sau.
+  // trang AdminInbox vẫn còn để bật lại sau; /admin chọn mục đầu được phép.
   {
     key: 'payments',
     icon: DollarOutlined,

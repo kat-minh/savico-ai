@@ -154,12 +154,14 @@ export async function fetchLibraryFilters(query: LibraryFilterQuery = {}): Promi
 export interface TemplateStyleQuery {
   drawingKind: '2D' | '3D'
   buildingTypeId?: string
+  floorCount?: number
+  hasTum?: boolean
   architectureStyleIds?: readonly string[]
   interiorStyleIds?: readonly string[]
 }
 
 /**
- * `templateId` của mọi mẫu công khai khớp phong cách. BE nhận tham số LẶP và tự xử lý: trong
+ * `templateId` của mọi mẫu công khai khớp các bộ lọc. BE nhận tham số LẶP cho phong cách: trong
  * mỗi nhóm khớp ít nhất một (OR), giữa hai nhóm và với loại công trình là AND; mẫu 2D bỏ qua
  * cả hai nhóm phong cách. Gửi id không phải GUID là 400.
  */
@@ -169,6 +171,8 @@ export async function fetchTemplateIdsByStyle(query: TemplateStyleQuery): Promis
     const qs = buildQuery({
       drawingKind: query.drawingKind,
       buildingTypeId: query.buildingTypeId,
+      floorCount: query.floorCount,
+      hasTum: query.hasTum,
       architectureStyleIds: query.architectureStyleIds,
       interiorStyleIds: query.interiorStyleIds,
       pageIndex,

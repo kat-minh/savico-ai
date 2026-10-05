@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { useAuthStore } from '@/shared/auth'
 
 import { contractorsApi } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
@@ -12,9 +13,11 @@ import { contractorKeys } from '../api/contractors.keys'
  * hiện đúng trạng thái từng dự án ("Chưa mời" / "Đã mời 2/3" / "Đã mời 3/3") mà
  * không phải gọi thêm một truy vấn cho mỗi dòng.
  */
-export function useBriefSummaries() {
+export function useBriefSummaries(enabled = true) {
+  const userId = useAuthStore((state) => state.user?.id)
   return useQuery({
-    queryKey: contractorKeys.briefSummaries(),
-    queryFn: () => contractorsApi.listBriefSummaries()
+    queryKey: contractorKeys.briefSummaries(userId),
+    queryFn: () => contractorsApi.listBriefSummaries(),
+    enabled: enabled && Boolean(userId)
   })
 }

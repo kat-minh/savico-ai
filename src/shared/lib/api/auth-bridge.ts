@@ -1,4 +1,4 @@
-import { AUTH_ENDPOINTS } from '@/shared/auth/auth.constants'
+import { AUTH_ENDPOINTS, AUTH_SESSION_ENDED_EVENT, AUTH_SESSION_REFRESHED_EVENT } from '@/shared/auth/auth.constants'
 import { clearSessionMarker } from '@/shared/auth/session-marker'
 import { useAuthStore } from '@/shared/auth/auth.store'
 import { API_CONFIG } from '@/shared/config/api.config'
@@ -29,7 +29,13 @@ export async function refreshSession(): Promise<boolean> {
         timeout: API_CONFIG.timeout
       }
     )
-    return res.data?.isSuccess !== false
+    const refreshed = res.data?.isSuccess !== false
+    if (refreshed && typeof window !== 'undefined') {
+      useAuthStore.getState().setInitialized(false)
+      // Finish the retry first, then recheck the new permission snapshot.
+      window.setTimeout(() => window.dispatchEvent(new Event(AUTH_SESSION_REFRESHED_EVENT)), 0)
+    }
+    return refreshed
   } catch {
     return false
   }
@@ -39,4 +45,5 @@ export async function refreshSession(): Promise<boolean> {
 export function onUnauthorized(): void {
   clearSessionMarker()
   useAuthStore.getState().reset()
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(AUTH_SESSION_ENDED_EVENT))
 }

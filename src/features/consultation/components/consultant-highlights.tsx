@@ -80,7 +80,7 @@ export function ConsultantHighlights({ preferredSpecialtyId }: ConsultantHighlig
           </Link>
         </header>
 
-        <ul className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+        <ul className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3'>
           {isPending
             ? Array.from({ length: HOME_CONSULTANT_COUNT }, (_, index) => (
                 <li key={index}>

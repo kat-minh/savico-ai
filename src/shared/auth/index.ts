@@ -3,6 +3,8 @@ export {
   AUTH_COOKIE_NAME,
   AUTH_ENDPOINTS,
   AUTH_STORAGE_KEY,
+  AUTH_SESSION_REFRESHED_EVENT,
+  AUTH_SESSION_ENDED_EVENT,
   MOCK_SESSION_USER_KEY,
   ROLES,
   type Role
@@ -16,3 +18,16 @@ export { GuestRoute } from './guards/guest-route'
 export { ProtectedRoute } from './guards/protected-route'
 export { RoleGuard } from './guards/role-guard'
 export { useAuth } from './hooks/use-auth'
+export { PERMISSIONS, type PermissionCode } from './permissions'
+export {
+  ADMIN_ROUTE_ACCESS,
+  authHome,
+  canAccessAdminRoute,
+  hasPermission,
+  isCustomerRoute,
+  isProtectedPath,
+  loginDestination,
+  matchesRoute
+} from './route-access'
+export { RouteGuard } from './guards/route-guard'
+export { AuthGuardFallback } from './guards/auth-guard-fallback'

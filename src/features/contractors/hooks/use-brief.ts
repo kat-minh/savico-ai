@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { useRouter } from '@/i18n/navigation'
 import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
+import { useAuthStore } from '@/shared/auth'
 import { contractorsApi, type SaveBriefPayload } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
 
@@ -18,10 +19,12 @@ import { contractorKeys } from '../api/contractors.keys'
  * thẻ dự án.
  */
 export function useBrief(projectId: string) {
+  const userId = useAuthStore((state) => state.user?.id)
   return useQuery({
-    queryKey: contractorKeys.brief(projectId),
+    queryKey: contractorKeys.brief(projectId, userId),
     queryFn: () => contractorsApi.getBrief(projectId),
-    enabled: Boolean(projectId) && projectId !== CONTRACTOR_PREVIEW_ID
+    enabled: Boolean(userId && projectId) && projectId !== CONTRACTOR_PREVIEW_ID,
+    retry: false
   })
 }
 
@@ -34,24 +37,26 @@ export function useBrief(projectId: string) {
  * để xếp.
  */
 export function useBriefs(enabled = true) {
+  const userId = useAuthStore((state) => state.user?.id)
   return useQuery({
-    queryKey: contractorKeys.briefList(),
+    queryKey: contractorKeys.briefList(userId),
     queryFn: () => contractorsApi.listBriefs(),
-    enabled
+    enabled: enabled && Boolean(userId)
   })
 }
 
 /**
  * "Tạo hồ sơ" ở landing (S09) — sinh mã dự án rồi mở thẳng Bước 1.
  *
- * Hồ sơ được tạo TRƯỚC khi khách nhập gì, giống luồng thiết kế: có mã dự án thì
- * mới lưu nháp được, và mọi màn sau (S12–S18) đều gắn theo mã đó.
+ * Chỉ tạo mã bản nhập liệu trên thiết bị. POST tạo SITE chạy ở S10 khi hồ sơ
+ * đủ dữ liệu; không gửi hồ sơ rỗng đến backend.
  */
 interface CreateBriefOptions {
   focus?: 'site' | 'needs' | 'documents'
 }
 
 export function useCreateBrief(options: CreateBriefOptions = {}) {
+  const userId = useAuthStore((state) => state.user?.id)
   const router = useRouter()
   const queryClient = useQueryClient()
   const t = useTranslations('errors')
@@ -59,7 +64,7 @@ export function useCreateBrief(options: CreateBriefOptions = {}) {
   return useMutation({
     mutationFn: () => contractorsApi.createBrief(),
     onSuccess: (brief) => {
-      queryClient.setQueryData(contractorKeys.brief(brief.id), brief)
+      queryClient.setQueryData(contractorKeys.brief(brief.id, userId), brief)
       const route = contractorBriefRoute(brief.id)
       router.push(options.focus ? route + '?focus=' + options.focus : route)
     },
@@ -69,15 +74,16 @@ export function useCreateBrief(options: CreateBriefOptions = {}) {
   })
 }
 
-/** Lưu Bước 1 — dùng cho cả "Lưu nháp" và "Tiếp tục: Kiểm tra hồ sơ" (S10). */
+/** Lưu bản nhập liệu cục bộ; không thay cho mutation ghi SITE ở S10. */
 export function useSaveBrief(projectId: string) {
+  const userId = useAuthStore((state) => state.user?.id)
   const queryClient = useQueryClient()
   const t = useTranslations('errors')
 
   return useMutation({
     mutationFn: (payload: SaveBriefPayload) => contractorsApi.saveBrief(projectId, payload),
     onSuccess: (brief) => {
-      queryClient.setQueryData(contractorKeys.brief(projectId), brief)
+      queryClient.setQueryData(contractorKeys.brief(projectId, userId), brief)
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))
@@ -90,13 +96,14 @@ export function useSaveBrief(projectId: string) {
  * popup 3 lựa chọn (R7) — điều hướng tiếp do màn hình quyết định, không phải hook.
  */
 export function useCompleteBrief(projectId: string) {
+  const userId = useAuthStore((state) => state.user?.id)
   const queryClient = useQueryClient()
   const t = useTranslations('errors')
 
   return useMutation({
     mutationFn: () => contractorsApi.completeBrief(projectId),
     onSuccess: (brief) => {
-      queryClient.setQueryData(contractorKeys.brief(projectId), brief)
+      queryClient.setQueryData(contractorKeys.brief(projectId, userId), brief)
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))

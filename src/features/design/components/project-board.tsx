@@ -12,6 +12,7 @@ import { usePageEntrance } from '@/shared/hooks'
 import { cn } from '@/shared/lib/utils'
 import { DEFAULT_PROJECT_SORT } from '../constants/design.constants'
 import { useProjects } from '../hooks/use-projects'
+import { DesignLoadError } from './design-load-error'
 import { countProjects, selectProjects } from '../services/project-list.service'
 import type { Project, ProjectSort, ProjectStatus } from '../types/design.types'
 import { ProjectCard } from './project-card'
@@ -86,7 +87,7 @@ function ProjectPagination({
  */
 export function ProjectBoard() {
   const t = useTranslations('design.projects')
-  const { data: projects, isPending } = useProjects()
+  const { data: projects, isPending, isError, refetch } = useProjects()
 
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<ProjectStatus | null>(null)
@@ -128,6 +129,8 @@ export function ProjectBoard() {
       </div>
     )
   }
+
+  if (isError) return <DesignLoadError onRetry={() => void refetch()} />
 
   // Chưa có dự án nào: bỏ hẳn thẻ đếm và bộ lọc. Không kèm nút — nút "Tạo dự án
   // mới" duy nhất của trang nằm giữa đầu trang (góp ý BuildX).

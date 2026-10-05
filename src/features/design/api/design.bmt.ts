@@ -1,4 +1,4 @@
-import { http } from '@/shared/lib/api'
+import { http, isApiError } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
 
 import {
@@ -8,9 +8,9 @@ import {
   stepOfState
 } from '../services/estimate-result.logic'
 import { projectStatus } from '../services/project-list.service'
-import type { Dossier, DossierImages, EstimateResult, Project, SharedDossier } from '../types/design.types'
+import type { DesignInput, Dossier, DossierImages, EstimateResult, Project, SharedDossier } from '../types/design.types'
 import type { CreateProjectPayload } from './design.api'
-import { mockDesignApi } from './design.mock'
+import { estimateInputApi } from './estimate-input.api'
 import {
   estimateGenerationApi,
   forgetOperation,
@@ -21,14 +21,7 @@ import {
   type ShareLink
 } from './estimate-generation.api'
 
-/**
- * Nối màn "Dự án của tôi" (danh sách + xóa dự toán) vào BMT API — GIỮ MOCK LÀM
- * NỀN. BE mới cấp `GET /estimates` (danh sách) và `POST /estimates/bulk-delete`
- * (xóa). Các bước tạo / nhập liệu / gửi AI của luồng Thiết kế VẪN mock (thiếu
- * upload ảnh + lệch model Bước 1 — xem `docs/BE_API_GAPS.md`), nên:
- * - `GET /estimates` rỗng hoặc lỗi → về mock để màn không trống khi demo.
- * - Xóa: dự toán THẬT (id uuid) gọi API; dự toán mock (id `SVC-…`) xóa ở mock.
- */
+/** Client dự toán thật; chế độ mock chỉ được chọn tại design.api.ts. */
 
 interface BmtEstimateListItem {
   estimateId: string
@@ -40,10 +33,7 @@ interface BmtEstimateListItem {
   modifiedAtUtc: string
 }
 
-/** id dự toán thật là uuid; id mock có dạng `SVC-YYYY-NNNN`. */
-const isApiEstimateId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id)
-
-const idem = () => ({ headers: { 'Idempotency-Key': crypto.randomUUID() } })
+const idem = (key?: string) => ({ headers: { 'Idempotency-Key': key ?? crypto.randomUUID() } })
 const nowIso = () => new Date().toISOString()
 
 /** DTO đầu vào Bước 1 (`Response`/`Command` của `/estimates/{id}/input`, TDD-PROJ-001). */
@@ -98,106 +88,109 @@ function toProject(item: BmtEstimateListItem): Project {
 }
 
 export const bmtDesignApi = {
+  getQuota: async () => {
+    const quota = await estimateInputApi.getDesignQuota()
+    return {
+      planName: quota.planName,
+      remaining: quota.unlimited ? Infinity : (quota.available ?? 0),
+      total: quota.limit
+    }
+  },
+  getInput: async (_projectId: string): Promise<DesignInput> => {
+    throw new Error('LegacyEstimateInputUnsupported')
+  },
+  saveInput: async (_projectId: string, _input: DesignInput): Promise<DesignInput> => {
+    throw new Error('LegacyEstimateInputUnsupported')
+  },
+  getSharedDossier: async (_token: string): Promise<SharedDossier | null> => null,
   listProjects: async (): Promise<Project[]> => {
-    // Đọc THẲNG dự toán thật `GET /estimates` — KHÔNG về mock khi rỗng nữa (trước
-    // đây fallback demo khiến khách tưởng còn mock; luồng TẠO dự toán chưa nối BE
-    // nên danh sách thật có thể trống cho tới khi bước tạo được nối). Lỗi mạng /
-    // 401 → trả rỗng để trang hiện trạng thái "chưa có dự án" thay vì demo giả.
-    try {
+    const items: Project[] = []
+    let pageIndex = 1
+    for (;;) {
       const page = await http.get<PagedResult<BmtEstimateListItem>>('/estimates', {
-        params: { pageIndex: 1, pageSize: 100 }
+        params: { pageIndex, pageSize: 100 }
       })
-      return page.items.map(toProject)
-    } catch {
-      return []
+      items.push(...page.items.map(toProject))
+      if (!page.hasNextPage) return [...new Map(items.map((item) => [item.id, item])).values()]
+      pageIndex++
     }
   },
 
   deleteProject: async (projectId: string): Promise<void> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.deleteProject(projectId)
-    await http.post<{ deletionRequestId: string }>(
+    const deleted = await http.post<{ results: { estimateId: string; status: string }[] }>(
       '/estimates/bulk-delete',
       { estimateIds: [projectId] },
       { headers: { 'Idempotency-Key': crypto.randomUUID() } }
     )
+    const status = deleted.results.find((item) => item.estimateId === projectId)?.status
+    if (status !== 'Deleted' && status !== 'AlreadyDeleted') {
+      throw { status: 409, code: status, message: status ?? 'InvalidDeletionResult' }
+    }
   },
 
   /** Tạo dự toán thật `POST /estimates` → trả receipt {estimateId,inputVersion,nameVersion}. */
-  createProject: async (payload: CreateProjectPayload): Promise<Project> => {
-    try {
-      const saved = await http.post<{ estimateId: string; inputVersion: number; nameVersion: number }>(
-        '/estimates',
-        {
-          name: payload.name,
-          // Chỉ gửi khi đã có cả cặp (BE bắt buộc cả hai; BE chưa triển khai thì bỏ qua trường lạ).
-          ...(payload.latitude !== undefined && payload.longitude !== undefined
-            ? { latitude: payload.latitude, longitude: payload.longitude }
-            : {})
-        },
-        idem()
-      )
-      return {
-        id: saved.estimateId,
-        name: payload.name,
-        ...(payload.description ? { description: payload.description } : {}),
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
-        currentStep: 1,
-        status: projectStatus(1),
-        coverUrl: null,
-        buildingType: null,
-        floorArea: null
-      }
-    } catch {
-      return mockDesignApi.createProject(payload)
+  createProject: async (payload: CreateProjectPayload, key?: string): Promise<Project> => {
+    const saved = await http.post<{ estimateId: string; inputVersion: number; nameVersion: number }>(
+      '/estimates',
+      {
+        name: payload.name.trim(),
+        ...(payload.description !== undefined ? { description: payload.description } : {}),
+        // Tạo nhanh được bỏ tọa độ; nếu có thì gửi đủ cặp.
+        ...(payload.latitude !== undefined && payload.longitude !== undefined
+          ? { latitude: payload.latitude, longitude: payload.longitude }
+          : {})
+      },
+      idem(key)
+    )
+    return {
+      id: saved.estimateId,
+      name: payload.name.trim(),
+      ...(payload.description ? { description: payload.description } : {}),
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      currentStep: 1,
+      status: projectStatus(1),
+      coverUrl: null,
+      buildingType: null,
+      floorArea: null
     }
   },
 
   /** `GET /estimates/{id}`. DTO không có mốc thời gian → tạm dùng hiện tại (thẻ danh sách lấy mốc thật từ `/estimates`). */
   getProject: async (projectId: string): Promise<Project> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.getProject(projectId)
-    try {
-      const e = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
-      const step = stepOfState(e.state)
-      return {
-        id: e.estimateId,
-        name: e.name,
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
-        currentStep: step,
-        status: projectStatus(step),
-        coverUrl: e.input?.inputImageUrl ?? null,
-        buildingType: null,
-        floorArea: null
-      }
-    } catch {
-      return mockDesignApi.getProject(projectId)
+    const e = await estimateInputApi.getEstimate(projectId)
+    const step = stepOfState(e.state)
+    return {
+      id: e.estimateId,
+      name: e.name,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      currentStep: step,
+      status: projectStatus(step),
+      coverUrl: e.input?.inputImageUrl ?? null,
+      buildingType: null,
+      floorArea: null
     }
   },
 
   /** Đổi tên: đọc `nameVersion` hiện hành rồi `PATCH /estimates/{id}/name` (khoá lạc quan tên). */
   renameProject: async (projectId: string, name: string): Promise<Project> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.renameProject(projectId, name)
-    try {
-      const e = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
-      const res = await http.patch<{ name: string; nameVersion: number }>(`/estimates/${projectId}/name`, {
-        name,
-        nameVersion: e.nameVersion
-      })
-      const step = stepOfState(e.state)
-      return {
-        id: projectId,
-        name: res.name,
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
-        currentStep: step,
-        status: projectStatus(step),
-        coverUrl: e.input?.inputImageUrl ?? null,
-        buildingType: null,
-        floorArea: null
-      }
-    } catch {
-      return mockDesignApi.renameProject(projectId, name)
+    const e = await estimateInputApi.getEstimate(projectId)
+    const res = await http.patch<{ name: string; nameVersion: number }>(`/estimates/${projectId}/name`, {
+      name,
+      nameVersion: e.nameVersion
+    })
+    const step = stepOfState(e.state)
+    return {
+      id: projectId,
+      name: res.name,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      currentStep: step,
+      status: projectStatus(step),
+      coverUrl: e.input?.inputImageUrl ?? null,
+      buildingType: null,
+      floorArea: null
     }
   },
 
@@ -207,12 +200,10 @@ export const bmtDesignApi = {
    * `EstimateFlowError('notSubmitted')` để quay về Bước 1 — mở lại trang không bao giờ tự tốn thêm lượt.
    */
   generateEstimate: (projectId: string, signal?: AbortSignal): Promise<EstimateResult> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.generateEstimate(projectId)
     return waitForEstimate(projectId, signal)
   },
 
   getEstimate: (projectId: string, signal?: AbortSignal): Promise<EstimateResult> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.getEstimate(projectId)
     return waitForEstimate(projectId, signal)
   },
 
@@ -221,8 +212,7 @@ export const bmtDesignApi = {
    * "sẵn sàng" khi tệp PDF đã xuất xong (`exportAvailability`); chưa thì `idle` và nút Nhận hồ sơ sẽ yêu cầu xuất.
    */
   getDossier: async (projectId: string): Promise<Dossier> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.getDossier(projectId)
-    const detail = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
+    const detail = await estimateInputApi.getEstimate(projectId)
     if (estimateStateKind(detail.state) !== 'succeeded') return idleDossier(projectId)
     const [result, share] = await Promise.all([estimateGenerationApi.getResult(projectId), activeShare(projectId)])
     const pdf = result.exportAvailability?.find(
@@ -241,7 +231,6 @@ export const bmtDesignApi = {
 
   /** "Nhận hồ sơ": yêu cầu xuất PDF rồi chờ Ready. Xuất hỏng (không lấy được tệp…) thì ném lỗi để màn chờ hiện Thử lại. */
   renderDossier: async (projectId: string): Promise<Dossier> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.renderDossier(projectId)
     const started = await estimateGenerationApi.requestExport(projectId, 'Pdf')
     const done = await pollExport(() => estimateGenerationApi.getExport(projectId, started.exportId))
     if (done.state !== 'Ready') throw new Error(done.failureCode ?? 'ExportFailed')
@@ -265,7 +254,6 @@ export const bmtDesignApi = {
     projectId: string,
     expiryDate?: string
   ): Promise<{ token: string; url?: string; expiryDate?: string | null; applied?: boolean }> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.createShareLink(projectId)
     if (!expiryDate) throw new Error('ExpiryRequired')
     const link = await estimateGenerationApi.createShare(projectId, expiryDate)
     return {
@@ -278,7 +266,6 @@ export const bmtDesignApi = {
 
   /** Thu hồi link: từ lúc này người có link (kể cả QR/email đã gửi) không xem hay tải được nữa. */
   revokeShareLink: async (projectId: string, shareId: string): Promise<void> => {
-    if (!isApiEstimateId(projectId)) return
     await estimateGenerationApi.revokeShare(projectId, shareId)
   },
 
@@ -287,7 +274,6 @@ export const bmtDesignApi = {
    * `unknown` = không biết thư đã nhận chưa; `Failed` thì ném lỗi. Phải có link hiện hành còn hiệu lực.
    */
   sendDossierEmail: async (projectId: string, email: string): Promise<'accepted' | 'unknown' | void> => {
-    if (!isApiEstimateId(projectId)) return mockDesignApi.sendDossierEmail(projectId, email)
     const link = await activeShare(projectId)
     if (!link) throw new Error('ShareUnavailable')
     const queued = await estimateGenerationApi.emailShare(projectId, link.shareId, email)
@@ -325,21 +311,31 @@ const POLL_INTERVAL_MS = 3_000
 const MAX_WAIT_MS = 20 * 60_000
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve) => {
-    const timer = window.setTimeout(resolve, ms)
-    signal?.addEventListener(
-      'abort',
-      () => {
-        window.clearTimeout(timer)
-        resolve()
-      },
-      { once: true }
-    )
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'))
+      return
+    }
+    const done = () => {
+      signal?.removeEventListener('abort', abort)
+      resolve()
+    }
+    const timer = window.setTimeout(done, ms)
+    const abort = () => {
+      window.clearTimeout(timer)
+      signal?.removeEventListener('abort', abort)
+      reject(new DOMException('Aborted', 'AbortError'))
+    }
+    signal?.addEventListener('abort', abort, { once: true })
   })
 }
 
-async function loadEstimateResult(projectId: string, detail: BmtEstimateDetail): Promise<EstimateResult> {
-  const raw = await estimateGenerationApi.getResult(projectId)
+async function loadEstimateResult(
+  projectId: string,
+  detail: BmtEstimateDetail,
+  signal?: AbortSignal
+): Promise<EstimateResult> {
+  const raw = await estimateGenerationApi.getResult(projectId, signal)
   const mapped = mapEstimateContent(raw.dossier?.content, {
     projectId,
     areaM2: Number(detail.input?.areaM2) || 0
@@ -355,36 +351,38 @@ async function waitForEstimate(projectId: string, signal?: AbortSignal): Promise
     const operationId = recallOperation(projectId)
     if (operationId) {
       try {
-        const generation = await estimateGenerationApi.getGeneration(projectId, operationId)
+        const generation = await estimateGenerationApi.getGeneration(projectId, operationId, signal)
         if (generation.state === 'Failed' || generation.state === 'TimedOut') {
           forgetOperation(projectId)
           throw new EstimateFlowError('failed', generation.failureCode)
         }
         if (generation.state === 'Pending') {
-          if (Date.now() - startedAt > MAX_WAIT_MS) throw new EstimateFlowError('failed', 'GenerationTimedOut')
+          if (Date.now() - startedAt > MAX_WAIT_MS) throw new Error('GenerationPollingTimeout')
           await sleep(POLL_INTERVAL_MS, signal)
           continue
         }
         // Succeeded: đọc kết quả qua bản dự toán bên dưới.
       } catch (error) {
         if (error instanceof EstimateFlowError) throw error
+        if (!isApiError(error) || error.status !== 404 || (error.messageCode ?? error.code) !== 'GenerationNotFound')
+          throw error
         // Mã cũ / không thuộc bản này (404 `GenerationNotFound`): bỏ và hỏi bản dự toán.
         forgetOperation(projectId)
       }
     }
 
-    const detail = await http.get<BmtEstimateDetail>(`/estimates/${projectId}`)
+    const detail = await estimateInputApi.getEstimate(projectId, signal)
     switch (estimateStateKind(detail.state)) {
       case 'succeeded':
         forgetOperation(projectId)
-        return loadEstimateResult(projectId, detail)
+        return loadEstimateResult(projectId, detail, signal)
       case 'draft':
         throw new EstimateFlowError('notSubmitted')
       case 'failed':
         forgetOperation(projectId)
         throw new EstimateFlowError('failed', detail.failureCode)
       default:
-        if (Date.now() - startedAt > MAX_WAIT_MS) throw new EstimateFlowError('failed', 'GenerationTimedOut')
+        if (Date.now() - startedAt > MAX_WAIT_MS) throw new Error('GenerationPollingTimeout')
         await sleep(POLL_INTERVAL_MS, signal)
     }
   }
@@ -426,7 +424,8 @@ async function waitForEmail(projectId: string, emailRequestId: string): Promise<
     const status = await estimateGenerationApi.getEmailStatus(projectId, emailRequestId)
     if (status.state === 'Accepted') return 'accepted'
     if (status.state === 'Unknown') return 'unknown'
-    if (status.state === 'Failed') throw new Error('EmailFailed')
+    if (status.state === 'Rejected' || status.state === 'Skipped' || status.state === 'Failed')
+      throw new Error(status.failureCode ?? 'EmailFailed')
     // Hết hạn chờ phía khách: không biết thư đã tới chưa.
     if (Date.now() - startedAt > EMAIL_MAX_WAIT_MS) return 'unknown'
     await sleepMs(EMAIL_POLL_MS)

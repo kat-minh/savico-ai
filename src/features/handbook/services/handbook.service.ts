@@ -135,6 +135,10 @@ export interface LibraryFilter {
    * PHONG CÁCH kiến trúc / nội thất (Phần 2.2).
    */
   secondary?: string
+  floorCount?: string
+  hasAttic?: boolean
+  architectureStyleIds?: readonly string[]
+  interiorStyleIds?: readonly string[]
   /** Từ khóa tìm theo tên và thông số hiển thị trên thẻ. */
   query?: string
   /**
@@ -142,6 +146,13 @@ export interface LibraryFilter {
    * sách mẫu của API không kèm). Không truyền = không giới hạn.
    */
   allowedIds?: ReadonlySet<string>
+}
+
+/** API dùng tổng số tầng; seed mock cũ dùng ground/ground+N. */
+export function floorCountOf(tag: string | undefined): number | undefined {
+  if (!tag) return undefined
+  const value = tag === 'ground' ? 1 : tag.startsWith('ground+') ? Number(tag.slice(7)) + 1 : Number(tag)
+  return Number.isInteger(value) && value > 0 ? value : undefined
 }
 
 /**
@@ -152,7 +163,17 @@ export interface LibraryFilter {
  */
 export function filterTemplates(
   pool: readonly HandbookTemplate[],
-  { kind, buildingType, secondary, query, allowedIds }: LibraryFilter
+  {
+    kind,
+    buildingType,
+    secondary,
+    floorCount,
+    hasAttic,
+    architectureStyleIds,
+    interiorStyleIds,
+    query,
+    allowedIds
+  }: LibraryFilter
 ): HandbookTemplate[] {
   const term = normalizeTemplateSearch(query ?? '')
 
@@ -160,6 +181,13 @@ export function filterTemplates(
     if (template.kind !== kind) return false
     if (allowedIds && !allowedIds.has(template.id)) return false
     if (buildingType && template.tags.buildingType !== buildingType) return false
+    if (floorCount && template.tags.floorCount !== floorCount) return false
+    if (hasAttic !== undefined && template.tags.hasAttic !== hasAttic) return false
+    if (kind === '3d') {
+      if (architectureStyleIds?.length && !architectureStyleIds.includes(template.tags.architectureStyle ?? ''))
+        return false
+      if (interiorStyleIds?.length && !interiorStyleIds.includes(template.tags.interiorStyle ?? '')) return false
+    }
     if (secondary) {
       const matchesSecondary =
         kind === '2d'

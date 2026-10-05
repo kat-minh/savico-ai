@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form'
 
 import type { AuthUser } from '@/shared/auth'
 import { Button } from '@/shared/components/ui/button'
+import { useRequiredMessage } from '@/shared/hooks'
 import {
   Dialog,
   DialogContent,
@@ -39,17 +40,18 @@ interface ProfileEditDialogProps {
 export function ProfileEditDialog({ open, onClose, user }: ProfileEditDialogProps) {
   const t = useTranslations('account.info')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const tCommon = useTranslations('common')
   const updateProfile = useUpdateProfile()
 
   const schema = useMemo(
     () =>
       createProfileSchema({
-        nameRequired: tv('required'),
+        nameRequired: required('fullName'),
         nameMaxLength: tv('maxLength', { max: PROFILE_NAME_MAX_LENGTH }),
         phoneInvalid: tv('phone')
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<ProfileFormValues>({

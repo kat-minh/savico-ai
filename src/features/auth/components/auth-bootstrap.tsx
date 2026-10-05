@@ -1,6 +1,7 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { Suspense, type ReactNode } from 'react'
+import { AuthGuardFallback, RouteGuard } from '@/shared/auth'
 
 import { useCurrentUser } from '../hooks/use-current-user'
 import { EmailVerifyDialog } from './email-verify-dialog'
@@ -19,7 +20,9 @@ export function AuthBootstrap({ children }: { children: ReactNode }) {
   useCurrentUser()
   return (
     <>
-      {children}
+      <Suspense fallback={<AuthGuardFallback />}>
+        <RouteGuard>{children}</RouteGuard>
+      </Suspense>
       <MustChangePasswordDialog />
       <EmailVerifyDialog />
     </>

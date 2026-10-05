@@ -74,8 +74,8 @@ export function SlotPicker({
   return (
     <section className='space-y-4'>
       <div className='space-y-1'>
-        <h3 className='text-sm font-semibold tracking-wide uppercase'>{t('title')}</h3>
-        <p className='text-muted-foreground text-xs text-pretty'>{t('sessionInfo')}</p>
+        <h3 className='text-sm max-md:text-base font-semibold tracking-wide uppercase'>{t('title')}</h3>
+        <p className='text-muted-foreground text-xs max-md:text-sm text-pretty'>{t('sessionInfo')}</p>
       </div>
 
       <LayoutGroup id='consultation-day-selection'>
@@ -125,7 +125,7 @@ export function SlotPicker({
                 </span>
                 <span
                   className={cn(
-                    'relative z-10 block text-xs group-hover:font-semibold',
+                    'relative z-10 block text-xs max-md:text-sm group-hover:font-semibold',
                     active ? 'opacity-80' : 'text-muted-foreground'
                   )}
                 >
@@ -204,7 +204,7 @@ function SessionRow({
               className='border-primary bg-primary/10 text-primary-strong rounded-lg border py-1.5 text-center text-sm font-medium'
             >
               <span className='block leading-tight'>{slot.time}</span>
-              <span className='block text-[10px] leading-tight'>{mineLabel}</span>
+              <span className='block max-md:text-xs text-[10px] leading-tight'>{mineLabel}</span>
             </span>
           ) : slot.full ? (
             <FullSlotButton key={slot.id} time={slot.time} fullLabel={fullLabel} fullHint={fullHint} />
@@ -285,7 +285,7 @@ function FullSlotButton({ time, fullLabel, fullHint }: { time: string; fullLabel
         >
           <span className='block'>
             <span className='block leading-tight opacity-60'>{time}</span>
-            <span className='block text-[10px] leading-tight'>{fullLabel}</span>
+            <span className='block max-md:text-xs text-[10px] leading-tight'>{fullLabel}</span>
           </span>
         </button>
       </TooltipTrigger>

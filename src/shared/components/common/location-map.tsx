@@ -60,6 +60,7 @@ export function LocationMap({ latitude, longitude, onChange, className }: Locati
 
   useEffect(() => {
     onChangeRef.current = onChange
+    markerRef.current?.setDraggable(Boolean(onChange))
     coordsRef.current = { latitude, longitude }
   })
 

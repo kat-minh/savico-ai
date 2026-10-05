@@ -10,10 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { geocodeApi } from '@/shared/geocode'
+import { useRequiredMessage } from '@/shared/hooks'
 import { useCreateProject } from '../hooks/use-projects'
-import { writeAddressSeed } from '../services/address-seed.storage'
-import { EstimateAddressField } from './estimate-address-field'
 import {
   createProjectSchema,
   PROJECT_DESCRIPTION_MAX_LENGTH,
@@ -42,6 +40,9 @@ const DESIGN_STYLES = [
   'garden-villa',
   'level4-modern'
 ] as const
+
+/** Ngón tay phải trượt xuống quá ngưỡng này (px) mới tính là kéo popup. */
+const DRAG_START_THRESHOLD = 8
 
 function isBuildingType(value: string | undefined): value is BuildingType {
   return Boolean(value && (BUILDING_TYPES as readonly string[]).includes(value))
@@ -75,6 +76,7 @@ function normalizeTemplateStyle(
 export function CreateProjectDialog() {
   const t = useTranslations('design.createProject')
   const tv = useTranslations('validation')
+  const required = useRequiredMessage()
   const tCommon = useTranslations('common')
 
   const open = useDesignStore((s) => s.isCreateDialogOpen)
@@ -90,17 +92,14 @@ export function CreateProjectDialog() {
   const dragStartRef = useRef<number | null>(null)
   const [dragY, setDragY] = useState(0)
   const [dragging, setDragging] = useState(false)
-  // Địa chỉ + vị trí công trình: BE bắt buộc toạ độ ngay khi tạo dự toán, lấy từ bản đồ trước khi bấm Tạo.
-  const [place, setPlace] = useState<{ text: string; region: string; latitude: number; longitude: number } | null>(null)
-  const [addressUnconfirmed, setAddressUnconfirmed] = useState(false)
-  const [addressError, setAddressError] = useState(false)
   const schema = useMemo(
     () =>
       createProjectSchema({
-        required: tv('required'),
-        maxLength: tv('maxLength', { max: PROJECT_NAME_MAX_LENGTH })
+        required,
+        maxLength: tv('maxLength', { max: PROJECT_NAME_MAX_LENGTH }),
+        descriptionMaxLength: tv('maxLength', { max: PROJECT_DESCRIPTION_MAX_LENGTH })
       }),
-    [tv]
+    [required, tv]
   )
 
   const form = useForm<CreateProjectFormValues>({
@@ -108,8 +107,9 @@ export function CreateProjectDialog() {
     defaultValues: { name: '', description: '' }
   })
 
+  const resetForm = form.reset
+
   const createProject = useCreateProject((projectId) => {
-    if (place) writeAddressSeed(projectId, place)
     const sourceTemplate = consumeProjectTemplateSeed()
     if (sourceTemplate) {
       const buildingType = isBuildingType(sourceTemplate.buildingType) ? sourceTemplate.buildingType : undefined
@@ -131,23 +131,15 @@ export function CreateProjectDialog() {
     window.setTimeout(() => {
       close()
       form.reset()
-      setPlace(null)
-      setAddressError(false)
       setExiting(false)
       router.push(designInputRoute(projectId))
     }, 360)
   })
 
   function onSubmit(values: CreateProjectFormValues) {
-    if (!place || addressUnconfirmed) {
-      setAddressError(true)
-      return
-    }
     createProject.mutate({
       name: values.name,
-      description: values.description || undefined,
-      latitude: place.latitude,
-      longitude: place.longitude
+      description: values.description || undefined
     })
   }
 
@@ -160,9 +152,10 @@ export function CreateProjectDialog() {
 
   useEffect(() => {
     if (!open) return
+    resetForm()
     const timer = window.setTimeout(() => nameRef.current?.focus(), 280)
     return () => window.clearTimeout(timer)
-  }, [open])
+  }, [open, resetForm])
 
   function resizeDescription() {
     const textarea = descriptionRef.current
@@ -179,9 +172,9 @@ export function CreateProjectDialog() {
   function cancel() {
     clearProjectTemplateSeed()
     close()
-    form.reset()
-    setPlace(null)
-    setAddressError(false)
+    // Không `form.reset()` ở đây: xóa chữ + render lại cả form giữa lúc popup đang
+    // chạy animation đóng làm nó khựng/giật (rõ nhất trên mobile). Form được reset
+    // lúc mở lại (effect bên dưới).
     setDragY(0)
     setDragging(false)
   }
@@ -209,25 +202,47 @@ export function CreateProjectDialog() {
             '--dialog-drag-y': `${dragY}px`
           } as CSSProperties
         }
+        // Animation mở chạy xong thì đánh dấu `data-settled` (CSS tắt hẳn animation từ đó):
+        // nếu không, mỗi lần `data-dragging` bật/tắt, animation trượt-lên lại chạy từ đầu
+        // và popup "nhảy lên rồi hiện lại". Gắn thẳng vào DOM nên không tốn render.
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget && event.currentTarget.dataset.state === 'open') {
+            event.currentTarget.dataset.settled = 'true'
+          }
+        }}
         onPointerDown={(event) => {
           if (event.pointerType !== 'touch') return
           if ((event.target as HTMLElement).closest('input, textarea, button, a')) return
+          // Chỉ ghi nhận điểm bắt đầu: chạm đơn thuần (tap) KHÔNG được coi là kéo.
           dragStartRef.current = event.clientY
-          setDragging(true)
-          event.currentTarget.setPointerCapture(event.pointerId)
         }}
         onPointerMove={(event) => {
           if (dragStartRef.current === null) return
-          setDragY(Math.max(0, event.clientY - dragStartRef.current))
+          const delta = event.clientY - dragStartRef.current
+          if (!dragging) {
+            if (delta < DRAG_START_THRESHOLD) return
+            setDragging(true)
+            event.currentTarget.setPointerCapture(event.pointerId)
+          }
+          setDragY(Math.max(0, delta))
         }}
         onPointerUp={(event) => {
           if (dragStartRef.current === null) return
-          event.currentTarget.releasePointerCapture(event.pointerId)
           dragStartRef.current = null
+          if (!dragging) return
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId)
+          }
           setDragging(false)
           if (dragY > 120) {
             cancel()
           }
+          setDragY(0)
+        }}
+        onPointerCancel={() => {
+          dragStartRef.current = null
+          if (!dragging) return
+          setDragging(false)
           setDragY(0)
         }}
         className='sm:max-h-[92vh] sm:max-w-lg sm:overflow-y-auto'
@@ -259,7 +274,6 @@ export function CreateProjectDialog() {
                         id='project-name'
                         data-create-project-name
                         placeholder={t('namePlaceholder')}
-                        maxLength={PROJECT_NAME_MAX_LENGTH}
                         // Nếu không chỉ định, Radix focus phần tử focusable đầu
                         // tiên là nút (i) và tooltip bật sẵn đè lên tiêu đề.
                         {...field}
@@ -288,7 +302,6 @@ export function CreateProjectDialog() {
                         data-create-project-description
                         rows={3}
                         placeholder={t('descriptionPlaceholder')}
-                        maxLength={PROJECT_DESCRIPTION_MAX_LENGTH}
                         {...field}
                         ref={(node) => {
                           field.ref(node)
@@ -303,44 +316,6 @@ export function CreateProjectDialog() {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
-              <EstimateAddressField
-                value={place?.text ?? ''}
-                latitude={place?.latitude ?? null}
-                longitude={place?.longitude ?? null}
-                context=''
-                invalid={addressError && (!place || addressUnconfirmed)}
-                onPick={async (choice) => {
-                  setPlace({
-                    text: choice.text,
-                    region: choice.region,
-                    latitude: choice.latitude,
-                    longitude: choice.longitude
-                  })
-                  setAddressError(false)
-                }}
-                onPinMove={(latitude, longitude) => {
-                  // Kéo ghim: dời ngay, rồi đổi chữ địa chỉ theo ghim (không có địa chỉ quanh ghim thì giữ chữ cũ).
-                  setPlace((current) => ({
-                    text: current?.text ?? '',
-                    region: current?.region ?? '',
-                    latitude,
-                    longitude
-                  }))
-                  void geocodeApi
-                    .reverse(latitude, longitude)
-                    .then((found) => {
-                      if (!found?.name) return
-                      setPlace((current) =>
-                        current?.latitude === latitude && current.longitude === longitude
-                          ? { ...current, text: found.name, region: found.address }
-                          : current
-                      )
-                    })
-                    .catch(() => undefined)
-                }}
-                onUnconfirmedChange={setAddressUnconfirmed}
               />
 
               {/* Hình 03: hai nút bằng nhau, chia đôi bề ngang — "Tạo dự án" là

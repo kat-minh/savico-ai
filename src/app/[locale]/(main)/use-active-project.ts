@@ -13,8 +13,8 @@ import { useAuth } from '@/shared/auth'
  * into `features/design`, which `features/landing` may never import.
  */
 export function useActiveProject(): Project | undefined {
-  const { isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isInitialized } = useAuth()
   const { data: projects } = useProjects()
-  if (!isAuthenticated) return undefined
+  if (!isInitialized || !isAuthenticated || user?.accountKind !== 'Customer') return undefined
   return mostRecentActiveProject(projects ?? [])
 }

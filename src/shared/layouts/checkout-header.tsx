@@ -32,12 +32,12 @@ export function CheckoutHeader() {
 
         {/* Hình S03: "Bạn cần hỗ trợ?" là CHỮ THƯỜNG (không bấm được), nút viền
             "Liên hệ BuildX" đứng ngay sau mới là chỗ bấm gọi hotline. */}
-        <div className='flex items-center gap-3'>
-          <span className='text-muted-foreground flex items-center gap-2 text-sm'>
-            <Headphones className='text-primary size-5' />
-            {t('headerSupport')}
+        <div className='flex shrink-0 items-center gap-2 sm:gap-3'>
+          <span className='text-muted-foreground flex items-center gap-2 text-sm whitespace-nowrap'>
+            <Headphones className='text-primary size-5 shrink-0' />
+            <span className='hidden sm:inline'>{t('headerSupport')}</span>
           </span>
-          <Button asChild variant='outline' size='sm' className='rounded-full'>
+          <Button asChild variant='outline' size='sm' className='rounded-full whitespace-nowrap'>
             <HotlineLink hotline={hotline}>{t('headerSupportAction')}</HotlineLink>
           </Button>
         </div>

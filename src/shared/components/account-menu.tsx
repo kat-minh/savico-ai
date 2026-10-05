@@ -82,7 +82,7 @@ export function AccountMenu({
 }) {
   const t = useTranslations('nav')
   const initials = initialsOf(user.name)
-  const isAdmin = user.roles?.includes(ROLES.ADMIN) ?? false
+  const isStaff = user.roles.includes(ROLES.STAFF) || user.roles.includes(ROLES.ADMIN)
   // Mục nào hiện ra cũng nhận độ trễ kế tiếp, nên bỏ/thêm mục không để hụt một nhịp.
   let staggerIndex = 0
   const nextStagger = () => staggerClass(staggerIndex++)
@@ -100,7 +100,7 @@ export function AccountMenu({
             <AvatarImage src={user.avatarUrl} alt={user.name} />
             <AvatarFallback className='text-xs'>{initials}</AvatarFallback>
           </Avatar>
-          {resumeProject ? (
+          {!isStaff && resumeProject ? (
             <span
               aria-hidden
               className='bg-primary ring-background absolute right-0 bottom-0 size-2.5 rounded-full ring-2'
@@ -113,7 +113,7 @@ export function AccountMenu({
         align='end'
         className='w-64 data-[state=closed]:duration-100 data-[state=closed]:slide-out-to-top-1 data-[state=open]:duration-200'
       >
-        {resumeProject ? (
+        {!isStaff && resumeProject ? (
           <DropdownMenuItem asChild className={nextStagger()}>
             <Link href={resumeProject.href}>
               <ArrowRight className='text-primary' />
@@ -128,20 +128,24 @@ export function AccountMenu({
           <span className={cn('truncate text-sm font-medium', nextStagger())}>{user.name}</span>
           <span className={cn('text-muted-foreground truncate text-xs font-normal', nextStagger())}>{user.email}</span>
         </DropdownMenuLabel>
-        <DropdownMenuItem asChild className={nextStagger()}>
-          <Link href={ROUTES.DESIGN}>
-            <LayoutDashboard />
-            {t('design')}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className={nextStagger()}>
-          <Link href={ROUTES.ACCOUNT}>
-            <UserRound />
-            {t('account')}
-          </Link>
-        </DropdownMenuItem>
+        {!isStaff ? (
+          <>
+            <DropdownMenuItem asChild className={nextStagger()}>
+              <Link href={ROUTES.DESIGN}>
+                <LayoutDashboard />
+                {t('design')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className={nextStagger()}>
+              <Link href={ROUTES.ACCOUNT}>
+                <UserRound />
+                {t('account')}
+              </Link>
+            </DropdownMenuItem>
+          </>
+        ) : null}
         {/* Lối vào khu quản trị — chỉ hiện với vai trò admin (mục X). */}
-        {isAdmin ? (
+        {isStaff ? (
           <DropdownMenuItem asChild className={nextStagger()}>
             <Link href={ADMIN_ROUTES.DASHBOARD}>
               <ShieldCheck />

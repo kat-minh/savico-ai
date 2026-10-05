@@ -16,6 +16,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Link } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -32,9 +33,11 @@ import { contractorBriefRoute, contractorMatchesRoute } from '@/shared/constants
 import { canShowReadyProjectPopup, cn } from '@/shared/lib'
 import { formatBudgetShort, formatCurrency } from '@/shared/utils'
 import { useBrief, useCompleteBrief } from '../hooks/use-brief'
+import { useConstructionScopes } from '../hooks/use-construction-scopes'
 import { briefReadiness, formatFileSize, fullAddress, isBriefComplete } from '../services/brief.service'
 import { BRIEF_STEP_TRANSITION_KEY, BriefSteps } from './brief-form'
 import { MATCHES_JUST_ARRIVED_KEY } from './contractor-matches'
+import { constructionSitesApi } from '../api/construction-sites.api'
 
 interface BriefReviewProps {
   projectId: string
@@ -51,15 +54,16 @@ interface BriefReviewProps {
  */
 export function BriefReview({ projectId }: BriefReviewProps) {
   const t = useTranslations('contractors.review')
-  const tScope = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const tScale = useTranslations('contractors.scale')
   const tCondition = useTranslations('contractors.siteCondition')
   const tStart = useTranslations('contractors.startWindow')
   const tCommon = useTranslations('contractors.common')
+  const tSite = useTranslations('contractors.siteForm')
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
 
-  const { data: brief, isPending } = useBrief(projectId)
+  const { data: brief, isPending, isError, refetch } = useBrief(projectId)
   const complete = useCompleteBrief(projectId)
 
   const [confirmed, setConfirmed] = useState(false)
@@ -137,6 +141,13 @@ export function BriefReview({ projectId }: BriefReviewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- so sánh một lần khi hồ sơ vừa tải/vừa lưu xong, không phải mỗi lần tham chiếu `brief` đổi
   }, [brief?.updatedAt, projectId])
 
+  if (isError)
+    return (
+      <div className='mx-auto max-w-[90rem] space-y-4 px-4 py-8' role='alert'>
+        <p>{tSite('errors.generic')}</p>
+        <Button onClick={() => void refetch()}>{tSite('retry')}</Button>
+      </div>
+    )
   if (isPending || !brief) {
     return (
       <div className='mx-auto w-full max-w-[90rem] px-4 py-5 lg:px-8'>
@@ -146,15 +157,44 @@ export function BriefReview({ projectId }: BriefReviewProps) {
   }
 
   const readiness = briefReadiness(brief)
+  const site = brief.constructionSite
+  const scaleLabel = site
+    ? site.profile.floorCount === null
+      ? ''
+      : tSite('floorLabel', { count: site.profile.floorCount })
+    : tScale(brief.scale)
+  const budgetLabel = site ? `${BigInt(site.budgetVnd).toLocaleString(locale)} ₫` : formatCurrency(brief.budget, locale)
+  async function downloadFile(attachmentId: string, name: string) {
+    if (!site) return
+    try {
+      const blob = await constructionSitesApi.download(site.constructionSiteId, attachmentId)
+      const url = URL.createObjectURL(blob)
+      const anchor = window.document.createElement('a')
+      anchor.href = url
+      anchor.download = name
+      anchor.click()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      toast.error(tSite('files.downloadError'))
+    }
+  }
 
   const siteRows = [
     { key: 'name', label: t('labels.name'), value: brief.name },
     { key: 'buildingType', label: t('labels.buildingType'), value: brief.buildingType },
-    { key: 'landArea', label: t('labels.landArea'), value: `${brief.landArea} m²` },
-    { key: 'condition', label: t('labels.condition'), value: tCondition(brief.siteCondition) },
-    { key: 'scale', label: t('labels.scale'), value: tScale(brief.scale) },
+    { key: 'landArea', label: t('labels.landArea'), value: `${site?.profile.areaM2 ?? brief.landArea} m²` },
+    { key: 'condition', label: t('labels.condition'), value: site?.conditionName ?? tCondition(brief.siteCondition) },
+    { key: 'scale', label: t('labels.scale'), value: scaleLabel },
+    ...(site?.profile.hasTum !== null && site?.profile.hasTum !== undefined
+      ? [{ key: 'tum', label: tSite('tum'), value: tSite(site.profile.hasTum ? 'yesTum' : 'noTum') }]
+      : []),
+    ...(site?.architectureStyleName
+      ? [{ key: 'architecture', label: tSite('architecture'), value: site.architectureStyleName }]
+      : []),
+    ...(site?.interiorStyleName ? [{ key: 'interior', label: tSite('interior'), value: site.interiorStyleName }] : []),
+    ...(site?.sourceEstimateId ? [{ key: 'source', label: tSite('source'), value: tSite('linkedSource') }] : []),
     { key: 'address', label: t('labels.address'), value: fullAddress(brief) },
-    { key: 'budget', label: t('labels.budget'), value: formatCurrency(brief.budget, locale) },
+    { key: 'budget', label: t('labels.budget'), value: budgetLabel },
     { key: 'startWindow', label: t('labels.startWindow'), value: tStart(brief.startWindow) }
   ]
 
@@ -163,7 +203,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
       initial={reduceMotion ? false : { opacity: 0, x: 32 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.32, ease: revealEase }}
-      className='mx-auto w-full max-w-[90rem] space-y-6 px-4 py-5 lg:px-8'
+      className='mx-auto w-full max-w-[90rem] space-y-5 lg:space-y-6 px-4 py-5 lg:px-8'
     >
       {/* Hình S11: link quay lại màu XANH, và ngay cạnh nó là viên nhãn
           "HỒ SƠ TỰ TẠO" — bản trước không có viên nhãn này. */}
@@ -180,9 +220,9 @@ export function BriefReview({ projectId }: BriefReviewProps) {
           <ArrowLeft className='size-4' />
           {t('back')}
         </Link>
-        <span className='bg-accent text-primary-strong inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide uppercase'>
+        <span className='bg-accent text-primary-strong inline-flex items-center gap-1.5 rounded-full px-3 py-1 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
           <ClipboardList className='size-3.5' />
-          {tCommon('selfCreated')}
+          {brief.selfCreated ? tCommon('selfCreated') : tSite('linkedSource')}
         </span>
       </motion.div>
 
@@ -220,7 +260,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
             rows={[
               // Hình S11: giá trị "Phạm vi" là VIÊN NHÃN nền xanh nhạt, không
               // phải chữ trơn như các dòng khác.
-              { key: 'scope', label: t('scopeLabel'), value: tScope(brief.scope), chip: true },
+              { key: 'scope', label: t('scopeLabel'), value: scopes.label(brief.scope, brief.scopeName), chip: true },
               { key: 'scopeNote', label: t('noteLabel'), value: brief.scopeNote }
             ]}
             changedKeys={changedFields}
@@ -259,6 +299,11 @@ export function BriefReview({ projectId }: BriefReviewProps) {
                     )}
                     <span className='min-w-0 flex-1 truncate text-sm'>{document.name}</span>
                     <span className='text-muted-foreground text-xs'>{formatFileSize(document, locale)}</span>
+                    {site ? (
+                      <Button variant='ghost' size='sm' onClick={() => void downloadFile(document.id, document.name)}>
+                        {tSite('files.download')}
+                      </Button>
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -283,15 +328,15 @@ export function BriefReview({ projectId }: BriefReviewProps) {
             <span className='bg-accent text-primary flex size-11 shrink-0 items-center justify-center rounded-xl'>
               <House className='size-5' />
             </span>
-            <span className='bg-accent text-primary-strong inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase'>
-              {tCommon('selfCreated')}
+            <span className='bg-accent text-primary-strong inline-flex items-center rounded-full px-2.5 py-1 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
+              {brief.selfCreated ? tCommon('selfCreated') : tSite('linkedSource')}
             </span>
           </div>
 
           <div>
             <h2 className='text-xl font-bold tracking-tight text-pretty'>{brief.name}</h2>
             <p className='text-muted-foreground mt-1 text-sm'>
-              {[brief.buildingType, tScale(brief.scale)].filter(Boolean).join(' · ')}
+              {[brief.buildingType, scaleLabel].filter(Boolean).join(' · ')}
             </p>
           </div>
 
@@ -308,7 +353,7 @@ export function BriefReview({ projectId }: BriefReviewProps) {
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2, ease: revealEase }}
               >
-                {t('projectCard.budgetLabel')} {formatBudgetShort(brief.budget, locale)}
+                {t('projectCard.budgetLabel')} {site ? budgetLabel : formatBudgetShort(brief.budget, locale)}
               </motion.span>
             </li>
           </ul>

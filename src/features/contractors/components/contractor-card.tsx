@@ -15,8 +15,9 @@ import { contractorFirmRoute, contractorInvitationsRoute, contractorInviteRoute 
 import { useCountUp } from '@/shared/hooks/use-count-up'
 import { cn } from '@/shared/lib/utils'
 import { formatNumber } from '@/shared/utils'
+import { useInvitations } from '../hooks/use-invitations'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
-import type { Contractor, ContractorSort } from '../types/contractor.types'
+import type { Contractor } from '../types/contractor.types'
 import { ContractorLogo } from './contractor-logo'
 
 interface ContractorCardProps {
@@ -33,8 +34,6 @@ interface ContractorCardProps {
   inviteLocked: boolean
   /** Đủ ba lựa chọn: khóa và làm mờ checkbox của những thẻ chưa chọn. */
   compareLocked?: boolean
-  /** Vừa đổi chip sắp xếp theo tiêu chí này — ô tương ứng nổi lên 1 giây (mục 4). */
-  highlightField?: ContractorSort | null
   /** Vừa tạo hồ sơ từ M04, đây là thẻ đầu danh sách → viền loé một lần (mục 6). */
   ringFlash?: boolean
 }
@@ -62,11 +61,12 @@ export function ContractorCard({
   invitedJustNow = false,
   inviteLocked,
   compareLocked = false,
-  highlightField,
   ringFlash = false
 }: ContractorCardProps) {
   const t = useTranslations('contractors.common')
   const tMatches = useTranslations('contractors.matches')
+  const rfq = useTranslations('contractors.rfq')
+  const { limit, isError, siteRequired } = useInvitations(projectId)
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
 
@@ -104,38 +104,49 @@ export function ContractorCard({
       key: 'rating',
       icon: Star,
       iconClass: 'text-warning fill-current',
-      value: (
-        <AnimatedMetric
-          value={Math.round(contractor.rating * 10)}
-          format={(value) => `${formatNumber(value / 10, locale, { minimumFractionDigits: 1 })}/5`}
-        />
-      ),
-      hint: t('reviewCount', { count: contractor.reviewCount })
+      value:
+        contractor.ratingKnown === false ? (
+          t('ratingUnknown')
+        ) : (
+          <AnimatedMetric
+            value={Math.round(contractor.rating * 10)}
+            format={(value) => `${formatNumber(value / 10, locale, { minimumFractionDigits: 1 })}/5`}
+          />
+        ),
+      hint:
+        contractor.reviewCountKnown === false
+          ? t('informationUnknown')
+          : t('reviewCount', { count: contractor.reviewCount })
     },
     {
       key: 'similar',
       icon: CalendarCheck,
       value: (
-        <AnimatedMetric value={contractor.similarProjects} format={(value) => t('similarShort', { count: value })} />
+        <AnimatedMetric value={contractor.completedProjects} format={(value) => t('similarShort', { count: value })} />
       ),
       hint: t('similarSuffix')
     },
     {
       key: 'distance',
       icon: MapPin,
-      value: (
-        <AnimatedMetric
-          value={Math.round(contractor.distanceKm * 10)}
-          format={(value) => t('distanceShort', { km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 }) })}
-        />
-      ),
+      value:
+        contractor.distanceKnown === false ? (
+          t('distanceUnknown')
+        ) : (
+          <AnimatedMetric
+            value={Math.round(contractor.distanceKm * 10)}
+            format={(value) =>
+              t('distanceShort', { km: formatNumber(value / 10, locale, { minimumFractionDigits: 1 }) })
+            }
+          />
+        ),
       hint: t('distanceSuffix')
     },
     {
       key: 'areas',
       icon: MapIcon,
       value: t('serviceAreas'),
-      hint: contractor.serviceAreas.slice(0, 3).join(', ')
+      hint: contractor.serviceAreas.slice(0, 3).join(', ') || t('informationUnknown')
     }
   ]
 
@@ -175,7 +186,7 @@ export function ContractorCard({
           ref={compareSourceRef}
           title={!compared && compareLocked ? tMatches('maxCompare', { max: MAX_INVITATIONS }) : undefined}
           className={cn(
-            'text-muted-foreground flex cursor-pointer flex-col items-center gap-1.5 text-[11px] transition-opacity',
+            'text-muted-foreground flex cursor-pointer flex-col items-center gap-1.5 max-md:text-xs text-[11px] transition-opacity',
             !compared && compareLocked && 'cursor-not-allowed opacity-35'
           )}
         >
@@ -223,7 +234,7 @@ export function ContractorCard({
                   duration: 0.35,
                   delay: invitedJustNow && !reduceMotion ? 0.45 : 0
                 }}
-                className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-medium'
+                className='bg-primary/10 text-primary-strong rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium'
               >
                 {t('invited')}
               </motion.span>
@@ -236,14 +247,7 @@ export function ContractorCard({
         <div className='divide-border mt-3 grid grid-cols-[minmax(0,1fr)] divide-y sm:grid-cols-2 lg:grid-cols-4'>
           <div className='divide-border grid grid-cols-[minmax(0,1fr)] divide-y sm:col-span-2 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:col-span-4 lg:grid-cols-4'>
             {facts.map((fact) => (
-              <Fact
-                key={fact.key}
-                icon={fact.icon}
-                iconClass={fact.iconClass}
-                value={fact.value}
-                hint={fact.hint}
-                highlighted={highlightField === fact.key}
-              />
+              <Fact key={fact.key} icon={fact.icon} iconClass={fact.iconClass} value={fact.value} hint={fact.hint} />
             ))}
           </div>
 
@@ -251,18 +255,27 @@ export function ContractorCard({
             <Fact
               icon={Clock}
               value={
-                <AnimatedMetric
-                  value={contractor.surveyWithinHours}
-                  format={(value) => t('surveyWithin', { hours: value })}
-                />
+                contractor.surveyTimeKnown === false ? (
+                  t('informationUnknown')
+                ) : (
+                  <AnimatedMetric
+                    value={contractor.surveyWithinHours}
+                    format={(value) => t('surveyWithin', { hours: value })}
+                  />
+                )
               }
-              hint={t('surveyEarly')}
-              highlighted={highlightField === 'survey'}
+              hint={t('surveyLabel')}
             />
             <Fact
               icon={CircleCheck}
-              value={contractor.acceptingProjects ? t('accepting') : t('notAccepting')}
-              hint={t('readyToStart')}
+              value={
+                contractor.acceptingProjectsKnown === false
+                  ? t('informationUnknown')
+                  : contractor.acceptingProjects
+                    ? t('accepting')
+                    : t('notAccepting')
+              }
+              hint={t('projectAvailability')}
             />
           </div>
         </div>
@@ -286,7 +299,18 @@ export function ContractorCard({
             </Link>
           </Button>
         ) : inviteLocked ? (
-          <Button disabled title={tMatches('inviteLimitReached', { max: MAX_INVITATIONS })}>
+          <Button
+            disabled
+            title={
+              siteRequired
+                ? rfq('siteRequired')
+                : isError
+                  ? rfq('quotaUnavailable')
+                  : limit === undefined
+                    ? rfq('loading')
+                    : tMatches('inviteLimitReached', { max: limit })
+            }
+          >
             <Send className='size-4' />
             {t('invite')}
           </Button>
@@ -326,7 +350,7 @@ export function ContractorCard({
               onAnimationComplete={() => setCompareFlight(null)}
               className='bg-card pointer-events-none fixed top-0 left-0 z-60 flex max-w-44 items-center gap-2 rounded-xl border px-2 py-1.5 shadow-lg'
             >
-              <ContractorLogo contractor={contractor} className='size-7 rounded-md text-[9px]' />
+              <ContractorLogo contractor={contractor} className='size-7 rounded-md max-md:text-xs text-[9px]' />
               <span className='truncate text-xs font-semibold'>{contractor.name}</span>
             </motion.div>,
             document.body
@@ -341,26 +365,25 @@ function Fact({
   icon: Icon,
   iconClass,
   value,
-  hint,
-  highlighted = false
+  hint
 }: {
   icon: typeof Star
   iconClass?: string
   value: ReactNode
   hint: string
-  /** Tiêu chí đang được xếp theo — nổi trong thẻ một giây (mục 4). */
-  highlighted?: boolean
 }) {
   return (
     // Cột chỉ số hẹp (4 ô trên một hàng) nên chữ phải nhỏ lại, và dòng nhãn
     // được XUỐNG DÒNG tối đa 2 dòng thay vì `truncate` — "TP. Buôn Ma Thuột,
     // Cư M'gar" mà cắt cụt thì mất luôn thông tin phục vụ ở đâu.
-    <div className={cn('min-w-0 rounded-lg px-2.5 py-2 transition-colors first:pl-0', highlighted && 'bg-accent')}>
+    <div className='min-w-0 rounded-lg px-2.5 py-2 first:pl-0'>
       <p className='flex items-center gap-1.5 text-[13px] leading-snug font-semibold'>
         <Icon aria-hidden className={cn('size-3.5 shrink-0', iconClass ?? 'text-primary')} />
         <span className='truncate'>{value}</span>
       </p>
-      <p className='text-muted-foreground mt-0.5 line-clamp-2 pl-5 text-[11px] leading-snug text-pretty'>{hint}</p>
+      <p className='text-muted-foreground mt-0.5 line-clamp-2 pl-5 max-md:text-xs text-[11px] leading-snug text-pretty'>
+        {hint}
+      </p>
     </div>
   )
 }

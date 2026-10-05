@@ -158,9 +158,15 @@ export function HomeReminderHost() {
   const reduceMotion = useReducedMotion()
 
   const { isAuthenticated, isInitialized, user } = useAuth()
-  const accountPlan = useAccountPlan(isAuthenticated)
-  const projectsQuery = useProjects(isAuthenticated)
-  const briefsQuery = useBriefs(isAuthenticated)
+  const isCustomer =
+    isAuthenticated &&
+    isInitialized &&
+    user?.accountKind === 'Customer' &&
+    !user.mustChangePassword &&
+    user.emailVerified !== false
+  const accountPlan = useAccountPlan(isCustomer)
+  const projectsQuery = useProjects(isCustomer)
+  const briefsQuery = useBriefs(isCustomer)
 
   const plans = useCmsCollection('plans')
   const invitations = useCmsCollection('contractorInvitations')
@@ -553,7 +559,7 @@ export function HomeReminderHost() {
                 </button>
 
                 <div className='pr-14'>
-                  <p className='flex items-center gap-2 text-[11px] font-extrabold tracking-[0.18em] text-primary-strong uppercase'>
+                  <p className='flex items-center gap-2 max-md:text-xs text-[11px] font-extrabold tracking-[0.18em] text-primary-strong uppercase'>
                     <span className='size-2 rounded-full bg-primary-strong' />
                     {t('eyebrow')}
                   </p>

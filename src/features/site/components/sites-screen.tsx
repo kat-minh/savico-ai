@@ -157,7 +157,7 @@ export function SitesScreen() {
                     {site.supervisionGrants.map((g) => (
                       <span
                         key={g.grantId}
-                        className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${grantTone[g.state] ?? 'bg-muted'}`}
+                        className={`rounded-full px-2 py-0.5 max-md:text-xs text-[11px] font-medium ${grantTone[g.state] ?? 'bg-muted'}`}
                       >
                         {g.planName} · {t(`grantState.${g.state}`)}
                       </span>

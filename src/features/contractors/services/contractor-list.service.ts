@@ -19,7 +19,7 @@ import type {
 /** Bộ lọc của header dự án + chip sắp xếp (S12). */
 export interface ContractorFilters {
   radiusKm: SearchRadiusKm
-  sort: ContractorSort
+  sort: ContractorSort | null
   /**
    * Tab vùng Bắc / Trung / Nam (S12). Bỏ trống thì không lọc theo vùng — landing
    * S09 dùng chung hàm này nhưng không có tab vùng.
@@ -27,10 +27,14 @@ export interface ContractorFilters {
   region?: ServiceRegion
 }
 
+const distanceScore = (c: Contractor) => (c.distanceKnown === false ? Number.POSITIVE_INFINITY : c.distanceKm)
+
+const surveyScore = (c: Contractor) => (c.surveyTimeKnown === false ? Number.POSITIVE_INFINITY : c.surveyWithinHours)
+
 const COMPARATORS: Record<ContractorSort, (a: Contractor, b: Contractor) => number> = {
-  distance: (a, b) => a.distanceKm - b.distanceKm,
+  distance: (a, b) => distanceScore(a) - distanceScore(b),
   rating: (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount,
-  survey: (a, b) => a.surveyWithinHours - b.surveyWithinHours || a.distanceKm - b.distanceKm
+  survey: (a, b) => surveyScore(a) - surveyScore(b) || distanceScore(a) - distanceScore(b)
 }
 
 /**
@@ -83,7 +87,11 @@ export function matchesCriteria(contractor: Contractor, criteria: ContractorCrit
 
   if (rating && contractor.rating < MIN_RATING[rating]) return false
 
-  if (startWindow === 'asap' && !(contractor.acceptingProjects && contractor.surveyWithinHours <= 24)) return false
+  if (
+    startWindow === 'asap' &&
+    !(contractor.acceptingProjects && contractor.surveyTimeKnown !== false && contractor.surveyWithinHours <= 24)
+  )
+    return false
   if (startWindow === 'in-1-3-months' && !contractor.acceptingProjects) return false
 
   return true
@@ -95,22 +103,24 @@ export function filterContractors(
   filters: ContractorFilters,
   criteria: ContractorCriteria = {}
 ): Contractor[] {
-  return contractors
-    .filter((c) => c.distanceKm <= filters.radiusKm)
+  const filtered = contractors
+    .filter(
+      (c) => !Number.isFinite(filters.radiusKm) || (c.distanceKnown !== false && c.distanceKm <= filters.radiusKm)
+    )
     .filter((c) => !filters.region || c.region === filters.region)
     .filter((c) => matchesCriteria(c, criteria))
-    .sort(COMPARATORS[filters.sort])
+  return filters.sort === null ? filtered : filtered.sort(COMPARATORS[filters.sort])
 }
 
 /**
  * R1 — còn được mời bao nhiêu nhà thầu nữa. Đủ 3 thì mọi nút "Mời báo giá" ở
  * S12/S13/S15 phải khóa lại, không chỉ ẩn ô đếm ở S18.
  */
-export function remainingInvites(invitations: readonly Invitation[]): number {
+export function remainingInvites(invitations: readonly Pick<Invitation, 'contractorId'>[]): number {
   return Math.max(0, MAX_INVITATIONS - invitations.length)
 }
 
 /** Nhà thầu này đã được mời cho dự án đang xét chưa. */
-export function isInvited(invitations: readonly Invitation[], contractorId: string): boolean {
+export function isInvited(invitations: readonly Pick<Invitation, 'contractorId'>[], contractorId: string): boolean {
   return invitations.some((invitation) => invitation.contractorId === contractorId)
 }

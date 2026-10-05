@@ -31,7 +31,8 @@ import type { Locale } from '@/i18n/routing'
 import { useAuth, useAuthDialogStore } from '@/shared/auth'
 import { isContractorEligible, useCmsCollection, useCmsDocument, useSiteImage } from '@/shared/cms'
 import { revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
-import { Button } from '@/shared/components/ui/button'
+import { Alert, AlertDescription, Button, Skeleton } from '@/shared/components/ui'
+import { env } from '@/shared/config/env'
 import {
   CONTRACTOR_PREVIEW_ID,
   contractorFirmRoute,
@@ -50,6 +51,8 @@ import {
   START_WINDOWS
 } from '../constants/contractors.constants'
 import { useBriefs, useCreateBrief } from '../hooks/use-brief'
+import { useContractorDirectory, useContractorFilterOptions } from '../hooks/use-contractors'
+import { useSelectedProject } from '../hooks/use-selected-project'
 import { isBriefComplete } from '../services/brief.service'
 import { filterContractors, type ContractorCriteria } from '../services/contractor-list.service'
 import type { Contractor, ContractorSort, SearchRadiusKm } from '../types/contractor.types'
@@ -57,6 +60,7 @@ import { ContractorLogo } from './contractor-logo'
 import { PartnerRegistrationDialog } from './partner-registration-dialog'
 import { ProjectPickerDialog } from './project-picker-dialog'
 import { useProjectPickerStore } from '../store/project-picker.store'
+import { useProjectSelectionStore } from '../store/project-selection.store'
 
 /**
  * Bề ngang phần nội dung của S09.
@@ -273,11 +277,11 @@ export function ContractorLanding() {
 
   // Banner hero theo sheet góp ý BuildX; admin vẫn thay được ở màn "Hình ảnh site".
   const mapImage = useSiteImage('map.contractors')
-  // Danh bạ do vận hành quản lý ở /admin/contractors; chỉ nhà thầu đạt Quy tắc đề
-  // xuất (không Ẩn, đúng khu vực, đủ tiêu chí) mới lên landing.
+  const mock = env.NEXT_PUBLIC_USE_MOCK_API
+  // CMS chỉ là nguồn nhà thầu cho chế độ mock. API thật quyết định hồ sơ công khai.
   const matching = useCmsDocument('contractorMatching')
   const today = new Date().toISOString().slice(0, 10)
-  const directory = useCmsCollection('contractors').filter((contractor) =>
+  const mockDirectory = useCmsCollection('contractors').filter((contractor) =>
     isContractorEligible(contractor, matching, today)
   )
   const rankingSectionRef = useRef<HTMLElement>(null)
@@ -291,15 +295,29 @@ export function ContractorLanding() {
   // gây hiểu lầm (mục 3).
   const { data: briefs } = useBriefs(isAuthenticated)
   const hasBrief = isAuthenticated && Boolean(briefs?.length)
-  /** Hồ sơ gần nhất dùng khi chọn nhà thầu hoặc đổi hồ sơ. CTA chính luôn tạo hồ sơ mới. */
-  // Ưu tiên hồ sơ đủ thông tin khi mời nhà thầu; nếu chưa có thì dùng nháp mới nhất.
+  // Ưu tiên dự án người dùng đã chọn; khi chưa có thì dùng hồ sơ đủ thông tin mới nhất.
+  const { userId, selectedProject } = useSelectedProject()
+  const clearSelectedProject = useProjectSelectionStore((s) => s.clearSelectedProject)
   const briefsByNewest = hasBrief ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) : []
-  const currentBrief = briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
+  const savedBrief = briefsByNewest.find(
+    (brief) => brief.id === selectedProject?.id && brief.status !== 'contracted' && isBriefComplete(brief)
+  )
+  const currentBrief = savedBrief ?? briefsByNewest.find(isBriefComplete) ?? briefsByNewest[0]
   const openPicker = useProjectPickerStore((s) => s.openPicker)
 
+  useEffect(() => {
+    if (isAuthenticated && userId && selectedProject && briefs && !savedBrief) {
+      try {
+        clearSelectedProject(userId)
+      } catch {
+        // An unavailable browser store must not prevent rendering the live project list.
+      }
+    }
+  }, [isAuthenticated, userId, selectedProject, briefs, savedBrief, clearSelectedProject])
+
   /**
-   * Bộ lọc tiêu chí (mục 5) — mọi tiêu chí đều lọc THẬT `ranked`: danh sách bên
-   * phải là top 3 nhà thầu khớp bộ tiêu chí đã chọn, xếp theo tab đang bật.
+   * Danh sách hiển thị tối đa ba nhà thầu khớp bộ lọc, xếp theo tab đang bật.
+   * Chế độ thật gửi loại/bán kính/số tầng/số dự án tương tự tới API.
    * Mỗi mục chỉ chọn được một lựa chọn; bấm lại lựa chọn đang chọn để bỏ.
    * `criterionSelections` lưu GIÁ TRỊ của lựa chọn (không phải nhãn hiển thị) để
    * lọc không phụ thuộc bản dịch.
@@ -308,18 +326,39 @@ export function ContractorLanding() {
   const radiusOptions = matching.radiusOptions
   const widestRadius = radiusOptions.at(-1) ?? 50
   const [radiusChoice, setRadiusKm] = useState<SearchRadiusKm | null>(null)
-  const radiusKm = radiusChoice ?? widestRadius
   const [criterionSelections, setCriterionSelections] = useState<Partial<Record<CriterionItem['key'], string>>>({})
+  const filterOptions = useContractorFilterOptions()
+  const siteId = isAuthenticated ? currentBrief?.constructionSiteId : undefined
+  const canFilterRadius = mock || Boolean(siteId)
+  const radiusApplied = canFilterRadius && radiusChoice !== null
+  const selectedScale = PROJECT_SCALES.find((key) => key === criterionSelections.scale)
+  // FloorCount tính cả trệt, cùng cách lưu trên hồ sơ và dự án nhà thầu.
+  const floorCount =
+    selectedScale === undefined ? undefined : selectedScale === 'ground' ? 1 : Number(selectedScale.split('+')[1]) + 1
+  const experience = criterionSelections.experience
+  const liveDirectory = useContractorDirectory({
+    ...(criterionSelections.type ? { buildingTypeIds: [criterionSelections.type] } : {}),
+    ...(floorCount !== undefined ? { floorCount } : {}),
+    ...(experience === 'junior' ? { minSimilarProjects: 0, maxSimilarProjects: 4 } : {}),
+    ...(experience === 'mid' ? { minSimilarProjects: 5, maxSimilarProjects: 15 } : {}),
+    ...(experience === 'senior' ? { minSimilarProjects: 16 } : {}),
+    ...(siteId && radiusApplied ? { constructionSiteId: siteId, radiusKm: radiusChoice } : {})
+  })
+  const directory = mock ? mockDirectory : liveDirectory.isError ? [] : (liveDirectory.data ?? [])
+  const directoryPending = !mock && liveDirectory.isPending
+  const directoryError = !mock && liveDirectory.isError
 
   const cmsBuildingTypes = useCmsCollection('buildingTypes')
   const criterionOptions: Record<CriterionItem['key'], CriterionOption[]> = {
     area: radiusOptions.map((km) => ({ value: String(km), label: tCommon('distanceShort', { km }) })),
     // Cùng danh mục "Loại công trình" với Bước 1 của luồng thiết kế/hồ sơ, nên
     // admin bật/tắt hay đổi tên ở một chỗ là đổi cả hai.
-    type: [...cmsBuildingTypes]
-      .filter((option) => option.status === 'active')
-      .sort((a, b) => a.order - b.order)
-      .map((option) => ({ value: option.id, label: option.label })),
+    type: mock
+      ? [...cmsBuildingTypes]
+          .filter((option) => option.status === 'active')
+          .sort((a, b) => a.order - b.order)
+          .map((option) => ({ value: option.id, label: option.label }))
+      : (filterOptions.data?.buildingTypes ?? []).map((option) => ({ value: option.id, label: option.name })),
     scale: PROJECT_SCALES.map((key) => ({ value: key, label: tScale(key) })),
     experience: EXPERIENCE_LEVELS.map((key) => ({ value: key, label: t(`criteria.experienceOptions.${key}`) })),
     rating: RATING_LEVELS.map((key) => ({ value: key, label: t(`criteria.ratingOptions.${key}`) })),
@@ -328,14 +367,22 @@ export function ContractorLanding() {
 
   const criteria: ContractorCriteria = {
     buildingTypeId: criterionSelections.type,
-    scale: PROJECT_SCALES.find((key) => key === criterionSelections.scale),
-    experience: EXPERIENCE_LEVELS.find((key) => key === criterionSelections.experience),
+    scale: mock ? PROJECT_SCALES.find((key) => key === criterionSelections.scale) : undefined,
+    experience: mock ? EXPERIENCE_LEVELS.find((key) => key === criterionSelections.experience) : undefined,
     rating: RATING_LEVELS.find((key) => key === criterionSelections.rating),
     startWindow: START_WINDOWS.find((key) => key === criterionSelections.schedule)
   }
 
-  const ranked = filterContractors(directory, { radiusKm, sort }, criteria).slice(0, 3)
-  const moreContractors = directory.filter((contractor) => !ranked.some((item) => item.id === contractor.id))
+  const filtered = filterContractors(
+    directory,
+    {
+      radiusKm: mock ? (radiusChoice ?? widestRadius) : Number.POSITIVE_INFINITY,
+      sort: sort === 'distance' && !radiusApplied && !mock ? null : sort
+    },
+    criteria
+  )
+  const ranked = filtered.slice(0, 3)
+  const moreContractors = filtered.slice(3)
 
   /**
    * Đứng ở danh sách xếp hạng lâu không bấm gì → thanh "Tạo hồ sơ dự án - miễn
@@ -405,7 +452,7 @@ export function ContractorLanding() {
   // trên ảnh 450px = 41–48px ở khổ thật, còn `space-y-16` (64px) của bản trước
   // đẩy trang dài ra và làm mỗi khối trôi ra xa nhau hơn ảnh.
   return (
-    <div className='space-y-10 sm:space-y-11 pb-5'>
+    <div className='space-y-5 sm:space-y-11 pb-5'>
       {/* Hero — ảnh phủ toàn banner, lớp blur bên trái tan dần trên ảnh. */}
       <section data-contractor-hero className='relative isolate overflow-hidden'>
         {/* Không chia cột ảnh: chỉ mask lớp blur, giữ ảnh gốc liền mạch. */}
@@ -523,7 +570,7 @@ export function ContractorLanding() {
             241…308, 331…428 — chia 424px thành 4 cột đều 106px thì cả bốn cụm
             đều nằm giữa cột của mình, không phải canh trái. */}
       <motion.section
-        className={cn(PAGE_CONTAINER, 'max-sm:-mt-3')}
+        className={PAGE_CONTAINER}
         initial={reduceMotion ? false : { opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.4 }}
@@ -589,8 +636,10 @@ export function ContractorLanding() {
               {CRITERIA_ITEMS.map((item) => {
                 const open = openCriterion === item.key
                 const options = criterionOptions[item.key]
-                const selectedValue = criterionSelections[item.key]
+                const selectedValue =
+                  item.key === 'area' && !canFilterRadius ? undefined : criterionSelections[item.key]
                 const selected = options.find((option) => option.value === selectedValue)?.label
+                const catalogCriterion = !mock && item.key === 'type'
                 return (
                   // Hình S09: mỗi ô cao 20/135 = 14.8% bề ngang cột tiêu chí,
                   // tức thoáng hơn hẳn `py-3` của bản trước.
@@ -663,12 +712,23 @@ export function ContractorLanding() {
                           className='overflow-hidden'
                         >
                           <div className='flex flex-wrap gap-2 px-4 pb-4'>
+                            {catalogCriterion && filterOptions.isPending ? <Skeleton className='h-8 w-full' /> : null}
+                            {catalogCriterion && filterOptions.isError ? (
+                              <Alert variant='destructive'>
+                                <AlertDescription>{t('criteria.loadError')}</AlertDescription>
+                                <Button size='sm' variant='outline' onClick={() => void filterOptions.refetch()}>
+                                  {t('ranking.retry')}
+                                </Button>
+                              </Alert>
+                            ) : null}
                             {options.map((option) => {
                               const isSelected = option.value === selectedValue
+                              const disabled = item.key === 'area' && !canFilterRadius
                               return (
                                 <button
                                   key={option.value}
                                   type='button'
+                                  disabled={disabled}
                                   aria-pressed={isSelected}
                                   onClick={() => {
                                     setCriterionSelections((current) => {
@@ -688,7 +748,7 @@ export function ContractorLanding() {
                                     }
                                   }}
                                   className={cn(
-                                    'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                                    'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50',
                                     isSelected
                                       ? 'border-primary bg-accent text-primary-strong'
                                       : 'hover:border-primary/40'
@@ -740,6 +800,14 @@ export function ContractorLanding() {
                 </button>
               ))}
             </div>
+            {sort === 'distance' && !mock && !radiusApplied ? (
+              <div className='mt-4 space-y-2'>
+                <p className='text-muted-foreground text-sm'>{t('criteria.distanceNeedsRadius')}</p>
+                <Button size='sm' variant='outline' onClick={() => setOpenCriterion('area')}>
+                  {t('criteria.configureRadius')}
+                </Button>
+              </div>
+            ) : null}
 
             {/* Hình S09: mỗi dòng chia BỐN cột cố định — ô logo (10.1% bề
                 ngang khung) · tên + chỉ số (32.5%) · lịch khảo sát (13.7%) ·
@@ -750,7 +818,24 @@ export function ContractorLanding() {
                 cách nằm ở S12 chứ không ở landing. */}
             {/* Thanh nhắc nổi không thay đổi chiều cao danh sách hoặc đẩy dải logo bên dưới. */}
             <ul id={RANKED_LIST_ID} className='mt-4 divide-y'>
-              {ranked.length === 0 ? (
+              {directoryPending ? (
+                <li aria-label={t('ranking.loading')} className='space-y-4 py-4'>
+                  {[0, 1, 2].map((row) => (
+                    <Skeleton key={row} className='h-24 w-full' />
+                  ))}
+                </li>
+              ) : null}
+              {directoryError ? (
+                <li className='py-4'>
+                  <Alert variant='destructive'>
+                    <AlertDescription>{t('ranking.loadError')}</AlertDescription>
+                    <Button size='sm' variant='outline' onClick={() => void liveDirectory.refetch()}>
+                      {t('ranking.retry')}
+                    </Button>
+                  </Alert>
+                </li>
+              ) : null}
+              {!directoryPending && !directoryError && ranked.length === 0 ? (
                 <li className='text-muted-foreground py-10 text-center text-sm text-pretty'>{t('ranking.empty')}</li>
               ) : null}
               {ranked.map((contractor) => (
@@ -772,19 +857,27 @@ export function ContractorLanding() {
                       <span className='flex items-center gap-1.5'>
                         <Star className='text-warning size-3.5 shrink-0 fill-current' />
                         <span className='text-foreground font-semibold'>
-                          {formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}
+                          {contractor.ratingKnown === false
+                            ? tCommon('ratingUnknown')
+                            : formatNumber(contractor.rating, locale, { minimumFractionDigits: 1 })}
                         </span>
-                        {tCommon('reviewCount', { count: contractor.reviewCount })}
+                        {contractor.reviewCountKnown !== false
+                          ? tCommon('reviewCount', { count: contractor.reviewCount })
+                          : null}
                       </span>
                       <span className='flex items-center gap-1.5'>
                         <BadgeCheck className='text-primary size-3.5 shrink-0' />
-                        {tCommon('similarProjects', { count: contractor.similarProjects })}
+                        {tCommon('similarProjects', {
+                          count: contractor.completedProjects ?? contractor.similarProjects
+                        })}
                       </span>
                     </span>
                   </div>
 
                   <p className='text-foreground/75 text-xs font-medium text-pretty'>
-                    {t('ranking.surveyWithin', { hours: contractor.surveyWithinHours })}
+                    {contractor.surveyTimeKnown === false
+                      ? tCommon('informationUnknown')
+                      : t('ranking.surveyWithin', { hours: contractor.surveyWithinHours })}
                   </p>
 
                   {/* Cùng việc cùng nhãn với trang Đề xuất (góp ý BuildX): "Xem hồ sơ"

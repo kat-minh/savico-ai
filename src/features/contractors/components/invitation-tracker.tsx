@@ -4,7 +4,6 @@ import {
   BadgeCheck,
   CalendarDays,
   ChevronLeft,
-  CircleCheck,
   FileText,
   Headset,
   Info,
@@ -19,6 +18,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+
+import { env } from '@/shared/config/env'
+import { QuotationTracker } from './quotation-tracker'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import type { Locale } from '@/i18n/routing'
@@ -35,11 +37,13 @@ import { formatDisplayDate, formatDisplayDateTime } from '@/shared/utils'
 import { surveySlotLabel } from '@/shared/cms'
 import { INVITATION_STEPS, INVITATIONS_ARRIVE_FORWARD_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
+import { useConstructionScopes } from '../hooks/use-construction-scopes'
 import { useContractors } from '../hooks/use-contractors'
-import { useContractorReviews, useInvitations } from '../hooks/use-invitations'
+import { useContractorReviews, useMockInvitations as useInvitations } from '../hooks/use-invitations'
 import type { Contractor, ContractorReview, Invitation } from '../types/contractor.types'
 import { ContractorReviewDialog } from './contractor-review-dialog'
 import { ContractorLogo } from './contractor-logo'
+import { ContractorProfileSheet } from './contractor-profile-sheet'
 import { ContractorStats } from './contractor-stats'
 import { ProjectContextBar } from './project-context-bar'
 
@@ -58,7 +62,7 @@ interface InvitationTrackerProps {
  * tả: mỗi thẻ hiện luôn LỊCH KHẢO SÁT đã đặt — sau S17 thì đây là chỗ duy nhất
  * khách xem lại được mình đã hẹn nhà thầu lúc nào.
  */
-export function InvitationTracker({ projectId }: InvitationTrackerProps) {
+function MockInvitationTracker({ projectId }: InvitationTrackerProps) {
   const t = useTranslations('contractors.invitations')
   const tStatus = useTranslations('contractors.status')
   const router = useRouter()
@@ -366,7 +370,10 @@ export function InvitationTracker({ projectId }: InvitationTrackerProps) {
         </div>
       )}
 
-      <ProfileSheet contractor={profileContractor} onOpenChange={(open) => !open && setProfileContractor(null)} />
+      <ContractorProfileSheet
+        contractor={profileContractor}
+        onOpenChange={(open) => !open && setProfileContractor(null)}
+      />
       <DossierSheet
         open={dossierOpen}
         onOpenChange={setDossierOpen}
@@ -541,7 +548,7 @@ function InvitationCard({
                   initial={{ opacity: 0, scale: 0.6 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.7 }}
-                  className='bg-destructive text-destructive-foreground ml-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold'
+                  className='bg-destructive text-destructive-foreground ml-0.5 rounded-full px-1.5 py-0.5 max-md:text-xs text-[9px] font-semibold'
                 >
                   {t('newUpdateBadge')}
                 </motion.span>
@@ -831,7 +838,7 @@ function StatusLegend({
  */
 function SentDossier({ projectId, version, onView }: { projectId: string; version: string; onView: () => void }) {
   const t = useTranslations('contractors.invitations')
-  const tScope = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const tScale = useTranslations('contractors.scale')
   const { data: brief } = useBrief(projectId)
   const reduceMotion = useReducedMotion()
@@ -841,7 +848,7 @@ function SentDossier({ projectId, version, onView }: { projectId: string; versio
   const rows = [
     { label: t('dossierType'), value: brief.buildingType },
     { label: t('dossierScale'), value: `${tScale(brief.scale)} · ${brief.landArea} m²` },
-    { label: t('dossierScope'), value: tScope(brief.scope) },
+    { label: t('dossierScope'), value: scopes.label(brief.scope, brief.scopeName) },
     { label: t('dossierFiles'), value: t('dossierFileCount', { count: brief.documents.length }) }
   ]
 
@@ -856,7 +863,7 @@ function SentDossier({ projectId, version, onView }: { projectId: string; versio
           initial={reduceMotion ? false : { scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20, delay: reduceMotion ? 0 : 0.9 }}
-          className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 text-[10px] font-medium'
+          className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'
         >
           {version}
         </motion.span>
@@ -888,94 +895,6 @@ function SentDossier({ projectId, version, onView }: { projectId: string; versio
   )
 }
 
-function ProfileSheet({
-  contractor,
-  onOpenChange
-}: {
-  contractor: Contractor | null
-  onOpenChange: (open: boolean) => void
-}) {
-  const t = useTranslations('contractors.invitations')
-  const tFirm = useTranslations('contractors.firm')
-
-  return (
-    <Sheet open={Boolean(contractor)} onOpenChange={onOpenChange}>
-      <SheetContent className='w-[94vw] overflow-y-auto sm:max-w-lg'>
-        {contractor ? (
-          <>
-            <SheetHeader className='pr-10'>
-              <div className='flex items-center gap-3'>
-                <ContractorLogo contractor={contractor} className='size-14 rounded-xl' />
-                <div className='min-w-0'>
-                  <SheetTitle className='flex items-center gap-1.5'>
-                    <span className='truncate'>{contractor.name}</span>
-                    {contractor.verified ? <BadgeCheck className='text-primary size-4 shrink-0' /> : null}
-                  </SheetTitle>
-                  <SheetDescription>{t('profilePanelDescription')}</SheetDescription>
-                </div>
-              </div>
-            </SheetHeader>
-
-            <motion.div
-              initial={{ opacity: 0, x: 18 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease: revealEase }}
-              className='space-y-5 px-4 pb-6'
-            >
-              <dl className='grid grid-cols-2 gap-2 text-sm'>
-                <div className='bg-muted/40 rounded-xl p-3'>
-                  <dt className='text-muted-foreground text-xs'>{t('profileRating')}</dt>
-                  <dd className='mt-1 font-semibold'>{contractor.rating}/5</dd>
-                </div>
-                <div className='bg-muted/40 rounded-xl p-3'>
-                  <dt className='text-muted-foreground text-xs'>{t('profileSimilar')}</dt>
-                  <dd className='mt-1 font-semibold'>{contractor.similarProjects}</dd>
-                </div>
-              </dl>
-
-              <section>
-                <h3 className='font-semibold'>{tFirm('introTitle')}</h3>
-                <p className='text-muted-foreground mt-2 text-sm leading-relaxed text-pretty'>{contractor.intro}</p>
-                <div className='mt-3 flex flex-wrap gap-2'>
-                  {contractor.strengths.map((strength) => (
-                    <span key={strength} className='bg-primary/10 text-primary-strong rounded-md px-2.5 py-1 text-xs'>
-                      {strength}
-                    </span>
-                  ))}
-                </div>
-              </section>
-
-              <section>
-                <h3 className='font-semibold'>{tFirm('featured')}</h3>
-                <ul className='mt-2 space-y-2'>
-                  {contractor.featuredProjects.map((project) => (
-                    <li key={project.id} className='bg-muted/40 flex justify-between gap-3 rounded-xl p-3 text-sm'>
-                      <span className='font-medium'>{project.name}</span>
-                      <span className='text-muted-foreground shrink-0'>{project.year}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section>
-                <h3 className='font-semibold'>{tFirm('legalTitle')}</h3>
-                <ul className='mt-2 space-y-2'>
-                  {contractor.legalChecks.map((check) => (
-                    <li key={check} className='flex items-start gap-2 text-sm'>
-                      <CircleCheck className='text-primary mt-0.5 size-4 shrink-0' />
-                      <span className='text-muted-foreground'>{check}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </motion.div>
-          </>
-        ) : null}
-      </SheetContent>
-    </Sheet>
-  )
-}
-
 function DossierSheet({
   open,
   onOpenChange,
@@ -988,7 +907,7 @@ function DossierSheet({
   version: string
 }) {
   const t = useTranslations('contractors.invitations')
-  const tScope = useTranslations('contractors.scope')
+  const scopes = useConstructionScopes()
   const tScale = useTranslations('contractors.scale')
   const { data: brief } = useBrief(projectId)
 
@@ -996,7 +915,7 @@ function DossierSheet({
     ? [
         { label: t('dossierType'), value: brief.buildingType },
         { label: t('dossierScale'), value: `${tScale(brief.scale)} · ${brief.landArea} m²` },
-        { label: t('dossierScope'), value: tScope(brief.scope) },
+        { label: t('dossierScope'), value: scopes.label(brief.scope, brief.scopeName) },
         { label: t('dossierFiles'), value: t('dossierFileCount', { count: brief.documents.length }) }
       ]
     : []
@@ -1007,7 +926,7 @@ function DossierSheet({
         <SheetHeader className='border-b pr-10'>
           <div className='flex items-center gap-2'>
             <SheetTitle>{t('dossierTitle')}</SheetTitle>
-            <span className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 text-[10px] font-medium'>
+            <span className='border-primary/40 text-primary-strong rounded-md border px-1.5 py-0.5 max-md:text-xs text-[10px] font-medium'>
               {version}
             </span>
           </div>
@@ -1040,4 +959,8 @@ function DossierSheet({
       </SheetContent>
     </Sheet>
   )
+}
+
+export function InvitationTracker(props: InvitationTrackerProps) {
+  return env.NEXT_PUBLIC_USE_MOCK_API ? <MockInvitationTracker {...props} /> : <QuotationTracker {...props} />
 }

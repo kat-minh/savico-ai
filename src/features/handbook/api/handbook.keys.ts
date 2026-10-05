@@ -13,8 +13,10 @@ export const handbookKeys = {
   articleList: (topic: string) => [...handbookKeys.articles(), topic] as const,
   articleDetail: (slug: string) => [...handbookKeys.articles(), 'detail', slug] as const,
 
-  libraryFilters: (kind: string) => [...handbookKeys.all, 'library-filters', kind] as const,
+  libraryFilters: (kind: string, buildingTypeId?: string) =>
+    [...handbookKeys.all, 'library-filters', kind, buildingTypeId] as const,
   templateIdsByStyle: (params: object) => [...handbookKeys.all, 'template-ids-by-style', params] as const,
+  templateStyles: (options: object | null | undefined) => [...handbookKeys.all, 'template-styles', options] as const,
   newsCategoryTree: () => [...handbookKeys.all, 'news-category-tree'] as const,
 
   stages: () => [...handbookKeys.all, 'stages'] as const,

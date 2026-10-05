@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { AdminShell } from '@/features/admin'
+import { AdminRouteGuard, AdminShell } from '@/features/admin'
 import { AdminGuard, ProtectedRoute } from '@/shared/auth'
 import { AntdProvider } from '@/shared/providers'
 import { AdminAccount } from './admin-account'
@@ -23,7 +23,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <AntdProvider>
       <ProtectedRoute>
         <AdminGuard fallback={<AdminForbidden />}>
-          <AdminShell userSlot={<AdminAccount />}>{children}</AdminShell>
+          <AdminShell userSlot={<AdminAccount />}>
+            <AdminRouteGuard>{children}</AdminRouteGuard>
+          </AdminShell>
         </AdminGuard>
       </ProtectedRoute>
     </AntdProvider>

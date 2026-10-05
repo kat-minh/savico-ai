@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useRef } from 'react'
+import { useAuth } from '@/shared/auth'
 import { useTranslations } from 'next-intl'
 
 import { useRouter } from '@/i18n/navigation'
@@ -13,10 +15,17 @@ import { useDesignStore } from '../store/design.store'
 
 /** Danh sách "Dự án của tôi" trong Cửa sổ cá nhân (mục IV). */
 export function useProjects(enabled = true) {
+  const { user, isAuthenticated, isInitialized } = useAuth()
   return useQuery({
-    queryKey: designKeys.projects(),
+    queryKey: [...designKeys.projects(), 'owner', user?.id],
     queryFn: () => designApi.listProjects(),
-    enabled
+    enabled:
+      enabled &&
+      isInitialized &&
+      isAuthenticated &&
+      user?.accountKind === 'Customer' &&
+      !user.mustChangePassword &&
+      user.emailVerified !== false
   })
 }
 
@@ -38,9 +47,15 @@ export function useCreateProject(onCreated?: (projectId: string) => void) {
   const closeCreateDialog = useDesignStore((s) => s.closeCreateDialog)
   const t = useTranslations('errors')
 
+  const request = useRef<{ body: string; key: string } | null>(null)
   return useMutation({
-    mutationFn: (payload: CreateProjectPayload) => designApi.createProject(payload),
+    mutationFn: (payload: CreateProjectPayload) => {
+      const body = JSON.stringify(payload)
+      if (request.current?.body !== body) request.current = { body, key: crypto.randomUUID() }
+      return designApi.createProject(payload, request.current.key)
+    },
     onSuccess: (project) => {
+      request.current = null
       queryClient.invalidateQueries({ queryKey: designKeys.projects() })
       if (onCreated) {
         onCreated(project.id)
@@ -65,6 +80,7 @@ export function useRenameProject() {
     mutationFn: ({ projectId, name }: { projectId: string; name: string }) => designApi.renameProject(projectId, name),
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: designKeys.projects() })
+      queryClient.invalidateQueries({ queryKey: designKeys.project(project.id) })
       toast.success(tProjects('rename.success', { name: project.name }))
     },
     onError: (error) => {
@@ -93,7 +109,14 @@ export function useDeleteProject() {
       toast.success(tProjects('delete.success'))
     },
     onError: (error) => {
-      toast.error(isApiError(error) ? error.message : t('generic'))
+      const code = isApiError(error) ? (error.messageCode ?? error.code) : null
+      toast.error(
+        code === 'Processing' || code === 'ConstructionSiteInUse'
+          ? tProjects(`delete.${code}`)
+          : isApiError(error)
+            ? error.message
+            : t('generic')
+      )
     }
   })
 }

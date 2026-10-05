@@ -54,7 +54,7 @@ interface StepInputFormProps {
 /** Nhãn nhóm đánh số trong cột trái (Hình 04): "1 · HÌNH ẢNH & MÔ TẢ". */
 function GroupHeading({ index, children }: { index: number; children: ReactNode }) {
   return (
-    <h2 className='text-muted-foreground mb-3 text-[11px] font-semibold tracking-[0.1em] uppercase'>
+    <h2 className='text-muted-foreground mb-3 max-md:text-xs text-[11px] font-semibold tracking-[0.1em] uppercase'>
       {index} · {children}
     </h2>
   )

@@ -6,7 +6,7 @@ import { App, Col, Divider, Form, Input, InputNumber, Row, Select, Switch, Typog
 import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
-import { http } from '@/shared/lib/api'
+import { getContractorFilterOptions, type ContractorFilterOptions } from '@/shared/contractors'
 import {
   contractorsAdminApi,
   type AdminContractorDetail,
@@ -14,7 +14,7 @@ import {
   type ContractorProfileUpdate
 } from '../../api/bmt/contractors.admin.api'
 import { constructionScopesApi } from '../../api/bmt/construction-scopes.api'
-import { AddressAutoComplete } from '../common/address-autocomplete'
+import { ContractorAddressField, contractorAddressKey } from './contractor-address-field'
 import { ApiResourceManager } from '../common/api-resource-manager'
 import { useContractorErrorMessage } from './contractor-errors'
 import { ContractorImagesField, ContractorLicensesField, ContractorPartnershipField } from './contractor-files'
@@ -44,10 +44,7 @@ const str = (v: unknown): string | null => {
   return s === '' ? null : s
 }
 
-interface FilterOptions {
-  buildingTypes: { id: string; name: string }[]
-  scopes: { id: string; name: string }[]
-}
+type FilterOptions = ContractorFilterOptions
 
 /**
  * QUẢN LÝ NHÀ THẦU (STORY-CTR-001, BR-CTR-002/004) — CRUD gọn: danh sách → form
@@ -82,6 +79,17 @@ function buildProfileBody(
       introduction: str(values.introduction),
       contractorType: str(values.contractorType),
       address: str(values.address),
+      ...(values._structuredAddress
+        ? {
+            provinceCode: str(values.provinceCode),
+            wardCode: str(values.wardCode),
+            addressDetail: str(values.addressDetail),
+            locationDatasetVersion:
+              str(values.provinceCode) || str(values.wardCode) || str(values.addressDetail)
+                ? str(values.locationDatasetVersion)
+                : null
+          }
+        : { provinceCode: str(values.provinceCode) }),
       latitude: num(values.latitude),
       longitude: num(values.longitude),
       foundedYear: num(values.foundedYear),
@@ -127,12 +135,10 @@ export function ContractorAdminManager() {
   const options = useQuery<FilterOptions>({
     queryKey: ['admin', 'contractor-form-options'],
     queryFn: async () => {
-      const [filter, scopes] = await Promise.all([
-        http.get<FilterOptions>('/contractors/filter-options'),
-        constructionScopesApi.list()
-      ])
+      const [filter, scopes] = await Promise.all([getContractorFilterOptions(), constructionScopesApi.list()])
       return {
-        buildingTypes: filter.buildingTypes ?? [],
+        ...filter,
+        buildingTypes: filter.buildingTypes,
         scopes: scopes.filter((s) => s.isActive).map((s) => ({ id: s.id, name: s.name }))
       }
     }
@@ -156,6 +162,12 @@ export function ContractorAdminManager() {
         shortDescription: '',
         introduction: '',
         address: '',
+        _structuredAddress: true,
+        _addressCoordinateKey: '',
+        provinceCode: null,
+        wardCode: null,
+        locationDatasetVersion: null,
+        addressDetail: null,
         latitude: null,
         longitude: null,
         serviceAreaText: '',
@@ -209,6 +221,19 @@ export function ContractorAdminManager() {
           introduction: p.introduction ?? '',
           contractorType: p.contractorType ?? '',
           address: p.address ?? '',
+          provinceCode: p.provinceCode ?? null,
+          wardCode: p.wardCode ?? null,
+          locationDatasetVersion: p.locationDatasetVersion ?? null,
+          addressDetail: p.addressDetail ?? null,
+          _structuredAddress: Boolean(p.locationDatasetVersion),
+          _originalProvinceCode: p.provinceCode,
+          _originalWardCode: p.wardCode,
+          _originalDatasetVersion: p.locationDatasetVersion,
+          _provinceName: p.provinceName,
+          _wardName: p.wardName,
+          _addressCoordinateKey: p.locationDatasetVersion
+            ? contractorAddressKey(p as unknown as Record<string, unknown>)
+            : '',
           latitude: p.latitude ?? null,
           longitude: p.longitude ?? null,
           foundedYear: p.foundedYear ?? null,
@@ -326,31 +351,7 @@ export function ContractorAdminManager() {
             </Form.Item>
 
             <Divider titlePlacement='start'>{c('sections.location')}</Divider>
-            {/* Chọn gợi ý là tự điền luôn vĩ độ/kinh độ bên dưới — BR-CTR-002 bắt
-                đủ toạ độ mới cho bật Hiện hồ sơ. */}
-            <Form.Item name='address' label={c('address')} extra={c('addressHint')}>
-              <AddressAutoComplete
-                onResolved={(found) => {
-                  form.setFieldsValue({
-                    address: found.display,
-                    latitude: found.latitude,
-                    longitude: found.longitude
-                  })
-                }}
-              />
-            </Form.Item>
-            <Row gutter={12}>
-              <Col span={12}>
-                <Form.Item name='latitude' label={c('latitude')}>
-                  <InputNumber style={{ width: '100%' }} step={0.000001} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item name='longitude' label={c('longitude')}>
-                  <InputNumber style={{ width: '100%' }} step={0.000001} />
-                </Form.Item>
-              </Col>
-            </Row>
+            <ContractorAddressField form={form} visible={ctx.item?.status === 'Visible'} />
             <Form.Item name='serviceAreaText' label={c('serviceAreaText')}>
               <Input />
             </Form.Item>

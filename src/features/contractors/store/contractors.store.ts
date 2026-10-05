@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
 
+import { useAuthStore } from '@/shared/auth'
 import { MAX_INVITATIONS } from '../constants/contractors.constants'
 import type { SurveyBooking } from '../types/contractor.types'
 
@@ -23,13 +24,15 @@ import type { SurveyBooking } from '../types/contractor.types'
  */
 interface ContractorsState {
   compareIds: string[]
+  queueProjectId?: string
+  queueUserId?: string
   inviteQueue: string[]
   queueIndex: number
   pendingBookings: SurveyBooking[]
 
   toggleCompare: (contractorId: string) => void
   clearCompare: () => void
-  startInviteQueue: (contractorIds: string[]) => void
+  startInviteQueue: (contractorIds: string[], projectId?: string) => void
   addBooking: (booking: SurveyBooking) => void
   advanceQueue: () => void
   clearQueue: () => void
@@ -69,8 +72,14 @@ export const useContractorsStore = create<ContractorsState>()(
 
       clearCompare: () => set({ compareIds: [] }),
 
-      startInviteQueue: (contractorIds) =>
-        set({ inviteQueue: contractorIds.slice(0, MAX_INVITATIONS), queueIndex: 0, pendingBookings: [] }),
+      startInviteQueue: (contractorIds, projectId) =>
+        set({
+          queueProjectId: projectId,
+          queueUserId: useAuthStore.getState().user?.id,
+          inviteQueue: contractorIds.slice(0, MAX_INVITATIONS),
+          queueIndex: 0,
+          pendingBookings: []
+        }),
 
       addBooking: (booking) =>
         set((state) => ({
@@ -82,7 +91,8 @@ export const useContractorsStore = create<ContractorsState>()(
 
       advanceQueue: () => set((state) => ({ queueIndex: state.queueIndex + 1 })),
 
-      clearQueue: () => set({ inviteQueue: [], queueIndex: 0, pendingBookings: [] })
+      clearQueue: () =>
+        set({ queueProjectId: undefined, queueUserId: undefined, inviteQueue: [], queueIndex: 0, pendingBookings: [] })
     }),
     {
       name: 'savico.contractors-session',

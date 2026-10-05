@@ -125,6 +125,7 @@ export function useAddressActions(input: ReturnType<typeof useEstimateInput>) {
     const current = inputRef.current
     const release = current.hold()
     try {
+      current.patch({ latitude: null, longitude: null })
       if (change.wardCode) current.chooseWard(change.wardCode)
       else current.chooseProvince(change.provinceCode)
 

@@ -275,7 +275,7 @@ export function inputBody(draft: EstimateInputDraft, withCoordinates = false): E
   return {
     buildingTypeId: draft.buildingTypeId,
     areaM2: blankToNull(draft.areaM2),
-    description: draft.description.trim() === '' ? null : draft.description,
+    description: draft.description === '' ? null : draft.description,
     provinceCode: draft.provinceCode,
     wardCode: draft.wardCode,
     locationDatasetVersion: draft.locationDatasetVersion,
@@ -300,7 +300,7 @@ export function normalizeSaved(input: Partial<EstimateInputBody> | null | undefi
   return {
     buildingTypeId: input?.buildingTypeId ?? null,
     areaM2: blank(input?.areaM2),
-    description: blank(input?.description),
+    description: input?.description ?? null,
     provinceCode: input?.provinceCode ?? null,
     wardCode: input?.wardCode ?? null,
     locationDatasetVersion: input?.locationDatasetVersion ?? null,
@@ -342,7 +342,11 @@ function sameValue(field: InputField, a: unknown, b: unknown): boolean {
 function numberText(value: unknown): string | null {
   if (value === null || value === undefined) return null
   const s = String(value)
-  return AREA_PATTERN.test(s) ? String(Number(s)) : s
+  if (!AREA_PATTERN.test(s)) return s
+  const [integer = '', fraction = ''] = s.split('.')
+  const whole = integer.replace(/^0+(?=\d)/, '')
+  const decimal = fraction.replace(/0+$/, '')
+  return decimal ? `${whole}.${decimal}` : whole
 }
 
 /* ===========================================================================

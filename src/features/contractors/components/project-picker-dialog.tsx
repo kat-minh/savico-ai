@@ -2,7 +2,9 @@
 
 import { CheckCircle2, FilePlus2, FileText, House, Inbox, MoreHorizontal, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 
+import { env } from '@/shared/config/env'
 import { Link, useRouter } from '@/i18n/navigation'
 import { Photo } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
@@ -25,8 +27,10 @@ import { cn } from '@/shared/lib/utils'
 import { MATCHES_PROJECT_CHANGED_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBriefSummaries } from '../hooks/use-brief-summaries'
 import { useCreateBrief } from '../hooks/use-brief'
+import { useSelectedProject } from '../hooks/use-selected-project'
 import { briefReadiness, isBriefComplete, shortAddress } from '../services/brief.service'
 import { useProjectPickerStore } from '../store/project-picker.store'
+import { useProjectSelectionStore } from '../store/project-selection.store'
 import type { ProjectBriefSummary } from '../types/contractor.types'
 
 interface ProjectPickerDialogProps {
@@ -57,11 +61,21 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
   const router = useRouter()
   const open = useProjectPickerStore((s) => s.open)
   const close = useProjectPickerStore((s) => s.closePicker)
+  const selectProject = useProjectSelectionStore((s) => s.selectProject)
+  const { userId } = useSelectedProject()
 
-  const { data: summaries, isPending } = useBriefSummaries()
+  const { data: summaries, isPending, isError, refetch } = useBriefSummaries(open)
   const createBrief = useCreateBrief()
 
   function choose(projectId: string) {
+    const brief = summaries?.find((summary) => summary.brief.id === projectId)?.brief
+    if (!userId || !brief) return
+    try {
+      selectProject(userId, brief)
+    } catch {
+      toast.error(t('saveSelectionError'))
+      return
+    }
     window.sessionStorage.setItem(MATCHES_PROJECT_CHANGED_KEY, projectId)
     close()
     router.push(contractorMatchesRoute(projectId))
@@ -69,23 +83,22 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && close()}>
-      {/* Mobile: bottom-sheet bám đáy màn hình (ngón cái với tới); từ `sm` trở lên
-          trở lại hộp thoại giữa màn hình như cũ. */}
-      <DialogContent
-        className={cn(
-          'top-auto bottom-0 left-0 max-h-[90dvh] w-full max-w-full translate-x-0 translate-y-0 gap-3 rounded-b-none p-4',
-          'sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-[calc(100vh-3rem)] sm:max-w-[52rem] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:gap-4 sm:rounded-2xl sm:p-5'
-        )}
-      >
-        <span aria-hidden className='bg-muted mx-auto -mt-1 h-1 w-10 rounded-full sm:hidden' />
+      {/* Giữ cùng quy tắc với các popup khác: hộp thoại luôn có khoảng cách hai bên
+          và căn giữa; nội dung tự cuộn khi danh sách dài hơn viewport. */}
+      <DialogContent className='max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[52rem] gap-3 rounded-2xl p-4 overscroll-contain sm:gap-4 sm:p-5'>
         <DialogHeader className='gap-1 pr-8 sm:items-center sm:gap-2 sm:pr-0 sm:text-center'>
           <DialogTitle className='text-lg sm:text-2xl'>{t('title')}</DialogTitle>
           <DialogDescription className='text-xs text-pretty sm:text-sm'>
-            {t('subtitle', { max: MAX_INVITATIONS })}
+            {env.NEXT_PUBLIC_USE_MOCK_API ? t('subtitle', { max: MAX_INVITATIONS }) : t('apiSubtitle')}
           </DialogDescription>
         </DialogHeader>
 
-        {isPending ? (
+        {isError ? (
+          <div role='alert'>
+            <p>{t('loadSelectionError')}</p>
+            <Button onClick={() => void refetch()}>{t('retrySelection')}</Button>
+          </div>
+        ) : isPending ? (
           <div className='space-y-3'>
             {[0, 1].map((index) => (
               <Skeleton key={index} className='h-24 rounded-xl' />
@@ -109,7 +122,10 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
                       selfCreated: tCommon('selfCreated'),
                       fromPlan: t('fromPlan'),
                       notInvited: t('notInvited'),
-                      invited: t('invitedCount', { used: summary.invitedCount, max: MAX_INVITATIONS }),
+                      invited: t('invitedCount', {
+                        used: summary.invitedCount,
+                        max: summary.invitationLimit ?? MAX_INVITATIONS
+                      }),
                       contracted: t('contracted'),
                       choose: t('choose'),
                       current: t('current'),
@@ -190,7 +206,9 @@ function EmptyBriefs({ onCreate, pending }: { onCreate: () => void; pending: boo
         </Button>
       </div>
 
-      <p className='text-muted-foreground text-xs'>{t('emptyFootnote', { max: MAX_INVITATIONS })}</p>
+      <p className='text-muted-foreground text-xs'>
+        {env.NEXT_PUBLIC_USE_MOCK_API ? t('emptyFootnote', { max: MAX_INVITATIONS }) : t('apiEmptyFootnote')}
+      </p>
     </div>
   )
 }
@@ -229,7 +247,7 @@ function BriefRow({
 }) {
   const { brief, invitedCount } = summary
   const contracted = brief.status === 'contracted'
-  const full = invitedCount >= MAX_INVITATIONS
+  const full = invitedCount >= (summary.invitationLimit ?? MAX_INVITATIONS)
   // Thiếu trường bắt buộc = "Bản nháp": không cho "Chọn" (trang Đề xuất sẽ ghép nhà
   // thầu trên dữ liệu rỗng) mà dẫn về đúng nhóm còn thiếu của Bước 1 (góp ý NT30).
   const draft = !contracted && !isBriefComplete(brief)
@@ -264,26 +282,24 @@ function BriefRow({
         )}
 
         <div className='min-w-0 flex-1'>
-          {/* Hồ sơ vừa tạo mà chưa điền gì thì `name` rỗng — không có nhãn dự
-            phòng, dòng chỉ còn mã dự án và trông như bị mất chữ. */}
+          {/* Hồ sơ chưa có tên dùng nhãn dự phòng để dòng vẫn nhận diện được. */}
           <p className='flex items-center gap-2 font-semibold'>
             {current ? <CheckCircle2 className='text-primary size-4 shrink-0' /> : null}
             <span className={cn('truncate', !brief.name.trim() && 'text-muted-foreground font-normal italic')}>
               {brief.name.trim() || labels.untitled}
             </span>
           </p>
-          <p className='text-muted-foreground truncate font-mono text-[11px] sm:text-xs'>{brief.id}</p>
           <p className='text-muted-foreground truncate text-xs'>
             {[brief.buildingType, labels.scale, shortAddress(brief)].filter(Boolean).join(' · ')}
           </p>
 
           <div className='mt-1.5 flex flex-wrap items-center gap-2'>
-            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase'>
+            <span className='bg-accent text-primary-strong rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold tracking-wide uppercase'>
               {brief.selfCreated ? labels.selfCreated : labels.fromPlan}
             </span>
             <span
               className={cn(
-                'rounded-md px-2 py-0.5 text-[11px] font-medium',
+                'rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-medium',
                 (contracted || invitedCount === 0) && 'bg-muted text-muted-foreground',
                 !contracted && invitedCount > 0 && !full && 'bg-info-soft text-info',
                 !contracted && full && 'bg-accent text-primary-strong'
@@ -292,7 +308,7 @@ function BriefRow({
               {contracted ? labels.contracted : invitedCount === 0 ? labels.notInvited : labels.invited}
             </span>
             {draft ? (
-              <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+              <span className='bg-brand-orange-soft text-brand-orange rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                 {labels.draft}
               </span>
             ) : null}

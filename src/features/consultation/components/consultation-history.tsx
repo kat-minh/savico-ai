@@ -65,7 +65,7 @@ function StatusPill({ booking }: { booking: ConsultationHistoryBooking }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-medium',
+        'inline-flex items-center gap-1.5 rounded-full px-2 py-1 max-md:text-xs text-[11px] font-medium',
         STATUS_TONE[booking.status]
       )}
     >
@@ -185,10 +185,10 @@ export function ConsultationHistory() {
               <div className='min-w-0 flex-1'>
                 <div className='flex flex-wrap items-center gap-2'>
                   <h3 className='font-semibold'>{upcoming.consultantName}</h3>
-                  <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-[11px]'>
+                  <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 max-md:text-xs text-[11px]'>
                     {upcoming.specialtyLabel}
                   </span>
-                  <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-[11px]'>
+                  <span className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 max-md:text-xs text-[11px]'>
                     {t('yearsExperience', { count: upcoming.yearsExperience })}
                   </span>
                   <StatusPill booking={upcoming} />
@@ -200,7 +200,7 @@ export function ConsultationHistory() {
 
                 {upcoming.note ? (
                   <div className='bg-muted/60 mt-3 rounded-lg px-3 py-2.5'>
-                    <p className='text-muted-foreground text-[11px] font-medium'>{t('yourNote')}</p>
+                    <p className='text-muted-foreground max-md:text-xs text-[11px] font-medium'>{t('yourNote')}</p>
                     <p className='mt-1 text-xs leading-relaxed text-pretty'>{upcoming.note}</p>
                   </div>
                 ) : null}
@@ -209,7 +209,7 @@ export function ConsultationHistory() {
 
             <div className='flex flex-row items-center justify-between gap-3 border-t pt-3 lg:flex-col lg:items-stretch lg:justify-start lg:border-t-0 lg:pt-0'>
               <div className='text-right'>
-                <p className='text-muted-foreground text-[11px]'>{t('upcomingLabel')}</p>
+                <p className='text-muted-foreground max-md:text-xs text-[11px]'>{t('upcomingLabel')}</p>
                 <p className='text-primary-strong text-lg font-bold'>
                   {upcomingOngoing ? t('ongoing') : t('hoursLeft', { count: hoursUntilUpcoming ?? 0 })}
                 </p>
@@ -301,7 +301,7 @@ export function ConsultationHistory() {
                       <ConsultantAvatar booking={booking} />
                       <div className='min-w-0'>
                         <p className='truncate text-sm font-semibold'>{booking.consultantName}</p>
-                        <p className='text-muted-foreground mt-0.5 text-[11px]'>
+                        <p className='text-muted-foreground mt-0.5 max-md:text-xs text-[11px]'>
                           {booking.specialtyLabel} · {t('yearsExperience', { count: booking.yearsExperience })} ·{' '}
                           {booking.id}
                         </p>

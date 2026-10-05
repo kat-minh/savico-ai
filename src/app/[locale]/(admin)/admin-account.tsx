@@ -46,7 +46,7 @@ export function AdminAccount() {
           {
             key: 'site',
             icon: <UserOutlined />,
-            label: <Link href={ROUTES.ACCOUNT}>{t('shell.myAccount')}</Link>
+            label: <Link href={ROUTES.HOME}>{t('shell.viewSite')}</Link>
           },
           {
             key: 'logout',

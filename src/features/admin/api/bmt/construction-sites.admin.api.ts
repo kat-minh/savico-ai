@@ -1,4 +1,4 @@
-import { http } from '@/shared/lib/api'
+import { http, httpClient } from '@/shared/lib/api'
 import type { PagedResult } from '@/shared/types'
 import { normalizeSite, type AdminConstructionSite } from './construction-sites.logic'
 
@@ -18,6 +18,14 @@ export const constructionSitesAdminApi = {
   async list(params: { pageIndex: number; pageSize: number }): Promise<PagedResult<AdminConstructionSite>> {
     const page = await http.get<PagedResult<unknown>>(BASE, { params })
     return { ...page, items: (page.items ?? []).map(normalizeSite) }
+  },
+
+  async download(siteId: string, attachmentId: string): Promise<Blob> {
+    const response = await httpClient.get<Blob>(
+      `/construction-sites/${encodeURIComponent(siteId)}/attachments/${encodeURIComponent(attachmentId)}/content`,
+      { responseType: 'blob' }
+    )
+    return response.data
   },
 
   async get(siteId: string): Promise<AdminConstructionSite> {

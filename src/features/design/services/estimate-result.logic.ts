@@ -66,43 +66,17 @@ export class EstimateFlowError extends Error {
  * ======================================================================== */
 
 const COST_ORDER: readonly CostSection[] = ['structure', 'finishing', 'interior']
-
-/** Khoá phần của hợp đồng → nhóm chi phí trên màn hình. `rough` (phần thô) là kết cấu. */
-function costSectionOf(key: string | undefined, index: number): CostSection {
-  switch ((key ?? '').toLowerCase()) {
-    case 'rough':
-    case 'structure':
-    case 'shell':
-      return 'structure'
-    case 'finishing':
-    case 'finish':
-      return 'finishing'
-    case 'interior':
-    case 'furniture':
-      return 'interior'
-    default:
-      return COST_ORDER[Math.min(index, COST_ORDER.length - 1)] ?? 'structure'
-  }
-}
+const SOURCE_KEYS = ['rough', 'finishing', 'interior'] as const
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
-/** Số tiền BE có thể trả dạng số hoặc chuỗi số; hỏng thì 0. */
+/** Không thay tiền thiếu/sai bằng 0, hoặc cộng lại tổng thay cho dữ liệu nguồn. */
 export function toAmount(value: unknown): number {
-  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value.replace(/[^\d.-]/g, '')) : NaN
-  return Number.isFinite(n) ? n : 0
-}
-
-function adviceOf(value: unknown): string {
-  if (typeof value === 'string') return value
-  if (isRecord(value)) {
-    for (const key of ['text', 'message', 'summary', 'content']) {
-      const found = value[key]
-      if (typeof found === 'string') return found
-    }
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    throw new Error('InvalidEstimateResult')
   }
-  return ''
+  return value
 }
 
 export interface MapContext {
@@ -124,42 +98,40 @@ export interface MappedResult {
 }
 
 export function mapEstimateContent(content: unknown, context: MapContext): MappedResult {
-  const root = isRecord(content) ? content : {}
-  const estimate = isRecord(root.estimate) ? root.estimate : {}
-  const rawSections = Array.isArray(estimate.sections) ? estimate.sections : []
-
-  const merged = new Map<CostSection, EstimateSection>()
-  rawSections.forEach((raw, index) => {
-    if (!isRecord(raw)) return
-    const key = typeof raw.key === 'string' ? raw.key : undefined
-    const name = typeof raw.name === 'string' ? raw.name : (key ?? '')
+  if (
+    !isRecord(content) ||
+    !isRecord(content.estimate) ||
+    !Array.isArray(content.estimate.sections) ||
+    content.estimate.currency !== 'VND' ||
+    typeof content.consultation !== 'string'
+  ) {
+    throw new Error('InvalidEstimateResult')
+  }
+  const estimate = content.estimate
+  const rawSections = estimate.sections as unknown[]
+  if (rawSections.length !== SOURCE_KEYS.length) throw new Error('InvalidEstimateResult')
+  const sections: EstimateSection[] = SOURCE_KEYS.map((key, index) => {
+    const matches = rawSections.filter((raw) => isRecord(raw) && raw.key === key)
+    const raw = matches[0]
+    if (matches.length !== 1 || !isRecord(raw) || typeof raw.name !== 'string' || !raw.name.trim()) {
+      throw new Error('InvalidEstimateResult')
+    }
     const amount = toAmount(raw.amount)
-    const section = costSectionOf(key, index)
-    const existing = merged.get(section) ?? { section, items: [], total: 0 }
-    existing.items.push({ id: key ?? `${section}-${index}`, label: name, amount, children: [] })
-    existing.total += amount
-    merged.set(section, existing)
+    const section = COST_ORDER[index]!
+    return { section, total: amount, items: [{ id: key, label: raw.name, amount, children: [] }] }
   })
-
-  const sections = COST_ORDER.flatMap((section) => {
-    const found = merged.get(section)
-    return found ? [found] : []
-  })
-  const summed = sections.reduce((sum, section) => sum + section.total, 0)
-  const total = toAmount(estimate.total)
-
   return {
     result: {
       projectId: context.projectId,
       sections,
-      grandTotal: total > 0 ? total : summed,
-      advisory: adviceOf(root.consultation),
+      grandTotal: toAmount(estimate.total),
+      advisory: content.consultation,
       estimatedFloorArea: context.areaM2,
       xlsxUrl: context.xlsxUrl ?? '',
       ...(context.completedAt ? { completedAt: context.completedAt } : {})
     },
-    isSample: root.isSample === true,
-    notice: typeof root.notice === 'string' ? root.notice : ''
+    isSample: content.isSample === true,
+    notice: typeof content.notice === 'string' ? content.notice : ''
   }
 }
 

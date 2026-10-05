@@ -61,17 +61,19 @@ function toDesiredAt(date: string, time: string): string {
   return `${date}T${time.length === 5 ? `${time}:00` : time}+07:00`
 }
 
+/** Số KTS của một trang danh sách (cột trái + lưới trang Tư vấn). */
+const CONSULTANT_LIST_PAGE_SIZE = 20
+
 export const bmtConsultationApi = {
+  /**
+   * Lấy DANH SÁCH KTS (một trang đầu), không kéo toàn bộ KTS về như trước. Mở hồ sơ
+   * một KTS bất kỳ đã có `getConsultant` riêng nên không cần cả danh sách trong tay.
+   */
   async listConsultants(): Promise<Consultant[]> {
-    const items: BmtArchitect[] = []
-    for (let pageIndex = 1; pageIndex <= 20; pageIndex++) {
-      const page = await http.get<PagedResult<BmtArchitect>>('/architects', {
-        params: { pageIndex, pageSize: 100 }
-      })
-      items.push(...page.items)
-      if (!page.hasNextPage) break
-    }
-    return items.map(toConsultant)
+    const page = await http.get<PagedResult<BmtArchitect>>('/architects', {
+      params: { pageIndex: 1, pageSize: CONSULTANT_LIST_PAGE_SIZE }
+    })
+    return page.items.map(toConsultant)
   },
 
   async getConsultant(id: string): Promise<Consultant | null> {

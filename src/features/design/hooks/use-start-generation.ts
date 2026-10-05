@@ -12,6 +12,7 @@ import { estimateInputApi } from '../api/estimate-input.api'
 export type StartErrorKind =
   | 'alreadyRunning'
   | 'unavailable'
+  | 'mediaUnavailable'
   | 'locationChanged'
   | 'versionConflict'
   | 'invalid'
@@ -21,12 +22,14 @@ export type StartErrorKind =
 /** Lỗi gửi AI → nhóm. `GenerationInProgress` / `EstimateAlreadyGenerated` nghĩa là tác vụ đã chạy / đã xong: không phải lỗi. */
 export function startErrorKind(error: unknown): StartErrorKind {
   if (!isApiError(error)) return 'other'
-  switch (error.messageCode) {
+  switch (error.messageCode ?? error.code) {
     case 'GenerationInProgress':
     case 'EstimateAlreadyGenerated':
       return 'alreadyRunning'
     case 'DependencyUnavailable':
       return 'unavailable'
+    case 'MediaReferenceUnavailable':
+      return 'mediaUnavailable'
     case 'LocationDatasetChanged':
       return 'locationChanged'
     case 'InputVersionConflict':
@@ -54,6 +57,8 @@ export function useStartGeneration(projectId: string) {
       const started = await estimateGenerationApi.start(projectId, version, keyRef.current.key)
       // Trang chờ hỏi đúng tác vụ này (kèm mã lỗi chính xác khi thất bại).
       rememberOperation(projectId, started.operationId)
+      // Một lần đã được tiếp nhận kết thúc hành động này; retry sau thất bại là tác vụ mới.
+      keyRef.current = null
       return started
     }
   })

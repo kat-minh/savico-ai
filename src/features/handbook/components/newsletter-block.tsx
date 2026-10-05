@@ -401,7 +401,13 @@ export function NewsletterBlock() {
                 <p data-newsletter-lead-part className='text-muted-foreground text-sm leading-relaxed'>
                   {displayedLead.excerpt}
                 </p>
-                <p data-newsletter-lead-part className={cn(ARTICLE_META_TEXT, 'flex items-center gap-2 text-xs')}>
+                <p
+                  data-newsletter-lead-part
+                  className={cn(
+                    ARTICLE_META_TEXT,
+                    'flex flex-wrap items-center gap-x-2 gap-y-1 text-xs whitespace-nowrap'
+                  )}
+                >
                   {formatDisplayDate(displayedLead.publishedAt, locale, { weekday: true })}
                   <span aria-hidden>·</span>
                   <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
@@ -433,7 +439,7 @@ export function NewsletterBlock() {
                   </div>
                   <span className='min-w-0 space-y-1'>
                     <span className='line-clamp-3 block text-sm font-medium'>{article.title}</span>
-                    <span className={cn(ARTICLE_META_TEXT, 'flex items-center gap-1 text-xs')}>
+                    <span className={cn(ARTICLE_META_TEXT, 'flex items-center gap-1 text-xs whitespace-nowrap')}>
                       <Clock className={cn(ARTICLE_META_ICON, 'size-3')} />
                       {t('readingTime', { minutes: article.readingMinutes })}
                     </span>
@@ -503,7 +509,10 @@ function RelatedRow({ article }: { article: HandbookArticle }) {
         </span>
         <span className='block text-xs'>
           <span className='text-primary'>{labelName(article.category)}</span>
-          <span className={ARTICLE_META_TEXT}> · {t('readingTime', { minutes: article.readingMinutes })}</span>
+          <span className={cn(ARTICLE_META_TEXT, 'whitespace-nowrap')}>
+            {' '}
+            · {t('readingTime', { minutes: article.readingMinutes })}
+          </span>
         </span>
       </span>
       <ArrowRight

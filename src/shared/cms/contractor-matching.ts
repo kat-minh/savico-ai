@@ -19,7 +19,7 @@ export function isContractorEligible(
 ): boolean {
   const { criteria } = rules
   if (contractor.hidden) return false
-  if (!rules.supportedRegions.includes(contractor.region)) return false
+  if (contractor.region === null || !rules.supportedRegions.includes(contractor.region)) return false
   if (criteria.acceptingOnly && !contractor.acceptingProjects) return false
   if (criteria.verifiedOnly && !contractor.verified) return false
   if (criteria.surveyCapableOnly && !(contractor.surveyCapable ?? contractor.surveyWithinHours > 0)) return false

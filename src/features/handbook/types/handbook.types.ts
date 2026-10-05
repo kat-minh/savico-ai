@@ -45,6 +45,11 @@ export interface HandbookTemplateDetail extends HandbookTemplate {
   interiorStyles?: HandbookStyleRef[]
 }
 
+export interface HandbookTemplateStyles {
+  architectureStyles: HandbookStyleRef[]
+  interiorStyles: HandbookStyleRef[]
+}
+
 /**
  * Bài viết từ BMT API kèm id các danh mục gắn TRỰC TIẾP. Bộ lọc danh mục cần id (không phải
  * tên) để khớp cả bài thuộc danh mục con — xem `handbook.news.logic.ts`.

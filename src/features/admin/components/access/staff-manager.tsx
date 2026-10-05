@@ -29,6 +29,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { PERMISSIONS, useAuth } from '@/shared/auth'
 import { isApiError } from '@/shared/lib/api'
 import { adminKeys } from '../../api/admin.keys'
 import {
@@ -81,11 +82,14 @@ export function StaffManager() {
   const t = useTranslations('admin')
   const tr = useTranslations('admin.rbacStaff')
   const { message, modal } = App.useApp()
+  const { hasPermission, hasAllPermissions } = useAuth()
+  const canManageRoles = hasPermission(PERMISSIONS.ROLE_MANAGE)
+  const canCreate = hasAllPermissions([PERMISSIONS.USER_MANAGE, PERMISSIONS.ROLE_MANAGE])
 
   const [rolesTarget, setRolesTarget] = useState<StaffItem | null>(null)
   const [created, setCreated] = useState<StaffCreated | null>(null)
 
-  const { data: roles = [] } = useQuery({ queryKey: ROLES_KEY, queryFn: listRoles })
+  const { data: roles = [] } = useQuery({ queryKey: ROLES_KEY, queryFn: listRoles, enabled: canManageRoles })
   const roleOptions = assignableRoles(roles)
 
   return (
@@ -157,27 +161,35 @@ export function StaffManager() {
           }
         ]}
         createValues={() => ({ roleIds: [] })}
-        onCreate={async (values) => {
-          const form = values as CreateStaffFormValues
-          const result = await createStaff({
-            email: (form.email ?? '').trim(),
-            firstName: (form.firstName ?? '').trim(),
-            lastName: (form.lastName ?? '').trim(),
-            roleIds: form.roleIds ?? []
-          })
-          // Bắt lấy mật khẩu sinh ra để hiện một lần sau khi ngăn kéo đóng.
-          setCreated(result)
-          return result
-        }}
+        onCreate={
+          canCreate
+            ? async (values) => {
+                const form = values as CreateStaffFormValues
+                const result = await createStaff({
+                  email: (form.email ?? '').trim(),
+                  firstName: (form.firstName ?? '').trim(),
+                  lastName: (form.lastName ?? '').trim(),
+                  roleIds: form.roleIds ?? []
+                })
+                // Bắt lấy mật khẩu sinh ra để hiện một lần sau khi ngăn kéo đóng.
+                setCreated(result)
+                return result
+              }
+            : undefined
+        }
         rowActions={(item, ctx): RowAction[] => {
           const isLocked = item.status === 'Locked'
           return [
-            {
-              key: 'manageRoles',
-              label: tr('actions.manageRoles'),
-              icon: <TeamOutlined />,
-              onClick: () => setRolesTarget(item)
-            },
+            ...(canManageRoles
+              ? [
+                  {
+                    key: 'manageRoles',
+                    label: tr('actions.manageRoles'),
+                    icon: <TeamOutlined />,
+                    onClick: () => setRolesTarget(item)
+                  }
+                ]
+              : []),
             {
               key: 'lock',
               label: isLocked ? tr('actions.unlock') : tr('actions.lock'),
@@ -282,7 +294,9 @@ export function StaffManager() {
 
       <GeneratedPasswordModal created={created} onClose={() => setCreated(null)} />
 
-      <StaffRolesDrawer target={rolesTarget} roles={roleOptions} onClose={() => setRolesTarget(null)} />
+      {canManageRoles ? (
+        <StaffRolesDrawer target={rolesTarget} roles={roleOptions} onClose={() => setRolesTarget(null)} />
+      ) : null}
     </>
   )
 }

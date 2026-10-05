@@ -10,19 +10,20 @@ import type {
   CmsServiceRegion,
   CmsSurveyBooking
 } from '@/shared/cms'
+import type { AttachmentGroup, SiteDetail, SiteDraft } from './construction-site.types'
 
 /**
  * Kiểu dữ liệu của luồng TÌM NHÀ THẦU (S09–S18).
  *
  * Hai quy tắc chi phối toàn bộ file này, nên chúng được nhắc lại ở từng chỗ
  * dễ vi phạm nhất:
- * - **R1** — mỗi dự án mời TỐI ĐA 3 nhà thầu, không có bước so sánh báo giá.
+ * - **R1** — mặc định 3 nhà thầu/hồ sơ; API RFQ trả giới hạn hiện hành, không có bước so sánh báo giá.
  * - **R2** — web KHÔNG hiển thị giá / báo giá của nhà thầu. Vì vậy không type
  *   nào ở đây có trường tiền của nhà thầu; `ProjectBrief.budget` là ngân sách
- *   dự kiến của CHỦ NHÀ và không nằm trong hồ sơ gửi đi (S18).
+ *   dự kiến của CHỦ NHÀ; RFQ giữ ngân sách trong bản hồ sơ đã gửi theo TDD-RFQ-001.
  */
 
-/** Phạm vi thi công — 4 thẻ chọn ở Bước 1 (S10). */
+/** Mã phạm vi cũ, chỉ dành cho dữ liệu lịch sử và mock. */
 export type ConstructionScope = 'turnkey' | 'shell' | 'finishing' | 'interior'
 
 /** Hiện trạng khu đất — hàng chọn ở Bước 1 (S10). */
@@ -98,6 +99,8 @@ export interface BriefDocument {
   /** Cỡ tệp tính theo byte — hiển thị "2,4 MB" trên danh sách (S11). */
   sizeBytes: number
   kind: 'image' | 'document'
+  attachmentGroup?: AttachmentGroup
+  contentPath?: string
 }
 
 /**
@@ -121,6 +124,14 @@ export interface BriefAddress {
  * toán do SAVI phát hành — badge "Hồ sơ tự tạo" theo hồ sơ suốt các màn sau.
  */
 export interface ProjectBrief {
+  /** Local owner; legacy records need server verification before reuse. */
+  userId?: string
+  /** Set at creation or after an owned SITE response, never by migrating a storage key. */
+  ownershipVersion?: 1
+  /** Persisted SITE data; contractor needs stay local until the RFQ integration. */
+  constructionSiteId?: string
+  constructionSite?: SiteDetail
+  siteDraft?: SiteDraft
   /** Mã dự án `SVC-YYYY-NNNN` — cùng quy ước với luồng thiết kế. */
   id: string
   name: string
@@ -132,10 +143,12 @@ export interface ProjectBrief {
   /** Tum chỉ áp dụng cho các loại nhà; căn hộ khóa một mặt sàn và không tum. */
   hasAttic?: boolean | null
   address: BriefAddress
-  /** Ngân sách dự kiến (VND) của chủ nhà — KHÔNG gửi cho nhà thầu (S18). */
+  /** Ngân sách dự kiến (VND) của chủ nhà; bản lưu RFQ giữ giá trị SITE tại lúc gửi. */
   budget: number
   startWindow: StartWindow
-  scope: ConstructionScope
+  /** ID phạm vi hệ thống; mã cũ vẫn được đọc để giữ bản nhập liệu trước đây. */
+  scope: string
+  scopeName?: string
   scopeNote: string
   documents: BriefDocument[]
   /**
@@ -166,6 +179,7 @@ export interface ProjectBriefSummary {
   brief: ProjectBrief
   /** Số lời mời đã gửi cho dự án này — tối đa 3 (R1). */
   invitedCount: number
+  invitationLimit?: number
 }
 
 /*
@@ -177,7 +191,14 @@ export interface ProjectBriefSummary {
 export type ContractorPhoto = CmsContractorPhoto
 
 /** Dự án tiêu biểu của nhà thầu (S13). */
-export type ContractorProject = CmsContractorProject
+export type ContractorProject = CmsContractorProject & {
+  /** Phân loại do API trả, cùng GUID và tên danh mục hiện hành. */
+  buildingTypeName?: string
+  scopeId?: string
+  scopeName?: string
+  /** Tổng số tầng gồm tầng trệt, tum được ghi riêng. */
+  floorCount?: number
+}
 
 /** Khối "Đối tác hợp tác cùng SAVICO" + bản scan thỏa thuận (S14). */
 export type ContractorPartnership = CmsContractorPartnership
@@ -189,7 +210,14 @@ export type ContractorLegalProfile = CmsContractorLegalProfile
  * Một nhà thầu — dùng chung cho thẻ danh sách, bảng so sánh và hồ sơ. Trường
  * `contact` chỉ dành cho vận hành, trang công khai không in ra.
  */
-export type Contractor = CmsContractor
+export type Contractor = Omit<CmsContractor, 'featuredProjects'> & {
+  featuredProjects: ContractorProject[]
+  /** API phân biệt chưa khai báo với giá trị 0/false; mock cũ không có các cờ này. */
+  ratingKnown?: boolean
+  reviewCountKnown?: boolean
+  surveyTimeKnown?: boolean
+  acceptingProjectsKnown?: boolean
+}
 
 /** Một khung giờ khảo sát (S16). */
 export interface SurveySlot {

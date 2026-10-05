@@ -394,6 +394,8 @@ export const CONTRACTOR_ERROR_CODES = [
   'ContractorAssetInUse',
   'ContractorNotFound',
   'ContractorProjectNotFound',
+  'LocationDatasetChanged',
+  'DependencyUnavailable',
   'AccessForbidden'
 ] as const
 

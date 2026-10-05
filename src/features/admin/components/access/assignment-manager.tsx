@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import type { Locale } from '@/i18n/routing'
+import { PERMISSIONS, useAuth } from '@/shared/auth'
 import { isApiError } from '@/shared/lib/api'
 import { formatDisplayDateTime } from '@/shared/utils'
 import { adminKeys } from '../../api/admin.keys'
@@ -49,6 +50,8 @@ export function AssignmentManager() {
   const tAdmin = useTranslations('admin')
   const { message, modal } = App.useApp()
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
+  const canListStaff = hasPermission(PERMISSIONS.USER_MANAGE)
 
   const [staffFilter, setStaffFilter] = useState<string | 'all'>('all')
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>('active')
@@ -64,7 +67,8 @@ export function AssignmentManager() {
   // Danh sách nhân viên: vừa để lọc / chọn người nhận, vừa để tra tên theo id.
   const staffQuery = useQuery({
     queryKey: adminKeys.bmt('staff'),
-    queryFn: () => assignmentsAdminApi.listStaff()
+    queryFn: () => assignmentsAdminApi.listStaff(),
+    enabled: canListStaff
   })
   const staff = useMemo(() => staffQuery.data ?? [], [staffQuery.data])
   const activeStaff = useMemo(() => staff.filter((item) => item.status === 'Active'), [staff])
@@ -94,15 +98,21 @@ export function AssignmentManager() {
         drawerWidth={520}
         banner={
           <Space orientation='vertical' size={16} style={{ width: '100%' }}>
-            <NeedsReassignmentPanel activeStaff={activeStaff} staffLoading={staffQuery.isPending} />
+            {!canListStaff ? <Alert type='info' showIcon title={t('staffPermissionRequired')} /> : null}
+            <NeedsReassignmentPanel
+              activeStaff={activeStaff}
+              staffLoading={staffQuery.isLoading}
+              canListStaff={canListStaff}
+            />
             <Space wrap>
               <Select<string | 'all'>
+                disabled={!canListStaff}
                 value={staffFilter}
                 onChange={setStaffFilter}
                 style={{ minWidth: 240 }}
                 showSearch
                 optionFilterProp='label'
-                loading={staffQuery.isPending}
+                loading={staffQuery.isLoading}
                 options={[
                   { value: 'all', label: t('filters.allStaff') },
                   ...staff.map((item) => ({ value: item.userId, label: staffLabel(item) }))
@@ -175,7 +185,16 @@ export function AssignmentManager() {
           // Dòng đã kết thúc hiệu lực thì không còn thao tác.
           if (item.effectiveToUtc) return []
           return [
-            { key: 'transfer', label: t('transfer'), icon: <SwapOutlined />, onClick: () => setTransferItem(item) },
+            ...(canListStaff
+              ? [
+                  {
+                    key: 'transfer',
+                    label: t('transfer'),
+                    icon: <SwapOutlined />,
+                    onClick: () => setTransferItem(item)
+                  }
+                ]
+              : []),
             {
               key: 'remove',
               label: t('remove'),
@@ -210,7 +229,7 @@ export function AssignmentManager() {
         confirmLabel={t('selectStaff')}
         // Chuyển cho chính người đang phụ trách sẽ bị BE từ chối (DuplicateAssignment).
         options={activeStaff.filter((s) => s.userId !== transferItem?.staffUserId)}
-        loading={staffQuery.isPending}
+        loading={staffQuery.isLoading}
         onClose={() => setTransferItem(null)}
         onSubmit={async (staffUserId) => {
           if (!transferItem) return
@@ -230,7 +249,15 @@ function Stamp({ value }: { value?: string | null }) {
 }
 
 /** Banner "Cần chia lại": mỗi gói kèm nút Phân công. */
-function NeedsReassignmentPanel({ activeStaff, staffLoading }: { activeStaff: BmtStaffItem[]; staffLoading: boolean }) {
+function NeedsReassignmentPanel({
+  activeStaff,
+  staffLoading,
+  canListStaff
+}: {
+  activeStaff: BmtStaffItem[]
+  staffLoading: boolean
+  canListStaff: boolean
+}) {
   const t = useTranslations('admin.rbacAssignments')
   const tAdmin = useTranslations('admin')
   const { message } = App.useApp()
@@ -285,7 +312,13 @@ function NeedsReassignmentPanel({ activeStaff, staffLoading }: { activeStaff: Bm
                   </Text>
                 </Space>
               </Space>
-              <Button type='primary' size='small' icon={<UserAddOutlined />} onClick={() => setAssignTo(item)}>
+              <Button
+                type='primary'
+                size='small'
+                disabled={!canListStaff}
+                icon={<UserAddOutlined />}
+                onClick={() => setAssignTo(item)}
+              >
                 {t('assign')}
               </Button>
             </div>

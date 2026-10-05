@@ -94,7 +94,7 @@ export function HandbookHighlights() {
                         {/* Phủ xanh mờ khi rê — nằm ĐÈ LÊN ảnh, không thay ảnh. */}
                         <div className='bg-primary/0 group-hover:bg-primary/20 pointer-events-none absolute inset-0 transition-colors duration-300' />
                         {isNew ? (
-                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 text-[11px] font-semibold'>
+                          <span className='bg-primary text-primary-foreground absolute top-3 left-3 rounded-md px-2 py-0.5 max-md:text-xs text-[11px] font-semibold'>
                             {t('newBadge')}
                           </span>
                         ) : null}
@@ -108,12 +108,12 @@ export function HandbookHighlights() {
                             <Tag className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                             {labelName(article.category)}
                           </span>
-                          <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <span className='flex items-center gap-1.5 border-l pl-4 whitespace-nowrap'>
                             <CalendarDays className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                             {formatDisplayDate(article.publishedAt, locale)}
                           </span>
                           {/* Thời gian đọc nằm cùng hàng ngày đăng (góp ý BuildX) — bớt một dòng dưới thẻ. */}
-                          <span className='flex items-center gap-1.5 border-l pl-4'>
+                          <span className='flex items-center gap-1.5 border-l pl-4 whitespace-nowrap'>
                             <Clock className={cn(ARTICLE_META_ICON, 'size-3.5')} />
                             {t('readTime', { minutes: article.readingMinutes })}
                           </span>

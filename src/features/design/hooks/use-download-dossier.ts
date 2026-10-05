@@ -1,11 +1,13 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { env } from '@/shared/config/env'
 import { useLocale, useTranslations } from 'next-intl'
 
 import type { Locale } from '@/i18n/routing'
 import { siteConfig } from '@/shared/config/site'
 import { formatCurrency, formatDisplayDate, formatNumber } from '@/shared/utils'
+import { estimateGenerationApi, waitForExport, downloadEstimateExport } from '../api/estimate-generation.api'
 import { COST_SECTIONS } from '../constants/design.constants'
 import { displayProjectId } from '../services/estimate-input.logic'
 import type { DossierPdfData, DossierPdfLabels, DossierPdfSection } from '../services/pdf/dossier-pdf.types'
@@ -41,6 +43,19 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
 
     const fileName = t('pdf.fileName', { project: info.projectName || siteConfig.name })
 
+    if (!env.NEXT_PUBLIC_USE_MOCK_API) {
+      if (!dossier) throw new Error('ExportNotReady')
+      setPending(true)
+      try {
+        const started = await estimateGenerationApi.requestExport(dossier.projectId, 'Pdf')
+        const done = await waitForExport(() => estimateGenerationApi.getExport(dossier.projectId, started.exportId))
+        if (done.state !== 'Ready') throw new Error(done.failureCode ?? 'ExportFailed')
+        await downloadEstimateExport(dossier.projectId, started.exportId, fileName)
+      } finally {
+        setPending(false)
+      }
+      return
+    }
     if (remoteUrl) {
       const anchor = document.createElement('a')
       anchor.href = remoteUrl
@@ -140,7 +155,7 @@ export function useDownloadDossier({ dossier, result, info, advisory }: UseDownl
     } finally {
       setPending(false)
     }
-  }, [isPending, remoteUrl, result, info, advisory, locale, t, tEstimate])
+  }, [isPending, remoteUrl, result, info, advisory, locale, t, tEstimate, dossier])
 
   // Cỡ file VỪA DỰNG được ưu tiên: đó là cỡ thật của thứ người dùng tải về,
   // còn `pdfSize` từ API chỉ là con số ước tính hiển thị kèm dấu "~".

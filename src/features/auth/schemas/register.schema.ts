@@ -1,8 +1,10 @@
 import { z } from 'zod'
 
+import type { RequiredMessage } from '@/shared/hooks'
+
 /** Resolved, localized validation messages for the register form. */
 export interface RegisterSchemaMessages {
-  required: string
+  required: RequiredMessage
   email: string
   passwordMin: string
   passwordMismatch: string
@@ -13,10 +15,13 @@ export interface RegisterSchemaMessages {
 export function createRegisterSchema(m: RegisterSchemaMessages) {
   return z
     .object({
-      name: z.string().min(1, { message: m.required }),
-      email: z.string().min(1, { message: m.required }).email({ message: m.email }),
+      name: z.string().min(1, { message: m.required('fullName') }),
+      email: z
+        .string()
+        .min(1, { message: m.required('email') })
+        .email({ message: m.email }),
       password: z.string().min(8, { message: m.passwordMin }),
-      confirmPassword: z.string().min(1, { message: m.required }),
+      confirmPassword: z.string().min(1, { message: m.required('confirmPassword') }),
       agreeTerms: z.boolean().refine((v) => v, { message: m.agreeTerms })
     })
     .refine((data) => data.password === data.confirmPassword, {

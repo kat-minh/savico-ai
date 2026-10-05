@@ -1,16 +1,23 @@
 'use client'
 
-import { CircleCheck, Clock, Info, MapPin, Scale, Star, X } from 'lucide-react'
+import { Ban, CircleCheck, Clock, Info, MapPin, Scale, Star, X } from 'lucide-react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Link, useRouter } from '@/i18n/navigation'
 import { useCmsDocument } from '@/shared/cms'
+import { env } from '@/shared/config/env'
 import { EmptyState, revealContainerVariants, revealEase, revealItemVariants } from '@/shared/components/common'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
-import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute, contractorCompareRoute } from '@/shared/constants/routes'
+import {
+  CONTRACTOR_PREVIEW_ID,
+  contractorBriefRoute,
+  contractorCompareRoute,
+  contractorMatchesRoute
+} from '@/shared/constants/routes'
+import { isApiError } from '@/shared/lib/api'
 import { cn } from '@/shared/lib/utils'
 import {
   CONTRACTOR_SORTS,
@@ -22,12 +29,14 @@ import {
   SERVICE_REGIONS
 } from '../constants/contractors.constants'
 import { useBrief } from '../hooks/use-brief'
-import { useContractors } from '../hooks/use-contractors'
+import { useContractors, useContractorFilterOptions } from '../hooks/use-contractors'
 import { useInvitations } from '../hooks/use-invitations'
+import { useSelectedProject } from '../hooks/use-selected-project'
 import { briefReadiness, isBriefComplete } from '../services/brief.service'
-import { filterContractors, isInvited, remainingInvites } from '../services/contractor-list.service'
+import { filterContractors, isInvited } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import { useProjectPickerStore } from '../store/project-picker.store'
+import { useProjectSelectionStore } from '../store/project-selection.store'
 import type { ContractorSort, SearchRadiusKm, ServiceRegion } from '../types/contractor.types'
 import { ContractorCard } from './contractor-card'
 import { ContractorLogo } from './contractor-logo'
@@ -40,30 +49,60 @@ interface ContractorMatchesProps {
 
 const SORT_ICON = { distance: MapPin, rating: Scale, survey: Clock } as const
 
-/** Suy vùng từ tỉnh trong hồ sơ thay vì đoán theo cụm nhà thầu hiện có. */
-function serviceRegionFromProvince(provinceCode?: number | null, provinceName = ''): ServiceRegion {
-  const centralCodes = new Set([38, 40, 42, 44, 45, 46, 48, 49, 51, 52, 54, 56, 58, 60, 62, 64, 66, 67, 68])
-  const southCodes = new Set([70, 72, 74, 75, 77, 79, 80, 82, 83, 84, 86, 87, 89, 91, 92, 93, 94, 95, 96])
-  if (provinceCode && centralCodes.has(provinceCode)) return 'central'
-  if (provinceCode && southCodes.has(provinceCode)) return 'south'
+/** Only the preview URL restores the browser preference; explicit project URLs keep their context. */
+export function ContractorMatches({ projectId }: ContractorMatchesProps) {
+  return projectId === CONTRACTOR_PREVIEW_ID ? (
+    <RestorePreviewMatches />
+  ) : (
+    <ContractorMatchesContent key={projectId} projectId={projectId} />
+  )
+}
 
-  const normalized = provinceName
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-  if (
-    /da nang|hue|quang|nghe an|ha tinh|thanh hoa|binh dinh|phu yen|khanh hoa|ninh thuan|binh thuan|dak|gia lai|kon tum|lam dong/.test(
-      normalized
+function RestorePreviewMatches() {
+  const router = useRouter()
+  const t = useTranslations('contractors.matches')
+  const tCommon = useTranslations('common')
+  const { userId, selectedProject, isHydrated } = useSelectedProject()
+  const clearSelectedProject = useProjectSelectionStore((state) => state.clearSelectedProject)
+  const { data: brief, isPending, isSuccess, error, refetch } = useBrief(selectedProject?.id ?? '')
+  const canRestore = brief !== undefined && brief.status !== 'contracted' && isBriefComplete(brief)
+  const missing = isApiError(error) && error.status === 404
+
+  useEffect(() => {
+    if (!isHydrated || !userId || !selectedProject) return
+    if (canRestore) {
+      router.replace(contractorMatchesRoute(selectedProject.id))
+    } else if (isSuccess || missing) {
+      try {
+        clearSelectedProject(userId)
+      } catch {
+        // Continue in preview even if browser storage is unavailable.
+      }
+    }
+  }, [isHydrated, userId, selectedProject, canRestore, isSuccess, missing, router, clearSelectedProject])
+
+  if (!isHydrated || (selectedProject && (isPending || canRestore))) {
+    return (
+      <div role='status' aria-label={tCommon('loading')} className='mx-auto max-w-7xl space-y-6 px-4 py-8'>
+        <span className='sr-only'>{tCommon('loading')}</span>
+        <Skeleton className='h-24 rounded-2xl' />
+        <Skeleton className='h-40 rounded-2xl' />
+      </div>
     )
-  )
-    return 'central'
-  if (
-    /ho chi minh|dong nai|binh duong|tay ninh|ba ria|vung tau|long an|tien giang|ben tre|tra vinh|vinh long|dong thap|an giang|kien giang|can tho|hau giang|soc trang|bac lieu|ca mau/.test(
-      normalized
+  }
+
+  if (selectedProject && error && !missing) {
+    return (
+      <div className='mx-auto max-w-7xl px-4 py-8'>
+        <EmptyState
+          title={t('restoreError')}
+          action={<Button onClick={() => void refetch()}>{t('restoreRetry')}</Button>}
+        />
+      </div>
     )
-  )
-    return 'south'
-  return 'north'
+  }
+
+  return <ContractorMatchesContent projectId={CONTRACTOR_PREVIEW_ID} />
 }
 
 /**
@@ -140,14 +179,13 @@ function DrawnCheck({ delay, duration }: { delay: number; duration: number }) {
  * Panel phải `sticky`: danh sách cuộn dài mà ô "Đã chọn so sánh (n/3)" trôi mất
  * thì thao tác chọn 2–3 nhà thầu đứt đoạn.
  */
-export function ContractorMatches({ projectId }: ContractorMatchesProps) {
+function ContractorMatchesContent({ projectId }: ContractorMatchesProps) {
   const t = useTranslations('contractors.matches')
   const tSort = useTranslations('contractors.sort')
   const reduceMotion = useReducedMotion()
 
-  const { data: brief } = useBrief(projectId)
-  const { data: contractors, isPending } = useContractors(projectId)
-  const { data: invitations } = useInvitations(projectId)
+  const { data: brief, isError: briefFailed } = useBrief(projectId)
+  const { data: invitations, limit, remaining } = useInvitations(projectId)
 
   const compareIds = useContractorsStore((s) => s.compareIds)
   const toggleCompare = useContractorsStore((s) => s.toggleCompare)
@@ -171,45 +209,55 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
     router.replace(`${contractorBriefRoute(projectId)}?focus=${group}`)
   }, [briefIsDraft, brief, projectId, router])
 
-  // Nấc bán kính, mặc định và khu vực được hỗ trợ do admin cấu hình (Quy tắc đề xuất nhà thầu).
+  // Các nấc bán kính do admin cấu hình; khi mở trang chưa áp dụng bán kính.
   const rules = useCmsDocument('contractorMatching')
-  const regions = useMemo(
-    () => SERVICE_REGIONS.filter((value) => rules.supportedRegions.includes(value)),
-    [rules.supportedRegions]
-  )
+  const filterOptions = useContractorFilterOptions()
+  const regions = env.NEXT_PUBLIC_USE_MOCK_API
+    ? SERVICE_REGIONS
+    : (filterOptions.data?.regions.map((r) => r.code) ?? [])
   const [radiusChoice, setRadiusKm] = useState<SearchRadiusKm | null>(null)
-  const radiusKm =
-    radiusChoice !== null && rules.radiusOptions.includes(radiusChoice) ? radiusChoice : rules.defaultRadiusKm
-  const [sort, setSort] = useState<ContractorSort>('rating')
-  /**
-   * Vùng đang chọn. Mặc định lấy vùng có NHIỀU nhà thầu nhất trong danh bạ chứ
-   * không cứng "Bắc" như ảnh mẫu — ảnh dùng dữ liệu demo miền Nam, còn danh bạ
-   * thật thì để trống tab đang chọn là màn hình trắng trơn ngay khi mở.
-   */
-  const [region, setRegion] = useState<ServiceRegion | null>(null)
-
-  const defaultRegion = useMemo<ServiceRegion>(() => {
-    if (brief?.address.provinceCode || brief?.address.provinceName) {
-      return serviceRegionFromProvince(brief.address.provinceCode, brief.address.provinceName)
-    }
-
-    const tally = new Map<ServiceRegion, number>()
-    for (const contractor of contractors ?? []) tally.set(contractor.region, (tally.get(contractor.region) ?? 0) + 1)
-    return (regions.length ? regions : SERVICE_REGIONS).reduce((best, candidate) =>
-      (tally.get(candidate) ?? 0) > (tally.get(best) ?? 0) ? candidate : best
-    )
-  }, [brief, contractors, regions])
-
-  const activeRegion = region ?? defaultRegion
-
+  const radiusKm = radiusChoice !== null && rules.radiusOptions.includes(radiusChoice) ? radiusChoice : null
+  const [sort, setSort] = useState<ContractorSort | null>(null)
+  // undefined follows the project's province; null is the user's explicit "all regions" choice.
+  const [region, setRegion] = useState<ServiceRegion | null | undefined>(undefined)
+  const provinceCode = brief?.constructionSite?.profile.provinceCode ?? brief?.address.provinceCode
+  const projectRegion =
+    provinceCode == null
+      ? null
+      : (filterOptions.data?.provinces.find((province) => Number(province.code) === Number(provinceCode))?.regionCode ??
+        null)
+  const activeRegion = region === undefined ? projectRegion : region
+  const filtersReady =
+    (preview || (brief !== undefined && !briefIsDraft)) && (env.NEXT_PUBLIC_USE_MOCK_API || filterOptions.isSuccess)
+  const siteId = preview ? undefined : brief?.constructionSiteId
+  const canFilterRadius = env.NEXT_PUBLIC_USE_MOCK_API || Boolean(siteId)
+  const radiusApplied = canFilterRadius && radiusKm !== null
+  const {
+    data: contractors,
+    isPending,
+    isError,
+    refetch
+  } = useContractors(
+    projectId,
+    {
+      ...(activeRegion ? { region: activeRegion } : {}),
+      ...(siteId && radiusKm !== null ? { constructionSiteId: siteId, radiusKm } : {})
+    },
+    filtersReady
+  )
   const visible = useMemo(
-    () => filterContractors(contractors ?? [], { radiusKm, sort, region: activeRegion }),
+    () =>
+      filterContractors(contractors ?? [], {
+        radiusKm: env.NEXT_PUBLIC_USE_MOCK_API ? (radiusKm ?? Number.POSITIVE_INFINITY) : Number.POSITIVE_INFINITY,
+        sort,
+        ...(activeRegion ? { region: activeRegion } : {})
+      }),
     [contractors, radiusKm, sort, activeRegion]
   )
 
   const sent = invitations ?? []
   const used = sent.length
-  const inviteLocked = remainingInvites(sent) === 0
+  const inviteLocked = remaining === 0
   const selected = (contractors ?? []).filter((c) => compareIds.includes(c.id))
 
   /** Vừa từ M04 sang (mục 6/10) — đọc một lần rồi xoá cờ ngay. */
@@ -226,6 +274,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   const [inviteFlipStage, setInviteFlipStage] = useState<'old' | 'lock' | null>(null)
   const [newlyInvitedIds, setNewlyInvitedIds] = useState<Set<string>>(() => new Set())
   const [projectChangeRevision, setProjectChangeRevision] = useState(0)
+
   useEffect(() => {
     if (window.sessionStorage.getItem(MATCHES_PROJECT_CHANGED_KEY) === projectId) {
       window.sessionStorage.removeItem(MATCHES_PROJECT_CHANGED_KEY)
@@ -278,7 +327,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   /** Số đang hiện trên nhãn "Đã mời x/3" — lúc chờ lật thì chưa tính các lời mời vừa gửi. */
   const usedBeforeReturn = Math.max(0, used - (reduceMotion ? 0 : newlyInvitedIds.size))
   const shownUsed = inviteFlipStage === 'old' ? usedBeforeReturn : used
-  const pillLocked = (inviteFlipStage ? usedBeforeReturn : used) >= MAX_INVITATIONS
+  const pillLocked = (inviteFlipStage ? usedBeforeReturn : used) >= (limit ?? 0)
 
   const orderedVisible = useMemo(() => {
     if (!pinnedContractorId) return visible
@@ -295,12 +344,8 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
     knownBriefId.current = brief.id
   }, [brief])
 
-  /** Đổi chip sắp xếp → tiêu chí đang xếp nổi trong thẻ một giây (mục 4). */
-  const [justSorted, setJustSorted] = useState<ContractorSort | null>(null)
   const handleSort = (next: ContractorSort) => {
-    setSort(next)
-    setJustSorted(next)
-    window.setTimeout(() => setJustSorted(null), 1000)
+    setSort((current) => (current === next ? null : next))
   }
 
   /**
@@ -323,10 +368,21 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
     return () => window.clearTimeout(timer)
   }, [lockShake])
 
+  if (!preview && briefFailed)
+    return (
+      <div className='mx-auto max-w-7xl px-4 py-8' role='alert'>
+        <EmptyState
+          title={t('profileUnavailable')}
+          action={<Button onClick={openPicker}>{t('chooseAnotherProfile')}</Button>}
+        />
+        <ProjectPickerDialog />
+      </div>
+    )
+
   return (
     // Bản thiết kế S12 rộng ~1500px: bó `max-w-6xl` (1152px) thì cột giữa chỉ
     // còn ~370px cho BỐN ô chỉ số, chữ bị cắt ("18 dự …", "TP. Buôn Ma Thuộ…").
-    <div className='relative mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-5 lg:px-8'>
+    <div className='relative mx-auto flex w-full max-w-[90rem] flex-col gap-5 lg:gap-6 px-4 py-5 lg:px-8'>
       {/* Thiết kế S12: tiêu đề đứng TRÊN thẻ dự án. */}
       <motion.header
         initial='hidden'
@@ -375,6 +431,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
       ) : (
         <>
           <motion.div
+            data-project-bar-slot
             initial={reduceMotion ? false : { opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.4, ease: revealEase }}
@@ -391,7 +448,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                   brief={brief}
                   invitedPill={
                     <motion.span
-                      title={pillLocked ? t('inviteLimitReached', { max: MAX_INVITATIONS }) : undefined}
+                      title={pillLocked ? t('inviteLimitReached', { max: limit ?? 0 }) : undefined}
                       initial={reduceMotion ? false : { scale: 0.85, opacity: 0 }}
                       animate={{
                         scale: reduceMotion ? 1 : lockShake ? [1, 1.06, 1] : 1,
@@ -422,8 +479,8 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                         <Fragment key={inviteReturned ? 'invite-return' : 'steady'}>
                           {t.rich('invitedPill', {
                             used: shownUsed,
-                            max: MAX_INVITATIONS,
-                            left: MAX_INVITATIONS - shownUsed,
+                            max: limit ?? 0,
+                            left: remaining,
                             n: (chunks) => <FlipValue value={chunksText(chunks)} />
                           })}
                         </Fragment>
@@ -442,13 +499,28 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         <span className='text-muted-foreground text-sm font-medium'>{t('regionLabel')}</span>
         <div
           className='grid min-w-0 flex-1 overflow-hidden rounded-xl border'
-          style={{ gridTemplateColumns: `repeat(${Math.max(1, regions.length)}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${regions.length + 1}, minmax(0, 1fr))` }}
         >
+          <button
+            type='button'
+            onClick={() => setRegion(null)}
+            disabled={!filtersReady}
+            aria-pressed={filtersReady && activeRegion === null}
+            className={cn(
+              'px-3 py-2.5 text-sm font-medium',
+              filtersReady && activeRegion === null
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card text-muted-foreground'
+            )}
+          >
+            {t('allRegions')}
+          </button>
           {regions.map((value) => (
             <button
               key={value}
               type='button'
               onClick={() => setRegion(value)}
+              disabled={!filtersReady}
               aria-pressed={value === activeRegion}
               className={cn(
                 'relative isolate px-4 py-2.5 text-sm font-medium transition-colors',
@@ -507,37 +579,59 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
         <div className='ml-auto flex w-full flex-col items-start gap-1.5 sm:items-end lg:w-auto'>
           <div className='flex flex-wrap items-center gap-2'>
             <span className='text-muted-foreground text-sm font-medium'>{t('radiusShort')}</span>
-            {rules.radiusOptions.map((km) => (
+            {[null, ...rules.radiusOptions].map((km) => (
               <motion.button
-                key={km}
+                key={km ?? 'none'}
                 variants={revealItemVariants}
                 type='button'
                 onClick={() => setRadiusKm(km)}
-                aria-pressed={km === radiusKm}
+                disabled={km !== null && !canFilterRadius}
+                aria-label={km === null ? t('radiusNone') : undefined}
+                title={km === null ? t('radiusNone') : undefined}
+                aria-pressed={km === null ? !radiusApplied : radiusApplied && km === radiusKm}
                 className={cn(
-                  'rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors',
-                  km === radiusKm
+                  'inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors',
+                  (km === null ? !radiusApplied : radiusApplied && km === radiusKm)
                     ? 'border-primary text-primary-strong'
                     : 'bg-card text-muted-foreground hover:text-foreground hover:border-primary/40'
                 )}
               >
-                {t('radiusOption', { km })}
+                {km === null ? <Ban className='size-5' aria-hidden='true' /> : t('radiusOption', { km })}
               </motion.button>
             ))}
           </div>
           {/* "3 nhà thầu trong 10 km" lật số khi đổi bán kính (mục 5). */}
           <span className='text-muted-foreground overflow-hidden text-xs whitespace-nowrap'>
-            <FlipValue value={t('resultsInRadius', { count: visible.length, km: radiusKm })} />
+            <FlipValue
+              value={
+                radiusApplied
+                  ? t('resultsInRadius', { count: visible.length, km: radiusKm })
+                  : t('resultsCount', { count: visible.length })
+              }
+            />
           </span>
         </div>
       </motion.section>
 
       <div className='order-5 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'>
         <div className='min-w-0 space-y-3'>
-          {isPending ? (
+          {isError || filterOptions.isError ? (
+            <div role='alert' className='space-y-3 rounded-xl border p-4'>
+              <p>{t('loadError')}</p>
+              <Button
+                variant='outline'
+                onClick={() => {
+                  if (filtersReady) void refetch()
+                  void filterOptions.refetch()
+                }}
+              >
+                {t('retry')}
+              </Button>
+            </div>
+          ) : isPending || !filtersReady ? (
             [0, 1, 2].map((i) => <Skeleton key={i} className='h-40 rounded-2xl' />)
           ) : visible.length === 0 ? (
-            <EmptyState title={t('empty', { km: radiusKm })} />
+            <EmptyState title={radiusApplied ? t('empty', { km: radiusKm }) : t('emptyFilters')} />
           ) : (
             <AnimatePresence mode='popLayout'>
               {orderedVisible.map((contractor, index) => (
@@ -564,7 +658,6 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                     invitedJustNow={newlyInvitedIds.has(contractor.id)}
                     inviteLocked={inviteLocked || preview}
                     compareLocked={!compareIds.includes(contractor.id) && compareIds.length >= MAX_INVITATIONS}
-                    highlightField={justSorted}
                     ringFlash={
                       (justArrived && index === 0) ||
                       lastViewedId === contractor.id ||
@@ -607,7 +700,7 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
                     transition={{ duration: 0.24, delay: reduceMotion ? 0 : 0.68 }}
                     className='flex items-center gap-2.5 rounded-xl border p-2.5'
                   >
-                    <ContractorLogo contractor={contractor} className='size-10 rounded-lg text-[11px]' />
+                    <ContractorLogo contractor={contractor} className='size-10 rounded-lg max-md:text-xs text-[11px]' />
                     <span className='min-w-0 flex-1 truncate text-sm font-medium'>{contractor.name}</span>
                     <span className='inline-flex shrink-0 items-center gap-1 text-sm font-semibold'>
                       <Star className='text-warning size-3.5 fill-current' />
@@ -664,8 +757,10 @@ export function ContractorMatches({ projectId }: ContractorMatchesProps) {
             <ul className='mt-3 space-y-2.5 text-sm'>
               {[
                 t('why1'),
-                t('why2', { count: visible[0]?.similarProjects ?? 0 }),
-                t('why3', { hours: visible[0]?.surveyWithinHours ?? 24 })
+                t('why2', { count: visible[0]?.completedProjects ?? 0 }),
+                visible[0] && visible[0].surveyTimeKnown !== false
+                  ? t('why3', { hours: visible[0].surveyWithinHours })
+                  : t('whySurveyUnknown')
               ].map((reason, index) => (
                 // 3 dòng tick vẽ nét lần lượt; vừa tạo hồ sơ → chậm hơn để đọc
                 // kịp (mục 10).
