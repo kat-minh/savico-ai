@@ -198,13 +198,15 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
               className='absolute inset-0 backdrop-blur-[2px]'
               style={{ maskImage: 'linear-gradient(to right, black 25%, transparent 64%)' }}
             />
-            <div className='absolute inset-0 bg-linear-to-r from-card from-0% via-card/90 via-32% to-transparent to-67% max-[899px]:from-card/98 max-[899px]:via-card/95 max-[899px]:via-65% max-[899px]:to-card/65' />
+            <div className='absolute inset-0 bg-linear-to-r from-card from-0% via-card/90 via-32% to-transparent to-67% max-[899px]:from-card/90 max-[899px]:via-card/80 max-[899px]:via-55% max-[899px]:to-transparent max-[899px]:to-95%' />
           </div>
           <div className='relative flex min-h-[270px] flex-col justify-center px-6 pt-8 pb-5 min-[900px]:w-[40%] sm:px-8'>
             <h2 className='text-primary-strong text-[clamp(1.35rem,2.1vw,1.72rem)] font-extrabold tracking-[-0.025em]'>
               {t('end.title')}
             </h2>
-            <p className='text-muted-foreground mt-2 text-[14px] leading-relaxed'>{t('end.subtitle')}</p>
+            <p className='text-muted-foreground mt-2 text-[14px] leading-relaxed max-[899px]:text-foreground/80'>
+              {t('end.subtitle')}
+            </p>
 
             <ul className='mt-4 space-y-2.5'>
               {[t('end.p1'), t('end.p2'), t('end.p3')].map((item) => (
@@ -219,7 +221,7 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
           </div>
           <div
             data-article-end-actions
-            className='relative grid items-center gap-3 px-6 pb-6 min-[900px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[900px]:gap-2'
+            className='relative grid items-center justify-items-center gap-3 px-6 pb-6 min-[900px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[900px]:justify-items-stretch min-[900px]:gap-2'
           >
             <ActionButtons article={article} onCreateProject={createProject} bannerRow />
             <span
@@ -228,11 +230,11 @@ export function ArticleEndExperience({ article, articleRef, onCreateProject }: A
             >
               <span data-article-handwritten-text>{t('end.handwritten')}</span>
             </span>
-            <div className='flex items-center justify-center gap-1 max-[899px]:grid max-[899px]:grid-cols-3 max-[899px]:gap-2'>
+            <div className='grid w-full grid-cols-3 items-center gap-1.5 min-[900px]:flex min-[900px]:w-auto min-[900px]:justify-center min-[900px]:gap-1'>
               {[t('end.tag1'), t('end.tag2'), t('end.tag3')].map((tag) => (
                 <span
                   key={tag}
-                  className='text-foreground bg-card/95 flex h-[36px] items-center gap-1 whitespace-nowrap rounded-full border border-accent px-1.5 text-[10px] font-bold shadow-sm backdrop-blur max-[899px]:w-full max-[899px]:min-w-0 max-[899px]:justify-center'
+                  className='text-foreground bg-card/95 flex h-[36px] min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full border border-accent px-1.5 text-[9px] font-bold shadow-sm backdrop-blur'
                 >
                   <span className='text-primary-foreground flex size-[14px] shrink-0 items-center justify-center rounded-full bg-primary-strong'>
                     <Check className='size-3' strokeWidth={3} />
@@ -386,7 +388,7 @@ function ActionButtons({
     <div
       className={
         bannerRow
-          ? 'flex items-center gap-1 max-[899px]:grid max-[899px]:grid-cols-3 max-[899px]:gap-2'
+          ? 'grid w-full grid-cols-3 items-center gap-1.5 min-[900px]:flex min-[900px]:w-auto min-[900px]:gap-1'
           : compact
             ? 'flex flex-wrap items-center gap-2.5 max-[899px]:grid max-[899px]:grid-cols-1'
             : 'flex flex-wrap gap-3 max-[899px]:grid max-[899px]:grid-cols-1'
@@ -403,7 +405,8 @@ function ActionButtons({
           compact
             ? 'h-[42px] w-auto px-4 text-[13px] has-[>svg]:px-4 max-[899px]:w-full'
             : 'h-[42px] w-auto px-3.5 text-[12px] has-[>svg]:px-3.5 max-[899px]:w-full',
-          bannerRow && 'h-9 gap-1 px-2.5 text-[10px] has-[>svg]:px-2.5 max-[899px]:w-full'
+          bannerRow &&
+            'h-9 gap-1 px-2 text-[10px] has-[>svg]:px-2 max-[899px]:w-full min-[900px]:px-2.5 min-[900px]:has-[>svg]:px-2.5'
         )}
       >
         {t('create')}
@@ -423,7 +426,7 @@ function ActionButtons({
           compact
             ? 'h-[42px] w-auto px-4 text-[13px] max-[899px]:w-full'
             : 'h-[42px] w-auto px-3.5 text-[12px] max-[899px]:w-full',
-          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-full'
+          bannerRow && 'h-9 px-2 text-[10px] max-[899px]:w-full min-[900px]:px-2.5'
         )}
       >
         <Link href={ROUTES.CONSULT} onClick={completeFromPage}>
@@ -438,7 +441,7 @@ function ActionButtons({
           compact
             ? 'h-[42px] w-auto px-4 text-[13px] max-[899px]:w-full'
             : 'h-[42px] w-auto px-3.5 text-[12px] max-[899px]:w-full',
-          bannerRow && 'h-9 px-2.5 text-[10px] max-[899px]:w-full'
+          bannerRow && 'h-9 px-2 text-[10px] max-[899px]:w-full min-[900px]:px-2.5'
         )}
       >
         <Link href={`${ROUTES.CONSULT}?type=legal`} onClick={completeFromPage}>
