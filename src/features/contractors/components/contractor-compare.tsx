@@ -262,9 +262,9 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
       ) : (
         <>
           <div id={TABLE_TOP_ANCHOR_ID} className='h-px' aria-hidden />
-          <div className='bg-card overflow-x-auto rounded-2xl border md:overflow-visible'>
+          <div className='contractor-compare-scroll bg-card overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border md:overflow-visible'>
             <div className='relative min-w-[820px] md:min-w-[640px]'>
-              <table className='w-full border-collapse text-sm'>
+              <table className='contractor-compare-table w-full text-sm'>
                 <thead className='sticky top-0 z-20 md:top-16'>
                   <tr
                     className={cn(
@@ -363,7 +363,7 @@ export function ContractorCompare({ projectId }: ContractorCompareProps) {
                         transition={{ duration: 0.3, delay: rowIndex * 0.04 }}
                         onMouseEnter={() => setHoveredRow(criterion)}
                         onMouseLeave={() => setHoveredRow((current) => (current === criterion ? null : current))}
-                        className={cn('border-b transition-colors', hoveredRow === criterion && 'bg-muted/40')}
+                        className={cn('transition-colors', hoveredRow === criterion && 'bg-muted/40')}
                       >
                         <th className='bg-card sticky left-0 z-10 border-r p-3.5 text-left text-sm font-normal whitespace-nowrap'>
                           <Tooltip>

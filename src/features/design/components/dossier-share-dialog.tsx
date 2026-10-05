@@ -136,6 +136,7 @@ export function DossierShareDialog({
     <Dialog open={mode !== null} onOpenChange={handleOpenChange}>
       <DialogContent
         data-origin-dialog
+        data-dossier-share-dialog
         style={
           { '--dialog-origin-x': `${origin?.x ?? 0}px`, '--dialog-origin-y': `${origin?.y ?? 0}px` } as CSSProperties
         }

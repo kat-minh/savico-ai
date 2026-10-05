@@ -46,14 +46,15 @@ export function ConsultantDetail({ consultantId }: ConsultantDetailProps) {
         <p className='text-muted-foreground'>{t('subtitle')}</p>
       </header>
 
-      <div className='grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[20rem_1fr]'>
+      <div className='grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]'>
         <ConsultantRail consultants={consultants ?? []} activeId={consultantId} isPending={listPending} />
 
-        <div className='bg-card relative overflow-hidden rounded-xl border p-4 sm:p-6'>
+        <div className='bg-card relative min-w-0 overflow-hidden rounded-xl border p-4 sm:p-6'>
           <AnimatePresence mode='wait' initial={false} custom={profileDirection}>
             <motion.div
               key={consultantId}
               custom={profileDirection}
+              className='min-w-0'
               variants={profileVariants}
               initial={reduceMotion ? { opacity: 0 } : 'enter'}
               animate={{ opacity: 1, y: 0 }}
