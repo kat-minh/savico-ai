@@ -6615,6 +6615,14 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
   }
 }
 
+/* Link chia sẻ ở Bước 3 cần hiện ổn định trên mobile: không scale/fade khi mở. */
+[data-dossier-share-dialog][data-state='open'],
+[data-dossier-share-dialog][data-state='closed'] {
+  animation: none !important;
+  transition: none !important;
+  scale: 1 !important;
+}
+
 /* Hai bảng của trang Bảng giá cuộn ngang trên mobile và có cột đầu `sticky`.
    `border-collapse` gắn đường kẻ vào lưới của bảng chứ không vào ô, nên khi cột
    đầu đứng yên thì nền của nó đứng lại còn đường kẻ trôi đi — các vạch chồng lên
@@ -6656,6 +6664,26 @@ html[data-pricing-scrolling='true'] .supervision-journey-flow-dot {
    thuộc về cột, không còn là lớp phủ `::after` đặt theo % khung nên lệch khi cuộn. */
 .supervision-comparison-table :is(th, td):has(+ .supervision-control-column) {
   border-right-color: color-mix(in srgb, var(--brand-orange) 46%, var(--border));
+}
+
+/* Bảng so sánh nhà thầu: chỉ wrapper cuộn ngang; chiều cao bảng để tự nhiên
+ * để scroll dọc luôn thuộc về trang trên mobile. Border nằm trên từng ô thay
+ * vì <tr>, nhờ vậy line của cột tiêu chí sticky đi cùng line của các ô dữ liệu. */
+.contractor-compare-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.contractor-compare-table > tbody > tr:not(:last-child) > :is(th, td) {
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 767.98px) {
+  .contractor-compare-scroll {
+    overflow-y: clip;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
+  }
 }
 
 /* Slogan viết trực tiếp trên ảnh, chỉ giữ ánh màu chữ và nét gạch chân. */
