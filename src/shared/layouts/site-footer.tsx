@@ -370,13 +370,12 @@ export function SiteFooter() {
 
           {/* Cot 5 - Lien he */}
           <motion.div
-            className='max-lg:order-5'
+            className='max-lg:order-5 max-sm:hidden'
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.58, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
             style={{ '--footer-contact-delay': '0.56s' } as CSSProperties}
-            className='max-sm:hidden'
           >
             <ColumnTitle>{t('contactTitle')}</ColumnTitle>
             <ul className='text-footer-foreground space-y-2.5 text-sm leading-5'>
