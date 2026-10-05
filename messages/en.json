@@ -859,7 +859,11 @@
       "titleMobile": "Home-building handbook"
     },
     "card": {
-      "imageCount": "{count} 3D images"
+      "imageCount": "{count} 3D images",
+      "floorsNotApplicable": "Floors: Not applicable",
+      "tumNotApplicable": "Rooftop room: Not applicable",
+      "stylesLoading": "Loading styles…",
+      "stylesError": "Unable to load styles"
     },
     "library": {
       "bannerTitle": "Explore floor plan templates\nthat fit your home",
@@ -869,6 +873,17 @@
         "3d": "3D templates"
       },
       "allBuildingTypes": "All building types",
+      "kindShort": {
+        "2d": "2D",
+        "3d": "3D"
+      },
+      "filterLabels": {
+        "buildingType": "Building type",
+        "floors": "Number of floors",
+        "tum": "Rooftop room",
+        "architecture": "Architectural style",
+        "interior": "Interior style"
+      },
       "allScales": "All scales",
       "allStyles": "All styles",
       "buildingTypePrefix": "Building type: {value}",
@@ -884,6 +899,11 @@
       },
       "optionAll": "All",
       "scalePrefix": "Scale: {value}",
+      "tumPrefix": "Rooftop room: {value}",
+      "withTum": "With rooftop room",
+      "withoutTum": "Without rooftop room",
+      "architecturePrefix": "Architecture: {value}",
+      "interiorPrefix": "Interior: {value}",
       "stylePrefix": "Style: {value}",
       "prevPage": "Previous page",
       "nextPage": "Next page"
@@ -902,6 +922,13 @@
       "planTitle": "Drawing details",
       "templateTitle": "Template details",
       "buildingType": "Building type",
+      "tum": "Rooftop room",
+      "architectureStyle": "Architectural styles",
+      "interiorStyle": "Interior styles",
+      "notApplicable": "Not applicable",
+      "withTum": "With rooftop room",
+      "withoutTum": "Without rooftop room",
+      "floorCountValue": "{count} floors",
       "floors": "Scale",
       "lotSize": "Lot size",
       "floorArea": "Floor area",
@@ -922,6 +949,7 @@
       "breadcrumbRoot": "Handbook",
       "breadcrumbLibrary": "Template library",
       "similar": "Similar templates",
+      "similarEmpty": "Empty",
       "zoom": "Enlarge drawing",
       "viewerTitle": "Full-screen drawing viewer",
       "previousFloor": "Previous floor",

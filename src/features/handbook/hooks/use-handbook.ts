@@ -1,6 +1,6 @@
 'use client'
 
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { useAuthStore } from '@/shared/auth'
@@ -10,9 +10,11 @@ import { handbookApi } from '../api/handbook.api'
 import { mockHandbookApi } from '../api/handbook.mock'
 import { LibraryAccessDeniedError, type ArticleListQuery } from '../api/handbook.bmt'
 import { handbookKeys } from '../api/handbook.keys'
+import type { TemplateStyleQuery } from '../api/handbook.library'
 import { selectPersonalizedTemplates } from '../services/handbook.service'
 import { localDayKey, useHandbookQuotaLedger } from '../store/handbook-quota.store'
 import type { HandbookFilter, HandbookTemplateKind, LibraryMatchCriteria } from '../types/handbook.types'
+import type { HandbookTemplateStyles, LibraryFilterOptions } from '../types/handbook.types'
 
 const STATIC_CONTENT_STALE_TIME = 5 * 60 * 1000
 
@@ -82,38 +84,64 @@ export function useHandbookNewsCategoryTree() {
 }
 
 /**
- * Tuỳ chọn bộ lọc thư viện từ BE (loại công trình, số tầng, phong cách). `null` = không có (mock
- * hoặc lỗi) → dùng tuỳ chọn suy ra từ danh sách mẫu. Chỉ gọi khi `enabled`.
+ * Danh mục hệ thống, gồm giá trị cũ còn được mẫu công khai dùng; thu hẹp theo loại công trình.
  */
-export function useHandbookLibraryFilters(kind: HandbookTemplateKind, enabled = true) {
+export function useHandbookLibraryFilters(kind: HandbookTemplateKind, enabled = true, buildingTypeId?: string) {
   return useQuery({
-    queryKey: handbookKeys.libraryFilters(kind),
-    queryFn: () => handbookApi.getLibraryFilters({ drawingKind: kind === '3d' ? '3D' : '2D' }),
+    queryKey: handbookKeys.libraryFilters(kind, buildingTypeId),
+    queryFn: () => handbookApi.getLibraryFilters({ drawingKind: kind === '3d' ? '3D' : '2D', buildingTypeId }),
     staleTime: STATIC_CONTENT_STALE_TIME,
     enabled
   })
 }
 
 /**
- * Mẫu khớp MỘT phong cách nội thất, lọc ở BE. Giữ kết quả cũ trong lúc tải kết quả mới để lưới
- * không nháy trống khi đổi lựa chọn.
+ * Mẫu khớp đồng thời các bộ lọc. Tách query theo điều kiện để phản hồi cũ không ghi đè lựa chọn mới.
  */
-export function useHandbookTemplateIdsByInteriorStyle(params: {
-  kind: HandbookTemplateKind
-  interiorStyleId?: string
-  enabled?: boolean
-}) {
-  const { kind, interiorStyleId, enabled = true } = params
+export function useHandbookTemplateIdsByFilters(query: TemplateStyleQuery, enabled: boolean) {
   return useQuery({
-    queryKey: handbookKeys.templateIdsByStyle({ kind, interiorStyleId }),
-    queryFn: () =>
-      handbookApi.listTemplateIdsByStyle({
-        drawingKind: kind === '3d' ? '3D' : '2D',
-        ...(interiorStyleId ? { interiorStyleIds: [interiorStyleId] } : {})
-      }),
+    queryKey: handbookKeys.templateIdsByStyle(query),
+    queryFn: () => handbookApi.listTemplateIdsByStyle(query),
     staleTime: STATIC_CONTENT_STALE_TIME,
-    placeholderData: keepPreviousData,
-    enabled: enabled && Boolean(interiorStyleId)
+    enabled
+  })
+}
+
+/** Summary chưa kèm phong cách: đọc membership qua danh sách công khai, không mở chi tiết/tính lượt. */
+export function useHandbookTemplateStyles(options: LibraryFilterOptions | null | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: handbookKeys.templateStyles(options),
+    enabled: enabled && Boolean(options),
+    staleTime: STATIC_CONTENT_STALE_TIME,
+    queryFn: async (): Promise<Record<string, HandbookTemplateStyles>> => {
+      const result: Record<string, HandbookTemplateStyles> = {}
+      const entries = [
+        ...(options?.architectureStyles ?? []).map((style) => ({ group: 'architectureStyles' as const, style })),
+        ...(options?.interiorStyles ?? []).map((style) => ({ group: 'interiorStyles' as const, style }))
+      ]
+      // Giới hạn bốn yêu cầu song song; mỗi nhóm/ID lấy membership một lần cho cả lưới.
+      for (let start = 0; start < entries.length; start += 4) {
+        const memberships = await Promise.all(
+          entries.slice(start, start + 4).map(async ({ group, style }) => ({
+            group,
+            style,
+            ids: await handbookApi.listTemplateIdsByStyle({
+              drawingKind: '3D',
+              ...(group === 'architectureStyles'
+                ? { architectureStyleIds: [style.styleId] }
+                : { interiorStyleIds: [style.styleId] })
+            })
+          }))
+        )
+        for (const { group, style, ids } of memberships) {
+          for (const id of ids ?? []) {
+            const labels = (result[id] ??= { architectureStyles: [], interiorStyles: [] })
+            labels[group].push(style)
+          }
+        }
+      }
+      return result
+    }
   })
 }
 

@@ -14,8 +14,10 @@ import {
 } from 'react'
 
 import { useSiteImage } from '@/shared/cms'
+import { env } from '@/shared/config/env'
 import { EmptyState, ErrorState, Photo } from '@/shared/components/common'
 import { Input } from '@/shared/components/ui/input'
+import { Button } from '@/shared/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/shared/components/ui/select'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { usePageEntrance } from '@/shared/hooks'
@@ -28,14 +30,16 @@ import {
 import {
   useHandbookLibraryFilters,
   useHandbookLookupQuota,
-  useHandbookTemplateIdsByInteriorStyle,
+  useHandbookTemplateIdsByFilters,
+  useHandbookTemplateStyles,
   useHandbookTemplates
 } from '../hooks/use-handbook'
-import { filterTemplates, pageCount, pageSlice } from '../services/handbook.service'
+import { filterTemplates, floorCountOf, pageCount, pageSlice } from '../services/handbook.service'
 import type { HandbookTemplate, HandbookTemplateKind } from '../types/handbook.types'
 import { QuotaBadge } from './quota-badge'
 import { TemplateCard } from './template-card'
 import { TemplateLookupExhaustedDialog } from './template-lookup-exhausted-dialog'
+import { LibraryStyleFilter } from './library-style-filter'
 
 const ALL = 'all'
 const FILTER_EXIT_MS = 120
@@ -49,7 +53,10 @@ type ChangeReason = 'filter' | 'page-forward' | 'page-back' | 'restore' | 'initi
 interface LibraryRestoreState {
   kind: HandbookTemplateKind
   buildingType: string
-  secondary: string
+  floorCount: string
+  tum: string
+  architectureStyleIds: string[]
+  interiorStyleIds: string[]
   term: string
   appliedQuery: string
   page: number
@@ -138,7 +145,10 @@ export function TemplateLibrary() {
 
   const [kind, setKind] = useState<HandbookTemplateKind>('2d')
   const [buildingType, setBuildingType] = useState(ALL)
-  const [secondary, setSecondary] = useState(ALL)
+  const [floorCount, setFloorCount] = useState(ALL)
+  const [tum, setTum] = useState(ALL)
+  const [architectureStyleIds, setArchitectureStyleIds] = useState<string[]>([])
+  const [interiorStyleIds, setInteriorStyleIds] = useState<string[]>([])
   const [term, setTerm] = useState('')
   const [appliedQuery, setAppliedQuery] = useState('')
   const [page, setPage] = useState(1)
@@ -156,31 +166,34 @@ export function TemplateLibrary() {
   const lookupQuota = useHandbookLookupQuota()
   const pool = useMemo(() => templates ?? [], [templates])
 
-  // Danh sách mẫu của API KHÔNG kèm phong cách nên bộ lọc phong cách 3D không suy ra được từ chính
-  // dữ liệu đang hiển thị (như mẫu mock). Với mẫu từ API, tuỳ chọn lấy từ `/design-templates/filters`
-  // và việc lọc do BE làm (`interiorStyleIds` — tham số lặp), ở đây chỉ giữ các mẫu BE trả về.
-  const isApiPool = useMemo(() => pool.some((template) => template.source === 'bmt'), [pool])
-  const { data: apiFilters } = useHandbookLibraryFilters(kind, isApiPool && kind === '3d')
-  const apiStyleOptions = useMemo(
-    () =>
-      isApiPool && kind === '3d'
-        ? (apiFilters?.interiorStyles ?? []).map((style) => ({ value: style.styleId, label: style.name }))
-        : [],
-    [apiFilters, isApiPool, kind]
+  const apiMode = !env.NEXT_PUBLIC_USE_MOCK_API
+  const filterOptions = useHandbookLibraryFilters(kind, apiMode, buildingType === ALL ? undefined : buildingType)
+  const apiFilters = filterOptions.data
+  const filterActive =
+    buildingType !== ALL ||
+    floorCount !== ALL ||
+    tum !== ALL ||
+    (kind === '3d' && (architectureStyleIds.length > 0 || interiorStyleIds.length > 0))
+  const filteredIds = useHandbookTemplateIdsByFilters(
+    {
+      drawingKind: kind === '3d' ? '3D' : '2D',
+      buildingTypeId: buildingType === ALL ? undefined : buildingType,
+      floorCount: floorCount === ALL ? undefined : Number(floorCount),
+      hasTum: tum === ALL ? undefined : tum === 'true',
+      architectureStyleIds: kind === '3d' ? architectureStyleIds : undefined,
+      interiorStyleIds: kind === '3d' ? interiorStyleIds : undefined
+    },
+    apiMode && filterActive
   )
-  const useApiStyles = apiStyleOptions.length > 0
-  const styleFilterActive = useApiStyles && secondary !== ALL
-  const styleIds = useHandbookTemplateIdsByInteriorStyle({
-    kind,
-    interiorStyleId: styleFilterActive ? secondary : undefined,
-    enabled: styleFilterActive
-  })
   const allowedIds = useMemo(() => {
-    if (!styleFilterActive) return undefined
-    // BE lỗi (`null`): không áp bộ lọc phía BE thay vì hiện lưới rỗng sai. Chưa có dữ liệu: rỗng.
-    if (styleIds.data === null) return undefined
-    return new Set(styleIds.data ?? [])
-  }, [styleFilterActive, styleIds.data])
+    if (!apiMode || !filterActive) return undefined
+    return new Set(filteredIds.data ?? [])
+  }, [apiMode, filterActive, filteredIds.data])
+  const styleOptions = useHandbookLibraryFilters('3d', apiMode && kind === '3d')
+  const templateStyles = useHandbookTemplateStyles(
+    styleOptions.data,
+    apiMode && kind === '3d' && pool.some((item) => item.kind === '3d')
+  )
   const { rootRef, entranceState, entranceStyle } = usePageEntrance('handbook.library', { offsetMs: 220 })
 
   const gridViewportRef = useRef<HTMLDivElement>(null)
@@ -212,36 +225,52 @@ export function TemplateLibrary() {
 
   const buildingOptions = useMemo(
     () =>
-      uniqueOptions(
-        pool.filter((template) => template.kind === kind),
-        (template) => template.tags.buildingType,
-        (template) => template.specs.buildingTypeLabel
-      ),
-    [pool, kind]
+      apiMode
+        ? (apiFilters?.buildingTypes ?? []).map((type) => ({ value: type.id, label: type.name }))
+        : uniqueOptions(
+            pool.filter((template) => template.kind === kind),
+            (template) => template.tags.buildingType,
+            (template) => template.specs.buildingTypeLabel
+          ),
+    [apiMode, apiFilters, pool, kind]
   )
 
-  const secondaryOptions = useMemo(() => {
-    if (useApiStyles) return apiStyleOptions
-    const scoped = pool.filter((template) => template.kind === kind)
-    if (kind === '3d') {
-      return uniqueOptions(
-        scoped,
-        (template) => template.tags.interiorStyle,
-        (template) => template.styleLabel
-      )
-    }
+  const scopedPool = useMemo(
+    () =>
+      pool.filter(
+        (template) => template.kind === kind && (buildingType === ALL || template.tags.buildingType === buildingType)
+      ),
+    [pool, kind, buildingType]
+  )
+  const floorOptions = useMemo(() => {
+    if (apiMode)
+      return (apiFilters?.floorCounts ?? []).map((count) => ({
+        value: String(count),
+        label: t('floorOption', { count })
+      }))
     return uniqueOptions(
-      scoped,
+      scopedPool,
       (template) => template.tags.floorCount,
       (template) => floorCountLabel(template.tags.floorCount, (count) => t('floorOption', { count }))
     )
-  }, [apiStyleOptions, pool, kind, t, useApiStyles])
+  }, [apiMode, apiFilters, scopedPool, t])
+  const architectureOptions = apiMode
+    ? (apiFilters?.architectureStyles ?? []).map((style) => ({ value: style.styleId, label: style.name }))
+    : uniqueOptions(
+        scopedPool,
+        (template) => template.tags.architectureStyle,
+        (template) => template.styleLabel
+      )
+  const interiorOptions = apiMode
+    ? (apiFilters?.interiorStyles ?? []).map((style) => ({ value: style.styleId, label: style.name }))
+    : uniqueOptions(
+        scopedPool,
+        (template) => template.tags.interiorStyle,
+        (template) => template.styleLabel
+      )
 
-  const secondaryPrefix = kind === '2d' ? 'scalePrefix' : 'stylePrefix'
-  const secondarySelectedLabel =
-    secondary === ALL
-      ? t('optionAll')
-      : (secondaryOptions.find((option) => option.value === secondary)?.label ?? t('optionAll'))
+  const floorSelectedLabel =
+    floorCount === ALL ? t('optionAll') : t('floorOption', { count: floorCountOf(floorCount) ?? 1 })
   const buildingSelectedLabel =
     buildingType === ALL
       ? t('optionAll')
@@ -251,13 +280,26 @@ export function TemplateLibrary() {
     () =>
       filterTemplates(pool, {
         kind,
-        buildingType: buildingType === ALL ? undefined : buildingType,
-        // Phong cách của mẫu API do BE lọc (`allowedIds`), không so với `tags` (API không có).
-        secondary: secondary === ALL || useApiStyles ? undefined : secondary,
+        buildingType: apiMode || buildingType === ALL ? undefined : buildingType,
+        floorCount: apiMode || floorCount === ALL ? undefined : floorCount,
+        hasAttic: apiMode || tum === ALL ? undefined : tum === 'true',
+        architectureStyleIds: apiMode ? undefined : architectureStyleIds,
+        interiorStyleIds: apiMode ? undefined : interiorStyleIds,
         query: appliedQuery,
         allowedIds
       }),
-    [pool, kind, buildingType, secondary, appliedQuery, useApiStyles, allowedIds]
+    [
+      pool,
+      kind,
+      buildingType,
+      floorCount,
+      tum,
+      architectureStyleIds,
+      interiorStyleIds,
+      appliedQuery,
+      apiMode,
+      allowedIds
+    ]
   )
 
   const totalPages = pageCount(results.length, LIBRARY_PAGE_SIZE)
@@ -316,12 +358,12 @@ export function TemplateLibrary() {
   }, [])
 
   const commitFilterChange = useCallback(
-    (update: () => void) => {
+    (update: () => void, immediate = false) => {
       cancelRunningAnimations()
       captureGrid()
       changeReasonRef.current = 'filter'
 
-      if (prefersReducedMotion()) {
+      if (prefersReducedMotion() || immediate) {
         if (trackRef.current) trackRef.current.style.transform = 'translate3d(0,0,0)'
         update()
         setPage(1)
@@ -646,7 +688,19 @@ export function TemplateLibrary() {
     previousRectsRef.current = new Map()
     previousContentHeightRef.current = 0
     changeReasonRef.current = 'initial'
-  }, [appliedQuery, buildingType, isPending, kind, page, prefersReducedMotion, secondary, visible])
+  }, [
+    appliedQuery,
+    buildingType,
+    isPending,
+    kind,
+    page,
+    prefersReducedMotion,
+    floorCount,
+    tum,
+    architectureStyleIds,
+    interiorStyleIds,
+    visible
+  ])
 
   useEffect(() => {
     if (isPending) return
@@ -667,7 +721,10 @@ export function TemplateLibrary() {
         changeReasonRef.current = 'restore'
         setKind(stored.kind)
         setBuildingType(stored.buildingType)
-        setSecondary(stored.secondary)
+        setFloorCount(stored.floorCount ?? ALL)
+        setTum(stored.tum ?? ALL)
+        setArchitectureStyleIds(stored.architectureStyleIds ?? [])
+        setInteriorStyleIds(stored.interiorStyleIds ?? [])
         setTerm(stored.term)
         setAppliedQuery(stored.appliedQuery)
         setPage(stored.page)
@@ -739,7 +796,10 @@ export function TemplateLibrary() {
       const value: LibraryRestoreState = {
         kind,
         buildingType,
-        secondary,
+        floorCount,
+        tum,
+        architectureStyleIds,
+        interiorStyleIds,
         term,
         appliedQuery,
         page: safePage,
@@ -751,7 +811,7 @@ export function TemplateLibrary() {
         window.sessionStorage.setItem(HANDBOOK_TEMPLATE_RETURN_SESSION_KEY, JSON.stringify(marker))
       }
     },
-    [appliedQuery, buildingType, kind, safePage, secondary, term]
+    [appliedQuery, buildingType, kind, safePage, floorCount, tum, architectureStyleIds, interiorStyleIds, term]
   )
 
   const handleBlocked = useCallback((templateId: string) => {
@@ -968,129 +1028,233 @@ export function TemplateLibrary() {
         data-template-toolbar
         data-entrance-step='0'
         data-entrance-from='soft-scale'
-        className='bg-card flex flex-wrap items-center gap-3 rounded-xl border p-3'
+        className='bg-card space-y-4 rounded-xl border p-3 sm:p-4'
       >
         <div
-          ref={kindTrackRef}
-          data-template-kind-toggle
-          data-entrance-step='1'
-          data-entrance-order='0'
-          className='bg-muted relative inline-flex max-w-full flex-nowrap rounded-full p-1.5'
+          data-template-toolbar-main
+          className='grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:grid-cols-[auto_minmax(0,1fr)_auto]'
         >
-          <span
-            data-template-kind-pill
-            data-ready={pillStyle.ready}
-            className='brand-green-button pointer-events-none absolute top-0 left-0 rounded-full'
-            style={{
-              transform: pillStyle.transform,
-              width: pillStyle.width,
-              height: pillStyle.height
-            }}
-          />
-          {(['2d', '3d'] as const).map((option) => (
-            <button
-              key={option}
-              ref={(node) => {
-                kindButtonRefs.current[option] = node
+          <div
+            ref={kindTrackRef}
+            data-template-kind-toggle
+            data-entrance-step='1'
+            data-entrance-order='0'
+            className='bg-muted relative inline-flex w-fit max-w-full flex-nowrap rounded-full p-1'
+          >
+            <span
+              data-template-kind-pill
+              data-ready={pillStyle.ready}
+              className='brand-green-button pointer-events-none absolute top-0 left-0 rounded-full'
+              style={{
+                transform: pillStyle.transform,
+                width: pillStyle.width,
+                height: pillStyle.height
               }}
-              type='button'
-              data-template-kind-button={option}
-              onClick={() => {
-                if (option === kind) {
-                  if (pendingKindRef.current !== null) cancelRunningAnimations()
-                  return
-                }
-                commitFilterChange(() => {
-                  pendingKindRef.current = null
-                  setKind(option)
-                  setBuildingType(ALL)
-                  setSecondary(ALL)
-                })
-                if (transitionTimerRef.current) pendingKindRef.current = option
+            />
+            {(['2d', '3d'] as const).map((option) => (
+              <button
+                key={option}
+                ref={(node) => {
+                  kindButtonRefs.current[option] = node
+                }}
+                type='button'
+                data-template-kind-button={option}
+                onClick={() => {
+                  if (option === kind) {
+                    if (pendingKindRef.current !== null) cancelRunningAnimations()
+                    return
+                  }
+                  commitFilterChange(() => {
+                    pendingKindRef.current = null
+                    setKind(option)
+                    setBuildingType(ALL)
+                    setFloorCount(ALL)
+                    setTum(ALL)
+                    setArchitectureStyleIds([])
+                    setInteriorStyleIds([])
+                  })
+                  if (transitionTimerRef.current) pendingKindRef.current = option
+                }}
+                aria-pressed={kind === option}
+                aria-label={t(`kind.${option}`)}
+                className={cn(
+                  // `whitespace-nowrap shrink-0`: tuyệt đối không rớt dòng ("Mẫu bản vẽ / 2D") ở màn nhỏ như iPhone;
+                  // đệm ngang thu nhỏ ở mobile để cặp nút vẫn vừa một hàng.
+                  'relative z-10 min-h-10 shrink-0 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors duration-200 sm:px-5',
+                  kind === option ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <span className='sm:hidden'>{t(`kindShort.${option}`)}</span>
+                <span className='hidden sm:inline'>{t(`kind.${option}`)}</span>
+              </button>
+            ))}
+          </div>
+
+          <div
+            data-template-search
+            data-entrance-step='1'
+            data-entrance-order='3'
+            className='group/search relative col-span-2 row-start-2 min-w-0 md:col-span-1 md:col-start-2 md:row-start-1'
+          >
+            <Search className='text-muted-foreground group-focus-within/search:text-primary pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 transition-colors' />
+            <Input
+              value={term}
+              onChange={(event) => {
+                setTerm(event.target.value)
               }}
-              aria-pressed={kind === option}
-              className={cn(
-                // `whitespace-nowrap shrink-0`: tuyệt đối không rớt dòng ("Mẫu bản vẽ / 2D") ở màn nhỏ như iPhone;
-                // đệm ngang thu nhỏ ở mobile để cặp nút vẫn vừa một hàng.
-                'relative z-10 shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-200 sm:px-6',
-                kind === option ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {t(`kind.${option}`)}
-            </button>
-          ))}
+              placeholder={kind === '2d' ? t('searchPlaceholder2d') : t('searchPlaceholder3d')}
+              className='bg-background focus:border-primary focus:ring-primary/15 h-11 rounded-lg pl-9 shadow-none transition-[border-color,box-shadow] duration-200 focus:ring-2 focus-visible:border-primary'
+            />
+          </div>
+
+          <div
+            data-entrance-step='1'
+            data-entrance-order='4'
+            className='col-start-2 row-start-1 justify-self-end md:col-start-3'
+          >
+            <QuotaBadge
+              className='whitespace-nowrap px-2.5 py-2 shadow-none'
+              scope='lookup'
+              shakeNonce={quotaShakeNonce}
+            />
+          </div>
         </div>
-
-        <Select value={buildingType} onValueChange={(value) => commitFilterChange(() => setBuildingType(value))}>
-          <SelectTrigger
-            data-template-select
-            data-entrance-step='1'
-            data-entrance-order='1'
-            className='w-full transition-colors sm:w-52'
-          >
-            <span className='truncate'>{t('buildingTypePrefix', { value: buildingSelectedLabel })}</span>
-          </SelectTrigger>
-          <SelectContent
-            data-template-select-content
-            className='data-[state=closed]:duration-150 data-[state=open]:duration-220'
-          >
-            <SelectItem value={ALL}>{t('buildingTypePrefix', { value: t('optionAll') })}</SelectItem>
-            {buildingOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {t('buildingTypePrefix', { value: option.label })}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={secondary} onValueChange={(value) => commitFilterChange(() => setSecondary(value))}>
-          <SelectTrigger
-            data-template-select
-            data-entrance-step='1'
-            data-entrance-order='2'
-            className='w-full transition-colors sm:w-52'
-          >
-            <span key={kind} data-template-secondary-label className='truncate'>
-              {t(secondaryPrefix, { value: secondarySelectedLabel })}
-            </span>
-          </SelectTrigger>
-          <SelectContent
-            data-template-select-content
-            className='data-[state=closed]:duration-150 data-[state=open]:duration-220'
-          >
-            <SelectItem value={ALL}>{t(secondaryPrefix, { value: t('optionAll') })}</SelectItem>
-            {secondaryOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {t(secondaryPrefix, { value: option.label })}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <div
-          data-template-search
-          data-entrance-step='1'
-          data-entrance-order='3'
-          className='group/search relative min-w-56 flex-1 origin-right'
+          data-template-filter-fields
+          className={cn('grid grid-cols-2 gap-3 border-t pt-4 sm:grid-cols-3', kind === '3d' && 'lg:grid-cols-5')}
         >
-          <Search className='text-muted-foreground group-focus-within/search:text-primary pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 transition-colors' />
-          <Input
-            value={term}
-            onChange={(event) => {
-              setTerm(event.target.value)
-            }}
-            placeholder={kind === '2d' ? t('searchPlaceholder2d') : t('searchPlaceholder3d')}
-            className='focus:border-primary focus:ring-primary/15 pl-9 transition-[border-color,box-shadow] duration-200 focus:ring-2 focus-visible:border-primary'
-          />
-        </div>
+          <div className='col-span-2 min-w-0 space-y-1.5 sm:col-span-1'>
+            <label htmlFor='library-buildingType-filter' className='text-muted-foreground block text-xs font-medium'>
+              {t('filterLabels.buildingType')}
+            </label>
+            <Select
+              value={buildingType}
+              onValueChange={(value) =>
+                commitFilterChange(() => {
+                  setBuildingType(value)
+                  setFloorCount(ALL)
+                  setArchitectureStyleIds([])
+                  setInteriorStyleIds([])
+                })
+              }
+              disabled={apiMode && filterOptions.isPending}
+            >
+              <SelectTrigger
+                id='library-buildingType-filter'
+                data-template-select
+                data-entrance-step='1'
+                data-entrance-order='1'
+                className='bg-background w-full min-w-0 rounded-lg shadow-none transition-colors data-[size=default]:h-11'
+              >
+                <span className='truncate'>{buildingSelectedLabel}</span>
+              </SelectTrigger>
+              <SelectContent
+                data-template-select-content
+                className='data-[state=closed]:duration-150 data-[state=open]:duration-220'
+              >
+                <SelectItem value={ALL}>{t('optionAll')}</SelectItem>
+                {buildingOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div data-entrance-step='1' data-entrance-order='4' className='ml-auto'>
-          <QuotaBadge scope='lookup' shakeNonce={quotaShakeNonce} />
+          <div className='min-w-0 space-y-1.5'>
+            <label htmlFor='library-floorCount-filter' className='text-muted-foreground block text-xs font-medium'>
+              {t('filterLabels.floors')}
+            </label>
+            <Select
+              value={floorCount}
+              onValueChange={(value) => commitFilterChange(() => setFloorCount(value))}
+              disabled={apiMode && filterOptions.isPending}
+            >
+              <SelectTrigger
+                id='library-floorCount-filter'
+                data-template-select
+                data-entrance-step='1'
+                data-entrance-order='2'
+                className='bg-background w-full min-w-0 rounded-lg shadow-none transition-colors data-[size=default]:h-11'
+              >
+                <span key={kind} data-template-secondary-label className='truncate'>
+                  {floorSelectedLabel}
+                </span>
+              </SelectTrigger>
+              <SelectContent
+                data-template-select-content
+                className='data-[state=closed]:duration-150 data-[state=open]:duration-220'
+              >
+                <SelectItem value={ALL}>{t('optionAll')}</SelectItem>
+                {floorOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className='min-w-0 space-y-1.5'>
+            <label htmlFor='library-tum-filter' className='text-muted-foreground block text-xs font-medium'>
+              {t('filterLabels.tum')}
+            </label>
+            <Select value={tum} onValueChange={(value) => commitFilterChange(() => setTum(value))}>
+              <SelectTrigger
+                id='library-tum-filter'
+                data-template-tum-filter
+                className='bg-background w-full min-w-0 rounded-lg shadow-none data-[size=default]:h-11'
+              >
+                <span className='truncate'>
+                  {tum === ALL ? t('optionAll') : t(tum === 'true' ? 'withTum' : 'withoutTum')}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t('optionAll')}</SelectItem>
+                <SelectItem value='true'>{t('withTum')}</SelectItem>
+                <SelectItem value='false'>{t('withoutTum')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {kind === '3d' ? (
+            <>
+              <LibraryStyleFilter
+                group='architecture'
+                options={architectureOptions}
+                value={architectureStyleIds}
+                onChange={(value) => commitFilterChange(() => setArchitectureStyleIds(value), true)}
+                disabled={apiMode && filterOptions.isPending}
+              />
+              <LibraryStyleFilter
+                group='interior'
+                options={interiorOptions}
+                value={interiorStyleIds}
+                onChange={(value) => commitFilterChange(() => setInteriorStyleIds(value), true)}
+                disabled={apiMode && filterOptions.isPending}
+              />
+            </>
+          ) : null}
         </div>
       </div>
 
       <div ref={contentRef} data-template-library-content>
-        {isPending ? (
+        {apiMode && kind === '3d' && (styleOptions.isError || templateStyles.isError) ? (
+          <div className='mb-4 flex flex-wrap items-center gap-3' role='status'>
+            <p className='text-destructive text-sm'>{tDetail('loadError')}</p>
+            <Button
+              variant='outline'
+              onClick={() => {
+                if (styleOptions.isError) void styleOptions.refetch()
+                if (templateStyles.isError) void templateStyles.refetch()
+              }}
+            >
+              {tDetail('retry')}
+            </Button>
+          </div>
+        ) : null}
+        {isPending || (apiMode && filterActive && filteredIds.isPending) ? (
           <div data-handbook-loading='true' className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4' aria-hidden='true'>
             {Array.from({ length: LIBRARY_PAGE_SIZE }).map((_, index) => (
               <div key={index} className='bg-card h-full overflow-hidden rounded-xl border'>
@@ -1106,12 +1270,16 @@ export function TemplateLibrary() {
               </div>
             ))}
           </div>
-        ) : isError ? (
+        ) : isError || (apiMode && (filterOptions.isError || (filterActive && filteredIds.isError))) ? (
           <ErrorState
             title={tDetail('loadError')}
             description={tDetail('loadErrorHint')}
             retryLabel={tDetail('retry')}
-            onRetry={() => void refetch()}
+            onRetry={() => {
+              if (isError) void refetch()
+              if (filterOptions.isError) void filterOptions.refetch()
+              if (filterActive && filteredIds.isError) void filteredIds.refetch()
+            }}
           />
         ) : visible.length === 0 ? (
           <EmptyState title={t('empty.title')} description={t('empty.description')} />
@@ -1147,6 +1315,11 @@ export function TemplateLibrary() {
                           <TemplateCard
                             key={template.id}
                             template={template}
+                            styles={templateStyles.data?.[template.id]}
+                            stylesPending={
+                              apiMode && kind === '3d' && (styleOptions.isPending || templateStyles.isPending)
+                            }
+                            stylesError={apiMode && kind === '3d' && (styleOptions.isError || templateStyles.isError)}
                             entranceOrder={pageIndex === 0 ? index : undefined}
                             searchQuery={appliedQuery}
                             onConsumeQuota={lookupQuota.isPending ? undefined : lookupQuota.consume}
@@ -1271,6 +1444,5 @@ function uniqueOptions(
 
 function floorCountLabel(tag: string | undefined, format: (count: number) => string): string {
   if (!tag) return format(1)
-  const extra = Number(tag.split('+')[1] ?? 0)
-  return format(extra + 1)
+  return format(floorCountOf(tag) ?? 1)
 }

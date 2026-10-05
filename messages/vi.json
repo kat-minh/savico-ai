@@ -859,7 +859,11 @@
       "titleMobile": "Cẩm nang xây nhà"
     },
     "card": {
-      "imageCount": "{count} ảnh 3D"
+      "imageCount": "{count} ảnh 3D",
+      "floorsNotApplicable": "Tầng: Không áp dụng",
+      "tumNotApplicable": "Tum: Không áp dụng",
+      "stylesLoading": "Đang tải phong cách…",
+      "stylesError": "Không tải được phong cách"
     },
     "library": {
       "bannerTitle": "Khám phá các mẫu bản vẽ\nphù hợp cho ngôi nhà của bạn",
@@ -869,6 +873,17 @@
         "3d": "Mẫu bản vẽ 3D"
       },
       "allBuildingTypes": "Tất cả loại công trình",
+      "kindShort": {
+        "2d": "2D",
+        "3d": "3D"
+      },
+      "filterLabels": {
+        "buildingType": "Loại công trình",
+        "floors": "Quy mô (tầng)",
+        "tum": "Tum",
+        "architecture": "Phong cách kiến trúc",
+        "interior": "Phong cách nội thất"
+      },
       "allScales": "Tất cả quy mô",
       "allStyles": "Tất cả phong cách",
       "buildingTypePrefix": "Loại công trình: {value}",
@@ -884,6 +899,11 @@
       },
       "optionAll": "Tất cả",
       "scalePrefix": "Quy mô: {value}",
+      "tumPrefix": "Tum: {value}",
+      "withTum": "Có tum",
+      "withoutTum": "Không tum",
+      "architecturePrefix": "Kiến trúc: {value}",
+      "interiorPrefix": "Nội thất: {value}",
       "stylePrefix": "Phong cách: {value}",
       "prevPage": "Trang trước",
       "nextPage": "Trang sau"
@@ -902,6 +922,13 @@
       "planTitle": "Thông tin bản vẽ",
       "templateTitle": "Thông tin mẫu",
       "buildingType": "Loại công trình",
+      "tum": "Tum",
+      "architectureStyle": "Phong cách kiến trúc",
+      "interiorStyle": "Phong cách nội thất",
+      "notApplicable": "Không áp dụng",
+      "withTum": "Có tum",
+      "withoutTum": "Không tum",
+      "floorCountValue": "{count} tầng",
       "floors": "Quy mô",
       "lotSize": "Kích thước lô",
       "floorArea": "Diện tích",
@@ -922,6 +949,7 @@
       "breadcrumbRoot": "Cẩm nang",
       "breadcrumbLibrary": "Thư viện mẫu",
       "similar": "Mẫu tương tự",
+      "similarEmpty": "Trống",
       "zoom": "Phóng to bản vẽ",
       "viewerTitle": "Xem bản vẽ toàn màn hình",
       "previousFloor": "Tầng trước",

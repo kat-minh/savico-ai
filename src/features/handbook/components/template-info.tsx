@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { Building2, Layers, Ruler, Square } from 'lucide-react'
+import { Building2, House, Layers, Palette, Ruler, Sofa, Square } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { cn } from '@/shared/lib/utils'
-import type { HandbookTemplate } from '../types/handbook.types'
+import { useTemplateClassification } from '../hooks/use-template-classification'
+import type { HandbookTemplateDetail } from '../types/handbook.types'
 
 const DESCRIPTION_ANIMATION_MS = 360
 
@@ -20,12 +21,13 @@ export function TemplateInfo({
   className,
   transitionActive = false
 }: {
-  template: HandbookTemplate
+  template: HandbookTemplateDetail
   className?: string
   transitionActive?: boolean
 }) {
   const t = useTranslations('handbook.info')
   const { specs } = template
+  const classification = useTemplateClassification(template)
   const [expanded, setExpanded] = useState(false)
   const descriptionCopyRef = useRef<HTMLDivElement>(null)
   const descriptionContentRef = useRef<HTMLDivElement>(null)
@@ -37,14 +39,21 @@ export function TemplateInfo({
     template.kind === '2d'
       ? [
           { icon: Building2, label: t('buildingType'), value: specs.buildingTypeLabel },
-          { icon: Layers, label: t('floorsPlan'), value: specs.floorLabel },
+          { icon: Layers, label: t('floorsPlan'), value: classification.floorLabel },
+          { icon: House, label: t('tum'), value: classification.tumLabel },
           { icon: Ruler, label: t('lotSize'), value: specs.lotSize },
           { icon: Square, label: t('floorArea'), value: specs.floorArea }
         ]
       : [
           { icon: Building2, label: t('buildingType'), value: specs.buildingTypeLabel },
-          { icon: Square, label: t('style'), value: template.styleLabel },
-          { icon: Layers, label: t('floors'), value: specs.floorLabel }
+          { icon: Layers, label: t('floors'), value: classification.floorLabel },
+          { icon: House, label: t('tum'), value: classification.tumLabel },
+          ...(classification.groupedStyles
+            ? [
+                { icon: Palette, label: t('architectureStyle'), value: classification.architectureLabel },
+                { icon: Sofa, label: t('interiorStyle'), value: classification.interiorLabel }
+              ]
+            : [{ icon: Palette, label: t('style'), value: template.styleLabel }])
         ]
 
   const descriptionLength = template.description.join(' ').length
@@ -147,13 +156,13 @@ export function TemplateInfo({
                     viewTransitionName: transitionActive ? `handbook-detail-info-row-${index}` : undefined
                   } as CSSProperties
                 }
-                className='hover:bg-muted/45 group/info relative flex items-center justify-between gap-4 rounded-md px-1 py-2.5 transition-colors'
+                className='hover:bg-muted/45 group/info relative grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-3 rounded-md px-1 py-2.5 transition-colors'
               >
-                <dt data-template-info-label className='text-muted-foreground flex items-center gap-2 text-sm'>
+                <dt data-template-info-label className='text-muted-foreground flex items-start gap-2 text-sm'>
                   <row.icon className='text-muted-foreground group-hover/info:text-primary size-4 shrink-0 transition-colors' />
                   {row.label}
                 </dt>
-                <dd data-template-info-value className='text-sm font-medium'>
+                <dd data-template-info-value className='min-w-0 text-right text-sm font-medium wrap-anywhere'>
                   {row.value}
                 </dd>
                 {index < rows.filter((item) => item.value).length - 1 ? (

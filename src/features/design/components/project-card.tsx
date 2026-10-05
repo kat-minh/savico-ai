@@ -148,7 +148,7 @@ function MiniStepper({ project }: { project: Project }) {
 
 /**
  * Một thẻ trong lưới "DỰ ÁN CỦA TÔI" (mục IV.1, Hình 02): ảnh thu nhỏ với nút ⋮
- * góc phải, tên dự án kèm badge trạng thái, mã dự án, ngày cập nhật, rồi hàng
+ * góc phải, tên dự án kèm badge trạng thái, ngày tạo, rồi hàng
  * cuối gồm mini-stepper 3 nấc bên trái và liên kết hành động bên phải.
  */
 export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
@@ -229,8 +229,7 @@ export function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
           </DropdownMenu>
         </div>
 
-        <p className='text-muted-foreground mt-1 font-mono text-xs'>{project.id}</p>
-        <p className='text-muted-foreground text-xs'>
+        <p className='text-muted-foreground mt-1 text-xs'>
           {t('createdAt', { date: formatDisplayDate(project.createdAt, locale) })}
         </p>
 

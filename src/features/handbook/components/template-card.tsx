@@ -9,9 +9,10 @@ import { handbookTemplateRoute } from '@/shared/constants/routes'
 import { FavoriteButton } from '@/shared/favorite'
 import { cn } from '@/shared/lib/utils'
 import { useHandbookReadStore } from '../store/handbook-read.store'
-import type { HandbookFloor, HandbookTemplate } from '../types/handbook.types'
+import type { HandbookFloor, HandbookTemplate, HandbookTemplateStyles } from '../types/handbook.types'
 import { ReadBadge } from './read-badge'
 import { TemplateFigure } from './template-figure'
+import { TemplateCategoryBadges } from './template-category-badges'
 
 const GALLERY_HOVER_DELAY_MS = 720
 const GALLERY_CYCLE_MS = 1800
@@ -41,6 +42,9 @@ interface TemplateCardProps {
   onQuotaBlocked?: (templateId: string) => void
   /** Called immediately before leaving the library so Back state can be saved. */
   onNavigate?: (templateId: string) => void
+  styles?: HandbookTemplateStyles
+  stylesPending?: boolean
+  stylesError?: boolean
 }
 
 /**
@@ -63,7 +67,10 @@ export function TemplateCard({
   searchQuery = '',
   onConsumeQuota,
   onQuotaBlocked,
-  onNavigate
+  onNavigate,
+  styles,
+  stylesPending = false,
+  stylesError = false
 }: TemplateCardProps) {
   const t = useTranslations('handbook.card')
   const router = useRouter()
@@ -85,8 +92,11 @@ export function TemplateCard({
 
   const specLine = (
     template.kind === '2d'
-      ? [specs.lotSize, specs.floorArea, specs.floorLabel]
-      : [specs.floorLabel, specs.imageCount ? t('imageCount', { count: specs.imageCount }) : undefined]
+      ? [specs.lotSize, specs.floorArea, inPanel ? specs.floorLabel : undefined]
+      : [
+          inPanel ? specs.floorLabel : undefined,
+          specs.imageCount ? t('imageCount', { count: specs.imageCount }) : undefined
+        ]
   ).filter(Boolean)
 
   const clearGalleryTimers = () => {
@@ -284,6 +294,16 @@ export function TemplateCard({
           <p className='text-muted-foreground text-xs'>
             {[specs.buildingTypeLabel, template.styleLabel].filter(Boolean).join(' · ')}
           </p>
+        ) : !inPanel ? (
+          <div className='flex flex-wrap items-center gap-2'>
+            <TemplateCategoryBadges
+              template={template}
+              styles={styles}
+              stylesPending={stylesPending}
+              stylesError={stylesError}
+            />
+            <ReadBadge id={template.id} />
+          </div>
         ) : (
           /* Cặp chip theo ảnh: mẫu 2D là "Nhà phố · 2 tầng" (Hình 5), mẫu 3D là
              "Nhà phố · Hiện đại" (Hình 6) — tức 3D lấy phong cách thay quy mô. */
