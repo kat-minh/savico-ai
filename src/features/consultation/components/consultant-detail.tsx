@@ -46,7 +46,7 @@ export function ConsultantDetail({ consultantId }: ConsultantDetailProps) {
         <p className='text-muted-foreground'>{t('subtitle')}</p>
       </header>
 
-      <div className='grid gap-5 lg:grid-cols-[20rem_1fr]'>
+      <div className='grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[20rem_1fr]'>
         <ConsultantRail consultants={consultants ?? []} activeId={consultantId} isPending={listPending} />
 
         <div className='bg-card relative overflow-hidden rounded-xl border p-4 sm:p-6'>
