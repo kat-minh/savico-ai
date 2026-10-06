@@ -1,41 +1,56 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/shared/auth'
-import {
-  hydrateProjectSelection,
-  PROJECT_SELECTION_STORAGE_KEY,
-  useProjectSelectionStore
-} from '../store/project-selection.store'
+import { contractorKeys } from '../api/contractors.keys'
+import { projectSelectionApi } from '../api/project-selection.api'
+import { selectedProjectSiteId } from '../services/project-selection.service'
+import type { ProjectBrief } from '../types/contractor.types'
 
-/** Restore browser selection after hydration, keeping each account's choice separate. */
+/** Server preference, isolated by account; no browser persistence or metadata snapshots. */
 export function useSelectedProject() {
-  const [isHydrated, setIsHydrated] = useState(false)
-  const userId = useAuthStore((state) => state.user?.id)
-  const selectedProject = useProjectSelectionStore((state) => {
-    const selected = userId ? state.selectedProjects[userId] : undefined
-    if (!selected || (selected.userId !== undefined && selected.userId !== userId)) return undefined
-    return selected.ownershipVersion === 1 || selected.constructionSiteId ? selected : undefined
+  const user = useAuthStore((state) => state.user)
+  const userId = user?.accountKind === 'Customer' ? user.id : undefined
+  const query = useQuery({
+    queryKey: contractorKeys.selection(userId),
+    queryFn: ({ signal }) => projectSelectionApi.get(userId!, signal),
+    enabled: Boolean(userId),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    retry: false
   })
+  const siteId = query.data?.constructionSiteId
+  return {
+    userId,
+    selectedProject: siteId ? { id: siteId, constructionSiteId: siteId } : undefined,
+    isReady: !userId || query.isSuccess,
+    isFetching: Boolean(userId && query.isFetching),
+    isError: Boolean(userId && query.isError),
+    refetch: query.refetch
+  }
+}
 
-  useEffect(() => {
-    let active = true
-    void hydrateProjectSelection().then(() => {
-      if (active) setIsHydrated(true)
-    })
-    const syncStorage = () => void useProjectSelectionStore.persist.rehydrate()
-    const onStorage = (event: StorageEvent) => {
-      if (event.storageArea === localStorage && (event.key === PROJECT_SELECTION_STORAGE_KEY || event.key === null))
-        syncStorage()
-    }
-    window.addEventListener('storage', onStorage)
-    window.addEventListener('focus', syncStorage)
-    return () => {
-      active = false
-      window.removeEventListener('storage', onStorage)
-      window.removeEventListener('focus', syncStorage)
-    }
-  }, [])
-
-  return { userId, selectedProject, isHydrated }
+export function useSelectProject() {
+  const userId = useAuthStore((state) => state.user?.id)
+  const client = useQueryClient()
+  const t = useTranslations('contractors.picker')
+  return useMutation({
+    // Queue writes for this account, including explicit URL synchronization.
+    scope: { id: `project-selection:${userId}` },
+    mutationFn: (brief: ProjectBrief) => {
+      if (!userId) throw new Error('AuthenticationRequired')
+      return projectSelectionApi.set(userId, selectedProjectSiteId(brief, userId))
+    },
+    onMutate: () => client.cancelQueries({ queryKey: contractorKeys.selection(userId) }),
+    onSuccess: async (selection) => {
+      if (useAuthStore.getState().user?.id !== userId) return
+      // Cancel GETs started while PUT was pending before publishing the committed selection.
+      await client.cancelQueries({ queryKey: contractorKeys.selection(userId) })
+      if (useAuthStore.getState().user?.id !== userId) return
+      client.setQueryData(contractorKeys.selection(userId), selection)
+    },
+    onError: () => toast.error(t('saveSelectionError'))
+  })
 }

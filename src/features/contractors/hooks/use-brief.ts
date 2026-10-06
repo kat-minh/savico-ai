@@ -8,12 +8,8 @@ import { useRouter } from '@/i18n/navigation'
 import { CONTRACTOR_PREVIEW_ID, contractorBriefRoute } from '@/shared/constants/routes'
 import { isApiError } from '@/shared/lib/api'
 import { useAuthStore } from '@/shared/auth'
-import {
-  hydrateProjectSelection,
-  refreshSelectedProject,
-  useProjectSelectionStore
-} from '../store/project-selection.store'
-import { isSelectableProject } from '../services/project-selection.service'
+import { projectSelectionApi } from '../api/project-selection.api'
+import { isSelectableProject, selectedProjectSiteId } from '../services/project-selection.service'
 import { contractorsApi, type SaveBriefPayload } from '../api/contractors.api'
 import { contractorKeys } from '../api/contractors.keys'
 
@@ -89,14 +85,8 @@ export function useSaveBrief(projectId: string) {
 
   return useMutation({
     mutationFn: (payload: SaveBriefPayload) => contractorsApi.saveBrief(projectId, payload),
-    onSuccess: async (brief) => {
+    onSuccess: (brief) => {
       queryClient.setQueryData(contractorKeys.brief(projectId, userId), brief)
-      await hydrateProjectSelection()
-      try {
-        refreshSelectedProject(brief)
-      } catch {
-        // The draft is saved even if browser preference storage is unavailable.
-      }
     },
     onError: (error) => {
       toast.error(isApiError(error) ? error.message : t('generic'))
@@ -114,17 +104,20 @@ export function useCompleteBrief(projectId: string) {
   const t = useTranslations('errors')
 
   return useMutation({
-    mutationFn: () => contractorsApi.completeBrief(projectId),
+    scope: { id: `project-selection:${userId}` },
+    mutationFn: async () => {
+      const brief = await contractorsApi.completeBrief(projectId)
+      if (userId && isSelectableProject(brief, userId)) {
+        await queryClient.cancelQueries({ queryKey: contractorKeys.selection(userId) })
+        const selection = await projectSelectionApi.set(userId, selectedProjectSiteId(brief, userId))
+        await queryClient.cancelQueries({ queryKey: contractorKeys.selection(userId) })
+        if (useAuthStore.getState().user?.id !== userId) throw new Error('ConstructionSiteSelectionOwnerMismatch')
+        queryClient.setQueryData(contractorKeys.selection(userId), selection)
+      }
+      return brief
+    },
     onSuccess: async (brief) => {
       queryClient.setQueryData(contractorKeys.brief(projectId, userId), brief)
-      await hydrateProjectSelection()
-      if (userId && isSelectableProject(brief, userId)) {
-        try {
-          useProjectSelectionStore.getState().selectProject(userId, brief)
-        } catch {
-          // Continue to the completed project when browser preference storage fails.
-        }
-      }
       void queryClient.invalidateQueries({ queryKey: contractorKeys.briefList(userId) })
       void queryClient.invalidateQueries({ queryKey: contractorKeys.briefSummaries(userId) })
     },

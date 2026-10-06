@@ -5,7 +5,7 @@ import ts from 'typescript'
 
 const root = new URL('../src/features/contractors/', import.meta.url)
 const modules = new Map()
-const owner = { user: { id: 'customer-a' } }
+const owner = { user: { id: 'customer-a', accountKind: 'Customer' } }
 globalThis[Symbol.for('project-selection-test-owner')] = owner
 const authModule = `data:text/javascript;base64,${Buffer.from(
   "export const useAuthStore = Object.assign(selector => selector(globalThis[Symbol.for('project-selection-test-owner')]), {getState: () => globalThis[Symbol.for('project-selection-test-owner')]})"
@@ -22,7 +22,11 @@ async function loadSource(file) {
       ? await loadSource(new URL(path + '.ts', file))
       : path === '@/shared/auth'
         ? authModule
-        : import.meta.resolve(path)
+        : path === '@/shared/lib/api'
+          ? httpModule
+          : path === '@/shared/config/env'
+            ? envModule
+            : import.meta.resolve(path)
     js = js.replace(match[0], `from '${resolved}'`)
   }
   const url = `data:text/javascript;base64,${Buffer.from(js).toString('base64')}`
@@ -49,13 +53,37 @@ class MemoryStorage {
 globalThis.localStorage = new MemoryStorage()
 const storage = globalThis.localStorage
 const service = await import(await loadSource(new URL('services/project-selection.service.ts', root)))
-const { emptyBrief } = await import(await loadSource(new URL('services/brief.service.ts', root)))
-const {
-  useProjectSelectionStore: store,
-  PROJECT_SELECTION_STORAGE_KEY: key,
-  hydrateProjectSelection,
-  refreshSelectedProject
-} = await import(await loadSource(new URL('store/project-selection.store.ts', root)))
+const { emptyBrief, isBriefComplete } = await import(await loadSource(new URL('services/brief.service.ts', root)))
+const { siteToBrief } = await import(await loadSource(new URL('api/brief-drafts.ts', root)))
+const { siteDetailSchema } = await import(await loadSource(new URL('types/construction-site.types.ts', root)))
+const transport = {
+  selections: new Map(),
+  calls: [],
+  failure: undefined,
+  beforeResponse: undefined,
+  malformed: false,
+  async get(path, options) {
+    this.calls.push({ method: 'GET', path, signal: options?.signal })
+    if (this.failure) throw this.failure
+    return this.malformed ? {} : { constructionSiteId: this.selections.get(owner.user.id) ?? null }
+  },
+  async put(path, body) {
+    this.calls.push({ method: 'PUT', path, body })
+    if (this.failure) throw this.failure
+    this.selections.set(owner.user.id, body.constructionSiteId)
+    this.beforeResponse?.()
+    return body
+  }
+}
+globalThis[Symbol.for('selection-test-http')] = transport
+const httpModule = `data:text/javascript;base64,${Buffer.from(
+  "export const http = globalThis[Symbol.for('selection-test-http')]"
+).toString('base64')}`
+const envModule = `data:text/javascript;base64,${Buffer.from(
+  'export const env = { NEXT_PUBLIC_USE_MOCK_API: false }'
+).toString('base64')}`
+const { projectSelectionApi: api } = await import(await loadSource(new URL('api/project-selection.api.ts', root)))
+const snapshot = (project) => ({ id: project.id, constructionSiteId: project.constructionSiteId })
 
 function brief(id = 'local-a', overrides = {}) {
   return {
@@ -76,12 +104,74 @@ function brief(id = 'local-a', overrides = {}) {
     ...overrides
   }
 }
-function persist(selections) {
-  storage.setItem(key, JSON.stringify({ state: { selectedProjects: selections }, version: 2 }))
+// BR-SITE-001/Then 14 and BR-RFQ-001/Then 2: persisted SITE is complete;
+// browser-only contractor needs must not prevent selecting an owned server profile.
+function serverSite(overrides = {}) {
+  return siteDetailSchema.parse({
+    constructionSiteId: 'b3680d77-123c-4cb4-8787-3fcb963f1caa',
+    name: 'Project from API',
+    address: 'Street, Ward, Province',
+    latitude: 10.84523445800005,
+    longitude: 106.78719193600006,
+    version: 1,
+    createdAtUtc: '2026-10-05T10:32:56.191951+00:00',
+    updatedAtUtc: '2026-10-05T10:32:56.191951+00:00',
+    profile: {
+      areaM2: '150',
+      provinceCode: '79',
+      wardCode: '26842',
+      locationDatasetVersion: 'pov2-37e41027084215f3',
+      addressDetail: 'Street',
+      buildingTypeId: '4ca47fbd-5481-455d-a110-a8be91202416',
+      floorCount: 3,
+      hasTum: null,
+      architectureStyleId: 'c54f2e8a-65b4-4587-93f8-45e9a6f3ce5c',
+      interiorStyleId: '600fdabb-256b-418f-99e5-94d1989f16f7',
+      ...overrides
+    },
+    catalogRevisionId: '06087a5e-dca3-4b61-9728-062a87bf0b38',
+    conditionId: 'b5710000-0000-4000-8000-000000000002',
+    conditionName: 'Condition',
+    budgetVnd: '15000000',
+    plannedStart: 'Within1To3Months',
+    provinceName: 'Province',
+    wardName: 'Ward',
+    sourceEstimateId: null,
+    buildingTypeName: 'Karaoke',
+    architectureStyleName: 'Modern',
+    interiorStyleName: 'Luxury',
+    files: [],
+    canEdit: true,
+    canDelete: true,
+    lockedFields: []
+  })
 }
-function selected(userId = owner.user.id) {
-  return store.getState().selectedProjects[userId]
-}
+
+test('owned API profiles remain complete and selectable without browser drafts, including non-applicable fields', () => {
+  for (const fields of [{ hasTum: null }, { hasTum: false }, { floorCount: null, hasTum: null }]) {
+    const restored = siteToBrief(serverSite(fields))
+    assert.equal(restored.scope, '')
+    assert.equal(restored.scopeNote, '')
+    assert.equal(restored.documents.length, 0)
+    assert.equal(isBriefComplete(restored), true)
+    assert.equal(service.isSelectableProject(restored, 'customer-a'), true)
+    assert.equal(service.resolveSelectedProject([restored], undefined, 'customer-a'), restored)
+  }
+})
+
+test('an API profile does not bypass ownership or contracted checks', () => {
+  const restored = siteToBrief(serverSite())
+  assert.equal(service.isSelectableProject(restored, 'customer-b'), false)
+  assert.equal(service.isSelectableProject({ ...restored, ownershipVersion: undefined }, 'customer-a'), false)
+  assert.equal(service.isSelectableProject({ ...restored, status: 'contracted' }, 'customer-a'), false)
+})
+
+test('a server ID alone or a mismatched server profile does not complete an unfinished browser draft', () => {
+  const unfinished = brief('unfinished', { scope: '', scopeNote: '' })
+  assert.equal(isBriefComplete(unfinished), false)
+  assert.equal(isBriefComplete({ ...unfinished, constructionSite: serverSite() }), false)
+  assert.equal(isBriefComplete({ ...unfinished, constructionSiteId: undefined, constructionSite: serverSite() }), false)
+})
 
 test('the first completed project is selectable; empty, incomplete, contracted and foreign projects are not', () => {
   assert.equal(service.isSelectableProject(brief(), 'customer-a'), true)
@@ -100,20 +190,17 @@ test('a saved choice survives a newer project and refreshes its live summary', (
   const chosen = brief('a')
   const updated = { ...chosen, name: 'Updated project', address: { ...chosen.address, street: 'New street' } }
   const newer = brief('b', { updatedAt: '2026-10-06T00:00:00Z' })
-  assert.equal(
-    service.resolveSelectedProject([newer, updated], service.projectSelectionSnapshot(chosen), 'customer-a'),
-    updated
-  )
+  assert.equal(service.resolveSelectedProject([newer, updated], snapshot(chosen), 'customer-a'), updated)
 })
 
 test('server/local URL aliases resolve to the same project', () => {
   const local = brief('local-a')
   const server = { ...local, id: local.constructionSiteId }
-  assert.equal(service.resolveSelectedProject([local], service.projectSelectionSnapshot(server), 'customer-a'), local)
+  assert.equal(service.resolveSelectedProject([local], snapshot(server), 'customer-a'), local)
 })
 
 test('a deleted or ineligible choice falls back to the newest eligible owned project', () => {
-  const chosen = service.projectSelectionSnapshot(brief('missing'))
+  const chosen = snapshot(brief('missing'))
   const fallback = brief('b', { updatedAt: '2026-10-06T00:00:00Z' })
   assert.equal(
     service.resolveSelectedProject(
@@ -129,83 +216,87 @@ test('a deleted or ineligible choice falls back to the newest eligible owned pro
   )
 })
 
-test('completion hydration preserves selections already stored for another account', async () => {
-  const other = brief('other', { userId: 'customer-b' })
-  persist({ 'customer-b': service.projectSelectionSnapshot(other) })
-  await hydrateProjectSelection()
-  store.getState().selectProject('customer-a', brief())
-  assert.equal(selected().id, 'local-a')
-  assert.equal(selected('customer-b').id, 'other')
-  assert.equal(JSON.parse(storage.getItem(key)).state.selectedProjects['customer-a'].id, 'local-a')
+// STORY-SITE-001/AC-039–041: the source of selection is the account API.
+test('selection request uses the verified server ID instead of a browser draft URL', () => {
+  const restored = siteToBrief(serverSite(), undefined, 'local-alias')
+  assert.equal(service.selectedProjectSiteId(restored, 'customer-a'), serverSite().constructionSiteId)
+  assert.throws(() => service.selectedProjectSiteId(restored, 'customer-b'), /OwnerMismatch/)
+  assert.throws(() => service.selectedProjectSiteId({ ...restored, constructionSiteId: undefined }, 'customer-a'))
 })
 
-test('opening another owned URL updates the persistent choice, without duplicate writes on rerender', () => {
-  store.getState().selectProject('customer-a', brief('direct-url'))
+test('selection survives clearing localStorage and API instances read the account choice', async () => {
+  const siteId = serverSite().constructionSiteId
+  await api.set('customer-a', siteId)
+  storage.values.clear()
   const writes = storage.writes
-  store.getState().selectProject('customer-a', brief('direct-url'))
-  assert.equal(selected().id, 'direct-url')
+  assert.deepEqual(await api.get('customer-a'), { constructionSiteId: siteId })
   assert.equal(storage.writes, writes)
-})
-
-test('editing the chosen project refreshes metadata; editing a different project keeps the choice', () => {
-  refreshSelectedProject(brief('unselected', { name: 'Other edit' }))
-  assert.equal(selected().id, 'direct-url')
-  refreshSelectedProject(
-    brief('direct-url', { name: 'Renamed', address: { ...brief().address, street: 'Updated street' } })
-  )
-  assert.equal(selected().name, 'Renamed')
-  assert.equal(selected().address.street, 'Updated street')
-})
-
-test('account changes and late responses cannot write a foreign selection', () => {
-  owner.user = { id: 'customer-b' }
-  assert.throws(() => store.getState().selectProject('customer-a', brief()), /OwnerMismatch/)
-  assert.throws(() => store.getState().selectProject('customer-b', brief()), /OwnerMismatch/)
-  refreshSelectedProject(brief('direct-url', { name: 'Late response' }))
-  assert.equal(selected('customer-a').name, 'Renamed')
-  owner.user = { id: 'customer-a' }
-})
-
-test('rehydration picks up a choice changed in another tab and key deletion clears memory', async () => {
-  persist({ 'customer-a': service.projectSelectionSnapshot(brief('other-tab')) })
-  await store.persist.rehydrate()
-  assert.equal(selected().id, 'other-tab')
-  storage.removeItem(key)
-  await store.persist.rehydrate()
-  assert.equal(selected(), undefined)
-})
-
-test('malformed records are discarded while valid account choices remain', async () => {
-  persist({
-    'customer-a': { id: 'incomplete' },
-    'customer-b': service.projectSelectionSnapshot(brief('b', { userId: 'customer-b' }))
+  assert.deepEqual(transport.calls.at(-2), {
+    method: 'PUT',
+    path: '/me/construction-sites/selection',
+    body: { constructionSiteId: siteId }
   })
-  await store.persist.rehydrate()
-  assert.equal(selected(), undefined)
-  assert.equal(selected('customer-b').id, 'b')
-  assert.deepEqual(service.restoreProjectSelections({ selectedProjects: null }), {})
-  assert.deepEqual(
-    service.restoreProjectSelections({
-      selectedProjects: { 'customer-a': service.projectSelectionSnapshot(brief('b', { userId: 'customer-b' })) }
-    }),
-    {}
-  )
 })
 
-test('legacy server references remain candidates without acquiring ownership from storage', () => {
-  const legacy = service.projectSelectionSnapshot(brief('legacy', { userId: undefined, ownershipVersion: undefined }))
-  assert.equal(
-    service.restoreProjectSelections({ selectedProjects: { 'customer-a': legacy } })['customer-a'].ownershipVersion,
-    undefined
-  )
-  assert.equal(service.isSelectableProject(brief('legacy', { ownershipVersion: undefined }), 'customer-a'), false)
+test('another account has its own selection and returning to the first restores it', async () => {
+  owner.user = { id: 'customer-b', accountKind: 'Customer' }
+  assert.deepEqual(await api.get('customer-b'), { constructionSiteId: null })
+  const siteId = 'fb063fd8-a1f4-448b-a368-6812ba64587f'
+  await api.set('customer-b', siteId)
+  assert.equal((await api.get('customer-b')).constructionSiteId, siteId)
+  owner.user = { id: 'customer-a', accountKind: 'Customer' }
+  assert.equal((await api.get('customer-a')).constructionSiteId, serverSite().constructionSiteId)
 })
 
-test('failed storage writes roll back memory and preserve the last saved project', () => {
-  store.getState().selectProject('customer-a', brief('saved'))
-  storage.blocked = true
-  assert.throws(() => store.getState().selectProject('customer-a', brief('unsaved')), /QuotaExceededError/)
-  assert.equal(selected().id, 'saved')
-  assert.equal(JSON.parse(storage.getItem(key)).state.selectedProjects['customer-a'].id, 'saved')
-  storage.blocked = false
+test('failed PUT propagates its error and preserves the previous account choice', async () => {
+  transport.failure = new Error('ServiceUnavailable')
+  await assert.rejects(api.set('customer-a', 'fb063fd8-a1f4-448b-a368-6812ba64587f'), /ServiceUnavailable/)
+  transport.failure = undefined
+  assert.equal((await api.get('customer-a')).constructionSiteId, serverSite().constructionSiteId)
+})
+
+test('failed or malformed GET is not converted to an empty choice', async () => {
+  transport.failure = new Error('ServiceUnavailable')
+  await assert.rejects(api.get('customer-a'), /ServiceUnavailable/)
+  transport.failure = undefined
+  transport.malformed = true
+  await assert.rejects(api.get('customer-a'))
+  transport.malformed = false
+})
+
+test('a preference changed by another device is read on the next API fetch', async () => {
+  const otherSite = 'a8903867-2448-4bf8-81c6-3ae54cbb6031'
+  transport.selections.set('customer-a', otherSite)
+  const signal = new AbortController().signal
+  assert.deepEqual(await api.get('customer-a', signal), { constructionSiteId: otherSite })
+  assert.equal(transport.calls.at(-1).signal, signal)
+})
+
+test('foreign, staff, malformed and unauthenticated selection requests do not reach HTTP', async () => {
+  const calls = transport.calls.length
+  await assert.rejects(api.set('customer-b', serverSite().constructionSiteId), /OwnerMismatch/)
+  await assert.rejects(api.set('customer-a', 'local-draft'))
+  owner.user = { id: 'customer-a', accountKind: 'Staff' }
+  await assert.rejects(api.get('customer-a'), /OwnerMismatch/)
+  owner.user = null
+  await assert.rejects(api.get('customer-a'), /OwnerMismatch/)
+  owner.user = { id: 'customer-a', accountKind: 'Customer' }
+  assert.equal(transport.calls.length, calls)
+})
+
+test('account changes during PUT reject the late result instead of publishing it to the new account', async () => {
+  transport.beforeResponse = () => {
+    owner.user = { id: 'customer-b', accountKind: 'Customer' }
+  }
+  await assert.rejects(api.set('customer-a', serverSite().constructionSiteId), /OwnerMismatch/)
+  transport.beforeResponse = undefined
+  owner.user = { id: 'customer-a', accountKind: 'Customer' }
+})
+
+test('a deleted site clears the database preference and permits resolving another complete API project', async () => {
+  transport.selections.delete('customer-a')
+  storage.values.clear()
+  assert.deepEqual(await api.get('customer-a'), { constructionSiteId: null })
+  const fresh = siteToBrief(serverSite())
+  assert.equal(service.resolveSelectedProject([fresh], undefined, 'customer-a'), fresh)
 })

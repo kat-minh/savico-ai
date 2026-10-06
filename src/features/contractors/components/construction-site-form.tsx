@@ -39,7 +39,6 @@ import { cn } from '@/shared/lib/utils'
 import { constructionSitesApi } from '../api/construction-sites.api'
 import { allConstructionSites } from '../api/construction-briefs.api'
 import { briefDrafts, requireBriefUserId, siteToBrief } from '../api/brief-drafts'
-import { hydrateProjectSelection, refreshSelectedProject } from '../store/project-selection.store'
 import { contractorKeys } from '../api/contractors.keys'
 import { useBrief } from '../hooks/use-brief'
 import { useConstructionScopes } from '../hooks/use-construction-scopes'
@@ -426,12 +425,6 @@ export function ConstructionSiteForm({ projectId }: { projectId: string }) {
     const detail = await constructionSitesApi.detail(id)
     const brief = briefDrafts.put(localBrief(form.getValues(), detail))
     client.setQueryData(contractorKeys.brief(projectId, userId), brief)
-    await hydrateProjectSelection()
-    try {
-      refreshSelectedProject(brief)
-    } catch {
-      // Saving the server project must not fail because browser preferences are unavailable.
-    }
     return detail
   }
   async function finish(id: string) {

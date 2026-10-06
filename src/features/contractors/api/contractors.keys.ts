@@ -16,6 +16,7 @@ export const contractorKeys = {
     [...contractorKeys.all, 'project', contractorId, projectId] as const,
 
   briefs: () => [...contractorKeys.all, 'brief'] as const,
+  selection: (userId?: string) => [...contractorKeys.all, 'selection', userId] as const,
   /** Danh sách hồ sơ dự án của tài khoản (S09 — nút "Xem nhà thầu"). */
   briefList: (userId?: string) => [...contractorKeys.briefs(), 'list', ...(userId ? [userId] : [])] as const,
   briefSummaries: (userId?: string) => [...contractorKeys.briefs(), 'summaries', ...(userId ? [userId] : [])] as const,

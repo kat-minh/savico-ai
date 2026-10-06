@@ -1,20 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
-import { isSelectableProject } from '../services/project-selection.service'
-import { useProjectSelectionStore } from '../store/project-selection.store'
+import { useEffect, useRef } from 'react'
+import { isSelectableProject, sameSelectedProject } from '../services/project-selection.service'
 import type { ProjectBrief } from '../types/contractor.types'
-import { useSelectedProject } from './use-selected-project'
+import { useSelectedProject, useSelectProject } from './use-selected-project'
 
-/** The successfully loaded project on an explicit URL becomes the browser preference. */
+/** An explicitly opened owned URL updates the server preference once, without fighting refetches. */
 export function useSyncSelectedProject(brief: ProjectBrief | undefined) {
-  const { userId, isHydrated } = useSelectedProject()
+  const { userId, selectedProject, isReady, isFetching } = useSelectedProject()
+  const { mutate } = useSelectProject()
+  const synchronized = useRef('')
   useEffect(() => {
-    if (!isHydrated || !userId || !brief || !isSelectableProject(brief, userId)) return
-    try {
-      useProjectSelectionStore.getState().selectProject(userId, brief)
-    } catch {
-      // Browser preferences must not prevent viewing an owned project.
-    }
-  }, [brief, isHydrated, userId])
+    if (!isReady || isFetching || !userId || !brief?.constructionSiteId || !isSelectableProject(brief, userId)) return
+    const key = `${userId}:${brief.constructionSiteId}`
+    if (synchronized.current === key) return
+    synchronized.current = key
+    if (!sameSelectedProject(selectedProject, brief)) mutate(brief)
+  }, [brief, isReady, isFetching, userId, selectedProject, mutate])
 }

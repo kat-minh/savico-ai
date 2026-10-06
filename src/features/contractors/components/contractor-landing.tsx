@@ -60,7 +60,6 @@ import { ContractorLogo } from './contractor-logo'
 import { PartnerRegistrationDialog } from './partner-registration-dialog'
 import { ProjectPickerDialog } from './project-picker-dialog'
 import { useProjectPickerStore } from '../store/project-picker.store'
-import { useProjectSelectionStore } from '../store/project-selection.store'
 
 /**
  * Bề ngang phần nội dung của S09.
@@ -264,6 +263,7 @@ export function ContractorLanding() {
   const tScale = useTranslations('contractors.scale')
   const tStartWindow = useTranslations('contractors.startWindow')
   const tGlobal = useTranslations('common')
+  const tPicker = useTranslations('contractors.picker')
 
   const locale = useLocale() as Locale
   const reduceMotion = useReducedMotion()
@@ -297,25 +297,11 @@ export function ContractorLanding() {
   const { data: briefs } = briefsQuery
   const hasBrief = isAuthenticated && Boolean(briefs?.length)
   // Ưu tiên dự án người dùng đã chọn; khi chưa có thì dùng hồ sơ đủ thông tin mới nhất.
-  const { userId, selectedProject, isHydrated } = useSelectedProject()
+  const { userId, selectedProject, isReady, isError: selectionError, refetch: refetchSelection } = useSelectedProject()
   const briefsByNewest = hasBrief ? [...(briefs ?? [])].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)) : []
   const savedBrief = userId ? resolveSelectedProject(briefsByNewest, selectedProject, userId) : undefined
-  const currentBrief = savedBrief ?? briefsByNewest[0]
+  const currentBrief = isReady ? (savedBrief ?? briefsByNewest[0]) : undefined
   const openPicker = useProjectPickerStore((s) => s.openPicker)
-
-  useEffect(() => {
-    // Cached/failed lists cannot establish that the saved project was deleted.
-    if (!isAuthenticated || !userId || !isHydrated || !briefs || !briefsQuery.isSuccess || briefsQuery.isFetching)
-      return
-    try {
-      const store = useProjectSelectionStore.getState()
-      const next = resolveSelectedProject(briefs, store.selectedProjects[userId], userId)
-      if (next) store.selectProject(userId, next)
-      else if (store.selectedProjects[userId]) store.clearSelectedProject(userId)
-    } catch {
-      // An unavailable browser store must not prevent rendering the live project list.
-    }
-  }, [isAuthenticated, userId, isHydrated, selectedProject, briefs, briefsQuery.isSuccess, briefsQuery.isFetching])
 
   /**
    * Danh sách hiển thị tối đa ba nhà thầu khớp bộ lọc, xếp theo tab đang bật.
@@ -542,6 +528,14 @@ export function ContractorLanding() {
                   <Link href={contractorPreviewRoute()}>{t('hero.viewContractors')}</Link>
                 </Button>
               </motion.div>
+              {selectionError ? (
+                <div role='alert' className='mt-4 space-y-2 text-sm'>
+                  <p>{tPicker('loadSelectedProjectError')}</p>
+                  <Button variant='outline' onClick={() => void refetchSelection()}>
+                    {tPicker('retrySelection')}
+                  </Button>
+                </div>
+              ) : null}
               {currentBrief ? (
                 <motion.button
                   variants={revealItemVariants}

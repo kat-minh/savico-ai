@@ -36,7 +36,6 @@ import { briefReadiness, isBriefComplete } from '../services/brief.service'
 import { filterContractors, isInvited } from '../services/contractor-list.service'
 import { useContractorsStore } from '../store/contractors.store'
 import { useProjectPickerStore } from '../store/project-picker.store'
-import { useProjectSelectionStore } from '../store/project-selection.store'
 import type { ContractorSort, SearchRadiusKm, ServiceRegion } from '../types/contractor.types'
 import { ContractorCard } from './contractor-card'
 import { ContractorLogo } from './contractor-logo'
@@ -49,7 +48,7 @@ interface ContractorMatchesProps {
 
 const SORT_ICON = { distance: MapPin, rating: Scale, survey: Clock } as const
 
-/** Only the preview URL restores the browser preference; explicit project URLs keep their context. */
+/** Only the preview URL restores the account preference; explicit project URLs keep their context. */
 export function ContractorMatches({ projectId }: ContractorMatchesProps) {
   return projectId === CONTRACTOR_PREVIEW_ID ? (
     <RestorePreviewMatches />
@@ -62,26 +61,41 @@ function RestorePreviewMatches() {
   const router = useRouter()
   const t = useTranslations('contractors.matches')
   const tCommon = useTranslations('common')
-  const { userId, selectedProject, isHydrated } = useSelectedProject()
-  const clearSelectedProject = useProjectSelectionStore((state) => state.clearSelectedProject)
-  const { data: brief, isPending, isSuccess, error, refetch } = useBrief(selectedProject?.id ?? '')
+  const {
+    selectedProject,
+    isReady,
+    isFetching: fetchingSelection,
+    isError: selectionError,
+    refetch: refetchSelection
+  } = useSelectedProject()
+  const { data: brief, isPending, error, refetch } = useBrief(selectedProject?.id ?? '')
   const canRestore = brief !== undefined && brief.status !== 'contracted' && isBriefComplete(brief)
   const missing = isApiError(error) && error.status === 404
 
   useEffect(() => {
-    if (!isHydrated || !userId || !selectedProject) return
+    if (!isReady || fetchingSelection || !selectedProject) return
     if (canRestore) {
       router.replace(contractorMatchesRoute(selectedProject.id))
-    } else if (isSuccess || missing) {
-      try {
-        clearSelectedProject(userId)
-      } catch {
-        // Continue in preview even if browser storage is unavailable.
-      }
     }
-  }, [isHydrated, userId, selectedProject, canRestore, isSuccess, missing, router, clearSelectedProject])
+  }, [isReady, fetchingSelection, selectedProject, canRestore, router])
 
-  if (!isHydrated || (selectedProject && (isPending || canRestore))) {
+  useEffect(() => {
+    // Deleting a site clears its preference in the DB; reread it instead of overwriting a newer choice.
+    if (missing) void refetchSelection()
+  }, [missing, refetchSelection])
+
+  if (selectionError) {
+    return (
+      <div className='mx-auto max-w-7xl px-4 py-8'>
+        <EmptyState
+          title={t('restoreError')}
+          action={<Button onClick={() => void refetchSelection()}>{t('restoreRetry')}</Button>}
+        />
+      </div>
+    )
+  }
+
+  if (!isReady || fetchingSelection || (selectedProject && (isPending || canRestore))) {
     return (
       <div role='status' aria-label={tCommon('loading')} className='mx-auto max-w-7xl space-y-6 px-4 py-8'>
         <span className='sr-only'>{tCommon('loading')}</span>

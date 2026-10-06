@@ -6099,7 +6099,9 @@
     },
     "picker": {
       "title": "Chọn dự án để tìm nhà thầu",
-      "saveSelectionError": "Không lưu được dự án đã chọn. Hãy cho phép lưu trữ trong trình duyệt rồi thử lại.",
+      "saveSelectionError": "Không lưu được dự án đã chọn. Vui lòng thử lại.",
+      "savingSelection": "Đang lưu…",
+      "loadSelectedProjectError": "Chưa tải được dự án đang chọn. Vui lòng thử lại.",
       "subtitle": "Mỗi dự án mời tối đa {max} nhà thầu. Hồ sơ gửi đi không chứa giá hay ngân sách.",
       "emptyBadge": "Chưa có dự án",
       "emptyTitle": "Bạn chưa có dự án nào",

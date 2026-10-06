@@ -6099,7 +6099,9 @@
     },
     "picker": {
       "title": "Pick a project to find contractors",
-      "saveSelectionError": "Could not save the selected project. Allow browser storage and try again.",
+      "saveSelectionError": "Could not save the selected project. Please try again.",
+      "savingSelection": "Saving…",
+      "loadSelectedProjectError": "Could not load the selected project. Please try again.",
       "subtitle": "Each project can invite up to {max} contractors. The brief we send carries no prices or budget.",
       "emptyBadge": "No project yet",
       "emptyTitle": "You have no projects yet",

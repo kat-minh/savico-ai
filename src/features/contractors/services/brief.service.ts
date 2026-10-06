@@ -71,8 +71,12 @@ export function isBlankBrief(brief: ProjectBrief): boolean {
   )
 }
 
-/** Hồ sơ đủ điều kiện bấm "Hoàn tất & tìm nhà thầu" (S11). */
+/** Hồ sơ đủ điều kiện tìm nhà thầu; SITE đã lưu luôn đủ dữ liệu bắt buộc. */
 export function isBriefComplete(brief: ProjectBrief): boolean {
+  // BR-SITE-001/Then 14: backend không lưu công trình nháp. Scope/scopeNote
+  // chỉ lưu trên trình duyệt, không thuộc contract SITE/RFQ và có thể bị mất.
+  // Cần hồ sơ đã đọc từ API khớp ID, không chỉ một ID lưu trong localStorage.
+  if (brief.constructionSite && brief.constructionSite.constructionSiteId === brief.constructionSiteId) return true
   const readiness = briefReadiness(brief)
   return readiness.hasProjectInfo && readiness.hasNeeds
 }

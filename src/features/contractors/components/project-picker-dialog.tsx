@@ -2,7 +2,7 @@
 
 import { CheckCircle2, FilePlus2, FileText, House, Inbox, MoreHorizontal, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
+import type { MouseEvent } from 'react'
 
 import { env } from '@/shared/config/env'
 import { Link, useRouter } from '@/i18n/navigation'
@@ -27,10 +27,9 @@ import { cn } from '@/shared/lib/utils'
 import { MATCHES_PROJECT_CHANGED_KEY, MAX_INVITATIONS } from '../constants/contractors.constants'
 import { useBriefSummaries } from '../hooks/use-brief-summaries'
 import { useCreateBrief } from '../hooks/use-brief'
-import { useSelectedProject } from '../hooks/use-selected-project'
+import { useSelectedProject, useSelectProject } from '../hooks/use-selected-project'
 import { briefReadiness, isBriefComplete, shortAddress } from '../services/brief.service'
 import { useProjectPickerStore } from '../store/project-picker.store'
-import { useProjectSelectionStore } from '../store/project-selection.store'
 import type { ProjectBriefSummary } from '../types/contractor.types'
 
 interface ProjectPickerDialogProps {
@@ -61,28 +60,31 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
   const router = useRouter()
   const open = useProjectPickerStore((s) => s.open)
   const close = useProjectPickerStore((s) => s.closePicker)
-  const selectProject = useProjectSelectionStore((s) => s.selectProject)
-  const { userId } = useSelectedProject()
+  const selection = useSelectProject()
+  const { userId, selectedProject } = useSelectedProject()
 
   const { data: summaries, isPending, isError, refetch } = useBriefSummaries(open)
   const createBrief = useCreateBrief()
 
-  function choose(projectId: string) {
+  async function choose(projectId: string) {
     const brief = summaries?.find((summary) => summary.brief.id === projectId)?.brief
-    if (!userId || !brief) return
+    if (!userId || !brief || selection.isPending) return
     try {
-      selectProject(userId, brief)
+      await selection.mutateAsync(brief)
     } catch {
-      toast.error(t('saveSelectionError'))
       return
     }
-    window.sessionStorage.setItem(MATCHES_PROJECT_CHANGED_KEY, projectId)
+    try {
+      window.sessionStorage.setItem(MATCHES_PROJECT_CHANGED_KEY, projectId)
+    } catch {
+      // This optional animation marker must not block a selection already committed by the API.
+    }
     close()
     router.push(contractorMatchesRoute(projectId))
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && close()}>
+    <Dialog open={open} onOpenChange={(next) => !next && !selection.isPending && close()}>
       {/* Giữ cùng quy tắc với các popup khác: hộp thoại luôn có khoảng cách hai bên
           và căn giữa; nội dung tự cuộn khi danh sách dài hơn viewport. */}
       <DialogContent className='max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[52rem] gap-3 rounded-2xl p-4 overscroll-contain sm:gap-4 sm:p-5'>
@@ -113,9 +115,16 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
                 <li key={summary.brief.id}>
                   <BriefRow
                     summary={summary}
-                    current={summary.brief.id === currentProjectId}
-                    onChoose={() => choose(summary.brief.id)}
-                    onNavigate={close}
+                    current={
+                      summary.brief.id === currentProjectId ||
+                      (!currentProjectId && summary.brief.constructionSiteId === selectedProject?.constructionSiteId)
+                    }
+                    pending={selection.isPending}
+                    onChoose={() => void choose(summary.brief.id)}
+                    onNavigate={(event) => {
+                      if (selection.isPending) event.preventDefault()
+                      else close()
+                    }}
                     labels={{
                       scale: tScale(summary.brief.scale),
                       untitled: t('untitled'),
@@ -127,7 +136,10 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
                         max: summary.invitationLimit ?? MAX_INVITATIONS
                       }),
                       contracted: t('contracted'),
-                      choose: t('choose'),
+                      choose:
+                        selection.isPending && selection.variables?.id === summary.brief.id
+                          ? t('savingSelection')
+                          : t('choose'),
                       current: t('current'),
                       viewInvites: t('viewInvites'),
                       menu: t('rowMenu'),
@@ -158,14 +170,17 @@ export function ProjectPickerDialog({ currentProjectId }: ProjectPickerDialogPro
               variant='outline'
               className='w-full sm:w-auto'
               onClick={() => createBrief.mutate()}
-              disabled={createBrief.isPending}
+              disabled={createBrief.isPending || selection.isPending}
             >
               <FilePlus2 className='size-4' />
               {t('createMore')}
             </Button>
             <Link
               href={ROUTES.PLANS}
-              onClick={close}
+              onClick={(event) => {
+                if (selection.isPending) event.preventDefault()
+                else close()
+              }}
               className='text-primary hover:text-primary/80 text-center text-sm font-medium text-balance underline underline-offset-4'
             >
               {t('buyPlan')}
@@ -235,14 +250,16 @@ interface BriefRowLabels {
 function BriefRow({
   summary,
   current,
+  pending,
   onChoose,
   onNavigate,
   labels
 }: {
   summary: ProjectBriefSummary
   current: boolean
+  pending: boolean
   onChoose: () => void
-  onNavigate: () => void
+  onNavigate: (event: MouseEvent) => void
   labels: BriefRowLabels
 }) {
   const { brief, invitedCount } = summary
@@ -341,11 +358,12 @@ function BriefRow({
           </Button>
         ) : (
           <>
-            <Button className='flex-1 sm:flex-none' onClick={onChoose}>
+            <Button className='flex-1 sm:flex-none' onClick={onChoose} disabled={pending}>
               {labels.choose}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger
+                disabled={pending}
                 aria-label={labels.menu}
                 className='text-muted-foreground hover:text-foreground flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors sm:size-8 sm:border-0'
               >
